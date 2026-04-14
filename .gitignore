@@ -1,3 +1,9 @@
+# Local doc fixtures — source MD files for review sessions, never published
+fixtures/
+
+# Generated doc inventory (output of Session 9, used to pull fixtures)
+docs/doc-inventory.md
+
 # Claude Code session files — not part of the public plugin
 CLAUDE.md
 .claude/
