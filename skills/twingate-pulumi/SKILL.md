@@ -39,6 +39,22 @@ When generating or debugging Twingate Pulumi code, inspect `https://github.com/T
 | Pulumi config key (token) | `twingate:apiToken` |
 | Pulumi config key (network) | `twingate:network` |
 
+## Current Documentation
+
+Twingate Pulumi provider documentation is available in `./references/`. If reference files are not yet populated, fetch directly:
+
+```bash
+# Pulumi Registry — full resource reference
+curl -s https://www.pulumi.com/registry/packages/twingate/
+
+# Provider source and SDK examples
+git clone https://github.com/Twingate/pulumi-twingate
+# See README and examples/ directory
+
+# Reference programs
+git clone https://github.com/Twingate-Solutions/pulumi-scripts
+```
+
 ---
 
 ## Evergreen Knowledge
@@ -435,7 +451,7 @@ const instance = new aws.ec2.Instance("twingate-connector", {
 
 ---
 
-## Anti-Patterns
+## Anti-Patterns and Gotchas
 
 **Do not store connector tokens or service account keys in plain Pulumi config.**
 ```bash

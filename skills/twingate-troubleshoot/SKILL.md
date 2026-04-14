@@ -245,4 +245,5 @@ Corporate firewalls with deep-packet inspection can intercept and terminate TLS 
 - [twingate-architect](../twingate-architect/SKILL.md) — connection chain architecture, P2P vs. Relay, encryption model
 - [twingate-connectors](../twingate-connectors/SKILL.md) — connector deployment, token management, upgrade procedures, HA
 - [twingate-identity](../twingate-identity/SKILL.md) — security policy configuration, device trust, group access, session duration
+- [twingate-idfw](../twingate-idfw/SKILL.md) — Identity Firewall diagnostics: SSH certificate validation failures, PAM module errors, gateway connectivity issues
 - [twingate-dns-security](../twingate-dns-security/SKILL.md) — DNS filtering and split DNS configurations that may conflict with Twingate's DNS interception

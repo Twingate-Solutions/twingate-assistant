@@ -155,7 +155,17 @@ Gate LoadBalancer or Ingress services that have a public IP with identity-aware 
 - Staging and QA environments deployed on public clusters that should not be open to the internet.
 - Internal developer tools (Grafana, Argo CD, internal dashboards) deployed behind an Ingress but requiring stronger access control than HTTP basic auth.
 
-### Runtime Repository Inspection
+### Current Documentation and Runtime Repository Inspection
+
+Twingate Kubernetes documentation is available in `./references/`. If reference files are not yet populated, fetch directly:
+
+```bash
+# Helm chart connector deployment
+curl -s https://www.twingate.com/docs/kubernetes-helm
+
+# Kubernetes operator
+curl -s https://www.twingate.com/docs/kubernetes-operator
+```
 
 When configuring the Helm chart, clone `https://github.com/Twingate/helm-charts` and inspect `charts/connector/values.yaml` for the full options reference. The values schema is the authoritative source for resource limits, replica settings, image configuration, environment variable injection, and extra annotations.
 
@@ -339,7 +349,7 @@ affinity:
         topologyKey: kubernetes.io/hostname
 ```
 
-## Anti-Patterns
+## Anti-Patterns and Gotchas
 
 **Putting tokens directly in values.yaml**
 Do not set `connector.accessToken` or `connector.refreshToken` as plaintext strings in a values file that is committed to source control. These are long-lived credentials. Store them in a Kubernetes Secret and reference with `secretKeyRef`. Use an operator like External Secrets Operator to sync from a secrets manager (AWS Secrets Manager, HashiCorp Vault) in production.

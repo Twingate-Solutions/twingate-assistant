@@ -226,7 +226,7 @@ If internal FQDNs overlap with public DNS names (e.g., `app.example.com` resolve
 
 ## Related Skills
 
-- **twingate-connectors** — Connector deployment across all platforms (Docker, Linux, Kubernetes, cloud marketplaces), HA configuration, upgrades, metrics, and logging
-- **twingate-identity** — IdP integration (Okta, Azure AD, Google, etc.), SCIM setup, security policies, device trust, and group management
-- **twingate-troubleshoot** — Systematic diagnostics for connectivity failures: device, DNS, Connector, and firewall layers
-- **twingate-terraform** — Terraform provider for automating Remote Network, Resource, Group, and Connector configuration as code
+- [twingate-connectors](../twingate-connectors/SKILL.md) — Connector deployment across all platforms (Docker, Linux, Kubernetes, cloud marketplaces), HA configuration, upgrades, metrics, and logging
+- [twingate-identity](../twingate-identity/SKILL.md) — IdP integration (Okta, Azure AD, Google, etc.), SCIM setup, security policies, device trust, and group management
+- [twingate-troubleshoot](../twingate-troubleshoot/SKILL.md) — Systematic diagnostics for connectivity failures: device, DNS, Connector, and firewall layers
+- [twingate-terraform](../twingate-terraform/SKILL.md) — Terraform provider for automating Remote Network, Resource, Group, and Connector configuration as code

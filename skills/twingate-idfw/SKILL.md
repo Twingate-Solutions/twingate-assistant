@@ -45,6 +45,24 @@ Do NOT load this skill for general network connectivity questions — those belo
 | Ansible | Works transparently — no plugin needed, cert is the SSH auth mechanism |
 | Gateway repo | `github.com/Twingate/gateway` — inspect `deploy/` for Helm and Compose examples |
 
+## Current Documentation
+
+Twingate Identity Firewall documentation is available in `./references/`. If reference files are not yet populated, fetch directly:
+
+```bash
+# IDFW overview
+curl -s https://www.twingate.com/docs/identity-firewall
+
+# SSH PAM module setup
+curl -s https://www.twingate.com/docs/ssh-pam
+
+# Session recording
+curl -s https://www.twingate.com/docs/session-recording
+
+# Kubernetes gateway / kubectl proxy
+curl -s https://www.twingate.com/docs/kubernetes-gateway
+```
+
 ---
 
 ## Evergreen Knowledge
@@ -284,7 +302,8 @@ app-02 ansible_host=10.0.1.11
 
 [linux_servers:vars]
 ansible_user=ec2-user           # Match gateway config YAML username
-ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+# Use accept-new (trust-on-first-use) rather than no — reconnects verify host keys
+ansible_ssh_common_args='-o StrictHostKeyChecking=accept-new'
 ```
 
 **Requirements:**
@@ -350,6 +369,7 @@ resource "null_resource" "deploy_gateway_config" {
       type        = "ssh"
       user        = "ubuntu"
       host        = aws_instance.gateway.private_ip
+      # Key file must have 0600 permissions; do not commit the key path variable value to source control
       private_key = file(var.gateway_ssh_key_path)
     }
   }
@@ -484,7 +504,9 @@ recording:
 
 ```bash
 # 1. Install Twingate PAM module (Ubuntu/Debian)
+# Production: download, review, then run. Quick install for dev/staging:
 curl -s https://binaries.twingate.com/pam/install.sh | sudo bash
+# Production alternative: curl -so install-pam.sh https://binaries.twingate.com/pam/install.sh && sudo bash install-pam.sh
 
 # 2. Copy Twingate CA public key to server
 sudo cp twingate_ca.pub /etc/ssh/twingate_ca.pub
@@ -511,10 +533,11 @@ sudo systemctl restart sshd
 # ansible.cfg
 [defaults]
 remote_user = ec2-user
-host_key_checking = False
+# host_key_checking = False  # Avoid in production — disables MITM protection entirely
 
 [ssh_connection]
-ssh_args = -o ForwardAgent=yes -o StrictHostKeyChecking=no
+# Use accept-new (TOFU) not no — verifies host key on reconnect, prevents MITM
+ssh_args = -o ForwardAgent=yes -o StrictHostKeyChecking=accept-new
 pipelining = True
 ```
 
@@ -545,7 +568,7 @@ ansible-playbook -i inventory/hosts.ini playbook.yml
 
 ---
 
-## Anti-Patterns
+## Anti-Patterns and Gotchas
 
 **Do not configure the SSH username in the Twingate admin console resource definition.**
 The `username` field does not exist there. The admin console resource definition controls network access (which groups can reach the resource). The UNIX username is configured exclusively in the gateway config YAML. Searching the admin console or GraphQL API for a username field wastes time.
@@ -569,8 +592,8 @@ The gateway validates the certificate before forwarding the connection, but the 
 
 ## Related Skills
 
-- **twingate-terraform** — `twingate_gateway_config` resource details, provider setup, and state management for IDFW Terraform configurations.
-- **twingate-connectors** — connector deployment and the fundamental distinction between connectors (network layer) and the gateway (protocol layer).
-- **twingate-kubernetes** — K8s operator, Helm chart, and resource routing; complements the gateway's kubectl proxy mode.
-- **twingate-identity** — group membership management, JIT access provisioning, device trust, and time-bounded access patterns used in the contractor SSH flow.
-- **twingate-architect** — overall Twingate architecture context, including how the gateway fits into the control plane and data plane.
+- [twingate-terraform](../twingate-terraform/SKILL.md) — `twingate_gateway_config` resource details, provider setup, and state management for IDFW Terraform configurations.
+- [twingate-connectors](../twingate-connectors/SKILL.md) — connector deployment and the fundamental distinction between connectors (network layer) and the gateway (protocol layer).
+- [twingate-kubernetes](../twingate-kubernetes/SKILL.md) — K8s operator, Helm chart, and resource routing; complements the gateway's kubectl proxy mode.
+- [twingate-identity](../twingate-identity/SKILL.md) — group membership management, JIT access provisioning, device trust, and time-bounded access patterns used in the contractor SSH flow.
+- [twingate-architect](../twingate-architect/SKILL.md) — overall Twingate architecture context, including how the gateway fits into the control plane and data plane.

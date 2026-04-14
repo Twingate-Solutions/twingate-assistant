@@ -272,7 +272,7 @@ This pattern creates an audit trail and enforces least-privilege without requiri
 
 ## Related Skills
 
-- **twingate-architect** — overall Twingate architecture, remote networks, resources, and how groups connect to resources
-- **twingate-connectors** — connector deployment for the infrastructure that serves the resources groups access
-- **twingate-idfw** — Identity Firewall for SSH PAM and Kubernetes gateway: protocol-level identity enforcement layered on top of Twingate network access
-- **twingate-troubleshoot** — debugging access failures caused by policy misconfiguration, device trust posture failures, group sync issues, or SCIM errors
+- [twingate-architect](../twingate-architect/SKILL.md) — overall Twingate architecture, remote networks, resources, and how groups connect to resources
+- [twingate-connectors](../twingate-connectors/SKILL.md) — connector deployment for the infrastructure that serves the resources groups access
+- [twingate-idfw](../twingate-idfw/SKILL.md) — Identity Firewall for SSH PAM and Kubernetes gateway: protocol-level identity enforcement layered on top of Twingate network access
+- [twingate-troubleshoot](../twingate-troubleshoot/SKILL.md) — debugging access failures caused by policy misconfiguration, device trust posture failures, group sync issues, or SCIM errors

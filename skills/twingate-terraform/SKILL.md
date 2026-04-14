@@ -445,8 +445,8 @@ Key Twingate doc slugs relevant to this skill:
 
 ## Related Skills
 
-- **twingate-architect** — architecture background; understand Remote Networks, Resources, and Groups before writing Terraform for them
-- **twingate-connectors** — connector deployment detail across platforms (Docker, Linux service, cloud marketplace); use alongside this skill when passing connector tokens to a compute resource
-- **twingate-idfw** — Identity Firewall implementation; the `twingate_gateway_config` resource is only relevant in this context
-- **twingate-kubernetes** — Helm-based connector deployment; use when passing connector tokens to a Helm release via Terraform's `helm_release` resource
-- **twingate-api** — GraphQL API for data sources and automation; useful when Terraform data sources don't expose the field needed and a direct API call is required
+- [twingate-architect](../twingate-architect/SKILL.md) — architecture background; understand Remote Networks, Resources, and Groups before writing Terraform for them
+- [twingate-connectors](../twingate-connectors/SKILL.md) — connector deployment detail across platforms (Docker, Linux service, cloud marketplace); use alongside this skill when passing connector tokens to a compute resource
+- [twingate-idfw](../twingate-idfw/SKILL.md) — Identity Firewall implementation; the `twingate_gateway_config` resource is only relevant in this context
+- [twingate-kubernetes](../twingate-kubernetes/SKILL.md) — Helm-based connector deployment; use when passing connector tokens to a Helm release via Terraform's `helm_release` resource
+- [twingate-api](../twingate-api/SKILL.md) — GraphQL API for data sources and automation; useful when Terraform data sources don't expose the field needed and a direct API call is required
