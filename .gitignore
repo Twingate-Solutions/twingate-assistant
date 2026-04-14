@@ -1,0 +1,37 @@
+# Claude Code session files — not part of the public plugin
+CLAUDE.md
+.claude/
+
+# Internal planning docs — kept local, not shipped with the plugin
+docs/TECHNICAL_PLAN.md
+docs/SESSIONS.md
+docs/sessions/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+*.egg
+
+# Environment / secrets
+.env
+.env.*
+*.secret
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~

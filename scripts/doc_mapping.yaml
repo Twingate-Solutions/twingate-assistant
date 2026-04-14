@@ -1,0 +1,648 @@
+# doc_mapping.yaml
+# Maps Twingate documentation URLs to the skill that owns them.
+# This file seeds the auto-update pipeline. New docs discovered via sitemap
+# diff are auto-assigned using the patterns below, then added here.
+#
+# Schema:
+#   docs[].url     — full Twingate docs URL
+#   docs[].skill   — skill name (twingate-{domain})
+#   docs[].keywords — optional list of keywords for summary context
+#
+# Auto-assign patterns apply to URLs not yet in this list.
+# First matching pattern wins.
+
+docs:
+
+  # ── twingate-architect ──────────────────────────────────────────────────────
+
+  - url: https://www.twingate.com/docs/
+    skill: twingate-architect
+    keywords: [overview, introduction, getting started]
+
+  - url: https://www.twingate.com/docs/architecture
+    skill: twingate-architect
+    keywords: [architecture, components, controller, client, connector, relay]
+
+  - url: https://www.twingate.com/docs/how-it-works
+    skill: twingate-architect
+    keywords: [how it works, connection flow, authentication]
+
+  - url: https://www.twingate.com/docs/how-dns-works-with-twingate
+    skill: twingate-architect
+    keywords: [dns, split dns, dns resolution, managed resources]
+
+  - url: https://www.twingate.com/docs/p2p-communication
+    skill: twingate-architect
+    keywords: [p2p, peer to peer, direct connection, latency]
+
+  - url: https://www.twingate.com/docs/nat-traversal
+    skill: twingate-architect
+    keywords: [nat traversal, firewall, relay, fallback]
+
+  - url: https://www.twingate.com/docs/encryption
+    skill: twingate-architect
+    keywords: [encryption, wireguard, tls, security]
+
+  - url: https://www.twingate.com/docs/twingate-vs-vpn
+    skill: twingate-architect
+    keywords: [vpn comparison, ztna vs vpn, zero trust]
+
+  - url: https://www.twingate.com/docs/twingate-vs-mesh-vpn
+    skill: twingate-architect
+    keywords: [mesh vpn, tailscale, wireguard, comparison]
+
+  - url: https://www.twingate.com/docs/use-cases
+    skill: twingate-architect
+    keywords: [use cases, scenarios, deployment patterns]
+
+  - url: https://www.twingate.com/docs/quick-start
+    skill: twingate-architect
+    keywords: [quick start, getting started, first deployment]
+
+  - url: https://www.twingate.com/docs/automated-deployment
+    skill: twingate-architect
+    keywords: [automation, IaC, automated setup]
+
+  - url: https://www.twingate.com/docs/remote-networks
+    skill: twingate-architect
+    keywords: [remote network, network design, topology]
+
+  - url: https://www.twingate.com/docs/resources
+    skill: twingate-architect
+    keywords: [resources, fqdn, cidr, wildcard, ip]
+
+  - url: https://www.twingate.com/docs/resource-access
+    skill: twingate-architect
+    keywords: [resource access, access control, groups]
+
+  # ── twingate-connectors ─────────────────────────────────────────────────────
+
+  - url: https://www.twingate.com/docs/connectors
+    skill: twingate-connectors
+    keywords: [connector, overview, architecture]
+
+  - url: https://www.twingate.com/docs/connector-deployment
+    skill: twingate-connectors
+    keywords: [deployment, install, setup]
+
+  - url: https://www.twingate.com/docs/deploy-connectors-docker
+    skill: twingate-connectors
+    keywords: [docker, container, docker run]
+
+  - url: https://www.twingate.com/docs/deploy-connectors-linux
+    skill: twingate-connectors
+    keywords: [linux, apt, yum, package]
+
+  - url: https://www.twingate.com/docs/deploy-connectors-systemd
+    skill: twingate-connectors
+    keywords: [systemd, service, unit file]
+
+  - url: https://www.twingate.com/docs/deploy-connectors-kubernetes
+    skill: twingate-connectors
+    keywords: [kubernetes, helm, k8s, chart]
+
+  - url: https://www.twingate.com/docs/deploy-connectors-aws
+    skill: twingate-connectors
+    keywords: [aws, ec2, ecs, fargate, cloudformation]
+
+  - url: https://www.twingate.com/docs/deploy-connectors-azure
+    skill: twingate-connectors
+    keywords: [azure, aci, vm, bicep, arm]
+
+  - url: https://www.twingate.com/docs/deploy-connectors-gcp
+    skill: twingate-connectors
+    keywords: [gcp, gce, cloud run, google cloud]
+
+  - url: https://www.twingate.com/docs/deploy-connectors-ecs
+    skill: twingate-connectors
+    keywords: [ecs, fargate, task definition, aws]
+
+  - url: https://www.twingate.com/docs/deploy-connectors-aci
+    skill: twingate-connectors
+    keywords: [aci, azure container instances]
+
+  - url: https://www.twingate.com/docs/connector-updates
+    skill: twingate-connectors
+    keywords: [upgrades, updates, version, rolling update]
+
+  - url: https://www.twingate.com/docs/connector-management
+    skill: twingate-connectors
+    keywords: [management, tokens, lifecycle]
+
+  - url: https://www.twingate.com/docs/connector-metrics
+    skill: twingate-connectors
+    keywords: [metrics, prometheus, monitoring, observability]
+
+  - url: https://www.twingate.com/docs/connector-logging
+    skill: twingate-connectors
+    keywords: [logging, logs, syslog, structured]
+
+  - url: https://www.twingate.com/docs/connector-health-check
+    skill: twingate-connectors
+    keywords: [health, status, alive, dead, heartbeat]
+
+  - url: https://www.twingate.com/docs/connector-best-practices
+    skill: twingate-connectors
+    keywords: [best practices, ha, high availability, recommendations]
+
+  - url: https://www.twingate.com/docs/connector-details
+    skill: twingate-connectors
+    keywords: [details, internals, technical, implementation]
+
+  - url: https://www.twingate.com/docs/connector-metadata
+    skill: twingate-connectors
+    keywords: [metadata, labels, tags, custom]
+
+  - url: https://www.twingate.com/docs/connector-deployment-automation
+    skill: twingate-connectors
+    keywords: [automation, scripted deployment, terraform, ansible]
+
+  - url: https://www.twingate.com/docs/connector-unqualified-domains
+    skill: twingate-connectors
+    keywords: [unqualified domains, short names, search domains]
+
+  # ── twingate-terraform ──────────────────────────────────────────────────────
+
+  - url: https://www.twingate.com/docs/terraform
+    skill: twingate-terraform
+    keywords: [terraform, iac, infrastructure as code]
+
+  - url: https://www.twingate.com/docs/terraform-provider
+    skill: twingate-terraform
+    keywords: [provider, registry, resources, data sources]
+
+  - url: https://www.twingate.com/docs/terraform-idfw
+    skill: twingate-terraform
+    keywords: [terraform, identity firewall, gateway config, ssh]
+
+  # ── twingate-pulumi ─────────────────────────────────────────────────────────
+
+  - url: https://www.twingate.com/docs/pulumi
+    skill: twingate-pulumi
+    keywords: [pulumi, iac, infrastructure as code]
+
+  - url: https://www.twingate.com/docs/pulumi-provider
+    skill: twingate-pulumi
+    keywords: [pulumi provider, typescript, python, go, csharp]
+
+  # ── twingate-kubernetes ─────────────────────────────────────────────────────
+
+  - url: https://www.twingate.com/docs/kubernetes
+    skill: twingate-kubernetes
+    keywords: [kubernetes, k8s, overview]
+
+  - url: https://www.twingate.com/docs/kubernetes-connector-helm
+    skill: twingate-kubernetes
+    keywords: [helm chart, helm values, k8s connector]
+
+  - url: https://www.twingate.com/docs/kubernetes-operator
+    skill: twingate-kubernetes
+    keywords: [operator, crds, custom resources, reconcile]
+
+  - url: https://www.twingate.com/docs/kubernetes-operator-crds
+    skill: twingate-kubernetes
+    keywords: [crds, twingateresource, twingateremotenetwork, schema]
+
+  - url: https://www.twingate.com/docs/kubernetes-traffic-routing
+    skill: twingate-kubernetes
+    keywords: [traffic routing, headless client, egress, routing]
+
+  - url: https://www.twingate.com/docs/kubernetes-kubectl-access
+    skill: twingate-kubernetes
+    keywords: [kubectl, api server, k8s access, cluster access]
+
+  - url: https://www.twingate.com/docs/kubernetes-private-services
+    skill: twingate-kubernetes
+    keywords: [private services, clusterip, internal, service mesh]
+
+  # ── twingate-idfw ───────────────────────────────────────────────────────────
+
+  - url: https://www.twingate.com/docs/identity-firewall
+    skill: twingate-idfw
+    keywords: [identity firewall, idfw, gateway, protocol enforcement]
+
+  - url: https://www.twingate.com/docs/ssh-pam
+    skill: twingate-idfw
+    keywords: [ssh, pam, certificates, short-lived, ca]
+
+  - url: https://www.twingate.com/docs/kubernetes-access
+    skill: twingate-idfw
+    keywords: [kubernetes, privileged access, kubectl, gateway]
+
+  - url: https://www.twingate.com/docs/ssh-session-recording
+    skill: twingate-idfw
+    keywords: [session recording, audit, compliance, replay]
+
+  - url: https://www.twingate.com/docs/ssh-remote-development
+    skill: twingate-idfw
+    keywords: [remote development, vscode, devcontainer, ssh tunnel]
+
+  - url: https://www.twingate.com/docs/ssh-contractor-access
+    skill: twingate-idfw
+    keywords: [contractor, vendor, ephemeral, temporary access]
+
+  - url: https://www.twingate.com/docs/ssh-ansible-automation
+    skill: twingate-idfw
+    keywords: [ansible, automation, playbook, ssh certificate]
+
+  - url: https://www.twingate.com/docs/idfw-terraform
+    skill: twingate-idfw
+    keywords: [terraform, gateway config, twingate_gateway_config]
+
+  - url: https://www.twingate.com/docs/privileged-access-ssh
+    skill: twingate-idfw
+    keywords: [privileged access, ssh, pam, certificates]
+
+  - url: https://www.twingate.com/docs/privileged-access-kubernetes
+    skill: twingate-idfw
+    keywords: [privileged access, kubernetes, gateway, rbac]
+
+  # ── twingate-identity ───────────────────────────────────────────────────────
+
+  - url: https://www.twingate.com/docs/identity-provider
+    skill: twingate-identity
+    keywords: [identity provider, idp, saml, sso]
+
+  - url: https://www.twingate.com/docs/identity-entra-id
+    skill: twingate-identity
+    keywords: [entra id, azure ad, microsoft, saml, scim]
+
+  - url: https://www.twingate.com/docs/identity-google-workspace
+    skill: twingate-identity
+    keywords: [google workspace, gsuite, saml, scim]
+
+  - url: https://www.twingate.com/docs/identity-okta
+    skill: twingate-identity
+    keywords: [okta, saml, scim, provisioning]
+
+  - url: https://www.twingate.com/docs/identity-onelogin
+    skill: twingate-identity
+    keywords: [onelogin, saml, scim]
+
+  - url: https://www.twingate.com/docs/identity-jumpcloud
+    skill: twingate-identity
+    keywords: [jumpcloud, saml, scim]
+
+  - url: https://www.twingate.com/docs/identity-keycloak
+    skill: twingate-identity
+    keywords: [keycloak, saml, self-hosted idp]
+
+  - url: https://www.twingate.com/docs/scim-provisioning
+    skill: twingate-identity
+    keywords: [scim, provisioning, lifecycle, sync, groups]
+
+  - url: https://www.twingate.com/docs/security-policies
+    skill: twingate-identity
+    keywords: [security policy, auth frequency, mfa, device trust]
+
+  - url: https://www.twingate.com/docs/security-policy-device-only
+    skill: twingate-identity
+    keywords: [device only policy, service account, m2m]
+
+  - url: https://www.twingate.com/docs/device-trust
+    skill: twingate-identity
+    keywords: [device trust, posture, crowdstrike, intune, jamf]
+
+  - url: https://www.twingate.com/docs/device-management
+    skill: twingate-identity
+    keywords: [device management, approved devices, trust levels]
+
+  - url: https://www.twingate.com/docs/device-posture-crowdstrike
+    skill: twingate-identity
+    keywords: [crowdstrike, device posture, edr, endpoint]
+
+  - url: https://www.twingate.com/docs/device-posture-sentinelone
+    skill: twingate-identity
+    keywords: [sentinelone, device posture, edr, endpoint]
+
+  - url: https://www.twingate.com/docs/device-posture-intune
+    skill: twingate-identity
+    keywords: [intune, mdm, compliance, microsoft]
+
+  - url: https://www.twingate.com/docs/device-posture-jamf
+    skill: twingate-identity
+    keywords: [jamf, mdm, macos, ios, compliance]
+
+  - url: https://www.twingate.com/docs/device-posture-kandji
+    skill: twingate-identity
+    keywords: [kandji, mdm, macos, compliance]
+
+  - url: https://www.twingate.com/docs/groups
+    skill: twingate-identity
+    keywords: [groups, manual, synced, system, everyone]
+
+  - url: https://www.twingate.com/docs/users
+    skill: twingate-identity
+    keywords: [users, user management, roles]
+
+  - url: https://www.twingate.com/docs/admins
+    skill: twingate-identity
+    keywords: [admins, admin roles, permissions]
+
+  - url: https://www.twingate.com/docs/offboarding
+    skill: twingate-identity
+    keywords: [offboarding, deprovisioning, revoke, remove]
+
+  - url: https://www.twingate.com/docs/jit-access
+    skill: twingate-identity
+    keywords: [jit, just in time, access request, approval workflow]
+
+  - url: https://www.twingate.com/docs/ephemeral-access
+    skill: twingate-identity
+    keywords: [ephemeral, temporary, time-bound, expiry]
+
+  - url: https://www.twingate.com/docs/auto-lock
+    skill: twingate-identity
+    keywords: [auto lock, usage-based, inactivity, revoke]
+
+  - url: https://www.twingate.com/docs/authentication
+    skill: twingate-identity
+    keywords: [authentication, sso, social login, mfa]
+
+  - url: https://www.twingate.com/docs/mfa
+    skill: twingate-identity
+    keywords: [mfa, multi-factor, authenticator, totp]
+
+  - url: https://www.twingate.com/docs/social-login
+    skill: twingate-identity
+    keywords: [social login, google, github, passwordless]
+
+  - url: https://www.twingate.com/docs/service-accounts
+    skill: twingate-identity
+    keywords: [service accounts, m2m, machine to machine, api]
+
+  # ── twingate-api ────────────────────────────────────────────────────────────
+
+  - url: https://www.twingate.com/docs/api
+    skill: twingate-api
+    keywords: [api, graphql, endpoint, authentication]
+
+  - url: https://www.twingate.com/docs/api-reference
+    skill: twingate-api
+    keywords: [api reference, schema, queries, mutations]
+
+  - url: https://www.twingate.com/docs/api-tokens
+    skill: twingate-api
+    keywords: [api tokens, x-api-key, permissions, read write provision]
+
+  - url: https://www.twingate.com/docs/api-pagination
+    skill: twingate-api
+    keywords: [pagination, cursor, relay, hasNextPage, after]
+
+  - url: https://www.twingate.com/docs/twingate-cli
+    skill: twingate-api
+    keywords: [cli, command line, tg-cli, python cli]
+
+  - url: https://www.twingate.com/docs/twingate-labs
+    skill: twingate-api
+    keywords: [labs, community tools, open source, scripts]
+
+  # ── twingate-dns-security ───────────────────────────────────────────────────
+
+  - url: https://www.twingate.com/docs/internet-security
+    skill: twingate-dns-security
+    keywords: [internet security, dns filtering, overview]
+
+  - url: https://www.twingate.com/docs/dns-filtering
+    skill: twingate-dns-security
+    keywords: [dns filtering, content filtering, categories, profiles]
+
+  - url: https://www.twingate.com/docs/dns-categories
+    skill: twingate-dns-security
+    keywords: [categories, malware, phishing, adult, gambling, streaming]
+
+  - url: https://www.twingate.com/docs/dns-profiles
+    skill: twingate-dns-security
+    keywords: [profiles, priority, group assignment, fallback]
+
+  - url: https://www.twingate.com/docs/exit-networks
+    skill: twingate-dns-security
+    keywords: [exit networks, egress, ip allowlisting, regional routing]
+
+  - url: https://www.twingate.com/docs/dns-over-https
+    skill: twingate-dns-security
+    keywords: [doh, dns over https, encrypted dns, resolver]
+
+  - url: https://www.twingate.com/docs/browser-security
+    skill: twingate-dns-security
+    keywords: [browser security, chrome extension, edge]
+
+  - url: https://www.twingate.com/docs/nextdns-integration
+    skill: twingate-dns-security
+    keywords: [nextdns, advanced filtering, custom rules]
+
+  # ── twingate-troubleshoot ───────────────────────────────────────────────────
+
+  - url: https://www.twingate.com/docs/troubleshoot
+    skill: twingate-troubleshoot
+    keywords: [troubleshoot, overview, diagnostic, support]
+
+  - url: https://www.twingate.com/docs/troubleshoot-connection
+    skill: twingate-troubleshoot
+    keywords: [connection, connectivity, can't connect, access denied]
+
+  - url: https://www.twingate.com/docs/troubleshoot-dns
+    skill: twingate-troubleshoot
+    keywords: [dns, resolution, nxdomain, split dns, 100.95]
+
+  - url: https://www.twingate.com/docs/troubleshoot-connector
+    skill: twingate-troubleshoot
+    keywords: [connector, dead, offline, heartbeat, token]
+
+  - url: https://www.twingate.com/docs/troubleshoot-firewall
+    skill: twingate-troubleshoot
+    keywords: [firewall, outbound, blocked, ports, twingate.com]
+
+  - url: https://www.twingate.com/docs/troubleshoot-p2p
+    skill: twingate-troubleshoot
+    keywords: [p2p, relay, fallback, nat, latency]
+
+  - url: https://www.twingate.com/docs/troubleshoot-client
+    skill: twingate-troubleshoot
+    keywords: [client, app, desktop, mobile, not authenticated]
+
+  # ── additional / shared ─────────────────────────────────────────────────────
+
+  - url: https://www.twingate.com/docs/client-apps
+    skill: twingate-architect
+    keywords: [client, app, desktop, mobile, install]
+
+  - url: https://www.twingate.com/docs/client-macos
+    skill: twingate-architect
+    keywords: [macos, osx, client, install]
+
+  - url: https://www.twingate.com/docs/client-windows
+    skill: twingate-architect
+    keywords: [windows, client, install]
+
+  - url: https://www.twingate.com/docs/client-linux
+    skill: twingate-architect
+    keywords: [linux, client, install]
+
+  - url: https://www.twingate.com/docs/client-ios
+    skill: twingate-architect
+    keywords: [ios, iphone, ipad, mobile]
+
+  - url: https://www.twingate.com/docs/client-android
+    skill: twingate-architect
+    keywords: [android, mobile]
+
+  - url: https://www.twingate.com/docs/split-tunneling
+    skill: twingate-architect
+    keywords: [split tunneling, vpn conflict, routing]
+
+  - url: https://www.twingate.com/docs/network-access-control
+    skill: twingate-architect
+    keywords: [nac, access control, policy enforcement]
+
+  - url: https://www.twingate.com/docs/changelog
+    skill: twingate-architect
+    keywords: [changelog, release notes, updates, versions]
+
+  - url: https://www.twingate.com/docs/faq
+    skill: twingate-architect
+    keywords: [faq, frequently asked questions, common questions]
+
+  - url: https://www.twingate.com/docs/glossary
+    skill: twingate-architect
+    keywords: [glossary, terms, definitions, concepts]
+
+  - url: https://www.twingate.com/docs/managed-devices
+    skill: twingate-identity
+    keywords: [managed devices, mdm, enrolled, corporate]
+
+  - url: https://www.twingate.com/docs/access-policies
+    skill: twingate-identity
+    keywords: [access policies, access modes, manual, auto-lock, jit]
+
+  - url: https://www.twingate.com/docs/network-segmentation
+    skill: twingate-architect
+    keywords: [segmentation, micro-segmentation, least privilege, zero trust]
+
+  - url: https://www.twingate.com/docs/connectors-high-availability
+    skill: twingate-connectors
+    keywords: [high availability, ha, redundancy, failover, multiple connectors]
+
+  - url: https://www.twingate.com/docs/connector-tokens
+    skill: twingate-connectors
+    keywords: [tokens, access token, refresh token, rotate]
+
+  - url: https://www.twingate.com/docs/deploy-connectors-fargate
+    skill: twingate-connectors
+    keywords: [fargate, serverless, ecs, aws]
+
+  - url: https://www.twingate.com/docs/api-rate-limits
+    skill: twingate-api
+    keywords: [rate limits, throttling, 429, backoff]
+
+  - url: https://www.twingate.com/docs/api-examples
+    skill: twingate-api
+    keywords: [api examples, code samples, scripts, graphql]
+
+  - url: https://www.twingate.com/docs/dns-filtering-fallback
+    skill: twingate-dns-security
+    keywords: [fallback, auto, strict, dns resolution]
+
+  - url: https://www.twingate.com/docs/exit-network-config
+    skill: twingate-dns-security
+    keywords: [exit network config, egress connector, routing]
+
+  - url: https://www.twingate.com/docs/identity-1password
+    skill: twingate-identity
+    keywords: [1password, xam, device trust, extended access management]
+
+  - url: https://www.twingate.com/docs/security-policy-compliance
+    skill: twingate-identity
+    keywords: [compliance, geo-block, country restriction, policy]
+
+  - url: https://www.twingate.com/docs/resource-shortcuts
+    skill: twingate-architect
+    keywords: [shortcuts, browser, client integration, launch]
+
+  - url: https://www.twingate.com/docs/resource-types-wildcards
+    skill: twingate-architect
+    keywords: [wildcard, dns wildcard, dynamic subdomains, *.example.com]
+
+  - url: https://www.twingate.com/docs/resource-types-cidr
+    skill: twingate-architect
+    keywords: [cidr, subnet, ip range, 10.0.0.0/8]
+
+  - url: https://www.twingate.com/docs/multi-idp
+    skill: twingate-identity
+    keywords: [multi idp, multiple identity providers, migration]
+
+  - url: https://www.twingate.com/docs/scim-group-sync
+    skill: twingate-identity
+    keywords: [scim, group sync, provisioning, okta groups, entra groups]
+
+  - url: https://www.twingate.com/docs/connector-vpn-interop
+    skill: twingate-connectors
+    keywords: [vpn interop, coexistence, vpn split tunnel]
+
+# ── Auto-assign patterns ────────────────────────────────────────────────────
+# Applied to URLs discovered in the sitemap that are not yet in this file.
+# First matching pattern wins. Unmatched docs go to _triage/ for manual review.
+
+auto_assign_patterns:
+  - pattern: "/docs/connector"
+    skill: twingate-connectors
+  - pattern: "/docs/deploy-connectors"
+    skill: twingate-connectors
+  - pattern: "/docs/k8s"
+    skill: twingate-kubernetes
+  - pattern: "/docs/kubernetes"
+    skill: twingate-kubernetes
+  - pattern: "/docs/helm"
+    skill: twingate-kubernetes
+  - pattern: "/docs/ssh-"
+    skill: twingate-idfw
+  - pattern: "/docs/idfw"
+    skill: twingate-idfw
+  - pattern: "/docs/identity-firewall"
+    skill: twingate-idfw
+  - pattern: "/docs/privileged-access"
+    skill: twingate-idfw
+  - pattern: "/docs/terraform"
+    skill: twingate-terraform
+  - pattern: "/docs/pulumi"
+    skill: twingate-pulumi
+  - pattern: "/docs/dns-"
+    skill: twingate-dns-security
+  - pattern: "/docs/internet-security"
+    skill: twingate-dns-security
+  - pattern: "/docs/exit-"
+    skill: twingate-dns-security
+  - pattern: "/docs/browser-security"
+    skill: twingate-dns-security
+  - pattern: "/docs/api"
+    skill: twingate-api
+  - pattern: "/docs/twingate-cli"
+    skill: twingate-api
+  - pattern: "/docs/twingate-labs"
+    skill: twingate-api
+  - pattern: "/docs/identity-"
+    skill: twingate-identity
+  - pattern: "/docs/security-polic"
+    skill: twingate-identity
+  - pattern: "/docs/device-"
+    skill: twingate-identity
+  - pattern: "/docs/scim"
+    skill: twingate-identity
+  - pattern: "/docs/groups"
+    skill: twingate-identity
+  - pattern: "/docs/users"
+    skill: twingate-identity
+  - pattern: "/docs/offboarding"
+    skill: twingate-identity
+  - pattern: "/docs/jit"
+    skill: twingate-identity
+  - pattern: "/docs/ephemeral"
+    skill: twingate-identity
+  - pattern: "/docs/troubleshoot"
+    skill: twingate-troubleshoot
+  - pattern: "/docs/remote-network"
+    skill: twingate-architect
+  - pattern: "/docs/resource"
+    skill: twingate-architect
+  - pattern: "/docs/client"
+    skill: twingate-architect
