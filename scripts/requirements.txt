@@ -3,3 +3,4 @@ beautifulsoup4>=4.12
 anthropic>=0.40
 pyyaml>=6.0
 lxml>=5.0
+httpx>=0.27

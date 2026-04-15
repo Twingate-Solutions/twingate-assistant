@@ -33,9 +33,9 @@ from pathlib import Path
 SCRIPTS_DIR = Path(__file__).parent
 sys.path.insert(0, str(SCRIPTS_DIR))
 
-from diff_docs import auto_assign, diff_docs, load_mapping
-from fetch_sitemap import fetch_sitemap
-from summarize_docs import (
+from diff_docs import auto_assign, diff_docs, load_mapping  # noqa: E402
+from fetch_sitemap import fetch_sitemap  # noqa: E402
+from summarize_docs import (  # noqa: E402
     SYSTEM_PROMPT,
     content_hash,
     extract_text_from_html,
@@ -97,7 +97,7 @@ def phase1(target_url: str | None, quiet: bool = False) -> None:
             else:
                 url = target_url
                 skill = "_triage"
-                print(f"  URL not in mapping and no auto-assign match: routing to _triage")
+                print("  URL not in mapping and no auto-assign match: routing to _triage")
     else:
         # Default: pick first mapped entry.
         if not docs:

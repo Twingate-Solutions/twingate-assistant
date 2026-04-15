@@ -10,6 +10,8 @@ from unittest.mock import MagicMock, patch
 import requests
 
 from summarize_docs import (
+    REQUEST_HEADERS,
+    _is_safe_url,
     content_hash,
     extract_text_from_html,
     fetch_doc_html,
@@ -102,7 +104,7 @@ def test_fetch_doc_html_returns_html_on_success(mock_get: MagicMock) -> None:
 
     assert result == "<html><body>OK</body></html>"
     mock_get.assert_called_once_with(
-        "https://www.twingate.com/docs/test", timeout=30
+        "https://www.twingate.com/docs/test", timeout=30, headers=REQUEST_HEADERS
     )
 
 
@@ -173,13 +175,13 @@ def test_extract_handles_minimal_html() -> None:
 # ── content_hash tests ──────────────────────────────────────────────────────
 
 
-def test_content_hash_returns_consistent_md5() -> None:
-    """Same input always produces the same 32-char hex string."""
+def test_content_hash_returns_consistent_hash() -> None:
+    """Same input always produces the same 64-char SHA-256 hex string."""
     h1 = content_hash("test content")
     h2 = content_hash("test content")
 
     assert h1 == h2
-    assert len(h1) == 32
+    assert len(h1) == 64
     assert all(c in "0123456789abcdef" for c in h1)
 
 
@@ -273,3 +275,67 @@ def test_summarize_doc_long_html_still_calls_api(
     ]
     assert "Big Doc" in user_content
     assert "[Content truncated for length]" in user_content
+
+
+# ── _is_safe_url tests ──────────────────────────────────────────────────────
+
+
+def test_is_safe_url_allows_twingate_docs() -> None:
+    assert _is_safe_url("https://www.twingate.com/docs/connector-deployment")
+
+
+def test_is_safe_url_allows_github_twingate_org() -> None:
+    assert _is_safe_url("https://github.com/Twingate/kubernetes-operator")
+
+
+def test_is_safe_url_allows_github_twingate_org_subpath() -> None:
+    assert _is_safe_url("https://github.com/Twingate/kubernetes-operator/blob/main/README.md")
+
+
+def test_is_safe_url_allows_raw_githubusercontent_twingate() -> None:
+    assert _is_safe_url("https://raw.githubusercontent.com/Twingate/kubernetes-operator/main/README.md")
+
+
+def test_is_safe_url_rejects_github_other_org() -> None:
+    assert not _is_safe_url("https://github.com/SomeOtherOrg/repo")
+
+
+def test_is_safe_url_rejects_raw_githubusercontent_other_org() -> None:
+    assert not _is_safe_url("https://raw.githubusercontent.com/SomeOtherOrg/repo/main/file.md")
+
+
+def test_is_safe_url_rejects_http_scheme() -> None:
+    assert not _is_safe_url("http://www.twingate.com/docs/connector-deployment")
+
+
+def test_is_safe_url_rejects_arbitrary_host() -> None:
+    assert not _is_safe_url("https://evil.com/docs/something")
+
+
+def test_is_safe_url_rejects_metadata_endpoint() -> None:
+    assert not _is_safe_url("https://169.254.169.254/docs/latest/meta-data/")
+
+
+@patch("summarize_docs.requests.get")
+def test_fetch_doc_html_rejects_non_twingate_url(mock_get: MagicMock) -> None:
+    """fetch_doc_html returns None without making a request for disallowed URLs."""
+    result = fetch_doc_html("https://github.com/SomeOtherOrg/repo")
+
+    assert result is None
+    mock_get.assert_not_called()
+
+
+@patch("summarize_docs.requests.get")
+def test_fetch_doc_html_allows_github_twingate_url(mock_get: MagicMock) -> None:
+    """fetch_doc_html fetches github.com/Twingate/ URLs."""
+    mock_get.return_value = MagicMock(
+        status_code=200,
+        text="<html><body>Operator README</body></html>",
+        content=b"<html><body>Operator README</body></html>",
+        raise_for_status=MagicMock(),
+    )
+
+    result = fetch_doc_html("https://github.com/Twingate/kubernetes-operator")
+
+    assert result is not None
+    mock_get.assert_called_once()

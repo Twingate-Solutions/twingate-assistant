@@ -5,15 +5,18 @@ from unittest.mock import patch
 
 import anthropic
 import httpx
+import pytest
 
 import update_references
 from update_references import (
+    check_api_health,
     load_hash_cache,
     main,
     process_doc,
     save_hash_cache,
     summarize_with_backoff,
     url_to_slug,
+    write_reference_file,
 )
 
 
@@ -62,6 +65,19 @@ def test_url_to_slug_bare_domain():
 
 def test_url_to_slug_empty_string():
     assert url_to_slug("") == "index"
+
+
+def test_url_to_slug_double_dot_becomes_index():
+    """A segment of '..' is sanitized to empty and falls back to 'index'."""
+    url = "https://www.twingate.com/docs/.."
+    assert url_to_slug(url) == "index"
+
+
+def test_url_to_slug_strips_special_chars():
+    """Characters outside [a-zA-Z0-9-_] are replaced with hyphens."""
+    url = "https://www.twingate.com/docs/page%20name"
+    slug = url_to_slug(url)
+    assert slug == "page-20name"
 
 
 # ---------------------------------------------------------------------------
@@ -143,7 +159,7 @@ def test_summarize_with_backoff_exhausts_retries(mock_summarize, mock_sleep):
 @patch("update_references.time.sleep")
 @patch("update_references.summarize_doc")
 def test_summarize_with_backoff_api_error_no_retry(mock_summarize, mock_sleep):
-    """Non-rate-limit APIError should return None immediately, no retries."""
+    """Non-rate-limit APIConnectionError should return None immediately, no retries."""
     api_err = _make_api_connection_error()
     mock_summarize.side_effect = api_err
 
@@ -289,8 +305,9 @@ def test_process_doc_triage(tmp_path):
 # ---------------------------------------------------------------------------
 
 
+@patch("update_references.check_api_health", return_value=True)
 @patch("update_references.fetch_sitemap", side_effect=Exception("network down"))
-def test_main_sitemap_fail(mock_sitemap, tmp_path, capsys):
+def test_main_sitemap_fail(mock_sitemap, mock_health, tmp_path, capsys):
     """Fatal sitemap failure returns exit code 1."""
     exit_code = main()
     assert exit_code == 1
@@ -308,6 +325,7 @@ def test_main_happy_path(tmp_path):
     }
 
     with (
+        patch("update_references.check_api_health", return_value=True),
         patch("update_references.SKILLS_DIR", skills_dir),
         patch("update_references.TRIAGE_DIR", triage_dir),
         patch("update_references.HASH_CACHE_PATH", hash_cache_path),
@@ -348,6 +366,7 @@ def test_main_hash_skip(tmp_path):
     }
 
     with (
+        patch("update_references.check_api_health", return_value=True),
         patch("update_references.SKILLS_DIR", skills_dir),
         patch("update_references.TRIAGE_DIR", triage_dir),
         patch("update_references.HASH_CACHE_PATH", hash_cache_path),
@@ -380,6 +399,7 @@ def test_main_new_doc_auto_assigned(tmp_path):
     }
 
     with (
+        patch("update_references.check_api_health", return_value=True),
         patch("update_references.SKILLS_DIR", skills_dir),
         patch("update_references.TRIAGE_DIR", triage_dir),
         patch("update_references.HASH_CACHE_PATH", hash_cache_path),
@@ -412,6 +432,7 @@ def test_main_new_doc_triage(tmp_path):
     }
 
     with (
+        patch("update_references.check_api_health", return_value=True),
         patch("update_references.SKILLS_DIR", skills_dir),
         patch("update_references.TRIAGE_DIR", triage_dir),
         patch("update_references.HASH_CACHE_PATH", hash_cache_path),
@@ -445,6 +466,7 @@ def test_main_exits_nonzero_on_doc_failure(tmp_path):
     }
 
     with (
+        patch("update_references.check_api_health", return_value=True),
         patch("update_references.SKILLS_DIR", skills_dir),
         patch("update_references.TRIAGE_DIR", triage_dir),
         patch("update_references.HASH_CACHE_PATH", hash_cache_path),
@@ -457,3 +479,124 @@ def test_main_exits_nonzero_on_doc_failure(tmp_path):
         exit_code = main()
 
     assert exit_code == 1
+
+
+# ---------------------------------------------------------------------------
+# write_reference_file — path traversal guard
+# ---------------------------------------------------------------------------
+
+
+def test_write_reference_file_rejects_traversal_in_skill(tmp_path):
+    """write_reference_file raises ValueError if skill name tries to escape SKILLS_DIR."""
+    skills_dir = tmp_path / "skills"
+    skills_dir.mkdir(parents=True)
+
+    with (
+        patch("update_references.SKILLS_DIR", skills_dir),
+        pytest.raises(ValueError, match="escapes skills directory"),
+    ):
+        write_reference_file("../../evil", "some-doc", "content")
+
+
+# ---------------------------------------------------------------------------
+# check_api_health
+# ---------------------------------------------------------------------------
+
+
+def test_check_api_health_missing_key():
+    """Returns False immediately when ANTHROPIC_API_KEY is not set."""
+    with patch.dict("os.environ", {}, clear=True):
+        # Ensure the key is absent even if present in the test environment.
+        import os
+        env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
+        with patch.dict("os.environ", env, clear=True):
+            result = check_api_health()
+    assert result is False
+
+
+@patch("update_references.anthropic.Anthropic")
+def test_check_api_health_success(mock_anthropic_cls):
+    """Returns True when the API responds successfully."""
+    mock_client = mock_anthropic_cls.return_value
+    mock_client.messages.create.return_value = object()  # any non-exception response
+
+    with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-test"}):
+        result = check_api_health()
+
+    assert result is True
+    mock_client.messages.create.assert_called_once()
+
+
+@patch("update_references.anthropic.Anthropic")
+def test_check_api_health_auth_error(mock_anthropic_cls):
+    """Returns False on AuthenticationError (bad or missing key)."""
+    request = httpx.Request("POST", "https://api.anthropic.com/v1/messages")
+    response = httpx.Response(401, request=request)
+    mock_client = mock_anthropic_cls.return_value
+    mock_client.messages.create.side_effect = anthropic.AuthenticationError(
+        message="invalid key", response=response, body=None
+    )
+
+    with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-bad"}):
+        result = check_api_health()
+
+    assert result is False
+
+
+@patch("update_references.anthropic.Anthropic")
+def test_check_api_health_connection_error(mock_anthropic_cls):
+    """Returns False on APIConnectionError (API unreachable)."""
+    request = httpx.Request("POST", "https://api.anthropic.com/v1/messages")
+    mock_client = mock_anthropic_cls.return_value
+    mock_client.messages.create.side_effect = anthropic.APIConnectionError(
+        message="connection refused", request=request
+    )
+
+    with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-test"}):
+        result = check_api_health()
+
+    assert result is False
+
+
+@patch("update_references.anthropic.Anthropic")
+def test_check_api_health_server_error(mock_anthropic_cls):
+    """Returns False on APIStatusError (e.g. 529 overloaded, 500 internal)."""
+    request = httpx.Request("POST", "https://api.anthropic.com/v1/messages")
+    response = httpx.Response(529, request=request)
+    mock_client = mock_anthropic_cls.return_value
+    mock_client.messages.create.side_effect = anthropic.InternalServerError(
+        message="overloaded", response=response, body=None
+    )
+
+    with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-test"}):
+        result = check_api_health()
+
+    assert result is False
+
+
+@patch("update_references.check_api_health", return_value=False)
+def test_main_exits_early_if_api_unhealthy(mock_health):
+    """Pipeline exits with code 1 immediately when health check fails, touching no files."""
+    with patch("update_references.fetch_sitemap") as mock_sitemap:
+        exit_code = main()
+
+    assert exit_code == 1
+    mock_sitemap.assert_not_called()  # no work done before the health check fails
+
+
+# ---------------------------------------------------------------------------
+# summarize_with_backoff — unexpected exception handling
+# ---------------------------------------------------------------------------
+
+
+@patch("update_references.time.sleep")
+@patch("update_references.summarize_doc")
+def test_summarize_with_backoff_catches_unexpected_exception(mock_summarize, mock_sleep):
+    """An unexpected exception (e.g. ValueError) is caught and returns None."""
+    mock_summarize.side_effect = ValueError("unexpected content block type")
+
+    result = summarize_with_backoff("https://www.twingate.com/docs/foo", "<html></html>")
+
+    assert result is None
+    mock_summarize.assert_called_once()  # no retries for non-API errors
+    mock_sleep.assert_not_called()

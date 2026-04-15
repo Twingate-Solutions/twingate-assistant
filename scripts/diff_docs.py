@@ -34,7 +34,7 @@ def load_mapping(mapping_path: str | Path = DEFAULT_MAPPING_PATH) -> dict:
     path = Path(mapping_path)
     logger.info("Loading doc mapping from %s", path)
     with path.open("r", encoding="utf-8") as fh:
-        data: dict = yaml.safe_load(fh)
+        data: dict = yaml.safe_load(fh) or {}
     doc_count = len(data.get("docs", []))
     pattern_count = len(data.get("auto_assign_patterns", []))
     logger.info(

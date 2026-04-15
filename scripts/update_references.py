@@ -13,16 +13,22 @@ This is the main entry point for the auto-update pipeline. It:
 
 import json
 import logging
+import os
 import random
+import re
 import sys
 import time
 from pathlib import Path
+
+# Ensure the scripts/ directory is on the path for sibling module imports,
+# regardless of the working directory from which the script is invoked.
+sys.path.insert(0, str(Path(__file__).parent))
 
 import anthropic
 
 from diff_docs import auto_assign, diff_docs, load_mapping
 from fetch_sitemap import fetch_sitemap
-from summarize_docs import content_hash, extract_text_from_html, fetch_doc_html, summarize_doc
+from summarize_docs import CLAUDE_MODEL, content_hash, extract_text_from_html, fetch_doc_html, summarize_doc
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +44,42 @@ BACKOFF_MAX_SECONDS = 60.0
 BACKOFF_MAX_RETRIES = 4
 
 
+def check_api_health() -> bool:
+    """Verify the Claude API is reachable before starting the pipeline.
+
+    Makes a minimal API call (max_tokens=1) to confirm that the API key
+    is valid and the service is responding. Called at pipeline start so
+    that an outage or misconfiguration is detected immediately — before
+    the pipeline fetches any doc HTML — ensuring no existing reference
+    files are touched when the API is unavailable.
+
+    Returns:
+        True if the API responded successfully; False otherwise.
+    """
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        logger.error("ANTHROPIC_API_KEY environment variable is not set")
+        return False
+
+    try:
+        client = anthropic.Anthropic()
+        client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=1,
+            messages=[{"role": "user", "content": "ping"}],
+        )
+        logger.info("API health check passed")
+        return True
+    except anthropic.AuthenticationError as exc:
+        logger.error("API authentication failed — check ANTHROPIC_API_KEY: %s", exc)
+    except anthropic.APIConnectionError as exc:
+        logger.error("API is unreachable (connection error): %s", exc)
+    except anthropic.APIStatusError as exc:
+        logger.error("API returned error status %d: %s", exc.status_code, exc)
+    except Exception as exc:
+        logger.error("Unexpected error during API health check: %s", exc)
+    return False
+
+
 def load_hash_cache(path: Path = HASH_CACHE_PATH) -> dict[str, str]:
     """Load the persisted URL-to-content-hash cache from disk.
 
@@ -46,7 +88,7 @@ def load_hash_cache(path: Path = HASH_CACHE_PATH) -> dict[str, str]:
 
     Returns:
         A dictionary mapping documentation URL strings to their last-seen
-        MD5 hex-digest. Returns an empty dict if the file does not exist.
+        SHA-256 hex-digest. Returns an empty dict if the file does not exist.
     """
     if not path.exists():
         logger.debug("Hash cache not found at %s, starting fresh", path)
@@ -60,7 +102,7 @@ def save_hash_cache(cache: dict[str, str], path: Path = HASH_CACHE_PATH) -> None
     """Persist the URL-to-content-hash cache to disk.
 
     Args:
-        cache: Dictionary mapping URL strings to MD5 hex-digests.
+        cache: Dictionary mapping URL strings to SHA-256 hex-digests.
         path: Filesystem path to write the JSON file.
     """
     logger.debug("Saving hash cache to %s (%d entries)", path, len(cache))
@@ -72,7 +114,9 @@ def url_to_slug(url: str) -> str:
     """Convert a documentation URL to a filesystem-safe filename slug.
 
     Uses the last non-empty path segment of the URL. Replaces dots with
-    hyphens. Falls back to ``"index"`` for bare-domain or root-only URLs.
+    hyphens, then strips any characters outside ``[a-zA-Z0-9\\-_]`` to
+    prevent path traversal via crafted URL segments. Falls back to
+    ``"index"`` for bare-domain, root-only, or fully-stripped URLs.
 
     Args:
         url: A full documentation page URL.
@@ -83,7 +127,12 @@ def url_to_slug(url: str) -> str:
     parts = [p for p in url.rstrip("/").split("/") if p]
     if not parts:
         return "index"
-    return parts[-1].replace(".", "-")
+    raw = parts[-1].replace(".", "-")
+    # Allow only alphanumeric, hyphens, and underscores.
+    slug = re.sub(r"[^a-zA-Z0-9\-_]", "-", raw)
+    # Collapse consecutive hyphens and strip leading/trailing hyphens.
+    slug = re.sub(r"-{2,}", "-", slug).strip("-")
+    return slug or "index"
 
 
 def references_dir_for_skill(skill: str) -> Path:
@@ -140,13 +189,18 @@ def summarize_with_backoff(url: str, html: str) -> str | None:
         except anthropic.APIError as exc:
             logger.error("Claude API error for %s: %s", url, exc)
             return None
+        except Exception as exc:
+            logger.error("Unexpected error summarizing %s: %s", url, exc)
+            return None
     return None  # unreachable; satisfies mypy
 
 
 def write_reference_file(skill: str, slug: str, content: str) -> Path:
     """Write a summary to the skill's ``references/`` directory.
 
-    Creates the directory tree if it does not already exist.
+    Creates the directory tree if it does not already exist. Validates
+    that the resolved output path stays within ``SKILLS_DIR`` to prevent
+    path traversal via crafted skill or slug values.
 
     Args:
         skill: Skill name (e.g. ``"twingate-connectors"``).
@@ -155,10 +209,19 @@ def write_reference_file(skill: str, slug: str, content: str) -> Path:
 
     Returns:
         The absolute path of the file that was written.
+
+    Raises:
+        ValueError: If the resolved output path escapes ``SKILLS_DIR``.
     """
     refs_dir = references_dir_for_skill(skill)
     refs_dir.mkdir(parents=True, exist_ok=True)
     output_path = refs_dir / f"{slug}.md"
+
+    # Guard against path traversal via crafted skill or slug values.
+    resolved = output_path.resolve()
+    if not resolved.is_relative_to(SKILLS_DIR.resolve()):
+        raise ValueError(f"Output path escapes skills directory: {resolved}")
+
     output_path.write_text(content, encoding="utf-8")
     logger.info("Wrote reference file: %s", output_path)
     return output_path
@@ -232,13 +295,22 @@ def main() -> int:
     """Orchestrate the full documentation update pipeline.
 
     Returns:
-        Exit code ``0`` on full success, ``1`` if the sitemap fetch fails
-        or any individual document fails to process.
+        Exit code ``0`` on full success, ``1`` if the API health check fails,
+        the sitemap fetch fails, or any individual document fails to process.
     """
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
+
+    # Step 0: Verify the Claude API is reachable before doing any work.
+    logger.info("Step 0: Checking Claude API availability")
+    if not check_api_health():
+        logger.error(
+            "Fatal: Claude API is unavailable. "
+            "No files have been modified. Retry when the API is operational."
+        )
+        return 1
 
     # Step 1: Fetch the live sitemap.
     logger.info("Step 1: Fetching sitemap")
@@ -263,7 +335,7 @@ def main() -> int:
 
     # Step 4: Process all docs already in the mapping.
     mapped_docs = mapping.get("docs", [])
-    logger.info("Step 3: Processing %d mapped docs", len(mapped_docs))
+    logger.info("Step 4: Processing %d mapped docs", len(mapped_docs))
     for entry in mapped_docs:
         url = entry.get("url", "")
         skill = entry.get("skill", "")
@@ -274,7 +346,7 @@ def main() -> int:
 
     # Step 5: Handle newly discovered docs.
     if new_urls:
-        logger.info("Step 4: Processing %d new docs", len(new_urls))
+        logger.info("Step 5: Processing %d new docs", len(new_urls))
         for url in new_urls:
             assigned_skill = auto_assign(url, patterns) or ""
             if assigned_skill:

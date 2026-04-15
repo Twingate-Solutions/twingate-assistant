@@ -8,6 +8,7 @@ in the Claude Code plugin. Used by the auto-update pipeline.
 
 import hashlib
 import logging
+from urllib.parse import urlparse
 
 import anthropic
 import requests
@@ -19,6 +20,20 @@ REQUEST_TIMEOUT_SECONDS = 30
 CLAUDE_MODEL = "claude-sonnet-4-6"
 CLAUDE_MAX_TOKENS = 1024
 MAX_TEXT_LENGTH = 8000
+
+# Allowed URL origins for the auto-update pipeline.
+# Each entry is (hostname, path_prefix). An empty path_prefix matches any path
+# on that host; a non-empty prefix restricts to that subtree only.
+_ALLOWED_SCHEMES = {"https"}
+_ALLOWED_ORIGINS: list[tuple[str, str]] = [
+    ("www.twingate.com", ""),              # Twingate documentation site
+    ("github.com", "/Twingate/"),          # Twingate GitHub org (operator, Helm, tf provider, etc.)
+    ("raw.githubusercontent.com", "/Twingate/"),  # Raw file content from Twingate repos
+]
+
+REQUEST_HEADERS = {
+    "User-Agent": "twingate-assistant-pipeline/1.0 (github.com/Twingate-Solutions/twingate-assistant)"
+}
 
 SYSTEM_PROMPT = (
     "You are summarizing a Twingate documentation page for use as a "
@@ -37,23 +52,52 @@ REMOVE_TAGS = ("script", "style", "nav", "footer", "header", "aside")
 MAIN_CONTENT_SELECTORS = ("main", "article", "#content", ".content")
 
 
+def _is_safe_url(url: str) -> bool:
+    """Return True if the URL is in the pipeline's fetch allowlist.
+
+    Allows HTTPS URLs from Twingate's documentation site and from the
+    Twingate GitHub org (github.com/Twingate/ and raw.githubusercontent.com/Twingate/).
+    Rejects all other origins to prevent SSRF via a compromised sitemap or
+    mapping file.
+
+    Args:
+        url: The URL string to validate.
+
+    Returns:
+        True if the URL is safe to fetch; False otherwise.
+    """
+    parsed = urlparse(url)
+    if parsed.scheme not in _ALLOWED_SCHEMES:
+        return False
+    for hostname, path_prefix in _ALLOWED_ORIGINS:
+        if parsed.hostname == hostname:
+            if not path_prefix or parsed.path.startswith(path_prefix):
+                return True
+    return False
+
+
 def fetch_doc_html(url: str) -> str | None:
     """Fetch a documentation page and return its HTML.
 
-    Makes an HTTP GET request to the given URL and returns the response
-    body as a string. Returns ``None`` on any request failure (network
-    error, timeout, non-2xx status) and logs a warning instead of
-    raising.
+    Validates that the URL points to www.twingate.com over HTTPS before
+    fetching. Makes an HTTP GET request and returns the response body as
+    a string. Returns ``None`` on any request failure (network error,
+    timeout, non-2xx status, or disallowed URL) and logs a warning
+    instead of raising.
 
     Args:
         url: The full URL of the documentation page to fetch.
 
     Returns:
-        The HTML content as a string, or ``None`` if the request failed.
+        The HTML content as a string, or ``None`` if the request failed
+        or the URL did not pass domain/scheme validation.
     """
+    if not _is_safe_url(url):
+        logger.warning("Refusing to fetch non-twingate URL: %s", url)
+        return None
     try:
         logger.info("Fetching doc page: %s", url)
-        response = requests.get(url, timeout=REQUEST_TIMEOUT_SECONDS)
+        response = requests.get(url, timeout=REQUEST_TIMEOUT_SECONDS, headers=REQUEST_HEADERS)
         response.raise_for_status()
         logger.info(
             "Fetched %s successfully, status=%d, length=%d bytes",
@@ -104,7 +148,7 @@ def extract_text_from_html(html_content: str) -> str:
 
 
 def content_hash(text: str) -> str:
-    """Compute an MD5 hex digest of the given text.
+    """Compute a SHA-256 hex digest of the given text.
 
     Used for change detection so the pipeline can skip re-summarizing
     pages whose content has not changed since the last run.
@@ -113,9 +157,9 @@ def content_hash(text: str) -> str:
         text: The text string to hash.
 
     Returns:
-        A 32-character lowercase hexadecimal MD5 digest string.
+        A 64-character lowercase hexadecimal SHA-256 digest string.
     """
-    return hashlib.md5(text.encode("utf-8")).hexdigest()
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def summarize_doc(url: str, html_content: str) -> str:
@@ -136,6 +180,7 @@ def summarize_doc(url: str, html_content: str) -> str:
     Raises:
         anthropic.APIError: If the Claude API call fails. The caller
             is responsible for retry logic.
+        ValueError: If the API response does not contain a text block.
     """
     page_text = extract_text_from_html(html_content)
 
@@ -160,7 +205,11 @@ def summarize_doc(url: str, html_content: str) -> str:
     )
 
     first_block = message.content[0]
-    summary: str = first_block.text  # type: ignore[union-attr]
+    if not hasattr(first_block, "text") or first_block.text is None:
+        raise ValueError(
+            f"Unexpected content block type from Claude API: {type(first_block)}"
+        )
+    summary: str = first_block.text
     logger.info("Summary generated for %s (%d chars)", url, len(summary))
     return summary
 

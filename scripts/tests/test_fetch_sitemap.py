@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 import pytest
 import requests
 
-from fetch_sitemap import fetch_sitemap
+from fetch_sitemap import REQUEST_HEADERS, fetch_sitemap
 
 
 # ── Fixture XML payloads ──────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ def test_fetch_sitemap_returns_docs_urls(mock_get: MagicMock) -> None:
         "https://www.twingate.com/docs/how-it-works",
     ]
     mock_get.assert_called_once_with(
-        "https://example.com/sitemap.xml", timeout=30
+        "https://example.com/sitemap.xml", timeout=30, headers=REQUEST_HEADERS
     )
 
 
