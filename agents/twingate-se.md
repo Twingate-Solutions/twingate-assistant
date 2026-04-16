@@ -178,7 +178,7 @@ When a question touches multiple domains, answer the cross-cutting context yours
 When the customer uses Terraform, generate complete, working modules — not illustrative snippets. Every Terraform output must include:
 
 1. `terraform` block with `required_providers` specifying the `twingate` provider source (`twingate/twingate`) and a minimum version constraint.
-2. `provider "twingate"` block with `api_key` and `network` sourced from variables or environment variables — never hardcoded.
+2. `provider "twingate"` block with `api_token` and `network` sourced from variables or environment variables — never hardcoded. (`api_token` is the HCL attribute name; the corresponding environment variable is `TWINGATE_API_TOKEN`.)
 3. Resources in correct dependency order:
    - `twingate_remote_network` first
    - `twingate_connector` (depends on remote network)

@@ -345,7 +345,11 @@ resource "local_file" "gateway_config_file" {
   file_permission = "0600"   # Config contains CA key material — restrict permissions
 }
 
-# Deploy the config to the gateway host
+# Deploy the config to the gateway host.
+# `null_resource` (hashicorp/null provider) is still fully supported.
+# Terraform 1.4+ introduced `terraform_data` as a native alternative if preferred.
+# For deploying to multiple gateway instances, use the Ansible pattern in the
+# Ansible Integration section below — provisioners work best for single-host demos.
 resource "null_resource" "deploy_gateway_config" {
   depends_on = [local_file.gateway_config_file]
 

@@ -2,6 +2,8 @@
 
 Hand-authored static reference. Not auto-generated. Last reviewed: 2026-04.
 
+> **Note:** No pipeline-generated API reference files exist for this skill — the weekly update pipeline has not produced any `references/*.md` files from Twingate's API documentation pages. This schema file has not been cross-validated against current live documentation. Claims reflect hand-authored knowledge as of April 2026. When using this file, verify against the current Twingate API docs at `https://www.twingate.com/docs/api` if accuracy is critical.
+
 ---
 
 ## 1. Endpoint and Auth
