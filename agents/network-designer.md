@@ -9,7 +9,7 @@ description: |
   deployment code (use aws-deployer, azure-deployer, gcp-deployer, or twingate-terraform
   skill for that).
 tools: Read, Write, Edit, Grep, Glob, Bash
-skills: twingate-architect, twingate-connectors, twingate-identity
+skills: twingate-architect, twingate-connectors, twingate-identity, twingate-terraform
 ---
 
 ## Role

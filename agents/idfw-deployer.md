@@ -8,7 +8,7 @@ description: |
   time-bounded SSH access. Also trigger on 'IDFW', 'gateway config', 'SSH certificates',
   'short-lived certs', 'PAM module', or 'privileged access management'.
 tools: Read, Grep, Glob, Bash, Write, Edit
-skills: twingate-idfw, twingate-kubernetes, twingate-terraform
+skills: twingate-idfw, twingate-kubernetes, twingate-terraform, twingate-identity
 ---
 
 ## Role
