@@ -18,6 +18,12 @@ resource behavior, `twingate-terraform` is the authoritative reference.
 
 ## Decisions & Guidelines
 
+- **Read existing Twingate Pulumi resources before generating.** When operating in a Pulumi
+  program, read existing source files for `twingate.RemoteNetwork`, `twingate.Connector`,
+  `twingate.Resource`, or `twingate.Group` resource declarations before generating new code.
+  Understand the existing stack structure, naming patterns, and config access pattern (e.g.,
+  `pulumi.Config`, environment variables). Generate additions that follow the existing
+  patterns — do not produce a standalone program when one already exists.
 - **Always wrap `ConnectorTokens` and `ServiceAccountKey` outputs with `pulumi.secret()`
   (TypeScript) or `pulumi.Output.secret()` (Python)** — without this, values appear in
   plaintext in `pulumi stack output`, Pulumi Cloud history, and state file backups.

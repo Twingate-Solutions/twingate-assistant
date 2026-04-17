@@ -19,6 +19,14 @@ mechanics belong in `twingate-connectors`; IDFW kubectl proxy mode belongs in
 
 ## Decisions & Guidelines
 
+- **Check for existing Twingate Kubernetes resources before generating.** When operating in a
+  Kubernetes or Helm context, check for existing Twingate Helm releases (`helm list -A | grep
+  twingate`) and existing `values.yaml` files with Twingate connector configuration before
+  generating values or manifests. If a release exists, produce a `values-patch.yaml` or
+  targeted changes to the existing values file rather than a full replacement. Check for
+  existing `TwingateConnector` and `TwingateResource` CRDs before generating new operator
+  manifests.
+
 **Choose the right pattern before writing any configuration.** These patterns are
 complementary, not mutually exclusive — each serves a distinct purpose:
 

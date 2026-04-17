@@ -19,6 +19,13 @@ leaking credentials.
 
 ## Decisions & Guidelines
 
+- **Read existing Twingate Terraform before generating.** When operating in a repo, glob for
+  `*.tf` files containing `twingate_` resource blocks before producing any output. Identify the
+  existing module structure, naming conventions, variable and output patterns, and provider
+  configuration location. Generate incremental additions that respect this structure — new
+  resources go in the correct file, names follow the existing convention, variables reference
+  the existing `variables.tf`. Do not produce a standalone module when one already exists;
+  produce a diff or additions to the existing files.
 - **Never hardcode `api_token` in `.tf` files** — set via `TWINGATE_API_TOKEN` environment
   variable; if passed as a Terraform variable, mark it `sensitive = true`. Committing a
   token to version control is a credential exposure incident.
