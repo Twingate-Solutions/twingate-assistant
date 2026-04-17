@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 REQUEST_TIMEOUT_SECONDS = 30
 CLAUDE_MODEL = "claude-sonnet-4-6"
 CLAUDE_MAX_TOKENS = 1024
-MAX_TEXT_LENGTH = 8000
+MAX_TEXT_LENGTH = 60000
 
 SYSTEM_PROMPT = (
     "You are summarizing a Twingate documentation page for use as a "

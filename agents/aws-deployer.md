@@ -45,41 +45,9 @@ Key configuration points:
 - Apply a dedicated Security Group with no inbound rules (see Security Group section)
 - Deploy two instances in different AZs for HA
 
-User data pattern (simplified):
-
-```bash
-#!/bin/bash
-ACCESS_TOKEN=$(aws secretsmanager get-secret-value \
-  --secret-id twingate/connector-1/access-token \
-  --query SecretString --output text)
-REFRESH_TOKEN=$(aws secretsmanager get-secret-value \
-  --secret-id twingate/connector-1/refresh-token \
-  --query SecretString --output text)
-
-docker run -d \
-  --name twingate-connector \
-  -e TWINGATE_NETWORK="<tenant>" \
-  -e TWINGATE_ACCESS_TOKEN="$ACCESS_TOKEN" \
-  -e TWINGATE_REFRESH_TOKEN="$REFRESH_TOKEN" \
-  -e TWINGATE_TIMESTAMP_FORMAT=2 \
-  -e TWINGATE_LABEL_DEPLOYED_BY=ec2-userdata \
-  --restart unless-stopped \
-  twingate/connector:1
-```
-
 ### 3. EKS with Helm Chart (recommended for EKS shops)
 
 If the customer already runs EKS, deploy connectors inside the cluster using the official Helm chart. This keeps the connector in the same network namespace as in-cluster services and simplifies the deployment model.
-
-```bash
-helm repo add twingate https://twingate.github.io/helm-charts
-helm repo update
-
-helm install twingate-connector-1 twingate/connector \
-  --set connector.network="<tenant>" \
-  --set connector.accessToken="<access-token>" \
-  --set connector.refreshToken="<refresh-token>"
-```
 
 Store tokens in Kubernetes Secrets or use the External Secrets Operator to sync from Secrets Manager. Deploy two Helm releases with separate token pairs and configure pod anti-affinity so they land on different nodes.
 
@@ -115,22 +83,11 @@ Do not reuse the VPC default Security Group or any group that has inbound rules.
 
 ### ECS Task Role (for Fargate/ECS deployments)
 
-The ECS task role needs permission to read the connector token secrets from Secrets Manager:
-
-```json
-{
-  "Effect": "Allow",
-  "Action": "secretsmanager:GetSecretValue",
-  "Resource": [
-    "arn:aws:secretsmanager:<region>:<account>:secret:twingate/connector-1/*",
-    "arn:aws:secretsmanager:<region>:<account>:secret:twingate/connector-2/*"
-  ]
-}
-```
+The ECS task role needs permission to read the connector token secrets from Secrets Manager. Scope the policy to the specific secret ARNs — do not use broad `secretsmanager:*` or `Resource: "*"`.
 
 ### EC2 Instance Profile (for EC2 deployments)
 
-Attach an instance profile with the same `secretsmanager:GetSecretValue` permission scoped to the connector secret ARNs. Do not use broad `secretsmanager:*` or `Resource: "*"` — scope to the specific secrets.
+Attach an instance profile with `secretsmanager:GetSecretValue` permission scoped to the connector secret ARNs.
 
 ---
 
@@ -138,114 +95,11 @@ Attach an instance profile with the same `secretsmanager:GetSecretValue` permiss
 
 Generate complete Terraform that automates both the Twingate resources and the AWS infrastructure together. Always produce two connector task definitions or instances for HA.
 
-Key resources to include:
+The Twingate side covers `twingate_remote_network`, `twingate_connector`, and `twingate_connector_tokens` for two connectors. The AWS side covers Secrets Manager secrets (storing tokens), the Security Group, ECS task definitions, and ECS services (one per AZ).
 
-**Twingate side:**
-
-```hcl
-resource "twingate_remote_network" "aws_vpc" {
-  name     = "AWS Production VPC"
-  location = "AWS"
-}
-
-resource "twingate_connector" "connector_1" {
-  remote_network_id = twingate_remote_network.aws_vpc.id
-  name              = "aws-connector-1"
-}
-
-resource "twingate_connector_tokens" "connector_1" {
-  connector_id = twingate_connector.connector_1.id
-}
-
-resource "twingate_connector" "connector_2" {
-  remote_network_id = twingate_remote_network.aws_vpc.id
-  name              = "aws-connector-2"
-}
-
-resource "twingate_connector_tokens" "connector_2" {
-  connector_id = twingate_connector.connector_2.id
-}
-```
-
-**AWS side (ECS Fargate example):**
-
-```hcl
-resource "aws_secretsmanager_secret" "connector_1_access" {
-  name = "twingate/connector-1/access-token"
-}
-
-resource "aws_secretsmanager_secret_version" "connector_1_access" {
-  secret_id     = aws_secretsmanager_secret.connector_1_access.id
-  secret_string = twingate_connector_tokens.connector_1.access_token
-}
-
-# (repeat for refresh token and connector 2)
-
-resource "aws_security_group" "twingate_connector" {
-  name   = "twingate-connector"
-  vpc_id = var.vpc_id
-
-  egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-resource "aws_ecs_task_definition" "connector_1" {
-  family                   = "twingate-connector-1"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = "256"
-  memory                   = "512"
-  task_role_arn            = aws_iam_role.connector_task.arn
-  execution_role_arn       = aws_iam_role.connector_execution.arn
-
-  container_definitions = jsonencode([{
-    name  = "twingate-connector"
-    image = "twingate/connector:1"
-    secrets = [
-      {
-        name      = "TWINGATE_ACCESS_TOKEN"
-        valueFrom = aws_secretsmanager_secret.connector_1_access.arn
-      },
-      {
-        name      = "TWINGATE_REFRESH_TOKEN"
-        valueFrom = aws_secretsmanager_secret.connector_1_refresh.arn
-      }
-    ]
-    environment = [
-      { name = "TWINGATE_NETWORK", value = var.twingate_network },
-      { name = "TWINGATE_TIMESTAMP_FORMAT", value = "2" },
-      { name = "TWINGATE_LABEL_DEPLOYED_BY", value = "terraform" }
-    ]
-  }])
-}
-
-resource "aws_ecs_service" "connector_1" {
-  name            = "twingate-connector-1"
-  cluster         = var.ecs_cluster_id
-  task_definition = aws_ecs_task_definition.connector_1.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
-
-  network_configuration {
-    subnets          = [var.private_subnet_az1_id]
-    security_groups  = [aws_security_group.twingate_connector.id]
-    assign_public_ip = false
-  }
-}
-
-# Deploy connector_2 in a second AZ (var.private_subnet_az2_id)
-```
+> See [`skills/twingate-connectors/references/aws-connector-patterns.md`](../skills/twingate-connectors/references/aws-connector-patterns.md)
+> for the complete working ECS Fargate module, EC2 user data pattern, EKS Helm commands,
+> and IAM policy examples.
 
 Never write token values to Terraform output blocks. If outputs are needed for debugging, mark them `sensitive = true`. Tokens are managed internally by the `twingate_connector_tokens` resource and passed directly to Secrets Manager — they do not need to be visible outside the module.
 
@@ -256,7 +110,7 @@ Never write token values to Terraform output blocks. If outputs are needed for d
 Always deploy exactly two connectors per Remote Network, each in a different AZ:
 
 - **ECS**: Two separate `aws_ecs_service` resources, one in each private subnet AZ (`desired_count = 1` each, not `desired_count = 2` on one service)
-- **EC2**: Two separate instances with separate instance profiles and token pairs, in `us-east-1a` and `us-east-1b` (or equivalent AZs in the target region)
+- **EC2**: Two separate instances with separate instance profiles and token pairs, in different AZs
 - **EKS**: Two Helm releases with pod anti-affinity rules targeting `topology.kubernetes.io/zone`
 
 The Twingate client performs automatic load balancing and failover across healthy connectors. No load balancer or health check target group is needed.

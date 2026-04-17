@@ -47,7 +47,7 @@ SKILLS_DIR = PROJECT_ROOT / "skills"
 TEST_OUTPUT_DIR = SCRIPTS_DIR / "test_output"
 STATE_FILE = TEST_OUTPUT_DIR / "pipeline_state.json"
 
-MAX_TEXT_LENGTH = 8000  # matches summarize_docs.py
+MAX_TEXT_LENGTH = 60000  # matches summarize_docs.py
 
 
 def url_to_slug(url: str) -> str:

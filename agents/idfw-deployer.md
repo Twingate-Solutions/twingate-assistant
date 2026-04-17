@@ -53,146 +53,30 @@ Walk the customer through these steps in order. Do not skip steps or present the
 
 ### 1. Create the Twingate Resource
 
-In the admin console or via Terraform (`twingate_resource`), create a resource pointing to the SSH target:
-- Address: the FQDN or IP of the target SSH server
-- Protocol: TCP, port 22
-- Assign it to the appropriate group(s)
-
-This controls which Twingate users can reach the server at the network level. It is a prerequisite for the gateway to intercept the connection.
+In the admin console or via Terraform (`twingate_resource`), create a resource pointing to the SSH target (address: FQDN or IP, protocol: TCP port 22). Assign it to the appropriate group(s). This controls which Twingate users can reach the server at the network level and is a prerequisite for the gateway to intercept the connection.
 
 ### 2. Generate the Gateway Config YAML
 
-The gateway config YAML drives all IDFW behavior. Use the `twingate_gateway_config` Terraform resource to generate it, or write it manually.
-
-**Manual YAML (annotated):**
-
-```yaml
-# gateway-config.yaml
-ssh:
-  resources:
-    - resource_id: "UmVzb3VyY2U6MTIz"      # Base64-encoded Twingate resource ID
-      username: "ec2-user"                   # UNIX account — NOT set in admin console
-      certificate_authority: |              # Twingate CA public key (from admin console)
-        ssh-rsa AAAAB3NzaC1yc2EAAAADAQAB...
-
-recording:
-  enabled: true
-  output_dir: "/var/log/twingate/recordings"
-```
-
-**Terraform generation:**
-
-```hcl
-resource "twingate_gateway_config" "ssh_gateway" {
-  output_path = "${path.module}/gateway-config.yaml"
-
-  ssh {
-    resource {
-      resource_id           = twingate_resource.linux_servers.id
-      username              = "ec2-user"
-      certificate_authority = var.twingate_ca_public_key
-    }
-  }
-
-  recording {
-    enabled    = true
-    output_dir = "/var/log/twingate/recordings"
-  }
-}
-
-resource "local_file" "gateway_config_file" {
-  content  = twingate_gateway_config.ssh_gateway.content
-  filename = "${path.module}/gateway-config.yaml"
-}
-```
-
-`twingate_gateway_config` is a local code generation resource — it makes no API call and creates no remote Terraform state. It is functionally equivalent to rendering a template locally. The resulting YAML file must be deployed to the gateway host separately (via provisioner, Ansible, or your config management tool).
+The gateway config YAML drives all IDFW behavior. Use the `twingate_gateway_config` Terraform resource to generate it, or write it manually. The config defines the resource ID, UNIX username, and CA public key for each SSH resource. `twingate_gateway_config` is a local code generation resource — it makes no API call, creates no remote state, and is functionally equivalent to rendering a template locally. The resulting YAML must be deployed to the gateway host separately.
 
 ### 3. Deploy the Gateway
 
-Inspect the `Twingate/gateway` repo for current deployment configurations:
-
-```bash
-git clone https://github.com/Twingate/gateway
-# Review deploy/ directory for Helm chart and Docker Compose examples
-ls deploy/
-```
-
-Deployment options:
-
-**Docker Compose (fastest for evaluation):**
-```bash
-docker compose -f deploy/docker-compose.yaml up -d
-```
-
-**Helm (recommended for Kubernetes-hosted gateways):**
-```bash
-helm repo add twingate https://twingate.github.io/gateway
-helm install twingate-gateway twingate/gateway \
-  --namespace twingate \
-  --set config.path=/etc/twingate/gateway-config.yaml
-```
-
-**systemd** — for VM or bare-metal deployments; see the `deploy/` directory for the service unit file.
-
-Deploy at least two gateway instances behind a load balancer. A single gateway instance is a single point of failure for all SSH access to the resources it serves.
-
-The gateway also acts as a connector — it dials out to the Twingate Controller and needs a connector token. It requires outbound internet access but no inbound firewall rules.
+Inspect the `Twingate/gateway` repo for current deployment configurations (`deploy/` directory contains Helm chart, Docker Compose, and systemd examples). Deploy at least two gateway instances behind a load balancer — a single instance is a single point of failure for all SSH access. The gateway also acts as a connector and needs a connector token; it requires outbound internet access but no inbound firewall rules.
 
 ### 4. Install the PAM Module on Each Target Server
 
-Every target SSH server must have the Twingate PAM module installed. The gateway validates the certificate before forwarding the connection, but the target server also validates it via PAM to complete the chain. Servers without the PAM module may fall back to password or key auth, creating a bypass path.
-
-```bash
-# Ubuntu/Debian — quick install (review the script before running in production)
-curl -s https://binaries.twingate.com/pam/install.sh | sudo bash
-
-# Production alternative: download first, review, then run
-curl -so install-pam.sh https://binaries.twingate.com/pam/install.sh
-sudo bash install-pam.sh
-```
+Every target SSH server must have the Twingate PAM module installed. The gateway validates the certificate before forwarding, but the target server also validates it via PAM to complete the chain. Servers without the PAM module may fall back to password or key auth, creating a bypass path.
 
 ### 5. Configure `sshd_config` and PAM
 
-On every target server:
-
-```sshd
-# /etc/ssh/sshd_config
-
-# Point sshd to the Twingate CA public key
-TrustedUserCAKeys /etc/ssh/twingate_ca.pub
-
-# Disable static credentials — this is required to eliminate the bypass path
-PasswordAuthentication no
-PubkeyAuthentication no
-ChallengeResponseAuthentication no
-
-# PAM must be enabled
-UsePAM yes
-```
-
-```pam
-# /etc/pam.d/sshd — add at the TOP of the auth stack
-auth required pam_twingate.so
-```
-
-Copy the Twingate CA public key (obtained from the admin console under IDFW/gateway settings) to each target server:
-
-```bash
-sudo cp twingate_ca.pub /etc/ssh/twingate_ca.pub
-sudo chmod 644 /etc/ssh/twingate_ca.pub
-sudo systemctl restart sshd
-```
+On every target server: point `TrustedUserCAKeys` to the Twingate CA public key, disable static credentials (`PasswordAuthentication no`, `PubkeyAuthentication no`, `ChallengeResponseAuthentication no`), enable PAM (`UsePAM yes`), and add `pam_twingate.so` at the top of the PAM auth stack.
 
 ### 6. Test the End-to-End Flow
 
-1. User authenticates to Twingate on their device.
-2. User SSHes to the resource FQDN/IP.
-3. Twingate Client intercepts the connection and routes it through the gateway.
-4. Gateway issues a short-lived SSH certificate signed by Twingate's CA.
-5. SSH client presents the certificate; PAM on the target server validates it.
-6. User is logged in as the UNIX username defined in the gateway config YAML.
-7. If recording is enabled, the session is captured under the user's Twingate identity.
+Verify the full certificate-issuance path: user authenticates to Twingate, SSHes to the resource, the gateway issues a short-lived cert, the target server validates it via PAM, and the user lands as the UNIX username defined in the gateway config.
+
+> See [`references/ssh-pam-deployment-guide.md`](../skills/twingate-idfw/references/ssh-pam-deployment-guide.md)
+> for annotated config examples, install commands, and the full deployment walkthrough.
 
 ---
 
@@ -213,7 +97,8 @@ The gateway can proxy `kubectl` commands with Twingate identity enforcement, eli
 - Session recording captures `kubectl` commands associated with the Twingate user identity, not just the Kubernetes service account.
 - Revocation is instant — remove the user from the Twingate group.
 
-Refer to the `twingate-kubernetes` skill for Helm chart values, operator configuration, and K8s-specific resource routing.
+> See the `twingate-kubernetes` skill and the gateway repo's `deploy/` directory for
+> Helm values specific to kubectl proxy mode.
 
 ---
 
@@ -245,9 +130,7 @@ Recording is not retroactive. Enabling it after sessions have occurred does not 
 IDFW provides a clean, auditable, credential-free pattern for contractor SSH access.
 
 ```
-1. Create a restricted UNIX account on target servers:
-   $ sudo useradd -m -s /bin/rbash contractor_user
-   $ sudo usermod -aG limited_tools contractor_user
+1. Create a restricted UNIX account on target servers.
 
 2. Create a Twingate group: "contractors-linux-prod"
 
@@ -280,109 +163,14 @@ Twingate SSH certificates work transparently with Ansible. No special Ansible pl
 
 **How it works:** Ansible uses SSH for transport. When the Twingate Client is running on the Ansible control node and the user is authenticated to Twingate, SSH connections from Ansible to protected SSH resources automatically use the Twingate-issued certificate.
 
-```ini
-# ansible.cfg
-[defaults]
-remote_user = ec2-user          # Must match username in gateway config YAML
-
-[ssh_connection]
-ssh_args = -o ForwardAgent=yes -o StrictHostKeyChecking=accept-new
-pipelining = True
-```
-
-Use `StrictHostKeyChecking=accept-new` (trust-on-first-use), not `=no`. `accept-new` verifies the host key on subsequent connections, preventing MITM attacks. `=no` disables all host key checking and should never be used in production.
-
 **Requirements checklist:**
 - Twingate Client running on the Ansible control node.
 - Control node user authenticated to Twingate with access to the target resources.
 - SSH agent running with the Twingate certificate loaded.
 - Target servers have PAM configured and `sshd_config` updated (steps 4–5 above).
 
----
-
-## Terraform for IDFW — Full Reference Pattern
-
-```hcl
-# variables.tf
-variable "twingate_ca_public_key" {
-  description = "Twingate CA public key — obtain from admin console, IDFW section"
-  type        = string
-  sensitive   = true   # Treat as sensitive — do not output in plaintext
-}
-
-variable "ssh_resource_id" {
-  description = "Base64-encoded Twingate resource ID for the SSH target"
-  type        = string
-}
-
-variable "gateway_ssh_key_path" {
-  description = "Path to SSH private key for provisioner access to gateway host"
-  type        = string
-  sensitive   = true
-}
-
-# main.tf
-resource "twingate_gateway_config" "prod_ssh" {
-  output_path = "${path.module}/gateway-config.yaml"
-
-  ssh {
-    resource {
-      resource_id           = var.ssh_resource_id
-      username              = "ec2-user"
-      certificate_authority = var.twingate_ca_public_key
-    }
-  }
-
-  recording {
-    enabled    = true
-    output_dir = "/var/log/twingate/recordings"
-  }
-}
-
-resource "local_file" "gateway_config_file" {
-  content         = twingate_gateway_config.prod_ssh.content
-  filename        = "${path.module}/gateway-config.yaml"
-  file_permission = "0600"   # Config contains CA key material — restrict permissions
-}
-
-# Deploy the config to the gateway host.
-# `null_resource` (hashicorp/null provider) is still fully supported.
-# Terraform 1.4+ introduced `terraform_data` as a native alternative if preferred.
-# For deploying to multiple gateway instances, use the Ansible pattern in the
-# Ansible Integration section below — provisioners work best for single-host demos.
-resource "null_resource" "deploy_gateway_config" {
-  depends_on = [local_file.gateway_config_file]
-
-  triggers = {
-    config_hash = sha256(twingate_gateway_config.prod_ssh.content)
-  }
-
-  provisioner "file" {
-    source      = local_file.gateway_config_file.filename
-    destination = "/etc/twingate/gateway-config.yaml"
-
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      host        = aws_instance.gateway.private_ip
-      private_key = file(var.gateway_ssh_key_path)
-    }
-  }
-
-  provisioner "remote-exec" {
-    inline = ["sudo systemctl restart twingate-gateway"]
-
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      host        = aws_instance.gateway.private_ip
-      private_key = file(var.gateway_ssh_key_path)
-    }
-  }
-}
-```
-
-For provider setup, authentication, and state management, refer to the `twingate-terraform` skill.
+> See [`references/gateway-terraform-patterns.md`](../skills/twingate-idfw/references/gateway-terraform-patterns.md)
+> for the `ansible.cfg` configuration.
 
 ---
 
@@ -404,3 +192,5 @@ For provider setup, authentication, and state management, refer to the `twingate
 - **twingate-terraform** skill — provider setup, `twingate_resource` and `twingate_group` resource reference, state management for the full IDFW Terraform stack.
 - **twingate-identity** skill — group membership management, JIT access provisioning, device trust, and time-bounded access patterns used in the contractor SSH flow.
 - **twingate-connectors** skill — connector deployment fundamentals and the distinction between connectors (network layer) and the gateway (protocol layer).
+- **references/ssh-pam-deployment-guide.md** — SSH PAM deployment walkthrough and config examples
+- **references/gateway-terraform-patterns.md** — Terraform `twingate_gateway_config` and Ansible patterns

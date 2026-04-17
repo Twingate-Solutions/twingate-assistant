@@ -67,7 +67,12 @@ capabilities. You need a gateway.
 ## References
 
 See [`references/`](./references/) for current doc summaries.
-Key references: `identity-firewall-overview.md`
+
+Key references:
+
+- `identity-firewall-overview.md` — IDFW feature overview and gateway architecture
+- `ssh-pam-deployment-guide.md` — SSH PAM deployment walkthrough with annotated config examples
+- `gateway-terraform-patterns.md` — `twingate_gateway_config` Terraform pattern and Ansible config
 
 For gateway deployment examples, inspect `https://github.com/Twingate/gateway` — the
 `deploy/` directory contains current Helm chart values, Docker Compose, and systemd

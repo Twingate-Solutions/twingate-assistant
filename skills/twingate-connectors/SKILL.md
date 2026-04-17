@@ -55,3 +55,6 @@ See [`references/`](./references/) for current doc summaries.
 Key references:
 
 - `connector-deployment.md` — deployment guides for Docker, systemd, Helm, ECS, ACI, GCE
+- `aws-connector-patterns.md` — ECS Fargate and EC2 deployment modules
+- `azure-connector-patterns.md` — ACI and AKS deployment modules
+- `gcp-connector-patterns.md` — Cloud Run and GCE deployment modules

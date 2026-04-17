@@ -229,15 +229,15 @@ def test_summarize_doc_calls_api_with_correct_params(
 def test_summarize_doc_truncates_long_text(
     mock_anthropic_cls: MagicMock,
 ) -> None:
-    """Text exceeding 8000 chars is truncated with a notice appended."""
+    """Text exceeding 60000 chars is truncated with a notice appended."""
     mock_client = MagicMock()
     mock_anthropic_cls.return_value = mock_client
     mock_client.messages.create.return_value = _mock_claude_message(
         "# Truncated Summary"
     )
 
-    # Build HTML with a body exceeding 8000 chars of text.
-    long_text = "word " * 3000  # ~15000 chars
+    # Build HTML with a body exceeding 60000 chars of text.
+    long_text = "word " * 15000  # ~75000 chars
     long_html = f"<html><body><p>{long_text}</p></body></html>"
 
     summarize_doc("https://www.twingate.com/docs/long", long_html)
@@ -259,7 +259,7 @@ def test_summarize_doc_long_html_still_calls_api(
         "# Long Page Summary"
     )
 
-    long_text = "paragraph " * 5000
+    long_text = "paragraph " * 7000
     long_html = (
         f"<html><body><main><h1>Big Doc</h1><p>{long_text}</p></main></body></html>"
     )
