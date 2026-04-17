@@ -1,0 +1,26 @@
+{
+  "name": "twingate-solutions",
+  "owner": {
+    "name": "Twingate Solutions Engineering"
+  },
+  "metadata": {
+    "description": "Twingate ZTNA implementation assistant — architecture, deployment, IaC, troubleshooting"
+  },
+  "plugins": [
+    {
+      "name": "twingate-assistant",
+      "source": {
+        "source": "github",
+        "repo": "Twingate-Solutions/twingate-assistant"
+      },
+      "description": "Twingate ZTNA implementation assistant — architecture, deployment, IaC, troubleshooting. Use when working with Twingate, zero trust network access, connectors, remote networks, security policies, identity providers, device trust, DNS filtering, exit networks, Twingate API, Terraform provider, Pulumi provider, Kubernetes operator, or SSH PAM.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Twingate Solutions Engineering"
+      },
+      "repository": "https://github.com/Twingate-Solutions/twingate-assistant",
+      "license": "Apache-2.0",
+      "keywords": ["twingate", "ztna", "zero-trust", "networking", "terraform", "kubernetes", "idp", "ssh"]
+    }
+  ]
+}

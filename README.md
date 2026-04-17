@@ -6,25 +6,21 @@ A Claude Code plugin that turns Claude Code into a Twingate ZTNA implementation 
 
 ## Installation
 
-### Option 1 — Plugin directory flag
-
 ```bash
-claude --plugin-dir /path/to/twingate-assistant
+# Add the Twingate Solutions marketplace (once)
+/plugin marketplace add Twingate-Solutions/twingate-assistant
+
+# Install the plugin
+/plugin install twingate-assistant@twingate-solutions
 ```
 
-Add to your shell profile or project `.clauderc` to load automatically.
+That's it. The plugin loads automatically in future sessions.
 
-### Option 2 — Clone and reference
+### Local development / testing
 
 ```bash
-git clone https://github.com/Twingate-Solutions/twingate-assistant.git ~/plugins/twingate-assistant
-claude --plugin-dir ~/plugins/twingate-assistant
-```
-
-### Option 3 — Marketplace (when available)
-
-```text
-/plugin add twingate-assistant
+git clone https://github.com/Twingate-Solutions/twingate-assistant.git
+claude --plugin-dir ./twingate-assistant
 ```
 
 ---
@@ -135,9 +131,11 @@ Reference documentation in each skill's `references/` directory is kept current 
 To run the pipeline locally:
 
 ```bash
-cd scripts
-pip install -r requirements.txt
-ANTHROPIC_API_KEY=your_key python update_references.py
+# No API key needed — uses Claude Code CLI:
+python scripts/test_pipeline.py --claude-code --url https://www.twingate.com/docs/how-twingate-works
+
+# Full production run (requires ANTHROPIC_API_KEY):
+ANTHROPIC_API_KEY=your_key python scripts/update_references.py
 ```
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for full pipeline documentation.

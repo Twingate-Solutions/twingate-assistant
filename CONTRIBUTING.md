@@ -74,7 +74,7 @@ To add a new mapping:
 1. Find the canonical URL for the doc page (use the live Twingate docs site)
 2. Identify the correct skill (see the Skill Quick Reference in `CLAUDE.md`)
 3. Add the entry to `doc_mapping.yaml`
-4. Run the pipeline locally to verify it picks up and routes the URL correctly
+4. Run `python scripts/test_pipeline.py --url <your-url>` to verify it picks up and routes correctly (no API key needed)
 
 The pipeline also auto-discovers new docs via sitemap diff. Any URL not in `doc_mapping.yaml` is routed to the `_triage/` directory for manual review and subsequent mapping.
 
@@ -82,7 +82,30 @@ The pipeline also auto-discovers new docs via sitemap diff. Any URL not in `doc_
 
 ## Running the Pipeline Locally
 
-The auto-update pipeline requires an Anthropic API key with access to Claude Sonnet.
+### Without an API key (recommended for testing)
+
+`scripts/test_pipeline.py` runs every pipeline step and lets you test individual docs without an Anthropic API key. It uses the Claude Code CLI (`claude --print`) as the summarization engine.
+
+```bash
+cd scripts
+pip install -r requirements.txt
+
+# Fetch sitemap, diff against doc_mapping.yaml, extract text, and print what would be sent to Claude:
+python test_pipeline.py
+
+# Test a specific URL:
+python test_pipeline.py --url https://www.twingate.com/docs/how-twingate-works
+
+# End-to-end: fetch, summarize via Claude Code CLI, and write the reference file (no API key needed):
+python test_pipeline.py --claude-code --url https://www.twingate.com/docs/how-twingate-works
+
+# Process N docs in sequence from the mapping:
+python test_pipeline.py --claude-code --count 3
+```
+
+The `--claude-code` mode requires an active Claude Code CLI session but no `ANTHROPIC_API_KEY`.
+
+### With an Anthropic API key (production pipeline)
 
 ```bash
 cd scripts
@@ -102,14 +125,12 @@ python diff_docs.py              # Diffs sitemap against doc_mapping.yaml
 
 The pipeline is idempotent — it skips pages whose content hasn't changed since the last run (hash-checked). On first run, it will fetch and summarize all mapped docs. Subsequent runs only update changed pages.
 
-**Cost note:** Each page summarization makes one Claude API call (~500 tokens output). With ~80 mapped docs, a full run costs roughly $0.10–0.20. The hash check avoids re-summarizing unchanged pages.
+**Cost note:** Each page summarization makes one Claude API call (~500 tokens output). With ~286 mapped docs, a first-run full seed costs roughly $0.50–1.00. Steady-state weekly runs process only the 6–10 pages that typically change, keeping incremental cost under $0.05.
 
 ### Running tests
 
 ```bash
-cd scripts
-pip install -r requirements.txt
-pytest tests/ -q
+pytest scripts/tests/ -q
 ```
 
 All HTTP and Claude API calls are mocked in the test suite — no network access or API key required to run tests.

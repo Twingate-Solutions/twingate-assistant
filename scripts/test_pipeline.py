@@ -17,15 +17,26 @@ Phase 2 — write the Claude-provided summary to the reference file::
     # or via stdin (ensure UTF-8):
     python scripts/test_pipeline.py --write < summary.md
 
+--claude-code mode (end-to-end with Claude Code CLI, no API key needed)::
+
+    python scripts/test_pipeline.py --claude-code [--url URL] [--count N]
+
+Fetches, extracts, summarizes via ``claude`` CLI subprocess, and writes the reference file
+in a single pass. No ANTHROPIC_API_KEY required.
+
 ``--url URL``             Pick a specific doc URL instead of the first mapped entry.
 ``--write``               Phase 2: read summary and write reference file.
 ``--summary-file PATH``   Read summary from this file (UTF-8) instead of stdin.
 ``--quiet``               Suppress the PROMPT FOR CLAUDE text block (state JSON still written).
                           Use this when running automated: read extracted_text from pipeline_state.json.
+``--claude-code``         End-to-end mode using the Claude Code CLI subprocess (no API key needed).
+``--count N``             With --claude-code: process N docs from the mapping in sequence (default: 1).
+                          Ignored when --url is also given.
 """
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -214,15 +225,117 @@ def phase2(summary_file: str | None) -> None:
     print("Phase 2 complete.")
 
 
+def claude_code_mode(target_url: str | None, count: int) -> None:
+    """End-to-end mode: fetch, extract, summarize via claude -p subprocess, write reference file.
+
+    Uses the Claude Code CLI (``claude --print``) as the summarization engine.
+    No ANTHROPIC_API_KEY required — uses the active Claude Code session auth.
+    """
+    mapping = load_mapping()
+    docs = mapping.get("docs", [])
+    patterns = mapping.get("auto_assign_patterns", [])
+
+    # Build list of (url, skill) pairs to process.
+    targets: list[tuple[str, str]] = []
+    if target_url:
+        entry = next((d for d in docs if d.get("url") == target_url), None)
+        if entry:
+            targets = [(entry["url"], entry["skill"])]
+        else:
+            assigned = auto_assign(target_url, patterns)
+            targets = [(target_url, assigned if assigned else "_triage")]
+    else:
+        for entry in docs[:count]:
+            targets.append((entry["url"], entry["skill"]))
+
+    total = len(targets)
+    written = 0
+    failed = 0
+
+    for idx, (url, skill) in enumerate(targets, 1):
+        print(f"\n[{idx}/{total}] {url} -> {skill}")
+
+        # Fetch HTML.
+        html = fetch_doc_html(url)
+        if html is None:
+            print("  ERROR: Failed to fetch page.")
+            failed += 1
+            continue
+
+        # Extract and optionally truncate text.
+        text = extract_text_from_html(html)
+        truncated = len(text) > MAX_TEXT_LENGTH
+        if truncated:
+            text = text[:MAX_TEXT_LENGTH] + "\n\n[Content truncated for length]"
+
+        slug = url_to_slug(url)
+        user_message = f"URL: {url}\n\n{text}"
+
+        # Call the Claude Code CLI as a subprocess.
+        # Flag confirmed from `claude --help`: -p / --print for non-interactive output.
+        try:
+            combined = f"{SYSTEM_PROMPT}\n\nUser:\n{user_message}"
+            result = subprocess.run(
+                ["claude", "--print", combined],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                timeout=120,
+            )
+        except subprocess.TimeoutExpired:
+            print("  ERROR: subprocess timed out after 120s")
+            failed += 1
+            continue
+        except FileNotFoundError:
+            print("  ERROR: 'claude' not found on PATH. Is Claude Code CLI installed?")
+            failed += 1
+            continue
+
+        if result.returncode != 0:
+            print(f"  ERROR: subprocess returned {result.returncode}")
+            if result.stderr:
+                print(f"  stderr: {result.stderr[:200]}")
+            failed += 1
+            continue
+
+        summary = result.stdout.strip()
+        if not summary:
+            print("  ERROR: claude returned empty output")
+            failed += 1
+            continue
+
+        # Write reference file.
+        if skill == "_triage":
+            out_dir = SKILLS_DIR / "_triage"
+            content = f"<!-- triage: unassigned URL: {url} -->\n\n{summary}"
+        else:
+            out_dir = SKILLS_DIR / skill / "references"
+            content = summary
+
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = out_dir / f"{slug}.md"
+        out_path.write_text(content, encoding="utf-8")
+        written += 1
+
+        trunc_str = "yes" if truncated else "no"
+        print(f"        Extracted: {len(text):,} chars | Truncated: {trunc_str} | Written: {out_path}")
+
+    print(f"\n--claude-code run complete: {total} processed, {written} written, {failed} failed")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--url", help="Specific doc URL to process (default: first mapped entry)")
     parser.add_argument("--write", action="store_true", help="Phase 2: read summary and write reference file")
     parser.add_argument("--summary-file", help="Path to summary .md file (Phase 2); reads stdin if omitted")
     parser.add_argument("--quiet", action="store_true", help="Suppress PROMPT FOR CLAUDE block; state JSON still written")
+    parser.add_argument("--claude-code", action="store_true", help="End-to-end mode using the Claude Code CLI (no API key needed)")
+    parser.add_argument("--count", type=int, default=1, metavar="N", help="With --claude-code: number of docs to process in sequence (default: 1; ignored when --url is given)")
     args = parser.parse_args()
 
-    if args.write:
+    if args.claude_code:
+        claude_code_mode(args.url, args.count)
+    elif args.write:
         phase2(args.summary_file)
     else:
         phase1(args.url, quiet=args.quiet)
