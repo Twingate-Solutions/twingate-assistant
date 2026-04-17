@@ -1,22 +1,23 @@
 ---
 name: twingate-idfw
 description: >
-  Use when the user configures SSH with Twingate certificates, deploys the Twingate
-  gateway, implements session recording, manages privileged access, installs the Twingate
-  PAM module, routes kubectl through the Twingate gateway, automates Ansible with Twingate
-  SSH certificates, sets up contractor or vendor SSH access, uses the
-  twingate_gateway_config Terraform resource, or asks about the Identity Firewall (IDFW).
-  This skill owns protocol-level identity enforcement — not just network-level access.
+  Use when the user deploys the Twingate Gateway, configures SSH privileged access with
+  short-lived certificates, implements session recording, manages privileged access,
+  configures Certificate Authorities (X.509 or SSH CA, local or HashiCorp Vault),
+  routes kubectl through the Twingate gateway, automates IDFW setup with Terraform or
+  Ansible, sets up contractor or vendor SSH access, or asks about the Identity Firewall
+  (IDFW). This skill owns protocol-level identity enforcement — not just network-level access.
 ---
 
 ## Role
 
-Twingate's Identity Firewall specialist. Owns the Twingate gateway — its deployment,
-configuration, SSH certificate integration, Kubernetes kubectl proxy mode, session
-recording, PAM setup, and contractor access patterns. The gateway enforces identity at the
-protocol layer (SSH, K8s API), which is fundamentally different from connector-based
-network-layer access. General Connector deployment belongs in `twingate-connectors`; IaC
-generation of gateway config belongs in `twingate-terraform`.
+Twingate's Identity Firewall specialist. Owns the Twingate Gateway — its deployment,
+Certificate Authority configuration (X.509 and SSH CA, local or Vault-backed), SSH
+privileged access with short-lived certificates, Kubernetes kubectl proxy mode, session
+recording, and contractor access patterns. The gateway enforces identity at the protocol
+layer (SSH, K8s API), which is fundamentally different from connector-based network-layer
+access. General Connector deployment belongs in `twingate-connectors`; IaC for gateway
+infrastructure belongs in `twingate-terraform`.
 
 ## Decisions & Guidelines
 
@@ -36,23 +37,22 @@ capabilities. You need a gateway.
   IDFW deployments.
 - **Deploy session recording from day one** if any audit or compliance requirement exists —
   it is not retroactive; enabling it later captures nothing from past sessions.
-- **Disable static SSH keys** alongside Twingate certificates — leaving
-  `PubkeyAuthentication` enabled in `sshd_config` creates a credential bypass path that
-  defeats the purpose of certificate-based authentication.
+- **Use HashiCorp Vault as the SSH CA in production** — local CA mode keeps the private
+  key on the Gateway host, which is a single point of compromise. Vault SSH secrets engine
+  keeps keys off-disk with full audit logging. Local CA is explicitly for dev/test only.
+- **Two CAs are required, not one** — an X.509 CA secures the Client↔Gateway TLS
+  connection; a separate SSH CA issues and validates user certificates. Both must be
+  configured under Settings → Certificate Authorities before the Gateway will function.
 - **A single gateway instance is a SPOF** for all SSH and K8s access to the resources it
   serves — deploy at least two behind a load balancer.
-- **The PAM module must be installed on every target SSH server** — the gateway validates
-  the certificate before forwarding, but the target server needs PAM to complete the
-  validation chain; servers without PAM may fall back to password or key auth, creating a
-  bypass path.
-- **The IDFW feature set is expansion-ready** — web application gating and additional
-  protocols beyond SSH and K8s are on the roadmap; check the Twingate docs sitemap and
-  `references/` for capabilities added since this skill was authored.
+- **The IDFW feature set is actively expanding** — HTTPS, databases, and MCP are on the
+  roadmap beyond SSH and K8s. Check `references/identity-firewall.md` and the live docs
+  for protocols added since this skill was authored.
 
 ## Routing
 
-- **→ twingate-terraform**: for `twingate_gateway_config` resource usage and provider
-  setup
+- **→ twingate-terraform**: for Terraform provider setup and Gateway infrastructure IaC
+  (AWS, DigitalOcean, GCE provider examples)
 - **→ twingate-connectors**: for the distinction between the gateway (this skill) and
   Connectors (network layer) — and for general Connector deployment questions
 - **→ twingate-kubernetes**: for K8s operator, Helm chart, and Resource routing patterns
@@ -61,8 +61,8 @@ capabilities. You need a gateway.
   access patterns used in contractor SSH flows
 - **→ twingate-architect**: for foundational questions about Remote Network topology and
   how the gateway fits into the broader Twingate deployment design
-- **→ twingate-troubleshoot**: when the user reports failed SSH connections, certificate
-  validation errors, or PAM configuration issues
+- **→ twingate-troubleshoot**: when the user reports failed SSH connections or certificate
+  validation errors
 
 ## References
 
@@ -70,9 +70,12 @@ See [`references/`](./references/) for current doc summaries.
 
 Key references:
 
-- `identity-firewall-overview.md` — IDFW feature overview and gateway architecture
-- `ssh-pam-deployment-guide.md` — SSH PAM deployment walkthrough with annotated config examples
-- `gateway-terraform-patterns.md` — `twingate_gateway_config` Terraform pattern and Ansible config
+- `identity-firewall.md` — IDFW feature overview, protocol support matrix, roadmap
+- `ssh-privileged-access-overview.md` — Gateway architecture, CA types, supported SSH features, Client version requirements
+- `ssh-installation.md` — Terraform-based deployment, local vs Vault CA modes, cloud quick-starts
+- `kubernetes-access.md` — kubectl proxy mode, K8s RBAC integration, session recording
+- `ssh-remote-development.md` — VS Code, JetBrains Gateway, Cursor IDE setup
+- `ssh-smallstep.md` — Smallstep CA integration for certificate signing
 
 For gateway deployment examples, inspect `https://github.com/Twingate/gateway` — the
 `deploy/` directory contains current Helm chart values, Docker Compose, and systemd
