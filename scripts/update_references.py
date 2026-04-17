@@ -281,6 +281,9 @@ def process_doc(
     # Write output.
     if triage or not skill:
         TRIAGE_DIR.mkdir(parents=True, exist_ok=True)
+        resolved = output_path.resolve()
+        if not resolved.is_relative_to(TRIAGE_DIR.resolve()):
+            raise ValueError(f"Triage output path escapes triage directory: {resolved}")
         triage_content = f"<!-- triage: unassigned URL: {url} -->\n\n{summary}"
         output_path.write_text(triage_content, encoding="utf-8")
         logger.info("Wrote triage file: %s", output_path)

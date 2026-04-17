@@ -8,11 +8,12 @@ in the Claude Code plugin. Used by the auto-update pipeline.
 
 import hashlib
 import logging
-from urllib.parse import urlparse
 
 import anthropic
 import requests
 from bs4 import BeautifulSoup
+
+from url_safety import REQUEST_HEADERS, _is_safe_url
 
 logger = logging.getLogger(__name__)
 
@@ -20,20 +21,6 @@ REQUEST_TIMEOUT_SECONDS = 30
 CLAUDE_MODEL = "claude-sonnet-4-6"
 CLAUDE_MAX_TOKENS = 1024
 MAX_TEXT_LENGTH = 8000
-
-# Allowed URL origins for the auto-update pipeline.
-# Each entry is (hostname, path_prefix). An empty path_prefix matches any path
-# on that host; a non-empty prefix restricts to that subtree only.
-_ALLOWED_SCHEMES = {"https"}
-_ALLOWED_ORIGINS: list[tuple[str, str]] = [
-    ("www.twingate.com", ""),              # Twingate documentation site
-    ("github.com", "/Twingate/"),          # Twingate GitHub org (operator, Helm, tf provider, etc.)
-    ("raw.githubusercontent.com", "/Twingate/"),  # Raw file content from Twingate repos
-]
-
-REQUEST_HEADERS = {
-    "User-Agent": "twingate-assistant-pipeline/1.0 (github.com/Twingate-Solutions/twingate-assistant)"
-}
 
 SYSTEM_PROMPT = (
     "You are summarizing a Twingate documentation page for use as a "
@@ -50,30 +37,6 @@ REMOVE_TAGS = ("script", "style", "nav", "footer", "header", "aside")
 
 # CSS selectors tried in order to find the main content area.
 MAIN_CONTENT_SELECTORS = ("main", "article", "#content", ".content")
-
-
-def _is_safe_url(url: str) -> bool:
-    """Return True if the URL is in the pipeline's fetch allowlist.
-
-    Allows HTTPS URLs from Twingate's documentation site and from the
-    Twingate GitHub org (github.com/Twingate/ and raw.githubusercontent.com/Twingate/).
-    Rejects all other origins to prevent SSRF via a compromised sitemap or
-    mapping file.
-
-    Args:
-        url: The URL string to validate.
-
-    Returns:
-        True if the URL is safe to fetch; False otherwise.
-    """
-    parsed = urlparse(url)
-    if parsed.scheme not in _ALLOWED_SCHEMES:
-        return False
-    for hostname, path_prefix in _ALLOWED_ORIGINS:
-        if parsed.hostname == hostname:
-            if not path_prefix or parsed.path.startswith(path_prefix):
-                return True
-    return False
 
 
 def fetch_doc_html(url: str) -> str | None:

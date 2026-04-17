@@ -13,6 +13,9 @@ docs/TECHNICAL_PLAN.md
 docs/SESSIONS.md
 docs/sessions/
 
+# Pipeline test artifacts — generated during local development, not for release
+scripts/test_output/
+
 # Python
 __pycache__/
 *.py[cod]

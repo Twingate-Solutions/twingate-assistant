@@ -8,9 +8,10 @@ documentation pages exist.
 
 import logging
 import xml.etree.ElementTree as ET
-from urllib.parse import urlparse
 
 import requests
+
+from url_safety import REQUEST_HEADERS, _is_safe_url
 
 logger = logging.getLogger(__name__)
 
@@ -18,44 +19,6 @@ SITEMAP_NAMESPACE = "http://www.sitemaps.org/schemas/sitemap/0.9"
 DEFAULT_SITEMAP_URL = "https://www.twingate.com/sitemap/sitemap-0.xml"
 REQUEST_TIMEOUT_SECONDS = 30
 MAX_SITEMAP_BYTES = 10 * 1024 * 1024  # 10 MB guard against XML bombs
-
-# Allowed URL origins for the auto-update pipeline.
-# Each entry is (hostname, path_prefix). An empty path_prefix matches any path
-# on that host; a non-empty prefix restricts to that subtree only.
-_ALLOWED_SCHEMES = {"https"}
-_ALLOWED_ORIGINS: list[tuple[str, str]] = [
-    ("www.twingate.com", ""),              # Twingate documentation site
-    ("github.com", "/Twingate/"),          # Twingate GitHub org (operator, Helm, tf provider, etc.)
-    ("raw.githubusercontent.com", "/Twingate/"),  # Raw file content from Twingate repos
-]
-
-REQUEST_HEADERS = {
-    "User-Agent": "twingate-assistant-pipeline/1.0 (github.com/Twingate-Solutions/twingate-assistant)"
-}
-
-
-def _is_safe_url(url: str) -> bool:
-    """Return True if the URL is in the pipeline's fetch allowlist.
-
-    Allows HTTPS URLs from Twingate's documentation site and from the
-    Twingate GitHub org (github.com/Twingate/ and raw.githubusercontent.com/Twingate/).
-    Rejects all other origins to prevent SSRF via a compromised sitemap or
-    mapping file.
-
-    Args:
-        url: The URL string to validate.
-
-    Returns:
-        True if the URL is safe to fetch; False otherwise.
-    """
-    parsed = urlparse(url)
-    if parsed.scheme not in _ALLOWED_SCHEMES:
-        return False
-    for hostname, path_prefix in _ALLOWED_ORIGINS:
-        if parsed.hostname == hostname:
-            if not path_prefix or parsed.path.startswith(path_prefix):
-                return True
-    return False
 
 
 def fetch_sitemap(url: str = DEFAULT_SITEMAP_URL) -> list[str]:
