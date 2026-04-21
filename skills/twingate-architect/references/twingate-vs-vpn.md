@@ -2,20 +2,18 @@
 Twingate vs. VPNs
 
 ## Summary
-VPNs grant network-level access — authenticated users reach the entire network segment, which expands blast radius and requires exposing a public gateway. Twingate implements Zero Trust Networking with per-application access control, no public gateway, and rich contextual authorization (identity, device posture, location, time, risk score). The key architectural shift: Twingate Connectors make outbound connections only — the private network is never publicly visible.
+Detailed comparison of Twingate's Zero Trust Networking model against traditional corporate VPNs across security, performance, deployment, and user experience dimensions. Key architectural difference: Twingate provides application-level access control with no public-facing gateway, while VPNs grant broad network-level access through a public gateway.
 
 ## Key Information
-- **VPN model**: castle-and-moat perimeter; remote users join the network via a public VPN gateway
-- **ZTN model**: every access attempt verified regardless of network location; no implicit trust
-- **No public gateway**: Twingate Connectors initiate outbound connections — nothing is exposed on the internet for attackers to probe
-- **Per-application access**: users access only specific authorized resources, not the whole network — limits lateral movement
-- **Rich auth context**: identity (SSO/MFA), device posture (OS, MDM, EDR, screen lock), physical location, time of day, risk score
-- **Centralized logging**: single pane across all networks; integrates with SIEM
-- **Least privilege**: access granted at resource level, not network level — key ZTN principle
-- **VPN vulnerabilities**: public gateways are constantly probed; major vendor CVEs (e.g. Travelex $30M ransomware) are a pattern
+- **Security**: per-application access (not per-network); private resources not publicly visible; no gateway CVE exposure; lateral movement blocked; rich auth context (MFA, device posture, location, time)
+- **Performance**: split-tunnel by default — only resource traffic routes through Twingate; no backhauling through central VPN server; P2P connections minimize latency; edge-based auth processing eliminates tromboning
+- **Deployment**: no hardware procurement; no network reconfiguration; installs alongside existing VPN for parallel testing; single lightweight Connector per network; no re-addressing required
+- **Scalability**: scales via software — no appliance procurement; Twingate manages load balancing, redundancy, maintenance
+- **UX**: always-on client requires no user interaction; no server selection; no VPN toggle; correct geographic routing for localized content
+- **Cost**: no capex; opex model; lower admin burden; less time supporting users
 
 ## Prerequisites
-None — this is a comparison/concept page.
+None — reference page.
 
 ## Step-by-Step
 Not applicable.
@@ -24,11 +22,12 @@ Not applicable.
 None on this page.
 
 ## Gotchas
-- "Zero trust" here refers to the network access model (ZTN), not a product category — Twingate is a ZTN implementation
-- VPN replacement is a common starting use case but Twingate's policy engine (device posture, contextual auth) goes beyond what VPNs support
-- Twingate does not require replacing existing identity providers — it integrates with SSO/MFA
+- Twingate can be tested in parallel with an existing VPN — no rip-and-replace required
+- Users access resources at the same IPs/FQDNs as before — no retraining needed
+- Full-tunnel mode is available in Twingate but is not the default or recommended configuration
 
 ## Related Docs
-- `/docs/architecture` — how Twingate's four components implement ZTN
-- `/docs/use-cases` — VPN replacement and other scenarios
-- `/docs/quick-start` — getting started
+- `/docs/twingate-vs-mesh-vpns` — comparison with mesh VPN alternatives
+- `/docs/vpn-replacement-use-case` — VPN replacement use case guide
+- `/docs/architecture` — Twingate architecture overview
+- `/docs/peer-to-peer-communication-in-twingate` — P2P performance detail

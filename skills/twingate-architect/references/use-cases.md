@@ -2,30 +2,34 @@
 Twingate Use Cases
 
 ## Summary
-Navigation index for Twingate's primary deployment scenarios. Each use case links to a dedicated guide. Covers remote access, infrastructure/DevOps access, device controls, IP-based application gating, homelab, DNS-based internet security, and compliance.
+Index listing Twingate's seven primary deployment scenarios with brief descriptions. Use this to identify the right use case category before navigating to detailed implementation guides.
 
 ## Key Information
-- **VPN Replacement**: employees access office network, cloud VPCs, and private resources from any device
-- **Infrastructure Access**: engineers/DevOps get secure, automatable access to on-prem and cloud infrastructure
-- **Device Security Controls**: access policies screen device characteristics — OS type, screen lock, MDM/EDR enrollment
-- **Application Gating**: secure SaaS and private services that require IP whitelisting; supports staging server access and lightweight CASB
-- **Homelab / Personal**: free Starter plan; runs on Raspberry Pi and major NAS devices; no port forwarding required
-- **Internet Security**: DNS filtering to block domains + device-level DNS-over-HTTPS (DoH) to configurable resolver (Google, Cloudflare, OpenDNS)
-- **Compliance**: supports CPRA, GDPR, PCI DSS, SOC 2 control requirements
+- **VPN Replacement**: remote employee access to office networks, cloud VPCs, and private resources from any device
+- **Infrastructure Access**: secure, automatable access to on-premises and cloud infrastructure for engineers and DevOps
+- **Device Security Controls**: enforce access policies based on OS type, screen lock status, MDM/EDR enrollment, and custom posture checks
+- **Application Gating**: IP-allowlist-based access to SaaS apps and staging servers; lightweight CASB pattern
+- **Homelab & Personal**: secure home network access without port forwarding; free Starter plan; supports Raspberry Pi and NAS devices
+- **Internet Security**: DNS filtering to block domains; DNS-over-HTTPS (DoH) to configurable resolver (Google, Cloudflare, OpenDNS)
+- **Compliance**: supports implementing controls for CPRA, GDPR, PCI DSS, SOC 2
 
 ## Prerequisites
-None — this is an index page.
+None — index page.
 
 ## Step-by-Step
-Not applicable — links to individual use-case guides.
+Not applicable.
 
 ## Configuration Values
 None on this page.
 
 ## Gotchas
-- This page is a high-level index; each use case has its own detailed guide
-- "Application Gating" is Twingate's term for IP-whitelisting scenarios (often called egress IP / exit node use cases)
+- "Application Gating" is Twingate's term for IP-based egress/exit-node scenarios — not a separate licensed feature
+- MDM/EDR integrations for Device Security Controls require Business or Enterprise plan
 
 ## Related Docs
-- `/docs/quick-start` — initial deployment
-- `/docs/twingate-vs-vpn` — why replace VPN
+- `/docs/vpn-replacement-use-case`
+- `/docs/infra-access-use-case`
+- `/docs/device-controls-use-case`
+- `/docs/ip-based-access-use-case`
+- `/docs/internet-security-use-case`
+- `/docs/compliance-use-case`

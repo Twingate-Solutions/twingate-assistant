@@ -1,39 +1,38 @@
 ## Page Title
-Twingate Architecture Overview
+Architecture
 
 ## Summary
-Twingate implements Zero Trust Networking — every access attempt is authenticated and authorized regardless of whether the user is on a public or private network. The architecture relies on four components: Controller, Clients, Connectors, and Relay infrastructure. Users never gain broad network access; only specific authorized resources are reachable.
+Navigation hub for Twingate's architecture documentation. Covers the Zero Trust Networking model, the four core components (Controller, Clients, Connectors, Relay), DNS handling, and peer-to-peer connections. Use this to orient to the technical design before reading component-specific guides.
 
 ## Key Information
-- **Zero Trust model**: network is assumed untrusted; every resource access is verified per-request
+- **Zero Trust model**: every access attempt is authenticated and authorized regardless of network location; no implicit trust for internal network users
 - **Four components**:
-  - **Controller** — cloud-hosted control plane; manages auth, policy, and session orchestration
-  - **Client** — end-user software (desktop/mobile); intercepts DNS and routes resource traffic
-  - **Connector** — lightweight process deployed in the private network; proxies traffic to resources
-  - **Relay** — Twingate-hosted fallback infrastructure when peer-to-peer is unavailable
-- **DNS interception**: Client transparently intercepts DNS queries for Twingate resources; private DNS addresses resolve without exposing the DNS resolver
-- **Peer-to-peer by default**: direct Client↔Connector connections without open inbound ports; relay used only as fallback
-- **No network-level access**: users reach only the specific resources they are authorized for, not the broader network
+  - **Controller**: cloud-hosted control plane; manages auth, policy enforcement, and orchestration
+  - **Clients**: end-user apps (desktop/mobile) that intercept and route traffic
+  - **Connectors**: lightweight proxies deployed in private networks; make outbound-only connections
+  - **Relay**: Twingate-managed relay infrastructure for traffic that cannot establish P2P
+- **DNS**: Twingate Client intercepts DNS lookups for private resource addresses and resolves them transparently without exposing the private DNS resolver to users
+- **Peer-to-peer (P2P)**: direct connections between Client and Connector without open inbound ports; uses NAT traversal (QUIC); available to all plans; zero configuration required
+- No open inbound ports on Connectors — all connections are outbound from Connector to Controller/Relay
 
 ## Prerequisites
-- Twingate account (Controller is SaaS — no self-hosting required)
-- Connector deployed in target private network
-- Client installed on end-user device
+None — reference/overview page.
 
 ## Step-by-Step
-Not applicable — this is a concept/orientation page. See `/docs/how-twingate-works` for the detailed component walkthrough.
+Not applicable.
 
 ## Configuration Values
-None on this page — see individual component docs for deployment parameters.
+None on this page.
 
 ## Gotchas
-- This page is an architecture index, not a deployment guide — it links to sub-documents rather than providing step-by-step instructions
-- Peer-to-peer communication requires no extra configuration; it is on by default for all customers
-- "Zero trust" here refers to the network access model, not a vendor product category
+- The Relay is used as fallback only when P2P cannot be established (e.g. symmetric NAT); it does not see plaintext traffic — data is end-to-end encrypted
+- "Controller" is Twingate's cloud service — it is not deployed by the customer
+- Clients and Connectors authenticate to the Controller but do not route data through it
 
 ## Related Docs
-
-- `/docs/how-twingate-works` — detailed component communication flow
-- `/docs/how-dns-works-with-twingate` — DNS interception deep dive
-- `/docs/peer-to-peer-communication-in-twingate` — peer-to-peer connection mechanics
-- `/docs/how-nat-traversal-works` — relay fallback behavior
+- `/docs/how-twingate-works` — detailed component interaction
+- `/docs/how-dns-works-with-twingate` — DNS interception mechanics
+- `/docs/peer-to-peer-communication-in-twingate` — P2P connection detail
+- `/docs/understanding-relays` — Relay infrastructure
+- `/docs/how-nat-traversal-works` — NAT traversal mechanics
+- `/docs/twingate-vs-vpn` — architectural comparison with VPN

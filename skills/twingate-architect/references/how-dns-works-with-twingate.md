@@ -2,35 +2,37 @@
 How DNS Works with Twingate
 
 ## Summary
-Twingate uses a transparent proxy model where the Client intercepts DNS queries and assigns CGNAT-range IPs to private resources — the private network's DNS resolver is never exposed to the end user's device. The Connector resolves DNS inside the private network and proxies traffic back, keeping the resource's real IP hidden. This allows users to access internal FQDNs from anywhere without joining the private network.
+Explains how the Twingate Client intercepts DNS for private resources and resolves them transparently without exposing the private DNS resolver to users. The Client assigns CGNAT addresses to resources and uses a local proxy to forward traffic through the Connector, which performs the actual DNS resolution.
 
 ## Key Information
-- **DNS interception**: Twingate Client adds itself as the primary DNS resolver (`100.95.0.251–254`) on the device
-- **CGNAT IP assignment**: Resources resolve to IPs in the `100.64.0.0/10` (CGNAT) range on the client — e.g. `nas.home.int` → `100.108.194.142` — not the actual private IP
-- **Routing table modification**: Client routes all `100.96/12` traffic through its virtual network interface (`utun7` on macOS)
-- **Connector does the real DNS lookup**: the Connector queries the private DNS server and proxies the connection — the client never learns the private IP
-- **Works for public DNS resources too**: even resources with public DNS entries route through the Connector, overriding the public DNS path
-- **Resource list is local**: Client holds a local copy of all FQDNs/IPs it has access to; only those are intercepted
+- Client adds itself as the primary DNS resolver on the device (`100.95.0.251–254`)
+- Private resource FQDNs resolve to CGNAT addresses (`100.64.0.0/10`, routing range `100.96/12`)
+- Client modifies routing table: all traffic to CGNAT range routes through Twingate's virtual network interface (`utun` on macOS/Linux)
+- Connector performs real DNS resolution against the private DNS server on the remote network
+- Destination private IP is never exposed to the Client — it stays behind the Connector's transparent proxy
+- Three proxies in the Client: TCP, UDP, ICMP (ping only)
+- Same flow applies for resources with public DNS entries — resolution still passes through Connector, overriding direct DNS lookup
+- Traffic is encrypted client-side — Twingate cannot decrypt network traffic
 
 ## Prerequisites
-- Twingate Client installed on end-user device
-- Connector deployed with access to the private DNS resolver
-- Resources defined as FQDNs in Twingate (most common case)
+None — reference/overview page.
 
 ## Step-by-Step
-Not a how-to page — see Quick Start for deployment steps. The DNS flow is automatic once Client + Connector are running.
+Not applicable — see `dig` examples in the doc for diagnostic reference.
 
 ## Configuration Values
-- CGNAT DNS resolver IPs assigned by Client: `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254`
-- CGNAT range used for resource IP assignment: `100.64.0.0/10` (specifically `100.96/12` for routing)
+- CGNAT DNS resolvers added by Client: `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254`
+- CGNAT routing range: `100.96/12`
+- CGNAT assignment range: `100.64.0.0/10`
 
 ## Gotchas
-- If a resource FQDN is not in the user's access list, the Client ignores the DNS query — it won't resolve via Twingate even if the Connector can reach it
-- The resolved CGNAT IP changes between Client restarts; do not hardcode it
-- Running `dig` with Twingate ON will show a CGNAT IP, not the real private IP — this is expected and correct
-- Connector must be able to reach the private DNS server; if the DNS server is itself a Twingate Resource, resolution will fail
+- If a resource uses a public FQDN but you define it in Twingate, DNS still resolves through the Connector — the Connector's local DNS is authoritative, not the client's public resolver
+- Split-tunnel: only traffic for Twingate resources routes through the virtual interface; all other traffic uses normal routing
+- ICMP proxy supports ping only — other ICMP types are not proxied
 
 ## Related Docs
-- `/docs/architecture` — component overview
-- `/docs/resources` — FQDN vs IP vs CIDR resource types
-- `/docs/nat-traversal` — relay fallback
+- `/docs/how-twingate-works` — full architecture overview
+- `/docs/introduction-to-dns` — DNS primer
+- `/docs/how-twingate-forwards-dns` — Connector-side DNS forwarding detail
+- `/docs/private-dns-best-practices` — private DNS configuration recommendations
+- `/docs/supporting-unqualified-domain-names` — search domain configuration

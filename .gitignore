@@ -16,6 +16,9 @@ docs/sessions/
 # Pipeline test artifacts — generated during local development, not for release
 scripts/test_output/
 
+# Batch runner work files — temporary, created by run_batch.py --prepare
+scripts/.batch_work/
+
 # Python
 __pycache__/
 *.py[cod]

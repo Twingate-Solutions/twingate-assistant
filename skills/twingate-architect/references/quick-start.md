@@ -1,40 +1,32 @@
-## Page Title
-Quick Start
+## Quick Start
 
-## Summary
-Three-step guide to get Twingate running: define a Remote Network, deploy a Connector into it, then install the Client and access resources. Estimated setup time: 15 minutes.
+Three-step walkthrough to get Twingate operational: create a Remote Network, deploy a Connector, and install the Client. Resources must be added to a Group before users can access them.
 
-## Key Information
-- **Three steps**: Remote Network → Connector → Client install
-- **Remote Network**: logical container created in the Admin Console; select location (e.g. "AWS")
-- **Resource definition**: add FQDN, IP, or CIDR address; must assign to a Group before it's accessible (Everyone group available by default)
-- **Connector deployment**: deployed behind firewall on a host that can reach the target resources; supports Docker, native Linux service, and other options; must reach the Twingate Controller and Relay
-- **Peer-to-peer connections**: recommended to enable for better user experience and to stay within Fair Use Policy bandwidth limits
-- **Client install**: download from `get.twingate.com`; after auth, resources are immediately accessible
+**Key Information:**
+- Remote Network → Resource → Connector → Client is the setup sequence
+- A Resource must be added to at least one Group to be accessible -- creating it alone is not enough
+- Connector deployment options vary by environment (Docker, native Linux service, etc.)
+- Client download: get.twingate.com
+- P2P connections are recommended for bandwidth efficiency and Fair Use Policy compliance
 
-## Prerequisites
+**Prerequisites:**
 - Twingate account (free tier available)
-- Permission to deploy Docker container or native Linux service on the target host
-- Target host must be able to reach the resources you want to expose
+- Permissions to deploy Docker or native Linux service on the target Remote Network host
 
-## Step-by-Step
-1. Admin Console → Network → Remote Networks → Add → select location → name it
-2. Click the new Remote Network → Deploy Connector → select deployment method → run on target host
-3. Wait for Connector to show "connected" in Admin Console (connects to both Controller and Relay)
-4. Network → Add Resource → enter address → assign to a Group
-5. Install Client from `get.twingate.com` → authenticate → access the resource
+**Step-by-Step:**
+1. In Admin Console, click Network → Add next to Remote Networks → select location → name and create
+2. Within the Remote Network, click Add Resource → fill in address and label → click Add Resource
+3. Assign the Resource to a Group (required; "Everyone" is the default)
+4. Click Deploy Connector → select deployment method → run generated script on Connector host
+5. Monitor Connector status: both Controller and Relay connections must turn green
+6. Visit get.twingate.com, install Client, sign in → access the Resource
 
-## Configuration Values
-- Connector deployment: Docker or native Linux service (exact token/command shown in Admin Console)
-- Client download: `get.twingate.com`
+**Gotchas:**
+- Connector must be on a host that can route to the Resources it serves -- network reachability is not automatic
+- A Resource with no Group assigned is inaccessible to all users, even admins
 
-## Gotchas
-- A Resource must be assigned to at least one Group — it will be inaccessible otherwise
-- The Connector host must be able to resolve and route to the resources you define (Connector does the DNS lookup)
-- Two Connectors per Remote Network recommended for HA — single Connector is a single point of failure
-- The "Connection Status" sidebar in Admin Console updates in real-time as Connector comes online
-
-## Related Docs
-- `/docs/remote-networks` — Remote Network concept
-- `/docs/resources` — resource types (FQDN, IP, CIDR, wildcard)
-- `/docs/architecture` — component overview
+**Related Docs:**
+- /docs/remote-networks -- Remote Network configuration details
+- /docs/resources -- Resource address formats and options
+- /docs/connector -- Connector deployment options
+- /docs/local-peer-to-peer-best-practices -- P2P configuration
