@@ -1,42 +1,51 @@
-# Identity Firewall Overview
+## Twingate Identity Firewall Overview
 
-**Page Title:** Twingate Identity Firewall
+Identity Firewall (IDFW) extends Twingate's Zero Trust controls **from the network layer (Layer 3/4) to the application layer (Layer 7)** -- propagating user identity and recording sessions for protocol-aware access.
 
-**Summary:** Identity Firewall extends Zero Trust and PAM controls to every user, resource, and agent by propagating IdP identity through a Layer 7 gateway proxy. Access is granted just-in-time and tied to authenticated identity with no static credentials. Currently supports Kubernetes API and SSH, with HTTPS, databases, and MCP planned.
+**Availability:**
+- Available now for all Twingate plans
+- **Free for up to 5 Resources**
 
-**Key Information:**
-- Available on all plans; free for up to 5 Resources
-- Core component: **Twingate Gateway** — open-source Layer 7 reverse proxy deployed in-environment
-- Identity from IdP flows through to every resource without separate auth tokens
-- Session recording and forensic-level audit per user/agent
-- Dynamic Zero-Standing Access: permissions auto-revoked when context no longer matches
-- Policies enforce identity, device posture, location, and context at access time
+**Currently Supported Protocols:**
+- **SSH** (Privileged Access for SSH)
+- **Kubernetes API** (Privileged Access for Kubernetes)
 
-**Prerequisites:**
-- Existing IdP connected to Twingate
-- Twingate Gateway deployed within the target environment
+**On the Roadmap:**
+- HTTPS
+- Database protocols (PostgreSQL, MySQL, etc.)
+- Model Context Protocol (MCP) -- for AI agent / remote MCP server access
 
-**Protocol Support:**
-| Protocol | Status |
+**How It Works -- The Twingate Gateway:**
+- IDFW introduces the **Twingate Gateway**, an open-source Layer 7 reverse proxy deployed within the customer environment
+- Sits between the Connector and the protected Resource
+- Authenticates the user via their existing IdP (no separate creds, no static tokens)
+- Propagates identity into the protocol (e.g., Kubernetes RBAC sees the actual user, SSH session is tied to the user identity)
+- Records sessions for forensic-level audit + replay
+
+**Key Capabilities:**
+
+| Capability | What It Means |
 |---|---|
-| Kubernetes API | Available |
-| SSH | Available |
-| HTTPS | Planned |
-| Databases | Planned |
-| MCP (remote servers) | Planned |
+| Unified Identity Enforcement | One IdP login -> identity flows to every Resource (K8s, SSH, etc.) |
+| Zero-Standing Access | Just-in-time access based on identity + device posture + context; revoked when no longer needed |
+| Session Recording | Every command / API call / query attributed to a specific user; replayable |
+| Cost-Effective PAM | No hardware appliances, no separate PAM infrastructure |
 
-**Architecture Notes:**
-- Gateway sits in-path as a reverse proxy before the protected resource
-- No hardware appliances or complex infrastructure required
-- Authentication and policy enforcement happen before requests reach the protected environment
+**Vs. Twingate Without IDFW:**
+- Without IDFW: Twingate gates *network reach* to a Resource. SSH/K8s still authenticate the user via local credentials (kubeconfig, SSH keys/passwords).
+- With IDFW: Twingate gates network reach **and** propagates the IdP identity into the protocol -- the Kubernetes audit log shows the actual user, not a shared kubeconfig identity.
 
-**Gotchas:**
-- Gateway must be deployed inside the environment — it is not a cloud-hosted component
-- Free tier caps at 5 Resources; plan accordingly for larger deployments
-- MCP support is not yet available despite being listed as a roadmap item
+**When to Use IDFW:**
+- Compliance requirements need command-level audit trails (SOC2, HIPAA, ISO 27001)
+- Privileged operations on shared infrastructure (production K8s, jump hosts) where you need session replay
+- Replacing legacy PAM solutions (CyberArk, BeyondTrust) for K8s/SSH workflows
+- Contractor/vendor access where session recording is required
+
+**Decision: IDFW SSH vs. Smallstep CA**
+- /docs/ssh-smallstep -- Older pattern using Smallstep CA + OAuth -- works but requires separate CA infrastructure
+- /docs/ssh-privileged-access-overview -- IDFW native SSH -- recommended for new deployments
 
 **Related Docs:**
-- Privileged Access for Kubernetes
-- Privileged Access for SSH
-- `ssh-installation.md` (local reference)
-- `ssh-privileged-access-overview.md` (local reference)
+- /docs/ssh-privileged-access-overview -- IDFW SSH setup
+- /docs/kubernetes-access -- IDFW Kubernetes setup
+- Open source: github.com/Twingate/kubernetes-access-gateway

@@ -1,50 +1,48 @@
-```markdown
-# Remote Development with Twingate SSH and VS Code
+## Remote Development with Twingate SSH (VS Code)
 
-## Summary
-Configures VS Code Remote SSH to connect to private SSH Resources via Twingate's Privileged Access for SSH — no public IP, no VPN, no key files required. The Twingate Client handles certificate trust automatically via SSH config sync, eliminating TOFU prompts.
+How to use VS Code Remote SSH against private SSH Resources reached through the Twingate Gateway -- no public IP, no VPN, no SSH key files.
 
-## Key Information
-- VS Code Remote SSH extension (`ms-vscode-remote.remote-ssh`) is the only IDE tooling required
-- SSH Resources are accessed by IP or internal FQDN (e.g., `10.124.16.7` or `my-server.int`)
-- First connection installs VS Code Server on the remote VM — takes a few extra seconds
-- Full IntelliSense, debugging, and terminal access work once connected
+**Prerequisites:**
+- Twingate Client installed and running, meeting minimum versions for IDFW SSH:
+  - macOS: 2026.85
+  - Windows: 2026.90
+  - Linux: 2025.342
+- Privileged Access for SSH already deployed (Gateway + Connector + SSH Resource configured)
+- User has Group access to the SSH Resource
 
-## Prerequisites
-- Twingate Client installed and running on the development machine (must meet minimum version requirements)
-- Privileged Access for SSH fully configured:
-  - Gateway and Connector deployed in the same network as the target VM
-  - SSH Resource created and accessible to the user's group
-- VS Code with Remote - SSH extension installed
+**SSH Server Configuration Auto-Sync (do this first):**
+- Open the Twingate Client -> **More** menu -> enable **SSH Server Configuration Auto-Sync**
+- Syncs the SSH CA's public key into `~/.ssh/known_hosts` automatically
+- Result: no Trust-On-First-Use (TOFU) prompts when connecting -- the Gateway's host certificates are pre-trusted
+- Without this: OpenSSH shows a TOFU warning on the first connection to each host
 
-## Step-by-Step
+**VS Code Steps:**
+1. Install the **Remote - SSH** extension (`ms-vscode-remote.remote-ssh`)
+2. Command Palette: `Cmd+Shift+P` (macOS) / `Ctrl+Shift+P` (Windows/Linux)
+3. Run **Remote-SSH: Connect to Host**
+4. Enter the SSH Resource address -- private IP (`10.124.16.7`) or alias/FQDN (`my-server.int`)
+5. VS Code opens a new window connected to the remote host
+   - First connection: VS Code installs its server component on the remote VM (a few seconds)
+6. Click **Open Folder** -> navigate to the project directory
+7. IntelliSense, debugging, and integrated terminal all work as if local
 
-### Enable SSH Config Sync (one-time)
-1. Open Twingate Client → **More**
-2. Enable **SSH Server Configuration Auto-Sync**
-3. This writes the Gateway's CA public key to `~/.ssh/known_hosts` automatically
+**Why It Works Seamlessly:**
+- Twingate Client routes SSH traffic to the in-environment Gateway
+- Gateway authenticates the user via the IdP (no SSH keys on the dev machine)
+- Gateway issues a short-lived cert per connection to authenticate to the target host
+- VS Code Remote SSH sees a normal SSH endpoint -- no VS Code-specific config required
 
-### Connect via VS Code Remote SSH
-1. Open VS Code
-2. Open Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`)
-3. Run `Remote-SSH: Connect to Host`
-4. Enter the SSH Resource address or alias
-5. VS Code opens a remote window and installs its server component on first connect
-6. Click **Open Folder** → navigate to project directory
+**Other Supported IDEs (per /docs/ssh-privileged-access-overview):**
+- JetBrains Gateway
+- Cursor
+- Any tool that uses standard `ssh` works (rsync, sftp, custom CLIs)
 
-## Configuration Values
-| Setting | Location | Purpose |
-|---|---|---|
-| SSH Server Configuration Auto-Sync | Twingate Client → More | Syncs CA public key to `~/.ssh/known_hosts` |
-| `ms-vscode-remote.remote-ssh` | VS Code extension ID | Required extension |
+**Gotchas:**
+- Skipping SSH Auto-Sync results in TOFU prompts that may be incorrectly accepted by users -- always enable
+- VS Code's remote server requires a writable home dir on the target -- ensure the user account has one
+- File transfer (sftp) and TCP port forwarding work; X11 forwarding does NOT (per IDFW SSH limitations)
 
-## Gotchas
-- SSH config sync must be enabled **before** connecting — otherwise TOFU prompts will appear and the CA cert won't be trusted automatically
-- First connection is slower than subsequent ones (VS Code Server installation on remote)
-- This guide covers IDE setup only — the underlying Privileged Access for SSH infrastructure must already be operational
-
-## Related Docs
-- Privileged Access for SSH (architecture, CAs, session recording)
-- User configuration (SSH config sync details)
-- Minimum version requirements (Twingate Client)
-```
+**Related Docs:**
+- /docs/ssh-privileged-access-overview -- IDFW SSH overview
+- /docs/ssh-installation -- Gateway deployment
+- /docs/identity-firewall -- IDFW concept overview
