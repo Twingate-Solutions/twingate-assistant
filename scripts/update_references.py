@@ -372,8 +372,25 @@ def main() -> int:
         len(new_urls),
         len(removed_urls),
     )
+    if stats["failed"] > 0:
+        logger.warning(
+            "%d doc(s) failed during this run; see WARNING/ERROR lines above. "
+            "These will be retried on the next scheduled run.",
+            stats["failed"],
+        )
 
-    return 0 if stats["failed"] == 0 else 1
+    # Soft-fail policy: individual doc failures don't abort the run. We
+    # return non-zero only when nothing succeeded at all (no doc was
+    # updated AND no doc was unchanged), which indicates a fatal issue
+    # like complete API/network failure. The Step 0 health check already
+    # short-circuits on a fully-broken API, so reaching this point with
+    # zero successes typically means the pipeline state itself is bad.
+    if stats["updated"] == 0 and stats["skipped"] == 0:
+        logger.error(
+            "Fatal: no docs were processed successfully (0 updated, 0 skipped)."
+        )
+        return 1
+    return 0
 
 
 if __name__ == "__main__":

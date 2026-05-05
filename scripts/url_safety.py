@@ -9,9 +9,11 @@ Centralises the SSRF allowlist and the request User-Agent header so that
 # on that host; a non-empty prefix restricts to that subtree only.
 _ALLOWED_SCHEMES: frozenset[str] = frozenset({"https"})
 _ALLOWED_ORIGINS: list[tuple[str, str]] = [
-    ("www.twingate.com", ""),                        # Twingate documentation site
-    ("github.com", "/Twingate/"),                    # Twingate GitHub org
-    ("raw.githubusercontent.com", "/Twingate/"),     # Raw file content from Twingate repos
+    ("www.twingate.com", ""),                              # Twingate documentation site
+    ("github.com", "/Twingate/"),                          # Twingate GitHub org
+    ("github.com", "/Twingate-Solutions/"),                # Twingate-Solutions GitHub org
+    ("raw.githubusercontent.com", "/Twingate/"),           # Raw files from Twingate repos
+    ("raw.githubusercontent.com", "/Twingate-Solutions/"), # Raw files from Twingate-Solutions repos
 ]
 
 REQUEST_HEADERS: dict[str, str] = {
@@ -26,9 +28,9 @@ def _is_safe_url(url: str) -> bool:
     """Return True if the URL is in the pipeline's fetch allowlist.
 
     Allows HTTPS URLs from Twingate's documentation site and from the
-    Twingate GitHub org (github.com/Twingate/ and raw.githubusercontent.com/Twingate/).
-    Rejects all other origins to prevent SSRF via a compromised sitemap or
-    mapping file.
+    Twingate and Twingate-Solutions GitHub orgs (both github.com/<org>/
+    and raw.githubusercontent.com/<org>/). Rejects all other origins to
+    prevent SSRF via a compromised sitemap or mapping file.
 
     Args:
         url: The URL string to validate.
