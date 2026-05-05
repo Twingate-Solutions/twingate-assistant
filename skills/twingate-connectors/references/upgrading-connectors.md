@@ -1,21 +1,39 @@
-## Upgrading Connectors
+# Updating Twingate Connectors
 
-Best practices and method index for updating Twingate Connectors across all deployment types.
+## Summary
+Covers best practices and deployment-specific instructions for updating Twingate Connectors. Updates require temporary disconnection, so redundancy and token preservation are critical. Notification emails alert admins weekly when updates are available.
 
-**Universal Principles:**
-- Update one Connector at a time within a redundant pair — never update all Connectors simultaneously
-- Retain the same access and refresh tokens during upgrade — tokens uniquely identify each Connector; new tokens require reprovisioning
-- Always maintain at least 2 Connectors per Remote Network before performing any update
+## Key Information
+- Connectors run as Docker containers, Kubernetes/Helm deployments, or Linux systemd services
+- Multiple Connectors in the same Remote network auto-cluster for load balancing and failover
+- Update notifications sent weekly at **00:00 UTC on Mondays** to all admin users
+- Notification lists all Connectors eligible for update
 
-**Update Paths by Deployment Type:**
-- Docker (Linux, AWS ECS, Azure ACI): see /docs/docker update guide
-- systemd service (Linux): see /docs/systemd-service update guide
-- Helm (Kubernetes): see Helm upgrade documentation
+## Prerequisites
+- Minimum two Connectors deployed per Remote network (for redundancy during updates)
+- Access to existing Connector access and refresh tokens
+- Admin role to receive update notification emails
 
-**Notifications:**
-- When a Connector update is available, all admin users receive a weekly email notification at 00:00 UTC on Mondays listing which Connectors can be updated
+## Step-by-Step (General Process)
+1. Confirm at least two Connectors exist in the target Remote network
+2. Select one Connector to update first
+3. Preserve existing access and refresh tokens before making changes
+4. Follow deployment-specific update instructions (Docker / systemd / Helm)
+5. Verify Connector reconnects successfully
+6. Repeat for remaining Connectors one at a time
 
-**Related Docs:**
-- /docs/docker -- Docker/ECS/Azure container update instructions
-- /docs/systemd-service -- systemd package update instructions
-- /docs/connector-best-practices -- HA deployment and redundancy
+## Configuration Values
+| Item | Value |
+|------|-------|
+| Notification schedule | Weekly, Mondays 00:00 UTC |
+| Notification recipients | All users with admin role |
+
+## Gotchas
+- **Never update all Connectors simultaneously** — causes complete Remote network downtime
+- **Token reuse is required** — generating new tokens during update creates a new Connector identity; old tokens become orphaned and must be re-provisioned
+- Update process differs by deployment type; use the correct platform-specific guide
+
+## Related Docs
+- Docker Connector deployment/update guide
+- Systemd Connector deployment/update guide
+- Helm Connector deployment/update guide (covers GKE, EKS, MicroK8s)

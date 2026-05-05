@@ -1,25 +1,71 @@
-## Deploy Connector on Aptible
+# Deploy Twingate Connector on Aptible
 
-Two deployment methods for running Twingate Connectors on Aptible (a serverless PaaS platform with built-in security and compliance management).
+## Summary
+Deploy Twingate Connectors on Aptible's serverless platform via either the Twingate CLI (automated) or Aptible CLI (manual). Connectors enable secure remote access to Aptible-hosted services. Two Connectors on the same Remote Network provide HA with automatic load balancing and failover.
 
-**Method 1 — Automated (Twingate CLI):**
-- Requirements: Twingate CLI with Read/Write/Provision API token; Aptible CLI configured
-1. Run: `./tg deploy aptible app` (add `--environment NAME` for specific environment)
+## Key Information
+- Two deployment methods: Twingate CLI (automated) or Aptible CLI (manual)
+- HA setup: run deployment twice, selecting the same Remote Network
+- Success indicator: two green lights on Connector detail page in Admin Console
+- Peer-to-peer connections recommended for performance and Fair Use Policy compliance
+
+## Prerequisites
+**Automated:**
+- Twingate CLI installed and configured
+- Twingate API token with **Read, Write & Provision** permissions
+- Aptible CLI installed and configured
+
+**Manual:**
+- Aptible CLI installed and configured
+- Twingate Admin Console access to generate Connector tokens
+
+## Step-by-Step
+
+### Automated (Twingate CLI)
+1. Run `./tg deploy aptible app` (add `--environment NAME` for multiple Aptible environments)
 2. Enter Twingate account name and API token when prompted
-3. Select or create a Remote Network
-4. Connector deploys automatically; verify green status in Admin Console
-5. For HA: run the command again and select the same Remote Network — a second Connector is provisioned automatically
+3. Select existing or create new Remote Network
+4. Verify green status indicators in Admin Console
 
-**Method 2 — Manual (Aptible CLI):**
-1. In Twingate Admin Console: create Remote Network → select Connector → Manual deployment → Generate Tokens → copy Access Token and Refresh Token
-2. Create Aptible app: `aptible apps:create twingate-connector`
-3. Set app config:
-   ```
-   aptible config:set --app twingate-connector      TWINGATE_NETWORK="<account>"      TWINGATE_ACCESS_TOKEN="<token>"      TWINGATE_REFRESH_TOKEN="<token>"
-   ```
-4. Deploy: `aptible deploy --app twingate-connector --docker-image twingate/connector:1`
-5. Verify two green indicators in the Connector detail page in Admin Console
+### Manual (Aptible CLI)
+1. Create Remote Network in Admin Console → **Network** page
+2. Select **Manual** deployment → click **Generate Tokens** → copy both tokens (requires re-auth)
+3. Create Aptible app: `aptible apps:create [APP]`
+4. Set configuration (see below)
+5. Deploy: `aptible deploy --app [APP] --docker-image twingate/connector:1`
+6. Verify two green lights in Connector detail page
 
-**Related Docs:**
-- /docs/connector-deployment -- Full deployment method selection guide
-- /docs/connector-placement-best-practices -- General Connector best practices
+## Configuration Values
+
+### Environment Variables (set via `aptible config:set`)
+| Variable | Description |
+|---|---|
+| `TWINGATE_NETWORK` | Twingate account name |
+| `TWINGATE_ACCESS_TOKEN` | Generated Connector access token |
+| `TWINGATE_REFRESH_TOKEN` | Generated Connector refresh token |
+
+### Full Config Command
+```bash
+aptible config:set --app [APP] \
+  TWINGATE_NETWORK="[ACCOUNT]" \
+  TWINGATE_ACCESS_TOKEN="[ACCESS_TOKEN]" \
+  TWINGATE_REFRESH_TOKEN="[REFRESH_TOKEN]"
+```
+
+### Docker Image
+```
+twingate/connector:1
+```
+
+## Gotchas
+- Connector tokens are displayed **once**—copy both before leaving the generation screen
+- Re-authentication is required during token generation in the Admin Console
+- For HA, must explicitly select the **same** Remote Network when running the second deployment
+- Tokens generated per Connector; each HA instance needs its own token pair (manual method)
+
+## Related Docs
+- Twingate CLI setup
+- Connector Best Practices
+- Remote Network configuration
+- Peer-to-peer connections support
+- Fair Use Policy

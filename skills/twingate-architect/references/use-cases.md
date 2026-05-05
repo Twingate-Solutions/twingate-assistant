@@ -1,35 +1,54 @@
+# Twingate Use Cases
+
 ## Page Title
-Twingate Use Cases
+Use Cases Overview
 
 ## Summary
-Index listing Twingate's seven primary deployment scenarios with brief descriptions. Use this to identify the right use case category before navigating to detailed implementation guides.
+This page catalogs the primary deployment scenarios for Twingate, covering both enterprise and personal use cases. It serves as a navigation hub linking to detailed documentation for each use case category.
 
 ## Key Information
-- **VPN Replacement**: remote employee access to office networks, cloud VPCs, and private resources from any device
-- **Infrastructure Access**: secure, automatable access to on-premises and cloud infrastructure for engineers and DevOps
-- **Device Security Controls**: enforce access policies based on OS type, screen lock status, MDM/EDR enrollment, and custom posture checks
-- **Application Gating**: IP-allowlist-based access to SaaS apps and staging servers; lightweight CASB pattern
-- **Homelab & Personal**: secure home network access without port forwarding; free Starter plan; supports Raspberry Pi and NAS devices
-- **Internet Security**: DNS filtering to block domains; DNS-over-HTTPS (DoH) to configurable resolver (Google, Cloudflare, OpenDNS)
-- **Compliance**: supports implementing controls for CPRA, GDPR, PCI DSS, SOC 2
+
+- **7 distinct use cases** are documented
+- Covers enterprise, DevOps, and personal/homelab scenarios
+- Each use case links to dedicated detailed documentation
+
+## Use Cases at a Glance
+
+| Use Case | Core Function |
+|---|---|
+| **VPN Replacement** | Remote access to office networks, cloud VPCs, private resources |
+| **Infrastructure Access** | Engineer/DevOps access to on-prem and cloud infrastructure; supports automation |
+| **Device Security Controls** | Policy enforcement based on OS type, screen lock, MDM/EDR status |
+| **Application Gating** | IP whitelisting support for SaaS apps, staging servers, lightweight CASB |
+| **Homelab & Personal** | Home network access (Home Assistant, Plex, NAS, cameras); free Starter plan |
+| **Internet Security** | DNS filtering, DNS-over-HTTPS (DoH) for public internet traffic |
+| **Compliance** | Controls supporting CPRA, GDPR, PCI DSS, SOC 2 |
+
+## Configuration Notes
+
+- **Device policy filters**: OS type, screen lock, MDM enrollment, EDR status
+- **DNS resolvers supported**: Google, Cloudflare, OpenDNS (configurable)
+- **DNS features**: Native filtering + device-level DoH
+- **Connector platforms**: Raspberry Pi, major NAS devices, standard cloud/on-prem
 
 ## Prerequisites
-None — index page.
 
-## Step-by-Step
-Not applicable.
-
-## Configuration Values
-None on this page.
+- Free Starter plan available for personal/homelab use
+- Connectors required for private resource access
+- MDM/EDR integrations needed for device security control policies
 
 ## Gotchas
-- "Application Gating" is Twingate's term for IP-based egress/exit-node scenarios — not a separate licensed feature
-- MDM/EDR integrations for Device Security Controls require Business or Enterprise plan
+
+- Application Gating requires the third-party service to support IP-based access restrictions — Twingate provides a stable egress IP, not protocol-level app inspection
+- Homelab setup (~15 min) eliminates port forwarding but still requires Connector deployment on local hardware
+- Internet Security (DNS filtering/DoH) applies at device level, not just tunnel traffic
 
 ## Related Docs
-- `/docs/vpn-replacement-use-case`
-- `/docs/infra-access-use-case`
-- `/docs/device-controls-use-case`
-- `/docs/ip-based-access-use-case`
-- `/docs/internet-security-use-case`
-- `/docs/compliance-use-case`
+
+- VPN Replacement → `/docs/vpn-replacement`
+- Infrastructure Access → `/docs/infrastructure-access`
+- Device Security Controls → `/docs/device-security-controls`
+- Application Gating → `/docs/application-gating`
+- Homelab & Personal → `/docs/homelab`
+- Internet Security → `/docs/internet-security`
+- Compliance → `/docs/compliance`

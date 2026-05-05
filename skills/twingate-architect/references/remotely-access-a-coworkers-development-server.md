@@ -1,30 +1,34 @@
-## Remotely Accessing a Coworker's Development Server
+# Remotely Access a Coworker's Development Server
 
-Use case guide for sharing a developer's personal dev server (on a home or office network) with specific coworkers using Twingate. The developer installs a Connector on their dev server and adds it as a Twingate Resource; coworkers with explicit access can connect without any port forwarding, VPN server, or router changes on the developer's home network.
+## Summary
+Twingate enables secure access to development servers on private home networks without exposing the network to the internet. No port forwarding or VPN server setup is required, and access is restricted to specific resources for specific users.
 
-**Key Information**
-- The developer deploys the Connector on the dev server itself (or on the same LAN)
-- The dev server is added as a Twingate Resource and access granted only to named coworkers or a specific Group
-- No router ports opened, no VPN server needed, no changes to the home network
-- Access is narrowly scoped: only the dev server is exposed via Twingate, not the entire home network
-- Works whether the dev server is in an office, home, or rented datacenter
+## Key Information
+- Use case: share in-progress dev work for testing/review without requiring others to spin up their own servers
+- Works for servers on home networks (common post-COVID scenario)
+- Access is scoped to individual resources, not entire networks
+- No router port changes or network reconfiguration needed
+- Third parties cannot see or access the home network
 
-**Prerequisites**
-- Developer has a Twingate account and the dev server has Docker/Linux available for the Connector
-- Coworkers have Twingate Client installed and are added as users in the same Twingate account
+## Why Not Port Forwarding or VPN
+- **Port forwarding**: exposes home network elements to the internet
+- **VPN server**: also exposes network elements, heavier security burden on developer
 
-**Step-by-Step**
-1. Developer: create a Remote Network (e.g. "Dev Server at Home") in Twingate Admin Console
-2. Deploy Connector on the dev server (Docker or Linux systemd install)
-3. Add the dev server as a Twingate Resource (IP or hostname, specific port if needed)
-4. Grant access to the Resource for specific coworkers (individual users or a Group)
-5. Coworkers: install Twingate Client, sign in, connect -- the dev server resource appears in their client
+## Prerequisites
+- Twingate account with ability to deploy Connectors and manage Resources
+- A development server to share access to
+- Coworkers who need access must be granted explicit permissions in Twingate
 
-**Gotchas**
-- If the developer's home internet goes down or the Connector stops, coworkers lose access -- no HA for home Connectors
-- Access control is at the Twingate Group/Resource level; the dev server's own SSH/auth controls still apply on top
+## Implementation Steps
+1. Deploy a **Twingate Connector** on the development server
+2. Add the development server as a **Resource** in Twingate
+3. Grant specific coworkers access to that Resource
 
-**Related Docs**
-- /docs/connector-deployment
-- /docs/resources
-- /docs/groups
+## Architecture Notes
+- Twingate does not require inbound internet exposure
+- Connector initiates outbound connections; no open router ports needed
+- Access control is per-resource, not per-network
+
+## Related Docs
+- [Deploying a Connector](https://www.twingate.com/docs/connector)
+- [Adding a Resource](https://www.twingate.com/docs/resources)

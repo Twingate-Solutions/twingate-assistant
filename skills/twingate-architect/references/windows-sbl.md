@@ -1,40 +1,54 @@
-## Windows Start Before Logon (SBL)
+# Windows Start Before Logon (SBL)
 
-Enables Twingate-authenticated access to domain controllers (or other resources) at the Windows logon screen, before user authentication, using device-only Resource Policies. Replaces VPN-based SBL for Active Directory connectivity.
+## Summary
+Windows SBL enables network access at the Windows logon prompt before user authentication, replacing traditional VPN for domain controller access. Twingate implements this using Device-only Resource Policies combined with persistent session authentication. Users must have signed into the Twingate client at least once within the session validity period.
 
-**Key Information:**
-- Requires Twingate Windows Client v1.0.14 or later
-- Uses device-only Resource Policies -- no user authentication requirement for SBL resources
-- Default session length is 30 days; users must re-authenticate at least once every 30 days
-- Session persists across reboots and Client restarts unless the user explicitly logs out
-- Domain controller Resources are accessible at the Windows logon screen only when the above conditions are met
-- Device must be marked as Trusted in Twingate (recommended)
+## Key Information
+- SBL works by using device-only policies (no per-session user auth required)
+- Session persists across restarts unless user explicitly logs out
+- Default session length: 30 days
+- Device-only policies bypass user auth requirement; standard/default policies do not
+- Recommended for Active Directory domain controller access scenarios
 
-**Prerequisites:**
-- Twingate Windows Client v1.0.14+
-- Domain Controller Resources already defined in Twingate (see `/docs/active-directory`)
-- Admin access to Twingate Admin Console
+## Prerequisites
+- Twingate Windows Client **v1.0.14 or later**
+- Device-only Resource Policy configured
+- (Recommended) Trusted Devices feature enabled
+- User must have authenticated at least once within session window (default 30 days)
 
-**Step-by-Step:**
-1. Add domain controller addresses as Resources in Twingate (follow Active Directory guide)
-2. Create a Group, add the domain controller Resources and target users
-3. Create a Resource Policy named `Windows SBL` (Policies tab → Create Resource Policy)
-4. In the policy: disable user authentication requirements; enable device requirements (Windows devices; optionally restrict to Trusted only)
-5. Apply the Windows SBL policy to each domain controller Resource for the target Group
-6. Verify Minimum Authentication Requirements session length meets your needs (default: 30 days)
+## Step-by-Step Configuration
 
-**Configuration Values:**
-- Minimum session length: 30 days (default)
-- SBL Client version minimum: v1.0.14
-- Device restriction: Windows only (optionally Trusted devices)
+1. **Add Domain Controller as Resource** — Follow Active Directory with Twingate guide
+2. **Create a Group** — Add DC resources and target users to the group
+3. **Create Resource Policy** named "Windows SBL" — Via Admin Console → Policies tab → "Create Resource Policy"
+4. **Configure Policy** — Disable user authentication requirement; enable device requirements (restrict to Windows devices; allow trusted and/or untrusted as needed)
+5. **Apply Policy to Resources** — Modify each DC resource to use the new SBL policy scoped to the group
+6. **Verify session length** — Check Minimum Authentication Requirements match your needs (default: 30 days)
 
-**Gotchas:**
-- Standard Resource Policies (including the Default Policy) require user authentication re-validated after every reboot -- SBL only works for Resources with device-only policies
-- If the user logs out of the Twingate Client, SBL access is lost until they log in again
-- Trusted device requirement is recommended but optional -- untrusted Windows devices can also be allowed
+## Configuration Values
 
-**Related Docs:**
-- /docs/active-directory -- Configuring Active Directory resources with Twingate
-- /docs/resource-policies -- Device-only policy configuration
-- /docs/device-trust -- Trusted device setup
-- /docs/minimum-authentication -- Session length configuration
+| Setting | Value |
+|---|---|
+| Client minimum version | v1.0.14 |
+| Default session length | 30 days |
+| User auth on Device-only Policy | Disabled |
+| User auth on Standard/Default Policy | Required (re-validates on restart) |
+
+## Behavior by Policy Type
+
+| Policy Type | Requires user re-auth on restart? | SBL compatible? |
+|---|---|---|
+| Device-only (SBL policy) | No | Yes |
+| Standard / Default | Yes | No |
+
+## Gotchas
+- Users **must not log out** of the Twingate client — logout invalidates the session and breaks SBL until they re-authenticate
+- Standard/Default policies always re-require user auth after restart; only device-only policies support SBL
+- Session persists across reboots automatically if user stays signed in
+- SBL access fails if session has expired (>30 days since last login) even if device is trusted
+
+## Related Docs
+- [Active Directory with Twingate](https://www.twingate.com/docs/active-directory)
+- Device-only Resource Policies documentation
+- Trusted Devices documentation
+- Minimum Authentication Requirements configuration

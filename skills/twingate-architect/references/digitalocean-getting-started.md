@@ -1,31 +1,52 @@
-## Getting Started with DigitalOcean and Twingate
+# Getting Started with DigitalOcean and Twingate
 
-Quick guide to deploying a Twingate Connector on DigitalOcean using the `doctl` CLI and a cloud-init script. The Twingate Admin Console generates a ready-to-run `doctl` command that creates a Droplet with the Connector pre-configured via cloud-init; the process takes three steps.
+## Summary
+Deploy a Twingate Connector on a DigitalOcean Droplet using `doctl` CLI and `cloud-init`. The setup generates unique connector tokens from the Twingate Admin Console and provisions the Droplet automatically via a single installation command.
 
-**Key Information**
-- Deployment method: `doctl` CLI + cloud-init (Twingate Admin Console generates the full command)
-- The Admin Console's DigitalOcean Connector option generates the complete `doctl` command including Access and Refresh tokens
-- Each Connector requires its own unique token pair -- never reuse tokens across Connectors
-- After deployment, verify in both DigitalOcean (Droplet running) and Twingate Admin Console (Controller and Relay status = connected)
+## Key Information
+- Connector is deployed as a DigitalOcean Droplet configured via `cloud-init`
+- Installation command is generated directly in the Twingate Admin Console (includes tokens pre-embedded)
+- Each Connector requires its own unique Access/Refresh token pair — never reuse tokens
+- Verify success in both DigitalOcean Control Panel and Twingate Admin Console
 
-**Prerequisites**
+## Prerequisites
 - DigitalOcean account with API access
 - `doctl` CLI installed and authenticated with DigitalOcean credentials
 - Twingate account with Admin Console access
+- Basic familiarity with DigitalOcean Droplets and `cloud-init`
 
-**Step-by-Step**
-1. In Twingate Admin Console -> Remote Networks -> select network -> add/select Connector -> See More -> DigitalOcean
-2. Click "Generate Tokens" in Step 2 and authenticate; then copy the `doctl` command from Step 4
-3. Paste and run the `doctl` command in your terminal; wait for it to complete
-4. Verify in DigitalOcean Control Panel: Droplets -> confirm Droplet is running
-5. Verify in Twingate Admin Console: Remote Networks -> select network -> select Connector -> confirm Controller and Relay = connected
+## Step-by-Step
 
-**Gotchas**
-- Do NOT reuse token sets -- each Connector must have its own unique Access and Refresh token pair
-- Copy/paste errors can occur if your terminal reinterprets whitespace; paste into a script file first if needed
-- `doctl not found`: install via DigitalOcean docs and authenticate with `doctl auth init`
+1. Log in to Twingate Admin Console → **Remote Networks**
+2. Select the target Remote Network
+3. Add a new Connector or select an undeployed one
+4. Click **See More** → select **DigitalOcean** option
+5. Scroll to **Step 2** → click **Generate Tokens** (authenticate when prompted)
+6. Scroll to **Step 4** → copy the generated installation command
+7. Paste and run the command in your terminal (`doctl` executes it)
+8. Verify Droplet is running in DigitalOcean Control Panel → **Droplets**
+9. In Admin Console, confirm Connector shows **Controller** and **Relay** status as `connected`
 
-**Related Docs**
-- /docs/connector-management
-- /docs/resources
-- /docs/troubleshooting-guide
+## Configuration Values
+- **Access Token** and **Refresh Token**: Generated per-connector in Admin Console, embedded in the `doctl` command
+- Tokens are injected into the `cloud-init` script automatically via the copied command
+
+## Gotchas
+- **Do not reuse token sets** — each Connector must have unique tokens
+- Terminal white-space/copy-paste issues may corrupt the command; paste into a script file if needed
+- `doctl` must be authenticated before running the installation command
+- Troubleshoot Droplet creation with: `doctl compute droplet list`
+
+## Troubleshooting
+| Issue | Fix |
+|-------|-----|
+| Token errors | Verify tokens are correctly copied into `cloud-init` |
+| Copy/paste errors | Paste command into a script file first |
+| Connectivity issues | Run `doctl compute droplet list`; check Connector service status |
+| `doctl` not found | Install/authenticate via DigitalOcean docs |
+
+## Related Docs
+- [Twingate Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)
+- Connector Management (Twingate Admin Console)
+- Setting Up Resources (configuring private app/service access)
+- [doctl Installation (DigitalOcean)](https://docs.digitalocean.com/reference/doctl/)

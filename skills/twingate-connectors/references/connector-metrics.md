@@ -1,26 +1,56 @@
-## Connector Metrics
+# Connector Metrics Overview
 
-Twingate Connectors can export operational metrics in Prometheus format for monitoring and observability. Requires Connector v1.80.0 or later.
+## Page Title
+Twingate Connector Metrics Overview
 
-**Enabling Metrics:**
-- Set `TWINGATE_METRICS_PORT=9999` (or any unused port) as an environment variable on each Connector
-- Metrics exposed at `http://<connector-ip>:<port>/metrics`
+## Summary
+Twingate Connectors can export operational metrics in Prometheus format for monitoring traffic patterns, connection efficiency, and connector health. Metrics are enabled via an environment variable and compatible with standard monitoring tools like Prometheus and Grafana.
 
-**Available Metrics:**
-- `twingate_inbound_bytes_total{transport="direct"|"relay"}` -- inbound bytes by transport type
-- `twingate_outbound_bytes_total{transport="direct"|"relay"}` -- outbound bytes by transport type
-- `twingate_connector_uptime_seconds` -- Connector uptime
-- Resource counts per Connector (additional metrics in development)
+## Key Information
+- Metrics exported in standard Prometheus format
+- Minimum connector version: **v1.80.0**
+- Enable by setting `TWINGATE_METRICS_PORT=9999`
+- Data scraping endpoint exposed on configured port
 
-**Integration:**
-- Compatible with Prometheus, Grafana, and any Prometheus-compatible monitoring tool
-- See /docs/connector-monitoring for a full Prometheus + Grafana setup guide with alerting
+## Available Metrics
 
-**Use Cases:**
-- Monitor relay vs. direct connection ratios (high relay % indicates P2P issues)
-- Track Connector uptime and set alerts for downtime
-- Capacity planning based on bytes-transferred trends
+| Metric | Description |
+|--------|-------------|
+| `twingate_inbound_bytes_total` | Total inbound bytes, labeled by transport type |
+| `twingate_outbound_bytes_total` | Total outbound bytes, labeled by transport type |
+| `twingate_connector_uptime_seconds` | Connector uptime in seconds |
+| Resource counts | Number of resources handled per connector |
 
-**Related Docs:**
-- /docs/connector-monitoring -- Full Prometheus + Grafana setup walkthrough
-- /docs/advanced-connector-management -- Advanced Connector features index
+**Transport labels:** `direct`, `relay`
+
+## Prerequisites
+- Twingate Connector v1.80.0 or later
+- Prometheus-compatible monitoring system
+
+## Step-by-Step Setup
+1. Set `TWINGATE_METRICS_PORT=9999` on Connector deployment
+2. Configure Prometheus scrape job targeting `<connector-host>:9999`
+3. Build dashboards in Grafana or preferred visualization tool
+
+## Configuration Values
+
+| Variable | Value | Description |
+|----------|-------|-------------|
+| `TWINGATE_METRICS_PORT` | `9999` (example) | Port for Prometheus metrics endpoint |
+
+## Example Metric Output
+```
+twingate_inbound_bytes_total{transport="direct"} 1234567890
+twingate_outbound_bytes_total{transport="relay"} 987654321
+twingate_connector_uptime_seconds 86400
+```
+
+## Gotchas
+- Feature requires connector v1.80.0+; older connectors will not expose metrics
+- More metrics are planned but not yet available — do not build critical alerting on completeness of current metric set
+- Port `9999` is shown as example; confirm actual default in the full setup guide
+
+## Related Docs
+- [Complete Setup Guide](https://www.twingate.com/docs/connector-metrics) — detailed implementation instructions
+- Prometheus documentation for scrape configuration
+- Grafana dashboard setup

@@ -1,26 +1,45 @@
-## Best Practices for Private DNS with Twingate
+# Best Practices for Configuring Private DNS with Twingate
 
-Private DNS is recommended (not required) for Twingate deployments. It eliminates public DNS leaks for private Resources, provides user-friendly FQDNs, and resolves IP overlap ambiguity. DNS zones aligned with Twingate Groups (e.g. `*.engineering.yourcompany.com`) enable automatic access expansion as new hosts are added under the zone.
+## Summary
+Twingate recommends using private DNS exclusively for Resources rather than IP addresses or public DNS entries. The Connector handles FQDN resolution using its host's DNS configuration. Structuring DNS zones around permission boundaries simplifies Resource management.
 
-**Key Information**
-- DNS resolution is performed by the Connector, using whatever DNS servers are configured on the Connector host
-- Cloud-managed DNS options: AWS Route 53, Azure DNS (no dedicated server needed)
-- On-prem: deploy a DNS server on the internal network
-- Zone-to-Group alignment pattern: create one DNS zone per team/role (e.g. `*.engineering.yourcompany.com`), create one Twingate Resource matching that zone, assign to the corresponding Group -- new hosts under the zone are automatically included
-- Verify Connector DNS resolution: SSH into Connector host and run `nslookup hostX.Y.mycompany.com`
-- Custom DNS server for Connector is possible but adds configuration complexity; recommended to use the host's default DNS servers
+## Key Information
+- Private DNS prevents information leakage from public DNS entries for internal resources
+- DNS names resolve IP overlap issues (same IP on multiple networks)
+- Connector resolves FQDNs the same way any host on its subnet would
+- DNS zones can map directly to Twingate Groups, enabling wildcard-style Resource coverage
+- Adding hosts to a DNS zone automatically makes them accessible without new Resource configuration
 
-**Key Benefits Over IP-based Resources**
-- No public DNS records needed for private Resources (avoids information leakage)
-- Eliminates IP overlap ambiguity when same IP exists in multiple Remote Networks
-- More human-readable and maintainable for users and admins
+## Prerequisites
+- A private DNS solution (AWS Route 53, Azure DNS, or on-prem DNS server)
+- Connector deployed on the target network
+- Twingate Groups configured for access control
 
-**Gotchas**
-- If the Connector host cannot resolve the FQDN, users will get DNS failures -- verify resolution from the Connector host itself, not just from a workstation
-- DNS zone-based Resources are powerful but must match the actual DNS zones used by the Connector's DNS server; wildcards like `*.engineering.yourcompany.com` require that zone to actually exist in the DNS server the Connector uses
+## Setup Pattern
 
-**Related Docs**
-- /docs/ip-overlap
-- /docs/how-twingate-forwards-dns
-- /docs/how-dns-works-with-twingate
-- /docs/resources
+**DNS Zone → Twingate Resource → Group mapping:**
+1. Define a DNS zone aligned to a role/permission boundary (e.g., `.engineering.yourcompany.com`)
+2. Create a single Twingate Resource pointing to the DNS zone wildcard
+3. Map that Resource to the corresponding Twingate Group (e.g., Engineering)
+4. New hosts added under the zone are automatically accessible to the group
+
+## Configuration Values
+- **Resource value**: DNS zone wildcard (e.g., `*.engineering.yourcompany.com`)
+- **Custom DNS**: Configurable per-Connector but not recommended due to added complexity
+
+## Verification Command
+```bash
+# Run on the Connector host to confirm DNS resolution
+nslookup hostX.Y.mycompany.com
+```
+
+## Gotchas
+- Connector uses DNS servers configured on its **host OS** by default — ensure host DNS is correctly pointed at private DNS
+- Custom DNS server on Connector is possible but increases configuration complexity
+- Public DNS entries for private resources create an attack surface — remove them
+- IP-based Resources break when IP overlap exists across networks; DNS names avoid this
+
+## Related Docs
+- [IP Overlap](https://www.twingate.com/docs/ip-overlap)
+- [AWS Route 53](https://aws.amazon.com/route53/)
+- [Azure DNS](https://azure.microsoft.com/en-us/services/dns/)

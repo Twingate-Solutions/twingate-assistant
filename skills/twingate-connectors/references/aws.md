@@ -1,39 +1,84 @@
-## Deploy Connector on AWS
+# Deploy a Connector on AWS
 
-Multiple deployment options for Twingate Connectors on AWS, ranging from one-click CloudFormation to manual EC2 and ECS Fargate.
+## Summary
+Twingate supports multiple AWS deployment methods for Connectors: CloudFormation, EC2 (Linux), AMI, ECS Fargate, and EKS. All deployments require a subnet with outbound internet access to download container images and connect to Twingate.
 
-**Deployment Options:**
+## Key Information
+- Subnet must have outbound internet access for image download and Twingate connectivity
+- Peer-to-peer connections recommended to stay within Fair Use Policy bandwidth limits
+- Each Connector instance requires its own unique tokens — never reuse tokens across instances
+- AMIs come pre-installed with AWS SSM Agent for remote management
 
-**CloudFormation (easiest):**
-- Admin Console → Remote Network → Add Connector → AWS Quick Start
-- Select region (use same region as Resources) → Open AWS → select SSH key and Subnet ID → Create stack
-- Live within minutes
+## Prerequisites
+- Twingate Admin Console access
+- Remote Network already created in Admin Console
+- AWS account with appropriate IAM permissions
+- Subnet with outbound internet access
 
-**EC2 (Linux VM):**
-- Follow standard Linux Connector deployment instructions (Docker or systemd)
-- Supported on any 64-bit Linux distro (Docker) or Ubuntu/Fedora/Debian/CentOS (systemd)
-- Recommended instance: t3a.micro (sufficient for hundreds of users under typical usage)
-- For remote access: AMI pre-installed with systemd service + AWS SSM Agent (no SSH key required)
+## Deployment Methods
 
-**AMI Deployment:**
-- Admin Console → Connector → AMI option → Generate Tokens → fill AWS environment info → copy and run CLI command
+### CloudFormation (Easiest)
+1. Admin Console → Remote Networks → Select Network → Add Connector
+2. Click new Connector → Choose **AWS Quick Start** deployment
+3. Select target region → Click **Open AWS**
+4. Select SSH key and Subnet ID → Click **Create Stack**
+5. Connector live within a few minutes
 
-**ECS Fargate:**
-- Admin Console → Connector → ECS option → Generate Tokens → fill environment info → copy task definition command → launch command
-- For ICMP/ping support: add `systemControls` with `net.ipv4.ping_group_range: 0 2147483647` to the task definition
-- Each Connector needs its own task definition (tokens are Connector-specific)
+### EC2
+- Follow standard Linux Connector deployment instructions
+- Docker: any 64-bit Linux distro Docker supports
+- systemd service: Ubuntu, Fedora, Debian, CentOS only
 
-**EKS:**
-- Use the official Twingate Helm chart; see Kubernetes Best Practices Guide
+### AMI (Ubuntu x86, systemd pre-installed)
+1. Admin Console → Add Connector → Select **AMI** option
+2. Generate tokens (requires re-authentication)
+3. Fill in AWS environment details and optional features
+4. Select CLI environment, copy and run the generated command
 
-**IaC:**
+### ECS Fargate
+1. Admin Console → Add Connector → Select **ECS** option
+2. Generate tokens (requires re-authentication)
+3. Fill in AWS environment details
+4. Run task definition creation command via AWS CLI
+5. Run Connector launch command via AWS CLI
+
+### EKS
+- Use the official Twingate Helm chart
+- See Kubernetes Best Practices Guide
+
+### Infrastructure as Code
 - Terraform, Pulumi, or Twingate API
 
-**Gotchas:**
-- Subnet must have outbound internet access for image pull and Twingate connectivity
-- Do not reuse tokens across Connector instances
+## Configuration Values
 
-**Related Docs:**
-- /docs/connectors-on-linux -- Linux deployment details
-- /docs/connector-best-practices -- Hardware recommendations and network requirements
-- /docs/upgrading-connectors -- Update process for systemd and ECS connectors
+### ECS Fargate — Ping Support
+Add to `containerDefinitions` in task definition:
+```json
+"systemControls": [
+  {
+    "namespace": "net.ipv4.ping_group_range",
+    "value": "0 2147483647"
+  }
+]
+```
+
+## Gotchas
+- **Do not reuse Connector tokens** — create separate task definitions per Connector instance
+- Subnet must have outbound internet access or deployment will fail silently
+- systemd-based updates (EC2/AMI): stagger updates across Connectors to avoid downtime
+- ECS Fargate ping to Resources requires explicit `systemControls` sysctl config
+
+## Updates
+| Deployment Type | Update Method |
+|---|---|
+| EC2 / AMI (systemd) | Manual via package manager or scheduled task — see Systemd Update Guide |
+| ECS Fargate | AWS management console or CLI — see ECS Update Guide |
+
+## Related Docs
+- Connector Best Practices Guide
+- Peer-to-peer connections setup
+- Kubernetes Best Practices Guide
+- Systemd Connector Update Guide
+- ECS Connector Update Guide
+- Terraform / Pulumi / Twingate API docs
+- AWS Systems Manager User Guide

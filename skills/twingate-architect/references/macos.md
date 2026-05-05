@@ -1,26 +1,55 @@
-## macOS Client
+# macOS Twingate Client
 
-Install and setup guide for the Twingate macOS Client. Available via Mac App Store (preferred) or standalone installer; requires VPN configuration and (for standalone) a system extension.
+## Summary
+Twingate macOS client can be installed via Mac App Store or as a standalone client. First-time setup requires configuring VPN permissions and a system extension (standalone only). After setup, the client authenticates via your organization's identity provider.
 
-**Key Information:**
-- Two install options: Mac App Store or standalone client (for environments without Apple ID)
-- Apple Silicon (M-series) natively supported
-- Enabling notifications is strongly recommended -- used for additional authentication prompts on sensitive Resources
-- VPN configuration is required; system extension is additionally required for the standalone client
-- After connecting, only traffic for configured Resources is intercepted
+## Key Information
+- Native Apple Silicon (ARM) support included
+- Two installation paths: Mac App Store or standalone client
+- Standalone client requires enabling a system extension in addition to VPN configuration
+- Client only intercepts traffic for private Resources; regular internet unaffected
+- Notifications required for step-up authentication prompts on sensitive Resources
 
-**Step-by-Step:**
-1. Install from Mac App Store or get.twingate.com (or standalone installer)
-2. Run the app -- complete onboarding: allow notifications, add VPN configuration, enable system extension (standalone only)
-3. Enter network name (e.g., `autoco`) -- click "Join Network"
-4. Use dropdown to connect -- authenticate via IdP in browser -- click "Open Twingate.app" when prompted
-5. Browser closes; Client shows online
+## Prerequisites
+- Apple ID (Mac App Store path only)
+- Network name (provided in welcome email)
+- Identity provider credentials
+- macOS permissions: Notifications, VPN configuration, System Extension (standalone only)
 
-**Gotchas:**
-- After IdP authentication in browser, clicking "Open Twingate.app" is required to activate the Client -- missing this step leaves the Client offline
-- System extension approval requires macOS security settings access and may need admin approval in MDM-managed environments
+## Step-by-Step
 
-**Related Docs:**
-- /docs/macos-standalone-client -- Standalone (non-App-Store) macOS Client details
-- /docs/macos-and-ios -- Combined macOS/iOS documentation
-- /docs/clients -- Client overview
+### Installation
+1. **Mac App Store**: Search "Twingate" or visit `get.twingate.com`
+2. **Standalone**: Follow standalone client setup docs (no Apple ID required)
+
+### First-Time Setup
+1. Launch Twingate — onboarding wizard starts automatically
+2. Allow notifications (strongly recommended for auth prompts)
+3. Allow VPN configuration — **required**
+4. Enable system extension (standalone client only) — **required**
+
+### Connecting
+1. Enter network name (e.g., `acme`) from welcome email
+2. Click **Join Network**
+3. Use the drop-down menu → **Connect**
+4. Authenticate in the browser window that opens with your IdP credentials
+5. Click **Open Twingate.app** when browser prompts — required to activate client
+6. Client shows "online" status when complete
+
+## Configuration Values
+| Setting | Required | Notes |
+|---------|----------|-------|
+| VPN Configuration | Yes | Both install methods |
+| System Extension | Yes (standalone only) | Mac App Store version does not require this |
+| Notifications | Strongly recommended | Needed for MFA/step-up auth prompts |
+
+## Gotchas
+- Must click **"Open Twingate.app"** browser prompt after IdP auth — skipping this leaves the client inactive
+- System extension setup only required for **standalone** client, not Mac App Store version
+- Managed/MDM deployments require additional steps (separate docs)
+- Returning users will have network name pre-filled
+
+## Related Docs
+- Standalone Client setup
+- Managed environment deployment
+- `get.twingate.com` (redirect to Mac App Store)

@@ -1,28 +1,20 @@
-## Page Title
-Open Source Attributions
+# Open Source Attributions
 
 ## Summary
-Index page linking to third-party OSS license notice pages for each Twingate client application platform. No technical implementation guidance — legal/compliance reference only.
+This page provides links to third-party open source notices for each Twingate client application platform. No technical implementation details are included.
 
 ## Key Information
-- Links to platform-specific OSS attribution pages:
+- Separate attribution pages exist per platform
+- Platforms covered:
   - macOS and iOS Client Applications
   - Windows Client Application
   - Linux Client Application
   - Android and ChromeOS Client Applications
 
-## Prerequisites
-None.
-
-## Step-by-Step
-Not applicable.
-
-## Configuration Values
-None.
-
 ## Gotchas
-None.
+- No actionable implementation content on this page
+- Links point to platform-specific sub-pages (URLs not provided in source)
 
 ## Related Docs
-- `/docs/oss-linux-client-application`
-- `/docs/oss-android-and-chromeos-client-applications`
+- Platform-specific client installation documentation
+- Each linked attribution page contains the actual third-party notices

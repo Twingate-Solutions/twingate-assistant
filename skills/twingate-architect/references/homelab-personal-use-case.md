@@ -1,37 +1,57 @@
+# Homelab & Personal Use Cases
+
 ## Page Title
-Homelab & Personal Use Cases
+Twingate Homelab & Personal Use Cases
 
 ## Summary
-Use case overview for running Twingate on a home network to enable secure remote access without port forwarding or dynamic DNS. Free Starter plan available. Connector runs on Raspberry Pi, NAS devices, or any Linux/Docker host.
+Twingate provides secure remote access to home networks and self-hosted services without port forwarding or VPN server configuration. A free Starter plan is available, with typical setup time under 15 minutes via a single Connector deployment on a home network device.
 
 ## Key Information
-- Free Starter plan available for personal use — no credit card required
-- Connector deployment options: Docker container or systemd service
-- Supported home hardware: Raspberry Pi, Synology NAS (DSM 6 and 7), QNAP NAS, Proxmox, TrueNAS SCALE, Firewalla, Unraid
-- No open inbound ports or port forwarding required
-- No static IP or dynamic DNS needed on the home network
-- Granular per-resource access — share specific resources (e.g. photo library) without exposing others (e.g. cameras)
-- Desktop and mobile clients for all platforms
-- Advanced features available: Admin API, Python CLI, JavaScript CLI, Terraform, Pulumi
+- **Free tier available**: Starter plan supports personal/homelab use
+- **No open inbound ports required**: eliminates port forwarding security risks
+- **No static IP or dynamic DNS needed**
+- **Connector deployment options**: Docker container or systemd service (VM)
+- **Supported platforms**: Raspberry Pi, Synology NAS, QNAP NAS, TrueNAS SCALE, Proxmox, Firewalla, Linux servers, Windows
 
 ## Prerequisites
-- A device on the home network capable of running Docker or systemd (Raspberry Pi, NAS, Linux server, or Windows PC)
-- Free Twingate account
+- A Twingate account (free Starter plan available)
+- One device on the home network to host the Connector (Raspberry Pi, NAS, Linux/Windows machine)
+- Docker or systemd-compatible OS on the Connector host
 
-## Step-by-Step
-Not applicable on this page — see linked device-specific guides.
+## Step-by-Step (High Level)
+1. Create a Twingate account
+2. Choose a Connector host device on your home network
+3. Deploy the Connector (Docker image or systemd service)
+4. Define network Resources (e.g., Home Assistant URL, Plex server, camera IPs)
+5. Install Twingate client app on remote devices
+6. Configure access permissions per resource for users/groups
 
 ## Configuration Values
-None on this page.
+- No specific env vars documented on this page
+- Refer to platform-specific guides for Connector deployment flags
+- Automation supported via: Terraform, Pulumi, Admin API, JS CLI, Python CLI
+
+## Platform-Specific Guides
+| Service/Device | Guide Available |
+|---|---|
+| Synology NAS (DSM 6.x) | Yes |
+| Synology NAS (DSM 7.x) | Yes |
+| QNAP NAS | Yes |
+| TrueNAS SCALE | Yes |
+| Proxmox Container | Yes |
+| Firewalla | Yes |
+| Home Assistant (Raspberry Pi) | Yes |
+| Plex Media Server | Yes |
 
 ## Gotchas
-- Starter plan has user and resource limits — check current plan limits at twingate.com/pricing
-- Connector must remain running on the home network for remote access to work; plan for uptime (NAS or always-on device preferred over a laptop)
+- Only one Connector needed per home network (single device deployment)
+- DSM 6.x and DSM 7.x Synology deployments have separate guides—confirm version before following
+- Access permissions are per-resource and per-user; plan resource segmentation before inviting family/friends
 
 ## Related Docs
-- `/docs/homelab-step-by-step` — end-to-end homelab setup guide
-- `/docs/home-assistant-getting-started` — Home Assistant integration
-- `/docs/proxmox-getting-started` — Proxmox deployment
-- `/docs/how-to-set-up-twingate-on-a-synology-nas-dsm-7` — Synology DSM 7
-- `/docs/deploy-connector-on-firewalla` — Firewalla deployment
-- `/docs/unraid-getting-started` — Unraid deployment
+- [Deployment recommendations](https://www.twingate.com/docs/deployment-recommendations)
+- [Admin API](https://www.twingate.com/docs/api)
+- [Terraform integration](https://www.twingate.com/docs/terraform)
+- [Pulumi integration](https://www.twingate.com/docs/pulumi)
+- [JavaScript CLI configuration tool](https://www.twingate.com/docs/javascript-cli)
+- [Python CLI configuration tool](https://www.twingate.com/docs/python-cli)

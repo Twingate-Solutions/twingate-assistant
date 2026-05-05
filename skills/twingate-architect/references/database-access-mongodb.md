@@ -1,38 +1,64 @@
-## MongoDB Access with Twingate
+# MongoDB Access with Twingate
 
-Twingate secures access to MongoDB Atlas and self-hosted MongoDB by routing connections through Connectors. For Atlas, the Connector's public IP is added to the Atlas IP Access List; for self-hosted instances, the Connector's private IP is used in firewall or mongod.conf bind rules. Atlas supports PrivateLink (AWS/Azure) and Private Service Connect (GCP) for fully private connectivity.
+## Summary
+Twingate secures access to both MongoDB Atlas (managed) and self-hosted MongoDB by routing traffic through Connectors and enforcing IP-based access controls. Atlas clusters restrict connections via IP Access Lists, requiring Connector public IPs to be allowlisted. Self-hosted instances use firewall rules or `bindIp` configuration instead.
 
-**Key Information**
-- Atlas default port: TCP 27017; `mongodb+srv://` also requires UDP 53 for DNS SRV lookup
-- Atlas IP Access List: add Connector public IP per Connector (Network Access in Atlas console)
-- Atlas Admin Console (`cloud.mongodb.com`): separate org-level IP access list; Resource port 443
-- Self-hosted: restrict with `net.bindIp` in `mongod.conf` or firewall rule from Connector private IP
-- PrivateLink (AWS/Azure) / Private Service Connect (GCP): Connector connects to private endpoint; no public IP allowlisting needed
-- `mongodb+srv://`: SRV-based discovery; requires DNS access (UDP 53) + TCP 27017 -- both must be in Resource definition
-- `mongodb://`: connects directly to listed hosts/IPs; no DNS SRV required
+## Key Information
+- Atlas uses TLS on TCP port **27017** for database connections; DNS on UDP port **53** required for `mongodb+srv://` URIs
+- Atlas Admin UI (`cloud.mongodb.com`) secured separately via Organization-level IP Access List on port **443**
+- PrivateLink (AWS/Azure) or Private Service Connect (GCP) eliminates need to allowlist public Connector IPs for Atlas
+- Use Connector **private IP** for self-hosted firewall rules; **public IP** only when required (e.g., Atlas IP Access List)
 
-**Prerequisites**
-- Remote Network and Connector deployed
-- MongoDB Atlas project/cluster or self-hosted MongoDB server
-- Connector public IP (Atlas path) or private IP (self-hosted / PrivateLink path)
+## Prerequisites
+- Twingate Remote Network created with one or more Connectors deployed
+- MongoDB Atlas project/cluster OR self-hosted MongoDB server
+- Connector public IP addresses (for Atlas) or private IPs (for self-hosted)
 
-**Step-by-Step (Atlas)**
-1. Create Resource: host `*.mongodb.net`, ports TCP 27017 + UDP 53; assign to groups
-2. In Atlas -> Network Access, add Connector public IP for each Connector
-3. Connect: `mongosh "mongodb+srv://cluster0.abc123.mongodb.net/mydb" --username <u> --password <p>`
+## Step-by-Step
 
-**Step-by-Step (Self-hosted)**
-1. Create Resource: MongoDB server IP or DNS, port 27017
-2. Restrict firewall inbound to Connector private IP, or set `net.bindIp` in `mongod.conf`
+### Atlas Database Access
+1. Create Twingate Resource for `*.mongodb.net`, TCP port `27017`, UDP port `53`
+2. In Atlas → **Network Access** → **Add IP Address**: add each Connector public IP
+3. Connect via `mongosh "mongodb+srv://cluster0.abc123.mongodb.net/mydatabase" --username <user> --password <pass>`
+
+### Atlas Admin UI Access
+1. In Atlas → **Organization → Settings**, enable IP Access List for Atlas UI (contact MongoDB Support if not visible)
+2. Create Twingate Resource for `cloud.mongodb.com`, port `443`, same Remote Network as database Connectors
+3. Add Connector public IPs to the Organization-level IP Access List
+4. Verify: run Twingate Client, browse to `https://cloud.mongodb.com`
+
+### Self-Hosted MongoDB
+1. Create Twingate Resource with server IP/hostname, port `27017`
+2. Restrict server firewall to allow inbound only from Connector **private IP**, OR set `net.bindIp` in `mongod.conf`
 3. Connect via `mongosh` with Twingate Client running
 
-**Gotchas**
-- **Connection string mismatch is the most common failure**: `mongodb+srv://` needs DNS (UDP 53); `mongodb://` does not -- confirm Resource covers both if using SRV
-- Atlas IP Access List is per-project; Admin Console IP Access List is per-organization -- configure both if also securing admin access
-- TLS is required by Atlas; enable TLS on self-hosted deployments as well
-- If using PrivateLink/PSC, remove Connector public IP from Atlas IP Access List -- it is not needed
+## Configuration Values
+| Parameter | Value |
+|-----------|-------|
+| MongoDB default port | TCP `27017` |
+| DNS port | UDP `53` |
+| Atlas Admin UI | `cloud.mongodb.com`, port `443` |
+| Atlas Resource pattern | `*.mongodb.net` |
+| Self-hosted bindIp config | `net.bindIp` in `mongod.conf` |
 
-**Related Docs**
-- /docs/database-access-guide
-- /docs/saas-app-gating
-- /docs/connector-best-practices
+## Gotchas
+- `mongodb+srv://` requires DNS (port 53) access in addition to TCP 27017 — missing DNS in Resource definition is a common failure
+- Atlas database IP Access List and Atlas UI IP Access List are **separate** — securing one does not secure the other
+- Atlas UI IP Access List is **org-level**, not project-level; must be enabled by MongoDB Support if not visible
+- Another VPN running alongside Twingate Client can cause "No Activity" errors
+
+## Troubleshooting Reference
+| Symptom | Likely Cause |
+|---------|-------------|
+| `DNS Failed` in Recent Activity | Connector can't resolve hostname; check DNS routing |
+| `Connection Failed` in Recent Activity | DNS works but TCP blocked; check firewall/IP allowlist |
+| `No Activity` | Client not running, Resource not assigned, or conflicting VPN |
+| Connection refused | Connector IP missing from Atlas IP Access List |
+| Auth error | Wrong credentials or missing TLS configuration |
+
+## Related Docs
+- [SaaS App Gating Guide](https://www.twingate.com/docs/saas-app-gating)
+- [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
+- [Twingate Troubleshooting Guide](https://www.twingate.com/docs/troubleshooting)
+- [MongoDB Private Endpoint Connections](https://www.mongodb.com/docs/atlas/security-private-endpoint/)
+- [MongoDB Connection String Docs](https://www.mongodb.com/docs/manual/reference/connection-string/)

@@ -1,33 +1,55 @@
-## Evaluating Twingate Performance
+# Twingate Performance
 
-Covers performance characteristics of Twingate P2P connections compared to WireGuard and OpenVPN, and provides a methodology for running your own throughput tests. Peer-to-peer connections add 5-15% overhead versus baseline; relay fallback yields 200-250 Mbps consistently.
+## Page Title
+Evaluating Twingate Performance
 
-**Key Information:**
-- P2P connection overhead: 5-15% throughput reduction vs. baseline
-- Relay fallback (when P2P unavailable): 200-250 Mbps
-- WireGuard on same hardware: 63-84% throughput reduction vs. baseline
-- OpenVPN on same hardware: 66-87% throughput reduction vs. baseline
-- Split-tunnel design: only Resource-bound traffic passes through the tunnel; other traffic (video conferencing, etc.) uses direct internet
-- Determine P2P vs. relay status from the Admin Console activity logs
-- Public release of Twingate benchmark results requires Twingate's prior written approval
+## Summary
+Twingate uses peer-to-peer connections between Clients and Connectors, resulting in 5-15% throughput reduction versus baseline. Benchmarks show Twingate significantly outperforms self-hosted WireGuard and OpenVPN on equivalent hardware. Relay fallback connections deliver 200-250 Mbps consistently.
 
-**Test Methodology (Speedtest.net):**
-1. Create a Remote Network in a physically separate environment from the test client
-2. Add a wildcard Resource: address = `*speedtest*` (captures all speedtest domains), assign to a Group
-3. Run Speedtest.net baseline with Twingate Client disconnected
-4. Run Speedtest.net with Twingate Client connected -- egress IP should change to the Remote Network's location
-5. Compare results; within 5% of baseline indicates a healthy P2P connection
+## Key Information
+- **P2P overhead**: 5-15% throughput reduction typical
+- **Relay fallback**: 200-250 Mbps when P2P unavailable
+- **Split-tunnel design**: Only Resource-bound traffic goes through tunnel; other traffic (video calls, etc.) bypasses Twingate entirely
+- **Benchmark results** (1 vCPU, 2GB RAM VPS):
 
-**Configuration Values:**
-- Wildcard address format: `*speedtest*` (asterisks required)
-- Recommended test server upstream: 1 Gbps minimum
+| Test | Baseline | Twingate | WireGuard | OpenVPN (UDP) |
+|------|----------|----------|-----------|---------------|
+| Speedtest.net | 943 Mbps | 906 Mbps (-4%) | 148 Mbps (-84%) | 120 Mbps (-87%) |
+| 1.8GB File Transfer | 600 Mbps | 600 Mbps (0%) | 224 Mbps (-63%) | 208 Mbps (-66%) |
+| LAN Speed Test | 459 Mbps | 455 Mbps (-1%) | 166 Mbps (-64%) | 133 Mbps (-71%) |
 
-**Gotchas:**
-- File transfer tests are usually bottlenecked by storage I/O (especially HDD arrays), not the network -- use NVMe-based storage to remove this variable
-- LAN Speed Test (totusoft.com) is older and less accurate; use 1 GB+ sample file size for better results
-- A significantly lower-than-expected result warrants investigating both the client's local network and the Remote Network's upstream bandwidth
+## Prerequisites
+- Separate Remote Network (cloud/datacenter) with ≥1 Gbps internet connection for testing
+- Twingate Client installed on test user device
+- Resource and Group configured in Admin Console
+- Check activity logs to confirm P2P vs. Relay connection type
 
-**Related Docs:**
-- /docs/connector -- Connector deployment for test Remote Networks
-- /docs/remote-networks -- Setting up test Remote Networks
-- /docs/resources -- Configuring wildcard Resources
+## Step-by-Step: Speedtest.net Performance Test
+1. Run baseline Speedtest.net with Twingate Client **disconnected**
+2. In Admin Console → Resources → **Add Resource**
+3. Select Remote Network; set DNS Address to `*speedtest*` (wildcard)
+4. Assign Resource to a test Group (isolate from production users)
+5. Connect Twingate Client; run Speedtest.net again
+6. Verify egress IP changed (confirms traffic routes through Remote Network)
+7. Compare results — expect ≤5% degradation on P2P connection
+
+## Configuration Values
+- **Wildcard DNS address**: `*speedtest*` — captures all domains containing "speedtest"
+- **Recommended file size for LAN Speed Test**: ≥1 GB dataset for accuracy
+- **rsync flags for macOS**: `--v --stats --progress`
+- **Windows file transfer tools**: Teracopy, Robocopy
+- **Linux file transfer**: rsync
+
+## Gotchas
+- **Publishing benchmarks requires Twingate's prior approval**
+- File transfer tests are usually bottlenecked by storage I/O (HDD RAID << NVMe), not the network
+- Remote Network must be physically separate from user's local network — testing on same LAN skips P2P path
+- Remote Network internet speed must not be the bottleneck (use ≥1 Gbps)
+- LAN Speed Test tool is outdated and less accurate than direct file transfers
+- Low baseline speeds indicate ISP/local network issues, not Twingate
+
+## Related Docs
+- Wildcard Resources documentation
+- Activity logs (Admin Console) — verify P2P vs. Relay connection
+- Twingate Relay documentation
+- Remote Network Connector setup
