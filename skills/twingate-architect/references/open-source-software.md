@@ -1,25 +1,31 @@
-## Page Title
-Twingate Open Source Software
+# Twingate Open Source Software
 
 ## Summary
-Lists Twingate-authored open source software available for download. Currently contains one entry: tap-windows6, a Windows network tap driver licensed under GPLv2. Legal/compliance reference page.
+Twingate publishes source code for open source components used in their software. Currently, one open source component is available for download: a fork of the tap-windows6 driver licensed under GPLv2.
 
 ## Key Information
-- **Twingate tap-windows6** -- GPLv2; Windows virtual network adapter driver used by the Twingate Windows Client
-- Source code available for download from this page
+- Twingate provides source code downloads for software released under open source licenses
+- Currently one component listed: **tap-windows6** (GPLv2 license)
+- tap-windows6 is a Windows TAP driver used for virtual network adapter functionality
+
+## Available Components
+
+| Component | License | Notes |
+|-----------|---------|-------|
+| twingate tap-windows6 | GPLv2 | Windows TAP virtual network driver |
 
 ## Prerequisites
-None.
-
-## Step-by-Step
-Not applicable.
+- None specified for downloading source code
+- Building tap-windows6 from source requires Windows driver development tools (WDK)
 
 ## Configuration Values
-None.
+- None applicable — this page is a source code distribution page only
 
 ## Gotchas
-- tap-windows6 is a kernel-level driver component; source code is provided for GPL compliance, not for modification by end users
+- Only GPLv2-licensed components are listed; proprietary Twingate components are not available here
+- Page appears minimal — check back for additional components as Twingate's open source obligations expand
+- The tap-windows6 component is Windows-specific (TAP driver for VPN tunnel interface on Windows)
 
 ## Related Docs
-- `/docs/open-source-attributions` -- third-party OSS notices for client apps
-- `/docs/windows` -- Windows Client documentation
+- [Twingate Client installation docs](https://www.twingate.com/docs/clients) — context for where tap-windows6 is used
+- [tap-windows6 upstream project](https://github.com/OpenVPN/tap-windows6) — original OpenVPN project this is forked from

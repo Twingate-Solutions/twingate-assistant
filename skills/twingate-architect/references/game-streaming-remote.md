@@ -1,36 +1,55 @@
-## Remote Game Streaming with Twingate -- Overview
+# Remote Game Streaming with Twingate
 
-Index and comparison page for the three Twingate-secured game streaming options: Sunshine (simplest, traditional), Apollo (headless with automatic virtual displays), and Duo (multi-user simultaneous sessions). All three use the same Twingate architecture: a Connector on the gaming PC plus the Moonlight client on remote devices; no port forwarding required.
+## Page Title
+Remote Game Streaming with Twingate
 
-**Key Information**
-- Common architecture: streaming server (Sunshine/Apollo/Duo) + Twingate Connector on gaming PC; Moonlight + Twingate Client on remote device
-- Common hardware requirement: Windows PC with gaming-capable GPU (Nvidia/AMD/Intel for NVENC/AMF/QuickSync)
-- Streaming performance targets: 15-20 Mbps for 1080p60; 25-40 Mbps for 4K60; under 50ms latency
-- Wired ethernet on gaming PC strongly recommended
-- Hardware encoders (NVENC/AMF/QuickSync) required for real-time streaming -- software encoding insufficient
+## Summary
+Overview page for setting up remote PC game streaming secured by Twingate's Zero Trust network. Covers three streaming solutions (Sunshine, Apollo, Duo) that work with Moonlight client, eliminating port forwarding requirements. All setups route traffic through Twingate Connector for authenticated, encrypted access.
 
-**Comparison**
+## Key Information
+- Three supported streaming servers: **Sunshine** (general), **Apollo** (headless/virtual display), **Duo** (multi-user)
+- Client-side uses **Moonlight** app on remote device
+- No port forwarding required — Connector uses outbound-only connections
+- All traffic is authenticated, encrypted, and auditable with optional MFA
 
-| Feature | Sunshine | Apollo | Duo |
-|---|---|---|---|
-| Setup complexity | Easy | Easy | Moderate |
-| Virtual displays | Manual (IddSampleDriver) | Automatic (SudoVDA) | Automatic |
-| Multi-user | No | No | Yes (Patreon) |
-| HDR | Yes | Yes | Yes (Patreon) |
-| Cost | Free | Free | Free (limited) |
-| Best for | General streaming | Headless PCs | Families/shared PCs |
-
-**Prerequisites**
-- Windows gaming PC with GPU
-- Twingate account (free tier supported)
+## Prerequisites
+- Windows PC with gaming-capable GPU (Nvidia/AMD/Intel)
+- Twingate account (free tier available)
+- Remote device (laptop, phone, tablet)
 - Stable internet at both locations
+- Wired ethernet on gaming PC (strongly recommended)
 
-**Gotchas**
-- All three solutions require hardware GPU encoding -- software encoding is too slow for game streaming
-- Wired ethernet on the gaming PC is strongly recommended; Wi-Fi introduces variable latency
-- Choose Apollo over Sunshine if the PC has no monitor (headless); Apollo's SudoVDA handles virtual displays automatically
+## Architecture
+1. Streaming server (Sunshine/Apollo/Duo) runs on gaming PC
+2. Twingate Connector establishes outbound-only connection to Twingate Cloud
+3. Remote user connects via Twingate Client
+4. Moonlight streams over the encrypted Twingate tunnel
 
-**Related Docs**
-- /docs/game-streaming-sunshine
-- /docs/game-streaming-apollo
-- /docs/game-streaming-duo
+## Configuration Values / Performance Targets
+| Parameter | Value |
+|-----------|-------|
+| Bandwidth (1080p60) | 15–20 Mbps |
+| Bandwidth (4K60) | 25–40 Mbps |
+| Target latency | <50ms |
+| Encoding | Hardware only (NVENC/AMF/QuickSync) |
+
+## Solution Comparison
+| Feature | Sunshine | Apollo | Duo |
+|---------|----------|--------|-----|
+| Setup | Easy | Easy | Moderate |
+| Virtual Displays | Manual | Automatic (SudoVDA) | Automatic |
+| Multi-User | No | No | Yes (Patreon) |
+| Cost | Free | Free | Free (limited) |
+
+## Gotchas
+- Software encoding not viable for real-time streaming — hardware encoder required
+- Duo multi-user and HDR features require Patreon subscription
+- Apollo's key differentiator is SudoVDA for headless PCs (no physical monitor needed)
+- Each solution has its own dedicated quick start guide (not covered on this page)
+
+## Related Docs
+- Sunshine Remote Streaming guide
+- Apollo Remote Streaming guide
+- Duo Remote Streaming guide
+- Twingate Connector setup
+- Twingate Client installation

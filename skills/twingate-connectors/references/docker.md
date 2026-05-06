@@ -1,29 +1,79 @@
-## Upgrade Docker/ECS/Azure Connectors
+# How to Upgrade Containerized Connectors (AWS/Azure/Docker)
 
-Specific instructions for updating Twingate Connectors deployed as Docker containers (Linux Docker, AWS ECS, Azure Container Instances).
+## Summary
+Covers upgrading Twingate Connectors running as containers in Docker, AWS ECS, and Azure Container Instances. Each platform has a distinct upgrade path. Manual Docker upgrades require reprovisioning the Connector in the Admin Console.
 
-**AWS ECS — Force New Deployment:**
-- Management Console: ECS cluster → select Connector service → Update → Force new deployment → Skip to review → Update Service
-- AWS CLI: `aws ecs update-service --region <REGION> --cluster <CLUSTER_NAME> --service <SERVICE_NAME> --force-new-deployment`
-- Gotcha: if task definition image tag was changed from `1` or `latest`, the pulled image may not be latest
+## Key Information
+- Always use image tag `1` or `latest` to ensure upgrades pull the newest image
+- AWS ECS: Force new deployment (preserves config)
+- Azure: Must destroy and recreate container (no restart support due to Docker Hub rate limiting)
+- Docker: Automated script, Watchtower, or manual steps available
+- Manual Docker removal requires reprovisioning (tokens not preserved)
 
-**Azure Container Instance:**
-- Container restart command no longer works for upgrades (Docker Hub rate limiting + Azure CLI changes)
-- Must destroy old container and redeploy with `az container create` using Docker Hub credentials
-- Include `--registry-username`, `--registry-password "..."`, `--registry-login-server index.docker.io`
-- If signing into Docker Hub via SSO (Google/GitHub): use a Personal Access Token instead of a password
+## Prerequisites
+- Azure upgrades: Free Docker Hub account with username + password or PAT
+- Azure SSO Docker Hub users (Google/GitHub): Must use PAT instead of password
+- Watchtower: Not recommended for critical production systems
 
-**Docker (Linux host):**
-- Check current version: `docker exec twingate-connector ./connectord --version`
-- Automated upgrade script (preserves env vars): `curl -s https://binaries.twingate.com/connector/docker-upgrade.sh | sudo nohup sudo bash`
-  - Pulls latest `twingate/connector:1`, compares, stops/removes outdated containers, restarts with same env vars
-- Watchtower (automated, non-production): use `nicholas-fedor/watchtower:latest` fork; add label `com.centurylinklabs.watchtower.enable=true` to enable per-container control
-- Manual upgrade (requires reprovisioning tokens): `docker container rm -f <container>`, `docker image rm -f twingate/connector`, then deploy new `docker run` command from Admin Console
+## Step-by-Step
 
-**Gotchas:**
-- Manual Docker upgrade does NOT preserve tokens — requires reprovisioning in Admin Console
-- Automated script and Watchtower DO preserve tokens
+### AWS ECS (Console)
+1. Select running Connector service in ECS cluster → **Update**
+2. Check **Force new deployment** → **Skip to review**
+3. Click **Update Service**
 
-**Related Docs:**
-- /docs/upgrading-connectors -- General upgrade best practices
-- /docs/connectors-on-linux -- Docker deployment reference
+### AWS ECS (CLI)
+```bash
+aws ecs update-service --region <REGION> --cluster <CLUSTER_NAME> --service <SERVICE_NAME> --force-new-deployment
+```
+
+### Azure Container Instance
+Destroy old container, then recreate:
+```bash
+az container create --name twingate-connector-name --image twingate/connector:1 \
+  --resource-group RSG-here --vnet VNet-here --subnet Subnet-here \
+  --cpu 1 --memory 2 --os-type Linux \
+  --environment-variables TWINGATE_NETWORK="your-network" TWINGATE_ACCESS_TOKEN= TWINGATE_REFRESH_TOKEN= \
+  TWINGATE_TIMESTAMP_FORMAT=2 TWINGATE_LABEL_DEPLOYED_BY=azure \
+  --registry-username DockerHubUsername --registry-password "password" \
+  --registry-login-server index.docker.io
+```
+
+### Docker (Automated Script)
+```bash
+curl -s https://binaries.twingate.com/connector/docker-upgrade.sh | sudo nohup sudo bash
+```
+Handles: pull latest → compare → stop/delete outdated → restart with same env vars.
+
+### Docker (Manual - requires reprovisioning)
+```bash
+docker ps
+docker container rm -f [container ID or name]
+docker image rm -f twingate/connector
+# Get new run command from Admin Console
+docker run ...
+```
+
+## Configuration Values
+
+| Parameter | Notes |
+|---|---|
+| `twingate/connector:1` | Recommended image tag |
+| `TWINGATE_NETWORK` | Network name (Azure env var) |
+| `TWINGATE_ACCESS_TOKEN` | Auth token |
+| `TWINGATE_REFRESH_TOKEN` | Refresh token |
+| `TWINGATE_TIMESTAMP_FORMAT=2` | Azure deployment |
+| `TWINGATE_LABEL_DEPLOYED_BY` | Deployment label |
+| `com.centurylinklabs.watchtower.enable=true` | Watchtower label-enable filter |
+
+## Gotchas
+- Azure: `--registry-password` value **must** be in double quotes; `--registry-username` does not require quotes
+- ECS: If task definition uses a pinned tag (not `1`/`latest`), force deployment won't pull newest image
+- Manual Docker removal destroys auth tokens — must reprovision in Admin Console
+- Watchtower: Original project archived; use `nicholas-fedor/watchtower` fork
+
+## Related Docs
+- [Linux Docker Deployment](https://www.twingate.com/docs/linux-docker)
+- [Upgrading Connectors (best practices)](https://www.twingate.com/docs/upgrading-connectors)
+- [Connector Release Notes](https://www.twingate.com/docs/connector-release-notes)
+- [Docker Hub PAT documentation](https://docs.docker.com/security/for-developers/access-tokens/)

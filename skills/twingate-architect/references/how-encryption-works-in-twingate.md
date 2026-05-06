@@ -1,33 +1,50 @@
+# Twingate Encryption Architecture
+
 ## Page Title
-Encryption in Twingate
+How Encryption Works in Twingate
 
 ## Summary
-Describes how Twingate secures all communications between Client, Connector, Relay, and Controller. The two goals are confidentiality (traffic encrypted end-to-end, opaque to Twingate) and authentication (components verify they're talking to legitimate Twingate infrastructure using certificate pinning and signed tokens).
+Twingate secures communications between four components: customer-hosted Clients and Connectors, and Twingate-hosted Relays and Controller. The system provides confidentiality and authentication using TLS for public-facing components and a custom certificate-pinning scheme for Client-Connector traffic. Notably, even Twingate's own Relays cannot decrypt Client-Connector traffic.
 
 ## Key Information
-- **Two goals**: Confidentiality (no third party, including Twingate, can decrypt data traffic) and Authentication (components verify each other's identity)
-- **TLS-based authentication**: Client validates Relay and Controller using HTTPS/TLS with certificate authorities — same model as browser-to-bank connections
-- **Certificate pinning**: Client pins TLS connection to a specific Connector certificate digest (obtained from Controller) — prevents MITM even if CA is compromised
-- **Asymmetric encryption** used for key exchange; symmetric encryption used for data transport (standard TLS pattern)
-- **Controller-signed tokens**: time-bound tokens issued by Controller authorize Client-to-Connector connections; Connector verifies token was signed by its own Controller
-- **Relay opacity**: Relays forward encrypted packets but cannot decrypt content — encryption is established between Client and Connector, not Client and Relay
-- **No inbound ports**: encryption scheme works entirely over outbound connections
+- **Four components**: Client (end-user device), Connector (behind firewall), Relay (Twingate-hosted), Controller (Twingate-hosted)
+- **No open inbound ports required** for operation
+- **Two encryption layers**: TLS for Client/Connector→Relay/Controller; session key encryption for Client↔Connector
+- **Controller is the root of trust** for Client-Connector authentication
+- Twingate uses Let's Encrypt as its CA for `twingate.com` certificates
+- End-to-end encryption: Relays cannot decrypt Client-Connector packets
 
-## Prerequisites
-- Familiarity with TLS/HTTPS concepts helpful but not required — the doc explains from first principles
+## Client↔Connector Authentication Flow
 
-## Step-by-Step
-Not applicable — reference/explainer page.
+1. Connector generates public/private key pair + self-signed certificate at startup
+2. Connector sends SHA-256 digest of its certificate to Controller via heartbeat
+3. Client connects → requests Connector's self-signed certificate
+4. Client requests Connection Token (JWT) from Controller
+5. Controller issues JWT containing the stored SHA-256 digest of Connector's certificate
+6. Client verifies JWT authenticity AND matches digest against Connector's presented certificate
+7. Trust established → Client encrypts a session key using Connector's public key
+8. All subsequent Client↔Connector traffic uses symmetric session key encryption
 
 ## Configuration Values
-None — encryption is built-in and not configurable.
+- Connection Token format: **JWT signed by Controller**
+- Certificate fingerprint algorithm: **SHA-256**
+- Certificate type on Connector: **self-signed**, generated at startup
+
+## Architecture Notes
+
+| Component Pair | Encryption Method |
+|---|---|
+| Client/Connector → Controller/Relay | TLS (standard CA-signed certificates) |
+| Client ↔ Connector | Session key via Connector's self-signed cert + Controller-issued JWT |
 
 ## Gotchas
-- The Relay cannot decrypt traffic — this is by design, not a limitation
-- Certificate pinning means a Client must get the current Connector cert digest from the Controller before connecting — stale or revoked Connectors will fail auth
-- Time-bound tokens mean clock skew between Client and Controller can cause auth failures
+- Connector generates a **new key pair at each startup** — the Controller tracks the current digest via heartbeat
+- The self-signed certificate is **not CA-signed**; trust is established through the Controller's JWT, not a CA chain
+- Relay transport is transparent to encryption — Client-Connector session key is opaque to Relays
+- Both peer-to-peer and Relay-routed traffic use **identical** Client-Connector encryption process
 
 ## Related Docs
-- `/docs/how-twingate-works` — architecture overview with component roles
-- `/docs/client-connection-flow` — step-by-step token and TLS tunnel establishment
-- `/docs/understanding-relays` — Relay's role in the connection
+- Connector deployment documentation
+- Controller architecture
+- Relay configuration
+- Zero Trust Network Access concepts

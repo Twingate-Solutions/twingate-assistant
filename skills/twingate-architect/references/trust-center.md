@@ -1,28 +1,37 @@
-## Twingate Trust Center
+# Twingate Trust Center
 
-Index of Twingate's security, privacy, legal, and compliance documentation. Single reference point for due diligence and vendor assessment.
+## Page Title
+Twingate Trust Center
 
-**Security & Reliability:**
-- Security Information: /docs/twingate-security
-- Service Reliability: /docs/service-reliability
-- Service Status: status.twingate.com
+## Summary
+Central hub for Twingate's security, privacy, legal, and compliance documentation. Provides access to certifications, policies, and resources needed to evaluate Twingate for enterprise procurement or compliance reviews.
 
-**Disclosure & Privacy:**
-- Responsible Disclosure Policy: /docs/responsible-disclosure-policy
-- Privacy Policy (twingate.com)
-- California Supplemental Privacy Notice
+## Key Information
 
-**Legal Documents:**
-- Customer Agreement
-- User Terms of Service
+- **Security**: Security information page and responsible disclosure policy available
+- **Service Reliability**: Live service status page linked
+- **Compliance Certifications**: SOC 2, GDPR, HIPAA, PCI DSS, DORA
+- **Privacy**: Privacy Policy and California Supplemental Privacy Notice (CCPA)
+- **Legal**: Customer Agreement and User Terms of Service
+- **Additional**: Form W-9 and "Twingate & Customer Data" document available
 
-**Compliance Certifications:**
-- DORA: /docs/dora-compliance
-- GDPR: /docs/gdpr-compliance
-- HIPAA: /docs/hipaa-compliance
-- PCI DSS: /docs/pci-compliance
-- SOC 2 Type 2: /docs/soc-2 (request via trust.twingate.com)
+## Available Documents
 
-**Additional Resources:**
-- Twingate Inc. Form W-9
-- Twingate & Customer Data: /docs/twingate-customer-data
+| Category | Documents |
+|----------|-----------|
+| Security | Security Information, Responsible Disclosure Policy |
+| Privacy | Privacy Policy, California Supplemental Privacy Notice |
+| Legal | Customer Agreement, User Terms of Service |
+| Compliance | DORA, GDPR, HIPAA, PCI DSS, SOC 2 Report |
+| Other | Form W-9, Twingate & Customer Data |
+
+## Gotchas
+
+- Compliance certifications/standards not listed require direct contact with Twingate
+- SOC 2 Report access may require NDA or direct request (not explicitly stated on page)
+
+## Related Docs
+
+- Security Information page
+- Responsible Disclosure Policy
+- Twingate & Customer Data

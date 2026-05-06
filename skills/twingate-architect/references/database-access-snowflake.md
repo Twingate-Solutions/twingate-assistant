@@ -1,42 +1,70 @@
-## Snowflake Access with Twingate
+# Snowflake Access with Twingate
 
-Twingate routes Snowflake query traffic and Snowsight UI access through Connectors, with access enforced by Snowflake network policies that allowlist Connector public IP addresses. Network policies use network rules (IP CIDR lists or private endpoint identifiers); the same framework applies to both data warehouse connections and the Snowsight admin console. PrivateLink (AWS/Azure) and PSC (GCP) are supported for eliminating public IP management.
+## Summary
+Route Snowflake traffic (Snowsight UI and database queries) through Twingate Connectors and enforce Snowflake network policies scoped to Connector public IPs. Covers both warehouse/API access and the Snowsight admin console. Optionally use PrivateLink/Private Service Connect to avoid public IP allowlisting entirely.
 
-**Key Information**
-- All connections use HTTPS, port 443
-- Resource: `*.snowflakecomputing.com` (wildcard) or specific account URL `myorg-myaccount.snowflakecomputing.com`
-- Snowsight (admin console): Resource `*.snowflake.com` or regional URL; same network policy framework
-- Network policies contain network rules; rules define allowed IP CIDRs or private endpoint identifiers
-- Creating/applying network policies requires ACCOUNTADMIN or SECURITYADMIN role
-- Snowflake evaluates the most restrictive applicable policy (user-level vs account-level); Connector IPs must be in both if a user-level policy exists
-- PrivateLink/PSC: no public IP allowlisting needed; use private endpoint identifier in network rules
+## Key Information
+- Snowflake uses **network policies** (containing **network rules**) to allowlist IP addresses or private endpoint identifiers
+- Twingate Connector public IPs are added to Snowflake network rules/policies
+- Two separate resource types need protection: **Snowsight UI** (`*.snowflake.com`) and **database/warehouse access** (`*.snowflakecomputing.com`)
+- Both use port **443 (HTTPS)**
+- PrivateLink (AWS/Azure) or Private Service Connect (GCP) eliminates need for public IP allowlisting
 
-**Prerequisites**
-- Remote Network and Connector deployed
-- Snowflake account with ACCOUNTADMIN or SECURITYADMIN role
-- Connector public IP(s) noted from Twingate Admin Console
+## Prerequisites
+- Twingate Remote Network deployed with at least one Connector
+- Connector public IPs noted (Admin Console → Remote Network → Connectors → Public IP)
+- Snowflake account with `ACCOUNTADMIN` or `SECURITYADMIN` role
 
-**Step-by-Step (Database/Warehouse Access)**
-1. Create network rule in Snowflake: Admin -> Security -> Network Rules -> add Connector public IP in CIDR notation
-2. Create/update network policy referencing the network rule
-3. Create Twingate Resource: `*.snowflakecomputing.com`, port 443; assign to groups
-4. Connect with Twingate Client running; verify `snow sql -q "select current_user();"` succeeds
+## Step-by-Step
 
-**Step-by-Step (Snowsight)**
-1. Create Twingate Resource: `*.snowflake.com`, port 443; use same Remote Network
-2. Create/update Snowflake network policy to include Connector IPs
-3. Apply policy at account level in Admin -> Security -> Network Policies
+### Database/Warehouse Access
+1. Create Snowflake **Network Rule** scoped to Connector public IPs (Snowsight UI: Admin → Security → Network Rules, or via SQL)
+2. Create Twingate Resource for `myorg-myaccount.snowflakecomputing.com` (port 443)
+3. Connect Twingate Client; configure Snowflake CLI connection
 
-**Configuration Values**
-- Snowflake CLI config: `[connections.myconn]` in `config.toml`; password via `SNOWFLAKE_CONNECTIONS_MYCONN_PASSWORD` env var
-- SQL: `snow connection set-default myconn` to set default
+### Snowsight Console Access
+1. Create Snowflake **Network Policy** scoped to Connector public IPs (Admin → Security → Network Policies) and activate it
+2. Create Twingate Resource for `*.snowflake.com` or regional URL (port 443, same Remote Network)
+3. Connect Twingate Client before accessing `https://app.snowflake.com`
 
-**Gotchas**
-- User-level network policies are more restrictive than account-level -- Connector IPs must be in both
-- Incorrect account URL (missing org prefix `myorg-myaccount` vs just `myaccount`) is a common auth failure
-- Snowflake network policies block ALL other IPs implicitly once activated -- test before enforcing
+## Configuration Values
 
-**Related Docs**
-- /docs/database-access-guide
-- /docs/saas-app-gating
-- /docs/connector-best-practices
+```toml
+# config.toml (Snowflake CLI)
+[connections.myconn]
+account = "myaccount"
+user = "jondoe"
+role = "accountadmin"
+```
+
+```bash
+export SNOWFLAKE_CONNECTIONS_MYCONN_PASSWORD='abc123'
+snow connection set-default myconn
+snow sql -q "select current_user();"
+```
+
+| Parameter | Value |
+|-----------|-------|
+| Resource port | `443` |
+| Snowsight URL pattern | `*.snowflake.com` |
+| Warehouse URL pattern | `*.snowflakecomputing.com` |
+
+## Gotchas
+- **Multiple network policies**: Snowflake applies the most restrictive policy — ensure Connector IPs appear in both user-level and account-level policies if both are set
+- **Full account identifier required**: Use `myorg-myaccount` format; missing segments cause connection failures
+- Disconnected Twingate Client = immediate access denial (error 250001, IP not allowed)
+- Snowsight and warehouse access require **separate** Twingate Resources and Snowflake policy entries
+
+## Troubleshooting
+| Symptom | Check |
+|---------|-------|
+| Access denied | Connector IP in network rule; policy applied to account |
+| DNS Failed (Recent Activity) | Connector can resolve hostname; DNS server accessible |
+| Connection Failed | Route exists Connector→DB; firewall allows port 443 |
+| No Activity | Twingate Client running; no conflicting VPN |
+
+## Related Docs
+- [SaaS App Gating Guide](https://www.twingate.com/docs/saas-app-gating)
+- [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
+- [Snowflake Configuring Private Connectivity](https://docs.snowflake.com/en/user-guide/private-snowflake-service)
+- Twingate Troubleshooting Guide

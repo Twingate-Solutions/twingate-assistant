@@ -1,40 +1,47 @@
-## Best Practices for Local Peer-to-Peer Connections
+# Best Practices for Local Peer-to-Peer Connections
 
-Guide to designing internal network topology that maximizes Twingate's local P2P performance while enforcing Zero Trust segmentation. The recommended pattern uses two VLANs (Resources + Connectors on VLAN 1, Users on VLAN 2) with firewall rules that allow VLAN 2 traffic only to Connector private IPs on VLAN 1, blocking all other inter-VLAN traffic.
+## Summary
+Twingate supports local peer-to-peer (P2P) connections where users and Connectors are on the same physical network, enabling direct low-latency access without routing through a central gateway. The recommended topology uses two VLANs with strict firewall rules that force all user traffic through Twingate Connectors.
 
-**Key Information**
-- Local P2P: Twingate Client connects directly to the Connector on the same LAN, avoiding relay hops
-- Benefit: lower latency, higher throughput, reduced external bandwidth vs relay-based connections
-- Recommended topology: single physical network, two VLANs -- VLAN 1 (Resources + 2 Connectors), VLAN 2 (Users + DHCP)
-- Firewall rule order: allow VLAN 2 -> Connector IPs on VLAN 1 (any port); block all other VLAN 1 <-> VLAN 2 traffic
-- Two Connectors in VLAN 1 provide HA and load balancing
-- Applies to on-premises networks; same principle extends to cloud VPCs with security groups
+## Key Information
+- Local P2P keeps traffic within the local network, reducing latency and external bandwidth usage
+- Only authenticated/authorized users can initiate P2P connections (Zero Trust enforcement)
+- Two Connectors in the resource VLAN provide redundancy
+- All inter-VLAN access is mediated by Twingate security protocols
 
-**Prerequisites**
-- Managed switch or router supporting VLANs
-- Firewall capable of inter-VLAN policy rules
+## Recommended Network Topology
 
-**Firewall Rules (example)**
+**Single physical network, two VLANs:**
+- **VLAN 1 (Resources):** Servers, systems, 2x Twingate Connectors
+- **VLAN 2 (Users):** End-user devices, DHCP, DNS
+
+## Firewall Rules
+
 ```
-Source  | Destination        | Action
-VLAN 2  | Connector IPs:*    | Allow
-VLAN 2  | VLAN 1 (any other) | Block
-VLAN 1  | VLAN 2             | Block (or Allow if needed for return traffic)
+Source | Destination        | Action
+VLAN 2 | Connector IP (e.g. 10.0.0.2):* | Allow
+VLAN 2 | VLAN 1 *:*         | Block
+VLAN 1 | VLAN 2 *:*         | Block
 ```
+Rules are evaluated top-to-bottom; only Connector IPs in VLAN 1 are reachable from VLAN 2.
 
-**Supported Firewall Platforms**
-- Palo Alto Networks NGFW: security zones + security policies + optional PBF
-- Fortinet FortiGate: VLAN interfaces + firewall policies specifying destination IP
-- Sophos XG: VLAN interfaces + rules and policies
-- Barracuda CloudGen: VLAN interfaces + access rules with default deny
+## Firewall-Specific Configuration Steps
 
-**Gotchas**
-- All users in VLAN 2 must authenticate through Twingate to reach VLAN 1 -- direct inter-VLAN routing must be completely blocked except to Connector IPs
-- Place both Connectors in VLAN 1 (not VLAN 2) so they can directly reach Resources without traversing the firewall policy
-- If users and Resources are on the same VLAN with no segmentation, local P2P still works but Zero Trust enforcement is weaker
+| Firewall | Key Steps |
+|----------|-----------|
+| **Palo Alto NGFW** | Create VLANs → define security zones → create security policies (src zone=VLAN2, dst=Connector IPs) → optional PBF rules |
+| **FortiGate** | Network > VLAN (assign VIDs/interfaces) → Policy & Objects > new policy (src VLAN, dst=Connector IPs) → default deny for all other inter-VLAN |
+| **Sophos XG** | Network > Interfaces > Add VLAN → Rules and Policies > permit VLAN2→Connector IPs, block all else |
+| **Barracuda CloudGen** | Configure VLAN interfaces → Firewall Admin > Configuration > access rules (src=VLAN2 range, dst=Connector IP) → default deny rule |
 
-**Related Docs**
-- /docs/peer-to-peer-communication-in-twingate
-- /docs/how-nat-traversal-works
-- /docs/connector-placement-best-practices
-- /docs/troubleshooting-p2p
+## Gotchas
+- Firewall rules are **order-dependent**; the allow rule for Connector IPs must precede the block-all rule
+- Only Connector private IPs should be permitted through inter-VLAN firewall—not entire VLAN 1 subnet
+- Two Connectors are recommended; if using multiple, each Connector IP needs an explicit allow rule
+- Block traffic in **both directions** (VLAN1→VLAN2 and VLAN2→VLAN1) except through Connectors
+
+## Related Docs
+- [Twingate Architecture](https://www.twingate.com/docs/architecture)
+- [How Twingate Works](https://www.twingate.com/docs/how-twingate-works)
+- [Peer-to-Peer Communication in Twingate](https://www.twingate.com/docs/peer-to-peer)
+- [Troubleshooting P2P](https://www.twingate.com/docs/troubleshooting-p2p)

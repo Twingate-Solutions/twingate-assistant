@@ -1,30 +1,69 @@
-## Resource Tags
+# Resource Tags
 
-Key-value metadata attached to Resources for organization and filtering. Tags do not affect access control or routing; they are used for search, reporting, and operational organization.
+## Summary
+Tags are key-value metadata pairs attachable to Twingate Resources for organization and filtering. Each Resource supports up to 64 tags, manageable via Admin Console or API. Tags enable structured categorization by ownership, environment, application, and other attributes.
 
-**Key Information:**
-- Each tag is a key-value pair (e.g., `environment: production`)
-- Max 64 tags per Resource; one tag per key per Resource
-- Both keys and values are case-sensitive UTF-8; leading/trailing whitespace is auto-stripped
-- Keys cannot start with `tg` (reserved prefix); key length 1-128 chars; value length 1-256 chars
-- Tags are filterable in Admin Console: Network → Resources → Tags filter (include/exclude by key-value)
-- Managed via Admin Console or Twingate API; Terraform/Pulumi/K8s operator support planned
+## Key Information
+- Tags are key-value pairs (e.g., `environment: production`)
+- Used for: adding context to Resources, filtering/searching Resources efficiently
+- Manageable via Admin Console or Twingate API; Terraform/Pulumi/K8s operator support coming soon
+- Tag suggestions auto-populate from existing Network tags as you type
 
-**Common Tag Keys:**
-- `owner` -- team or person responsible (e.g., `devops`, `alex@autoco.example`)
-- `managed_by` -- provisioning tool (e.g., `terraform`, `k8s_operator`)
-- `application` -- workload name (e.g., `prometheus`, `kafka`)
-- `environment` -- lifecycle stage (e.g., `production`, `staging`)
-- `location` / `region` -- physical or cloud region (e.g., `us-west-2`)
+## Prerequisites
+- Admin Console access or API credentials
+- Resources already created in Twingate Network
 
-**Best Practices:**
-- Use consistent, standardized keys across all Resources -- avoid mixing synonyms like `owner` and `owner-team`
-- Tag all Resources; partial tagging reduces filter usefulness
+## Tag Requirements / Constraints
+| Constraint | Detail |
+|---|---|
+| Max tags per Resource | 64 |
+| Unique keys per Resource | One tag per key |
+| Case sensitivity | Both keys and values are case-sensitive |
+| Key length | 1–128 characters |
+| Value length | 1–256 characters |
+| Whitespace | Leading/trailing whitespace auto-stripped; cannot start/end with whitespace |
+| Prohibited key prefix | Keys cannot start with `tg` (e.g., `tg_remote_network` is invalid) |
+| Character set | Any valid UTF-8 characters |
 
-**Gotchas:**
-- Tags are purely metadata and do not affect routing or access control
-- Keys starting with `tg` are reserved and will be rejected
+## Adding Tags (Admin Console)
+1. Navigate to **Network → Resources**
+2. Create or edit a Resource
+3. Click **Add Tag**
+4. Set key, then set value (autocomplete suggests existing Network tags)
+5. Repeat for additional tags
+6. Save the Resource
+- To remove a tag: click the **✕** icon next to the tag (only removable, not editable after creation—must delete and re-add)
 
-**Related Docs:**
-- /docs/resources -- Resource configuration
-- /docs/graphql-api -- Managing tags via API
+## Filtering Resources by Tags
+1. Navigate to **Network → Resources**
+2. Use the **Tags** filter in the Resource table
+3. Select **Select Key** → search for desired key
+4. Choose filter mode: **in** (include) or **not in** (exclude)
+5. Search and select tag values to filter
+
+## Common Tag Patterns
+```
+owner: devops | it-team | user@example.com
+managed_by: terraform | pulumi | admin_console | k8s_operator
+application: prometheus | kafka | proxmox
+environment: development | staging | production
+location: sf-office | us-west-2
+region: us-west-2 | eu-central-1
+```
+
+## Configuration Values (API)
+- Tags manageable via [Twingate API](https://www.twingate.com/docs/api)
+- Terraform/Pulumi/K8s operator: not yet supported (upcoming)
+- API enables bulk tag management and importing tags from cloud providers (AWS, GCP)
+
+## Gotchas
+- Tag keys **cannot start with `tg`**—this prefix is reserved
+- Keys are **immutable after creation**—must delete and recreate to change a key
+- Duplicate keys on the same Resource are not allowed
+- Tags are most useful when applied **consistently across all Resources**; partial tagging reduces filter effectiveness
+- Avoid mixing similar key names (e.g., `owner` vs `owner-team`) without a standard
+
+## Related Docs
+- [Twingate API](https://www.twingate.com/docs/api)
+- Resources management
+- Terraform/Pulumi/Kubernetes operator integration (forthcoming tag support)

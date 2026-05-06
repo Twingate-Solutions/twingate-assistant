@@ -1,31 +1,29 @@
-## Page Title
-Ubuntu 18.04 End of Life
+# Ubuntu 18.04 End of Life
 
 ## Summary
-Twingate's end-of-life notice for Ubuntu 18.04 support. After May 31, 2023, Twingate no longer supports Connectors or Clients on Ubuntu 18.04. Customers should upgrade to Ubuntu 20.04 LTS or 22.04 LTS.
+Ubuntu 18.04 LTS reached end of life on May 31, 2023. Twingate dropped support for Connectors and Clients running on Ubuntu 18.04 after that date. Users must migrate to a supported Ubuntu version to receive future updates and support.
 
 ## Key Information
-- **EOL date**: May 31, 2023 -- Twingate ends support for Ubuntu 18.04 Connectors and Clients
-- **Future versions**: may not run on Ubuntu 18.04 at all
-- **Extended migration support**: Business and Enterprise plan customers could get migration assistance until July 31, 2023
-- **Existing versions**: continue to work but will eventually be deprecated
-- **Recommended upgrade targets**: Ubuntu 20.04 LTS or Ubuntu 22.04 LTS
+- **EOL Date**: May 31, 2023
+- Post-EOL: No support for Connectors or Clients on Ubuntu 18.04
+- Future Connector/Client versions may not be compatible with Ubuntu 18.04
+- Migration support window: Business and Enterprise plans had until July 31, 2023
+- Existing (older) Connector and Client versions continue to function but will eventually be deprecated
 
 ## Prerequisites
-None.
+- Active Twingate Business or Enterprise plan (for migration support, within window)
+- Access to machines running Ubuntu 18.04
 
-## Step-by-Step
-1. Identify all machines running Connectors or Clients on Ubuntu 18.04
-2. Upgrade to Ubuntu 20.04 LTS or 22.04 LTS
-3. Reinstall Connector/Client on the upgraded OS
-
-## Configuration Values
-None.
+## Required Action
+Upgrade all machines running Ubuntu 18.04 to a supported version:
+- **Ubuntu 20.04 LTS** (recommended)
+- **Ubuntu 22.04 LTS** (recommended)
 
 ## Gotchas
-- Running future Connector versions on Ubuntu 18.04 is unsupported -- Twingate will not debug issues on EOL OS
-- This notice is historical (EOL date has passed) -- any Ubuntu 18.04 machines should already be migrated
+- Running future Connector versions on Ubuntu 18.04 is unsupported — Twingate will not debug issues
+- Existing installed Connector/Client versions will keep working temporarily, but no new versions are guaranteed to install or run
+- Migration support from Twingate (Business/Enterprise) expired July 31, 2023 — no extended support window remains
 
 ## Related Docs
-- `/docs/connectors` -- Connector deployment overview
-- `/docs/linux` -- Linux Client requirements
+- [Canonical Ubuntu 18.04 EOL announcement](https://ubuntu.com/blog/18-04-end-of-life)
+- Twingate Connector installation docs (for Ubuntu 20.04/22.04)

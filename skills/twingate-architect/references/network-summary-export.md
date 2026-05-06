@@ -1,27 +1,60 @@
-## Network Summary Export
+# Network Summary Export
 
-Exports aggregate per-Resource connection statistics over a time range, rather than individual connection events. Same flow as Network Events export but with Report Type = Summary.
+## Page Title
+Network Summary Export
 
-**Key Information:**
-- Export path: Settings → Reports → Network Events tab → Generate Network Events Report → Report Type: Summary
-- One row per Resource with aggregated stats across the selected time period
-- Time range uses local timezone for selection; exported timestamps are UTC; filter uses connection end time
-- Output: GZIP-compressed CSV; rename to `.csv` after decompression
+## Summary
+Twingate allows admins to export summarized Remote Network activity reports from the Admin Console. Reports are generated asynchronously in gzip-compressed JSON format and contain per-resource connection statistics for a specified time range and network selection.
 
-**Summary Fields per Resource:**
-- `resource_id`, `resource_address`, `remote_network`, `remote_network_id`
-- `total_connections`, `success_connections`, `failed_connections`
-- `failed_connections_dns`, `failed_connections_other` -- failure breakdown
-- `total_bytes`, `bytes_transferred`, `bytes_received`
-- `protocol` -- protocols used
-- `percent_relay`, `percent_p2p` -- connection type distribution
-- `top_10_address_accessed` -- top 10 addresses accessed within the Resource
+## Key Information
+- Reports are generated in the background; download via Admin Console or email notification
+- Timestamps in the export are **UTC**, but the time range selection uses **local timezone**
+- Time range is based on **connection end time**, not start time
+- Default Remote Networks selection is "all"
+- Output format: **gzip-compressed, newline-delimited JSON** (not CSV natively)
+- Large datasets may contain millions of lines — avoid opening directly in spreadsheet editors
 
-**Gotchas:**
-- `percent_relay` high on a Resource indicates P2P is failing -- investigate firewall or NAT traversal
-- Safari auto-unpack may produce an empty file -- disable "Open 'safe' files after downloading" in Safari → Preferences → General
+## Prerequisites
+- Admin Console access
+- Access to Reports page under Settings
 
-**Related Docs:**
-- /docs/network-events-ac-export -- Per-connection event export
-- /docs/detailed-network-event-schema -- Field schema reference
-- /docs/syncing-data-to-s3 -- Continuous S3 sync
+## Step-by-Step
+
+1. Go to **Settings → Reports**
+2. Click **Network Events** tab
+3. Click **Generate Network Events Report**
+4. Set **Report Type** to `Summary`
+5. Select date/time range and Remote Network(s)
+6. Wait for background generation (refresh page or await email)
+7. Return to Reports page to download
+
+## Export Fields
+
+| Field | Description |
+|---|---|
+| `resource_id` | Resource ID |
+| `resource_address` | Resource address |
+| `remote_network` | Associated Remote Network name |
+| `remote_network_id` | Remote Network ID |
+| `total_connections` | Total connection count |
+| `success_connections` | Successful connections |
+| `failed_connections` | Failed connections total |
+| `failed_connections_dns` | DNS-related failures |
+| `failed_connections_other` | Other failures |
+| `total_bytes` | Total bytes transferred + received |
+| `bytes_transferred` | Bytes sent |
+| `bytes_received` | Bytes received |
+| `protocol` | Protocols used |
+| `percent_relay` | % routed through Twingate Relay |
+| `percent_p2p` | % routed peer-to-peer |
+| `top_10_address_accessed` | Top 10 accessed addresses within Resource |
+
+## Gotchas
+- File has **no `.csv` extension** after decompression — rename manually before opening in spreadsheet software
+- **Safari users**: if file appears empty, **uncheck** "Open 'Safe' files after downloading" in Safari → Preferences → General
+- Large exports may crash or hang spreadsheet editors — use CLI tools or data processing pipelines instead
+- Timezone mismatch: selection UI uses local time, export timestamps are UTC
+
+## Related Docs
+- Network Events (detailed/raw export variant)
+- Twingate Reports page (Admin Console)

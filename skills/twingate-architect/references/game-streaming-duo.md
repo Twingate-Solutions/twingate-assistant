@@ -1,42 +1,53 @@
-## Duo Multi-User Remote Game Streaming with Twingate
+# Duo Multi-User Remote Game Streaming with Twingate
 
-Duo enables multiple users to game simultaneously on one Windows PC by creating isolated virtual Windows sessions, each with dedicated resources. The free tier supports 30fps and limited sessions; a one-time $10 Patreon pledge unlocks unlimited simultaneous sessions and 60+ fps. Twingate provides secure access without port forwarding.
+## Summary
+Configures Duo (multi-user game streaming platform) with Twingate Zero Trust access so multiple family members can stream games simultaneously from one Windows PC. Replaces port forwarding with a Twingate Connector for secure, private remote access. Full setup takes ~30 minutes.
 
-**Key Information**
-- Requires Windows 11 23H2 or newer -- Windows 10 is not supported
-- Free tier: 30Hz/30fps limit; Patreon ($10 lifetime): unlimited sessions, 60+ fps, HDR
-- Twingate Resource ports: TCP 47984-47990, UDP 47998-48010 (wider UDP range for multiple concurrent sessions)
-- Each virtual session requires a dedicated Windows local user account
-- Per-session minimums: 4GB RAM (8GB recommended), 2 CPU cores (4 recommended)
-- Connector on gaming PC: WSL (recommended) or Docker Desktop
-- Client: Moonlight on all platforms; each user has their own Twingate account and Moonlight client
-- Duo web UI: `http://localhost:47990`; pairing via 4-digit PIN in web UI
+## Key Information
+- Duo enables multiple concurrent virtual Windows sessions on one gaming PC
+- Free tier: 30fps max, limited users. Patreon ($10 lifetime): unlimited sessions, 60+ fps, HDR
+- Streaming uses Moonlight client to connect to Duo (Sunshine-compatible protocol)
+- No inbound ports required; Connector makes outbound-only connections
 
-**Prerequisites**
-- Windows 11 23H2 or newer with gaming-capable GPU
-- Twingate account (one per streaming user)
-- Duo installed (free from GitHub releases or Patreon)
+## Prerequisites
+- Windows 11 23H2+ gaming PC with dedicated GPU
+- Twingate account with Admin Console access
+- WSL (Ubuntu) or Docker for Connector deployment
+- Remote devices with Twingate Client + Moonlight installed
 
-**Step-by-Step**
-1. Install Duo as Administrator (select all components); reboot
-2. For each user: `net user "Username" "Password" /add` and `net localgroup "Users" "Username" /add`
-3. In Duo web UI -> Sessions Management -> Add New Virtual Session; assign Windows user; set resolution; Start
-4. Deploy Twingate Connector via WSL or Docker; create Resource (TCP 47984-47990, UDP 47998-48010); assign to group
-5. Each family member: install Twingate Client, sign in, connect; install Moonlight; add PC by private IP; pair via PIN
-6. For Patreon features: link Patreon in Duo web UI -> Settings -> Patreon
+## Step-by-Step
 
-**Configuration Values**
-- Check Duo service: `sc query DuoService`
-- Check TermWrap service (required for virtual sessions): `sc query TermWrap`
-- Enable Remote Desktop: Settings -> System -> Remote Desktop -> Enable
+1. **Install Duo** — Download `Duo.exe`, run as Administrator, select all components, reboot
+2. **Configure Duo** — Open `http://localhost:47990`, set GPU encoder (NVENC/AMF/QuickSync)
+3. **Create Windows user accounts** per session: `net user "RemoteUser" "Password!" /add`
+4. **Create virtual sessions** in Duo UI → Sessions Management → Add New Virtual Session
+5. **Deploy Twingate Connector** on gaming PC via WSL (recommended) or Docker
+6. **Add Duo as Twingate Resource** with gaming PC's private IP
+7. **Assign resource access** to appropriate user groups in Admin Console
+8. **Install Twingate Client** on each remote device, sign in, connect
+9. **Install Moonlight** on remote devices, add PC via private IP, enter pairing PIN in Duo UI
 
-**Gotchas**
-- Windows 11 23H2 is a hard requirement; Windows 10 is not compatible
-- Free tier is hard-capped at 30Hz -- this is expected behavior, not a bug
-- Anti-cheat systems (Easy Anti-Cheat, BattleEye) may not work in virtual sessions
-- Monitor session resources via Task Manager; start with 2 sessions and scale gradually
+## Configuration Values
 
-**Related Docs**
-- /docs/game-streaming-remote
-- /docs/game-streaming-sunshine
-- /docs/game-streaming-apollo
+| Setting | Value |
+|---|---|
+| Duo Web UI | `http://localhost:47990` |
+| TCP Ports | `47984-47990` (Web UI + HTTPS) |
+| UDP Ports | `47998-48010` (streaming, multi-session) |
+| Resource Address | Gaming PC private IP (e.g., `192.168.1.100`) |
+
+## Gotchas
+- **Windows 11 23H2+ only** — Windows 10 not supported
+- Free tier hard-locked to 30Hz regardless of client/network capability
+- Some anti-cheat systems incompatible with virtual sessions
+- Moonlight pairing PIN must be entered in Duo UI while Twingate is connected
+- Try `127.0.0.1` in Moonlight if private IP connection fails
+- Check `TermWrap` service is running if virtual sessions won't start: `sc query TermWrap`
+- Per-session minimums: 4GB RAM, 2 CPU cores; monitor Task Manager before adding sessions
+
+## Related Docs
+- [Sunshine Remote Streaming](https://www.twingate.com/docs/game-streaming-sunshine) — single-user alternative
+- [Apollo Remote Streaming](https://www.twingate.com/docs/game-streaming-apollo) — automatic virtual displays
+- [Game Streaming Overview](https://www.twingate.com/docs/game-streaming) — compare options
+- [Connector Deployment Guides](https://www.twingate.com/docs/connector)
+- [Resource Access Configuration](https://www.twingate.com/docs/access-control)

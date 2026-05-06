@@ -1,36 +1,57 @@
-## Deploy Connector on Azure
+# Deploy a Connector on Azure
 
-Multiple deployment options for Twingate Connectors on Azure: Azure VM (Linux), Azure Container Instance (ACI), and AKS.
+## Summary
+Covers deployment options for Twingate Connectors on Azure including Virtual Machines, Container Instances (ACI), and AKS. The recommended approach is Azure Container Instance (ACI) using the Admin Console's built-in Azure CLI command generator.
 
-**Azure VM Deployment:**
-- Follow standard Linux Connector deployment instructions (Docker or systemd)
-- Supported on any 64-bit Linux distro (Docker) or Ubuntu/Fedora/Debian/CentOS (systemd)
+## Key Information
+- Three deployment methods: Azure VM (Linux), Azure Container Instance (ACI), AKS (Helm chart)
+- ACI deployment is recommended; Admin Console generates the full CLI command
+- Subnet must have outbound Internet access for image download and Twingate connectivity
+- Connector tokens are instance-specific — never reuse tokens across Connector instances
 
-**Azure Container Instance (recommended):**
-- Admin Console → Connector → Azure option → Generate Tokens → fill environment info → copy and run Azure CLI command
-- Required info: Resource group name, Virtual network name, Subnet name
-- Optional: custom DNS servers, Docker Hub credentials
+## Prerequisites (ACI Deployment)
+- Azure resource group name
+- Virtual network name
+- Subnet name (dedicated subnet strongly recommended for ACI)
+- DNS servers (if using custom VNet DNS — must specify manually via "Custom DNS" option)
+- Docker Hub account (optional but highly recommended to avoid rate limiting)
+- Register ACI provider if first-time ACI user:
+  ```bash
+  az provider register --namespace Microsoft.ContainerInstance
+  ```
 
-**Prerequisites for ACI:**
-- Container Instances typically require their own dedicated subnet — create a new subnet in an existing VNet
-- If first-time ACI deployment: `az provider register --namespace Microsoft.ContainerInstance`
-- If using custom DNS servers on your VNet: specify them via the Custom DNS option at deploy time (Container Instance does not inherit VNet DNS automatically)
+## Step-by-Step (ACI Deployment)
+1. Admin Console → Remote Networks → select Remote Network → **Add Connector**
+2. Click new Connector → Deployment page → select **Azure** option
+3. Scroll to Step 2 → generate tokens (re-authentication required)
+4. Scroll to Step 3 → fill in Azure environment details and optional settings
+5. Scroll to Step 4 → copy generated command → run in **Azure Cloud CLI**
 
-**Docker Hub Rate Limiting:**
-- ACI pulls from Docker Hub and may hit rate limits (`RegistryErrorResponse`)
-- Workaround: add `--registry-username`, `--registry-password`, `--registry-login-server index.docker.io` to the deploy command
-- If using SSO to Docker Hub (Google/GitHub): use a Personal Access Token instead of a password
+## Configuration Values
 
-**AKS Deployment:**
-- Use the official Twingate Helm chart; see Kubernetes Best Practices Guide
+**Docker Hub rate limit workaround** (append to deployment command):
+```bash
+--registry-username "Docker Hub username" \
+--registry-password "Docker Hub password" \
+--registry-login-server index.docker.io
+```
+> Use a Personal Access Token (PAT) instead of password if Docker Hub login uses SSO (Google/GitHub).
 
-**IaC:**
-- Terraform, Pulumi, or Twingate API
+## Gotchas
+- Custom DNS servers on VNet are **not** automatically recognized by ACI — must specify manually
+- Docker Hub rate limiting causes `RegistryErrorResponse` errors — use a Docker Hub account to avoid
+- ACI typically requires a **dedicated subnet** (separate from other resources)
+- `systemd` service support limited to: Ubuntu, Fedora, Debian, CentOS
+- Stagger Connector updates across instances to avoid downtime
 
-**Gotchas:**
-- Subnet requires outbound internet access
-- Do not reuse tokens across Connector instances
+## Updates
+- **VM/systemd**: Manual via Linux package manager or scheduled task → [Systemd Connector Update Guide]
+- **ACI**: Via Azure CLI → [Azure Connector Update Guide]
 
-**Related Docs:**
-- /docs/connectors-on-linux -- Linux deployment details
-- /docs/connector-best-practices -- Best practices and hardware recommendations
+## Related Docs
+- [Linux Connector Deployment](#)
+- [Connector Best Practices](#)
+- [AKS / Helm Chart Deployment](#)
+- [Terraform / Pulumi / API Deployment](#)
+- [Peer-to-peer connections](#)
+- [Fair Use Policy](#)

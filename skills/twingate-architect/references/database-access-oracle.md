@@ -1,45 +1,74 @@
-## Oracle Cloud Database Access with Twingate
+# Oracle Cloud Database Access with Twingate
 
-Twingate routes traffic to Oracle Database (on-prem, OCI VMs, Exadata, other clouds) and OCI-managed services (Autonomous Database, MySQL HeatWave, NoSQL) through Connectors. The recommended path uses Private Endpoints so all traffic stays on Oracle's internal network; public endpoint access requires adding Connector IPs to firewall or sqlnet.ora rules.
+## Summary
+Twingate secures access to Oracle Database (on-prem, OCI VMs, Autonomous Database, MySQL HeatWave, NoSQL) by routing traffic through Connectors deployed inside the same network as the database. Private endpoints are strongly preferred over public endpoints to avoid internet exposure.
 
-**Key Information**
-- Default Oracle listener port: 1521 (configurable in `listener.ora`)
-- OCI-managed databases (Autonomous DB, MySQL HeatWave): use Private Endpoint inside VCN, or add Connector public IP to OCI Network Security Groups
-- Self-managed Oracle: allowlist Connector IPs in firewall/Security List and optionally in `sqlnet.ora`
-- OCI Console (`cloud.oracle.com`): no native IP allowlist; gate via SSO/SaaS App Gating
-- Private Endpoints (OCI): Connector in same VCN; traffic never traverses public internet; no public IP allowlisting needed
+## Key Information
+- Default Oracle DB port: **1521**
+- Connector placement: inside the same VCN/subnet as the database (private IP preferred)
+- Supports: Oracle DB, Autonomous Database, MySQL HeatWave, OCI NoSQL
+- OCI Console gating requires SSO integration (no native IP allowlist in OCI)
 
-**Prerequisites**
-- Remote Network and Connector deployed (inside OCI VCN for private endpoint path)
-- Oracle Database instance or OCI-managed database service
-- Connector private IP (private endpoint path) or public IP (public endpoint / sqlnet.ora path)
+## Prerequisites
+- Twingate Remote Network created with Connector deployed in same VCN/LAN as database
+- Oracle Database instance accessible (private or public endpoint)
+- Connector private or public IP addresses noted for firewall rules
 
-**Step-by-Step (Autonomous Database)**
-1. Create Twingate Resource: Autonomous DB host, port 1521; assign to groups
-2. Set ACL to VCN and private subnet CIDR covering Connectors, or add Connector public IP to access control list
-3. Download wallet; unzip; edit `sqlnet.ora` to set `DIRECTORY` to wallet absolute path
-4. Set env var: `export TNS_ADMIN=/path/to/wallet`; get TNS name from `tnsnames.ora`
-5. Connect: `sqlplus username/password@TNS_NAME`
+## Step-by-Step
 
-**Step-by-Step (Self-managed Oracle)**
-1. Create Twingate Resource: DB private IP or FQDN, port 1521; assign to groups
-2. Configure firewall/Security List to allow Connector private IP on port 1521
-3. Optionally add to `sqlnet.ora`: `tcp.validnode_checking = YES` and `tcp.invited_nodes = (ip1, ip2)`
-4. Reload listener: `lsnrctl reload`
-5. Connect: `sqlplus username/password@"//host.privatesubnet.oraclevcn.com:1521/orclpdb"`
+### OCI Managed Databases (Autonomous DB, HeatWave, NoSQL)
+1. **Create Twingate Resource** — use private IP/FQDN, assign to user groups
+2. **Configure network restrictions** — allowlist Connector IPs in OCI Network Security Groups or VCN CIDR in access control list
+3. **Connect** — download wallet, set `sqlnet.ora` DIRECTORY, export `TNS_ADMIN` and `TNS_NAME`, run `sqlplus`
 
-**Configuration Values**
-- `TNS_ADMIN=/path/to/wallet` -- tells sqlplus where to find wallet and tnsnames.ora
-- `tcp.validnode_checking = YES` and `tcp.invited_nodes = (ip1, ip2)` in sqlnet.ora
-- `lsnrctl reload` -- required after sqlnet.ora changes (full listener restart not needed)
+### Self-Managed Oracle Database
+1. **Create Twingate Resource** — use private IP/FQDN, port 1521 (or per `listener.ora`)
+2. **Configure firewall** — allow DB port from Connector private IPs only
+3. **Configure `sqlnet.ora`** (optional) — enable Valid Node Checking
+4. **Connect** via SQL*Plus using private FQDN
 
-**Gotchas**
-- sqlnet.ora changes require `lsnrctl reload` to take effect -- forgetting this is a common misconfiguration
-- Autonomous Database wallet path in `sqlnet.ora` must be the absolute path, not a relative path
-- OCI has no console-level IP allowlist; Twingate + SSO is the only way to restrict Oracle Cloud Console access
-- Port mismatches: default is 1521 but custom listener configs are common -- verify in `listener.ora`
+## Configuration Values
 
-**Related Docs**
-- /docs/database-access-guide
-- /docs/saas-app-gating
-- /docs/connector-best-practices
+### sqlnet.ora (Valid Node Checking)
+```
+tcp.validnode_checking = YES
+tcp.invited_nodes = (CONNECTOR_IP_1, CONNECTOR_IP_2)
+```
+
+### Wallet-based Connection (Autonomous DB)
+```bash
+export TNS_ADMIN=/path/to/wallet
+export TNS_NAME=<name_from_tnsnames.ora>
+sqlplus username/password@TNS_NAME
+```
+
+### Direct Connection (Self-managed)
+```bash
+sqlplus username/password@"//hostname.oraclevcn.com:1521/orclpdb"
+```
+
+### Listener Reload After sqlnet.ora Changes
+```bash
+lsnrctl reload
+```
+
+## Gotchas
+- Changes to `sqlnet.ora` require `lsnrctl reload` — connections won't update automatically
+- `tcp.invited_nodes` missing or incorrect → Oracle rejects connection entirely
+- Port mismatch between Twingate Resource and `listener.ora` causes silent failures
+- OCI has no native console IP allowlist; use SSO + SaaS App Gating to restrict `cloud.oracle.com`
+- If no activity shows in Twingate console, check that no other VPN is intercepting the connection
+
+## Troubleshooting Quick Reference
+| Symptom | Likely Cause |
+|---|---|
+| DNS Failed | Connector can't resolve hostname; check DNS Resource or VPC DNS zone |
+| Connection Failed | Route missing or firewall blocking port on Connector→DB path |
+| No Activity | Client not running, no Resource access, or VPN hijacking traffic |
+| Slow connections | Connector health issue or upstream firewall throttling |
+
+## Related Docs
+- [SaaS App Gating Guide](https://www.twingate.com/docs)
+- [Connector Best Practices](https://www.twingate.com/docs)
+- [Twingate Troubleshooting Guide](https://www.twingate.com/docs)
+- [Oracle Private Endpoints in OCI](https://docs.oracle.com/en-us/iaas/Content/Database/Tasks/adbprivateaccess.htm)

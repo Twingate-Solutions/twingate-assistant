@@ -1,41 +1,62 @@
-## Connector Best Practices
+# Connector Best Practices
 
-Authoritative guide to Connector deployment, network requirements, hardware sizing, load balancing, and geographic routing.
+## Page Title
+Connector Best Practices
 
-**Deployment Principles:**
-- Deploy as many Remote Networks and Connectors as your architecture requires — no bottleneck advantage to fewer Connectors
-- **Always deploy at least 2 Connectors per Remote Network** for HA/failover; they auto-cluster within the same Remote Network
-- Each Connector must have its own unique token pair — reusing tokens causes connection failure
-- All Connectors in the same Remote Network should have the same network scope and permissions (they are interchangeable)
-- Deploy Connectors as physically close to Resources as possible — the last mile to Resources matters for performance
+## Summary
+Covers deployment recommendations for Twingate Connectors including redundancy, token management, network requirements, hardware sizing, and load balancing behavior. Multiple Connectors per Remote Network provide automatic load balancing and failover. Connectors require only outbound internet access.
 
-**Network Requirements:**
-- Outbound internet only — no inbound access required or recommended
-- If restricting outbound: TCP 443 (Controller/Relay), TCP 30000–31000 (Relay fallback), UDP/QUIC 1–65535 (P2P)
-- Connectors must have routing and DNS resolution to private Resources they serve
-- For ICMP: ensure Connector host has permission to send ICMP to target Resources
+## Key Information
+- **Minimum 2 Connectors per Remote Network** for redundancy; auto load-balanced and failover-capable
+- Each Connector requires **unique token pair** — reusing tokens causes connection failure
+- Connectors in the same Remote Network should have **identical network scope and permissions**
+- Deploy Connectors **co-located with target Resources** to minimize last-mile latency
+- Traffic routes directly from user device → Connector → Resource (not through Twingate cloud)
+- Geographic routing: single Remote Network + Connectors in each region → users routed to nearest active Connector
 
-**Hardware Recommendations (by platform):**
-- AWS: t3a.micro EC2 (sufficient for hundreds of users under typical load)
-- GCP: e2-small Compute Engine
-- Azure: use Container Instance (no hardware selection needed)
-- On-prem/VPS: 1 CPU, 2 GB RAM Linux VM
+## Network Requirements
+| Direction | Protocol | Ports | Purpose |
+|-----------|----------|-------|---------|
+| Outbound only | TCP | 443 | Controller/Relay communication |
+| Outbound only | TCP | 30000–31000 | Relay fallback if P2P unavailable |
+| Outbound only | UDP/QUIC (HTTP/3) | 1–65535 | P2P connectivity (optimal performance) |
 
-**Performance Notes:**
-- Priority: network bandwidth > memory > CPU
-- If resource-bound: add more Connectors (don't add CPU/memory to a single Connector — it won't improve performance)
-- Twingate auto-load-balances across all Connectors in a Remote Network
+- No inbound internet access required or recommended
+- Connector host needs routing/permissions to reach private Resources
+- ICMP must be explicitly permitted if required
+- Public exit node use: requires static public IP (direct or via NAT gateway)
 
-**Load Balancing & Failover:**
-- Multiple Connectors in the same Remote Network are automatically clustered
-- On Connector failure: clients automatically try the next Connector in their ordered list (~20-second failover delay per attempt)
-- Adding/removing Connectors is detected automatically; routing adjusts
+## Hardware Recommendations (Priority: Bandwidth > Memory > CPU)
 
-**Geographic Routing:**
-- Create one Remote Network containing all replicated Resources; deploy Connectors in each geographic location
-- Twingate automatically routes users to the nearest active Connector by location
+| Platform | Recommended Spec |
+|----------|-----------------|
+| AWS | t3a.micro Linux EC2 |
+| GCP | e2-small |
+| Azure | Container Instance service (no hardware selection needed) |
+| On-prem/VPS | 1 CPU, 2GB RAM Linux VM |
 
-**Related Docs:**
-- /docs/connector-placement-best-practices -- Where to place Connectors
-- /docs/connector-shutdown-process -- Failover mechanics
-- /docs/understanding-connectors -- Conceptual model
+- Adding CPU/memory to a single Connector **does not improve performance** — deploy additional Connectors instead
+- Azure Container Instances with custom VNet DNS: use "Custom DNS" option and specify DNS server manually
+
+## Gotchas
+- **Never reuse tokens** across Connectors — each provisioned Connector in Admin Console generates its own token pair
+- Scaling vertically (more CPU/RAM) on a single Connector is ineffective; scale horizontally instead
+- All Connectors in a Remote Network must have the same network permissions — mismatched permissions cause inconsistent Resource availability depending on which Connector handles the connection
+- Azure Container Instances do not auto-detect custom VNet DNS servers
+
+## Load Balancing & Failover Behavior
+- Automatic when >1 Connector exists in a Remote Network
+- Client tries alternate Connectors if one goes offline
+- Adding/removing Connectors is detected and adjusted automatically
+- Users can be simultaneously connected to multiple Connectors across different Remote Networks
+
+## Prerequisites
+- Twingate Admin Console access to provision Connector tokens
+- Outbound internet connectivity from Connector host
+- Routing from Connector host to target private Resources
+
+## Related Docs
+- Understanding Connectors
+- Help Me Choose (deployment method selector)
+- HTTP/3/QUIC guide (UDP port usage)
+- Public exit nodes configuration

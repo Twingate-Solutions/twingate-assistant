@@ -1,36 +1,48 @@
-## Deploying Connectors
+# Connector Deployment
 
-Guide to selecting the right Connector deployment method based on your environment. All Connectors deploy as either a Linux systemd package or an OCI (Docker) container.
+## Summary
+Twingate Connectors run as either a Linux systemd package or OCI (Docker) container. A single Connector can provide access to all reachable resources in its network segment; multiple Connectors enable load-balancing and failover. No inbound firewall rules are required—only outbound internet access.
 
-**Key Facts:**
-- One Connector can serve all reachable Resources in its network — no need to deploy per-host
-- Additional Connectors on separate hosts provide load balancing and failover
+## Key Information
+- Connectors do **not** need to be on every host—one Connector covers all reachable resources in its network
+- Multiple Connectors on separate hosts = automatic load-balancing + failover
+- Each distinct location/cloud requires its own **Remote Network** in Twingate
+- Peer-to-peer connections reduce bandwidth and improve UX; required for Fair Use Policy compliance
+- Two deployment formats: **Linux systemd package** or **OCI/Docker container**
 
-**Supported Linux Distributions (x86/AMD64 and ARM64):**
+## Supported Platforms
+
+**x86/AMD64 and ARM64:**
 - Ubuntu 22.04 LTS, 24.04 LTS
 - Debian 11+, Fedora 41+, CentOS Stream 9+, Oracle Linux 8+
-- x64-only: Arch Linux, HP ThinPro, NixOS, Gentoo
 
-**Deployment Options by Environment:**
+**x86/AMD64 only:**
+- Arch Linux, HP ThinPro, NixOS, Gentoo
 
-**Cloud VMs (recommended for cloud):**
-- AWS EC2, GCP Compute, Azure Compute, Kubernetes (Helm)
+## Deployment Methods by Environment
 
-**Offices / Data Centers / On-Premises:**
-- Docker Compose, Firewalla Box, Synology (DSM 6 or 7), QNAP NAS, Proxmox Container, TrueNAS SCALE
-- No inbound firewall rules needed — only outbound internet access required
-- Deploy a second Connector on a separate physical machine for HA
+| Environment | Options |
+|---|---|
+| Cloud VMs | AWS EC2, GCP Compute, Azure Compute, Kubernetes |
+| Office/Data Center | Docker Compose, Firewalla, Synology, QNAP, Proxmox, TrueNAS SCALE |
+| Serverless/PaaS | AWS ECS (Fargate), Azure ACS, Aptible |
+| IaC | Terraform, Pulumi |
+| Home Network | Mac VM, Synology NAS, Raspberry Pi, Linux, Home Assistant, Proxmox, Unraid |
 
-**Serverless / PaaS:**
-- AWS ECS Fargate, Azure ACS, Aptible
+## Prerequisites
+- Outbound internet access from Connector host
+- No inbound firewall rules needed
 
-**Infrastructure-as-Code:**
-- Terraform, Pulumi
+## Gotchas
+- **Cloud VMs are the recommended default**—most consistent performance and resource sizing control
+- **Serverless/PaaS** environments offer easier deployment but less control over CPU/memory/network allocation
+- Home networks with **dynamic IPs or CGNAT** (e.g., Starlink) cannot receive inbound connections—Connector deployment is the only viable option
+- For redundancy in offices/data centers, deploy second Connector on a **separate physical machine**
+- Multi-location setups require a separate Remote Network per location (not just per Connector)
 
-**Home Networks:**
-- Mac (VM), Synology DSM 7.x, Raspberry Pi, Linux, Home Assistant, Proxmox, Unraid
-
-**Related Docs:**
-- /docs/connector-placement-best-practices -- Placement guidance
-- /docs/deploy-connector-with-docker-compose -- Docker Compose reference
-- /docs/terraform-getting-started -- Terraform deployment
+## Related Docs
+- Peer-to-peer connections support
+- Fair Use Policy
+- Remote Networks configuration
+- Best Practices for Secure Infrastructure-as-Code (webinar)
+- Individual deployment guides: AWS EC2, GCP Compute, Azure Compute, Kubernetes, Docker Compose, Terraform, Pulumi, Raspberry Pi, Home Assistant

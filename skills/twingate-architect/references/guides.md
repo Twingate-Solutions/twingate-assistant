@@ -1,37 +1,65 @@
+# Twingate Guides Index
+
 ## Page Title
-Twingate Guides
+Twingate Guides Overview
 
 ## Summary
-Central index for all Twingate deployment, configuration, and management documentation. Organized by deployment environment, use case, and administrative topic. Use this page to find the right guide for a specific scenario.
+This is the documentation hub for Twingate deployment, configuration, and management guides. It categorizes all available guides across deployment targets, use cases, integrations, and architectural best practices. Use this page to navigate to specific implementation documentation.
 
 ## Key Information
-- **Cloud deployment**: AWS EC2, GCP Compute, Azure VM, Kubernetes, DigitalOcean
-- **On-premises deployment**: Docker Compose, Firewalla, Synology/QNAP NAS, Proxmox Container, TrueNAS SCALE
-- **IaC automation**: Terraform and Pulumi guides
-- **Homelab**: Home Assistant, Proxmox, Unraid
-- **MDM client deployment**: Jamf, Kandji, Omnissa Workspace ONE, Microsoft Intune
-- **Service compatibility**: Active Directory, Cisco Umbrella, Cloudflare DNS, Netskope DLP, Zscaler
-- **Scenario guides**: AI/LLM access, database access, CI/CD pipelines, game streaming, bastion replacement, vendor/contractor access, site-to-site
-- **SaaS app gating**: Google Workspace, JumpCloud, Entra ID, Okta, OneLogin, AWS CloudFront, Office 365
-- **Best practices**: AWS subnet design, private DNS, connector placement, P2P connections, overlapping IPs, security policies
-- **Technical reference**: NAT traversal, encryption, performance evaluation, connector shutdown, firewall behavior, service accounts
 
-## Prerequisites
-None — navigation index page only.
+### Deployment Targets
+- **Cloud**: AWS EC2, GCP Compute, Azure Compute, DigitalOcean, Kubernetes
+- **On-premises**: Docker Compose, Synology, QNAP NAS, Proxmox, TrueNAS SCALE, Firewalla
+- **Homelabs**: Home Assistant, Proxmox, Unraid
+- **IaC**: Terraform, Pulumi
 
-## Step-by-Step
-Not applicable.
+### Client Deployment (MDM)
+- Jamf, Kandji, Omnissa Workspace ONE, Microsoft Intune & Endpoint Manager
 
-## Configuration Values
-None on this page.
+### Service Compatibility
+- Active Directory, Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler
+
+### SaaS App Gating Integrations
+- Google Workspace, JumpCloud, Microsoft Entra ID, Okta, OneLogin
+- AWS Exit Nodes, AWS CloudFront, Office 365
+
+### Kubernetes Topics
+- Traffic routing, private/public resources, kubectl management
+
+### Key Use Cases
+- AI/LLM access, database access, SSH access, CI/CD pipelines
+- Site-to-site connections, IoT headless client gateway
+- Vendor/contractor access management, bastion server cloaking
+- Replace AWS VPN, AWS Workspaces integration
+
+## Technical Reference Docs
+- NAT traversal mechanics
+- Encryption implementation
+- Connector shutdown process
+- Firewall behavior
+- Service accounts
+- Windows Start Before Logon
+- Peer-to-peer connection troubleshooting
+- Performance evaluation
+
+## Best Practices Docs
+- Private DNS configuration
+- Connector placement
+- Overlapping IP addresses
+- Security policies
+- Non-production environment access
+- Whitelisting public resources
+- Local peer-to-peer (LAN) connections
+- Remote Network and Connector setup
 
 ## Gotchas
-- Every entry on this page links to a separate guide; no actionable steps appear here
-- "Deploying Twingate for Specific Use Cases" section combines multiple product features per scenario — follow those links for end-to-end walkthroughs
+- This page is an index only — no configuration values or step-by-step instructions are present here
+- Use this page to identify which sub-guide to consult for a specific task
 
 ## Related Docs
-- `/docs/quick-start` — first deployment
-- `/docs/architecture` — how Twingate works
-- `/docs/connector-deployment` — connector options
-- `/docs/security-policies` — access control
-- `/docs/troubleshooting` — diagnosing issues
+- `/docs/internet-security` — DNS-over-HTTPS and filtering
+- `/docs/saas-app-gating` — SaaS IP-based access control
+- `/docs/security-policies` — Policy configuration
+- `/docs/logging` — Audit log access and export
+- `/docs/kubernetes` — K8s-specific deployment and management
