@@ -31,11 +31,47 @@ jobs:
           else
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
+      - name: Bump plugin version (CalVer YYYY.DOY.patch)
+        id: bump
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          python <<'PYEOF'
+          import datetime, json, os
+          from pathlib import Path
+
+          today = datetime.date.today()
+          y, d = today.year, today.timetuple().tm_yday  # day-of-year, 1-indexed
+
+          path = Path('.claude-plugin/plugin.json')
+          data = json.loads(path.read_text())
+          parts = data['version'].split('.')
+
+          # If the current version is already today's CalVer, bump the patch.
+          # Otherwise (different day, or non-CalVer like '1.0.0'), reset to today's
+          # date with patch=0. DOY is zero-padded to 3 digits so lexicographic
+          # comparison (Claude Code's known-buggy comparator) sorts correctly:
+          # '2026.099.0' < '2026.100.0' (would otherwise compare wrong).
+          if len(parts) == 3 and parts[0] == str(y) and parts[1] == f'{d:03d}':
+              new_patch = int(parts[2]) + 1
+          else:
+              new_patch = 0
+
+          new_version = f'{y}.{d:03d}.{new_patch}'
+          data['version'] = new_version
+          path.write_text(json.dumps(data, indent=2) + '\n')
+          print(f'Bumped plugin version to {new_version}')
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'version={new_version}\n')
+          PYEOF
       - name: Create PR
         if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
-          title: 'docs: weekly reference update'
-          body: 'Automated weekly update of documentation reference summaries.'
+          title: 'docs: weekly reference update (v${{ steps.bump.outputs.version }})'
+          body: |
+            Automated weekly update of documentation reference summaries.
+
+            Plugin version bumped to **v${{ steps.bump.outputs.version }}** (CalVer: `YYYY.DOY.patch`).
           branch: docs/weekly-update
-          commit-message: 'docs: update reference summaries'
+          commit-message: 'docs: update reference summaries (v${{ steps.bump.outputs.version }})'
