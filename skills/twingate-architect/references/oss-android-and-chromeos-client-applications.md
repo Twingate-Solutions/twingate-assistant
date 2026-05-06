@@ -1,32 +1,40 @@
+# Twingate Android and ChromeOS Client Applications - OSS Notices
+
 ## Page Title
-Android and ChromeOS Client Applications — Open Source Attributions
+Android and ChromeOS Client Applications (Open Source Software Notices)
 
 ## Summary
-Third-party OSS license notices for the Twingate Android and ChromeOS client. No technical implementation guidance — legal/compliance reference listing component licenses.
+This page lists all third-party open source components used in the Twingate Android and ChromeOS client applications, along with their respective licenses. It serves as the legal attribution document required by the licenses of included dependencies.
 
 ## Key Information
-- **Notable components and licenses**:
-  - `libssl` (OpenSSL) — Apache 2.0
-  - `quickily` (QUIC implementation) — MIT
-  - `AndroidX`, `Dagger 2`, `Kotlin`, `OkHttp`, `Retrofit`, `RxJava`, `Timber` — Apache 2.0
-  - `libevent`, `lwip`, `Sentry` — BSD 3-Clause
-  - `siphash` — CC0 1.0 Universal
-  - `libjansson`, `jwt-cpp`, `args`, `pubnub` — MIT
-  - `nanopb`, `zlib` — zlib License
-  - `catch2` — Boost Software License 1.0
-  - `fmt` — MIT-equivalent with optional exception
+
+### Components by License
+
+| License | Components |
+|---------|------------|
+| Apache 2.0 | AndroidX, Dagger 2, Kotlin, libssl, Logback Android, Moshi, OkHttp, Retrofit, Retrofit Rx adapter, RxAndroid, RxJava, Timber |
+| BSD 3-Clause | libevent, lwip, Sentry |
+| MIT | args, jwt-cpp, libjansson, pubnub, quicly, Sentry SDK for Java and Android, SLF4J |
+| zlib | nanopb, zlib |
+| Boost 1.0 | catch2 |
+| CC0 1.0 Universal | siphash |
+| Custom (MIT-like) | fmt |
 
 ## Prerequisites
-None.
+- N/A — this is a legal/compliance reference page, not a configuration guide.
 
 ## Step-by-Step
-Not applicable.
+- N/A
 
 ## Configuration Values
-None.
+- N/A
 
 ## Gotchas
-None.
+- **siphash** uses CC0 1.0 (public domain dedication), not a traditional open source license — no attribution required but trademark/patent rights are not waived.
+- **fmt** includes an optional exception allowing embedded object code redistribution without license notices.
+- **Sentry** appears under two separate licenses: the native SDK under BSD 3-Clause and the Java/Android SDK under MIT.
+- Apache 2.0 components require NOTICE file preservation when redistributing derivative works.
 
 ## Related Docs
-- `/docs/open-source-attributions` — index page
+- [Twingate OSS notices for other platforms] (iOS, Windows, macOS, Linux clients likely have separate OSS pages)
+- Apache License 2.0: https://www.apache.org/licenses/

@@ -1,26 +1,39 @@
-## Connectors Overview
+# Twingate Connectors Overview
 
-Landing page for Twingate Connector documentation. Covers deployment methods, Admin Console behavior, naming, and status notifications.
+## Summary
+Connectors are Twingate components deployed behind your firewall to provide access to private Resources. They run as containers or Linux systemd services and are managed through the Twingate admin console.
 
-**Deployment Methods (from Admin Console):**
+## Key Information
+- Connectors act as the bridge between Twingate's network and your private resources
+- Run as either a **container** or **Linux systemd service**
+- Admin console provides ready-made deployment scripts for all supported environments
+- Connector names are randomly generated at creation but can be edited (must be unique across account)
+- Admins receive email notifications when Connectors go offline/come back online
+
+## Supported Deployment Environments
 - Docker
 - Kubernetes (via Helm Chart)
-- Azure Container Instance
-- Linux (generic systemd deployment script)
+- Azure (via ContainerInstance)
+- Linux (generic systemd)
 - AWS ECS Fargate
 - AWS AMI
-- Docker on Windows (not recommended — use Linux VM via Hyper-V instead)
 
-**Connector Names:**
-- Randomly generated on creation; editable at any time
-- Names must be unique across all Connectors in the account
-- Renaming in Admin Console does not rename in the deployment environment — rename before deploying for consistency
+## Prerequisites
+- Access to Twingate Admin Console
+- Target deployment environment (one of the supported platforms above)
+- For Windows: Linux VM via Hyper-V (Docker on Windows is not supported)
 
-**Status Notifications:**
-- Admins receive email when a Connector goes offline and when it comes back online
-- Can be disabled per Connector in the Admin Console
+## Configuration Notes
+- Rename Connectors in the admin console **before** deployment if you want custom names — renaming in the console does not update the name in the deployment environment
+- Status availability emails can be toggled per-Connector in admin settings
 
-**Related Docs:**
-- /docs/understanding-connectors -- How Connectors work
-- /docs/connector-deployment -- Choosing a deployment method
-- /docs/connector-placement-best-practices -- Placement guidance
+## Gotchas
+- **Do not deploy Connectors via Docker on Microsoft Windows** — known Docker issue makes this unreliable; use a Linux VM with Hyper-V instead
+- Renaming a Connector in the admin console is decoupled from the deployment environment name — they are not synced
+- Connector names must be unique across all Connectors in the account
+
+## Related Docs
+- First-time configuration guide (Connector deployment in Admin console)
+- Connector Management section (detailed deployment and management)
+- How Twingate Works (architecture deep-dive)
+- General Architecture section

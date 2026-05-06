@@ -1,42 +1,68 @@
-## Syncing Data to S3
+# Syncing Data to AWS S3
 
-Continuous sync of Twingate event logs to an AWS S3 bucket. Available on Business and Enterprise plans only. Events are delivered every 5 minutes.
+## Page Title
+Syncing Data to AWS S3 (Twingate)
 
-**Supported Event Types:**
-- `network_access` -- network connection events
-- `dns_filtering` -- DNS filtering events
-- `audit_log` -- Admin Console audit events
-- `data_loss_prevention` -- DLP events
+## Summary
+Twingate (Business/Enterprise) can sync audit logs, network events, DNS filtering logs, and DLP events to an AWS S3 bucket in JSON format every 5 minutes. Two authentication methods are supported: OIDC IAM Role (recommended) and static IAM User credentials. Configuration is done via the Admin Console or Terraform.
 
-**Authentication Methods:**
-- **OIDC IAM Role** (recommended) -- no long-lived credentials; uses Twingate's OIDC provider to assume a role
-- **IAM User credentials** -- access key + secret stored in Twingate Admin Console
+## Key Information
+- **Sync frequency**: Every 5 minutes; initial sync may take up to 10 minutes
+- **File format**: JSON; filename format: `2025-07-25T18:20:00+00:00.json`
+- **Event types**: `network_access`, `dns_filtering`, `audit_log`, `data_loss_prevention`
+- No file is written if there are no events to sync
+- Plan restriction: Business & Enterprise only
 
-**IAM Policy Requirements:**
-- `s3:PutObject` on the target bucket/prefix (both auth methods)
-- If using SSE-KMS encryption: `kms:GenerateDataKey*` and `kms:Decrypt` on the KMS key
+## Prerequisites
+- AWS S3 bucket created
+- IAM policy granting `s3:PutObject` on bucket
+- If SSE-KMS encryption: also need `kms:GenerateDataKey*` and `kms:Decrypt`
+- Twingate Admin Console access
 
-**OIDC Trust Policy Condition:**
-```
-"StringEquals": { "twingate.com:sub": "events_sync" }
-```
+## Step-by-Step
 
-**Terraform Setup (OIDC):**
-```hcl
-resource "aws_iam_openid_connect_provider" "twingate" {
-  url             = "https://twingate.com"
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["<thumbprint>"]
-}
-```
+### Option 1: OIDC Role (Recommended)
+1. Admin Console → Settings → Reports → Sync to S3 Bucket → OIDC Role → copy IAM Identity Provider URL
+2. AWS IAM → Identity Providers → Add provider → OpenID Connect
+   - Provider URL: copied URL from step 1
+   - Audience: `<network-slug>` (e.g., `acme`)
+3. Create IAM Policy with `s3:PutObject` on bucket
+4. Create IAM Role:
+   - Trusted entity: Web identity
+   - Provider: OIDC provider from step 2
+   - Condition: `<network>.twingate.com/oidc:sub` = `events_sync`
+   - Attach policy from step 3
+5. Admin Console → Settings → Reports → Sync to S3 Bucket → enter bucket name + IAM Role ARN
 
-**Gotchas:**
-- Business & Enterprise plans only
-- Logs may take up to 10 minutes to appear in S3 after initial configuration
-- Events are written every 5 minutes; not real-time
-- OIDC role requires Twingate's OIDC provider to be registered in IAM before use
+### Option 2: IAM User Credentials
+1. Create IAM User in AWS
+2. Create and attach IAM policy with `s3:PutObject`
+3. Generate Access Key + Secret Access Key
+4. Admin Console → Settings → Reports → Sync to S3 Bucket → enter bucket name, Access Key, Secret
 
-**Related Docs:**
-- /docs/audit-logs -- Audit log overview
-- /docs/detailed-network-event-schema -- JSON schema for network events
-- /docs/exporting-network-traffic -- Network traffic export options
+## Configuration Values
+
+| Field | OIDC | IAM User |
+|-------|------|----------|
+| Bucket name | Required (no `arn:aws:s3:::` prefix) | Required |
+| IAM Role ARN | Required | — |
+| Access Key | — | Required |
+| Secret Access Key | — | Required |
+
+**OIDC condition key**: `<tenant>.twingate.com/oidc:sub` = `events_sync`  
+**OIDC audience**: network slug (e.g., `acme`)  
+**Terraform versions**: Terraform ≥ 1.12.2, AWS Provider ~> 6.0.0
+
+## Gotchas
+- Do **not** include `arn:aws:s3:::` prefix when entering bucket name in Admin Console
+- Static IAM credentials require manual rotation — not recommended for production
+- SSE-KMS encryption requires additional KMS permissions beyond `s3:PutObject`
+- AWS Admin performing setup needs broad IAM permissions (CreateRole, CreateOpenIDConnectProvider, CreateUser, CreateAccessKey, etc.)
+- No file written to S3 if zero events occurred in the 5-minute window
+
+## Related Docs
+- [Network Events Schema](https://www.twingate.com/docs/network-events)
+- [DNS Filtering Logs Schema](https://www.twingate.com/docs/dns-filtering-logs)
+- [Audit Logs Schema](https://www.twingate.com/docs/audit-logs)
+- [Terraform Examples](https://www.twingate.com/docs/terraform)
+- [AWS S3 User Guide](https://docs.aws.amazon.com/s3/)

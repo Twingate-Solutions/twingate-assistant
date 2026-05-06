@@ -1,33 +1,57 @@
+# Twingate vs. VPN
+
 ## Page Title
 Twingate vs. VPNs
 
 ## Summary
-Detailed comparison of Twingate's Zero Trust Networking model against traditional corporate VPNs across security, performance, deployment, and user experience dimensions. Key architectural difference: Twingate provides application-level access control with no public-facing gateway, while VPNs grant broad network-level access through a public gateway.
+Twingate implements Zero Trust Networking (ZTN) as an alternative to corporate VPNs, providing application-level access control instead of network-level access. It eliminates public-facing gateways, reduces latency through split tunneling, and deploys without infrastructure changes. Designed to coexist with existing VPNs for gradual migration.
 
 ## Key Information
-- **Security**: per-application access (not per-network); private resources not publicly visible; no gateway CVE exposure; lateral movement blocked; rich auth context (MFA, device posture, location, time)
-- **Performance**: split-tunnel by default — only resource traffic routes through Twingate; no backhauling through central VPN server; P2P connections minimize latency; edge-based auth processing eliminates tromboning
-- **Deployment**: no hardware procurement; no network reconfiguration; installs alongside existing VPN for parallel testing; single lightweight Connector per network; no re-addressing required
-- **Scalability**: scales via software — no appliance procurement; Twingate manages load balancing, redundancy, maintenance
-- **UX**: always-on client requires no user interaction; no server selection; no VPN toggle; correct geographic routing for localized content
-- **Cost**: no capex; opex model; lower admin burden; less time supporting users
+
+**Security Advantages over VPN:**
+- Per-application access control (vs. full network access with VPNs)
+- No public-facing gateway — connectors make outbound connections only; network stays hidden
+- Rich authorization context: SSO/MFA, location, time-of-day, device posture, risk scores
+- Limits lateral movement — breach scope contained to specific apps
+- Centralized logging across all networks; SIEM integration supported
+
+**Performance Advantages:**
+- Split tunneling by default — only private resource traffic routes through internal network
+- No backhauling — traffic routes directly, not through distant VPN servers
+- Edge-based decision making via intelligent clients (ViPR technology) reduces tromboning latency
+- MFA checks performed before connection initiation
+
+**Deployment Advantages:**
+- No hardware/appliances required
+- Connector is a lightweight container installed on one device per network
+- No IP address or DNS name changes required
+- Protocol agnostic
+- Deployable in minutes
+
+**Operational Advantages:**
+- Managed scalability — no appliance procurement or network reconfiguration to scale
+- Centralized admin console for org-wide access management
+- Can coexist with existing VPNs — no rip-and-replace required
 
 ## Prerequisites
-None — reference page.
+- None for initial deployment; connector requires a single host within each private network
 
-## Step-by-Step
-Not applicable.
+## Step-by-Step (Migration Approach)
+1. Deploy Twingate alongside existing VPN infrastructure (no infrastructure changes needed)
+2. Pilot with a single team and subset of resources
+3. Gradually roll out to additional teams/resources
+4. Decommission VPN infrastructure when ready
 
 ## Configuration Values
-None on this page.
+- No specific env vars or CLI flags documented on this page
+- Connector delivered as a container image
 
 ## Gotchas
-- Twingate can be tested in parallel with an existing VPN — no rip-and-replace required
-- Users access resources at the same IPs/FQDNs as before — no retraining needed
-- Full-tunnel mode is available in Twingate but is not the default or recommended configuration
+- VPN mode is "full tunnel" (all traffic); Twingate is split tunnel by default — behavior differs for users expecting all traffic routed through corporate network
+- VPN gateways are publicly visible and regularly exploited (zero-days, unpatched CVEs); Twingate has no equivalent public endpoint — architectural difference matters for threat modeling
+- User traffic appears to originate from actual location (not VPN server location) — affects geo-localized content behavior
 
 ## Related Docs
-- `/docs/twingate-vs-mesh-vpns` — comparison with mesh VPN alternatives
-- `/docs/vpn-replacement-use-case` — VPN replacement use case guide
-- `/docs/architecture` — Twingate architecture overview
-- `/docs/peer-to-peer-communication-in-twingate` — P2P performance detail
+- [Zero Trust Networking explanation](https://www.twingate.com/docs/twingate-vs-vpn) (inline in this page)
+- [Quick, simple, low-risk migration guide](https://www.twingate.com/docs/)
+- Twingate free trial signup

@@ -1,23 +1,35 @@
-## Endpoint Requirements
+# Endpoint Requirements
 
-Lists system requirements and outbound firewall rules needed for the Twingate Client. The Client is under 10 MB, uses the OS native VPN interface, and requires no special permissions beyond VPN setup.
+## Summary
+The Twingate Client must be installed and running on user devices to access protected Resources. It uses the host OS's native VPN functionality to intercept traffic, requiring minimal resources (<10MB). Specific outbound firewall ports are needed for full functionality.
 
-**Key Information:**
-- App size: under 10 MB; minimal CPU/memory footprint
-- Uses OS native VPN (local connection to 127.0.0.1) to intercept Resource-bound traffic -- this is expected behavior
-- No special permissions required beyond the VPN interface
-- Client download: get.twingate.com (auto-detects platform)
+## Key Information
+- Client size: <10MB, minimal system resource usage
+- Uses native OS VPN functionality — VPN connection activating on device is expected/normal
+- Download via `get.twingate.com` (auto-detects platform)
+- Compatible with most device management solutions (MDM/EMM)
 
-**Required Outbound Firewall Rules:**
-- TCP 443 -- communication with Twingate Controller and Relay infrastructure
-- TCP 30000-31000 -- fallback Relay connections when P2P is unavailable
-- UDP 1-65535 (+ QUIC/HTTP3) -- peer-to-peer connectivity for optimal performance
+## Prerequisites
+- Device access to install software
+- Outbound firewall connectivity on required ports (see below)
 
-**Gotchas:**
-- Blocking UDP 1-65535 forces all connections through Relay (200-250 Mbps cap) -- open UDP for P2P performance
-- Seeing a local VPN connection (127.0.0.1) is expected; it is how Twingate intercepts Resource traffic
+## Configuration Values
 
-**Related Docs:**
-- /docs/clients -- Client installation overview
-- /docs/twingate-performance -- P2P vs. relay performance comparison
-- /docs/local-peer-to-peer-best-practices -- P2P firewall configuration
+### Required Firewall Rules (Outbound Only)
+
+| Port/Range | Protocol | Purpose |
+|---|---|---|
+| `443` | TCP | Communication with Twingate Controller and Relay infrastructure |
+| `30000-31000` | TCP | Relay infrastructure connections (fallback when P2P unavailable) |
+| `1-65535` | UDP + QUIC/HTTP3 | Peer-to-peer connectivity (optimal performance) |
+
+## Gotchas
+- No inbound firewall rules required — all connections are outbound-initiated
+- UDP ports `1-65535` are needed for P2P; without them, traffic falls back to Relay (ports `30000-31000`), which still works but is suboptimal
+- Special firewall rules are not usually needed; use the port list above only for troubleshooting connectivity issues
+- VPN indicator appearing on device is **expected behavior**, not an error
+
+## Related Docs
+- Download & Installation
+- Managed Devices
+- QUIC/HTTP3 guide (referenced for UDP/QUIC details)

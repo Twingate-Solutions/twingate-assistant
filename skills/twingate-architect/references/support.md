@@ -1,23 +1,38 @@
-## Support
+# Twingate Support Options
 
-Overview of Twingate's support resources and eligibility by plan.
+## Summary
+Twingate provides tiered support based on subscription plan. Technical support is only available for Business and Enterprise plans; Starter, Teams, and trial users are directed to community resources.
 
-**Self-Service Resources:**
-- Twingate Docs (docs.twingate.com)
-- Twingate Help Center (knowledge base)
-- Twingate Subreddit (community discussion)
+## Key Information
+- **Help Center**: Primary self-service documentation resource
+- **Community**: Twingate Subreddit for peer support
+- **Billing**: Handled via Subscription Management page
+- **Technical Support**: Break-fix only, Business and Enterprise plans exclusively
+- **Pre-sales**: Contact sales rep or email onboarding@twingate.com
 
-**Technical Support (Break-Fix):**
-- Available on **Business and Enterprise plans only**
-- Includes support request submission via the Technical Support Services portal
-- Starter, Teams, and trial Business accounts: no product support or troubleshooting assistance — use docs or the Subreddit
+## Support Tiers
 
-**Pre-Sales Support:**
-- Existing customers with a sales rep: route support requests through your rep
-- Self-serve trial customers (no sales rep): contact onboarding@twingate.com or post on the Subreddit
+| Plan | Support Available |
+|------|------------------|
+| Enterprise | Technical Support (break-fix) |
+| Business | Technical Support (break-fix) |
+| Teams | Community/docs only |
+| Starter | Community/docs only |
+| Trial (Business) | Community/docs only |
 
-**Billing Questions:**
-- See /docs/subscription-management
+## Contact Points
+- **Onboarding/Pre-sales (no sales rep)**: onboarding@twingate.com
+- **Technical Support requests**: Via Technical Support Services page (Business/Enterprise)
+- **Pre-sales (with sales rep)**: Through sales representative
+- **Community**: Twingate Subreddit
 
-**Related Docs:**
-- /docs/subscription-management -- Billing and plan FAQ
+## Gotchas
+- Trial Business accounts do **not** qualify for technical support despite being on a Business trial
+- No troubleshooting assistance provided for Starter or Teams plans regardless of issue severity
+- Pre-sales customers with a sales rep should route all support through that rep, not directly to support channels
+
+## Related Docs
+- Technical Support Services
+- Subscription Management
+- Twingate Help Center
+- Twingate Docs

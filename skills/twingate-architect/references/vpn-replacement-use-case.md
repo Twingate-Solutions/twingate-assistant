@@ -1,37 +1,46 @@
+# VPN Replacement Use Case
+
 ## Page Title
-VPN Replacement
+VPN Replacement Use Case
 
 ## Summary
-Overview of replacing a corporate VPN with Twingate. No open inbound ports required; split-tunnel by default; deploys in under 15 minutes without touching existing network infrastructure. Can be tested in parallel with an existing VPN before migration.
+Twingate replaces traditional VPNs by providing zero-trust, application-level access to private resources across office networks, cloud VPCs, and corporate infrastructure. It deploys in under 15 minutes without hardware procurement or network changes, and operates as split-tunnel by default for better performance.
 
 ## Key Information
-- No open inbound ports — Connector makes outbound connections only; no VPN gateway to patch
-- Split-tunnel by default — only defined-resource traffic routes through Twingate
-- Deploys alongside existing VPN for side-by-side testing before cutover
-- Application-level access control replaces broad network-level VPN access, reducing lateral movement risk
-- IdP integration for SSO rollout: Okta, JumpCloud, Entra ID, OneLogin, Google Workspace
-- Admin Console centralizes resource, user, and policy management
-- IaC support via Terraform, Kubernetes, Pulumi for automated administration
-- Additional SaaS app protection via MFA and device posture checks (not possible with traditional VPN)
+- **No open ports required** — Connector architecture eliminates public internet attack surface
+- **Split-tunnel by default** — only traffic destined for internal resources routes through Twingate (vs. VPN full-tunnel)
+- **Application-level access controls** — more granular than network-level VPN access; reduces lateral movement risk
+- **MFA and device posture checks** for third-party SaaS apps (not available with traditional VPNs)
+- **Single Connector host** required per network — no hardware, no network reconfiguration
+- **Coexists with existing VPN** — can be tested without removing current VPN solution
 
 ## Prerequisites
-- Connector deployed within target network on a single host (no network reconfiguration)
-- Identity Provider configured for user authentication (recommended for org-wide rollout)
+- A host within the target network to deploy the Connector
+- Identity Provider integration (optional but recommended): Okta, JumpCloud, Entra ID, OneLogin, or Google
+- Admin Console access for resource and user management
 
-## Step-by-Step
-Not applicable on this page — see linked environment-specific guides.
+## Deployment Overview
+1. Deploy lightweight Connector on a single host within target network
+2. Configure resources in Admin Console
+3. Integrate with existing Identity Provider for user rollout
+4. Users download and install Twingate Client (no IT assistance required)
+5. Total deployment time: ~15 minutes
 
 ## Configuration Values
-None on this page.
+- **Tunnel mode**: Split-tunnel (default)
+- **Automation support**: Terraform, Kubernetes, Pulumi
+- **Supported IdPs**: Okta, JumpCloud, Entra ID (Azure AD), OneLogin, Google
 
 ## Gotchas
-- Full-tunnel mode is available but not the default and is not recommended for most deployments
-- Twingate does not require a public-facing gateway — eliminates VPN CVE exposure surface
-- MFA and posture checks for SaaS apps require additional policy configuration and appropriate plan tier
+- VPN gateways require open ports and frequent patching; Twingate does not — validate firewall rules won't interfere with Connector outbound connections
+- Full-tunnel vs. split-tunnel behavior differs from VPN defaults; verify routing expectations with end users
+- Device posture checks and MFA for SaaS apps require Twingate Client to be active
 
 ## Related Docs
-- `/docs/aws-vpn-replacement` — AWS-specific VPN replacement
-- `/docs/site-2-site` — site-to-site connection replacement
-- `/docs/twingate-vs-vpn` — detailed architectural comparison
-- `/docs/twingate-vs-mesh-vpns` — comparison with mesh VPN alternatives
-- `/docs/vendor-and-contractor-access-management` — non-employee access management
+- [How to Replace the AWS VPN with Twingate]
+- [How to Secure Site-to-Site Connections with Twingate]
+- [How to Manage Access for Vendors & Contractors]
+- [How to Secure Private Resources in AWS / Azure / GCP]
+- [Twingate vs VPN] (architecture comparison)
+- [Twingate vs MeshVPN] (architecture comparison)
+- Identity Provider integration guides (Okta, JumpCloud, Entra ID, OneLogin, Google)

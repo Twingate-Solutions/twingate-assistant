@@ -1,43 +1,66 @@
-## Windows Headless Mode
+# Windows Headless Mode
 
-Runs the Twingate Windows Client as a background service authenticated by a Service Key, without user interaction. Installation via command-line installer; service managed through Windows Services.
+## Summary
+Twingate's Windows client can run in headless mode using a Service Key, enabling automated/unattended operation controlled via Windows Services. Installation is performed via command line with the `service_secret` switch pointing to a valid Service Key JSON file.
 
-**Key Information:**
-- Requires a Service Key from a configured Service Account
-- GUI installer does not support headless mode -- must use command-line installer
-- Service does not start automatically by default -- configure startup type in Windows Services
-- Service Key is securely stored by the Client after installation; original file can be removed
-- Logs: `C:\ProgramData\Twingate\logs`
-- Optional config: `C:\Program Files\Twingate\headless.conf`
+## Key Information
+- Requires a Service Account and Service Key from Twingate Admin Console
+- Client controlled via Windows Services (start/stop `Twingate Service`)
+- Does **not** auto-start by default; configure Windows service settings manually
+- Service Key is securely stored after installation; original file location doesn't matter post-install
+- Valid Service Key required for updates and reinstalls
 
-**Installation:**
-```powershell
-# Silent install
-TwingateWindowsInstaller.exe service_secret=C:\path	o\service_key.json /qn
+## Prerequisites
+- Service account created in Twingate Admin Console
+- Service Key downloaded as JSON file
+- Administrator permissions for installation and key management
+- Windows Client EXE installer (from [public changelog](https://www.twingate.com/docs/windows-headless))
 
-# With debug logging
-TwingateWindowsInstaller.exe service_secret=C:\path	o\service_key.json log_level=debug /qn
+## Step-by-Step
+
+**Install:**
+```cmd
+TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json /qn
 ```
 
-**Key Rotation:**
-```powershell
-# Option 1 via sc
+**With debug logging:**
+```cmd
+TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json log_level=debug /qn
+```
+
+**Update Service Key (method 1 - sc command):**
+```cmd
 sc stop twingate.service
-sc start twingate.service --config --service_secret C:\path	o\service\secret.json
+sc start twingate.service --config --service_secret C:\path\to\service\secret.json
+```
 
-# Option 2: re-run installer
-TwingateWindowsInstaller.exe service_secret=C:\path	o
-ew\service_key.json
+**Update Service Key (method 2 - reinstall):**
+```cmd
+TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json
+```
 
-# Delete stored key
+**Delete stored Service Key:**
+```cmd
 sc start twingate.service --config --reset
 ```
 
-**Gotchas:**
-- A valid Service Key is required for upgrades and reinstalls -- have it available before running the installer
-- If previously installed without a Service Key, `sc` cannot add one; perform a fresh install with `service_secret`
-- Service must be restarted for any configuration changes to take effect
+## Configuration Values
 
-**Related Docs:**
-- /docs/services -- Service Account and Service Key creation
-- /docs/linux-headless -- Linux equivalent
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `service_secret` | Yes | — | Path to Service Key JSON file |
+| `log_level` | No | `info` | Log verbosity level |
+| `/qn` | No | — | Silent install flag |
+
+**Config file path:** `C:\Program Files\Twingate\headless.conf`  
+**Log output path:** `C:\ProgramData\Twingate\logs`
+
+## Gotchas
+- Service must be **restarted** after any key or config changes
+- If originally installed *without* `service_secret`, you cannot use `sc` to add a key — must do a fresh install
+- Deleting the Service Key immediately disconnects the client from Twingate
+- Client won't auto-start after install; must configure Windows service startup type manually
+
+## Related Docs
+- [Services / Service Keys documentation](https://www.twingate.com/docs/services)
+- [Twingate public changelog](https://www.twingate.com/changelog) (for latest installer download)

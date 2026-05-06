@@ -1,23 +1,45 @@
-## Cloaking strongDM with Twingate
+# How to Cloak strongDM with Twingate
 
-Removes the publicly exposed TCP port required by strongDM gateways by routing strongDM traffic through Twingate. The strongDM gateway's advertised host is changed to its internal IP/hostname, which is added as a private Twingate Resource. No inbound firewall ports need to be open.
+## Summary
+Hides strongDM gateways behind Twingate, eliminating the need for publicly exposed TCP/IP ports. The strongDM gateway becomes accessible only through Twingate, making the network perimeter invisible externally.
 
-**Key Information**
-- strongDM default proxy port: 5000 (can be restricted per Resource in Twingate)
-- The Connector must be on the same private subnet as the strongDM gateway
-- Change strongDM's "advertised host" in the strongDM Admin UI to the internal hostname or IP address
-- After cloaking, the gateway has no publicly resolvable hostname or open inbound ports
+## Key Information
+- strongDM by default requires a publicly exposed TCP/IP port for SSH/RDP auditing and replay
+- Twingate removes the need for public inbound firewall ports or publicly resolvable IPs/hostnames
+- Default strongDM proxy port: **5000**
+- Approach mirrors the Twingate Bastion host cloaking pattern
 
-**Step-by-Step**
-1. Deploy a Twingate Connector on the same private subnet as the strongDM gateway
-2. In Twingate Admin Console, add the strongDM gateway's internal hostname or IP as a Resource; restrict to port 5000 (or the configured proxy port)
-3. In strongDM Admin UI, change the gateway's "advertised host" to the internal hostname or IP
+## Prerequisites
+- Existing strongDM gateway deployed on a private subnet
+- Access to Twingate Admin Console
+- Access to strongDM Admin UI
+- Twingate Client application installed on end-user devices
 
-**Testing**
-- Verify access is blocked when Twingate Client is not connected
-- Verify access works when Twingate Client is connected
+## Step-by-Step
 
-**Related Docs**
-- /docs/cloak-your-bastion-server
-- /docs/resources
-- /docs/connector-placement-best-practices
+1. **Deploy Twingate Connector** on the same private subnet as the strongDM gateway
+2. **Add strongDM gateway as a Twingate Resource** via Twingate Admin Console using the internal hostname or IP address
+3. **Apply port restriction** to the Resource (port 5000 by default)
+4. **Update strongDM gateway advertised host** in strongDM Admin UI to use the internal hostname/IP configured as the Twingate Resource
+
+## Configuration Values
+| Parameter | Value |
+|-----------|-------|
+| strongDM default proxy port | `5000` |
+| Twingate Resource address | Internal hostname or IP of strongDM gateway |
+
+## Testing
+1. Disconnect from Twingate → attempt strongDM resource access → confirm **blocked**
+2. Connect via Twingate Client → attempt strongDM resource access → confirm **successful**
+
+## Gotchas
+- The strongDM **advertised host** must be changed to the internal address; leaving it as a public address defeats the cloaking
+- Twingate Connector must be on the **same private subnet** as the strongDM gateway to reach it
+- No inbound firewall rules needed — all connectivity is outbound from the Connector
+
+## Related Docs
+- [Cloaking Bastion Host Servers](https://www.twingate.com/docs) (referenced pattern)
+- Twingate Connector deployment
+- Adding Resources in Twingate Admin Console
+- Port restrictions on Resources
+- Twingate Client installation by platform

@@ -1,38 +1,46 @@
-## Page Title
-How NAT Traversal Works
+# How NAT Traversal Works
 
 ## Summary
-Explains how Twingate establishes peer-to-peer tunnels between Clients and Connectors without opening any inbound ports, using NAT traversal as the primary method and Relay infrastructure as fallback. Covers NAT fundamentals, port mechanics, and the step-by-step ICE/STUN-style candidate exchange process Twingate uses.
+Twingate establishes secure Client-to-Connector connections without open inbound ports using two methods: Relay servers (intermediaries) and NAT traversal (peer-to-peer tunnels). NAT traversal uses the Relay as a coordination broker to enable simultaneous outbound connections that punch through firewalls on both sides.
 
 ## Key Information
-- **No open inbound ports required** — Twingate never requires inbound port forwarding
-- **Two transport methods**: (1) Relay intermediary — both Client and Connector connect outbound to public Relay, which forwards encrypted packets; (2) NAT traversal — direct P2P tunnel
-- **NAT basics**: private IPs (e.g. 192.168.x.x) are translated to public IP:port by router; firewalls allow inbound only from previously established outbound connections
-- **NAT traversal flow**:
-  1. Client and Connector both register with Relay (acting as STUN server) — share public IP:port
-  2. Relay distributes each peer's address to the other
-  3. Client and Connector simultaneously send packets to each other's public IP:port
-  4. Simultaneous outbound packets "punch holes" in each NAT — inbound packets from the other peer are now allowed
-  5. P2P tunnel established
-- **Relay fallback**: used when symmetric NAT or blocked UDP prevents P2P; Relays are globally distributed; traffic is end-to-end encrypted through Relay (Relay cannot decrypt)
-- Opening inbound ports is explicitly called out as dangerous and not required by Twingate
+- Twingate **never requires open inbound ports** on any network device
+- Two connectivity methods: **Relay-based** (intermediary) and **NAT traversal** (P2P)
+- NAT traversal is preferred; Relays are fallback when P2P cannot be established
+- Relay serves dual role: P2P traffic intermediary AND STUN-like coordination broker
+- All Client↔Connector traffic is **end-to-end encrypted**; Relays cannot decrypt it
+- Relays are deployed globally to minimize latency on fallback connections
 
-## Prerequisites
-- Understanding of Twingate architecture (Client, Connector, Relay roles)
+## Core Concepts
+- **NAT**: Translates private IPs (e.g., `192.168.1.4`) to unique public IPs for internet routing
+- **Ports**: 65,535 per IP address; NAT uses IP+port combos to track sessions per device
+- **Firewall rule**: Inbound packets allowed **only if** outbound packets were first sent to that same IP+port
+- **Port forwarding / open ports**: Explicitly not used; considered a security risk
 
-## Step-by-Step
-Not applicable — this is a reference/explainer page.
+## NAT Traversal Mechanism (Step-by-Step)
 
-## Configuration Values
-None — P2P and Relay transport are automatic with no configuration.
+1. Client and Connector both connect outbound to the Relay
+2. Relay establishes an encrypted messaging channel between them (acts as STUN server + broker)
+3. Client and Connector exchange their public IP address + port via the messaging channel
+4. Relay **coordinates simultaneous** outbound packet sends from both sides
+5. Client sends packets to Connector's public IP+port; Connector sends to Client's public IP+port at the same time
+6. Each firewall allows return traffic because it recognizes the prior outbound connection
+7. P2P tunnel established — Relay no longer needed for data transfer
+
+## Why Relays Are Still Needed
+- Some network configurations (symmetric NAT, strict firewalls) block P2P establishment
+- Relay provides fallback when NAT traversal fails
+- Trade-off: Relay adds latency (extra hop) vs. P2P direct path
 
 ## Gotchas
-- Symmetric NAT environments will fall back to Relay — P2P is not guaranteed
-- Relay fallback does not mean unencrypted — end-to-end encryption is maintained
-- Port forwarding (opening inbound ports) is explicitly discouraged; Twingate's design avoids it entirely
+- **Simultaneous sends are critical**: Both sides must send packets at the same time for firewall rules to open on both ends
+- Certain network conditions (e.g., symmetric NAT, carrier-grade NAT) can prevent P2P — system falls back to Relay automatically
+- VPN gateways require open inbound ports; Twingate Connectors do not — this is a fundamental architectural difference
+- Opening inbound ports exposes them to constant bot scanning and vulnerability probing
+
+## Configuration Values
+No direct configuration required for NAT traversal — handled automatically by Twingate infrastructure.
 
 ## Related Docs
-- `/docs/peer-to-peer-communication-in-twingate` — QUIC transport layer detail
-- `/docs/understanding-relays` — Relay infrastructure
-- `/docs/how-twingate-works` — full architecture overview
-- `/docs/troubleshooting-p2p` — diagnosing P2P failures
+- [Troubleshooting NAT traversal / P2P issues](https://www.twingate.com/docs/) — referenced for cases where P2P cannot be established
+- Twingate global Relay network documentation

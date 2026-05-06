@@ -1,44 +1,63 @@
-## Deploy Twingate Client with Microsoft Intune / Endpoint Manager
+# Deploy Twingate Client with Microsoft Intune
 
-Three methods to deploy the Twingate Windows Client via Microsoft Intune: MSI via Endpoint Manager, PowerShell via Platform Scripts (one-time run), and Detection and Remediation (scheduled compliance enforcement). All methods use the same MSI installer with command line arguments for tenant name and auto-update settings.
+## Summary
+Guide for deploying the Twingate Windows Client via Microsoft Endpoint Manager (Intune) using three methods: Line-of-Business app package, Platform Scripts (PowerShell), or Detection and Remediation for scheduled compliance enforcement.
 
-**Key Information**
-- MSI installer: download from Twingate Windows Managed Device page; deploy as Line-of-business app in Endpoint Manager
-- Command line arguments: specify Twingate tenant name and optional auto-update settings
-- Platform Scripts: PowerShell script downloads MSI and installs; must run as SYSTEM (not logged-on credentials)
-- Detection and Remediation: requires Windows 10/11 Enterprise E3 or E5 license; runs on schedule (hourly minimum)
-- Detection script checks installed version against Twingate Client Changelog RSS feed; runs remediation if outdated or missing
-- Example scripts hosted in Twingate Community GitHub repository
+## Key Information
+- Three deployment methods available: Intune LOB app, Platform Scripts (one-time), Detection & Remediation (scheduled)
+- All methods use the same Windows MSI installer and command-line arguments
+- Detection & Remediation requires Windows 10/11 Enterprise E3 or E5 licensing
+- Example scripts hosted in public GitHub repository
 
-**Prerequisites**
-- Microsoft Intune (Endpoint Manager) subscription
-- For Detection and Remediation: Windows 10/11 Enterprise E3 or E5 device licenses
-- Twingate MSI installer downloaded from Twingate Windows Managed Device page
+## Prerequisites
+- Microsoft Intune/Endpoint Manager access
+- Windows MSI installer downloaded from Twingate
+- Twingate tenant name for command-line arguments
+- For Detection & Remediation: Windows 10/11 Enterprise E3/E5 licenses
+- Review [Windows Managed Device](https://www.twingate.com/docs/windows-managed-device) page for MSI prerequisites
 
-**Step-by-Step (Endpoint Manager MSI)**
+## Method 1: Line-of-Business App (Endpoint Manager)
 1. Download Twingate Windows MSI installer
-2. Open Endpoint Manager -> Apps -> Add -> Other -> Line-of-business app
-3. Select MSI file; fill in Publisher and command line arguments (tenant name, auto-update options)
-4. Set assignments (target devices/groups) -> Review -> Create
+2. Intune → Apps → Add → Other → **Line-of-business app**
+3. Upload MSI file
+4. Fill in Publisher and command-line arguments (tenant name, update preferences)
+5. Configure Assignments → Review → Create
 
-**Step-by-Step (Platform Scripts)**
-1. Get/modify PowerShell example script from Twingate Community GitHub
-2. Intune -> Devices -> Scripts and remediations -> Platform scripts -> Add -> Windows 10 or later
-3. Select script file; set "Run this script using the logged on credentials" to No; disable signature check
-4. Set assignments -> Add
+## Method 2: Platform Scripts (One-Time)
+1. Prepare PowerShell script (see GitHub example) that: downloads MSI, checks/installs .NET Desktop Runtime, installs Client
+2. Intune → Devices → Scripts and remediations → Platform scripts → Add → Windows 10 or later
+3. Script Settings:
+   - Upload script file
+   - **Run with logged-on credentials: No** (requires elevated permissions)
+   - **Enforce script signature check: No**
+4. Configure Assignments → Add
 
-**Step-by-Step (Detection and Remediation)**
-1. Create/modify detection script (checks installed version vs RSS feed) and remediation script
-2. Intune -> Devices -> Scripts and remediations -> Remediation -> Create
-3. Select both scripts; set all options to No (run as SYSTEM)
-4. Set assignments and schedule (daily recommended, hourly minimum)
+## Method 3: Detection and Remediation (Scheduled Compliance)
+1. Create detection script (checks installed version vs. Changelog RSS feed)
+2. Create remediation script (installs latest Client if missing/outdated)
+3. Intune → Devices → Scripts and remediations → Remediation tab → + Create
+4. Settings page: assign both scripts; set **all options to No** (runs as system user)
+5. Assignments: select groups/All Devices, set schedule (hourly or daily recommended)
+6. Review → Create
 
-**Gotchas**
-- Platform Scripts must run as SYSTEM (not logged-on user) -- "Run using logged on credentials" must be set to No
-- Detection and Remediation requires E3/E5 license -- not available on all Intune SKUs
-- To trigger a Detection and Remediation script immediately, set schedule to "once" at a specific time, then revert
+## Configuration Values
+| Parameter | Notes |
+|-----------|-------|
+| Command-line arguments | Twingate tenant name + auto-update preference |
+| Run script as logged-on credentials | Must be **No** |
+| Enforce script signature check | **No** |
+| Detection/Remediation script options | All set to **No** |
+| Schedule frequency | Hourly (triggers within minutes) or Daily |
 
-**Related Docs**
-- /docs/windows-client
-- /docs/windows-managed-device
-- /docs/mdm-deployment
+## Gotchas
+- Platform Scripts run **once only**; use Detection & Remediation for ongoing compliance
+- To trigger Detection & Remediation immediately: edit Assignments, schedule as "run once" at specific time; it reverts to original schedule afterward
+- Remediation script is provided as-is — must be reviewed, modified, and tested before production use
+- Detection script compares against Twingate Changelog RSS feed for version checking
+- New devices enrolled in Intune automatically receive existing script packages
+
+## Related Docs
+- [Windows Managed Device](https://www.twingate.com/docs/windows-managed-device)
+- [Twingate MSI Command-line Arguments](https://www.twingate.com/docs/windows-managed-device)
+- [Microsoft Intune Detection & Remediation Documentation](https://docs.microsoft.com/en-us/mem/intune/)
+- [Example Scripts GitHub Repository](https://github.com/Twingate-Labs)

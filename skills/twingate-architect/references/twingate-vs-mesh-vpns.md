@@ -1,36 +1,50 @@
-## Page Title
-Twingate vs. Mesh VPNs
+# Twingate vs. Mesh VPNs
 
 ## Summary
-Compares Twingate against mesh VPN products across deployment complexity, ongoing administration, enterprise security features, and end-user experience. Key practical difference: mesh VPNs require re-addressing all network resources and installing agents on every node; Twingate requires no infrastructure changes and only a Connector per remote network.
+Twingate and mesh VPNs both provide secure access to private resources, but differ significantly in architecture, deployment complexity, and enterprise feature set. Twingate requires no network infrastructure changes and no IP re-addressing, while mesh VPNs typically require both. Twingate targets enterprise use cases with additional security features beyond basic access control.
 
-## Key Information
-- **Infrastructure**: mesh VPNs require globally unique IPs — existing overlapping ranges must be re-addressed; Twingate supports overlapping IPs, no re-addressing, no infrastructure changes
-- **Agent deployment**: mesh VPNs require an agent on every device including servers; Twingate requires only a client on user devices and a single Connector per remote network
-- **Coexistence**: Twingate can run alongside existing VPN/mesh solutions for parallel evaluation — no rip-and-replace
-- **Admin UX**: Twingate provides a GUI admin console; some mesh VPN products require JSON policy configuration
-- **Enterprise security features** beyond basic access control:
-  - Universal 2FA: applies 2FA to any protocol (SSH, RDP, databases) without application changes
-  - Device posture restrictions: access policies based on device attributes
-  - Identity-indexed network flow logs: all activity tied to user and device identity
-- **Compatibility**: Twingate supports major IdPs (Okta, OneLogin, Google Workspace, Entra ID) and DNS filtering products
+## Key Differences
+
+### Deployment
+| Factor | Twingate | Mesh VPN |
+|--------|----------|----------|
+| IP re-addressing | Not required | Typically required |
+| Overlapping IP support | Yes | No |
+| Agent installation | Clients + one Connector per network | Agent on every device including servers |
+| Infra changes | None | Significant |
+| Can coexist with existing VPN | Yes | Generally no |
+
+### Administration
+- Twingate: Point-and-click admin console, no JSON config required
+- Mesh VPNs: Often require JSON-based policy configuration
+- Both offer administrative APIs
+
+### Security Features (Twingate-specific)
+- **Universal 2FA**: Applies 2FA to any resource type (including SSH) without app changes
+- **Device posture checks**: Access policies based on device attributes
+- **Identity-indexed logs**: Network flow logs tied to user + device identity
+
+### Identity Provider Support
+- Okta, OneLogin, Google Workspace, Entra ID (Azure AD), social SSO
+
+### DNS Filtering Compatibility
+- Twingate integrates with DNSFilter for public internet traffic protection
 
 ## Prerequisites
-None — reference page.
-
-## Step-by-Step
-Not applicable.
-
-## Configuration Values
-None on this page.
+- N/A (comparison/reference document)
 
 ## Gotchas
-- Mesh VPN re-addressing is a blocking migration concern for organizations with complex overlapping IP topologies
-- "Universal 2FA" applies at the Twingate access layer — the underlying application still handles its own auth after the Twingate connection is established
-- Twingate's enterprise focus means simpler/self-hosted mesh VPNs (Tailscale, WireGuard) may still be appropriate for small teams without enterprise requirements
+- Mesh VPNs require unique IPs across entire private network — overlapping subnets across network segments require full re-addressing before deployment
+- IP re-addressing causes cascading updates: settings, bookmarks, workflows, and end-user retraining
+- Mesh VPN agent-on-every-server model becomes unmanageable at enterprise scale
+
+## Use Case Fit
+- Twingate targets enterprises including regulated industries (healthcare, financial services, legal)
+- Twingate can be piloted alongside existing VPN without disruption — reduces procurement risk
 
 ## Related Docs
-- `/docs/twingate-vs-vpn` — comparison with traditional VPNs
-- `/docs/ip-overlap` — overlapping IP address handling
-- `/docs/architecture` — Twingate architecture overview
-- `/docs/two-factor-authentication-security-policies` — 2FA policy configuration
+- Twingate Connectors (Remote Network setup)
+- Identity Provider integrations (Okta, OneLogin, Google Workspace, Entra ID)
+- DNSFilter compatibility
+- Administrative API documentation
+- Device posture / access policies

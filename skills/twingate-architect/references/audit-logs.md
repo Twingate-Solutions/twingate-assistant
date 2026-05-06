@@ -1,13 +1,19 @@
-## Audit Logs
+# Audit Logs
 
-Overview of Twingate audit log capabilities. Covers what event categories are logged and the two available export methods: manual Admin Console download or continuous AWS S3 sync.
+## Summary
+Twingate provides audit log export functionality for account activity tracking. Logs cover create, delete, edit, and connect events across major platform categories. Export is available manually via Admin Console or automatically synced to AWS S3.
 
-**Logged Event Categories:**
+## Key Information
+- **Format:** JSON
+- **Export methods:** Manual (Admin Console) or automated sync to AWS S3
+- **Schema reference:** Separate audit logs schema page available
+
+## Covered Event Categories
 - Access
 - API Keys
 - Devices & Device Integrations
 - Device Security
-- Secure DNS (DNS-over-HTTPS, DNS filtering)
+- Secure DNS (DNS-over-HTTPS and DNS filtering)
 - Network (Remote Networks, Connectors, Resources)
 - Policies
 - Service Accounts
@@ -16,11 +22,29 @@ Overview of Twingate audit log capabilities. Covers what event categories are lo
 - Data Exports
 - MFA Configurations
 
-**Key Information:**
-- Captures create, delete, edit, and connect events across all categories
-- Export via Admin Console (manual, GZIP JSON) or continuous sync to AWS S3 (JSON)
+## Event Types Captured
+- Create
+- Delete
+- Edit
+- Connect
 
-**Related Docs:**
-- /docs/audit-logs-schema -- JSON schema for audit log events
-- /docs/admin-console-export -- Manual export via Admin Console
-- /docs/syncing-data-to-s3 -- Continuous S3 sync configuration
+## Export Options
+
+### Manual Export
+- Access via Admin Console
+- One-time JSON download
+
+### Automated Export
+- Sync to AWS S3 bucket
+- JSON file format
+- Requires S3 bucket configuration (see related docs)
+
+## Gotchas
+- Only JSON format is supported; no native CSV or syslog export
+- AWS S3 sync requires separate configuration steps
+- Schema details are on a separate documentation page—verify field names before building integrations
+
+## Related Docs
+- Audit Logs Schema page (JSON field definitions)
+- AWS S3 bucket sync configuration
+- Admin Console guide
