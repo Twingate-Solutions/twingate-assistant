@@ -1,0 +1,16 @@
+# Source file for the auto-update pipeline's Python dependencies.
+# Edit this file (NOT requirements.txt) to bump or add deps, then re-lock:
+#
+#     pip install pip-tools          # one-time
+#     pip-compile scripts/requirements.in -o scripts/requirements.txt
+#
+# requirements.txt is the fully-resolved lockfile (including transitive
+# deps) that the GitHub Action installs from. Pinning the full tree
+# protects against supply-chain attacks via floor-constraint drift.
+
+requests>=2.31
+beautifulsoup4>=4.12
+anthropic>=0.40
+pyyaml>=6.0
+lxml>=5.0
+httpx>=0.27
