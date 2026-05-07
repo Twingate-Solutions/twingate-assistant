@@ -29,13 +29,20 @@ If absent: check group membership and device trust policy.
 **Device trust failures are silent — the resource disappears with no error message.**
 
 **Step 3 — Is DNS resolving correctly?**
-Managed FQDNs should return `100.95.x.x` when the client is connected. If resolving to
-the real backend IP, the client is not intercepting. If returning `100.95.x.x` but still
-timing out, the DNS layer is healthy — the problem is downstream (Connector or policy).
+Managed FQDNs should resolve to a Twingate-internal address (the Client uses a
+CGNAT-style range — current address space documented in
+`references/troubleshooting-overview.md` and `references/dns-failures.md`).
+If the response is the real backend IP, the client is not intercepting. If
+the response is the Twingate-internal address but the connection still times
+out, the DNS layer is healthy — the problem is downstream (Connector or policy).
 
 **Step 4 — Is the Connector ALIVE?**
-Check admin console → Remote Networks → Connectors. `DEAD_NO_RELAYS` always means outbound
-443 to `*.twingate.com` is blocked or a DPI appliance is intercepting the TLS connection.
+Check admin console → Remote Networks → Connectors. `DEAD_NO_RELAYS` always
+means the connector cannot reach Twingate's control/relay infrastructure —
+typically DPI/SSL inspection on `*.twingate.com`, or one of the required
+outbound ports being blocked. Read
+`skills/twingate-connectors/references/connector-best-practices.md` for the
+full network requirements before declaring a root cause.
 
 **Step 5 — Can the Connector reach the Resource?**
 Test from the Connector host, not the user's machine. The user's machine cannot directly
@@ -49,13 +56,15 @@ approval status.
 
 Additional guidelines:
 
-- **Both Connectors DEAD emergency:** Deploy a new Connector from any machine with outbound
-  internet access. Connectors only need outbound 443 to `*.twingate.com` to register — you
+- **Both Connectors DEAD emergency:** Deploy a new Connector from any machine
+  with outbound internet access that meets the connector network requirements
+  in `skills/twingate-connectors/references/connector-best-practices.md`. You
   do not need an existing working Connector to deploy a replacement.
-- **Platform-specific first steps:** macOS — verify the Network Extension is approved in
-  System Settings → Privacy & Security. Windows — verify the TAP adapter is present in
-  Device Manager. Linux headless — verify the service is running and the config file is
-  correctly populated.
+- **Platform-specific first steps:** Each OS has its own first-line check
+  (network extension approval on macOS, virtual adapter on Windows, service
+  status on Linux). Current per-platform diagnostic steps and component names
+  are in `references/troubleshooting-overview.md` — open that file before
+  walking a user through OS-specific commands.
 - **Always test Connector → Resource connectivity from the Connector host.** Never from the
   user's machine.
 - **Never probe inbound ports on a Connector.** Connectors have no inbound ports. Check
@@ -67,6 +76,21 @@ Additional guidelines:
   appliance terminating TLS. Add a bypass rule for `*.twingate.com`.
 - **Relay fallback is a latency concern, not a security concern.** Both P2P and Relay paths
   are encrypted. Never treat Relay fallback as a security incident.
+
+## When to Verify
+
+This skill body contains the diagnostic decision tree, not every error
+signature or platform-specific command. **Before answering questions
+involving any of the following, read the relevant `references/` file
+first** — and cite it in your response:
+
+- Specific IP ranges, port numbers, or DNS responses
+- Error message text or exact admin-console state names
+- Platform-specific diagnostic commands (macOS, Windows, Linux)
+- Connector log signatures and what they indicate
+- Firewall, P2P, NAT traversal, or split-tunnel failure modes
+
+Do not answer these from training-data memory or this skill body alone.
 
 ## Routing
 
@@ -80,8 +104,19 @@ Additional guidelines:
 
 ## References
 
-See [`references/`](./references/) for current doc summaries.
+`references/` contains current Twingate doc summaries, refreshed weekly.
+**Consult these before answering fact-shaped questions** — your loaded context
+may be incomplete or stale.
 
-Key references:
+| If the user asks about… | Read first |
+|---|---|
+| General diagnostic walkthrough, platform-specific first steps, error messages | `troubleshooting-overview.md`, `how-to-troubleshoot.md`, `troubleshooting.md` |
+| DNS resolution failures, internal-IP responses, split-DNS misbehaviour | `dns-failures.md` |
+| `DEAD` Connector states, Connector reachability | `connector-failures.md` (also `skills/twingate-connectors/references/connector-best-practices.md` for network requirements) |
+| Firewall rules, egress policy, DPI / SSL inspection issues | `firewalls-and-twingate.md`, `firewall-failures.md` |
+| P2P establishment failures, NAT traversal, Relay fallback | `troubleshooting-p2p.md` |
+| Split-tunnel routing, traffic not flowing through Twingate | `split-tunnel-failures.md` |
 
-- `troubleshooting-overview.md` — platform-specific diagnostic steps and error message reference
+For comprehensive coverage, see [`references/`](./references/) for the full
+set of doc summaries. **Default to checking** — do not answer error-message
+or platform-command questions from memory.

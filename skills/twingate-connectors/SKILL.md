@@ -24,21 +24,47 @@ why it stopped, this skill answers those questions.
 - **Each Connector requires its own unique token pair.** Never share tokens between
   Connectors. Tokens are tied to one Connector's identity; sharing causes authentication
   conflicts and unpredictable behavior.
-- **Always use the major-version tag (`twingate/connector:1`), never pin to a patch
-  version.** The `:1` tag self-updates on restart. Pinned images accumulate vulnerabilities
-  and miss bug fixes.
+- **Always use the rolling major-version tag, never pin to a patch version.**
+  The rolling tag self-updates on restart. Pinned images accumulate
+  vulnerabilities and miss bug fixes. Current tag string is in
+  `references/connector-deployment.md`.
 - **Scale by adding more Connectors, not by sizing up the host.** Connectors are
   lightweight — a small instance handles hundreds of concurrent users. Achieve HA through
   parallelism, not vertical scale.
 - **The Connector host must have line-of-sight to backend resources.** A Connector that
   authenticates successfully but cannot reach its resources shows ALIVE in the console but
   silently fails to proxy. Always test from the Connector host, never from the user's machine.
-- **`DEAD_NO_RELAYS` always means outbound 443 to `*.twingate.com` is blocked or
-  intercepted by DPI.** This is the single most common failure mode in hardened environments.
+- **`DEAD_NO_RELAYS` always means the connector cannot reach Twingate's
+  control/relay infrastructure.** The most common cause is DPI/SSL inspection
+  on `*.twingate.com`, but it can also be one of the required outbound ports
+  being blocked. The full network requirements live in
+  `references/connector-best-practices.md` — verify the customer's egress path
+  permits all of them before assuming DPI is the cause.
 - **Connector tokens are credentials.** Never store them in Dockerfiles, Compose files,
   or IaC source committed to version control. Inject via secrets management.
-- **Always set a restart policy (`--restart unless-stopped`)** so the Connector recovers
-  after host reboots without manual intervention.
+- **Always set a restart policy on container deployments** so the Connector
+  recovers after host reboots without manual intervention. Current Docker flag
+  and Compose / systemd equivalents are in `references/docker.md`,
+  `references/deploy-connector-with-docker-compose.md`, and
+  `references/systemd-service.md`.
+
+## When to Verify
+
+This skill body contains opinions and guidelines, not authoritative technical
+facts. **Before answering questions involving any of the following, read the
+relevant `references/` file first** — values change between releases and the
+references are the source of truth:
+
+- Outbound port numbers, protocols, or firewall/SG/NSG rules
+- Container image tags, Helm chart values keys, or environment variable names
+- Platform-specific deployment commands or Terraform/IaC field syntax
+- Hardware sizing recommendations
+- Connector log paths, metric names, or monitoring endpoints
+- Specific upgrade or shutdown procedures
+
+Do not answer these from training-data memory or from this skill body alone.
+Open the reference, confirm the current value, and cite the file in your
+response so the user can verify.
 
 ## Routing
 
@@ -50,11 +76,27 @@ why it stopped, this skill answers those questions.
 
 ## References
 
-See [`references/`](./references/) for current doc summaries.
+`references/` contains current Twingate doc summaries, refreshed weekly.
+**Consult these before answering fact-shaped questions** — your loaded context
+may be incomplete or stale.
 
-Key references:
+| If the user asks about… | Read first |
+|---|---|
+| Network requirements, ports, firewall/SG/NSG rules, egress | `connector-best-practices.md` |
+| AWS-specific deployment (ECS, EC2, EKS) | `aws-connector-patterns.md`, `aws.md`, `aws-ecs-headless-configurations.md` |
+| Azure-specific deployment (ACI, VMs, AKS) | `azure-connector-patterns.md`, `azure.md` |
+| GCP-specific deployment (GCE, GKE, Cloud Run, MIG) | `gcp-connector-patterns.md`, `gcp.md` |
+| Docker / Docker Compose deployment | `docker.md`, `deploy-connector-with-docker-compose.md` |
+| Linux / systemd deployment | `connectors-on-linux.md`, `systemd-service.md` |
+| NAS, homelab, on-prem (Synology, QNAP, TrueNAS, Proxmox, Unraid, Firewalla) | `how-to-set-up-twingate-on-a-synology-nas-dsm-7.md`, `nas-qnap-install.md`, `truenas-container-deployment.md`, `proxmox-container-deployment.md`, `unraid-getting-started.md`, `deploy-connector-on-firewalla.md` |
+| Connector image tag, container env vars, deployment commands | `connector-deployment.md`, `connector-metadata.md` |
+| Connector upgrades | `upgrading-connectors.md` |
+| `DEAD_NO_RELAYS`, `DEAD_NO_HEARTBEAT`, health diagnosis | `connector-real-time-logs.md`, `connector-monitoring.md`, `connector-health-checks.md` |
+| Logs, metrics, monitoring, SIEM integration | `connector-metrics.md`, `connector-monitoring.md`, `connector-real-time-logs.md`, `siem-guide.md` |
+| Hardware sizing, HA topology | `connector-best-practices.md` |
+| Headless / service account clients | `services-headless-clients.md`, `aws-ecs-headless-configurations.md` |
+| Connector shutdown, restart, lifecycle | `connector-shutdown-process.md`, `advanced-connector-management.md` |
 
-- `connector-deployment.md` — deployment guides for Docker, systemd, Helm, ECS, ACI, GCE
-- `aws-connector-patterns.md` — ECS Fargate and EC2 deployment modules
-- `azure-connector-patterns.md` — ACI and AKS deployment modules
-- `gcp-connector-patterns.md` — Cloud Run and GCE deployment modules
+For comprehensive coverage, see [`references/`](./references/) for the full
+set of doc summaries. **Default to checking** — do not answer port-level,
+command-syntax, or version questions from memory.

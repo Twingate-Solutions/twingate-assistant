@@ -36,6 +36,24 @@ evaluating, or asking architecture-level questions, this skill answers them.
 - **Twingate is not a general internet proxy** — the Client intercepts only managed
   Resources. Exit Networks serve specific egress use cases.
 
+## When to Verify
+
+This skill body covers design opinions and architectural concepts, not
+detailed component specifications. **Before answering questions involving any
+of the following, read the relevant `references/` file first** — and cite it
+in your response:
+
+- Component-level technical specifications (Controller / Client / Connector / Relay)
+- Specific encryption protocols, ciphers, or key-exchange details
+- DNS interception flow specifics (which queries are intercepted, in what order)
+- P2P / NAT-traversal mechanics and which environments they fail in
+- Compliance-framework specifics (HIPAA, SOC 2, PCI, GDPR, DORA, FedRAMP)
+- Platform-specific Client behavior (macOS, Windows, Linux, iOS, Android, ChromeOS)
+- Specific use-case patterns (database access, bastion replacement, VPN replacement)
+
+Do not answer architectural-detail or compliance questions from training-data
+memory — both Twingate's implementation details and compliance scope evolve.
+
 ## Routing
 
 - **→ twingate-connectors**: for Connector deployment, HA, upgrade procedures, or
@@ -47,12 +65,28 @@ evaluating, or asking architecture-level questions, this skill answers them.
 
 ## References
 
-See [`references/`](./references/) for current doc summaries.
+`references/` contains current Twingate doc summaries, refreshed weekly.
+**Consult these before answering fact-shaped questions.**
 
-Key references:
+| If the user asks about… | Read first |
+|---|---|
+| Core architecture, components, connection flow | `architecture.md`, `how-twingate-works.md`, `client-connection-flow.md`, `detailed-client-connection-flow.md` |
+| Network model overview, customer networks | `network-overview.md`, `customer-networks.md`, `remote-network-best-practices.md` |
+| DNS model, split DNS, DNS forwarding | `how-dns-works-with-twingate.md`, `how-twingate-forwards-dns.md`, `introduction-to-dns.md`, `private-dns-best-practices.md` |
+| P2P / NAT traversal | `peer-to-peer-communication-in-twingate.md`, `how-nat-traversal-works.md`, `local-peer-to-peer-best-practices.md` |
+| Encryption, cryptography | `how-encryption-works-in-twingate.md` |
+| VPN comparison, VPN replacement | `aws-vpn-replacement.md`, `diy-vpn-setup-guide.md` |
+| Bastion replacement | `bastion-replacement.md`, `cloak-your-bastion-server.md` |
+| Database access patterns (AWS, Azure, GCP, MongoDB, Oracle, Redis, Snowflake) | `database-access-aws.md`, `database-access-azure.md`, `database-access-gcp.md`, `database-access-guide.md`, `database-access-mongodb.md`, `database-access-oracle.md`, `database-access-redis.md`, `database-access-snowflake.md` |
+| Compliance use cases | `compliance-use-case.md`, `hipaa-compliance.md`, `pci-compliance.md`, `gdpr-compliance.md`, `dora-compliance.md`, `dora-locations.md` |
+| AWS-specific access patterns | `accessing-private-resources-in-azure.md`, `aws-cloudfront.md`, `aws-how-to-setup-subnets-for-secure-access.md`, `aws-workspaces.md` |
+| Audit logs, network events, analytics, reporting | `audit-logs.md`, `audit-logs-schema.md`, `network-events-ac-export.md`, `detailed-network-event-schema.md`, `network-summary-export.md`, `analytics.md`, `generating-insights-reports.md`, `exporting-network-traffic.md` |
+| Client platform details (macOS, Windows, Linux, mobile, ChromeOS) | `clients.md`, `macos.md`, `macos-and-ios.md`, `macos-standalone-client.md`, `linux.md`, `linux-headless.md`, `linux-userspace-networking.md`, `ios.md`, `android.md`, `chromeos.md`, `endpoint-requirements.md` |
+| Use-case overviews (infra access, internet security, device controls, IP-based) | `infra-access-use-case.md`, `internet-security-use-case.md`, `device-controls-use-case.md`, `ip-based-access-use-case.md`, `compliance-use-case.md` |
+| MSP, multi-tenant, partner deployments | `msp.md`, `msp-billing.md` |
+| Quick start / onboarding | `quick-start.md`, `automated-quick-start.md`, `digitalocean-getting-started.md` |
 
-- `architecture.md` — component overview and connection flow
-- `how-dns-works-with-twingate.md` — split DNS model deep dive
-- `remote-networks.md` — Remote Network design and management
-- `resources.md` — Resource types and definition strategies
-- `twingate-vs-vpn.md` — comparison for evaluation conversations
+For comprehensive coverage, see [`references/`](./references/) for the full
+set of doc summaries (~150 architecture-related files). **Default to
+checking** — architectural details, compliance scope, and use-case
+patterns evolve.

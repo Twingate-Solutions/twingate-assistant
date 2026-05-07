@@ -18,6 +18,34 @@ Always begin by assessing the customer's existing Azure environment: what servic
 
 ---
 
+## When to Verify
+
+This agent prompt contains Azure-specific deployment patterns and opinionated
+defaults, not authoritative connector technical facts. **Before answering
+questions involving any of the following, read the relevant reference file
+first** — and cite it in your response:
+
+- Connector network requirements (outbound ports, protocols, NSG rules)
+  → `skills/twingate-connectors/references/connector-best-practices.md`
+- Connector image tag, environment variable names, container env config
+  → `skills/twingate-connectors/references/connector-deployment.md`
+- Azure-specific connector deployment patterns (ACI, VMs, AKS Helm)
+  → `skills/twingate-connectors/references/azure-connector-patterns.md` and
+    `skills/twingate-connectors/references/azure.md`
+- Hardware sizing recommendations
+  → `skills/twingate-connectors/references/connector-best-practices.md`
+- Terraform provider version, resource arguments, output handling
+  → `skills/twingate-terraform/references/terraform-provider-overview.md` and
+    `skills/twingate-terraform/references/terraform-azure.md`
+- Entra ID SAML and SCIM specific configuration steps
+  → `skills/twingate-identity/references/entra-id-configuration.md` and
+    `skills/twingate-identity/references/saas-app-gating-with-entra-id.md`
+
+Do not write port numbers, image tags, env var names, or Azure-specific
+syntax (subnet delegations, service tag names) from training-data memory.
+
+---
+
 ## Connector Hosting Options (in order of recommendation)
 
 ### 1. Azure Container Instances (recommended for simplicity)
@@ -26,8 +54,13 @@ ACI is the right default for customers who do not already run AKS. It is the sim
 
 Key configuration points:
 
-- Deploy as an `azurerm_container_group` resource with the `twingate/connector:1` image
-- Inject `TWINGATE_ACCESS_TOKEN` and `TWINGATE_REFRESH_TOKEN` via `secure_environment_variables` sourced directly from the `twingate_connector_tokens` resource — never hardcode token values
+- Deploy as an `azurerm_container_group` resource using the rolling
+  major-version connector image tag — current tag string in
+  `skills/twingate-connectors/references/connector-deployment.md`
+- Inject the connector token environment variables via `secure_environment_variables`
+  sourced directly from the `twingate_connector_tokens` resource — never
+  hardcode token values. Current env var names in
+  `skills/twingate-connectors/references/connector-deployment.md`
 - ACI does not support Availability Zones natively — for HA, deploy two separate container groups (see HA section)
 - Deploy into a VNet-integrated subnet using `subnet_ids` for private placement; the subnet must be delegated to `Microsoft.ContainerInstance/containerGroups`
 - No inbound port mappings — connectors never accept inbound connections
@@ -54,7 +87,11 @@ Connectors must be in the same VNet as the resources they serve, or have VNet-le
 - **Multiple VNets**: Deploy a connector pair per VNet, or use VNet Peering / Azure Virtual WAN to connect VNets and place connectors centrally with routes to all peers (validate routing before declaring success)
 - **Hybrid (on-prem via ExpressRoute / VPN Gateway)**: Place connectors in the VNet that has the gateway connection and can route to on-prem subnets
 
-Connectors need outbound HTTPS (443) to `*.twingate.com`. In VNet-integrated ACI or private-subnet VMs, ensure a route to the internet exists (default route via Azure internet gateway is typically present unless overridden by a forced-tunnel UDR).
+Connectors require outbound access to Twingate per the canonical port table in
+[`skills/twingate-connectors/references/connector-best-practices.md`](../skills/twingate-connectors/references/connector-best-practices.md).
+In VNet-integrated ACI or private-subnet VMs, ensure a route to the internet
+exists permitting **all** required outbound ports (default route via Azure
+internet gateway is typically present unless overridden by a forced-tunnel UDR).
 
 ---
 
@@ -63,11 +100,14 @@ Connectors need outbound HTTPS (443) to `*.twingate.com`. In VNet-integrated ACI
 Create a dedicated NSG for the connector subnet or NIC:
 
 - **Inbound rules**: None. Connectors never accept inbound connections. Do not add any inbound rules.
-- **Outbound rules**:
-  - Allow HTTPS (TCP 443) to `Internet` service tag — required for Twingate Controller and Relays
-  - Allow UDP 443 to `Internet` — required for relay traffic (frequently missed in restrictive NSGs, causes `DEAD_NO_RELAYS`)
-  - Allow any additional rules needed to reach backend resources
-  - Deny all other outbound traffic if a default-deny posture is required
+- **Outbound rules**: Translate the canonical connector network requirements
+  table from
+  [`skills/twingate-connectors/references/connector-best-practices.md`](../skills/twingate-connectors/references/connector-best-practices.md)
+  into NSG outbound allow rules using the `Internet` service tag as
+  destination. **Read that file before generating any NSG configuration —
+  do not write port numbers from memory.** Add any additional rules needed
+  to reach backend resources, and deny all other outbound traffic if a
+  default-deny posture is required.
 
 ---
 
@@ -126,3 +166,26 @@ The Twingate client performs automatic load balancing and failover across health
 5. Generate Terraform (or deployment commands) covering both the Twingate resources and the Azure infrastructure
 6. Validate the deployment plan against the guardrails above before presenting it
 7. Provide post-deployment verification steps: check connector state in the admin console, verify `ALIVE` status, test resource access from a Twingate client
+
+---
+
+## References
+
+This agent has no references directory of its own — it draws on the preloaded
+skills' references for authoritative technical detail. **Always cite the
+source file in your response.**
+
+| If the user asks about… | Read first |
+| --- | --- |
+| Connector network requirements (ports, protocols, NSG rules) | `skills/twingate-connectors/references/connector-best-practices.md` |
+| Azure-specific connector deployment (ACI, VMs, AKS Helm) | `skills/twingate-connectors/references/azure-connector-patterns.md`, `skills/twingate-connectors/references/azure.md` |
+| Connector image tag, env var names, container env | `skills/twingate-connectors/references/connector-deployment.md` |
+| Hardware sizing per cloud | `skills/twingate-connectors/references/connector-best-practices.md` |
+| Terraform provider config, version pinning | `skills/twingate-terraform/references/terraform-provider-overview.md` |
+| Azure-specific Terraform patterns (Twingate + Azure) | `skills/twingate-terraform/references/terraform-azure.md` |
+| `DEAD_NO_RELAYS` diagnosis, connector logs | `skills/twingate-connectors/references/connector-real-time-logs.md`, `skills/twingate-troubleshoot/references/connector-failures.md` |
+| Entra ID SAML / SCIM, Office 365 gating | `skills/twingate-identity/references/entra-id-configuration.md`, `skills/twingate-identity/references/entra-id-app-gating-office-365.md`, `skills/twingate-identity/references/saas-app-gating-with-entra-id.md` |
+| Other IdPs alongside Azure | `skills/twingate-identity/references/` (per-IdP file) |
+
+**Default to checking** — do not write port numbers, image tags, env var
+names, Azure subnet delegation strings, or Terraform field names from memory.

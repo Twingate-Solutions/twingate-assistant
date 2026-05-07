@@ -40,14 +40,40 @@ capabilities. You need a gateway.
 - **Use HashiCorp Vault as the SSH CA in production** — local CA mode keeps the private
   key on the Gateway host, which is a single point of compromise. Vault SSH secrets engine
   keeps keys off-disk with full audit logging. Local CA is explicitly for dev/test only.
-- **Two CAs are required, not one** — an X.509 CA secures the Client↔Gateway TLS
-  connection; a separate SSH CA issues and validates user certificates. Both must be
-  configured under Settings → Certificate Authorities before the Gateway will function.
+- **Two CAs are required, not one** — an X.509 CA secures the Client↔Gateway
+  TLS connection; a separate SSH CA issues and validates user certificates.
+  Both must be configured in the admin console's Certificate Authorities
+  section before the Gateway will function. Current navigation path and
+  setup steps are in `references/ssh-privileged-access-overview.md` and
+  `references/ssh-installation.md`.
 - **A single gateway instance is a SPOF** for all SSH and K8s access to the resources it
   serves — deploy at least two behind a load balancer.
-- **The IDFW feature set is actively expanding** — HTTPS, databases, and MCP are on the
-  roadmap beyond SSH and K8s. Check `references/identity-firewall.md` and the live docs
-  for protocols added since this skill was authored.
+- **The IDFW feature set is actively expanding beyond SSH and K8s.** Check
+  `references/identity-firewall.md` and `references/identity-firewall-overview.md`
+  for the current protocol support matrix and roadmap. Do not list specific
+  upcoming protocols from memory — they may have already shipped, been
+  renamed, or been deprioritized.
+
+## When to Verify
+
+This skill body covers concepts and decisions, not gateway config schemas
+or CA setup steps. **Before answering questions involving any of the
+following, read the relevant `references/` file first** — and cite it in
+your response:
+
+- Gateway config YAML keys and structure (recording, ssh.resources, CA refs)
+- Admin console navigation paths and UI labels
+- Specific Vault secrets engine paths or policy syntax
+- Smallstep CA configuration syntax
+- Helm chart values for kubectl proxy mode
+- Supported SSH features, protocol matrix, IDFW roadmap items
+
+For **gateway deployment examples** (Helm chart values, Docker Compose,
+systemd), inspect `https://github.com/Twingate/gateway` — the `deploy/`
+directory contains current configuration.
+
+Do not answer protocol-support, CA-setup, or YAML-schema questions from
+training-data memory.
 
 ## Routing
 
@@ -66,17 +92,19 @@ capabilities. You need a gateway.
 
 ## References
 
-See [`references/`](./references/) for current doc summaries.
+`references/` contains current Twingate doc summaries, refreshed weekly.
+**Consult these before answering fact-shaped questions.**
 
-Key references:
+| If the user asks about… | Read first |
+|---|---|
+| IDFW feature overview, protocol support matrix, roadmap | `identity-firewall.md`, `identity-firewall-overview.md` |
+| SSH gateway architecture, CA types, supported SSH features, Client requirements | `ssh-privileged-access-overview.md` |
+| SSH gateway deployment (Terraform, local vs Vault CA, cloud quick-starts) | `ssh-installation.md` |
+| Kubectl proxy mode, K8s RBAC integration, K8s session recording | `kubernetes-access.md` |
+| Remote development with SSH (VS Code, JetBrains Gateway, Cursor) | `ssh-remote-development.md` |
+| Smallstep CA integration | `ssh-smallstep.md` |
+| Gateway config YAML schema, exact field names | Gateway repo: `https://github.com/Twingate/gateway` (`deploy/` directory) |
 
-- `identity-firewall.md` — IDFW feature overview, protocol support matrix, roadmap
-- `ssh-privileged-access-overview.md` — Gateway architecture, CA types, supported SSH features, Client version requirements
-- `ssh-installation.md` — Terraform-based deployment, local vs Vault CA modes, cloud quick-starts
-- `kubernetes-access.md` — kubectl proxy mode, K8s RBAC integration, session recording
-- `ssh-remote-development.md` — VS Code, JetBrains Gateway, Cursor IDE setup
-- `ssh-smallstep.md` — Smallstep CA integration for certificate signing
-
-For gateway deployment examples, inspect `https://github.com/Twingate/gateway` — the
-`deploy/` directory contains current Helm chart values, Docker Compose, and systemd
-examples.
+For comprehensive coverage, see [`references/`](./references/) for the full
+set of doc summaries. **Default to checking** — gateway config keys and CA
+setup steps drift, and an out-of-date YAML key fails at gateway startup.

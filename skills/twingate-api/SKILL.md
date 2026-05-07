@@ -24,6 +24,27 @@ This skill owns Twingate's GraphQL API, service account key management, CLI tool
 - **Implement 429 retry with `Retry-After` backoff from the start, not as an afterthought.** The API enforces per-minute rate limits. Scripts that ignore 429 fail mid-run on large operations. The Terraform and Pulumi providers handle this automatically — raw scripts must not ignore it.
 - **Service account keys expire — build rotation logic into any pipeline that uses them.** Monitor `expiresAt` and rotate before expiry. Reactive rotation on failure disrupts pipelines.
 
+## When to Verify
+
+This skill body contains automation patterns and guidelines, not the schema.
+**Before writing any API code or answering questions involving any of the
+following, read `references/graphql-schema-reference.md` first** — this is
+the authoritative type and field reference and must be consulted for every
+non-trivial query or mutation:
+
+- Exact query/mutation names, argument names, or argument types
+- Field names on response objects (including nested fields and pagination structures)
+- Enum values for any field (e.g., resource protocol enums, address-type enums)
+- Input type structure for create/update mutations
+- Whether a given field exists, is nullable, or is deprecated
+
+For **CLI tooling** (Python `tg-cli`, JavaScript `tg-cli`, OpenClaw),
+read the corresponding CLI reference before suggesting commands — flag
+names and subcommand structure differ between tools.
+
+Do not answer schema or CLI questions from training-data memory — the
+schema evolves and CLI tools have version-specific syntax.
+
 ## Routing
 
 - **→ twingate-terraform / twingate-pulumi**: when the user wants persistent IaC management rather than API scripting — IaC provides drift detection, audit trail, and lifecycle management that raw API scripts do not
@@ -32,7 +53,21 @@ This skill owns Twingate's GraphQL API, service account key management, CLI tool
 
 ## References
 
-See [`references/`](./references/) for auto-generated doc summaries and the static schema file.
+`references/` contains the static GraphQL schema (hand-maintained, authoritative)
+and current Twingate doc summaries refreshed weekly. **Consult these before
+answering fact-shaped questions.**
 
-Key references:
-- [`graphql-schema-reference.md`](./references/graphql-schema-reference.md) — hand-maintained full type definitions, field signatures, enum values, input types, and all query/mutation signatures; read this before writing any API code
+| If the user asks about… | Read first |
+|---|---|
+| Query/mutation signatures, field names, enum values, input types | `graphql-schema-reference.md` (authoritative) |
+| API overview, authentication, getting started | `api-overview.md`, `api.md`, `getting-started-with-the-api.md` |
+| Exploring the API, sample queries | `exploring-the-apis.md` |
+| Python CLI (`tg-cli`) | `introduction-to-the-python-cli.md` |
+| JavaScript CLI (`tg-cli`) | `introduction-to-tg-cli-javascript.md` |
+| OpenClaw automation tool (general, Docker Compose, DigitalOcean) | `openclaw.md`, `openclaw-docker-compose.md`, `openclaw-digitalocean.md` |
+| CI/CD pipeline patterns | `example-cicd-configurations.md` |
+| General automation script examples | `general-scripts.md` |
+
+For comprehensive coverage, see [`references/`](./references/) for the full
+set of doc summaries. **Default to checking the schema** — never write a
+query or mutation from memory; field names and enum values change.

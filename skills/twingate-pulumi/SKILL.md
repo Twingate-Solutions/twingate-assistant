@@ -38,6 +38,25 @@ resource behavior, `twingate-terraform` is the authoritative reference.
 - **Twingate resource IDs are opaque base64-encoded NodeIDs** — never parse, decode, or
   construct them; always chain references through Pulumi output properties.
 
+## When to Verify
+
+This skill body contains opinions and guidelines, not authoritative SDK
+schemas. **Before answering questions involving any of the following, read
+the relevant `references/` file first** — and cite it in your response:
+
+- Specific SDK method names, argument names, or default values per language
+- Pulumi config keys, secret-marking syntax, or stack output handling
+- Cloud-specific Pulumi integration (AWS Secrets Manager, Azure Key Vault,
+  GCP Secret Manager) when wiring tokens into compute resources
+
+For **current SDK examples and schemas**, inspect
+`https://github.com/Twingate/pulumi-twingate`. The Pulumi Registry at
+`https://www.pulumi.com/registry/packages/twingate/` is also authoritative.
+For reference programs, see `https://github.com/Twingate-Solutions/pulumi-scripts`.
+
+Do not answer these from training-data memory — SDK signatures vary across
+TypeScript / Python / Go / C# and evolve between releases.
+
 ## Routing
 
 - **→ twingate-terraform**: for resource semantics and API behavior when Pulumi docs are
@@ -50,9 +69,18 @@ resource behavior, `twingate-terraform` is the authoritative reference.
 
 ## References
 
-See [`references/`](./references/) for current doc summaries.
-Key references: `pulumi-provider-overview.md`
+`references/` contains current Twingate doc summaries, refreshed weekly.
+**Consult these before answering fact-shaped questions.**
 
-For current SDK examples and schemas, inspect `https://github.com/Twingate/pulumi-twingate`.
-For reference programs, see `https://github.com/Twingate-Solutions/pulumi-scripts`. Also
-check the Pulumi Registry at `https://www.pulumi.com/registry/packages/twingate/`.
+| If the user asks about… | Read first |
+|---|---|
+| Provider config, getting started, secret-marking patterns | `pulumi-provider-overview.md`, `pulumi-getting-started.md` |
+| AWS-specific Pulumi patterns (EC2/ECS + Twingate) | `pulumi-aws.md` (and `skills/twingate-connectors/references/aws-connector-patterns.md`) |
+| Azure-specific Pulumi patterns (ACI/VMs + Twingate) | `pulumi-azure.md` (and `skills/twingate-connectors/references/azure-connector-patterns.md`) |
+| GCP-specific Pulumi patterns (GCE/MIG + Twingate) | `pulumi-gcp.md` (and `skills/twingate-connectors/references/gcp-connector-patterns.md`) |
+| Resource semantics or API behavior the Pulumi docs don't cover | `skills/twingate-terraform/references/terraform-provider-overview.md` (underlying API is identical) |
+| Exact SDK method signatures per language | Provider source repo (`https://github.com/Twingate/pulumi-twingate`) and Pulumi Registry |
+
+For comprehensive coverage, see [`references/`](./references/) for the full
+set of doc summaries. **Default to checking** — SDK schemas drift, and an
+out-of-date method name fails at `pulumi up`.

@@ -42,10 +42,13 @@ Twingate API objects (Resources, Remote Networks); the Helm chart manages the Co
 process (data path). Do not let both manage the same Twingate objects or you will create
 duplicates.
 
-- **Never put `accessToken` or `refreshToken` as plaintext strings in a committed
-  `values.yaml`** — store in a Kubernetes Secret and reference via `secretKeyRef`; in
-  production, use External Secrets Operator to sync from a secrets manager (AWS Secrets
-  Manager, HashiCorp Vault) rather than manual `kubectl create secret`.
+- **Never commit connector token values as plaintext in Helm values files** —
+  store in a Kubernetes Secret and reference via `secretKeyRef`; in production,
+  use External Secrets Operator to sync from a secrets manager (AWS Secrets
+  Manager, HashiCorp Vault) rather than manual `kubectl create secret`. Helm
+  chart field names evolve between versions — verify current values keys in
+  `references/k8s-helm-chart.md` or the chart's published `values.yaml` before
+  generating configuration.
 - **Deploy a minimum of two Helm releases per Remote Network in production** — each release
   is an independent Connector; use pod anti-affinity rules to prevent both scheduling on
   the same node.
@@ -57,6 +60,25 @@ duplicates.
 - **Always inspect the Helm chart `values.yaml` at the target chart version before writing
   configuration** — the schema evolves between releases; do not rely on third-party docs
   that may reference outdated field names.
+
+## When to Verify
+
+This skill body covers patterns and decisions, not chart values or CRD
+schemas. **Before answering questions involving any of the following, read
+the relevant `references/` file first** — and cite it in your response:
+
+- Specific Helm chart values keys (token field names, image tag, anti-affinity)
+- CRD field names and schemas (`TwingateConnector`, `TwingateResource`, etc.)
+- Helm install / upgrade commands and chart version compatibility
+- Kubectl proxy mode configuration (when not in IDFW context)
+
+For the **authoritative Helm chart values schema**, clone
+`https://github.com/Twingate/helm-charts` and inspect
+`charts/connector/values.yaml`. For **CRD schemas**, clone
+`https://github.com/Twingate/kubernetes-operator` and check `config/crd/`.
+
+Do not answer these from training-data memory — chart values keys and CRD
+fields drift between releases.
 
 ## Routing
 
@@ -74,9 +96,20 @@ duplicates.
 
 ## References
 
-See [`references/`](./references/) for current doc summaries.
-Key references: `kubernetes-operator.md`
+`references/` contains current Twingate doc summaries, refreshed weekly.
+**Consult these before answering fact-shaped questions.**
 
-For current Helm chart values schema, clone `https://github.com/Twingate/helm-charts` and
-inspect `charts/connector/values.yaml`. For CRD schemas, clone
-`https://github.com/Twingate/kubernetes-operator` and check `config/crd/`.
+| If the user asks about… | Read first |
+|---|---|
+| Helm chart deployment, values keys, install commands | `k8s-helm-chart.md` |
+| Helm chart upgrades and chart version handling | `k8s-helm-chart-upgrades.md` |
+| Operator CRDs, GitOps with `TwingateResource` / `TwingateRemoteNetwork` | `kubernetes-operator.md` |
+| Cluster service exposure (private services to Twingate users) | `k8s-private-services.md`, `k8s.md` |
+| Public service exposure patterns | `k8s-public-services.md` |
+| kubectl access via Twingate (non-IDFW) | `k8s-cluster-access.md`, `k8s-kubectl.md` |
+| Helm values schema (exact field names) | Helm chart repo: `charts/connector/values.yaml` |
+| CRD schemas (exact field names) | Operator repo: `config/crd/` |
+
+For comprehensive coverage, see [`references/`](./references/) for the full
+set of doc summaries. **Default to checking** — chart values keys and CRD
+schemas drift between versions.

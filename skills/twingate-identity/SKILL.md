@@ -36,6 +36,24 @@ what conditions, and for how long, this skill governs those decisions.
 - **When running multiple IdPs, enforce strict email uniqueness.** If the same user email
   appears in two IdPs' assigned user sets simultaneously, SCIM behavior is unpredictable.
 
+## When to Verify
+
+This skill body contains policy-design opinions, not the per-IdP configuration
+steps or device-trust integration details. **Before answering questions
+involving any of the following, read the relevant `references/` file first**
+— and cite it in your response:
+
+- Per-IdP SAML and SCIM configuration steps (Okta, Entra ID, Google Workspace,
+  JumpCloud, OneLogin, Keycloak, etc.)
+- Specific MDM / EDR integration (Jamf, Kandji, Intune, CrowdStrike,
+  SentinelOne, 1Password, Omnissa)
+- Security policy field names, default values, or exact policy semantics
+- SCIM endpoint URLs, attribute mapping, or provisioning-mode options
+- Device posture check types and configuration
+
+Do not answer per-IdP or per-MDM configuration questions from training-data
+memory — IdP UIs and SCIM connectors evolve frequently.
+
 ## Routing
 
 - **→ twingate-architect**: for Resource definition, Remote Network design, or deployment
@@ -49,8 +67,30 @@ what conditions, and for how long, this skill governs those decisions.
 
 ## References
 
-See [`references/`](./references/) for current doc summaries.
+`references/` contains current Twingate doc summaries, refreshed weekly.
+**Consult these before answering fact-shaped questions.**
 
-Key references:
+| If the user asks about… | Read first |
+|---|---|
+| General IdP overview, choosing an IdP | `identity-providers.md`, `identity-provider-setup.md` |
+| Okta SAML / SCIM | `okta-configuration.md`, `okta-app-configuration.md`, `okta-scim-configuration.md` |
+| Entra ID SAML / SCIM, Office 365 gating | `entra-id-configuration.md`, `entra-id-app-gating-office-365.md`, `saas-app-gating-with-entra-id.md` |
+| Google Workspace SAML / SCIM | `google-workspace-configuration.md`, `saas-app-gating-with-google-workspace.md` |
+| JumpCloud SAML / SCIM | `jumpcloud-configuration.md`, `saas-app-gating-with-jumpcloud.md` |
+| OneLogin SAML / SCIM | `onelogin-configuration.md`, `onelogin-configuration-scim.md`, `saas-app-gating-with-onelogin.md` |
+| Keycloak | `keycloak-configuration.md` |
+| Active Directory | `using-active-directory-with-twingate.md` |
+| SCIM endpoint, provisioning API, attribute mapping | `scim-provisioning-api.md` |
+| Security policies (overview, design, migration) | `security-policies.md`, `security-policies-best-practices.md`, `security-policy-guides.md`, `security-policies-migration-guide.md` |
+| MFA / 2FA enforcement | `two-factor-authentication.md`, `two-factor-authentication-security-policies.md` |
+| Device trust (overview, posture checks, managed devices) | `trusted-devices.md`, `device-posture-checks.md`, `managed-devices.md`, `device-security-guide.md`, `windows-managed-devices.md`, `manually-verified-devices.md`, `managing-devices.md`, `device-failures.md`, `devices.md`, `device-only-resource-policies.md` |
+| MDM / EDR integration (Jamf, Kandji, Intune, etc.) | `jamf-configuration.md`, `jamf-mdm.md`, `kandji-configuration.md`, `kandji-mdm.md`, `intune-configuration.md`, `omnissa-workspace-one-mdm.md`, `crowdstrike-configuration.md`, `sentinelone-configuration.md`, `1password-configuration.md` |
+| JIT / ephemeral access, contractor patterns | `jit-access-requests.md`, `resources-reviewing-access-requests.md`, `ephemeral-access-to-resources.md`, `vendor-and-contractor-access-management.md`, `usage-based-auto-lock.md` |
+| Groups, users, admins, offboarding | `groups.md`, `users.md`, `admins.md`, `offboarding-users.md` |
+| Authentication, social logins | `authentication.md`, `social-logins.md` |
+| Service accounts | `service-accounts-guide.md` |
+| SaaS app gating | `saas-app-gating.md`, `saas-app-gating-best-practices.md` |
 
-- `identity-provider-setup.md` — SAML and SCIM configuration for all supported IdPs
+For comprehensive coverage, see [`references/`](./references/) for the full
+set of doc summaries. **Default to checking** — IdP and MDM integration
+guides change as vendor UIs and APIs evolve.
