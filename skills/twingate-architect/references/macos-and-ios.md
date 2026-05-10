@@ -1,53 +1,53 @@
-# macOS & iOS — Twingate MDM Deployment
+# macOS & iOS – Twingate MDM Distribution & Configuration
 
 ## Summary
-Twingate clients for macOS and iOS can be deployed and configured via MDM solutions using custom `.mobileconfig` configuration profiles. The Standalone Client (macOS) is preferred over the App Store version as it supports more configuration options. Clients older than 12 months will not connect to the service.
+Twingate Client for macOS and iOS can be distributed and configured via MDM solutions (Kandji, Jamf, Omnissa Workspace ONE) using custom `.mobileconfig` configuration profiles. The Standalone Client is preferred over the App Store version for full feature availability, including system extension auto-install and automatic update controls.
 
 ## Key Information
-- **macOS**: Standalone App (recommended) or Mac App Store
-- **iOS**: App Store only
-- Supported MDMs: Kandji, Jamf, Omnissa Workspace ONE
-- Config profiles are XML files with `.mobileconfig` extension
-- App Store distribution requires Apple Business Manager (ABM) seat provisioning — free but required
-
-## Configuration Values (Profile Keys)
-
-| Key | Type | Description |
-|-----|------|-------------|
-| `network` | String | Pre-populates Twingate network name at login |
-| `PresentedDataPrivacy` | Boolean | Skip privacy screen on first launch |
-| `PresentedEducation` | Boolean | Skip education screen on first launch |
-| `automaticallyInstallSystemExtension` | Boolean | Auto-install system extension (Standalone only) |
-| `LaunchApp` | Boolean | Launch app at login |
-| `SUEnableAutomaticChecks` | Boolean | Enable update checks (Standalone only) |
-| `SUAutomaticallyUpdate` | Boolean | Auto-download updates and prompt to install (Standalone only) |
-
-**Bundle identifiers:**
-- App: `com.twingate.macos`
-- Tunnel provider: `com.twingate.macos.tunnelprovider`
-- Team ID: `6GX8KVTR9H`
-- PayloadType for app config: `com.twingate.macos`
+- **macOS**: Available as Standalone App or Mac App Store
+- **iOS**: Available on App Store only
+- Clients older than 12 months are unsupported and cannot connect
+- Profile format: XML `.mobileconfig` file with Apple plist structure
+- Bundle IDs: `com.twingate.macos` (app), `com.twingate.macos.tunnelprovider` (tunnel)
+- Team Identifier: `6GX8KVTR9H`
 
 ## Prerequisites
-- MDM solution enrolled with managed devices
-- For App Store distribution: Apple Business Manager account with Twingate seats "purchased"
-- Profile creation tool (MDM built-in, iMazing Profile Editor, or ProfileCreator)
+- MDM solution (Kandji, Jamf, or Workspace ONE)
+- For App Store distribution: Apple Business Manager (ABM) account with "purchased" Twingate seats
+- Standalone App required for: `automaticallyInstallSystemExtension`, `SUEnableAutomaticChecks`, `SUAutomaticallyUpdate`
 
-## Step-by-Step: Silent Install via MDM
-1. Build `.mobileconfig` XML with required payloads (VPN, app config, notifications, background items, system extension policy)
-2. Set `automaticallyInstallSystemExtension: true`, `PresentedDataPrivacy: true`, `PresentedEducation: true`
-3. Set `network` to your Twingate network name (e.g., `acme`)
-4. Upload profile to MDM and deploy alongside Standalone App package
+## Configuration Values (Profile Key/Value Pairs)
+
+| Key | Type | Description | Standalone Only |
+|-----|------|-------------|-----------------|
+| `network` | String | Pre-populates network name (e.g., `acme`) | No |
+| `PresentedDataPrivacy` | Boolean | `true` bypasses privacy screen on first launch | No |
+| `PresentedEducation` | Boolean | `true` bypasses education screen on first launch | No |
+| `automaticallyInstallSystemExtension` | Boolean | `true` auto-installs system extension | Yes |
+| `LaunchApp` | Boolean | `true` launches app on login | No |
+| `SUEnableAutomaticChecks` | Boolean | `true` enables auto update checks | Yes |
+| `SUAutomaticallyUpdate` | Boolean | `true` auto-downloads updates, prompts to install | Yes |
+
+## Profile Payload Types Required for Silent Install
+1. `com.apple.vpn.managed` – VPN configuration
+2. `com.twingate.macos` – App-specific settings
+3. `com.apple.notificationsettings` – Enable notifications
+4. `com.apple.servicemanagement` – Background items (TeamID: `6GX8KVTR9H`)
+5. `com.apple.system-extension-policy` – Allow system extension
+
+## Apple Business Manager Distribution Steps
+1. Sign in to Apple Business Manager with company Apple ID
+2. Search "Twingate" and provision seats (free)
+3. Seats appear in MDM; deploy without requiring user personal Apple IDs
 
 ## Gotchas
-- **Client expiry**: Clients >12 months old cannot connect — if disabling auto-updates, establish a manual update process
-- **LaunchApp conflict**: Set `LaunchApp: false` if using a Twingate Launch Daemon (keep-alive) to avoid conflicts
-- **Standalone-only keys**: `automaticallyInstallSystemExtension`, `SUEnableAutomaticChecks`, `SUAutomaticallyUpdate` do not apply to App Store version
-- **ABM requirement**: Even though Twingate is free, MDM distribution of App Store version requires ABM seat allocation
-- `PayloadRemovalDisallowed: true` in example profile prevents users from removing the config
+- **`LaunchApp` conflict**: Set to `false` if using a Twingate Launch Daemon/keep-alive agent to avoid duplicate launch
+- **Managed update process**: If disabling `SUEnableAutomaticChecks`, you must maintain a manual update process — clients older than 12 months stop working entirely
+- `automaticallyInstallSystemExtension`, `SUEnableAutomaticChecks`, and `SUAutomaticallyUpdate` only apply to the **Standalone App**, not the App Store version
+- `PayloadRemovalDisallowed: true` in the example profile prevents users from removing the configuration
 
 ## Related Docs
-- Kandji deployment guide
-- Jamf deployment guide
-- Omnissa Workspace ONE guide
-- Apple Business Manager user guide
+- Kandji MDM Guide
+- Jamf MDM Guide
+- Omnissa Workspace ONE Guide
+- [iMazing Profile Editor](https://imazing.com/profile-editor) / [ProfileCreator](https://github.com/ProfileCreator/ProfileCreator) for building profiles

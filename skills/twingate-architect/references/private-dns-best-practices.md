@@ -1,31 +1,28 @@
 # Best Practices for Configuring Private DNS with Twingate
 
 ## Summary
-Twingate recommends using private DNS exclusively for Resources rather than IP addresses or public DNS entries. The Connector handles FQDN resolution using its host's DNS configuration. Structuring DNS zones around permission boundaries simplifies Resource management.
+Twingate recommends using private DNS exclusively for Resources rather than IP addresses or public DNS entries. DNS zones can be mapped to Twingate Resources and Groups to simplify access management. The Connector handles FQDN resolution using its host's configured DNS servers.
 
 ## Key Information
-- Private DNS prevents information leakage from public DNS entries for internal resources
-- DNS names resolve IP overlap issues (same IP on multiple networks)
-- Connector resolves FQDNs the same way any host on its subnet would
-- DNS zones can map directly to Twingate Groups, enabling wildcard-style Resource coverage
-- Adding hosts to a DNS zone automatically makes them accessible without new Resource configuration
+- Private DNS prevents information leakage from public DNS entries pointing to private Resources
+- DNS names eliminate IP overlap ambiguity (same IP on different networks)
+- DNS zones can be structured to match permission boundaries (e.g., `.engineering.yourcompany.com`)
+- A single Twingate Resource can point to an entire DNS zone — new hosts added to the zone are automatically accessible without additional Resource configuration
+- The **Connector** resolves FQDNs, not the client — resolution behavior matches any host on the Connector's subnet
 
 ## Prerequisites
-- A private DNS solution (AWS Route 53, Azure DNS, or on-prem DNS server)
-- Connector deployed on the target network
-- Twingate Groups configured for access control
+- A private DNS zone (AWS Route 53, Azure DNS, or on-prem DNS server)
+- Connector deployed on a host with access to the private DNS server
 
 ## Setup Pattern
-
-**DNS Zone → Twingate Resource → Group mapping:**
-1. Define a DNS zone aligned to a role/permission boundary (e.g., `.engineering.yourcompany.com`)
-2. Create a single Twingate Resource pointing to the DNS zone wildcard
-3. Map that Resource to the corresponding Twingate Group (e.g., Engineering)
-4. New hosts added under the zone are automatically accessible to the group
+1. Define DNS zones aligned with access roles (e.g., `*.engineering.yourcompany.com`)
+2. Create a Twingate Resource pointing to the DNS zone wildcard
+3. Map the Resource to the corresponding Twingate Group (e.g., Engineering group)
+4. New hosts added under the zone inherit access automatically
 
 ## Configuration Values
-- **Resource value**: DNS zone wildcard (e.g., `*.engineering.yourcompany.com`)
-- **Custom DNS**: Configurable per-Connector but not recommended due to added complexity
+- Resource value: DNS zone pattern (e.g., `*.engineering.yourcompany.com`)
+- Custom DNS server: Optional per-Connector setting (not recommended — use host DNS instead)
 
 ## Verification Command
 ```bash
@@ -34,12 +31,12 @@ nslookup hostX.Y.mycompany.com
 ```
 
 ## Gotchas
-- Connector uses DNS servers configured on its **host OS** by default — ensure host DNS is correctly pointed at private DNS
-- Custom DNS server on Connector is possible but increases configuration complexity
-- Public DNS entries for private resources create an attack surface — remove them
-- IP-based Resources break when IP overlap exists across networks; DNS names avoid this
+- Connector uses DNS servers configured on its **host OS** by default — ensure the host resolves private zones correctly before assuming Connector will work
+- Custom DNS server on Connector is possible but increases configuration complexity — avoid unless necessary
+- Public DNS entries for private Resources are a security risk even if Twingate is in use
 
 ## Related Docs
-- [IP Overlap](https://www.twingate.com/docs/ip-overlap)
-- [AWS Route 53](https://aws.amazon.com/route53/)
-- [Azure DNS](https://azure.microsoft.com/en-us/services/dns/)
+- IP Overlap documentation
+- AWS Route 53
+- Azure DNS
+- Connector configuration

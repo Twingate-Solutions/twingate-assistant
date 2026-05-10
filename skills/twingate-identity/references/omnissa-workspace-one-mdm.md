@@ -1,54 +1,48 @@
-## Deploying Twingate Clients with Omnissa Workspace ONE
+# Deploying macOS & iOS Clients with Omnissa Workspace ONE
 
-How to distribute the Twingate macOS and iOS Clients via Omnissa Workspace ONE (formerly VMware Workspace ONE).
+## Summary
+Guide for distributing the Twingate Client via Omnissa Workspace ONE MDM for both macOS and iOS platforms. macOS uses PKG distribution; iOS requires Apple Business Manager integration.
 
-**macOS:**
-- Distribute as a **non-App Store app** (PKG)
-- Download the .pkg from the Twingate download page
-- Upload via Workspace ONE's standard non-App Store app workflow
+## Key Information
+- macOS deployment uses non-App Store PKG distribution
+- iOS deployment requires Apple Business Manager (ABM) linked to Workspace ONE
+- Pre-configuration of macOS client is supported via configuration profiles
 
-**iOS -- Requires Apple Business Manager:**
-- Add Twingate Client to **Apple Business Manager** first
-- Distribute via Workspace ONE's ABM integration
+## Prerequisites
+- **macOS**: Workspace ONE configured for non-App Store app distribution; Twingate PKG downloaded from the Twingate download page
+- **iOS**: Apple Business Manager account; Twingate iOS app added to ABM; Workspace ONE linked to ABM via VPP Managed Distribution
 
-**Linking Workspace ONE to ABM:**
-- **Settings -> Apple (under Devices & Users) -> VPP Managed Distribution**
-- Follow the guided setup
-- **Uncheck "Automatically Send Invites"**
+## Step-by-Step
 
-**Required Workspace ONE Settings After Linking:**
+### macOS
+1. Download Twingate PKG installer from the Twingate download page
+2. Upload PKG to Workspace ONE as a non-App Store app
+3. Follow Workspace ONE documentation to configure and distribute
+4. Optionally apply configuration profiles for pre-configuration (VPN config, system extension, Network pre-population)
 
-**1. Enable Device Assignment** (avoids requiring users' personal Apple IDs)
-- **Applications -> Native -> Purchased**
-- Select Twingate iOS app
-- **More Actions -> Enable Device Assignment**
+### iOS
+1. Add Twingate iOS Client to Apple Business Manager
+2. In Workspace ONE, navigate to **Settings → Apple (Devices & Users) → VPP Managed Distribution**
+3. Link Apple Business Manager account following guided steps
+4. Ensure **"Automatically Send Invites"** is **unchecked**
+5. Navigate to **Applications → Native → Purchased**, select Twingate iOS app
+6. From **More Actions**, select **Enable Device Assignment** (prevents personal Apple ID requirement)
+7. From **More Actions**, select **Enable Auto Updates** (recommended)
 
-**2. Enable Auto Updates** (recommended)
-- Same screen, **More Actions -> Enable Auto Updates**
+## Configuration Values
+| Setting | Location | Value |
+|---|---|---|
+| Automatically Send Invites | VPP Managed Distribution setup | Unchecked |
+| Device Assignment | More Actions on app | Enabled |
+| Auto Updates | More Actions on app | Enabled (recommended) |
 
-**Pre-Migration Step (Important):**
-- Uninstall any manually-installed Twingate Clients via a temporary policy first
-- Why: manually-installed versions may differ from MDM-distributed, causing config drift
-- Deactivate the cleanup policy before rolling out the MDM-managed Client
+## Gotchas
+- **Manually installed clients conflict**: Users who installed Twingate manually before MDM rollout may experience version mismatch issues. Create a temporary removal policy to uninstall existing clients before distributing via Workspace ONE; deactivate that policy before rollout.
+- ABM integration must be completed before iOS app distribution is possible.
+- Device assignment must be explicitly enabled — default deployment requires users to accept via personal Apple ID.
 
-**Pre-Configuring the macOS Client:**
-- Follow the Twingate **Configuration Profiles** guide (`/docs/macos-and-ios`) to:
-  - Auto-enable VPN configuration
-  - Auto-allow system extension
-  - Pre-populate the Twingate network/tenant name
-  - Skip privacy/education screens for silent install
-- Same Bundle ID + Team Identifier values as in /docs/jamf-mdm:
-  - Bundle ID: `com.twingate.macos`
-  - Team Identifier: `6GX8KVTR9H`
-  - Tunnel provider: `com.twingate.macos.tunnelprovider`
-
-**Gotchas:**
-- "Automatically Send Invites" being **on** during VPP setup will email each user requesting their personal Apple ID -- defeats the device assignment model
-- Without the macOS configuration profile, users see prompts for VPN approval and system extension -- not fully silent
-- iOS app distribution depends entirely on ABM linkage being correct -- test on a single device before fleet rollout
-
-**Related Docs:**
-- /docs/macos-and-ios -- Configuration profile keys
-- /docs/jamf-mdm -- Detailed config profile recipe (same keys apply here)
-- /docs/kandji-mdm -- Auto App alternative
-- /docs/intune-configuration -- Intune for Windows/cross-platform
+## Related Docs
+- [Twingate Configuration Profiles (macOS pre-configuration)](https://www.twingate.com/docs/configuration-profiles)
+- Workspace ONE non-App Store app distribution (Workspace ONE official docs)
+- Workspace ONE + Apple Business Manager integration (Workspace ONE official docs)
+- Apple Business Manager (Apple official docs)

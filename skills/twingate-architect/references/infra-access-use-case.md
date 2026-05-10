@@ -4,61 +4,59 @@
 Twingate Infrastructure Access Use Case
 
 ## Summary
-Twingate provides secure, zero-trust access to on-premises and cloud infrastructure without exposing resources publicly. It replaces jump servers, bastion hosts, and VPNs with a lightweight connector-based approach deployable in under 15 minutes.
+Twingate provides secure, zero-trust access to on-premises and cloud infrastructure without public exposure via bastion hosts or VPNs. It supports programmatic configuration through Terraform, Pulumi, and an Admin API, and integrates with Kubernetes and CI/CD pipelines.
 
 ## Key Information
-- No public internet exposure required for protected resources
-- Networks remain hidden while allowing access to authorized users/services
-- Supports simultaneous access to multiple clouds or environments
-- Programmatic management via Terraform, Pulumi, and Admin API
-- Kubernetes operator available for cluster integration
+- No public internet exposure required — eliminates jump servers/bastion hosts
+- Deployment time: under 15 minutes with a single lightweight Connector host
+- No network reconfiguration or VPN server setup needed
+- Supports simultaneous access to multiple clouds/environments
+- Kubernetes Operator available for GKE, EKS, microK8s integrations
 
 ## Prerequisites
-- Twingate account with Admin access
-- Network where Connector can be deployed (single host)
-- No network reconfiguration required
+- A Twingate account with Admin access
+- A host within the target network to deploy the Connector
+- For IaC: Terraform or Pulumi installed; Twingate Admin API credentials
 
-## Use Cases Covered
+## Use Case Categories & Related Guides
+
+### Automation / IaC
+- Terraform integration: `Getting Started with Terraform and Twingate`
+- Pulumi integration: `Getting Started with Pulumi and Twingate`
+- Admin API for programmatic management
 
 ### CI/CD Workflows
-- CircleCI and GitHub Actions pipeline security
-- GitHub Codespaces resource access
-- Machine-to-machine communication via Service Accounts
+- CircleCI & GitHub Actions: `How to Secure CI/CD Pipelines`
+- GitHub Codespaces: `How to Enable Secure Access to Resources from Github Codespaces`
+- Machine-to-machine: `How to Secure Machine-to-machine Communication Using Service Accounts`
 
-### Kubernetes Deployments
-- Supported platforms: GKE, Amazon EKS, microK8s
-- Traffic routing from Kubernetes clusters
-- Accessing private and public resources in clusters
-- `kubectl` secure management
+### Kubernetes
+- `How to Route Traffic from a Kubernetes Cluster Using the Twingate Client`
+- `How to Securely Access Private Resources in a Kubernetes Cluster`
+- `How to Securely Access Publicly Exposed Resources in a Kubernetes Cluster`
+- `How to Securely Manage Kubernetes using kubectl`
 
 ### Development Environments
-- Non-production environment access controls
-- MFA for all protocols (SSH, RDP, SQL, zOS)
-- Private DNS integration
+- `Best Practices for Securing Access to Non-production Environments`
+- `How to Add MFA to all Protocols (ssh, RDP, SQL, zOS, etc.)`
+- `Using Private DNS with Twingate`
 
 ## Configuration Values
-- **IaC**: Terraform provider, Pulumi provider
-- **API**: Admin API for automated management
-- **Operator**: Twingate Kubernetes Operator
-
-## Step-by-Step (High Level)
-1. Deploy Twingate Connector on single host within target network
-2. Define Resources (individual IPs, hostnames, or CIDR ranges)
-3. Create Groups with least-privilege access policies
-4. Assign users/service accounts to Groups
-5. For CI/CD: configure Service Accounts for machine-to-machine access
-6. For Kubernetes: deploy Twingate Kubernetes Operator
+| Method | Reference |
+|--------|-----------|
+| IaC | Terraform provider, Pulumi provider |
+| API | Twingate Admin API |
+| K8s | Twingate Kubernetes Operator |
 
 ## Gotchas
-- Service Accounts required for automated/machine-to-machine workflows (not regular user accounts)
-- Kubernetes operator needed for seamless cluster integration — manual connector deployment has limitations
-- Multiple environments (dev/staging) can be accessed simultaneously, but require separate Connectors per network segment
+- Connector must be deployed **inside** the target network — it initiates outbound connections, so no inbound firewall rules needed
+- Least-privilege access requires explicit Resource and Group configuration — no implicit broad access
+- CI/CD service access should use **Service Accounts**, not user credentials
 
 ## Related Docs
-- [Getting Started with Terraform and Twingate](https://www.twingate.com/docs/terraform)
-- [Getting Started with Pulumi and Twingate](https://www.twingate.com/docs/pulumi)
-- [Twingate Kubernetes Operator](https://www.twingate.com/docs/kubernetes-operator)
-- [How to Secure CI/CD Pipelines](https://www.twingate.com/docs/cicd-pipelines)
-- [Machine-to-machine via Service Accounts](https://www.twingate.com/docs/service-accounts)
-- [Private DNS with Twingate](https://www.twingate.com/docs/private-dns)
-- [Best Practices for Non-production Environments](https://www.twingate.com/docs/non-production-environments)
+- Twingate Terraform Provider
+- Twingate Pulumi Provider
+- Admin API Reference
+- Twingate Kubernetes Operator
+- Service Accounts documentation
+- Private DNS with Twingate

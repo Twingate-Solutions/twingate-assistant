@@ -1,43 +1,39 @@
-## The Ultimate Guide to DNS & Twingate
+# The Ultimate Guide to DNS & Twingate
 
-Index doc for DNS-related Twingate questions. Use this as a navigation hub for the deeper guides linked below.
+## Page Title
+The Ultimate Guide to DNS & Twingate
 
-### Common DNS Questions Answered Elsewhere
+## Summary
+This is an index/navigation page that consolidates Twingate's DNS documentation into a single reference. It links to five separate guides covering DNS fundamentals, private DNS setup, Twingate DNS resolution mechanics, DNS query troubleshooting, and DNS encryption.
 
-| Question | Where to Look |
-|---|---|
-| What exactly is DNS? | /docs/introduction-to-dns -- general DNS primer |
-| I don't run a DNS server -- should I? | /docs/private-dns-best-practices -- benefits of private DNS |
-| How does Twingate resolve private FQDNs? | /docs/how-twingate-forwards-dns or /docs/how-dns-works-with-twingate -- mechanics |
-| How do I run `dig` / `nslookup` against private IPs through Twingate? | /docs/how-twingate-forwards-dns -- forwarding queries to retrieve real IPs |
-| How does Twingate encrypt DNS traffic? | /docs/dns-security -- DoH and DNS encryption |
+## Key Information
+- **Five topic areas covered:**
+  1. DNS fundamentals (for users new to DNS)
+  2. Private DNS server benefits and best practices
+  3. How Twingate resolves private FQDNs (CGNAT IP mechanics)
+  4. Running `dig`/`nslookup` queries against actual private IPs (not CGNAT IPs)
+  5. DNS traffic encryption via Twingate
 
-### Key Concepts to Understand
+- Twingate Client assigns **CGNAT IP addresses** to private FQDNs matching Resources — these differ from actual private IPs
+- Twingate can forward DNS queries to retrieve real private IP addresses (useful for troubleshooting)
+- Twingate can encrypt **all** DNS traffic, including traffic not related to private Resources
 
-**CGNAT IPs in the Twingate Client:**
-- The Client returns a Carrier-Grade NAT (CGNAT) IP for each private FQDN that maps to a Twingate Resource
-- This is **not** the actual private IP -- it's a synthetic IP the Client uses for its own routing
-- For troubleshooting (when you actually need the real IP): see /docs/how-twingate-forwards-dns
+## Prerequisites
+None — page serves as an entry point for all DNS knowledge levels.
 
-**DNS Encryption:**
-- Twingate can encrypt all outbound DNS via DoH -- not just queries to private Resources
-- Configurable per device or fleet-wide
-- See /docs/dns-security and /docs/internet-security
+## Step-by-Step
+Not applicable — this is a navigation/index page only.
 
-**Private DNS Servers:**
-- Optional but improves UX -- lets you use friendly hostnames (`prod-db.internal`) rather than IPs in Resource definitions
-- See /docs/private-dns-best-practices for setup patterns
+## Configuration Values
+None defined on this page.
 
-### Decision Notes
+## Gotchas
+- When using `dig` or `nslookup` from a machine running the Twingate Client, queries return CGNAT IPs, **not** the actual private IP of the Resource — requires a specific forwarding configuration to retrieve real IPs
+- DNS encryption covers all traffic only when configured; not enabled by default implicitly
 
-- Most teams **don't need** to run a private DNS server -- IP-based Resources work fine for small deployments
-- Once you have more than ~10 Resources or your team rotates IPs, **set up a private DNS server** -- the management cost goes way down
-- For DNS filtering / encryption: pair Twingate with NextDNS, Cloudflare DoH, or DNS Security profile (see /docs/dns-filtering, /docs/doh-cloudflare)
-
-### Related Docs
-
-- /docs/how-dns-works-with-twingate, /docs/how-twingate-forwards-dns -- Mechanics
-- /docs/private-dns-best-practices -- Private DNS setup
-- /docs/dns-security -- DNS encryption (DoH)
-- /docs/dns-filtering, /docs/doh-cloudflare, /docs/nextdns-configuration -- DNS filtering integrations
-- /docs/dns-failures -- DNS troubleshooting
+## Related Docs
+- Complete introduction to DNS (linked internally)
+- DNS best practices guide (private DNS server setup)
+- In-depth practical guide on DNS with Twingate (FQDN resolution mechanics)
+- Guide on forwarding DNS queries (troubleshooting with `dig`/`nslookup`)
+- Guide to DNS security (encrypting DNS traffic)

@@ -1,38 +1,29 @@
-## Keycloak Configuration
+# Keycloak Configuration
 
-Twingate integrates with Keycloak for **OIDC-based user authentication only**. No SCIM user/group sync.
+## Summary
+Twingate integrates with Keycloak to delegate user authentication via OIDC. Only users associated with the Twingate app in Keycloak can access Twingate and private resources. Configuration requires contacting Twingate support directly.
 
-**Plan Requirement:**
-- **Business or Enterprise** Twingate plans only
+## Key Information
+- Integration type: OIDC-based user authentication delegation
+- Access control: Only Keycloak users associated with the Twingate app can use Twingate
+- Twingate does **not** handle user authentication when Keycloak is configured — Keycloak does
+- No self-serve configuration available; must contact Twingate
 
-### What's Delegated to Keycloak
+## Prerequisites
+- **Business or Enterprise plan required** (not available on lower tiers)
+- Existing Keycloak instance
 
-- **User authentication** via OIDC
-- **No** user/group sync (unlike Okta, Entra ID, etc.)
+## Step-by-Step
+No public self-serve steps documented. Contact Twingate to initiate configuration.
 
-This means:
-- Users authenticate via Keycloak
-- Twingate Users / Groups are managed manually (or via the Admin API)
-- No automatic provisioning/deprovisioning -- you must disable users in Twingate when offboarding from Keycloak
+## Configuration Values
+None documented publicly.
 
-### Setup
+## Gotchas
+- This feature is **Business & Enterprise only** — attempting to configure on lower plans will not work
+- No documented self-serve setup path; configuration is handled through Twingate support
+- Documentation is minimal — implementation details are not publicly available
 
-The Keycloak Twingate integration is **not self-service** -- contact Twingate Support to enable it.
-
-### Decision Notes
-
-- **Use Keycloak only if it's your existing IdP** -- you'll lack the SCIM lifecycle automation that Okta/Entra ID/JumpCloud/Google Workspace provide
-- For new IdP rollouts, prefer one of the SCIM-supported IdPs unless Keycloak is a non-negotiable constraint
-- Manual user lifecycle in Twingate means **higher operational risk** -- a Keycloak-disabled user can still log in to Twingate until you also disable them in Twingate
-
-### Gotchas
-
-- No SCIM sync = manual user/group management
-- Offboarding requires action in **both** Keycloak and Twingate -- automate this externally if possible (custom script via Twingate Admin API)
-- Setup is gated through Twingate Support -- expect a longer onboarding cycle than self-service IdPs
-
-### Related Docs
-
-- /docs/identity-providers -- IdP overview (compare integration options)
-- /docs/users, /docs/groups -- Manual user/group management
-- /docs/api-overview -- Twingate Admin API for automation
+## Related Docs
+- [Twingate Pricing](https://www.twingate.com/pricing)
+- Contact Twingate support to proceed: https://www.twingate.com/contact

@@ -1,91 +1,64 @@
-## Kandji Configuration (Trust Method)
+# Kandji Configuration
 
-Integrate Kandji with Twingate -- gates Twingate access on Kandji-managed macOS device verification.
+## Page Title
+Kandji Device Integration Configuration for Twingate
 
-**Plan Requirement:**
-- **Business or Enterprise** Twingate plans only
+## Summary
+Twingate integrates with Kandji MDM to verify macOS device compliance as part of Device Security policies. The integration uses the Kandji API to match device serial numbers and validate management status. Verified devices can be required as a trust method in Security Policy Trusted Profiles.
 
-### How It Works
+## Key Information
+- **Plan requirement**: Business and Enterprise only
+- **Platform support**: macOS devices only
+- **Sync behavior**: Twingate pulls device list via Kandji API; matches by serial number
+- **Sync interval**: Initial sync shows "Waiting to sync" for a few minutes; subsequent syncs show last sync time
 
-- Twingate uses the Kandji API to pull the list of Kandji-managed devices
-- Twingate Client returns device serial number; matched against Kandji's list
-- A device is **Kandji-verified** when ALL of:
-  - Its serial is in Kandji's managed list
-  - It has reported to Kandji **within the last 7 days**
-  - Kandji agent is installed
-  - MDM profile is installed
-  - Device has not been removed from Kandji
+## Prerequisites
+- Twingate Business or Enterprise plan
+- Kandji admin access to generate API token
+- Kandji API permissions: **Device details** and **Device list** (under Devices)
 
-### Supported Platforms
+## Step-by-Step
 
-- **macOS only**
+### Generate Kandji API Key
+1. Kandji web app → **Settings** → **Access** tab
+2. Scroll to **API Token** → **Add Token**
+3. Enter Name and Description → Save token
+4. In **Manage API Permissions** modal → **Configure**
+5. Under Devices, enable **Device details** and **Device list**
 
-### Setup
-
-**Stage 1: Generate Kandji API Token**
-
-1. Kandji web app -> **Settings** (left panel)
-2. Click **Access** in the top bar
-3. Scroll to **API Token** -> **Add Token**
-4. Set Name + Description
-5. Save the **API token**
-
-**Stage 2: Configure API Token Permissions**
-- "Manage API Permissions" modal -> **Configure**
-- Under **Devices**, enable:
-  - **Device details**
-  - **Device list**
-
-**Stage 3: Connect in Twingate**
-1. Twingate Admin Console -> **Settings -> Device Integration**
+### Configure Integration in Twingate
+1. Twingate Admin → **Settings** → **Device Integration**
 2. Click **Connect** next to Kandji
-3. Enter the **Kandji URL** in the format:
-   - US: `<subdomain>.api.kandji.io`
-   - EU: `<subdomain>.api.eu.kandji.io`
-4. Enter the API token
-5. Save
+3. Enter Kandji URL: `<subdomain>.api.kandji.io` or `<subdomain>.api.eu.kandji.io`
+4. Enter API token
 
-Device Settings page shows current sync status.
+### Apply to Security Policies
+1. Navigate to Device Security → Trusted Profiles
+2. Create/edit a macOS Trusted Profile
+3. Add **Kandji** as a required Trust Method
+4. Incorporate the Trusted Profile into Security Policies
 
-### Add to Trusted Profiles
+## Configuration Values
+| Parameter | Format |
+|-----------|--------|
+| Kandji URL (US) | `<subdomain>.api.kandji.io` |
+| Kandji URL (EU) | `<subdomain>.api.eu.kandji.io` |
 
-- Device Security -> Trusted Profiles
-- Create/edit a Trusted Profile for **macOS**
-- Add **Kandji** as a Trust Method
-- Apply via Resource Policies requiring Trusted Devices
+## Device Verification Requirements
+A device is considered Kandji-verified only if **all** are true:
+- Serial number exists in Kandji
+- Reported to Kandji within the past **7 days**
+- Kandji agent installed
+- MDM profile installed
+- Not removed from Kandji
 
-### Troubleshooting
+## Gotchas
+- Initial sync has a delay ("Waiting to sync"); devices may show incorrect state during this window
+- **Recoverable errors** (API unresponsive): Integration shows last successful sync time; auto-resolves when API is reachable
+- **Unrecoverable errors** (invalid credentials, deleted token, altered permissions): Integration stops retrying; admin email notification sent; requires manual reconfiguration with new API credentials
+- Altering Kandji API token permissions after setup causes unrecoverable error
 
-**"Waiting to sync"**: initial sync takes a few minutes; devices may show wrong state until completion
-
-**"Kandji not verified"** reasons:
-- Device not managed by Kandji
-- Hasn't reported in 7+ days
-- Kandji agent uninstalled
-- MDM profile missing
-- Device removed from Kandji
-
-**Recoverable errors**: shows last success + last failure; auto-resolves when API recovers
-
-**Unrecoverable errors** (credentials revoked, permissions altered): integration stops; admins emailed. Recovery: regenerate API token, reconfigure.
-
-### Decision Notes
-
-- Kandji is the right Trust Method for **all-Apple orgs** that prefer Kandji over Jamf -- often newer, simpler operations than Jamf Pro
-- The Kandji **Auto App** also exists (see /docs/kandji-mdm) for distributing the Twingate Client itself; that's a different integration
-- Use minimum API permissions (Device details + Device list) -- Kandji has many other API scopes that aren't needed
-- The 5 verification requirements are all-or-nothing -- a device losing its MDM profile is enough to fail verification, even if everything else is fine
-
-### Gotchas
-
-- Kandji URL format with EU vs. US suffix is easy to get wrong -- verify your tenant's region
-- API token doesn't auto-expire (per Kandji), but rotate periodically as a hygiene practice
-- Removed-from-Kandji devices fail verification immediately -- don't remove devices from Kandji during routine deprovisioning until Twingate access is also revoked
-
-### Related Docs
-
-- /docs/device-security-guide -- Trusted Profiles model
-- /docs/trusted-devices -- Trusted Devices policy rule
-- /docs/kandji-mdm -- Deploying the Twingate Client via Kandji (different doc -- Client distribution)
-- /docs/jamf-configuration -- Jamf as alternative macOS Trust Method
-- /docs/managed-devices -- Trust Methods overview
+## Related Docs
+- Twingate Device Security / Trusted Profiles documentation
+- Twingate Security Policies documentation
+- [Twingate Pricing](https://www.twingate.com/pricing)

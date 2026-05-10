@@ -1,51 +1,31 @@
-## Managed Devices Overview
+# Managed Devices
 
-Twingate Client deployment across MDM solutions -- index page pointing to platform-specific guides.
+## Summary
+Twingate supports deployment on managed devices via major MDM solutions. Installation packages are available for Windows, macOS, and iOS with silent/pre-configuration options. The client creates a local VPN profile (127.0.0.1) that never routes traffic off-device.
 
-### Supported MDMs
+## Key Information
+- Compatible MDMs: AirWatch, InTune, JAMF, Kandji
+- Windows: EXE or MSI package with silent install and pre-configuration support
+- macOS/iOS: Available via Apple App Store or standalone PKG
+- Mac/iOS App Store deployments require apps allocated through **Apple Business Manager**
+- Client requires no special device privileges
+- Creates a VPN profile to operate, but VPN server address is `127.0.0.1` — no traffic leaves the device
 
-Twingate Client works with most MDM solutions:
-- **AirWatch / Workspace ONE** (Omnissa)
-- **Microsoft Intune / Endpoint Manager**
-- **Jamf** (macOS/iOS)
-- **Kandji** (macOS/iOS)
-- **Other MDMs** that support PKG/EXE/MSI deployment
+## Prerequisites
+- MDM solution configured for your organization
+- For App Store deployments: Apple Business Manager account with Twingate allocated
 
-### Platform-Specific Guides
+## Configuration Notes
+- Silent install options available for Windows MSI/EXE (see platform-specific sub-articles)
+- PKG available as alternative to App Store for macOS managed deployments
 
-| Platform | Format | Notes |
-|---|---|---|
-| **Windows** | EXE (preferred) or MSI | EXE bundles .NET 8 Runtime; see /docs/windows-managed-devices |
-| **macOS** | App Store app or standalone PKG | MDMs use Apple Business Manager for App Store distribution |
-| **iOS** | App Store app | Requires Apple Business Manager linkage in the MDM |
+## Gotchas
+- The local VPN profile (`127.0.0.1`) may trigger VPN-detection policies or user alerts — it is not a traditional VPN
+- MDMs deploying Mac/iOS App Store version must have the app allocated via Apple Business Manager first; direct MDM push without ABM allocation will fail
+- Client needs permission to create VPN profiles; this may require MDM policy configuration even though no elevated privileges are needed
 
-### Permissions / Privileges
-
-The Twingate Client does **not** require special device privileges, **but** it must create a **VPN profile** to operate.
-
-**Important**: the Twingate Client uses a local VPN profile -- the VPN server address is `127.0.0.1`. **No VPN traffic actually leaves the device** via traditional VPN means; the VPN profile is just the OS hook for the Twingate tunnel infrastructure.
-
-This is relevant for:
-- MDM compliance reviews flagging "VPN configuration" as a concern
-- Documentation for security/privacy stakeholders -- Twingate is not a traditional VPN despite the OS-level VPN hook
-
-### Decision Notes
-
-- For mixed fleets (Windows + Mac + iOS): use Intune for Windows + Jamf/Kandji for macOS+iOS, OR Workspace ONE for cross-platform
-- For Apple-only orgs: Kandji (with the Twingate Auto App) is fastest to deploy
-- For Microsoft-only orgs: Intune handles all three platforms reasonably
-- Always pre-configure the Twingate Network and silent-install flags to minimize end-user friction
-
-### Gotchas
-
-- The "VPN profile" terminology can confuse users and security reviewers -- proactively document that no traditional VPN traffic is involved
-- iOS distribution **always** requires Apple Business Manager -- plan ABM linkage before MDM rollout
-- macOS configuration profiles for VPN/system extension are required for silent UX -- without them, users still see system prompts
-
-### Related Docs
-
-- /docs/windows-managed-devices -- Windows MDM details
-- /docs/jamf-mdm -- Jamf for macOS/iOS
-- /docs/kandji-mdm -- Kandji for macOS/iOS
-- /docs/intune-configuration -- Microsoft Intune
-- /docs/omnissa-workspace-one-mdm -- Omnissa Workspace ONE
+## Related Docs
+- Windows MDM deployment (sub-article)
+- macOS MDM deployment (sub-article)
+- iOS MDM deployment (sub-article)
+- Apple Business Manager integration

@@ -1,39 +1,44 @@
-## Private Resources in Kubernetes
+# Private Resources in Kubernetes
 
-How to provide Twingate access to ClusterIP / internal services running inside a Kubernetes cluster -- without exposing them on the public internet or via a LoadBalancer.
+## Page Title
+Private Resources in Kubernetes - Access Private Services Within a K8s Cluster
 
-**Architecture:**
-1. Deploy Connector(s) **inside the cluster** via the Twingate Helm chart (or the Twingate Kubernetes Operator)
-2. Define a Twingate **Resource** for each internal service using:
-   - the service's ClusterIP, or
-   - the cluster-internal DNS name (e.g., `myservice.namespace.svc.cluster.local`)
-3. Grant access to the Resource via Group membership
+## Summary
+Deploy Twingate Connectors inside a Kubernetes cluster via Helm Chart to enable authorized users to access internal K8s services without public internet exposure. Users access services using internal IPs or K8s cluster DNS names through Twingate Resources.
 
-**Why It Works:**
-- The Connector pod runs in the same network namespace as other cluster pods, so it can reach ClusterIP services and resolve cluster DNS
-- Twingate Client on the user's machine intercepts traffic to the configured Resource address and tunnels it through the in-cluster Connector
-- No NodePort, LoadBalancer, or Ingress required
+## Key Information
+- Connectors must be deployed **inside** the K8s cluster (not external)
+- Resources can be defined using internal service IPs or K8s cluster-internal DNS addresses
+- No public internet exposure required for the target services
+- Access control managed via Twingate Resource permissions
 
-**Resource Address Choices:**
+## Prerequisites
+- Kubernetes cluster running
+- Helm installed
+- Twingate account with admin access
+- Twingate Helm Chart (available on GitHub)
 
-| Address Type | Example | When to Use |
-|---|---|---|
-| ClusterIP | `10.96.0.42` | Stable IP, but changes if Service is recreated |
-| Cluster DNS FQDN | `db.production.svc.cluster.local` | Recommended -- survives Service recreation |
-| Custom DNS (FQDN as Resource) | `db.example.internal` | When you map private DNS to ClusterIP via CoreDNS or external-dns |
+## Step-by-Step
 
-**Connector Placement:**
-- One Connector per cluster is functional; two+ for HA
-- For multi-namespace clusters, the Connector pod can usually reach all namespaces' Services unless NetworkPolicies restrict it -- review NetworkPolicies if Resources are unreachable
-- Connector pod needs outbound internet access to Twingate Controller (egress on standard HTTPS + UDP for P2P)
+1. **Deploy Connector(s)** inside the K8s cluster using the Twingate Helm Chart
+   - Reference the Helm Chart deployment guide in the Twingate GitHub repository
 
-**Gotchas:**
-- ClusterIP changes if you delete and recreate the Service -- prefer DNS FQDNs in the Twingate Resource
-- NetworkPolicies that block egress from the Connector pod will block all Twingate access to that namespace
-- For multi-cluster setups, deploy a Connector per cluster and a Remote Network per cluster
+2. **Create a Twingate Resource** using either:
+   - Internal service IP address
+   - K8s cluster-internal DNS address (e.g., `service-name.namespace.svc.cluster.local`)
 
-**Related Docs:**
-- /docs/k8s-helm-chart -- Connector deployment via Helm
-- /docs/k8s-public-services -- Sibling pattern for already-exposed services
-- /docs/k8s -- K8s deployment overview (Operator vs Helm)
-- /docs/private-dns-best-practices -- Using FQDNs as Resource addresses
+3. **Grant user access** to the defined Resource — users can then reach the service via its internal IP or DNS name
+
+## Configuration Values
+- **Resource address**: Internal K8s service IP or cluster DNS name
+  - DNS format example: `<service>.<namespace>.svc.cluster.local`
+
+## Gotchas
+- Connector must be deployed **inside** the cluster so it can reach cluster-internal DNS and IPs
+- K8s cluster-internal DNS names are not resolvable outside the cluster — Connector placement inside the cluster is what makes this work
+- Multiple Connectors can be deployed for redundancy (recommended)
+
+## Related Docs
+- [Twingate Helm Chart deployment guide (GitHub)](https://github.com/Twingate/helm-charts)
+- Twingate Resource creation documentation
+- Connector deployment documentation

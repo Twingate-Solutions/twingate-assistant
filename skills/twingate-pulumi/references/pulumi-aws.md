@@ -1,68 +1,73 @@
-## Pulumi: Twingate on AWS
+# Pulumi with AWS and Twingate
 
-End-to-end Pulumi (TypeScript) recipe for AWS: VPC, subnet, internet gateway, route table, two EC2 instances (Connector + demo server using the Twingate AMI), and full Twingate config.
+## Summary
+Step-by-step guide for deploying Twingate Connectors on AWS EC2 using Pulumi with TypeScript. Creates a VPC, subnet, demo server, and Twingate Connector VM with automated connector configuration via user data script.
 
-**Setup:**
-- `pulumi new typescript` -- scaffold the project
-- AWS auth via env vars: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`
-- `pulumi config set twingate:apiToken <token> --secret`
-- `pulumi config set twingate:network <tenant>`
-- `cat ~/.ssh/aws_id_rsa.pub | pulumi config set publicKey` -- store SSH public key in config
+## Key Information
+- Uses TypeScript/Node.js for Pulumi configuration
+- Deploys two EC2 instances: a private demo server and a public-facing Twingate Connector
+- Connector auto-configures via bash user data script on startup
+- Uses Twingate AMI from owner `617935088040` with filter `twingate/images/hvm-ssd/twingate-amd64-*`
+- Instance size: `t2.micro`
 
-**npm Modules:**
+## Prerequisites
+- AWS account with resource creation/deletion permissions
+- Pulumi CLI installed with general Pulumi prerequisites met
+- Node.js installed (`node -v` to verify)
+- Bash-compatible OS
+- Twingate API key and tenant name
+
+## Step-by-Step
+1. `mkdir twingate_pulumi_aws_demo && cd twingate_pulumi_aws_demo`
+2. `pulumi new typescript` (follow prompts)
+3. Set AWS credentials as env vars
+4. `pulumi config set twingate:apiToken YOUR_TOKEN --secret`
+5. `pulumi config set twingate:network <tenant-name>`
+6. Generate SSH keypair: `ssh-keygen` → save to `~/.ssh/aws_id_rsa`
+7. `cat ~/.ssh/aws_id_rsa.pub | pulumi config set publicKey`
+8. `npm install @pulumi/aws @twingate/pulumi-twingate`
+9. Write `index.ts` with full configuration (see below)
+10. `pulumi preview` → `pulumi up`
+11. Assign Twingate user to created group manually in Twingate admin
+
+## Configuration Values
+
+| Config Key | Command | Notes |
+|---|---|---|
+| `twingate:apiToken` | `pulumi config set twingate:apiToken TOKEN --secret` | Mark as secret |
+| `twingate:network` | `pulumi config set twingate:network TENANT` | Tenant prefix only |
+| `publicKey` | `cat key.pub \| pulumi config set publicKey` | SSH public key |
+
+**Environment Variables (AWS auth):**
+```bash
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_REGION=...
 ```
-npm install @pulumi/aws @twingate/pulumi-twingate
-```
 
-**Twingate AMI:**
-- Filter: `name = "twingate/images/hvm-ssd/twingate-amd64-*"`, owner `617935088040`
-- Pre-installed Connector + dependencies; configure via cloud-init `userData`
-
-**Connector Bootstrap (cloud-init via `pulumi.all().apply()`):**
-The `userData` script writes `/etc/twingate/connector.conf` with:
-- `TWINGATE_URL=https://${twingate.config.network}.twingate.com`
-- `TWINGATE_ACCESS_TOKEN`, `TWINGATE_REFRESH_TOKEN` from `TwingateConnectorTokens`
-- `TWINGATE_LOG_ANALYTICS=v1` (enable analytics logs)
-- `TWINGATE_LABEL_HOSTNAME=$HOSTNAME_LOOKUP` (from EC2 metadata)
-- `TWINGATE_LABEL_EGRESSIP=$EGRESS_IP` (from `checkip.amazonaws.com`)
+**Connector config written to `/etc/twingate/connector.conf`:**
+- `TWINGATE_URL`, `TWINGATE_ACCESS_TOKEN`, `TWINGATE_REFRESH_TOKEN`
+- `TWINGATE_LOG_ANALYTICS=v1`
 - `TWINGATE_LABEL_DEPLOYEDBY=tg-pulumi-aws-ec2`
 
-Then `systemctl enable --now twingate-connector`.
+## Twingate Resources Created
+- `TwingateRemoteNetwork` → `TwingateConnector` → `TwingateConnectorTokens`
+- `TwingateGroup` (name: "aws demo group")
+- `TwingateResource` (TCP ports 22/80 restricted; UDP allow all; ICMP allowed)
 
-**Access Group Pattern (note: differs from Terraform):**
+## Gotchas
+- Demo server has `associatePublicIpAddress: false`; Connector VM has `true` — don't swap these
+- After `pulumi up`, manually assign Twingate users to the created group — not automated
+- `Pulumi.demo.yaml` stores encrypted secrets — exclude from source control
+- AMI owner ID `617935088040` is hardcoded; verify this is current
+- Connector tokens are sensitive — passed via `pulumi.all()` to avoid plaintext exposure
+
+## Teardown
+```bash
+pulumi down
 ```
-const tgresource = new twingate.TwingateResource("resource", {
-  name: "aws demo server",
-  address: webserver.privateIp,
-  remoteNetworkId: network.id,
-  accessGroups: [{ groupId: group.id }],   // <-- accessGroups (camelCase, object form)
-  protocols: {
-    allowIcmp: true,
-    tcp: { policy: "RESTRICTED", ports: ["22","80"] },
-    udp: { policy: "ALLOW_ALL" }
-  }
-});
-```
 
-The Pulumi provider uses `accessGroups: [{ groupId }]` instead of Terraform's `group_ids = [...]`.
-
-**EC2 Instances:**
-- Demo server (`Demo Server`): `associatePublicIpAddress: false`, no public IP
-- Connector (`Twingate-Connector`): `associatePublicIpAddress: true` (needed for outbound to Twingate without NAT)
-
-**Workflow:**
-1. `pulumi preview` -- non-destructive plan
-2. `pulumi up` -- approve to create resources
-3. Add Twingate user to the new group (Admin Console)
-4. Test SSH: `ssh -i ~/.ssh/aws_id_rsa ubuntu@10.0.1.X` (private IP) via Twingate Client
-5. `pulumi down` to tear down
-
-**Gotchas:**
-- Pulumi state with `--secret` values is encrypted at rest in the Pulumi service; still avoid committing `Pulumi.<stack>.yaml`
-- `twingate.config.network` references the configured `twingate:network` -- works inside `pulumi.interpolate` / `apply()`
-- Pulumi provider is community-maintained: file issues at the GitHub repo
-
-**Related Docs:**
-- /docs/pulumi-getting-started -- Pulumi setup overview
-- /docs/pulumi-azure, /docs/pulumi-gcp -- Other clouds
-- /docs/aws -- Manual AWS deployment
+## Related Docs
+- [Twingate Pulumi GitHub Examples](https://github.com/Twingate)
+- [Twingate API Key Generation](https://www.twingate.com/docs/api-overview)
+- [Pulumi General Twingate Guide](https://www.twingate.com/docs/pulumi)

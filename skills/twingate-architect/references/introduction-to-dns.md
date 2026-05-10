@@ -4,14 +4,16 @@
 Introduction to DNS
 
 ## Summary
-Conceptual overview of DNS fundamentals for Twingate users. Covers how domain names resolve to IP addresses through hierarchical nameservers, DNS record types, zonefiles, caching/TTL mechanics, and private DNS. Serves as prerequisite reading for understanding Twingate's DNS integration.
+Foundational reference explaining DNS concepts including resolution hierarchy, record types, zonefiles, and caching. Covers host-level DNS configuration (`/etc/hosts`, resolvers) and how Twingate inserts its own DNS resolver. Serves as prerequisite reading for understanding Twingate's DNS integration.
 
 ## Key Information
 
-- **DNS hierarchy**: Root Servers → TLD Servers → Domain Level Nameservers → IP address
-- **Resolution order**: Always hierarchical, top-level down
-- **Twingate DNS resolvers**: `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254` (inserted as highest-priority resolver when client is active)
-- **Hosts file takes precedence** over DNS on all systems
+- **DNS purpose**: Translates human-readable names (e.g., `google.com`) to IP addresses and vice versa
+- **Resolution hierarchy**: Root Servers → TLD Servers → Domain Level Nameservers (always top-down)
+- **Twingate DNS resolvers**: `100.95.0.251–254` (injected as resolver #1 when Twingate Client is active)
+- **`/etc/hosts` takes precedence** over DNS; supports only A record equivalents
+- **DNS caching**: Unix = app-level (browser); Windows = OS-level (`ipconfig /displaydns`)
+- **TTL** controls per-record cache expiry; SOA record sets zone-wide default expiry
 
 ## DNS Record Types
 
@@ -19,42 +21,34 @@ Conceptual overview of DNS fundamentals for Twingate users. Covers how domain na
 |--------|---------|
 | `A` | Hostname → IPv4 |
 | `AAAA` | Hostname → IPv6 |
-| `CNAME` | Alias one name to another |
-| `MX` | Mail server with priority |
+| `CNAME` | Alias one record to another |
+| `MX` | Mail server(s) with priority |
 | `PTR` | IP → hostname (Reverse DNS) |
 | `SOA` | Zone authority/metadata |
 | `SRV` | Service location |
 | `TXT` | Arbitrary data (SPF, verification) |
 
-## Configuration Files
+## Configuration Values
 
-- **Unix DNS resolver config**: `/etc/resolv.conf`
-- **Unix hosts file**: `/etc/hosts`
-- **Windows hosts file**: `C:\Windows\System32\drivers\etc\hosts`
-- **Windows DNS cache view**: `ipconfig /displaydns`
-- **macOS resolver inspection**: `scutil --dns`
-
-## DNS Caching & TTL
-
-- `$TTL` in zonefile = default cache duration (seconds) for all records
-- SOA record `expiry` = max time clients cache the full zonefile
-- Per-record TTL overrides SOA expiry
-- **Unix**: caching typically at application level (per-browser)
-- **Windows**: OS-level centralized DNS cache
+- **macOS resolver check**: `scutil --dns`
+- **Windows DNS cache**: `ipconfig /displaydns`
+- **Hosts file (Unix)**: `/etc/hosts`
+- **Hosts file (Windows)**: `C:\Windows\System32\drivers\etc\hosts`
+- **Default TTL field** in zonefile: `$TTL 3600` (seconds)
 
 ## Reverse DNS
 
-- Reverse octets of IP: `22.33.44.55` → `55.44.33.22`
-- Append `in-addr.arpa`: `55.44.33.22.in-addr.arpa`
+- Reverse octets of IP → append `in-addr.arpa`
+- Example: `22.33.44.55` → query `55.44.33.22.in-addr.arpa`
 - Requires `PTR` records in zonefile
 
 ## Gotchas
 
-- `/etc/hosts` only supports `A`-record equivalents; cannot replace full DNS
-- First four lines of `/etc/hosts` are auto-generated; do not modify without understanding implications
-- DNS record updates propagate slowly if SOA expiry/TTL is long (up to 24hrs)
-- When Twingate client is active, its resolvers (`100.95.0.25x`) are prepended at highest priority — this is intentional for private resource resolution
-- Multiple hostnames can map to one IP in `/etc/hosts` via space-separated names on one line
+- First 4 lines of `/etc/hosts` are auto-generated; do not modify without expertise
+- DNS record updates can take up to the SOA expiry time (e.g., 24h) to propagate network-wide
+- `/etc/hosts` cannot replace DNS — limited to A record equivalents only
+- Multiple space-separated names on one `/etc/hosts` line all resolve to that IP
+- Twingate Client adds its resolvers **at the top** of the OS resolver list, taking priority
 
 ## Related Docs
 

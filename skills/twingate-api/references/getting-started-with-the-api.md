@@ -1,111 +1,66 @@
-## Getting Started with the Twingate API
+# Getting Started with the Twingate API
 
-Quickstart for using the Twingate **GraphQL Admin API** -- generate a token, send your first query, understand the response shape.
+## Summary
+Twingate exposes GraphQL APIs for automating admin tasks, accessible directly or via Python/JavaScript CLIs. All API access requires an API key and tenant name. The API follows standard GraphQL conventions with nodes/edges response structure.
 
-### Three Automation Paths
+## Key Information
+- API type: GraphQL (not REST)
+- Endpoint format: `https://<tenant_name>.twingate.com/api/graphql/`
+- CLIs (Python and JavaScript) are wrappers around these same GraphQL APIs
+- Compatible with orchestration platforms: Ansible, Chef, Puppet, etc.
+- Postman collection available for download with pre-built example requests
 
-| Path | Best For |
-|---|---|
-| **GraphQL APIs (direct)** | Custom integrations, ad-hoc queries, exploring the schema |
-| **Python CLI** | Python-default shops; quick scripts |
-| **JavaScript CLI** | JS/TS shops; quick scripts |
+## Prerequisites
+- Active Twingate tenant
+- API key with appropriate permissions (Read & Write or Read, Write & Provision)
 
-All three can be integrated into orchestration platforms (Ansible, Chef, Puppet, etc.).
+## Step-by-Step: Generate API Key
+1. Open Admin Panel → Settings → API
+2. Click **Generate Token**
+3. Select permission level: **Read & Write** or **Read, Write & Provision** (required for modifying objects)
+4. Copy and store token immediately — cannot be retrieved after closing the dialog
 
-### Prerequisites
+## Configuration Values
 
-- Twingate **API Token**
-- Twingate **Tenant Name** (subdomain in `<tenant>.twingate.com`)
+| Parameter | Value |
+|-----------|-------|
+| API Endpoint | `https://<tenant_name>.twingate.com/api/graphql/` |
+| Auth Header | `X-API-KEY: <token>` |
+| Postman variable | `tenant_name` |
 
-### Generating an API Token
-
-1. Open **Admin Console**
-2. **Settings -> API**
-3. Click **Generate Token**
-4. Choose permissions:
-   - **Read** -- queries only
-   - **Read & Write** -- modify objects (most use cases)
-   - **Read, Write & Provision** -- includes Connector token generation
-5. Copy the token immediately -- it's not retrievable later
-6. Optionally restrict by IP range
-
-You can disable / re-enable / modify token details after creation, but cannot view the token value again.
-
-### Recommended GraphQL Clients
-
-| Client | Strength |
-|---|---|
-| **Postman** | Familiar if you know REST APIs; Twingate publishes a Postman collection with example queries |
-| **Altair GraphQL Client** | Friendlier for GraphQL-first users; built-in introspection / schema browsing |
-
-### First API Call (Postman Pattern)
-
-1. Create a new **Collection** in Postman
-2. **Authorization** tab -> Type: **API Key**
-   - Key: `X-API-KEY`
-   - Value: paste your Twingate API token
-3. **Variables** tab -> add `tenant_name` = your tenant subdomain
-4. Add a request to `https://{{tenant_name}}.twingate.com/api/graphql/`
-5. Run a basic query (e.g., list Resources)
-
-### First API Call (Altair Pattern)
-
-1. URL: `https://<subdomain>.twingate.com/api/graphql/`
-2. Header: `X-API-KEY: <your-token>`
-3. Click **QueriesRoot -> Resources -> ADD QUERY**
-4. Replace `node` block with:
-   ```
-   node {
-     id
-     name
-   }
-   ```
-5. **Run query**
-
-### Understanding GraphQL Response Shape
-
-GraphQL returns a **nested structure** matching your query:
-
-```
+## Example: List Resources Query
+```graphql
 {
-  "data": {
-    "resources": {
-      "edges": [
-        { "node": { "id": "UmVzb3VyY2U6...", "name": "AWS SSH" } },
-        { "node": { "id": "UmVzb3VyY2U6...", "name": "AWS Grafana" } }
-      ],
-      "pageInfo": {
-        "startCursor": "YXJyYXljb25uZWN0aW9uOjA=",
-        "hasNextPage": false
+  resources {
+    edges {
+      node {
+        id
+        name
+        createdAt
+        updatedAt
+        isActive
       }
+    }
+    pageInfo {
+      startCursor
+      hasNextPage
     }
   }
 }
 ```
 
-- **`edges`** -- collection wrapper
-- **`node`** -- individual object with the fields you requested
-- **`pageInfo`** -- pagination cursor for fetching subsequent pages
-- The response shape **mirrors the query shape** -- key advantage of GraphQL over REST
+## Gotchas
+- **Token is shown only once** — copy it before closing the Generate Token dialog; no way to retrieve it afterward
+- Token can be disabled/re-enabled or have details modified after creation
+- GraphQL responses only return fields explicitly requested in the query — structure your queries to include needed fields
+- Pagination: check `pageInfo.hasNextPage` to determine if additional results exist
 
-### Decision Notes
+## Recommended API Clients
+- **Postman** — better if familiar with REST APIs; import available Postman Collection
+- **Altair GraphQL Client** — better for GraphQL-native exploration with schema browsing
 
-- For one-off interactive exploration: Postman + Twingate's published collection
-- For repeated automation: pick one CLI (Python or JS) and stick with it
-- For IaC: skip the API entirely and use the **Terraform provider** -- it wraps the API and adds drift management
-- Always restrict API tokens by IP for production use
-
-### Gotchas
-
-- Tokens are **sensitive credentials** -- store in a secret manager, never commit to git
-- Token re-display is impossible -- save securely on first generate
-- GraphQL learning curve is real if you're coming from REST -- expect a learning period
-- Pagination via `pageInfo.hasNextPage` and cursors -- don't assume all results come in one response
-
-### Related Docs
-
-- /docs/api-overview -- API capabilities + endpoint URL + throttling limits
-- /docs/exploring-the-apis -- Postman collection + video walkthroughs
-- /docs/introduction-to-the-python-cli, /docs/introduction-to-tg-cli-javascript -- CLI wrappers
-- /docs/scim-provisioning-api -- Separate SCIM API
-- /docs/terraform-getting-started -- IaC alternative
+## Related Docs
+- Twingate API Reference
+- Python CLI documentation
+- JavaScript CLI documentation
+- Twingate API Keys documentation

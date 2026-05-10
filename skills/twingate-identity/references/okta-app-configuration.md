@@ -1,55 +1,50 @@
-## Twingate Okta Application Configuration
+# Twingate Okta Application Configuration
 
-How to add and configure the official Twingate gallery app in Okta -- step 1 of the Okta integration. Step 2 (SCIM sync) is covered separately in /docs/okta-scim-configuration.
+## Summary
+Steps to activate the Twingate application in Okta's app catalog and connect it to the Twingate Admin console. Requires entering subdomain, assigning users/groups, then providing Okta credentials back in Twingate.
 
-### Add the Twingate App in Okta
+## Key Information
+- Twingate is available in the Okta App Catalog (no manual SAML setup needed)
+- Users cannot authenticate via Okta dashboard tile — only from Twingate Client app on device
+- Integration requires three values from Okta: Domain, Client ID, Client Secret
+- Twingate will prompt you to sign in with Okta to validate credentials during setup
 
-1. Okta Admin -> **Applications** -> **Browse App Catalog**
-2. Search for **Twingate**, select it
+## Prerequisites
+- Access to Okta Admin dashboard
+- Access to Twingate Admin console
+- At least one user (yourself) assigned to the Twingate Okta app before completing integration
+
+## Step-by-Step
+
+### In Okta
+1. Go to **Applications → Browse App Catalog**
+2. Search for and select **Twingate**
 3. Click **Add**
-4. Enter your **Twingate subdomain** (the `mycorp` part of `mycorp.twingate.com`)
-5. **Recommended**: check both **Application Visibility** boxes to **hide** Twingate from users' Okta dashboards
-   - Reason: users authenticate by starting at the Twingate Client, not by clicking the Okta tile (Twingate doesn't support IdP-Initiated SSO)
-   - Showing the tile invites confused user behavior
+4. Enter your Twingate subdomain
+5. Check both **Application Visibility** boxes (hides app from Okta dashboard)
+6. Assign the app to users or groups (must include yourself)
 
-### Assign Users / Groups
+### In Twingate Admin Console
+1. Navigate to the Okta integration setup screen
+2. Enter **Okta Domain** (found in upper-right global header of Okta dashboard)
+3. Enter **Client ID** and **Client Secret** (found in **Sign On** tab of the Twingate Okta app)
+4. Complete the wizard by signing in with Okta to validate credentials
 
-- Assign the Twingate Okta app to the users / groups who should access Twingate
-- **Always assign yourself first** -- needed to validate the integration
+## Configuration Values
 
-**Suggested Pattern:**
-- Create a dedicated Okta group like **"Twingate-Admins"** that includes yourself
-- Assign that group to the Twingate app
-- **Avoid** using a different group that includes you. If you remove that group later, your access disappears
-- For non-admin users, use a separate group like **"Twingate-Users"**
+| Field | Source Location |
+|-------|----------------|
+| Okta Domain | Upper-right global header in Okta dashboard |
+| Client ID | Twingate app → Sign On tab in Okta |
+| Client Secret | Twingate app → Sign On tab in Okta |
+| Subdomain | Your Twingate subdomain |
 
-### Complete the Integration in Twingate Admin Console
+## Gotchas
+- **Hide app from Okta dashboard**: Users attempting to authenticate via Okta tile will fail — auth must start from Twingate Client
+- **Admin group management**: Don't assign yourself only through a group that may be removed later — losing group membership removes your Twingate access
+- **Recommended**: Create a dedicated Okta group (e.g., "Admins") specifically for Twingate admin access to avoid accidental lockout
+- Must assign yourself before completing integration or you cannot authenticate to finish setup
 
-In Twingate Admin Console -> Identity Provider -> Okta:
-
-| Field | Where to Get It |
-|---|---|
-| **Okta Domain** | Global header, upper-right of Okta dashboard |
-| **Client ID** | Sign On tab of the Twingate Okta app |
-| **Client Secret** | Sign On tab of the Twingate Okta app |
-
-After entering, Twingate prompts you to sign in with Okta to validate.
-
-### Decision Notes
-
-- Hide Twingate in users' portals -- always: prevents confusion since Okta tile click doesn't work
-- Use a dedicated Okta group for Twingate access -- not Default -- for cleaner future delegation
-- Assign yourself before saving -- otherwise you'll be locked out
-
-### Gotchas
-
-- IdP-Initiated SSO from Okta tile does **not** work -- always SP-Initiated (start at Twingate Client)
-- If you initially assign the integration via "Default" Okta group and later try to scope tighter, ensure your user remains in an assigned group throughout
-- Client Secret is sensitive -- treat as a credential
-
-### Related Docs
-
-- /docs/okta-configuration -- Overall Okta integration overview (step 0)
-- /docs/okta-scim-configuration -- Step 2: SCIM user/group sync
-- /docs/identity-providers -- IdP overview
-- /docs/saas-app-gating-with-okta -- App gating pattern
+## Related Docs
+- [Okta Configuration Overview](https://www.twingate.com/docs/) (referenced as "this article")
+- [Okta Domain location guide](https://help.okta.com/) (Okta's official guide)

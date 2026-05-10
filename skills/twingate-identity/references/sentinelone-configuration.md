@@ -1,88 +1,58 @@
-## SentinelOne Configuration (Trust Method)
+# SentinelOne Configuration
 
-Integrate SentinelOne with Twingate -- gates Twingate access on SentinelOne EDR signal for macOS and Windows.
+## Page Title
+SentinelOne Configuration (Twingate Device Security Integration)
 
-**Plan Requirement:**
-- **Business or Enterprise** Twingate plans only
+## Summary
+Twingate integrates with SentinelOne via API to verify device security status as a condition for accessing private Resources. The Twingate Client matches device serial numbers against SentinelOne-managed devices and checks multiple health criteria. Available on Business and Enterprise plans only; supports macOS and Windows.
 
-### How It Works
+## Key Information
+- Integration pulls device list via SentinelOne API using serial number matching
+- Verified devices must: be present in SentinelOne, reported within past hour, not infected, not decommissioned, no threat reboot pending, operational state = `na`
+- Only macOS and Windows devices are supported
+- After setup, expect a brief "Waiting to sync" period before device states are accurate
 
-- Twingate uses the SentinelOne API to pull the list of managed devices
-- Twingate Client returns the device serial number; matched against SentinelOne's list
-- A device is **SentinelOne-verified** when ALL of:
-  - Its serial is in the SentinelOne managed list
-  - It has reported to SentinelOne **within the past hour** (much tighter than Intune/Jamf/Kandji's 7 days)
-  - Is **not infected**
-  - Is **not decommissioned**
-  - Does **not** require a threat reboot
-  - Operational state is `na` (agent not disabled or corrupted)
+## Prerequisites
+- Twingate Business or Enterprise plan
+- SentinelOne Management Console access
+- SentinelOne Service User API token with **Viewer** access or higher
 
-### Supported Platforms
+## Step-by-Step
 
-- **macOS** and **Windows**
+### Generate SentinelOne API Key
+1. SentinelOne Console → **Settings** → **Users** → **Service Users**
+2. **Actions** → **Create New Service User**
+3. Set name and expiration date
+4. Assign site/account scope with **Viewer** access minimum
+5. Save the generated API token
 
-### Setup
-
-**Stage 1: Generate SentinelOne Service User + API Token**
-
-1. SentinelOne Management Console -> **Settings** (left panel)
-2. **Users** in the top bar
-3. **Service Users** tab
-4. **Actions -> Create New Service User**
-5. Name + expiration date
-6. Choose the site/account Twingate should access
-7. Permission: **Viewer** (or higher)
-8. Save the **API token** -- needed in Stage 2
-
-**Stage 2: Connect in Twingate**
-
-1. Twingate Admin Console -> **Settings -> Device Integration**
+### Configure in Twingate
+1. Twingate Admin → **Settings** → **Device Integration**
 2. Click **Connect** next to SentinelOne
-3. Enter:
-   - **Management URL** -- just the subdomain (e.g., `abcd` for `https://abcd.sentinelone.net/web/api`)
-   - API token from Stage 1
-4. Save
+3. Enter Management URL subdomain only (e.g., `abcd` from `https://abcd.sentinelone.net/web/api`)
+4. Enter API token
+5. Verify status on Device Settings page
 
-Device Settings page shows current sync status.
+### Apply to Security Policies
+1. Create a Trusted Profile for macOS/Windows
+2. Set SentinelOne as a required Trust Method
+3. Incorporate Trusted Profile into Security Policies
 
-### Add to Trusted Profiles
+## Configuration Values
+| Field | Format | Example |
+|-------|--------|---------|
+| Management URL | Subdomain only | `abcd` (not full URL) |
+| API Token | Service User token | From SentinelOne console |
+| Permission Level | Viewer or higher | — |
 
-- Device Security -> Trusted Profiles
-- Create/edit Trusted Profile for **macOS** or **Windows**
-- Add **SentinelOne** as a Trust Method
-- Apply via Resource Policies requiring Trusted Devices
+## Gotchas
+- **Subdomain only** in Management URL field — do not paste the full URL
+- Initial sync shows "Waiting to sync" — device states may be incorrect for a few minutes
+- Recoverable errors (API unresponsive): integration shows last successful sync time; auto-resolves when API is reachable
+- Unrecoverable errors (invalid/deleted credentials, changed permissions): integration stops retrying; admin email notification sent; requires manual reconfiguration
+- `SentinelOne not verified` can occur if serial number cannot be retrieved from the device itself
 
-### Troubleshooting
-
-**"Waiting to sync"**: initial sync takes a few minutes -- normal
-
-**"SentinelOne not verified"** reasons:
-- Not managed by SentinelOne
-- Hasn't reported in the past hour (very tight window!)
-- SentinelOne marks the device as: infected, decommissioned, requires reboot, agent disabled, agent corrupted
-- Couldn't read serial from device
-- Couldn't fetch SentinelOne data
-
-**Recoverable errors**: shows last success + last failure; auto-resolves
-**Unrecoverable errors** (credentials revoked): integration stops; admins emailed
-
-### Decision Notes
-
-- **The 1-hour reporting window is much tighter than other Trust Methods** (Intune/Jamf/Kandji use 7 days). Devices that go offline briefly may temporarily fail verification.
-- Use SentinelOne if your org already runs S1 -- excellent EDR signal for security-conscious deployments
-- Service User with Viewer permission is sufficient -- minimum-privilege approach
-- Set the API token expiration generously but rotate periodically -- expired token = silent integration failure
-
-### Gotchas
-
-- The 1-hour reporting requirement is unforgiving -- communicate to users that going offline overnight may delay morning access until S1 phones home
-- "Operational state na" wording is unintuitive -- it actually means "not disabled/corrupted" (i.e., healthy)
-- The Management URL must be just the subdomain, NOT the full URL -- common configuration error
-- API token expiration breaks the integration silently -- monitor admin email for unrecoverable error notifications
-
-### Related Docs
-
-- /docs/device-security-guide -- Trusted Profiles model
-- /docs/trusted-devices -- Trusted Devices policy rule
-- /docs/managed-devices -- Trust Methods overview
-- /docs/crowdstrike-configuration -- Alternative EDR Trust Method (sibling pattern)
+## Related Docs
+- Device Security / Trusted Profiles
+- Security Policies
+- Twingate Pricing (Business/Enterprise plans)

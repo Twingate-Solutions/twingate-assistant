@@ -1,69 +1,48 @@
-## Configuring Active Directory with Twingate
+# Active Directory Configuration with Twingate
 
-How to make Active Directory services (SMB/CIFS, LDAP, Kerberos, GPO, domain join) work cleanly when client traffic flows through Twingate.
+## Summary
+Configure Twingate to expose Active Directory domain controllers and service discovery endpoints as Resources so clients can authenticate against AD services (SMB, CIFS, LDAP, etc.) while connected. Requires adding specific DNS patterns and DC hostnames as Twingate Resources.
 
-**Concepts:**
-- AD requires clients to discover and reach Domain Controllers (DCs)
-- Discovery uses DNS SRV records under `_msdcs.<domain>` and `_tcp.<domain>` namespaces
-- Twingate must be configured as Resources for both **DC IPs/FQDNs** and **service-discovery wildcards**
+## Key Information
+- AD authentication requires domain controllers to be reachable as Twingate Resources
+- Service discovery uses DNS SRV records (`_tcp` wildcards)
+- Resources should typically be assigned to the "Everyone" group or all Windows users group
+- Domain joins require additional **Windows Start Before Logon** configuration
 
-### Domain Join Considerations
+## Prerequisites
+- Twingate network with at least one Connector deployed
+- Access to Twingate Admin Console to create Resources
+- DNS access to query AD SRV records
+- AD domain name (e.g., `yourcompany.com`)
 
-If joining a Windows machine to AD over Twingate:
-- Follow the **Windows Start Before Logon** documentation in addition to the steps below
-- Ensures the Windows machine can connect to DCs **before** user logon (otherwise GPO / domain auth fails)
-- See /docs/windows-sbl
+## Step-by-Step
 
-### Setting Up DC Resources
+1. **Add service discovery resource**: Create Resource with address `*_tcp*.yourcompany.com`
 
-**Step 1 -- Discover DCs**
-On a machine connected to AD (or that can resolve the AD DNS), run:
-- macOS / Linux: `nslookup -type=any _ldap._tcp.dc._msdcs.yourcompany.com`
-- Windows: `nslookup -type=all _ldap._tcp.dc._msdcs.yourcompany.com`
+2. **Query domain controllers via DNS SRV**:
+   - Linux/Mac: `nslookup -type=any _ldap._tcp.dc._msdcs.yourcompany.com`
+   - Windows: `nslookup -type=all _ldap._tcp.dc._msdcs.yourcompany.com`
 
-Replace `yourcompany.com` with your AD domain. Output lists DC FQDNs (e.g., `zr5cdi61eltc73z.yourcompany.com`).
+3. **Add returned DC hostnames as Resources** (e.g., `zr5cdi61eltc73z.yourcompany.com`)
 
-**Step 2 -- Add Twingate Resources**
+4. **Assign all Resources** to the Everyone group (or Windows users group)
 
-| Resource Label | Resource Address | Purpose |
-|---|---|---|
-| AD Domain | `yourcompany.com` | The base AD domain |
-| Domain Controller 1 | `zr5cdi61eltc73z.yourcompany.com` | First DC FQDN from nslookup |
-| Domain Controller 2 | `a1ks10fndwoyhax.yourcompany.com` | Second DC FQDN (if applicable) |
-| Domain Service Discovery | `*_tcp*.yourcompany.com` | SRV record discovery wildcard |
+5. **Verify** connectivity; optionally restrict to required ports per Microsoft's AD firewall guidance
 
-Add additional DCs as needed -- one Resource per DC.
+## Required Resources (Final Configuration)
 
-**Step 3 -- Assign to "Everyone" Group**
-- These Resources should be accessible to **all Twingate users** (or all Windows users)
-- Per /docs/security-policies-best-practices, the **Everyone Group** with a no-auth + device-trust Resource Policy is the recommended pattern -- lets clients reach DCs **before** user logon
+| Label | Address | Purpose |
+|-------|---------|---------|
+| AD Domain | `yourcompany.com` | AD domain root |
+| Domain Controller N | `<dc-hostname>.yourcompany.com` | One entry per DC returned by SRV query |
+| Domain Service Discovery | `*_tcp*.yourcompany.com` | SRV-based service discovery |
 
-### Port Restrictions
+## Gotchas
+- **NetBIOS name resolution** does not work over Twingate (requires LAN broadcast); use IP or DNS name for file sharing instead
+- **Azure Container Connectors**: Must manually set Custom DNS Server to a DC IP; Azure Containers don't inherit VNet DNS settings automatically. Linux VM Connectors handle DNS automatically
+- **Domain joins**: Must also configure Windows Start Before Logon or the machine can't reach DCs pre-login
+- **Debugging**: Add `*.yourcompany.com` as a catch-all Resource and inspect Resource Activity in Admin Console to find uncaptured AD traffic
 
-After basic connectivity works, restrict Resource ports to AD-required ones (LDAP 389/636, SMB 445, Kerberos 88, RPC, dynamic high ports). See Microsoft's "How to configure a firewall for Active Directory domains and trusts" doc.
-
-### Troubleshooting
-
-**NetBIOS name resolution will not work over Twingate** -- broadcast-based, requires LAN. Use FQDNs / IPs instead. SMB file sharing still works via FQDN/IP.
-
-**DC in Azure + Connector as Azure Container:**
-- Check **Custom DNS Server** when deploying the Container -- specify a DC IP
-- Ensure the container's subnet is in the same VNet as the DC (or has connectivity)
-- Azure Containers do **not** inherit DNS automatically
-- Linux VM Connectors generally inherit DNS correctly with no special config
-
-**Catch-all Debugging Rule:**
-- Add `*.yourcompany.com` as a Twingate Resource and test
-- Any traffic that wasn't already covered by the more specific rules will show up in **Resource Activity** in the Admin Console -- gives you a list of names you may have missed
-
-**Gotchas:**
-- Don't skip the Service Discovery wildcard -- DC IPs alone fail if clients use SRV lookups (most do)
-- DCs added by FQDN are preferred over IP -- DC IPs can change; FQDNs are stable
-- Group Policy / SYSVOL access uses SMB to DCs -- if you restrict ports, port 445 must be open to all DCs
-- Time sync (NTP, port 123) for Kerberos -- if clients drift > 5 min from DC, auth fails
-
-**Related Docs:**
-- /docs/windows-sbl -- Windows Start Before Logon (required for domain join over Twingate)
-- /docs/private-dns-best-practices -- FQDN-based Resource patterns
-- /docs/security-policies-best-practices -- Everyone Group + Resource Policy for AD
-- /docs/network-overview -- Resource Activity for debugging
+## Related Docs
+- Windows Start Before Logon (required for domain join scenarios)
+- Microsoft: [How to configure a firewall for Active Directory domains and trusts](https://support.microsoft.com/en-us/topic/how-to-configure-a-firewall-for-active-directory-domains-and-trusts-7c1a23b5-9f8f-cd89-9e8c-f8e6d02a1e1a) (for port restrictions)

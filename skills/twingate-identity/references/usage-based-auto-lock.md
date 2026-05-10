@@ -1,81 +1,60 @@
-## Usage-Based Auto-Lock
+# Usage-based Auto-lock
 
-Auto-lock revokes a user's access to a Resource if they haven't accessed it within a configurable inactivity window. Per-user, automatic, designed for least-privilege hygiene.
+## Summary
+Usage-based auto-lock automatically removes Resource access for users who haven't accessed it within a configured time period. Access can be regained through manual admin approval or automatic approval with a user-provided reason. Changes are tracked in Audit Logs under the Access category.
 
-**Concept:**
-- Users granted access to a Resource
-- If a user doesn't access the Resource for N days, that user is locked out (other users in the same Group are unaffected -- it's per-user)
-- Locked user can request re-access (manual approval) or unlock with a reason (auto approval)
+## Key Information
+- Auto-lock operates **per-user**, even when configured at Group level
+- Duration options via Admin Console: **1, 7, 30, 60, or 90 days**
+- Additional durations available via **API only**
+- Groups inherit Resource-level auto-lock by default; can be overridden per Group
+- Locked users appear on the user's detail page; admins unlock from there
+- Access reports downloadable from Resource, Group, or User pages
 
-**Available Durations (Admin Console):**
-- 1, 7, 30, 60, 90 days
-- Other durations possible via API
+## Configuration Locations
+- **Resource page**: Sets default for all Groups/users on that Resource
+- **Group page**: Override duration/approval for specific Resources per Group
 
-**Configuration Locations:**
-- **Resource page**: applies to all Group assignments (default)
-- **Group page**: per-Group on a specific Resource (overrides the Resource default)
-- **Per-Group-on-Resource**: when adding a Group to a Resource, set duration + approval method inline
+## Approval Modes
+| Mode | Locked User Experience | Admin Action Required |
+|------|----------------------|----------------------|
+| Manual | Submit request + reason via block page | Admin must unlock |
+| Automatic | Submit reason, access granted immediately | None (reason logged) |
 
-### Approval Modes (When Locked Out)
+## Notifications Configuration
+- Configured in **Settings → Access Requests**
+- Choose which admin roles receive email: Admins, DevOps, or Access Reviewers
+- Can disable emails and use **webhook** instead
 
-| Mode | Flow |
-|---|---|
-| **Manual Approval** | User submits a request with a reason -> admin/Resource Approver decides |
-| **Auto Approval** | User provides a reason -> immediately unlocked; reason logged in analytics |
-
-### Tracking & Audit
-
-- Auto-lock duration changes appear in the **Access category of Audit Logs**
-- Per-Resource / per-Group / per-User CSV export includes:
-  - Groups with access + their Resource Policy
-  - Expiration dates (if Ephemeral Access is also configured)
-  - Auto-lock duration
-  - Per-user current lock status + last unlock timestamp
-
-### Notifications & Webhooks
-
-Admins choose how to be notified of incoming unlock requests:
-- **Email**: select which Admin roles receive (Admins, DevOps, Access Reviewers)
-- **Webhook**: disable emails, integrate with Slack / PagerDuty / SIEM
-
-**Webhook Payload Schema** (`type: ACCESS_REQUEST`):
+### Webhook Payload Fields
 ```json
 {
-  "timestamp": "...",
-  "tenant": "autoco.twingate.com",
-  "version": "1",
   "type": "ACCESS_REQUEST",
-  "request_id": "...",
-  "request_url": "https://...",
-  "user_name": "Alex Marshall",
-  "user_url": "https://...",
-  "resource_name": "Gitlab",
-  "resource_url": "https://...",
-  "requested_at": "...",
-  "reason": "I need access after a long period of no usage.",
-  "approval_mode": "MANUAL",
   "request_type": "AutoLock",
-  "request_duration_seconds": 2592000
+  "approval_mode": "MANUAL" | "AUTOMATIC",
+  "request_duration_seconds": 2592000,
+  "reason": "<user-provided string>",
+  "resource_name": "...",
+  "user_name": "...",
+  "request_url": "...",
+  "timestamp": "<ISO8601>",
+  "tenant": "<tenant>.twingate.com"
 }
 ```
 
-`request_type` distinguishes `AutoLock` (this doc) from JIT (`JITAccessRequest`).
+## Access Reports Include
+- Groups with access and their policy
+- Expiration dates (if set)
+- Auto-lock duration configured
+- Per-user lock status and last admin-unlock date
 
-### Decision Notes
+## Gotchas
+- Changing auto-lock duration affects **future** lock calculations; review existing access when modifying
+- Automatic approval still logs the reason—not fully frictionless from an audit standpoint
+- Per-user locking means users in the same Group may have different lock states
+- Admin Console limits durations to 5 preset values; use API for custom durations
 
-- Use auto-lock as a **backstop** for over-provisioned access (vendors, contractors, team-rotation users)
-- 30-90 day windows are typical -- shorter windows generate too many unlock requests
-- Combine with **Ephemeral Access** for time-bound engagements: ephemeral sets the hard cutoff; auto-lock catches early inactivity
-- For high-trust users + frequently-used Resources: don't enable auto-lock; the unlock friction isn't worth it
-
-**Gotchas:**
-- Auto-lock is **per-user**, not per-Group -- one user's access being locked doesn't affect Group members
-- Resource Policy is unrelated to auto-lock duration -- a user can satisfy the Resource Policy and still be auto-locked for inactivity
-- Manual approval mode requires admin attention -- if your team is small, default to auto approval with reason logging
-- The reason field is free-text -- don't rely on it for structured workflows; use a webhook + ticketing for that
-
-**Related Docs:**
-- /docs/jit-access-requests -- Sibling: time-bounded access via explicit request
-- /docs/ephemeral-access-to-resources -- Sibling: time-bounded Group access (no inactivity check)
-- /docs/resources-reviewing-access-requests -- Approval workflow
-- /docs/audit-logs -- Audit Logs reference
+## Related Docs
+- [Reviewing Access Requests](https://www.twingate.com/docs/reviewing-access-requests)
+- Audit Logs (Admin Console → Access category)
+- Twingate API (for custom auto-lock durations)

@@ -1,57 +1,50 @@
-## Exploring the Twingate APIs (GraphQL)
+# Exploring the Twingate APIs
 
-Twingate's APIs are **GraphQL-based**, not REST. This page is a video-walkthrough hub for getting started with the GraphQL Admin API using Postman.
+## Page Title
+Exploring the APIs
 
-### Key Concept: GraphQL vs REST
+## Summary
+Twingate's primary API interface is GraphQL, which enables precise data queries but has a steeper learning curve than REST APIs. This page provides video walkthroughs and a Postman collection to help users get started with both queries and mutations.
 
-- **GraphQL strength**: clients craft specific queries, get back exactly the fields they need -- no over-fetching
-- **GraphQL friction**: more complex to discover and learn than REST endpoints -- requires understanding query/mutation/introspection patterns
+## Key Information
+- Twingate uses **GraphQL APIs** as the official supported interface
+- A **Postman collection** (JSON template) is provided with pre-built API request examples
+- Content covers: basic queries, nested queries, mutations, and introspection
+- Five video walkthroughs available covering beginner to advanced usage
 
-### Postman Collection
+## Prerequisites
+- Twingate API Token (generated via the Twingate Admin Console)
+- [Postman](https://www.postman.com/) installed (free)
+- Twingate Postman collection JSON imported into Postman
 
-Twingate maintains a **template Postman collection** with example queries + mutations:
-- Download Postman (free) if you don't have it
-- Right-click the linked collection -> Save Link As -> import the JSON into Postman
-- Collection contains many request examples covering common operations
+## Step-by-Step Setup
 
-### Video Walkthrough Series
+1. **Install Postman** if not already installed
+2. **Download the Postman collection**: Right-click the provided link → "Save Link As" → save JSON file
+3. **Import JSON** into Postman environment
+4. **Generate an API Token** in Twingate Admin Console (covered in Part 1 video)
+5. Use collection examples to run queries and mutations
+
+## Video Content Structure
 
 | Part | Topic |
-|---|---|
-| **Part 1: Getting Started** | Generate API token, navigate the Postman collection, explore available Queries |
-| **Part 2: Nesting** | Advanced queries; figuring out how to nest sub-queries |
-| **Part 3: Mutations** | Working with mutations; using variables in queries and mutations |
-| **Bonus 1: Introspection (Queries)** | Discover new queries via GraphQL introspection |
-| **Bonus 2: Introspection (Mutations)** | Discover new mutations via introspection |
+|------|-------|
+| Part 1 | Generate API token, navigate Postman collection, basic queries |
+| Part 2 | Advanced queries, nested query patterns |
+| Part 3 | Mutations, variables in queries/mutations |
+| Bonus 1 | Discovering queries via introspection |
+| Bonus 2 | Discovering mutations via introspection |
 
-### Getting Started Sequence
+## Configuration Values
+- **API Token**: Required for all requests; generated from Twingate Admin Console
+- **Variables**: Supported in both queries and mutations (covered in Part 3)
 
-1. **Generate API token** in Twingate Admin Console (Settings -> API)
-   - Choose permissions: Read, Read/Write, or Read/Write/Provision
-   - Optionally restrict by IP range
-2. **Import Postman collection**
-3. **Authenticate Postman**: paste API token into the collection's environment variables (typically `X-API-KEY` header)
-4. **Run example queries** to confirm connectivity
-5. **Explore introspection** to discover other operations
+## Gotchas
+- GraphQL requires more intentional query construction than REST — you must specify exactly which fields to return
+- Introspection is the primary method for self-discovering available queries/mutations not documented elsewhere
+- All Postman examples depend on the template collection; custom environments need the token configured separately
 
-### Decision Notes
-
-- For **interactive exploration**: Postman + introspection is the fastest path
-- For **production automation**: prefer the Twingate **Terraform provider** (built on this same API) or one of the published CLI tools (Python, JavaScript)
-- For **quick scripts**: the Python or JavaScript CLI wraps common operations -- avoids reinventing GraphQL queries
-- **Always restrict API tokens by IP range** for production use
-
-### Gotchas
-
-- GraphQL learning curve is real -- expect to spend time on the intro videos before being productive
-- Introspection lets you discover the schema, but the schema can change between Twingate versions -- pin to known operations rather than dynamically introspecting in production scripts
-- Postman collection is a snapshot -- check for updated versions periodically
-
-### Related Docs
-
-- /docs/api -- GraphQL API base reference
-- /docs/api-overview -- API overview / use cases
-- /docs/getting-started-with-the-api -- API token generation walkthrough
-- /docs/introduction-to-the-python-cli, /docs/introduction-to-tg-cli-javascript -- CLI wrappers (Python, JS)
-- /docs/scim-provisioning-api -- Separate SCIM API (not GraphQL)
-- /docs/terraform-getting-started -- Terraform provider (recommended for IaC use cases)
+## Related Docs
+- Twingate GraphQL API reference (introspection-based exploration)
+- API Token generation (Admin Console)
+- Postman collection import documentation

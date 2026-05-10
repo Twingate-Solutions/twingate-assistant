@@ -1,43 +1,42 @@
 # Twingate Architecture
 
 ## Summary
-Twingate implements Zero Trust Networking for secure access to private resources, operating on the principle that all networks and users are untrusted by default. The system uses four core components (Controller, Clients, Connectors, Relay infrastructure) to enforce authentication and authorization for every resource access attempt.
+Twingate implements Zero Trust Networking for secure private resource access, assuming all networks and users are untrusted by default. The system uses four components (Controller, Clients, Connectors, Relay) to enforce authentication and authorization on every access attempt. Unlike VPNs, Twingate treats internal and external networks with equal distrust.
 
 ## Key Information
-- **Zero Trust model**: Every access request requires authentication (who you are) and authorization (what you can access) regardless of network location
-- **Four core components**:
-  - **Controller**: Central management/policy enforcement
-  - **Clients**: End-user software
-  - **Connectors**: Deployed in private networks to expose resources
-  - **Relay infrastructure**: Facilitates connectivity
-- **Peer-to-peer connections**: Supported by default; no open inbound ports required; zero additional deployment needed; transparent to users and admins
-- **DNS handling**: Client intercepts DNS transparently; users can resolve private DNS addresses without direct access to private DNS resolvers
+- **Zero Trust model**: Every resource access attempt requires authentication (who you are) and authorization (what you can access)
+- **No network trust distinction**: Internal company networks treated same as public internet
+- **Four core components**: Controller, Clients, Connectors, Relay infrastructure
+- **Peer-to-peer connections**: Enabled by default, no open inbound ports required, transparent to users and admins
+- **DNS integration**: Client intercepts DNS transparently; users can access private DNS addresses without direct access to private DNS resolver
+- **P2P availability**: All customers, no additional deployment needed
 
 ## Prerequisites
-- None specific to this overview page
+None specified on this page — links out to component-specific docs.
 
-## Configuration Values
-None defined on this page (overview/architecture reference only)
+## Core Components
+| Component | Role |
+|-----------|------|
+| Controller | Central management/policy enforcement |
+| Client | Installed on user devices; handles DNS interception |
+| Connector | Deployed in private networks to proxy resource access |
+| Relay | Facilitates connections when direct P2P isn't possible |
 
-## Management Areas
-| Area | Purpose |
-|------|---------|
-| Connectors | Deploy in private networks |
-| Resources | Define what users can access |
-| Users & Groups | Identity management |
-| Policies | Access control rules |
-| Devices | Device trust configuration |
+## Configuration Areas
+- **Connectors**: Deployment and management
+- **Resources**: Define what private resources are accessible
+- **Users & Groups**: Identity management
+- **Policies**: Access control rules
+- **Devices**: Device trust configuration
 
 ## Gotchas
-- Twingate treats private networks with the same trust level as public internet — internal network access alone grants no implicit trust
-- Peer-to-peer connectivity requires no inbound ports, which differs from traditional VPN assumptions
-- DNS behavior is non-standard (client intercepts DNS queries); review DNS documentation before deployment to avoid conflicts with existing DNS infrastructure
+- DNS behavior is non-standard — Twingate Client intercepts DNS queries transparently; review DNS docs before deploying if you have complex DNS requirements
+- P2P connections require no inbound ports, but fallback to Relay infrastructure occurs automatically when P2P isn't possible
 
 ## Related Docs
-- [How Twingate Works](#) — detailed component communication
-- [DNS with Twingate](#) — DNS interception mechanics
-- [Peer-to-Peer Communication](#) — P2P connection details
-- [Twingate vs. VPNs](#) — comparison guide
-- [Twingate vs. Mesh VPNs](#) — comparison guide
-- [Connectors documentation](#)
-- [Resources documentation](#)
+- [How Twingate Works](https://www.twingate.com/docs/how-twingate-works) — detailed component communication
+- [DNS with Twingate](https://www.twingate.com/docs/dns) — DNS interception mechanics
+- [Peer-to-Peer Communication](https://www.twingate.com/docs/peer-to-peer) — P2P connection details
+- [Connectors](https://www.twingate.com/docs/connectors)
+- [Twingate vs. VPNs](https://www.twingate.com/docs/twingate-vs-vpn)
+- [Twingate vs. Mesh VPNs](https://www.twingate.com/docs/twingate-vs-mesh-vpn)

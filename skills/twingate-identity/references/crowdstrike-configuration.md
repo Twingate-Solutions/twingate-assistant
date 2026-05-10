@@ -1,91 +1,62 @@
-## CrowdStrike Configuration
+# CrowdStrike Configuration
 
-Integrate CrowdStrike Falcon with Twingate -- gates Twingate access on CrowdStrike's Zero Trust Assessment (ZTA) of the device.
+## Page Title
+CrowdStrike Configuration (Device Security Integration)
 
-**Plan Requirement:**
-- **Business or Enterprise** Twingate plans only
+## Summary
+Twingate integrates with CrowdStrike Falcon to verify device security posture using the CrowdStrike API and Zero Trust Assessment (ZTA) scores. Verified devices can be required as a condition for accessing private resources via Security Policies. Available on Business and Enterprise plans only.
 
-### Mandatory Prerequisite: ZTA Feature Enabled
+## Key Information
+- Uses CrowdStrike API to pull managed device list and validate device identity via Agent ID or ZTA file
+- ZTA score file must exist and be non-empty on endpoints before integration will work
+- Supports macOS, Windows, and Linux (Linux requires Twingate client v2024.018+)
+- Initial sync takes up to 10 minutes after setup
 
-The CrowdStrike Falcon **Zero Trust Assessment (ZTA)** feature must be enabled, and your CID must be shared with CrowdStrike Support.
+## Prerequisites
+- Twingate Business or Enterprise plan
+- CrowdStrike Falcon Zero Trust Assessment feature enabled on your Falcon CID (must be requested via CrowdStrike Support)
+- Verify ZTA file exists and is non-empty:
+  - **Windows:** `%ProgramData%\CrowdStrike\ZeroTrustAssessment\data.zta`
+  - **macOS:** `/Library/Application Support/Crowdstrike/ZeroTrustAssessment/data.zta`
 
-**Without ZTA enabled, the integration cannot work** -- the ZTA file won't be deployed to devices.
+## Step-by-Step
 
-**To enable**: contact CrowdStrike customer support directly to enable ZTA on your Falcon CID.
+1. **Generate CrowdStrike API client** in Falcon platform with these scopes:
+   - `Hosts: Read`
+   - `Zero Trust Assessment: Read`
+   - Save the **API Client ID**, **API Client Secret**, and **Base URL**
 
-**Verify on a test device** (file should exist and be > 0 KB):
-- Windows: `%ProgramData%\CrowdStrike\ZeroTrustAssessment\data.zta`
-- macOS: `/Library/Application Support/Crowdstrike/ZeroTrustAssessment/data.zta`
+2. In Twingate, go to **Settings → Device Settings**
 
-### How It Works
+3. Click **Connect** next to CrowdStrike; enter:
+   - API Client ID
+   - API Client Secret
+   - Base URL (CrowdStrike tenant URL)
 
-- Twingate uses CrowdStrike's API to pull the list of CrowdStrike-managed devices
-- The Twingate Client reads the **CrowdStrike Agent ID** OR the local **ZTA file** on the device
-- Cross-checks: is this device in the CrowdStrike-managed list AND does its ZTA file pass validity checks?
-- If both pass: device is considered **CrowdStrike-verified** in Twingate
+4. Confirm integration status on Device Settings page
 
-### Setup -- Four Steps
+5. Create a **Trusted Profile** requiring CrowdStrike as a Trust Method under Device Security
 
-**Step 1: Generate a CrowdStrike API Client Token**
+6. Add Trusted Profile to a **Security Policy**
 
-In the CrowdStrike Falcon platform:
-- Required scopes:
-  - **Hosts: Read**
-  - **Zero Trust Assessment: Read**
-- Save the **API Client ID** and **API Client Secret**
+## Configuration Values
 
-**Step 2: Configure in Twingate Admin Console**
+| Field | Source |
+|---|---|
+| API Client ID | CrowdStrike Falcon API client |
+| API Client Secret | CrowdStrike Falcon API client |
+| Base URL | CrowdStrike tenant base URL |
 
-- **Settings -> Device Settings**
-- Click **Connect** next to CrowdStrike
-- Enter:
-  - API Client ID
-  - API Client Secret
-  - **Base URL** for your CrowdStrike tenant (e.g., `api.crowdstrike.com`, `api.us-2.crowdstrike.com`, `api.eu-1.crowdstrike.com`)
+**Required API Scopes:** `Hosts: Read`, `Zero Trust Assessment: Read`
 
-**Step 3: Wait for Initial Sync**
+## Gotchas
+- ZTA feature must be explicitly enabled by CrowdStrike Support — it is not on by default
+- Empty (0KB) ZTA file means the feature is not active; integration will not work
+- Initial sync delay of up to 10 minutes — devices may show incorrect verification state during this window
+- **Recoverable errors** (API unresponsive): auto-resolves when API is reachable again; last successful sync time is shown
+- **Unrecoverable errors** (deleted API client, changed permissions): integration stops retrying; admin email notification sent; requires full reconfiguration with new API credentials
 
-- Up to **10 minutes** for the first sync
-- During this window, Device Settings shows "Waiting to sync"
-- Devices may show wrong verification state until sync completes
-
-**Step 4: Add to Trusted Profiles**
-
-- Device Security -> Trusted Profiles
-- Create/edit a Trusted Profile (macOS / Windows / Linux)
-- Linux requires Twingate Client **2024.018+**
-- Add **CrowdStrike** as a Trust Method
-- Apply via Resource Policies that require Trusted Devices
-
-### Troubleshooting
-
-**Recoverable errors (CrowdStrike API down):**
-- Sync state shows last successful + most recent failure timestamps
-- Auto-resolves when the API recovers
-
-**Unrecoverable errors (API key deleted, permissions revoked):**
-- Twingate stops attempting sync
-- Admins notified via email
-- Recovery: regenerate API client + reconfigure integration in Twingate
-
-### Decision Notes
-
-- Most prevalent EDR Trust Method in production environments
-- Combine with `Hosts: Read` + `Zero Trust Assessment: Read` only -- minimum permissions
-- Linux client version 2024.018+ required for Linux device verification -- verify before applying to a Linux fleet
-- Use CrowdStrike + native posture checks (encryption, screen lock) together in the Trusted Profile for defense in depth
-
-### Gotchas
-
-- ZTA feature is **not on by default** -- you must explicitly request CrowdStrike Support enable it
-- The 10-minute initial sync delay can confuse rollouts -- communicate the wait window
-- API client deletion silently breaks the integration until you notice the email -- monitor admin inbox
-- Base URL differs by region -- get the exact URL from your CrowdStrike Falcon environment
-
-### Related Docs
-
-- /docs/device-security-guide -- Trusted Profiles + Device Security
-- /docs/trusted-devices -- Trusted Device policy rule
-- /docs/managed-devices -- Other Trust Method integrations
-- /docs/sentinelone-configuration -- Alternative EDR (sibling pattern)
-- /docs/1password-configuration -- Device-level Trust Method (sibling)
+## Related Docs
+- Device Security Trusted Profiles
+- Security Policies
+- Twingate pricing page (plan eligibility)

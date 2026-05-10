@@ -1,69 +1,64 @@
-## SaaS App Gating: Office 365 with Entra ID
+# SaaS App Gating Office 365 with Microsoft Entra ID
 
-Practical recipe to lock Office 365 access behind a Twingate Connector exit IP using Microsoft Entra ID **Conditional Access**. Users can only reach Office 365 if they're connected to Twingate.
+## Summary
+Configures Microsoft Entra ID Conditional Access to restrict Office 365 access exclusively through a Twingate Connector's public IP address. Users must connect via Twingate Client to reach Office 365; direct access from other IPs is blocked.
 
-**Prerequisites:**
-- Office 365 Business subscription
-- License for **Entra ID Conditional Access** (P1 or higher)
-- At least one Connector deployed with a known **public IP address** (record this IP per Connector)
+## Key Information
+- Twingate acts as a network egress point — Connector's public IP becomes the only trusted source for Office 365
+- Policy logic: block access from "any location" EXCEPT the trusted Connector IP (double-negative = allowlist)
+- Multiple Resources may be needed to cover all O365 URLs
+- Test with Report-only mode before enforcing; misconfiguration can lock out global admins
 
-**Architecture:**
-- Twingate Resource for Office 365 domains -- routes user traffic through the Connector
-- Entra ID Conditional Access -- denies Office 365 access from any source IP **except** the Connector's public IP
+## Prerequisites
+- Office 365 Business Subscription
+- Entra ID Conditional Access license
+- At least one deployed Twingate Connector with a known static public IP address
 
-### Step 1 -- Create the Twingate Resource
+## Step-by-Step
 
-In the Remote Network containing the gating Connector(s):
-- Create a Resource for the Office 365 domains. Depending on which apps you protect, add separate Resources for:
-  - `portal.office.com`
-  - `*.sharepoint.com`
-  - `*-my.sharepoint.com`
-  - `admin.microsoft.com`
-  - `*-admin.sharepoint.com`
-  - `admin.teams.microsoft.com`
-- Apply a **Device-only Policy** to these Resources (avoids the chicken-and-egg auth loop -- see /docs/saas-app-gating-best-practices)
+### 1. Add Twingate Resources
+In Admin Console, create Resources in the Remote Network for O365 URLs:
+- `portal.office.com`
+- `*.sharepoint.com`
+- `*-my.sharepoint.com`
+- `admin.microsoft.com`
+- `*-admin.sharepoint.com`
+- `admin.teams.microsoft.com`
 
-### Step 2 -- Entra ID Conditional Access
+### 2. Add Named Location in Entra ID
+- Navigate to: Entra ID → Conditional Access → Named Locations
+- Create location using Connector's public IP in CIDR notation
+- This represents the trusted Twingate egress point
 
-**WARNING:** Misconfigured Conditional Access can lock all admins (including global admins) out of the Entra portal. Always test with **Report-only** mode first and have a break-glass admin account excluded from the policy.
+### 3. Create Conditional Access Policy
+- **Target users**: Start with a single test account; expand later
+- **Target apps**: Office 365
+- **Condition — Locations**:
+  - Include: `Any location`
+  - Exclude: the Named Location (Connector IP) created above
+- **Grant**: `Block access`
 
-#### 2.1 Add a Trusted Location (Named Location)
-- Entra ID Conditional Access -> **Named locations** -> new
-- Name: e.g., "Twingate Connectors"
-- Enter the **public CIDR** of each Connector (e.g., `203.0.113.42/32`)
+### 4. Enable Policy
+- Start with `Report-only` mode to validate behavior in logs
+- Switch to `On` when confirmed working
 
-#### 2.2 Configure the Policy
-- Conditional Access -> **Policies** -> **New policy**
-- **Users**: scope to a single test user first; expand later
-- **Cloud apps or actions**: select **Office 365**
-- **Conditions** -> **Locations**:
-  - Include: **Any location**
-  - Exclude: **Twingate Connectors** (the trusted location from 2.1)
-- **Access controls** -> **Grant**: **Block access**
+## Configuration Values
 
-**Logic recap:**
-- "Any location except Twingate Connectors" -> **Block**
-- Result: only requests coming from the Connector's public IP are allowed
+| Setting | Value |
+|---|---|
+| Named Location IP | Connector's public IP in CIDR (e.g., `203.0.113.10/32`) |
+| Included Location | Any location |
+| Excluded Location | Named Location (Connector IP) |
+| Grant control | Block access |
+| Initial policy state | Report-only → On |
 
-#### 2.3 Enable as Report-Only First
-- Set policy to **Report-only**
-- Verify in Conditional Access logs that:
-  - Twingate-routed requests are reported as "would have been allowed"
-  - Direct requests are reported as "would have been blocked"
-- Toggle to **On** when validated
+## Gotchas
+- **Admin lockout risk**: Incorrect Conditional Access config can lock out global admin accounts — review carefully before enabling
+- **Multiple Connectors**: Each Connector has its own public IP; add all Connector IPs to the Named Location
+- **Policy logic is inverted**: "Block from any location except trusted" = "only allow from trusted" — easy to misconfigure
+- **Scope creep**: Not all O365 apps are covered by a single URL; enumerate all relevant domains as Twingate Resources
 
-### Result
-
-Twingate users connect via Client -> Office 365 traffic exits through the Connector -> Entra ID sees the Connector's public IP -> Conditional Access allows. Users not on Twingate are blocked.
-
-**Gotchas:**
-- Excluding a break-glass admin account from the policy is **not optional** -- if the Connector goes down, the policy locks everyone out
-- If the Connector's public IP changes (e.g., elastic IP not reserved, NAT gateway recreation), Conditional Access will start blocking users -- pin static IPs for production
-- Multiple Connectors can share a NAT egress -- one CIDR usually suffices; if Connectors have separate IPs, list each
-- Wildcard SharePoint domains (`*.sharepoint.com`) can match more than expected -- review which Microsoft domains you actually want gated
-
-**Related Docs:**
-- /docs/saas-app-gating-best-practices -- MAR + Device-only policy guidance (essential)
-- /docs/saas-app-gating-with-google-workspace -- Same pattern, different IdP
-- /docs/saas-app-gating-with-okta -- Okta Network Zones equivalent
-- /docs/entra-id-configuration -- Entra ID as Twingate IdP
+## Related Docs
+- [SaaS App Gating with Microsoft Entra ID](https://www.twingate.com/docs/saas-app-gating-entra-id) (parent guide)
+- Entra ID Conditional Access licensing information
+- Twingate Connector deployment documentation

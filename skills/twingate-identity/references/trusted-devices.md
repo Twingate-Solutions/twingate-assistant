@@ -1,50 +1,43 @@
-## Trusted Devices Rule
+# Trusted Devices
 
-A Security Policy rule that requires the device to be **marked as trusted** before allowing sign-in or Resource access. Applied to MAR and Resource Policies.
+## Summary
+Trusted Devices is a policy rule in Twingate that restricts access to resources or network sign-in based on whether a device is marked as trusted. It can be applied at both the network sign-in and resource access levels, blocking untrusted devices regardless of platform or location.
 
-**Functionality:**
-- When enabled on a policy, only devices that meet a Trusted Profile are allowed
-- Untrusted devices attempting to sign in (MAR) or access a Resource (Resource Policy) are blocked
-- Enforced for any device running the Twingate Client, regardless of platform or location
+## Key Information
+- Enforces device trust status as an access condition
+- Works across all platforms and locations where the Twingate Client app runs
+- Blocking is enforced at access time — untrusted devices are denied, not just warned
+- Two enforcement scopes: sign-in level and per-resource level
 
-**What Makes a Device "Trusted":**
-A device is considered trusted if it meets the requirements of a **Trusted Profile** -- defined in the Admin Console under Device Security settings.
+## Prerequisites
+- Twingate Client app installed on the device being evaluated
+- Device must be enrolled/visible in Twingate for trust status to be assigned
+- Admin access to configure Network Sign In Policies or Resource Policies
 
-A Trusted Profile combines:
-- **Verification method**: automated (CrowdStrike, SentinelOne, Jamf, Kandji, Intune, etc.) or manual (admin marks the device verified)
-- **Device posture checks**: HD encryption, screen lock, firewall, antivirus, biometric configuration, etc.
+## Applicability
+| Policy Type | Supported |
+|---|---|
+| Network Sign In Policies | ✅ |
+| Resource Policies | ✅ |
 
-A device must satisfy **all** elements of at least one Trusted Profile to be considered trusted.
+## Step-by-Step (Policy Configuration)
+1. Navigate to the relevant **Network Sign In Policy** or **Resource Policy** in the Twingate Admin Console
+2. Add a **Trusted Devices** rule to the policy
+3. Save and apply the policy to the target resource or network
+4. Mark devices as trusted via the Devices section in the Admin Console
+5. Test access from a trusted vs. untrusted device to verify enforcement
 
-**Setup Pattern:**
-1. Configure EDR/MDM integration in Admin Console (Device Settings)
-2. Create one or more Trusted Profiles per (OS, verification method) combination
-3. Add posture checks (encryption, screen lock, etc.) to each Profile as required
-4. Apply the **Trusted Devices** rule to MAR or Resource Policies
+## Configuration Values
+- No CLI flags or environment variables specific to this rule
+- Trust status is set per-device in the Admin Console (not via client-side configuration)
 
-**Common Profile Layouts:**
+## Gotchas
+- A device must have the Twingate Client app installed to be evaluated — devices without the client cannot be assessed for trust status
+- If a resource policy requires trusted devices, the user is **blocked entirely** from that resource on an untrusted device — there is no fallback or degraded access mode
+- Trust status is admin-assigned; users cannot self-designate their device as trusted
+- Applies regardless of network location (on-prem or remote), so trusted device requirements apply even to users on corporate networks
 
-| Profile | OS | Verification |
-|---|---|---|
-| Corporate Mac | macOS | CrowdStrike (automatic) |
-| Corporate Windows | Windows | CrowdStrike or SentinelOne (automatic) |
-| Contractor Windows | Windows | Manual verification (Twingate Serial Number) |
-| Contractor Mac (BYOD) | macOS | None -- native posture only |
-
-**Decision Notes:**
-- Most production environments require Trusted Devices on most Resource Policies
-- For BYOD users without EDR: create a Profile with native posture checks only (Screen Lock, Disk Encryption, Biometrics)
-- "Any Device" is appropriate only for very-low-risk Resources or for the IdP Resource accessed by the Everyone Group
-
-**Gotchas:**
-- A device's trust status is evaluated per policy -- the same device can satisfy one Profile and not another
-- Devices verified manually by an admin can be marked untrusted at any time -- the device immediately loses access on the next policy evaluation
-- Posture checks (encryption, screen lock) are evaluated by the Twingate Client locally -- some checks may not be available on all platforms
-
-**Related Docs:**
-- /docs/device-security-guide -- Device Security settings + Trusted Profiles
-- /docs/manually-verified-devices -- Manual verification flow
-- /docs/managed-devices -- EDR/MDM integration
-- /docs/device-posture-checks -- Posture check reference
-- /docs/security-policies -- Policy types overview
-- /docs/security-policies-best-practices -- Worked example with Trusted Profiles
+## Related Docs
+- Network Sign In Policies
+- Resource Policies
+- Device Management

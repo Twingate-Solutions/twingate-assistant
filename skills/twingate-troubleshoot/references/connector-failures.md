@@ -1,99 +1,82 @@
-## Connector Failures (Troubleshooting)
+# Connector Failures Troubleshooting
 
-Diagnostic playbook for **three Connector failure modes**: offline/flapping, online-but-can't-reach-Resources, and online-but-poor-performance.
+## Page Title
+Connector Failures
 
-### Failure Mode 1: Connector Offline or Flapping
+## Summary
+Covers three failure scenarios for Twingate Connectors: offline/flapping status, online but unable to reach Resources, and online with poor performance. A failed Connector affects all Resources in its Remote Network unless a backup Connector exists. Diagnostics focus on logs, Admin Console metrics, and network-layer testing.
 
-**Symptoms:**
-- All Resources in a Remote Network unreachable
-- Admin Console shows status `Offline` or alternating Online/Offline
-- Connector logs: `Invalid token`, `failed to get an access token`, `Gone, code 410`, `Failed to preconnect a relay listener` with `Connection timed out`
+## Key Information
+- Connector offline → all Resources in that Remote Network fail for all users
+- Three failure categories: offline/flapping, reachable but Resource access fails, degraded performance
+- Traffic routes peer-to-peer when possible; falls back to Relay (higher latency)
+- Resource addresses/FQDNs are resolved from the **Connector host's** perspective
 
-**Diagnose via Admin Console -> Connector detail page:**
+## Prerequisites
+- Access to Admin Console (Connector details page)
+- SSH or `docker exec` access to Connector host
+- `nc`, `nslookup`, `hostname` available on host
 
-| Indicator | Cause |
-|---|---|
-| Status: Offline | Host down or no internet |
-| **Time Offset > +/-5 sec** | **Clock drift** -- single most common cause of flapping; auth tokens get rejected |
+## Step-by-Step Diagnostics
 
-**Time Offset Fix**: confirm host runs a time sync service. **`chronyd` recommended over `ntpd`**. Host-level config, not Twingate.
+### Offline/Flapping
+1. Check Admin Console → Remote Network → Connector details
+   - `Time Offset > 5s` → fix NTP (use `chronyd`, not `ntpd`)
+   - Status `Offline` → host down or no internet
+2. Enable detailed logging: `TWINGATE_LOG_LEVEL=7`
+3. Check logs for error patterns (see table below)
+4. Verify only one Connector instance uses a given token set
+5. Confirm outbound connectivity to Twingate infrastructure
 
-**Other checks:**
-- Tokens correct? (regenerated tokens require Connector reconfigure)
-- Only ONE Connector instance running with each token pair (running multiples with same tokens causes conflicts)
-- Connector software up to date (very old versions blocked)
-- Host meets [hardware/OS requirements](/docs/connector-best-practices)
+### Resource Unreachable (Connector Online)
+1. SSH into Connector host; test reachability directly:
+   ```bash
+   nc -zv <RESOURCE_ADDRESS> <PORT>
+   nslookup <RESOURCE_FQDN>
+   ```
+2. Check VPC/VNet routing (peering, transit gateways, route tables)
+3. Check cloud security groups / on-prem firewalls between Connector and Resource
+4. Check application-level IP allowlists; get Connector IP: `hostname -I`
+5. Verify Resource config address/ports match what's actually reachable
 
-**Connector Logs (set `TWINGATE_LOG_LEVEL=7` for detail):**
+## Configuration Values
+
+| Parameter | Value |
+|-----------|-------|
+| `TWINGATE_LOG_LEVEL` | `7` (detailed logging) |
+| Outbound TCP | Port `443` (Controller + Relay) |
+| Outbound TCP | Ports `30000–31000` (Relay fallback) |
+| Outbound | UDP/QUIC for HTTP/3 |
+
+## Log Commands
+```bash
+# systemd
+journalctl -u twingate-connector -f
+
+# Docker
+docker logs <CONTAINER_NAME> -f
 ```
-journalctl -u twingate-connector -f          # systemd
-docker logs <container> -f                   # Docker
-```
 
-| Error Pattern | Cause |
-|---|---|
-| `Invalid token` | Clock drift (check Time Offset) |
-| `too many open files` | Host file descriptor limit too low; raise `ulimit` |
-| `Failed to preconnect a relay listener` | Outbound block to Twingate Relay infrastructure |
+## Error Reference
 
-**Outbound prerequisites:**
-- TCP 443 to `*.twingate.com` (Controller + Relay)
-- TCP 30000-31000 (Relay fallback)
-- UDP + QUIC (HTTP/3) -- ALL destinations
+| Error | Cause |
+|-------|-------|
+| `Invalid token` / `failed to get an access token` | Clock drift; `Time Offset > 5s` |
+| `Gone, code 410` | Likely token/version issue |
+| `too many open files` | `ulimit` (file descriptor limit) too low |
+| `Failed to preconnect a relay listener` + `Connection timed out` | Firewall blocking outbound to Relay; no public IPv4 |
 
-### Failure Mode 2: Connector Online but Cannot Reach Resources
+## Gotchas
+- **Clock skew**: Authentication fails if host clock drifts >5 seconds; use `chronyd`
+- **Duplicate tokens**: Multiple Connectors sharing same token set causes conflicts
+- **ICMP**: Ping failures while TCP works = host OS blocking outbound ICMP (not Twingate-controlled)
+- **Resource address resolution**: FQDN Resources must be resolvable from the Connector host, not the client
+- **Port restrictions**: Twingate forwards all TCP/UDP by default; if ports are restricted in Resource config, only those ports forward
 
-**Symptoms:**
-- Connector shows Online; specific Resources fail for users
-- Connector logs: `failed to connect`, `could not be reached` for specific Resource addresses
-- Some Resources work, others don't
-
-**Test from Connector host (SSH or `docker exec`):**
-```
-nc -zv <RESOURCE_ADDRESS> <PORT>     # TCP reachability
-nslookup <RESOURCE_FQDN>             # DNS resolution
-```
-
-If these fail FROM THE CONNECTOR HOST, problem is in the network path (not in Twingate).
-
-**Check:**
-1. **Network segmentation** -- Connector + Resource in same VPC/VNet, or peering/transit gateway between
-2. **Route tables** include route to Resource's subnet
-3. **Cloud security groups / NSGs** -- allow inbound from Connector's private IP on required ports
-4. **Application-layer IP filtering**:
-   - SSH: `AllowUsers`, `AllowGroups`, `iptables`, `ufw`
-   - PostgreSQL: `pg_hba.conf` source IP rules
-   - RDP: Windows Firewall + NLA
-   - Web apps: WAF, reverse proxy ACLs
-5. **Resource configuration** -- FQDN/IP correct, ports match the actual service ports
-
-**Critical**: Resource addresses are resolved **from the Connector's perspective**. FQDNs must be resolvable by the Connector's DNS; IPs must be routable from the Connector's network.
-
-Find Connector's private IP: `hostname -I` on the Connector host.
-
-### Failure Mode 3: Online but Performance Is Poor
-
-**Symptoms:** slow / unreliable connections, Connector healthy
-
-**Causes:**
-- **P2P not establishing** -- traffic falls back to Relay (higher latency). See /docs/troubleshooting-p2p
-- **Connector is geographically far** from Resources -- deploy Connectors in same region/VPC as Resources
-- **Resource-constrained Connector host** -- review hardware recommendations; scale up or add Connectors
-
-**ICMP/ping**: if ping fails to Resources but other connections (SSH/HTTP) work -- check the Connector host's outbound ICMP rules; this is host-level, not Twingate.
-
-### Decision Notes
-
-- **Always run 2+ Connectors per Remote Network** -- single Connector failure = total outage for that Remote Network
-- **Time Offset > 5s = silent kill** -- check this FIRST when triaging flapping
-- **Test from the Connector host** -- it's the source of truth for "is the path open?"
-- For AWS: NAT Gateways often break P2P; consider self-hosted NAT instances or Marketplace alternatives
-
-### Related Docs
-
-- /docs/connector-details, /docs/connector-real-time-logs -- Connector inspection
-- /docs/connector-best-practices -- Hardware + outbound requirements
-- /docs/troubleshooting-p2p -- P2P performance issues
-- /docs/firewall-failures -- Sibling: outbound firewall issues
-- /docs/dns-failures -- DNS issues (sibling failure class)
-- /docs/how-to-troubleshoot -- Top-level troubleshooting decision tree
+## Related Docs
+- Firewall Failures
+- Connector Logging
+- Peer-to-peer troubleshooting guide
+- Hardware and OS requirements
+- Resources configuration
+- Connector software updates
