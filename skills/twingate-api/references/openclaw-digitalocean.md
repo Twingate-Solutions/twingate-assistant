@@ -1,74 +1,66 @@
-## Securing OpenClaw on DigitalOcean with Twingate
+# Setup and Secure OpenClaw on DigitalOcean
 
-End-to-end deployment of **OpenClaw** (community-built AI assistant for WhatsApp/Telegram, formerly ClawdBot/MoltBot) on a DigitalOcean Droplet, fronted by a Twingate Connector for Zero Trust access.
+## Summary
+Deploy OpenClaw (AI-powered WhatsApp/Telegram assistant) on a DigitalOcean Droplet using the Marketplace image, then secure access via Twingate Zero Trust. The Droplet is completely locked down with no inbound ports; all access routes through the Twingate Connector.
 
-### Architecture
+## Key Information
+- OpenClaw runs on `localhost:18789` (Node.js gateway)
+- Caddy acts as reverse proxy, restricted to private IP only
+- Twingate Connector creates outbound-only connections—no inbound ports needed
+- Gateway requires a token for authentication (stored in `/opt/openclaw.env`)
+- Total setup time: 20–30 minutes
 
-- **DigitalOcean Droplet** runs OpenClaw Gateway (Node.js, listens on `localhost:18789`)
-- **Caddy** reverse-proxies to private IP only (no public exposure)
-- **Twingate Connector** on the same Droplet provides outbound-only secure access
-- **Team members** access via Twingate Client -- no SSH, no VPN, no public ports
+## Prerequisites
+- DigitalOcean account with SSH key added
+- Twingate account
+- (Optional) Terraform for automated deployment
 
-### Build Pattern (4 stages)
+## Step-by-Step
 
-**Stage 1: Deploy Droplet from Marketplace**
-- Visit DigitalOcean Marketplace -> OpenClaw -> Create Droplet
-- Recommended size: `s-2vcpu-4gb` or larger (4-8 GB RAM)
-- Or via API: `image: openclaw`, region of choice
-- Includes: Ubuntu 22.04 LTS, OpenClaw + Node.js pre-installed
+1. **Deploy Droplet** — Use DigitalOcean Marketplace OpenClaw image; 2 vCPU / 4 GB RAM minimum; note the private IP
+2. **Configure Caddy** — Restrict reverse proxy to private IP only:
+   ```bash
+   PRIVATE_IP=$(hostname -I | awk '{print $2}')
+   sudo tee /etc/caddy/Caddyfile > /dev/null <<EOF
+   ${PRIVATE_IP} { reverse_proxy localhost:18789 }
+   EOF
+   sudo systemctl restart caddy
+   ```
+3. **Get Gateway Token** — `cat /opt/openclaw.env`
+4. **Install Twingate Connector** on the Droplet using tokens from Admin Console
+5. **Create Twingate Resource** — Address: `<droplet-private-ip>`, assign to group
+6. **Create DigitalOcean Firewall** — Zero inbound rules, all outbound allowed; apply to Droplet
+7. **Access Gateway** — `https://<droplet-private-ip>/?token=<your-token>` via Twingate Client
 
-**Stage 2: Configure Caddy for Private IP Only**
-- SSH in (initial public access via SSH key)
-- Get private IP: `hostname -I | awk '{print $2}'`
-- Edit `/etc/caddy/Caddyfile` to bind only to the private IP
-- Restart Caddy: `sudo systemctl restart caddy`
-- Locate gateway token: `cat /opt/openclaw.env`
+## Configuration Values
 
-**Stage 3: Deploy Twingate Connector**
-- Twingate Admin Console -> Remote Networks -> Add Connector (Linux)
-- Generate Access + Refresh Tokens
-- On the Droplet:
-  ```
-  curl https://binaries.twingate.com/connector/setup.sh | sudo \
-    TWINGATE_ACCESS_TOKEN=... \
-    TWINGATE_REFRESH_TOKEN=... \
-    TWINGATE_NETWORK=yourcompany \
-    TWINGATE_LABEL_DEPLOYED_BY="openclaw" \
-    bash
-  ```
-- Verify: `sudo systemctl status twingate-connector`
-- Create a Twingate Resource for the Droplet's private IP
-- Add Group access; install Twingate Client on user devices to test
+| Item | Value |
+|------|-------|
+| Gateway port | `18789` |
+| Gateway token location | `/opt/openclaw.env` |
+| Caddy config | `/etc/caddy/Caddyfile` |
+| Connector env vars | `TWINGATE_ACCESS_TOKEN`, `TWINGATE_REFRESH_TOKEN`, `TWINGATE_NETWORK` |
+| Connector label | `TWINGATE_LABEL_DEPLOYED_BY="openclaw"` |
+| Droplet size (min) | `s-2vcpu-4gb` |
+| Marketplace image slug | `openclaw` |
 
-**Stage 4: Lock Down the VPC**
-- DigitalOcean Console -> Networking -> Firewalls -> Create
-- **Inbound rules: leave EMPTY** (zero inbound, including SSH)
-- **Outbound rules: allow all** (Connector needs outbound; AI providers need API access)
-- Apply to Droplet
-- Verify: SSH from a non-Twingate machine should time out
+## Gotchas
+- SSH must be used on **private IP** via Twingate after firewall lockdown—public SSH no longer works
+- Caddy must be reconfigured post-deploy; default marketplace image may expose public IP
+- Twingate Resource must be assigned to the same Remote Network where the Connector is installed
+- First SSH login prompts for AI provider API key; can skip with `CTRL-C`
+- For FQDN alias resource, use `127.0.0.1` as address with the alias set to your domain
 
-### Connector Configuration Values
+## Terraform Alternative
+```bash
+git clone https://github.com/Twingate-Community/secure-openclaw.git
+cd secure-openclaw/terraform/digitalocean
+cp terraform.tfvars.example terraform.tfvars
+terraform init && terraform apply
+```
+Required vars: `do_token`, `twingate_access_token`, `twingate_refresh_token`, `twingate_network`, `ssh_fingerprint`
 
-- `TWINGATE_NETWORK`: tenant subdomain (no `.twingate.com` suffix)
-- `TWINGATE_ACCESS_TOKEN`, `TWINGATE_REFRESH_TOKEN`: per-Connector tokens
-- `TWINGATE_LABEL_DEPLOYED_BY=openclaw`: useful for filtering Connectors in Admin Console
-
-### Decision Notes
-
-- The "zero inbound" pattern is the strongest possible network isolation -- combined with Twingate, no port (including SSH) is exposed
-- For team deployments: create a dedicated Group for OpenClaw access; use Resource Approvers (per /docs/resources-reviewing-access-requests) for delegated approval
-- A Terraform variant exists at `Twingate-Community/secure-openclaw` (terraform/digitalocean/) for IaC deployments
-
-### Gotchas
-
-- Forgetting to update Caddyfile to private-IP-only leaves OpenClaw publicly reachable -- always verify with `curl http://<droplet-public-ip>` (should fail)
-- Connector goes "Disconnected" if outbound is blocked -- verify firewall outbound rules before locking inbound
-- Marketplace image versions can lag -- always update via `apt` after deploy
-
-### Related Docs
-
-- /docs/openclaw -- Multi-platform OpenClaw deployment overview
-- /docs/openclaw-docker-compose -- Local/Docker deployment
-- /docs/connector-deployment -- Generic Connector install
-- /docs/connector-best-practices -- Connector deployment guidance
-- /docs/resources, /docs/groups -- Resource + Group management
+## Related Docs
+- [Twingate Connector Installation](https://www.twingate.com/docs)
+- [OpenClaw Documentation](https://openclaw.ai/docs)
+- [Twingate Community Subreddit](https://reddit.com/r/twingate)

@@ -1,55 +1,49 @@
 # Twingate Responsible Disclosure Policy
 
-## Page Title
-Responsible Disclosure Policy
-
 ## Summary
-Twingate accepts security vulnerability reports via email and commits to resolving critical issues within 5 business days. Researchers must follow defined rules around scope, data handling, and confidentiality. All assessments are final and prioritization is at Twingate's discretion.
+Twingate's responsible disclosure policy outlines how security researchers should report vulnerabilities. Reports are submitted via email, with a commitment to resolve critical issues within 5 business days. Researchers must follow strict rules around data access, confidentiality, and scope.
 
 ## Key Information
-- **Contact**: security [at] twingate.com
-- **Response SLA**: Acknowledge receipt within 5 business days; resolve critical issues within 5 business days of disclosure
-- **Scope**: Only test against accounts you own or have explicit permission to test
-- **Confidentiality**: Keep all bug disclosure communications confidential unless Twingate consents to third-party disclosure
-- **Artifact destruction**: Researchers must destroy all POC code, videos, and screenshots after bug report is closed
+- **Contact**: security@twingate.com
+- **Resolution target**: Critical issues within 5 business days of disclosure
+- **Acknowledgement**: Receipt confirmed within 5 business days
+- **All assessments are final**
 
-## Out of Scope Systems
+## Rules for Researchers
+- Only test against accounts you own or have explicit permission to access
+- Do not exploit discovered vulnerabilities
+- Keep all bug disclosure communications confidential (no third-party disclosure without Twingate consent)
+- Destroy all artifacts (POC code, videos, screenshots) after bug report is closed
+- Do not proceed further if a severe vulnerability granting system access is found — report immediately
+- Twingate has sole discretion over bug prioritization and remediation approach
+
+## Out of Scope — Endpoints/Systems
 - twingate.com (company site)
 - docs.twingate.com
 - forum.twingate.com
 - status.twingate.com
 - help.twingate.com
 - trust.twingate.com
-- Subdomains: email, packages, sales
+- Subdomains: `email`, `packages`, `sales`
 - Third-party hosted sites (unless they expose an in-scope weakness)
 
-## Out of Scope Vulnerability Types
+## Out of Scope — Vulnerability Types
 - DDoS attacks
 - Spamming
 - Physical property/data center attacks
 
-## Rules (Required)
-1. Do not disrupt services intentionally
-2. Do not access other users' data or accounts
-3. Do not exploit vulnerabilities for personal/third-party benefit
-4. Stop and report immediately if severe vulnerability granting system access is found — do not proceed further
-5. Do not target physical security measures
-6. Do not threaten Twingate personnel
-7. Do not disclose bug details to third parties without Twingate consent
-8. Destroy all artifacts after report closure
-
 ## Reporting Requirements
-Include in email:
+Include in your email:
 - Detailed vulnerability description
-- Step-by-step reproduction instructions
-- Must be in-scope under policy
+- Step-by-step reproduction steps
+- Do not include out-of-scope issues
 
 ## Gotchas
-- Policy explicitly does **not** authorize access to data that isn't yours, including user data and Twingate internal data
-- Prioritization and remediation approach are solely at Twingate's discretion — no negotiation
-- All assessments are final
-- Out-of-scope third-party sites **can** qualify if they lead to an in-scope weakness
+- Policy does **not** authorize access to any data that isn't yours, including Twingate internal data or other users' data
+- Threatening behavior toward Twingate personnel is prohibited
+- Third-party site vulnerabilities only qualify if they demonstrably affect an in-scope endpoint
+- Scope is limited — most public-facing Twingate web properties are explicitly excluded
 
 ## Related Docs
-- Vulnerability Reporting Acknowledgements (linked from policy page)
-- Policy URL (canonical): https://www.twingate.com/docs/responsible-disclosure-policy
+- [Vulnerability Reporting Acknowledgements](https://www.twingate.com/docs/responsible-disclosure-policy) (linked from policy page)
+- Policy updates tracked at: `https://docs.twingate.com/docs/responsible-disclosure-policy`

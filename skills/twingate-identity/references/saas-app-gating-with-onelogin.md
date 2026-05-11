@@ -1,43 +1,48 @@
-## SaaS App Gating: OneLogin (App Policies)
+# SaaS App Gating with OneLogin
 
-How to require Twingate connection for SaaS apps fronted by OneLogin -- the IP check happens at OneLogin authentication via an **App Policy** with **Allowed IP Addresses**.
+## Summary
+Configure Twingate and OneLogin together to restrict SaaS application access based on IP address. Users must be connected to Twingate to authenticate through OneLogin, ensuring only authorized users on approved devices can reach protected apps.
 
-**Twingate Admin Console Prerequisites:**
+## Key Information
+- Uses Twingate Connector's exit IP as an allowlist in OneLogin App Policies
+- Prevents direct SaaS app access without an active Twingate connection
+- Requires a Device-only policy on the IdP Resource to avoid authentication loops
+- Works per-app: each SaaS app gets the App Policy applied individually
 
-**1. Create a Resource for the OneLogin Login Domain**
-- `tenant.onelogin.com`
-- Associate with one or more Groups
+## Prerequisites
+- Twingate Admin Console access
+- OneLogin Admin Console access
+- Twingate Connectors deployed with a known public exit IP
+- OneLogin tenant URL (e.g., `tenant.onelogin.com`)
 
-**2. Apply a Device-only Resource Policy to the IdP Resource**
-- Required to break the chicken-and-egg auth loop
-- Allows the IdP portal to be reached without full Twingate user auth
+## Step-by-Step
 
-### OneLogin Setup
+### Twingate Admin Console
+1. **Create a Resource** for your OneLogin tenant FQDN (e.g., `tenant.onelogin.com`) and assign it to the appropriate Group(s)
+2. **Apply a Device-only Policy** to that Resource — prevents auth loops where Twingate requires IdP login but IdP requires Twingate connectivity
 
-#### Step 1 -- Create an App Policy
+### OneLogin Admin Console
+3. Navigate to **Security → Policies** → **New App Policy**
+4. Name the policy (e.g., `Twingate SaaS App Gate`)
+5. In the **Allowed IP Addresses** field, enter the public exit IP of the Remote network where your Connectors are deployed
+6. Navigate to **Applications → Applications** and select the target app (e.g., Google Workspace)
+7. Go to **Access → Policies**, select your new App Policy, and **Save**
 
-- OneLogin Admin Console -> **Security -> Policies -> New App Policy**
-- **Policy Name**: e.g., "Twingate SaaS App Gate"
-- **Allowed IP Addresses**: enter the public exit IP of the Connector(s) Remote Network
-- Save
+## Configuration Values
+| Field | Value |
+|---|---|
+| Twingate Resource | `tenant.onelogin.com` (your OneLogin FQDN) |
+| Twingate Resource Policy | Device-only |
+| OneLogin Policy Type | App Policy |
+| Allowed IP Addresses | Public exit IP of Twingate Remote network/Connector |
 
-#### Step 2 -- Apply the Policy to an SSO App
+## Gotchas
+- **Auth loop risk**: Without the Device-only policy on the IdP Resource, users can't reach OneLogin to authenticate, which blocks Twingate access — a circular dependency
+- **IP specificity**: The allowed IP is tied to a specific Remote network; users must connect to the correct Twingate network with a Connector on that IP
+- **Per-app configuration**: The App Policy must be applied to each SaaS application individually in OneLogin
+- **Group scoping**: Only users in the correct Twingate Group have access to route through the Connector, enforcing both network and identity controls
 
-- **Applications -> Applications** -> open target app (e.g., Google Workspace)
-- **Access -> Policies** -> select the App Policy created in Step 1
-- Save
-
-**Result:**
-- Twingate user -> Connector NAT IP matches Allowed IP -> OneLogin authentication proceeds
-- User not on Twingate -> OneLogin blocks the auth
-
-**Gotchas:**
-- The IP check happens at **authentication time** -- once authenticated, OneLogin does not re-check IPs continuously; an established SSO session survives a Twingate disconnect until SSO session expiry
-- For tighter enforcement, shorten OneLogin session lifetimes (consult OneLogin admin docs)
-- Always exclude a break-glass admin from the gated policies
-- NAT egress IPs should be pinned (static / elastic) in production -- IP changes lock everyone out
-
-**Related Docs:**
-- /docs/saas-app-gating-best-practices -- MAR + Device-only Policy (essential)
-- /docs/onelogin-configuration, /docs/onelogin-configuration-scim -- OneLogin as Twingate IdP
-- /docs/saas-app-gating-with-okta, /docs/saas-app-gating-with-jumpcloud, /docs/saas-app-gating-with-entra-id, /docs/saas-app-gating-with-google-workspace -- Other IdPs
+## Related Docs
+- [Create a Twingate Resource](https://www.twingate.com/docs)
+- [Device-only Resource Policy](https://www.twingate.com/docs)
+- SaaS App Gating (general concept)

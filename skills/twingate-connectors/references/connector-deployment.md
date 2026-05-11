@@ -1,14 +1,14 @@
 # Connector Deployment
 
 ## Summary
-Twingate Connectors run as either a Linux systemd package or OCI (Docker) container. A single Connector can provide access to all reachable resources in its network segment; multiple Connectors enable load-balancing and failover. No inbound firewall rules are required—only outbound internet access.
+Twingate Connectors run as either Linux systemd packages or OCI (Docker) containers. A single Connector provides access to all reachable resources in its network; multiple Connectors enable load-balancing and failover. No inbound firewall rules are required—only outbound internet access.
 
 ## Key Information
-- Connectors do **not** need to be on every host—one Connector covers all reachable resources in its network
-- Multiple Connectors on separate hosts = automatic load-balancing + failover
-- Each distinct location/cloud requires its own **Remote Network** in Twingate
-- Peer-to-peer connections reduce bandwidth and improve UX; required for Fair Use Policy compliance
-- Two deployment formats: **Linux systemd package** or **OCI/Docker container**
+- Single Connector covers all reachable resources in its deployed network
+- Multiple Connectors (separate hosts) = automatic load-balancing + failover
+- Deployment types: Linux systemd package or OCI/Docker container
+- Each distinct location/cloud should have its own Remote Network configured
+- Peer-to-peer connections improve UX and reduce bandwidth under Fair Use Policy
 
 ## Supported Platforms
 
@@ -19,30 +19,31 @@ Twingate Connectors run as either a Linux systemd package or OCI (Docker) contai
 **x86/AMD64 only:**
 - Arch Linux, HP ThinPro, NixOS, Gentoo
 
-## Deployment Methods by Environment
+## Deployment Method Selection
 
-| Environment | Options |
+| Environment | Recommended Methods |
 |---|---|
-| Cloud VMs | AWS EC2, GCP Compute, Azure Compute, Kubernetes |
-| Office/Data Center | Docker Compose, Firewalla, Synology, QNAP, Proxmox, TrueNAS SCALE |
+| Cloud VMs | AWS EC2, GCP Compute, Azure Compute |
+| Kubernetes | K8s deployment |
+| Office/Data Center | Docker Compose, Proxmox, Synology, QNAP, Firewalla, TrueNAS SCALE |
 | Serverless/PaaS | AWS ECS (Fargate), Azure ACS, Aptible |
-| IaC | Terraform, Pulumi |
-| Home Network | Mac VM, Synology NAS, Raspberry Pi, Linux, Home Assistant, Proxmox, Unraid |
+| Infrastructure-as-Code | Terraform, Pulumi |
+| Home Network | Raspberry Pi, Linux, Synology DSM 7.x, Home Assistant, Proxmox, Unraid, CasaOS, Mac VM |
 
 ## Prerequisites
-- Outbound internet access from Connector host
+- Outbound internet access from the host
 - No inbound firewall rules needed
+- For Cloud VMs: size compute based on expected user load
 
 ## Gotchas
-- **Cloud VMs are the recommended default**—most consistent performance and resource sizing control
-- **Serverless/PaaS** environments offer easier deployment but less control over CPU/memory/network allocation
-- Home networks with **dynamic IPs or CGNAT** (e.g., Starlink) cannot receive inbound connections—Connector deployment is the only viable option
-- For redundancy in offices/data centers, deploy second Connector on a **separate physical machine**
-- Multi-location setups require a separate Remote Network per location (not just per Connector)
+- Connectors do **not** need to be on every host—one per network segment is sufficient
+- Serverless/PaaS deployments offer less control over CPU/memory/network resources allocated to Connectors
+- Home networks with dynamic IPs, CGNATs (e.g., Starlink), or no inbound capability are fully supported—Connector handles this without port forwarding
+- Static IP use case: Cloud VM Connectors are appropriate when users need a fixed egress IP
 
 ## Related Docs
 - Peer-to-peer connections support
-- Fair Use Policy
+- Fair Use Policy (bandwidth)
 - Remote Networks configuration
 - Best Practices for Secure Infrastructure-as-Code (webinar)
-- Individual deployment guides: AWS EC2, GCP Compute, Azure Compute, Kubernetes, Docker Compose, Terraform, Pulumi, Raspberry Pi, Home Assistant
+- Platform-specific guides: AWS EC2, GCP Compute, Azure Compute, K8s, Docker Compose, Terraform, Pulumi, Home Assistant, Raspberry Pi, Synology

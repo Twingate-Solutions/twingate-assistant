@@ -1,47 +1,45 @@
 # Twingate MSP Portal
 
 ## Summary
-Twingate's MSP portal provides multi-tenant management for Customer Networks and consolidated billing. MSPs can create, manage, and offboard customer accounts through a single portal interface. Each Customer Network gets a 14-day free POC period before billing begins.
+Twingate's MSP Portal provides a multi-tenant management interface for Managed Service Providers to manage Customer Networks and consolidated billing. Each Customer Network represents a full customer account with its own Resources, Connectors, and team members. MSP Portal users require separate explicit access grants to each Customer Network.
 
 ## Key Information
-- Multi-tenant portal manages multiple Customer Networks from one interface
+- Sign-up requires credit card; each new Customer Network gets a **14-day free POC period**
+- MSP Portal URLs are **permanent and cannot be changed after creation**
+- Users added to the MSP Portal do **not** automatically get access to Customer Networks — must be added separately to each
 - Consolidated monthly billing across all Customer Networks
-- Users added to MSP Portal only access the portal itself — must be separately added to each Customer Network
-- Portal URL cannot be changed after creation
+- Users can be added manually or via Identity Provider sync
 
 ## Prerequisites
 - Credit card required to create Customer Networks
-- Sign up at Twingate's MSP portal signup page
+- Unique URL selection at signup (plan carefully — cannot be changed)
 
 ## URL Naming Convention
-- MSP Portal URL and all Customer Network URLs must be globally unique
-- **Recommended pattern**: Use `yourcompanymsp` or `yourcompanyportal` for the MSP portal URL
-- This reserves `yourcompany` for your own company's Twingate Network (as standalone or Customer Network)
+| Use Case | Recommended Pattern |
+|----------|-------------------|
+| MSP Portal | `yourcompanymsp` or `yourcompanyportal` |
+| Your own company network | `yourcompany` (kept free) |
 
-## Step-by-Step: Key Operations
+## Customer Network Management
 
-### Adding Users
-1. Add manually via portal UI, or
-2. Sync automatically via Identity Provider integration
-3. Add users to specific Customer Networks separately if access needed
+**Create/Delete:** Managed through the MSP Portal dashboard.
 
-### Removing Customers
-- **Offboard Network**: Customer retains access until end of billing cycle → downgraded to Starter tier → removed from MSP Network (no deletion)
-- **Delete Network**: Customer retains access until end of billing cycle → account permanently deleted
+**Offboard vs. Delete distinction:**
+- **Offboard Network**: Customer retains access until end of billing cycle → then downgraded to Starter tier and removed from MSP Network; billing stops
+- **Delete Network**: Customer retains access until end of billing cycle → then permanently deleted; billing stops
 
-Both options: accessed via ellipses (`...`) menu on Customer Network row → select option
-
-## Configuration Values
-None (UI-driven, no CLI/API params documented on this page)
+## Configuration Notes
+- Identity Provider sync available for MSP Portal user management
+- Billing details (history, address, payment methods) managed within the portal
 
 ## Gotchas
-- **URL is permanent** — cannot be changed after creation; plan naming carefully before setup
-- MSP Portal users ≠ Customer Network users; access must be granted at each level independently
-- "Offboard" preserves data on Starter tier; "Delete" permanently removes the network
-- Credit card required upfront, but 14-day free POC per Customer Network before charges apply
-- Billing cycle end determines actual termination, not the date you initiate offboard/delete
+- URL uniqueness is global across all Twingate networks — reserve your company's primary URL before creating the MSP portal URL
+- MSP Portal access ≠ Customer Network access; must grant users access to each network independently
+- Free POC period is 14 days per Customer Network; credit card charged after expiration
+- "Offboard" leaves the network as Starter tier (not deleted); use "Delete" if full removal is intended
 
 ## Related Docs
-- MSP Billing page (consolidated billing details)
-- Customer Networks page (creating, deleting, assigning admins)
-- Identity Provider sync documentation
+- MSP Billing page
+- Customer Networks page
+- Identity Provider integration docs
+- MSP Portal signup

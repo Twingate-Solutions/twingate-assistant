@@ -1,82 +1,60 @@
-## Privileged Access for SSH (IDFW)
+# Privileged Access for SSH Overview
 
-Twingate IDFW for SSH -- adds zero-trust controls to SSH sessions: identity propagation, short-lived per-connection certificates, and full session recording. Replaces SSH key distribution and bastion hosts.
+## Page Title
+Twingate Privileged Access for SSH Overview
 
-**Status:**
-- Early access, free for up to 5 Resources
+## Summary
+Twingate Privileged Access for SSH is a Layer 7 reverse proxy (Gateway) that adds zero trust SSH access controls without distributing SSH keys to users. It provides short-lived certificate-based auth, full session recording in asciicast v2 format stored on your infrastructure, and works with standard `ssh` clients. Currently early access, free for up to 5 Resources.
 
-**Architecture:**
-- **Twingate Gateway** = Layer 7 reverse proxy deployed in your environment (K8s or VM)
-- One Gateway can serve **multiple SSH Resources** within the same Remote Network
-- User SSH client -> Twingate Client -> Connector -> **Gateway** -> target SSH server
+## Key Information
+- Gateway acts as SSH reverse proxy: terminates inbound sessions, authenticates to targets via certificates, records sessions
+- No SSH keys on user devices; short-lived certificates issued per connection
+- Session recordings exported to Gateway `stderr` in asciicast v2 format — never sent to Twingate
+- One Gateway serves multiple SSH Resources within same Remote Network
+- Visualize recordings at `twingate.com/sessionplayer`
 
-**Authentication Flow:**
-1. User initiates `ssh user@host` (host = private IP or FQDN, defined as a Twingate Resource)
-2. Twingate Client tunnels to the Gateway
-3. Gateway authenticates the user via IdP (Twingate session = IdP identity)
-4. Gateway requests a **short-lived SSH user certificate** from the SSH CA
-5. Gateway authenticates to the target SSH server using that certificate
-6. SSH session proceeds normally; Gateway records all I/O
+## Prerequisites
+- Minimum Client versions: macOS `2026.85`, Windows `2026.90`, Linux `2025.342`
+- Minimum Connector version: `1.82.0` (all Connectors associated with SSH Resources)
+- Mobile clients (Android/iOS) not supported
+- Deployment target: Kubernetes cluster or VM
 
-**No SSH Keys on Devices:**
-- Users never see or manage SSH keys
-- Revoking Twingate access removes SSH access immediately (no key cleanup)
-- Existing `authorized_keys` entries on servers are unaffected -- migration is incremental
+## Components
 
-**Certificate Authorities (managed under Settings > Certificate Authorities):**
+### Certificate Authorities (configured in Settings > Certificate Authorities)
+| CA Type | Purpose | Required |
+|---------|---------|----------|
+| X.509 CA | Secures Client ↔ Gateway connection | Always |
+| SSH CA | Issues user/host certificates | For SSH Resources |
 
-| CA Type | Purpose | Required For |
-|---|---|---|
-| **X.509 CA** | Secures Twingate Client <-> Gateway link | Every Gateway |
-| **SSH CA** | Issues user certs (auth to servers) + host certs (Gateway identity) | Every SSH Resource on the Gateway |
+### Gateway Signing Modes
+- **Local SSH CA**: CA private key on Gateway; simpler, good for getting started
+- **HashiCorp Vault**: Uses Vault SSH secrets engine; recommended for production (keys off-disk, audit logging)
 
-**SSH CA Signing Modes:**
+## Supported SSH Features
+| Feature | Supported |
+|---------|-----------|
+| Interactive shell | ✅ |
+| Remote command execution | ✅ |
+| SFTP / rsync | ✅ |
+| TCP/IP port forwarding | ✅ |
+| X11 forwarding | ❌ |
 
-| Mode | Where Private Key Lives | Recommended For |
-|---|---|---|
-| **Local SSH CA** | On the Gateway itself | Getting started, simple deployments |
-| **HashiCorp Vault** | In Vault's SSH secrets engine | **Production** -- keys off-disk, full audit logging on cert ops |
+## User Configuration (Avoiding TOFU Prompts)
+1. Open Twingate Client
+2. Go to **More** → **SSH Server Configuration Auto-Sync**
+3. This syncs SSH CA public key to `~/.ssh/known_hosts` and keeps it updated
 
-**Supported SSH Features:**
-- Interactive shell
-- Remote command execution
-- File transfer (sftp, rsync)
-- TCP/IP port forwarding
+Without this step, OpenSSH shows TOFU warning on first connection.
 
-**Not Supported:**
-- X11 forwarding
+## Gotchas
+- File transfer and port forwarding data is **not** recorded in session logs
+- Existing `authorized_keys` entries are unaffected when adding SSH CA — migration is optional
+- You are responsible for forwarding/retaining session logs (SIEM, object storage)
+- Session recording captures terminal I/O for interactive shells; also logs channel open/close events
+- Windows Server supported if OpenSSH is installed
 
-**User Configuration -- SSH Auto-Sync:**
-- Twingate Client option (under **More**) -> **SSH Server Configuration Auto-Sync**
-- Syncs the SSH CA public key to `~/.ssh/known_hosts` so the Gateway's host cert is trusted automatically
-- Without this: TOFU prompts on first connection
-
-**Client Versions (minimum for IDFW SSH):**
-- macOS: 2026.85
-- Windows: 2026.90
-- Linux: 2025.342
-- Mobile (iOS, Android): **NOT supported** for IDFW SSH
-
-**Session Recording:**
-- All sessions automatically recorded
-- Format: **asciicast v2**
-- Output: Gateway's **stderr** stream
-- **Stays on customer infrastructure** -- never uploaded to Twingate
-- Capture: terminal I/O for interactive shells + command output + SSH events (channel open/close)
-- **Not** captured: file transfer payloads, port forwarding data
-- Replay: `twingate.com/sessionplayer` (paste log or upload), or any asciicast player (`asciinema play`)
-
-**Vs. Bastion Host:**
-- Replaces a bastion completely while adding identity propagation, session recording, and zero-trust access controls
-
-**Vs. Smallstep CA Pattern (/docs/ssh-smallstep):**
-- IDFW is the newer, integrated alternative -- recommended for new deployments
-- Smallstep pattern still works but requires running and maintaining a separate CA
-
-**Windows Server:**
-- Supported with OpenSSH installed
-
-**Related Docs:**
-- /docs/identity-firewall -- IDFW overview
-- /docs/ssh-installation -- Gateway deployment guides (AWS / DigitalOcean / GCE / Vault)
-- /docs/ssh-remote-development -- VS Code / JetBrains / Cursor IDE setup
+## Related Docs
+- [Installing Privileged Access for SSH](https://www.twingate.com/docs/installing-privileged-access-for-ssh) — prerequisites and deployment options
+- Remote development guide (VS Code, JetBrains, Cursor)
+- Twingate community subreddit

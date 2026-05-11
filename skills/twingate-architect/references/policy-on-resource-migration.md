@@ -4,48 +4,44 @@
 Migration to Policy on Resource
 
 ## Summary
-Twingate is migrating Security Policies from Group-associations to Resource-associations. Resources will now have a directly assigned Policy, with the option for Group-specific Policy overrides per Resource. Rollout is automatic and phased; no customer action required.
+Twingate is migrating Security Policies from Group-level associations to Resource-level associations. Resources will have a directly assigned Policy, while individual Group-Resource pairs can still override with their own Policy. Migration is automatic with no customer action required.
 
 ## Key Information
-- **New model**: Policies attach directly to Resources (Resource Policy), not Groups
-- **Override capability**: A specific Group accessing a specific Resource can have its own Policy separate from the Resource Policy
-- **Migration is automatic**: No action needed from customers
-- **Backwards compatible**: Existing APIs and Terraform code will be mapped to the updated model
+- **Old model**: Security Policies attached to Groups
+- **New model**: Security Policies attached directly to Resources (Resource Policy); Groups can have per-Resource Policy overrides
+- Rollout is phased; no customer action needed
+- API and Terraform backwards compatibility is maintained
 
 ## Migration Logic
 
 | Scenario | Result |
 |----------|--------|
-| All Groups accessing a Resource use the **same** Policy | That Policy becomes the Resource Policy; Groups inherit it |
-| Groups accessing a Resource use **different** Policies | Default Policy becomes the Resource Policy; individual Group↔Resource Policies are preserved |
+| All Groups accessing a Resource share the same Policy | That Policy becomes the Resource Policy |
+| Groups accessing a Resource have different Policies | Default Policy becomes the Resource Policy; individual Group-Resource Policies are preserved |
 
 **Example:**
-- Resource A + Group 1 (Company Policy) + Group 2 (Company Policy) → Resource Policy = Company Policy
-- Resource A + Group 1 (Company Policy) + Group 2 (Contractor Policy) → Resource Policy = Default Policy; each Group retains its specific Policy
+- Resource A + Group 1 (Company Policy) + Group 2 (Company Policy) → Resource Policy = Company Policy; both Groups inherit it
+- Resource A + Group 1 (Company Policy) + Group 2 (Contractor Policy) → Resource Policy = Default Policy; Group-level Policies remain intact
 
 ## Prerequisites
-- None; migration is handled automatically by Twingate
+- No prerequisites; migration is automatic for all Twingate customers
 
 ## Configuration Values
-- No new env vars, CLI flags, or API params introduced
-- Existing API/Terraform configurations are mapped automatically
+- None required; existing API calls and Terraform configurations are automatically mapped to the new model
 
-## Verifying Migration Status
-1. Navigate to a Resource in the Twingate admin console
-2. Check the left-hand column for a **Resource Policy** field
-3. If present, the updated model is active for your account
-
-## UI Changes Post-Migration
-- **Resources table**: Optional column to display Resource Policy
-- **Group detail page**: Policy shown next to each Resource in the Group
-- **Policy page**: Lists all Resources using that Policy as their Resource Policy
+## Verification Steps
+1. Navigate to a Resource in the Twingate admin UI
+2. Confirm a **Resource Policy** field appears in the left-hand column
+3. Check updated views:
+   - **Resources table**: optional column for Resource Policy
+   - **Group detail page**: Policy listed next to each Resource
+   - **Policy page**: Resources using that Policy as Resource Policy are listed
 
 ## Gotchas
-- Resources with mixed Group Policies will fall back to **Default Policy** as the Resource Policy — review these cases to ensure Default Policy meets your security requirements
-- Groups with access to the same Resource may now rely on Group-level Policy overrides; verify contractor/restricted Groups still have correct Policies applied post-migration
-- API/Terraform backwards compatibility is maintained, but new features (Resource Policy field) may require schema updates to manage explicitly
+- If Groups previously had **different** Policies on a Resource, the Resource Policy defaults to **Default Policy** — verify this is acceptable for your security posture
+- Groups with conflicting Policies will have their individual overrides preserved, but the baseline Resource Policy changes to Default Policy
+- Migration is phased; check your admin UI to confirm if your account has been updated yet
 
 ## Related Docs
-- [Updated Policy on Resource model](https://www.twingate.com/docs/) (referenced inline, URL not provided)
-- Twingate Security Policies documentation
-- Terraform provider documentation for Resources and Groups
+- [Updated Policy on Resource model](https://www.twingate.com/docs/policy-on-resource) (referenced inline)
+- Terraform provider documentation (implied by backwards compatibility note)

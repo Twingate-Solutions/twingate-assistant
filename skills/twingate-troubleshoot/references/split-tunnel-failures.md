@@ -1,92 +1,67 @@
-## Split Tunnel Failures (Troubleshooting)
+# Split Tunnel Failures
 
-Diagnostic playbook for two split-tunnel issues: **traffic captured when it shouldn't be** (local subnet collisions) and **traffic NOT captured when it should be** (missing Resource definitions).
+## Summary
+Twingate uses split tunneling by default, routing only explicitly defined Resource traffic through the tunnel. Two failure categories exist: local subnet collisions (Twingate captures traffic it shouldn't) and missing Resource definitions (Twingate doesn't capture traffic it should).
 
-### Background
+## Key Information
+- Split tunnel = only defined Resources are routed through Twingate
+- All other traffic follows normal network path
+- Full-tunnel mode requires configuring an **Exit Network** (not default)
+- `.local` domains conflict with mDNS/Bonjour — requires special handling
 
-Twingate is **split-tunnel by default** -- only Resource-destined traffic is intercepted. Two failure modes:
+## Local Subnet Collision Troubleshooting
 
-1. **Subnet overlap**: a Resource definition includes IPs that match the user's local network -> Twingate captures local printer/NAS traffic
-2. **Missing definitions**: app traffic goes to undefined domains -> bypasses Twingate entirely, fails IP allowlist checks
+**Symptoms:** Can't reach home printer/NAS/local devices; other VPN clients break when Twingate is active
 
-### Failure Mode 1: Local Subnet Collisions
+**Steps:**
+1. Get user's local IP/subnet: `ipconfig` (Windows) or `ifconfig`/`ip addr` (macOS/Linux)
+2. Check Admin Console Resources for overlapping CIDR ranges or specific IPs
+3. Refine Resource definitions to smallest precise scope
 
-**Symptoms:**
-- "I can't print to my home printer (`192.168.1.50`) when Twingate is on"
-- Can't access local NAS / file server / IoT device when connected
-- Other (non-Twingate) VPN client breaks when Twingate is active
+**Best Practice:** Use specific IPs (`10.0.5.23`) or small CIDRs (`10.0.5.0/24`) instead of broad ranges (`10.0.0.0/16`)
 
-**Diagnose:**
+## Missing Resource Definitions
 
-1. Get the user's local subnet (`ipconfig` on Windows, `ifconfig`/`ip addr` on macOS/Linux)
-2. Compare to Twingate Resource definitions in Admin Console
-3. Look for overlap: e.g., `192.168.1.0/24` Resource conflicting with the user's home network
+**Symptoms:** App partially loads; HTTP 401/403 errors; broken styles/scripts; intermittent failures
 
-**Fix:**
+### Fix with Browser DevTools
+1. Open app in browser with Twingate active → F12 → Network tab
+2. Reload page; filter for 401/403/blocked requests
+3. Note failing domains → add as wildcard DNS Resources (e.g., `*.partnersite.com`)
+4. Assign same Groups/Security Policies as primary Resource
 
-- **Be specific in Resource definitions** -- avoid broad CIDRs like `10.0.0.0/16`
-- Prefer specific IPs (`10.0.5.23`) or smaller CIDRs (`10.0.5.0/24`)
-- For full-tunnel use cases (untrusted Wi-Fi): use **Exit Networks** (per /docs/exit-networks) -- the proper full-tunnel feature
-
-**`.local` domain caveat:** Don't define `.local` Resources lightly -- conflicts with mDNS/Bonjour for local device discovery. See Twingate's specific KB article for the right pattern.
-
-### Failure Mode 2: Missing Resource Definitions (App Gating)
-
-**Symptoms:**
-- SaaS app partially loads; key features broken
-- HTTP 401/403 errors on a web app that works without Twingate
-- Page loads but styles/scripts/embedded content fail
-- App "works sometimes" / "works on some pages but not others"
-
-**Cause:** Twingate only tunnels traffic for **defined Resources**. Modern web apps load resources from many domains (CDN, auth, API subdomains, third-party). Undefined domains bypass the tunnel and fail IP-allowlist checks at the destination.
-
-#### Diagnose with Browser Developer Tools
-
-1. Open the app while signed in to Twingate
-2. Browser DevTools -> **Network** tab -> reload page
-3. Filter for failed requests (HTTP 401/403, blocked, cancelled)
-4. Note the domains in failed requests
-5. For each domain, add a **wildcard DNS Resource** (`*.partnersite.com`)
-6. Assign same Groups + Security Policies as the primary app Resource
-7. Wait for Resources to appear in the Client; reload and retest
-
-**Use wildcard Resources** (`*.partnersite.com`) over individual subdomains -- web apps add subdomains over time.
-
-#### Diagnose with Test Resources (Last Resort)
-
-For tricky apps where DevTools doesn't surface all traffic:
-
-**Setup (Admin Console):**
-
-1. Create two Resources on the affected Remote Network (do NOT assign Groups initially):
+### Fix with Test Resources (when DevTools insufficient)
+1. Create two temporary Resources on same Remote Network:
    - DNS Resource: `*.*` (name: "Test DNS")
    - IP Resource: `0.0.0.0/0` (name: "Test IP")
-2. Create a "Test Group", assign both test Resources to it
-3. Add the affected user to the Test Group temporarily
+2. Assign **no Groups** initially
+3. Create "Test Group" → add both test Resources
+4. Add affected user to Test Group → wait for Resources to appear in Client
+5. User reproduces failing workflow (should now work)
+6. **Remove user from Test Group immediately after**
+7. Review activity logs on test Resources for uncovered domains/IPs
+8. Add missing entries as permanent Resources with proper Groups/Security Policies
+9. **Delete or disable Test Group and test Resources**
 
-**Test:**
+## Configuration Values
+| Resource Type | Wildcard Syntax | Use Case |
+|---|---|---|
+| DNS Resource | `*.*` | Catch-all test |
+| DNS Resource | `*.partnersite.com` | Cover all subdomains |
+| IP Resource | `0.0.0.0/0` | Catch-all IP test |
 
-4. User loads the app and completes the broken workflow
-5. With test Resources active, all traffic flows through Twingate -- app should work
-6. **Immediately remove the user from the Test Group**
-7. Review **Network Activity** logs for the test session (User profile or Resource activity page)
-8. Find domains/IPs captured by test Resources but NOT covered by existing definitions
-9. Add those as permanent Resources (right Groups + Policies)
-10. Retest without test Resources
-11. **Delete or disable the test Group + test Resources**
+## Gotchas
+- Test Resources (`*.*` and `0.0.0.0/0`) route ALL user traffic — diagnostic use only, remove after testing
+- `.local` domain Resources conflict with mDNS device discovery
+- Modern web apps use multiple domains; missing any one breaks functionality
+- IP collision can be a specific address overlap, not just subnet-level
 
-**Critical: never leave test Resources enabled for users -- routes ALL traffic through Twingate, breaks normal operation.**
+## Prerequisites
+- Access to Twingate Admin Console
+- Ability to review Resource definitions and activity logs
+- Browser DevTools familiarity for domain identification
 
-### Decision Notes
-
-- **Most production "broken SaaS" issues** trace to missing Resource definitions for CDN / auth / third-party domains
-- Always be specific with Resource CIDRs -- broad ranges = collision risk
-- For real full-tunnel: Exit Networks; never use a `0.0.0.0/0` Resource permanently
-
-### Related Docs
-
-- /docs/exit-networks -- Proper full-tunnel feature
-- /docs/resources -- Resource definition best practices
-- /docs/saas-app-gating-best-practices -- App gating overview
-- /docs/dns-failures, /docs/connector-failures, /docs/firewall-failures -- Other failure classes
-- /docs/how-to-troubleshoot -- Decision tree
+## Related Docs
+- Exit Networks (full-tunnel mode)
+- `.local` domain knowledge base article
+- Activity/network logs (user profile page or Resource activity page)

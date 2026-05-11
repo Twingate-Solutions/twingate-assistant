@@ -1,67 +1,59 @@
-## Netskope DLP Configuration with Twingate
+# Netskope DLP Configuration for Twingate Compatibility
 
-How to configure Netskope DLP so its client coexists with the Twingate Client on the same device. Required when both endpoint security stacks intercept network traffic.
+## Summary
+Configures Netskope DLP to bypass inspection for Twingate Client processes, preventing conflicts when both clients run on the same device. Requires creating a certificate pinned app definition and a steering exception in the Netskope console.
 
-### The Problem
+## Key Information
+- Both Netskope and Twingate clients can conflict when installed on the same device
+- Solution uses Netskope's "Certificate Pinned Application" exception type to bypass Twingate traffic
+- Applies to macOS and Windows platforms
 
-Netskope intercepts and may inspect traffic from all installed apps. Without explicit exception, it can disrupt the Twingate Client's TLS connection or DNS resolution.
+## Prerequisites
+- Access to Netskope admin console
+- Existing or new Netskope Steering Configuration
+- Twingate Client installed on end-user devices
 
-### Three-Step Configuration
+## Step-by-Step
 
-#### Step 1: Define Twingate as a Certificate-Pinned Application
+### 1. Create Certificate Pinned Application
+- Navigate to **Settings → App Definition** in Netskope console
+- Create new **Certificate Pinned Application** (recommended name: "Twingate")
+- Add entries per platform using **Exact** match type
 
-In the Netskope console:
-1. **Settings (bottom-left) -> App Definition**
-2. Create a **certificate-pinned application** -- name it "Twingate"
-3. Add entries for each platform:
+### 2. Create Steering Exception
+- Navigate to **Settings → Steering Configuration**
+- Open existing config or create new one
+- Under **Exceptions** tab, add new exception:
+  - Type: **Certificate Pinned Application**
+  - App: Select the Twingate app created in Step 1
+  - Custom app domains: `*`
+  - Action per OS: **bypass**
+- Save the exception
 
-**macOS** (Exact match):
-```
-Twingate, Tunnel Provider macos
-```
+### 3. Apply Configuration
+- Click Netskope client icon → **Configuration → Update**
+- Restart the Twingate Client
 
-**Windows** (Exact match):
-```
-twingate.exe, twingate.service.exe, twingateupdater.exe
-```
+## Configuration Values
 
-These names are the Twingate Client process names that Netskope will recognize as off-limits for traffic interception.
+| Platform | Match Type | Process Definitions |
+|----------|------------|---------------------|
+| macOS | Exact | `Twingate, Tunnel Provider macos` |
+| Windows | Exact | `twingate.exe, twingate.service.exe, twingateupdater.exe` |
 
-#### Step 2: Create an Exception in Steering Configuration
+| Exception Field | Value |
+|----------------|-------|
+| Exception Type | Certificate Pinned Application |
+| Custom App Domains | `*` |
+| Action | bypass |
 
-1. **Settings -> Steering Configuration**
-2. Open existing config, or create new
-3. **Exceptions** tab -> create new exception
-4. Exception type: **Certificate Pinned Application**
-5. Select the **Twingate** application created in Step 1
-6. **Custom app domains**: `*` (all domains)
-7. For each operating system: select **bypass**
-8. Save
+## Gotchas
+- Must add entries for **all applicable platform types** in the app definition — omitting a platform leaves that OS unprotected from conflicts
+- After saving console changes, the Netskope client requires a manual **Update** pull before changes take effect
+- Twingate Client must be **restarted** after Netskope configuration is updated
+- Windows requires three separate process names; missing any may cause incomplete bypass
 
-#### Step 3: Apply the Configuration
-
-1. Click the Netskope client tray icon
-2. **Configuration -> Update**
-3. This pulls the updated policy down to the local Netskope agent
-4. **Restart the Twingate Client**
-
-After these steps, Netskope leaves Twingate's traffic alone, and both clients operate normally.
-
-### Decision Notes
-
-- Process names must match exactly -- typos cause silent partial failures
-- Custom app domains = `*` is broad but appropriate; the bypass is gated by the Twingate process names, not the domains
-- For mixed Windows + macOS fleets: configure both platforms in the same App Definition
-
-### Gotchas
-
-- "Update Configuration" is required after policy changes -- without it, the Netskope agent is using stale rules
-- Restart the Twingate Client after Netskope policy changes -- existing connections may have been disrupted
-- Future Twingate Client process renames could break this -- if Twingate adds a new process name in a Client update, add it to the App Definition
-
-### Related Docs
-
-- /docs/configuring-zscaler-with-twingate -- Sibling pattern for Zscaler
-- /docs/configuring-anyconnect-with-umbrella -- Cisco AnyConnect / Umbrella
-- /docs/firewalls-and-twingate -- Firewall coexistence overview
-- /docs/troubleshooting -- General troubleshooting
+## Related Docs
+- Netskope App Definition documentation (Netskope console)
+- Netskope Steering Configuration documentation (Netskope console)
+- Twingate Client installation guides

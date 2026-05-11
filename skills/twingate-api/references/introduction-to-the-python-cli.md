@@ -1,90 +1,55 @@
-## Twingate Python CLI (`tgcli`)
+# Twingate Python CLI - Introduction
 
-Open-source Python CLI wrapping the Twingate GraphQL Admin API. **Community-maintained** -- not part of Twingate product engineering. Good fit for Python-shop teams or users who already have `pandas` available.
+## Page Title
+Introduction to the Twingate Python CLI
 
-**Repo**: github (clone and run; no published binaries)
+## Summary
+Open-source CLI tool that wraps Twingate GraphQL APIs to automate administrative functions available in the Admin Panel. Requires Python 3 and the `pandas` library. Maintained outside Twingate's core engineering team; support via GitHub Issues.
 
-**Requirements**: Python 3 + `pandas` library
+## Key Information
+- Supports CRUD operations on: Resources, Devices, Groups, Connectors, Users, Service Accounts, Service Account Keys, Remote Networks, Policies
+- Returns JSON by default; supports CSV and DF (dataframe/table) output formats
+- Session-based authentication — authenticate once, reuse session name for subsequent commands
+- Use `-h` at any level of the command for contextual help
 
-### Discovery Pattern
+## Prerequisites
+- Python 3
+- `pandas` library (`pip install pandas`)
+- Twingate API Key
+- Twingate tenant name
 
-The CLI is built around **`-h` for everything** -- no need to memorize commands:
+## Step-by-Step
 
-```
-python3 ./tgcli.py -h                    # top-level: lists object types
-python3 ./tgcli.py resource -h           # per-object: lists operations
-python3 ./tgcli.py resource list -h      # per-operation: lists flags
-```
+1. **Clone repo**: `git clone <github-repo-url>`
+2. **Verify install**: `python3 ./tgcli.py auth list` → should return `['']`
+3. **Authenticate**:
+   ```bash
+   python3 ./tgcli.py auth login -t <tenant> -a <apikey>
+   # Returns session name e.g. "OrangeElk"
+   ```
+4. **Use session in commands**:
+   ```bash
+   python3 ./tgcli.py -s OrangeElk resource list
+   ```
 
-### Object Types
+## Configuration Values
 
-`auth`, `device`, `connector`, `user`, `group`, `resource`, `network`, `account`, plus `policy` and `service`.
+| Flag | Description | Required |
+|------|-------------|----------|
+| `-a` / `--apikey` | Twingate API Key | Yes (for login) |
+| `-t` / `--tenant` | Twingate tenant name | Yes (for login) |
+| `-s` / `--session` | Session name | Optional (auto-generated if omitted) |
+| `-f` / `--format` | Output format: `JSON`, `CSV`, `DF` | No (default: JSON) |
+| `-v` / `--version` | Show version | No |
 
-### Authentication Flow
+**Object types**: `auth`, `device`, `connector`, `user`, `group`, `resource`, `network`, `account`
 
-The CLI uses **named sessions** so you don't re-enter API key + tenant on every call.
+## Gotchas
+- Running any command without `-s <sessionname>` after login will fail with `error: no session name passed`
+- Missing `pandas` causes errors on first run — install it manually and retry
+- Session name is auto-generated (random words) unless specified with `-s` at login time
+- Pull latest version from GitHub periodically as features are actively added
 
-**Login:**
-```
-python3 ./tgcli.py auth login -t <tenant> -a <api-token>
-# Token Stored in session: OrangeElk
-```
-
-The CLI generates a random session name (e.g., `OrangeElk`) -- save it. Optionally specify with `-s <session-name>` for predictable naming.
-
-**List sessions:**
-```
-python3 ./tgcli.py auth list
-```
-
-**Use a session for queries:**
-```
-python3 ./tgcli.py -s OrangeElk resource list
-```
-
-### Output Formats
-
-| Format | Flag | Use Case |
-|---|---|---|
-| **JSON** (default) | `-f JSON` | Programmatic parsing |
-| **CSV** | `-f CSV` | Bash/PowerShell scripting |
-| **DF** | `-f DF` | Human-readable table (pandas dataframe) |
-
-```
-python3 ./tgcli.py -s OrangeElk -f DF resource list   # readable table
-python3 ./tgcli.py -s OrangeElk -f CSV resource list  # pipe to | grep, awk, etc.
-```
-
-### Capabilities (per object)
-
-- **Resources**: list / show / add / remove / update
-- **Devices**: list / show / update trust
-- **Groups**: list / show / add users / remove users / add resources / remove resources / create / delete / assign policy
-- **Connectors**: list / show / rename / generate tokens
-- **Users**: list / show
-- **Service Accounts**: list / show / create / delete / add resources / remove resources
-- **Service Account Keys**: show / create / revoke / delete / rename
-- **Remote Networks**: list / show
-- **Policies**: list / show / assign groups
-
-### Decision Notes
-
-- **Use the Python CLI** when Python is your shell scripting default; functionally equivalent to the JS CLI
-- For one-off automation: CLI is faster than writing custom GraphQL
-- For IaC / drift management: prefer the **Terraform provider**
-- Session-based auth makes scripting clean -- one login, many commands
-
-### Gotchas
-
-- Community-maintained -- file issues at the GitHub repo, not Twingate Support
-- `pandas` is a heavy dependency for a CLI tool -- consider `pip install pandas` ahead of time, especially in containers
-- Session storage is filesystem-based -- be aware on shared hosts (rotate sessions, use specific session names per user)
-- The CLI output schemas may differ slightly between releases -- pin a known-good version for production scripts
-
-### Related Docs
-
-- /docs/introduction-to-tg-cli-javascript -- JS CLI sibling
-- /docs/getting-started-with-the-api -- API token generation
-- /docs/exploring-the-apis -- GraphQL exploration
-- /docs/api-overview -- API reference
-- /docs/terraform-getting-started -- IaC alternative
+## Related Docs
+- [Twingate GraphQL APIs](https://www.twingate.com/docs/api-overview)
+- [GitHub Repository](https://github.com/Twingate-Labs/tg-cli) (issues and contributions)

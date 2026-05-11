@@ -1,53 +1,48 @@
-## Ephemeral Access
+# Ephemeral Access to Resources
 
-Time-bounded Group access to a Resource -- configure an expiration timestamp; when reached, the Group is automatically removed from the Resource.
+## Summary
+Ephemeral Access grants temporary, time-limited access to Resources for specific users or Groups. Access automatically expires at a configured time, removing the Group from the Resource without manual intervention.
 
-**Concept:**
-- Group X has access to Resource Y until 2026-06-01 17:00 UTC
-- After that timestamp, Group X is removed from Resource Y -- no manual cleanup
-- All users in the Group lose access at the same time
-- Distinct from auto-lock (per-user inactivity-based) and JIT (per-request, per-window)
+## Key Information
+- Configurable from either a **Resource page** or a **Group page**
+- Expiration window: **1 hour minimum** to **1 year maximum** from current date
+- On expiration: Group is automatically removed from Resource; users lose access
+- Expiration changes are logged in **Audit Logs → Access category** in Admin Console
+- Expiration times can be modified after initial assignment
 
-**Configurable Expiration Range:**
-- From the next hour up to **one year** from the current date
+## Prerequisites
+- Admin Console access
+- Existing Groups and Resources configured in Twingate
 
-### Configuration Locations
+## Step-by-Step
 
-| Location | What It Does |
-|---|---|
-| **Resource page** -- adding a Group | Set expiration when granting Group access |
-| **Resource page** -- options on existing Group assignment | Modify expiration on an already-granted Group |
-| **Group page** -- per-Resource the Group has access to | Same operation, different navigation |
+### Via Resource Page
+1. Navigate to the Resource page in Admin Console
+2. Add a Group to the Resource (or select an existing Group via the options button)
+3. Set expiration time and date (range: next hour → 1 year)
+4. Save — Group is auto-removed when expiration is reached
 
-### Audit
+### Via Group Page
+1. Navigate to the relevant Group page
+2. Locate the Resource to set expiration on
+3. Set the expiration time for that specific Resource
 
-- Expiration changes are logged in the **Access category of Audit Logs**
-- Useful for compliance: verifiable record of when contractor access was granted and when it ended
+## Configuration Values
+| Parameter | Range | Notes |
+|-----------|-------|-------|
+| Expiration time | 1 hour – 1 year | From current date/time |
 
-### Common Use Cases
+## Common Use Cases
+- Projects with defined end dates
+- Contractor/third-party engagements
+- "Break glass" emergency access to sensitive resources
 
-| Scenario | Pattern |
-|---|---|
-| **Project with defined end date** | Group expires at project end; access auto-revokes |
-| **Contractor engagement** | Contractor Group expires at engagement end |
-| **Break-glass access** | Add admin to break-glass Group with 4-hour expiry; Group auto-revokes |
-| **Onboarding window** | New hire gets temporary access to legacy systems while migrating off |
+## Gotchas
+- No built-in notification/warning before expiration — plan accordingly
+- Modifying expiration requires manual action; no recurring/renewable access option mentioned
+- Audit log entries only capture changes to expiration times, not just access events
 
-### Decision Notes
-
-- Use ephemeral when the **end date is known up front**
-- Use **JIT (just-in-time)** when access is needed on demand but you don't know when (per /docs/jit-access-requests)
-- Use **usage-based auto-lock** to catch forgotten access without an explicit end date (per /docs/usage-based-auto-lock)
-- Combining ephemeral + auto-lock: ephemeral sets the hard end; auto-lock revokes earlier if unused
-
-**Gotchas:**
-- Expiration removes the **Group from the Resource** -- not the user from the Group. If the Group has access to other Resources, the user keeps those.
-- Once the Group is removed, manually re-adding requires re-configuring everything -- consider using JIT workflows for repeated short-term access patterns
-- The expiration timestamp is precise -- set it generously to avoid mid-meeting access loss
-
-**Related Docs:**
-- /docs/jit-access-requests -- Per-request time-bounded access
-- /docs/usage-based-auto-lock -- Inactivity-based revocation
-- /docs/security-policies -- Policy types overview
-- /docs/audit-logs -- Audit Logs reference
-- /docs/vendor-and-contractor-access-management -- Pattern using ephemeral for contractors
+## Related Docs
+- Audit Logs (Access category)
+- Resource configuration
+- Group management

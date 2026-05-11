@@ -1,79 +1,51 @@
-## How Firewalls Work with Twingate
+# How Firewalls Work with Twingate
 
-Conceptual reference comparing firewall roles in **VPN architectures** vs. **Twingate**. Useful for explaining to security teams why Twingate doesn't need the same firewall layer.
+## Summary
+Twingate replaces the traditional VPN+firewall combination for user flows by handling both connectivity and access control in a single solution. Unlike VPNs, Twingate never grants users a network presence—traffic to unauthorized Resources never leaves the device. Firewalls remain recommended for machine-to-machine flows within the same network.
 
-### Firewall Role with Traditional VPN
+## Key Information
 
-VPNs assign users a **local IP on the private network** -- effectively joining them to the LAN. VPNs handle **connectivity only**, not access control.
+- **VPN model**: Connectivity only; firewalls add access control on top via IP-based rules
+- **Twingate model**: Connectivity + access control unified; users never get a local IP on the private network
+- **Lateral movement prevention**: User devices cannot scan or probe the network—unauthorized traffic is blocked at the client before leaving the device
+- **Machine-to-machine flows**: Protected via Twingate Service Accounts for cross-environment communication; firewalls still recommended for same-network app-to-app traffic
+- **Logging**: Real-time connection logs capture identity, source IP, Resource, protocol, port, Connector, Remote Network, and timestamp
+- **Admin Console security**: Dedicated Security Policy for admin access + Admin Actions Report (full audit trail of create/delete/edit/connect events)
 
-**Risk**: a user (or attacker on a compromised user device) connected via VPN has unrestricted lateral access on the network. They can:
-- Port scan
-- Catalog assets
-- Move laterally to compromise more systems
+## VPN vs. Twingate Firewall Role Comparison
 
-**Mitigation**: firewalls layered on top of VPNs to enforce access controls:
-- Block inbound traffic from user IPs to application/service IPs
-- Allowlist specific user-IP-ranges to specific service-IP+port combos (e.g., dev team to SSH 22 on dev servers)
-- Monitor outbound traffic from user IPs for scanning/anomalies
+| Concern | VPN + Firewall | Twingate |
+|---|---|---|
+| User connectivity | VPN | Twingate Client |
+| User access control | Firewall (IP rules) | Resources + Security Policies |
+| Lateral movement risk | High without firewall rules | Virtually eliminated |
+| Machine-to-machine (cross-env) | Firewall rules | Service Accounts |
+| Machine-to-machine (same network) | Firewall | **Still use firewall** |
+| Anomaly detection | Firewall alerts | Real-time connection logs → SIEM |
 
-VPNs also rarely contribute to **anomaly detection** -- firewalls (and SecOps tools) handle that.
+## Configuration Values
 
-### Firewall Role with Twingate
+- **Resources**: Define with specific protocols and ports (not broad network ranges)
+- **Security Policies**: Applied per Resource; configure auth frequency, 2FA requirements
+- **Admin Console Policy**: Dedicated Security Policy with stricter re-authentication
+- **Logging integration**: Export real-time connection logs to a SIEM
 
-Twingate handles **connectivity AND access control in one product**.
+## Gotchas
 
-**Key difference**: when a user connects to Twingate, they are NOT joined to the network. The user's device gets no local IP on the private network. Instead:
-- Twingate Client only allows traffic to Resources the user is **explicitly authorized** for
-- Unauthorized Resource traffic **never leaves the user's device** -- it doesn't even hit the network
-- Lateral attacks from a user device are virtually impossible (no presence on the network)
+- Twingate does **not** replace firewalls for same-network machine-to-machine flows—firewalls still needed there
+- Resources should be **tightly scoped** (specific IPs, protocols, ports)—broad Resource definitions undermine access control benefits
+- Only traffic through authorized Connector connections is logged; blocked attempts never reach the network and won't appear in network-layer logs
+- Admin Console is a high-value target; apply a strict dedicated Security Policy to it
 
-**Result**: Twingate replaces the firewall's role for **user-to-application flows** -- with stricter, identity-based gates than a network-IP-based firewall could provide.
+## Prerequisites
 
-### What Twingate Doesn't Replace
+- Resources defined with specific protocols/ports
+- Security Policies configured per Resource and for Admin Console
+- SIEM integration recommended for real-time monitoring of connection logs
 
-**Machine-to-machine flows** within the same network still benefit from firewalls:
-- Application-to-application segmentation on the same subnet
-- Preventing compromised app A from reaching app B
-- These are handled by traditional firewalls + network segmentation
+## Related Docs
 
-For **machine flows across networks**: Twingate **Service Accounts** + headless Client cover the same use case (e.g., CI/CD SaaS reaching on-prem service).
-
-### SecOps & Anomaly Detection in Twingate
-
-Twingate has **real-time connection logs** with rich detail:
-- User identity (email, public IP, device info)
-- Source: protocol, port, requested Resource
-- Network path: Connector, Remote Network
-- Context: timestamp, event type
-
-**Recommendation**: feed these logs to a SIEM for real-time monitoring + investigative work. Twingate replaces the firewall's monitoring role for user-flow access -- but only for traffic that's authorized (denied attempts don't leave the device, so no log).
-
-### Securing the Twingate Admin Console
-
-Admin Console = critical surface (defines mappings between Users, Groups, Resources, Policies).
-
-Twingate provides:
-- **Dedicated Admin Console Security Policy** (separate from MAR; more frequent re-auth, mandatory 2FA -- per /docs/admin-console-security)
-- **Admin Actions Report**: timestamped audit trail of every admin action -- create/delete/edit/connect across all object types
-
-### Decision Notes
-
-- **Firewalls + Twingate**: still valuable for machine-to-machine intra-network flows; less critical for user flows
-- For greenfield deployments: design Twingate Resources tightly (specific protocols + ports) -- this is where firewall-equivalent enforcement happens
-- For brownfield migrations: deploy Twingate alongside existing firewalls; tighten Resource definitions over time
-- Always feed Twingate connection logs to a SIEM -- the audit trail is essential for incident response
-
-### Gotchas
-
-- "Twingate replaces firewalls" is half-true -- it replaces firewall-for-users, not firewall-for-machines
-- Resource definitions that allow broad ports (`tcp policy=ALLOW_ALL`) lose the firewall-equivalent benefit -- always restrict to specific ports
-- The Twingate Admin Actions Report is critical for compliance audits -- enable + retain accordingly
-
-### Related Docs
-
-- /docs/twingate-vs-vpn -- Detailed VPN vs Twingate comparison
-- /docs/security-policies -- Resource Policies (the access control layer)
-- /docs/security-policies-best-practices -- Risk-tier policy design
-- /docs/admin-console-security -- Admin Console policy
-- /docs/network-overview, /docs/exporting-network-traffic, /docs/syncing-data-to-s3 -- Connection logs + SIEM integration
-- /docs/service-accounts-guide -- Machine-to-machine flows
+- [Security Policies](https://www.twingate.com/docs/security-policies)
+- [Real-time Connection Logs](https://www.twingate.com/docs/real-time-logs)
+- [Admin Actions Report](https://www.twingate.com/docs/admin-actions-report)
+- [Service Accounts](https://www.twingate.com/docs/service-accounts)

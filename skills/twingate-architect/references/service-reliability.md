@@ -1,40 +1,47 @@
 # Service Reliability
 
 ## Page Title
-Service Reliability - How Reliable is Twingate's Infrastructure and Service?
+Service Reliability – How Reliable is Twingate's Infrastructure and Service?
 
 ## Summary
-Twingate ensures high service availability, performance, and scalability through fault-tolerant GCP-hosted infrastructure across multiple geographic data centers. Traffic routing is optimized by eliminating backhauling, supporting split tunneling, and distributing authorization processing. Customers are shielded from scaling complexity as Twingate handles infrastructure scaling automatically.
+Twingate provides high availability, performance, and scalability through distributed infrastructure hosted on GCP with multi-region redundancy. Traffic routing is optimized via split tunneling and direct paths (no backhauling), with load balancing handled automatically at multiple levels. Customers are abstracted from scaling concerns entirely.
 
 ## Key Information
 
-### Availability
-- **Infrastructure**: Hosted on Google Cloud Platform (GCP) with multi-data-center redundancy
-- **Failover**: Automatic load redistribution if one data center has issues
-- **Status page**: `status.twingate.com` for real-time monitoring
-- **DDOS mitigation**: Active measures in place
-- **Monitoring**: 24/7 automated alerting
+**Availability:**
+- Hosted on Google Cloud Platform (GCP) with multi-datacenter redundancy
+- Automatic failover between data centers if one becomes unavailable
+- Geographically separated data centers mitigate location-specific disasters
+- DDoS mitigation measures in place
+- 24/7 automated monitoring with alerting
+- Service status page: **status.twingate.com**
 
-### Performance & Scalability
-- **No backhauling**: Traffic takes direct routes; clients auto-select optimal controllers/relays based on user location
-- **Split tunneling**: Non-Twingate traffic bypasses the service entirely, reducing unnecessary hops
-- **Load balancing**: Operates at multiple levels—controllers, relays, and connectors
-- **Co-location**: Controllers and relays hosted within AWS, Azure, and GCP to reduce latency for customers on those platforms
-- **Connector load balancing**: Multiple connectors per network are automatically load-balanced
-- **Distributed authorization**: Processing handled at the client level rather than a central bottleneck
-
-## Configuration Values
-- **Multiple connectors**: Deploy more than one connector within the same Remote Network to enable automatic load balancing for inbound access requests
-
-## Gotchas
-- Load balancing between connectors is **automatic**—no manual configuration required, but requires multiple connectors deployed in the same network
-- Split tunneling behavior depends on what resources are configured to route through Twingate; non-configured traffic bypasses Twingate by default
-- Customers do **not** manage scaling of Twingate infrastructure—this is fully handled by Twingate
+**Performance & Scalability:**
+- No backhauling: traffic takes direct routes rather than through a central gateway
+- Clients automatically select the best-performing controllers and relays based on user location and target resource
+- Split tunneling: non-Twingate traffic bypasses the service entirely
+- Controllers and relays co-hosted with major IaaS providers (AWS, Azure, GCP) to reduce latency
+- Load balancing operates at multiple levels: across regional controllers/relays and across customer-deployed connectors
+- Authorization processing is distributed (partially at client level) to avoid centralized bottlenecks
 
 ## Prerequisites
-- None specific to reliability features; behavior is inherent to Twingate's architecture
+- None for reliability features; they are platform-managed
+- Multiple connectors can be deployed per network to enable connector-level load balancing
+
+## Configuration Values
+| Feature | Customer Action Required |
+|---|---|
+| Connector load balancing | Deploy multiple Connectors in same network — Twingate handles balancing automatically |
+| Split tunneling | Configure which resources route through Twingate vs. bypass |
+| Regional relay selection | Automatic; no configuration needed |
+
+## Gotchas
+- Load balancing between connectors within a network is automatic, but requires **multiple connectors deployed** to take effect
+- Split tunneling scope is determined by what resources/policies are configured — unrouted traffic bypasses Twingate entirely (desired behavior, but verify policy coverage)
+- Twingate manages infrastructure scaling; customers do not deploy or scale relay/controller infrastructure themselves
 
 ## Related Docs
-- [GCP Infrastructure](https://cloud.google.com/about/locations) (external)
-- [Twingate Status Page](https://status.twingate.com)
+- [GCP Infrastructure Overview](https://cloud.google.com/docs) (external)
+- status.twingate.com – live service status
 - Connector deployment documentation (for multi-connector load balancing setup)
+- Split tunneling configuration

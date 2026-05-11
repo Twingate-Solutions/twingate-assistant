@@ -1,58 +1,58 @@
 # Twingate Quick Start
 
-## Page Title
-Quick Start Guide
-
 ## Summary
-Configure a Twingate network to provide secure access to private resources. Involves three core steps: define a Remote Network, deploy a Connector, and install the Client application.
+Configure a Twingate network by defining a Remote Network, deploying a Connector, and installing the Client. Provides encrypted access to private resources behind a firewall without exposing them publicly.
 
 ## Prerequisites
-- Active Twingate account (free tier available)
-- Permissions to deploy Docker container or native Linux service on the target Remote Network
+- Twingate account (free tier available)
+- Admin permissions to deploy Docker container or Linux service on the target Remote Network host
+- Host machine that can reach the private Resources you want to protect
 
 ## Step-by-Step
 
 ### 1. Define a Remote Network
-1. Navigate to **Network** in the navigation bar
-2. Click **Add** next to Remote Networks
-3. Select location (e.g., AWS, GCP)
-4. Enter a name (e.g., "AWS Production VPC") → click **Add Remote Network**
+- Navigate to **Network** → **Remote Networks** → **Add**
+- Select location (e.g., AWS, GCP, on-prem)
+- Name the network (e.g., "AWS Production VPC") → **Add Remote Network**
 
 ### 2. Define a Resource
-1. Navigate to **Network** → click **Add Resource**
-2. Enter resource address details → click **Add Resource**
-3. Assign to a Group (minimum: "Everyone") → click **Add 1 Group**
+- **Network** → **Add Resource**
+- Enter resource address/CIDR details → **Add Resource**
+- Assign to a Group (minimum: "Everyone") → **Add 1 Group**
+- ⚠️ Resource must be added to at least one Group to be accessible
 
 ### 3. Deploy a Connector
-1. Open the Remote Network → click **Deploy Connector**
-2. Select deployment method for your environment
-3. Run deployment on a host that can reach your target Resources
-4. Verify **Connection Status** sidebar shows successful connection to Controller and Relay
+- Inside your Remote Network, click **Deploy Connector**
+- Select deployment method (Docker, native Linux, etc.)
+- Run generated deployment command on a host that can reach your Resources
+- Verify: "Connection Status" sidebar shows successful connection to both Controller and Relay
 
 ### 4. Install the Client
-1. Visit `get.twingate.com` and install the Client
-2. Authenticate → access configured Resources directly
+- Visit **get.twingate.com** to download the Client
+- Authenticate → access protected Resources directly from any network
 
 ## Key Information
-- Connectors deploy behind your firewall and provide encrypted connectivity
-- Multiple deployment options available (Docker, native Linux, others)
-- Connection Status sidebar updates automatically during Connector provisioning
-- Connector must successfully connect to both **Controller** and **Relay** to be operational
+- Connectors deploy behind your firewall; no inbound firewall rules required
+- Resources are defined by address (IP, CIDR, hostname) — see Resource Definition docs for full syntax
+- Groups control access authorization; create custom Groups to restrict per-user access
+- Peer-to-peer connections improve performance and reduce bandwidth against Fair Use Policy limits
 
 ## Configuration Values
-- Resource addresses: see [Resource Definition](https://www.twingate.com/docs/resource-definition) for allowed formats
-- Client download: `get.twingate.com`
+| Item | Notes |
+|------|-------|
+| Connector deploy target | Must have network-level access to the Resources |
+| Group assignment | Required — no Group = no access |
+| Deployment options | Docker, native Linux service, and others (shown in UI) |
 
 ## Gotchas
-- **Resource must be added to a Group** or it will be inaccessible to users — this step is mandatory
-- Connector host **must have network access to the Resources** it will serve
-- Enable peer-to-peer connections to improve performance and stay within Fair Use Policy bandwidth limits
-- Pre-existing Remote Networks may exist from signup; skip creation step if so
+- Skipping Group assignment is the most common reason a Resource is unreachable after setup
+- The Connector host must have direct network access to the Resources — it acts as the network proxy
+- Enable peer-to-peer support to avoid Fair Use Policy bandwidth limits
 
 ## Related Docs
-- [Resource Definition](https://www.twingate.com/docs/resource-definition)
-- [Deploying Connectors](https://www.twingate.com/docs/deploying-connectors)
-- [Twingate Client Application](https://www.twingate.com/docs/client)
-- [Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
-- [Services (CI/CD)](https://www.twingate.com/docs/services)
-- [Security Policies](https://www.twingate.com/docs/security-policies)
+- Resource Definition (allowed address formats)
+- Deploying Connectors (all deployment environments)
+- Supporting Peer-to-Peer Connections
+- Services (for CI/CD / automated processes)
+- Security Policies
+- Custom Groups

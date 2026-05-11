@@ -1,29 +1,39 @@
-## Headless Clients
+# Headless Clients
 
-How to run Twingate Clients in headless (non-interactive) mode using a Service Account key, for use in CI/CD pipelines, containers, agents, and other non-human workloads.
+## Summary
+Twingate clients (Windows and Linux) can operate in headless mode using a Service Key to access Service Resources without a GUI. This enables automated and server-side use cases such as CI/CD pipelines and container deployments.
 
-**Supported Platforms:**
-- **Linux** -- full headless mode (TUN networking)
-- **Windows** -- headless mode supported
-- **Linux userspace mode** -- HTTP/HTTPS proxy, no kernel/TUN required (works inside containers without elevated privileges)
+## Key Information
+- Headless mode uses **Service Keys** (not user credentials) for authentication
+- Both **Windows** and **Linux** clients support headless mode
+- Linux client also supports **userspace networking mode** (alternative to kernel networking)
+- Designed for automated/non-interactive environments
 
-**Authentication:**
-- Headless Clients authenticate via a Service Account key (not user credentials)
-- Service key file is mounted/written to the Client's expected path (e.g., `/etc/twingate/service_key.json` on Linux)
+## Prerequisites
+- A configured Twingate Service with an associated Service Key
+- Windows or Linux Twingate client installed
+- Access to Service Key credentials
 
-**Use Cases (linked from this doc):**
-- CI/CD pipelines that need to reach private resources (GitHub Actions, Jenkins, GitLab runners)
-- ECS / containerized workloads (see /docs/aws-ecs-headless-configurations)
-- AI agents, frontend apps, batch jobs that need private backend access
+## Platform-Specific Instructions
+| Platform | Mode | Reference |
+|----------|------|-----------|
+| Linux | Headless | Linux headless mode instructions |
+| Windows | Headless | Windows headless mode instructions |
+| Linux | Userspace networking | Linux userspace networking instructions |
 
-**Mode Selection:**
-- Use **TUN (full headless)** when the workload needs full network connectivity (TCP/UDP/ICMP) and the host supports kernel modules / `/dev/net/tun` / `CAP_NET_ADMIN`
-- Use **userspace** when the environment cannot grant kernel privileges (e.g., AWS Fargate) and traffic is HTTP/HTTPS only
+## Example Use Cases
+- **CI/CD pipelines** — automated build/deploy systems accessing private Resources
+- **AWS ECS** — containerized workloads using Service Keys for Resource access
 
-**Related Docs:**
-- /docs/linux-headless -- Linux headless install instructions
-- /docs/windows-headless -- Windows headless install instructions
-- /docs/linux-userspace-networking -- Userspace (proxy) mode details
-- /docs/cicd-pipelines-with-twingate -- CI/CD configuration examples
-- /docs/aws-ecs-headless-configurations -- ECS-specific deployment patterns
-- /docs/service-accounts-guide -- Service Account key creation and rotation
+## Gotchas
+- Service Keys are required; standard user auth tokens do not apply in this context
+- Userspace networking mode is Linux-only — use when kernel-level networking is unavailable (e.g., unprivileged containers)
+- No GUI is presented; all configuration is done via CLI flags or config files
+
+## Related Docs
+- Linux headless mode instructions
+- Windows headless mode instructions
+- Linux userspace networking instructions
+- CI/CD Configurations
+- AWS ECS Configurations
+- Twingate Services (Service Key generation)

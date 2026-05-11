@@ -1,76 +1,55 @@
-## 1Password XAM (Device Trust) Configuration
+# 1Password XAM Configuration
 
-Integrate 1Password Extended Access Management (XAM) Device Trust with Twingate -- gates Twingate access on 1Password's device verification.
+## Page Title
+1Password Extended Access Management (XAM) Device Trust Integration
 
-**Plan Requirement:**
-- **Business or Enterprise** Twingate plans only
-- Customer must have 1Password XAM Device Trust subscription
+## Summary
+Twingate integrates with 1Password Device Trust to restrict resource access to verified devices by matching device serial numbers. Admins configure the integration via API key, then enforce it through Trusted Profiles in Security Policies. Available on Business and Enterprise plans only.
 
-### How It Works
+## Key Information
+- Supported platforms: macOS, Windows, Linux
+- Matching mechanism: device serial numbers returned by Twingate Client vs. 1Password Device Trust records
+- Device is considered verified if: serial number exists in 1Password AND device passes 1Password's device checks
+- Initial sync shows "Waiting to sync" status; resolves within a few minutes
+- Error recovery window: 28 hours before integration stops retrying; admin email notification sent on failure
 
-- Twingate matches **device serial numbers** returned by the Twingate Client against the device list managed by 1Password
-- Device is considered **1Password-verified** when:
-  1. Its serial number is in 1Password Device Trust's managed list
-  2. The device passes 1Password Device Trust's device checks (its `auth_state` is not `blocked`)
+## Prerequisites
+- Twingate Business or Enterprise plan
+- Access to 1Password Device Trust Console
+- Twingate Admin Console access
+- Existing Trusted Profiles configured in Twingate
 
-### Setup -- Three Steps
+## Step-by-Step
 
-**Step 1: Generate a 1Password Device Trust API Key**
+### Generate 1Password API Key
+1. Log into 1Password Device Trust Console
+2. Click user account (upper right) → **Settings**
+3. Left panel → **Developers**
+4. Click **Create New Key**
+5. Name the key and click **Save** (no write permissions needed)
 
-In the 1Password Device Trust Console:
-- Click your user account (upper right) -> **Settings**
-- Left panel -> **Developers**
-- **Create New Key** -> name it -> Save
-- **No special write permissions** are required -- read-only is sufficient
+### Connect Integration in Twingate
+1. Navigate to **Settings** → **Device Integrations**
+2. Click **Connect** next to 1Password
+3. Input the 1Password Device Trust API Key
 
-**Step 2: Configure in Twingate Admin Console**
+### Enforce via Security Policy
+1. Create a Trusted Profile for macOS/Windows/Linux
+2. Set **1Password Device Trust** as a required Trust Method
+3. Incorporate the Trusted Profile into a Security Policy
 
-- **Settings -> Device Integrations**
-- Click **Connect** next to 1Password
-- Paste the API Key
-- Save
+## Configuration Values
+| Parameter | Location | Notes |
+|---|---|---|
+| 1Password Device Trust API Key | Twingate Device Integrations settings | Read-only permissions sufficient |
 
-The Device Integrations page shows the current sync status.
+## Gotchas
+- **"Waiting to sync"** after setup is normal; devices may show incorrect verification state during this window
+- Device shows `1Password not verified` if: not managed by 1Password OR device `auth_state` is `blocked`
+- Integration halts after **28 hours** of failed sync attempts; requires manual reconfiguration with new API credentials
+- After 28-hour failure, admin receives email — resolution requires re-entering API key, not just retrying
 
-**Step 3: Add to Trusted Profiles**
-
-- Navigate to Device Security -> Trusted Profiles
-- Create or edit a Trusted Profile (macOS / Windows / Linux supported)
-- Add **1Password Device Trust** as a Trust Method
-- Now only devices verified by 1Password Device Trust satisfy this Profile
-- Apply the Profile via Resource Policies that require Trusted Devices
-
-### Troubleshooting
-
-**"Waiting to sync" status:**
-- Initial sync takes a few minutes -- normal
-- Devices may show wrong verification state during this window
-
-**"1Password not verified":**
-- Device is not managed by 1Password, OR
-- Device's `auth_state` in 1Password is `blocked`
-
-**Persistent sync failures:**
-- Twingate retries for **28 hours** before giving up
-- Recoverable errors (1Password API briefly down) auto-resolve
-- After 28 hours: integration stops; admin gets an email
-- Recovery: regenerate API key, reconfigure integration
-
-### Decision Notes
-
-- Use 1Password Device Trust if your org already uses 1Password for password management + device security -- consolidates vendor footprint
-- For mixed environments: 1Password Trust can be one of multiple Trust Methods in a Trusted Profile (e.g., 1Password OR CrowdStrike)
-- Read-only API key keeps blast radius small -- always use minimum permissions
-
-### Gotchas
-
-- Initial sync is slow (a few minutes) -- don't expect immediate verification
-- 28-hour failure window means sync issues can silently degrade access for a full day -- monitor email alerts
-- Devices not managed by 1Password silently fail verification -- ensure 1Password device enrollment is thorough before relying on this for access gating
-
-### Related Docs
-
-- /docs/device-security-guide -- Trusted Profiles + Device Security
-- /docs/trusted-devices -- Trusted Device policy rule
-- /docs/managed-devices -- Other Trust Method integrations
-- /docs/crowdstrike-configuration, /docs/sentinelone-configuration -- Alternative EDR Trust Methods
+## Related Docs
+- Twingate Trusted Profiles documentation
+- Twingate Security Policies documentation
+- [Twingate Pricing Page](https://www.twingate.com/pricing)

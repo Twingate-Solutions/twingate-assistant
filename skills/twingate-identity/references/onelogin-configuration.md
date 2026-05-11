@@ -1,75 +1,53 @@
-## OneLogin Configuration
+# OneLogin Configuration
 
-How to integrate OneLogin with Twingate -- OIDC user authentication + SCIM user/group sync via the Twingate OneLogin application.
+## Page Title
+OneLogin Configuration (Twingate SSO & SCIM Integration)
 
-**Plan Requirement:**
-- **Business or Enterprise** Twingate plans
-- **SCIM sync requires OneLogin's Unlimited Plan**
+## Summary
+Twingate integrates with OneLogin to delegate user authentication via OIDC and synchronize users/groups via SCIM. Only users assigned to the OneLogin Twingate application can access Twingate resources. Requires Business or Enterprise plan for OIDC; SCIM additionally requires OneLogin's Unlimited Plan.
 
-### What's Delegated to OneLogin
+## Key Information
+- Authentication method: SP-Initiated SSO via OpenID Connect (OIDC)
+- User/group sync method: SCIM
+- Access control: Only OneLogin users assigned to the Twingate app can use Twingate
+- Twingate app should be hidden from OneLogin portal ("Visible in portal" disabled) — users must initiate auth from Twingate Client, not OneLogin portal
 
-- **User authentication** via OpenID Connect (OIDC)
-- **User and group synchronization** via SCIM
+## Prerequisites
+- Twingate Business or Enterprise plan (OIDC)
+- OneLogin Unlimited Plan (SCIM user sync)
+- Admin access to both OneLogin Admin console and Twingate Admin console
 
-Only users assigned to the OneLogin Twingate application can sign in to Twingate.
+## Step-by-Step
 
-### Supported Features
+### OneLogin Side
+1. Go to **Applications > Add App**, search for "Twingate", select it
+2. Disable **"Visible in portal"** toggle → Save
+3. Assign app to OneLogin roles (recommend creating a dedicated role rather than using Default role to avoid lockout)
+4. If SCIM error appears on save ("SCIM Base URL cannot be blank"): navigate to **Configuration** tab, enter `https://twingate.com`, Save
 
-- **SP-Initiated SSO** via OIDC (start at the Twingate Client)
-- IdP-Initiated SSO is **not** supported
+### Twingate Side
+5. Open Twingate Admin console, begin OneLogin integration activation
+6. Enter **OneLogin Subdomain** (found in OneLogin URL or **Settings > Branding > Brand**)
+7. Copy **Client ID** and **Client Secret** from the **SSO** tab of the Twingate app in OneLogin
+8. Complete sign-in verification wizard to validate credentials
+9. Configure SCIM separately (see Related Docs)
 
-### Setup -- Two Stages + SCIM
+## Configuration Values
 
-**Stage 1: Add the Twingate App in OneLogin**
+| Field | Source |
+|-------|--------|
+| `OneLogin Subdomain` | OneLogin Admin URL or Settings > Branding |
+| `Client ID` | SSO tab of Twingate app in OneLogin |
+| `Client Secret` | SSO tab of Twingate app in OneLogin |
+| SCIM Base URL workaround | `https://twingate.com` (placeholder to bypass UI bug) |
 
-1. OneLogin Admin -> **Applications** -> **Add App** (top-right)
-2. Search for **Twingate**, select it
-3. **Disable "Visible in portal"** (recommended) -- hides Twingate from users' OneLogin portal since IdP-Initiated SSO doesn't work
-4. **Save**
+## Gotchas
+- **OneLogin UI bug**: Saving the app may throw "SCIM Base URL cannot be blank" — enter `https://twingate.com` as placeholder to bypass; real SCIM config done separately
+- **Role assignment risk**: Assigning only to "Default" role works for testing but create a named admin role first to prevent lockout when restructuring roles later
+- **No portal login**: Users cannot authenticate from the OneLogin portal — must start sessions from the Twingate Client app
+- SCIM requires OneLogin Unlimited Plan (separate from Twingate plan requirement)
 
-**Known Issue**: After Save, OneLogin may show "SCIM Base URL cannot be blank" error. Workaround:
-- Navigate to **Configuration** tab
-- Enter `https://twingate.com` (placeholder; SCIM is configured properly later)
-- **Save** to silence the validation error
-
-**Stage 2: Assign OneLogin Roles to the Twingate App**
-
-OneLogin uses **Roles** for app assignment, not Groups directly.
-
-**Suggested Pattern:**
-- Create a OneLogin role like **"Twingate-Admins"** that you belong to
-- Assign that role to the Twingate app (in addition to or instead of "Default")
-- Avoid assigning **only** the "Default" role to the app -- if you later remove Default, all access vanishes including yours
-
-**Stage 3: Complete in Twingate Admin Console**
-
-| Field | Where to Get It |
-|---|---|
-| **OneLogin Subdomain** | Inspect your OneLogin Admin URL, OR check **Settings > Branding -> Brand** in OneLogin |
-| **Client ID** | SSO tab of the Twingate OneLogin app |
-| **Client Secret** | SSO tab of the Twingate OneLogin app |
-
-Twingate prompts you to sign in with OneLogin to validate.
-
-**Stage 4: Configure SCIM**
-- See /docs/onelogin-configuration-scim for the SCIM setup walkthrough
-
-### Decision Notes
-
-- For SaaS app gating: see /docs/saas-app-gating-with-onelogin (uses OneLogin App Policies)
-- Use a dedicated OneLogin role (not Default) for Twingate access -- enables granular delegation later
-- Hide Twingate in OneLogin portal: required for clean UX since IdP-Initiated SSO doesn't work
-
-### Gotchas
-
-- "SCIM Base URL cannot be blank" error on Save is a **known UI bug** -- use the placeholder workaround
-- IdP-Initiated SSO doesn't work -- always start at the Twingate Client
-- SCIM requires OneLogin Unlimited Plan -- check before assuming SCIM will work
-- Always assign yourself via a non-removable role; otherwise you'll lose access on cleanup
-
-### Related Docs
-
-- /docs/onelogin-configuration-scim -- Step-by-step SCIM setup
-- /docs/identity-providers -- IdP overview
-- /docs/saas-app-gating-with-onelogin -- App gating pattern
-- /docs/scim-provisioning-api -- Underlying SCIM API
+## Related Docs
+- [SCIM user & group sync configuration](#) (linked as next step)
+- [Twingate pricing page](https://www.twingate.com/pricing)
+- [OneLogin SCIM documentation](https://onelogin.com) (external)

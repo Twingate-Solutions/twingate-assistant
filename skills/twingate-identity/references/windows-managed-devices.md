@@ -1,81 +1,56 @@
-## Windows Managed Devices (MDM Deployment)
+# Windows Managed Devices
 
-How to distribute the Twingate Windows Client through MDM (Intune, third-party MDM, Chocolatey) and silent install / pre-config patterns.
+## Summary
+Twingate Windows Client supports EXE and MSI deployment formats for MDM distribution. EXE is recommended as it bundles the .NET Runtime prerequisite; MSI requires manual .NET 8 Desktop Runtime installation. Both formats support identical command-line parameters for automated deployment.
 
-### Package Formats
+## Key Information
+- EXE package: includes .NET Runtime, recommended for MDM deployment
+- MSI package: requires separate .NET Desktop Runtime 8.0 (x64) installation
+- Chocolatey support exists but updates may lag behind official releases
+- Clients older than 12 months are unsupported and cannot connect
 
-| Format | Includes .NET 8 Runtime? | Recommended? |
-|---|---|---|
-| **EXE** | Yes -- auto-installs the runtime | **Yes** -- preferred for MDM deployment |
-| **MSI** | No -- you must distribute .NET 8 Desktop Runtime separately | Use only if EXE doesn't fit your MDM workflow |
+## Prerequisites
+- .NET Desktop Runtime 8.0 (x64) if using MSI installer
+- MDM solution (Intune, Endpoint Manager, or third-party)
+- Download: EXE or MSI from Twingate downloads page
 
-Both formats accept the same command-line parameters. .NET 8 Desktop Runtime x64 must be present for the Client to run.
+## Command-Line Configuration Values
 
-**.NET requirement**: November 2024+ Client versions require .NET Desktop Runtime 8.0 (x64) or higher.
+| Parameter | Values | Description |
+|-----------|--------|-------------|
+| `/qn` | flag | Silent install, auto-accepts ToS |
+| `network=` | `<name>.twingate.com` | Pre-configures network name |
+| `auto_update=` | `true/false` | Reconnect automatically after update |
+| `no_optional_updates=` | `true/false` | Disables user-triggered updates |
+| `ncsi_global_dns=` | `true/false` | Fix false "No internet" NCSI warnings |
+| `TUN_DRIVER=` | `TunTap` (default) / `Wintun` | Tunnel driver selection |
 
-### Command-Line Options (EXE and MSI)
+## Step-by-Step: Basic Deployment
 
-| Option | Effect |
-|---|---|
-| `/qn` | Silent install -- suppresses dialog, accepts ToS |
-| `network=<subdomain>` | Pre-configure Twingate Network -- user doesn't have to enter it |
-| `auto_update=true` | After update, auto-reconnect using existing session (no re-login) |
-| `no_optional_updates=true` | Disable user-triggered updates |
-| `ncsi_global_dns=true` | Enables NCSI_GlobalDns -- fixes false "No internet" indicator while Twingate is running |
-| `TUN_DRIVER=Wintun` | Use Wintun driver instead of TunTap (default) |
+1. Download EXE installer (recommended) or MSI
+2. If MSI: separately deploy .NET Desktop Runtime 8.0 x64
+3. Configure command-line parameters for your environment
+4. Deploy via MDM (Intune guide available separately)
+5. Run installer with parameters
 
-### Example Silent-Install Command
-
+**Example command:**
 ```
 TwingateWindowsInstaller.exe /qn network=beamreach.twingate.com no_optional_updates=true auto_update=true
 ```
 
-This: silent install, pre-set network, disable user updates, auto-reconnect after updates. Re-running on a system with Twingate already installed performs an in-place update.
+Running this on a system with existing installation performs in-place update; `auto_update=true` restores existing session.
 
-### `no_optional_updates` -- When to Use
+## Gotchas
+- **`no_optional_updates` decision depends on local admin rights:**
+  - Users WITH local admin: leave enabled (default), users self-update
+  - Users WITHOUT local admin: set `no_optional_updates=true`, push updates via MDM — otherwise users see prompts they cannot action
+- MSI does NOT bundle .NET; missing runtime will cause installation failure
+- Chocolatey packages are **not** on automated release pipeline — updates may be delayed
+- Must maintain update cadence: clients >12 months old cannot connect to service
+- `ncsi_global_dns=true` only needed if users report false "No internet" status while Twingate is running
 
-**Local admin rights granted to users:**
-- Leave default (`no_optional_updates=false`)
-- Users get update prompts and can update when admin auth available
-
-**No local admin rights:**
-- Set `no_optional_updates=true`
-- Reason: users would see the prompt but couldn't act on it -- bad UX
-- You must update via MDM push instead
-
-**Important**: Clients older than 12 months are not supported by the Twingate service. Without user-triggered updates, your MDM **must** push updates regularly.
-
-### MDM Solutions
-
-**Microsoft Intune / Endpoint Manager:**
-- Detailed walkthrough at /docs/intune-configuration
-- Custom PowerShell script support: download .NET runtime + MSI, run installer (template available)
-
-**Third-Party MDMs (Workspace ONE, Jamf-for-Windows, etc.):**
-- Standard EXE/MSI deployment + command-line options
-- Use the example command above as a starting point
-
-**Chocolatey** (Early Access):
-- `choco install twingate`
-- Note: Chocolatey package is **not** updated by Twingate's automated release pipeline -- expect a delay vs. official releases
-
-### Decision Notes
-
-- **Always use EXE for new deployments** -- bundled .NET avoids dependency drift
-- **Always set `no_optional_updates=true` for non-admin users** -- avoids broken update UX
-- **Always enable `auto_update=true`** -- preserves user session across updates, removes friction
-- For MSI: pin a known-good .NET 8 version in your MDM and update both packages together
-
-### Gotchas
-
-- MSI without .NET 8 Runtime fails silently -- no obvious error to the user
-- 12-month support window means non-update fleets break Twingate access -- automate updates one way or another
-- Wintun vs. TunTap: only switch if you have a specific reason; default TunTap is the maintained path
-- Chocolatey lag: don't rely on it for security-critical version updates
-
-### Related Docs
-
-- /docs/managed-devices -- Cross-platform MDM overview
-- /docs/intune-configuration -- Microsoft Intune walkthrough
-- /docs/jamf-mdm, /docs/kandji-mdm, /docs/omnissa-workspace-one-mdm -- macOS/iOS MDM
-- /docs/windows -- Standalone Windows Client docs
+## Related Docs
+- Microsoft Intune & Endpoint Manager deployment guide
+- Microsoft Intune custom PowerShell script guide (includes .NET + MSI install script)
+- Twingate Windows Client public changelog
+- Chocolatey installation instructions

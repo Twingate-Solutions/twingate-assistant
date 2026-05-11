@@ -1,103 +1,65 @@
-## Twingate Admin API Overview
+# Twingate Admin API Overview
 
-Reference for the Twingate **GraphQL Admin API** -- endpoint, capabilities, throttling limits, and recommended clients.
+## Summary
+Twingate provides a GraphQL-based Admin API for managing all core network constructs (Resources, Groups, Connectors, Remote Networks, Devices, Users, Service Accounts, Policies). Access requires an API token and is available at a subdomain-specific endpoint. Rate limiting applies per minute for reads and writes.
 
-### Endpoint
+## Key Information
+- API type: GraphQL
+- Endpoint: `https://<subdomain>.twingate.com/api/graphql/`
+- Auth header: `X-API-KEY: <token>`
+- Schema always up-to-date via introspection at the endpoint
+- Terraform provider wraps this API for IaC workflows
 
-```
-https://<subdomain>.twingate.com/api/graphql/
-```
+## Prerequisites
+- Admin Console access to generate API token
+- Navigate: **Settings > API > Generate Token**
+- Token can be disabled/enabled or modified after creation
 
-**Authentication**: HTTP header `X-API-KEY: <your-api-token>`
+## Configuration Values
+| Parameter | Value |
+|-----------|-------|
+| Endpoint | `https://<subdomain>.twingate.com/api/graphql/` |
+| Auth Header | `X-API-KEY` |
+| Read limit | 60 requests/minute |
+| Write limit | 20 requests/minute |
+| Rate limit response | HTTP `429` |
 
-### Capabilities
+## Supported Operations
+- **Remote Networks**: CRUD
+- **Connectors**: CRUD + token generation
+- **Resources**: CRUD
+- **Groups**: CRUD
+- **Service Accounts/Keys**: CRUD
+- **Devices**: Read, archive, unarchive, block, unblock, trust status update
+- **Security Policies**: Read, update
+- **Users**: Read
+- **Social Users**: Read, invite, update, delete
+- **Policies**: Assign
 
-| Object | Operations |
-|---|---|
-| **Remote Networks** | Create, read, update, delete |
-| **Connectors** | Create, read, update, delete, **generate tokens** |
-| **Resources** | Create, read, update, delete |
-| **Groups** | Create, read, update, delete |
-| **Service Accounts + Keys** | Create, read, update, delete |
-| **Policies** | Assign |
-| **Devices** | Read, archive, unarchive, block, unblock, update trust status |
-| **Security Policies** | Read, update |
-| **Users** | Read |
-| **Social Users** | Read, invite, update, delete |
-
-### Schema Discovery
-
-The schema is **always up-to-date and self-describing** via GraphQL **introspection**. Tools like **Altair** have built-in introspection viewers.
-
-### Recommended Clients
-
-| Client | Install | Use Case |
-|---|---|---|
-| **GraphiQL** (Mac) | `brew install --cask graphiql` | Quick GUI exploration |
-| **Altair** | Open-source, multi-platform | GraphQL-friendly UI + introspection |
-| **gql** (Python) | `pip install gql` | Lightweight Python integration |
-
-### Example Query
-
-```
+## Example Query
+```graphql
 {
   remoteNetworks(after: null, first: 10) {
     edges {
-      node {
-        id
-        name
-      }
+      node { id name }
     }
-    pageInfo {
-      startCursor
-      hasNextPage
-    }
+    pageInfo { startCursor hasNextPage }
   }
 }
 ```
 
-Returns the first 10 Remote Networks with `id` + `name`, plus pagination info. Use `after: <cursor>` from `pageInfo.startCursor` to paginate.
+## Recommended Clients
+- **GUI**: GraphiQL (`brew install --cask graphiql`), Altair (has built-in introspection)
+- **Python**: `gql` library
+- **IaC**: Twingate Terraform provider
 
-### Terraform Provider
+## Gotchas
+- Rate limit: 60 reads/min, 20 writes/min — exceeding returns `429`
+- Terraform `429` errors: upgrade to latest Twingate provider version (handles retry logic)
+- Retry timing specified in the `429` response body
+- Token must be in HTTP header, not query params
 
-The **Twingate Terraform provider** wraps this API and adds:
-- Declarative state management
-- Drift detection
-- Idempotent operations
-- Built-in retry on `429` rate-limit responses
-
-For IaC use cases, **always prefer the Terraform provider over direct API calls**. See /docs/terraform-getting-started.
-
-**Important**: if `terraform apply` returns 429 errors, **upgrade the Twingate provider to the latest version** -- recent versions handle throttling correctly.
-
-### API Throttling
-
-Default per-account limits:
-
-| Request Type | Limit |
-|---|---|
-| **Reads** | 60 / minute |
-| **Writes** | 20 / minute |
-
-Exceeding the limit returns **HTTP 429** with a `Retry-After` value. Implement backoff in custom integrations.
-
-### Decision Notes
-
-- Use the **Terraform provider** for IaC -- it handles retries automatically
-- For ad-hoc admin queries: GraphQL clients (Altair / GraphiQL / Postman) are fastest
-- For Python automation: `gql` library + a few helper functions beats the Python CLI for production code
-- Keep batch sizes modest -- the 60 reads/min limit is easy to hit with naive pagination
-
-### Gotchas
-
-- Throttling is account-wide -- if you have multiple integrations sharing one token, they compete for the budget
-- Schema can evolve -- introspection-based discovery is fine for exploration, but pin to known operations in production code
-- 429 responses include `Retry-After` -- respect it; aggressive retries make throttling worse
-
-### Related Docs
-
-- /docs/getting-started-with-the-api -- Token generation + first query walkthrough
-- /docs/exploring-the-apis -- Postman collection + videos
-- /docs/scim-provisioning-api -- Separate SCIM API for IdP integrations
-- /docs/terraform-getting-started -- Recommended IaC path
-- /docs/introduction-to-the-python-cli, /docs/introduction-to-tg-cli-javascript -- CLI wrappers
+## Related Docs
+- Terraform Provider documentation
+- Terraform Getting Started guide
+- GraphQL introspection (schema discovery)

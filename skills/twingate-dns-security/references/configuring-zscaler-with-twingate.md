@@ -1,55 +1,52 @@
-## Configuring Zscaler with Twingate
+# Configuring Zscaler to Work with Twingate
 
-How to make Zscaler coexist with the Twingate Client. Default Zscaler config intercepts Twingate's TLS sessions, breaking the Twingate Client's secure channel due to invalid certificates (cert pinning failure).
+## Summary
+Zscaler intercepts Twingate TLS sessions, causing certificate validation failures that prevent the Twingate Client from establishing secure channels. The fix requires either disabling Zscaler or configuring SSL inspection bypass for Twingate domains.
 
-### Symptoms
+## Key Information
+- Conflict occurs because Zscaler performs SSL/TLS inspection on Twingate connections
+- Twingate uses certificate pinning, which fails when Zscaler substitutes its own certificate
+- Issue manifests on Windows clients (logged in `twingate.log`)
+- Both tools can coexist with proper Zscaler configuration
 
-In `twingate.log` (Windows):
+## Symptoms
+Error in `twingate.log` on Windows:
 ```
 [WARN] SSL check error from host: <twingate_network>.twingate.com. SSL Certificate is not pinned!
 [ERROR] Failed to validate controller url
 System.Net.Http.HttpRequestException: Could not establish trust relationship for SSL/TLS channel.
 ```
 
-This indicates Zscaler is doing SSL inspection on the Twingate-Controller connection -- which the Twingate Client refuses (its cert pinning is intentional, not a bug).
+## Resolution Options
 
-### Two Options
+### Option 1: Disable Zscaler
+- Uninstall Zscaler or stop/disable the Zscaler service
+- **Note:** Simply exiting the Zscaler application is insufficient — the service must be fully stopped/disabled
 
-**Option 1: Disable Zscaler**
-- Uninstall, OR
-- Stop/disable the Zscaler service (just exiting the UI is **not enough** -- the service must be disabled)
-- Use this option only if Zscaler isn't required on these machines
+### Option 2: Bypass SSL Inspection (Preferred — Allows Coexistence)
 
-**Option 2: Bypass SSL Inspection for Twingate (Recommended)**
+**Step 1: Create SSL Bypass Group**
+1. Zscaler Admin Console → `Administration` → `IP & FQDN Groups` → `Destination IPv4 Groups`
+2. Create a new group for SSL inspection bypass
+3. Add `.twingate.com` to the group
 
-In the Zscaler admin console:
+**Step 2: Add VPN Gateway Exception**
+1. Go to `Policy` → `Client Connector Portal` → `Windows`
+2. Add `<tenant>.twingate.com` as an exception under **VPN Gateway Bypass**
 
-1. **Administration -> IP & FQDN Groups -> Destination IPv4 Groups**
-   - Create a group for SSL inspection bypass
-   - Add `*.twingate.com` (or your specific tenant FQDN) to the group
+**Step 3: Apply Policy**
+- Update policy on the Zscaler local agent
 
-2. **Policy -> Client Connector Portal -> Windows**
-   - Add `<tenant>.twingate.com` as an exception under **VPN Gateway Bypass**
+## Configuration Values
+| Parameter | Value |
+|-----------|-------|
+| FQDN to bypass | `.twingate.com` |
+| Tenant-specific exception | `<tenant>.twingate.com` |
 
-3. **Update policy on the Zscaler local agent** (force pull)
+## Gotchas
+- Exiting Zscaler UI does **not** stop the service — must disable/uninstall to fully remove interference
+- Both the FQDN group bypass and the VPN Gateway exception are required; doing only one may not resolve the issue
+- Configuration is Windows-specific per the documented symptoms, though the underlying TLS conflict could affect other platforms
 
-After this, Zscaler stops MITM-ing the Twingate Client's TLS connection, and both clients run simultaneously.
-
-### Decision Notes
-
-- Always prefer Option 2 -- preserves Zscaler protection on other traffic
-- The bypass scope is narrow (only Twingate's domain) -- minimal security implication
-- For users on macOS/Linux: similar bypass needed (consult Zscaler docs for the platform-specific path)
-
-### Gotchas
-
-- Stopping the Zscaler **UI** is not the same as disabling the **service** -- the kernel/network components keep running
-- "Refresh / Update Configuration" on the Zscaler client is required after bypass policy changes -- wait for the policy to propagate before testing
-- If you have multiple Twingate tenants, ensure the bypass covers the actual hostname, not just `*.twingate.com` (wildcard usually fine)
-
-### Related Docs
-
-- /docs/configuring-anyconnect-with-umbrella -- Sibling pattern for Cisco AnyConnect / Umbrella
-- /docs/netskope-dlp-config -- Netskope DLP coexistence
-- /docs/firewalls-and-twingate -- General firewall/security software interaction
-- /docs/troubleshooting -- Top-level troubleshooting hub
+## Related Docs
+- [Zscaler Documentation](https://help.zscaler.com/) — for Zscaler-specific configuration details

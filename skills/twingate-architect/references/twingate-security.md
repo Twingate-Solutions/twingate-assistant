@@ -1,59 +1,76 @@
-# Twingate Security Overview
+# Twingate Security Posture & Practices
 
-## Page Title
-Twingate Security — Customer-Facing Security Posture Documentation
-
-## Summary
-Documents Twingate's internal security practices and product security architecture for customer/prospect evaluation. Covers people security, data handling, infrastructure, and product design principles. Last updated October 2024.
+## Page Summary
+Documents Twingate's information security practices and product security architecture for customer evaluation. Covers organizational security controls, data handling, and product design principles. Last updated October 2024.
 
 ## Key Information
 
-### Certifications & Audits
-- SOC 2 Type 2 report (annual audits) — request via account contact
-- Third-party security testing by Hacker House (penetration testing, white-box analysis, fuzzing, threat modeling)
+### Organizational Security
+- **Governance**: CTO owns security program; cross-disciplinary security team includes senior management
+- **SOC 2 Type 2**: Annual audits conducted; request report via Twingate contact
+- **Employee controls**: Background checks (US: SSN trace, criminal, OFAC/SDN), NDAs, documented offboarding
+- **Training**: Security training at onboarding + periodic refreshers; policy acknowledgment required
 
-### Data Handling
-- Customer data encrypted in transit (TLS/SSL) and at rest (AES-256+)
-- Hosted on Google Cloud Platform managed databases
-- Encryption keys use envelope encryption with master keys rotated regularly
-- No custom cryptographic implementations; follows NIST SP 800-52 Rev. 2
-- Daily automated database backups with regular restore testing
-- Twingate does **not** store customer passwords (delegated to IdP)
-- Customer data types stored: user details (email, name, group membership), infrastructure info (network/resource details, ACLs), event logs, crash reports
+### Data Protection
+- **Encryption in transit**: TLS/SSL for all client app communications
+- **Encryption at rest**: GCP-managed database, AES-256+, symmetric keys with master key rotation
+- **Cipher selection**: Follows NIST SP 800-52 Rev. 2 recommendations
+- **No custom cryptography**: Uses only standard implementations
+- **No password storage**: Authentication delegated to third-party IdPs
+- **Backups**: Automated daily backups, regularly tested, limited retention period
+- **Data deletion**: Permanent secure deletion on request or per contract
 
 ### Access Controls
-- Production access via Twingate + SSO + MFA
-- Principle of least privilege enforced at resource level
-- Developers have no direct database access; no SSH access to production servers
-- Automated CI/CD removes need for human access to production environment
+- **Internal access**: Twingate + IdP SSO + MFA for all production resource access
+- **Principle of least privilege**: Resource-level (not network-level) access controls
+- **Developer access**: No direct database access; no SSH to production servers generally
+- **Automated deployments**: CI/CD pipeline removes need for human production access
 
-### Product Architecture Security Principles
-- No single component can independently authorize traffic — multiple components run multiple checks
-- User data flows and authentication flows handled by **separate components**
-- Authentication delegated to third-party IdP (separation of concerns)
-- User data flows encrypted end-to-end; Twingate **cannot decrypt** relay traffic
-- No public gateway exposure — customer networks invisible to public internet
-- Resource-level (not network-level) access restrictions
+### Infrastructure
+- **Platform**: Google Cloud Platform, multi-region for redundancy
+- **Containers**: Docker + Kubernetes
+- **Secrets**: Commercial secrets management system (major vendor)
+- **DDoS**: GCP-provided protection
+- **Status page**: `status.twingate.com`
 
-## Prerequisites
-- For penetration testing: requires prior written approval from Twingate security team, advance notice of timing/scope, may require signed agreement
+## Product Security Architecture
 
-## Configuration Values / Policies
-| Area | Detail |
-|------|--------|
-| Cipher standard | NIST SP 800-52 Rev. 2 |
-| Encryption at rest | AES-256 or better |
-| Backup frequency | Daily |
-| Policy review cycle | At least annually |
-| Code review requirement | Minimum 1 approver via PR for all production changes |
+### Core Design Principles
+1. Every resource request must be authenticated, verified, and authorized
+2. Users access only explicitly granted resources
+3. Comprehensive logging for monitoring and investigation
+
+### Key Architectural Properties
+- **No single point of authorization**: Multiple components run multiple checks; data flow and auth flow are separate
+- **End-to-end encryption**: User data encrypted even through Twingate-controlled relays — Twingate cannot decrypt traffic
+- **IdP delegation**: Authentication handled by customer's identity provider
+- **No public exposure**: Customer networks invisible to public internet
+
+### Customer Data Handled
+- User details: email, names, group membership (no passwords)
+- Infrastructure info: network/resource details, ACLs
+- Event logs: user logins, token requests
+- Crash/error reports for diagnostics
+
+## Development Practices
+- All code requires peer review via PR; production changes require ≥1 approver
+- Static analysis tools for proprietary code and third-party library vulnerabilities
+- Third-party security testing by **Hacker House**: white-box analysis, reverse engineering, fuzzing, threat modeling
+- Customer data never used in testing
+
+## Penetration Testing
+- Customer pen testing permitted with **prior written approval** from Twingate security team
+- Must provide advance notice of timing and scope
+- May require signed agreement
+- Contact account manager to initiate
 
 ## Gotchas
-- Penetration testing requires **pre-approval** — do not initiate without contacting account manager
-- Subdomain allocation (`.twingate.com`) is at Twingate's discretion; they can revoke for trademark/spoofing violations
-- Physical security relies on GCP data center security; Twingate has no fixed offices
-- Background checks outside the U.S. vary by local law
+- Subdomain allocation (`.twingate.com`) is at Twingate's discretion; they can reassign for policy violations
+- Physical security relies entirely on GCP data centers (no Twingate-owned facilities)
+- No fixed offices; physical security responsibility placed on individual employees
 
 ## Related Docs
-- [GCP Physical Security](https://cloud.google.com/security/infrastructure/design) (referenced externally)
-- [Twingate Customer Agreement](https://www.twingate.com/docs/customer-agreement) (subdomain policy)
-- [status.twingate.com](https://status.twingate.com) — service status and maintenance
+- [GCP Physical Security](https://cloud.google.com/security/infrastructure)
+- [Twingate Customer Agreement](https://www.twingate.com/docs/customer-agreement)
+- [Status Page](https://status.twingate.com)
+- NIST SP 800-52 Rev. 2

@@ -1,70 +1,50 @@
-## Device Administration
+# Device Administration
 
-Reference for the Twingate Devices tab -- how device data is displayed, what attributes are tracked, and how to manage device state (active / archived / blocked).
+## Summary
+Twingate tracks device attributes and states for all user devices connecting to the network. Admins can view device details, manage verification status, and control access through three device states (active, archived, blocked). Device verification integrates with EDR/MDM tools or can be set manually for use in Security Policies.
 
-### Where Devices Appear
+## Key Information
+- Device info visible in both user detail page and the **Devices** tab in Admin Console
+- Tracked attributes include: name, hostname, make/model, OS, serial number, local username, client version, active state, internet security status
+- Verified devices can be used as conditions in Security Policies
+- Devices auto-archive after **90 days** of no sign-in or resource access
 
-- **User detail page** -- devices the user has connected from
-- **Devices tab** (top-level) -- all devices in the org
+## Device Attribute Platform Support
 
-### Device Attributes
+| Attribute | Windows | macOS | Linux | iOS |
+|-----------|---------|-------|-------|-----|
+| Name | ✓ | ✓ | — | ✓ |
+| Hostname | ✓ | ✓ | ✓ | — |
+| Make/Model | — | ✓ | ✓ | ✓ |
+| Serial Number | ✓ | ✓ | ✓ | — |
+| Local Username | ✓ | ✓ | ✓ | — |
+| Internet Security | ✓ | ✓ | ✓ | — |
+| OS, Client Version, Active State | All | All | All | All |
 
-| Attribute | Description | Platforms |
-|---|---|---|
-| **Name** | Friendly name set by user | Windows, macOS, iOS |
-| **Hostname** | DNS hostname assigned by device | Windows, macOS, Linux |
-| **Make** | Manufacturer | macOS, Linux, iOS |
-| **Model** | Model name | macOS, Linux, iOS |
-| **OS name** | Operating system name | All |
-| **OS version** | OS version number | All |
-| **Serial number** | Hardware serial | Windows, macOS, Linux |
-| **Local username** | OS-level user running Twingate | Windows, macOS, Linux |
-| **Client version** | Twingate Client version | All |
-| **Active state** | active / archived / blocked | All |
-| **Connection indicator** | Green dot if currently signed in | All |
-| **Internet Security** | Internet Security configuration status | Windows, macOS, Linux |
+## Device States
 
-### Device Active States
+| State | Resource Access | Admin Console | Auto-set |
+|-------|----------------|---------------|----------|
+| **Active** | Yes (per policy) | Visible | Default for new devices |
+| **Archived** | Requires re-auth | Filtered out | After 90 days inactive |
+| **Blocked** | No access | Filtered out | Manual only |
 
-| State | Use Case | Admin Console Visibility | Resource Access |
-|---|---|---|---|
-| **Active** | Default; in-use devices | Visible | Yes (subject to Security Policy) |
-| **Archived** | Old / deprecated devices; auto-archived after 90 days inactivity | Filtered out | Requires sign-in (re-auth restores active state) |
-| **Blocked** | Lost, stolen, or deprecated | Filtered out | **No access** |
+## State Behaviors
+- **Archived**: Auto-signs out user; re-authentication restores device to active state
+- **Blocked**: Auto-signs out user; user **cannot** sign back in on that device
+- States can be set via Admin Console or API
 
-**Auto-archival**: any device that hasn't signed in or accessed a Resource for **90 days** is automatically archived.
+## Device Verification
+- Supports EDR/MDM integrations for automatic verification
+- Manual verification available per device
+- Verification status usable as condition in Security Policies
+- Applies to all platforms and locations
 
-**State Transitions:**
-- **Active → Archived** (manual or automatic) -- signs the user out; re-auth restores active
-- **Active → Blocked** (manual) -- signs the user out; user can NOT sign in again from this device
-- **Archived → Active** (automatic) -- when the user re-authenticates
-- **Blocked → ?** -- effectively permanent unless an admin manually restores
+## Gotchas
+- Archived devices are filtered from default Admin Console view — not deleted
+- Re-authenticating on an archived device automatically reactivates it (not true for blocked)
+- Blocked devices permanently lose access — cannot be recovered by the user
+- iOS does not report hostname, make/model not available on Windows
 
-### Verified Devices
-
-Devices can be verified via:
-- EDR/MDM Trust Methods (CrowdStrike, Intune, Jamf, Kandji, SentinelOne, 1Password)
-- **Manual verification** (per /docs/manually-verified-devices)
-
-Verified status can be required by Security Policies (Trusted Profile or Custom device rule).
-
-### Decision Notes
-
-- Use **Block** for lost/stolen devices, NOT Archive -- Archive lets the user back in upon re-auth
-- 90-day auto-archive is a useful housekeeping default; users with seasonal access patterns may bounce in/out
-- The Connection Indicator (green dot) is real-time -- useful for quick triage when troubleshooting access issues
-- Bulk operations (block all devices for a user) require API calls; the Admin Console is per-device
-
-### Gotchas
-
-- Manual archive logs the user out -- they don't get a notification, just a "please sign in again" prompt next time they connect
-- Blocked + manually verified state is allowed (verification is retained) -- explicit unblock is needed to restore access
-- Mobile (iOS/Android) attributes are sparser than desktop -- some fields just aren't reported by the platform
-
-### Related Docs
-
-- /docs/devices -- Devices overview
-- /docs/manually-verified-devices -- Manual verification workflow
-- /docs/device-security-guide -- Trusted Profiles
-- /docs/managed-devices -- MDM-deployed Clients
-- /docs/trusted-devices -- Trusted Devices policy rule
+## Related Docs
+- [Device Security Guide](https://www.twingate.com/docs/device-security) — Trusted Profiles, Security Policies, verification integration setup

@@ -4,66 +4,53 @@
 Sunshine Remote Game Streaming with Twingate
 
 ## Summary
-Guides setup of Sunshine (open-source GameStream server) on a Windows gaming PC with Twingate Zero Trust access replacing port forwarding. Moonlight client connects to Sunshine through an encrypted Twingate tunnel. Total setup time ~30 minutes.
+Sunshine is an open-source self-hosted game streaming server (Nvidia GameStream protocol) used with the Moonlight client. This guide configures Sunshine on a Windows gaming PC secured via Twingate, eliminating port forwarding by routing traffic through an encrypted Twingate Connector tunnel.
 
 ## Key Information
-- Sunshine implements Nvidia GameStream protocol; pairs with Moonlight client
-- Twingate Connector creates outbound-only connection — no inbound ports needed
-- Architecture: Remote Device → Twingate Client → Twingate Cloud → Connector → Sunshine
+- Sunshine runs on Windows; Moonlight is the client (Windows/Mac/Linux/iOS/Android)
+- Twingate Connector deployed on gaming PC creates outbound-only connection — no inbound ports needed
+- Connector recommended via WSL (Ubuntu); Docker Desktop is alternative
+- Hardware encoding required: NVENC (Nvidia), AMF (AMD), QuickSync (Intel)
 
 ## Prerequisites
-- Windows PC with GPU (Nvidia/AMD/Intel)
-- Twingate account with Admin Console access
-- Remote device (Windows/Mac/iOS/Android) for streaming to
+- Windows PC with Nvidia/AMD/Intel GPU
+- Twingate account with admin access
+- Remote device with Twingate Client + Moonlight installed
+- WSL (Ubuntu) or Docker Desktop on gaming PC
 
 ## Step-by-Step
 
-1. **Install Sunshine**: `winget install LizardByte.Sunshine` or manual installer
-2. **Configure encoder** at `http://localhost:47990`: NVENC (Nvidia), AMF (AMD), QuickSync (Intel)
-3. **Deploy Twingate Connector** on gaming PC via WSL (recommended) or Docker
-4. **Add Sunshine as Twingate Resource** using PC's private IP
-5. **Install Twingate Client** on remote device and connect
-6. **Install Moonlight** on remote device
-7. **Pair**: Enter PC private IP in Moonlight → enter PIN in Sunshine web UI (`/PIN` section)
+1. **Install Sunshine**: `winget install LizardByte.Sunshine` or manual installer; access web UI at `http://localhost:47990`
+2. **Configure encoder**: Web UI → Configuration → Video/Audio → select GPU-appropriate encoder
+3. **Deploy Twingate Connector**: Admin Console → Remote Networks → Connectors → deploy via WSL or Docker
+4. **Add Twingate Resource**: Resources → Add Resource with gaming PC's private IP
+5. **Assign access**: Resource → Access → Add group
+6. **Install Twingate Client** on remote device; connect and verify resource appears
+7. **Install Moonlight** on remote device
+8. **Pair**: Moonlight → Add PC → enter private IP → enter 4-digit PIN in Sunshine web UI (`http://localhost:47990` → PIN section)
 
 ## Configuration Values
 
-**Sunshine ports (Resource config):**
-| Protocol | Ports | Purpose |
-|----------|-------|---------|
-| TCP | 47984-47990 | Web UI + HTTPS |
-| UDP | 47998-48000 | Streaming |
-
-**Sunshine web UI:** `http://localhost:47990`
-
-**WSL Connector install:**
-```bash
-wsl --install  # then Ubuntu from Microsoft Store
-# Run generated token command in WSL Ubuntu terminal
-```
-
-**Check Sunshine service:**
-```powershell
-sc query SunshineService
-```
-
-**Get PC IP:**
-```powershell
-ipconfig  # look for IPv4 under active adapter
-```
+| Setting | Value |
+|---|---|
+| Sunshine Web UI | `http://localhost:47990` |
+| TCP Ports (Resource) | `47984-47990` |
+| UDP Ports (Resource) | `47998-48000` |
+| WSL install command | `wsl --install` |
+| Service check | `sc query SunshineService` |
+| Starting bitrate (1080p) | 15–20 Mbps |
 
 ## Gotchas
-- Hardware encoder must be selected — software encoding insufficient for real-time streaming
-- Connector must stay running (WSL/Docker keeps it in background)
-- Pairing PIN must be entered while connected via Twingate
-- Headless PCs need a physical monitor or virtual display driver (IddSampleDriver)
-- Poor performance: start at 15-20 Mbps bitrate for 1080p; use wired ethernet on gaming PC
-- If IP connection fails, try `127.0.0.1` in Moonlight
-- Some games require Sunshine run as administrator
+- Connector must stay running at all times for remote streaming to work
+- Select correct Remote Network when creating the Resource (must match where Connector is deployed)
+- Physical monitor must be connected, or use virtual display driver (IddSampleDriver) for headless setups
+- Some games require Sunshine to run as Administrator
+- Wired ethernet on gaming PC strongly recommended for performance
+- Try `127.0.0.1` instead of private IP if Moonlight can't connect
 
 ## Related Docs
-- [Apollo Remote Streaming](https://www.twingate.com/docs) — automatic virtual display management
-- [Duo Remote Streaming](https://www.twingate.com/docs) — multi-user simultaneous gaming
-- [Game Streaming Overview](https://www.twingate.com/docs) — compare all options
-- [Connector Deployment Guides](https://www.twingate.com/docs)
-- [Official Sunshine Docs](https://docs.lizardbyte.dev/projects/sunshine/)
+- Apollo Remote Streaming (automatic virtual display management)
+- Duo Remote Streaming (multi-user simultaneous gaming)
+- Game Streaming Overview (compare all options)
+- Connector Deployment Guides
+- Resource Access Configuration
