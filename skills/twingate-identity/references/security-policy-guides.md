@@ -1,39 +1,36 @@
-## Policy Guides Index
+# Security Policy Guides
 
-Index page pointing to the per-rule configuration guides for Security Policies. Treat this as a navigation hub.
+## Page Title
+Security Policy Guides
 
-**Configurable Rule Types (each has its own deeper guide):**
+## Summary
+This is a top-level index page for Twingate's Security Policy documentation. It lists the available policy rule types with links to individual detailed guides. No implementation details are provided on this page itself.
 
-| Rule | What It Controls | Detailed Guide |
-|---|---|---|
-| **Authentication** | Re-auth frequency + MFA requirement | /docs/authentication |
-| **Two-Factor Authentication** | MFA enforcement specifics within auth requirements | /docs/two-factor-authentication-security-policies |
-| **Device-only Resource Policies** | Evaluate only device requirements (no user auth check) | /docs/device-only-resource-policies |
-| **Trusted Devices** | Whether devices must be trusted (manually or automatically via EDR/MDM) | /docs/trusted-devices |
+## Key Information
+- Twingate supports multiple distinct Security Policy rule types
+- Four main policy areas are documented separately:
+  - **Authentication** – controls re-authentication frequency and 2FA requirements
+  - **Two-factor Authentication** – specific settings for 2FA within authentication requirements
+  - **Device-only Resource Policies** – policies that evaluate device requirements exclusively
+  - **Trusted Devices** – controls whether devices must be trusted (manually or automatically) to satisfy Security Policy requirements
 
-### Quick Reference
+## Prerequisites
+- Access to Twingate admin console
+- Refer to individual linked guides for specific prerequisites per policy type
 
-**When to use Device-only Policy:**
-- IdP login Resources (`*.okta.com`, `login.microsoftonline.com`) -- breaks the SaaS app gating auth loop
-- AD/DC Resources for the Everyone Group -- allows pre-logon connectivity
-- Any Resource where you want to gate purely on device, not on user-level auth
+## Step-by-Step
+Not applicable — this is an index/navigation page only.
 
-**When to use Trusted Devices:**
-- Any sensitive Resource (default for most production deployments)
-- Trusted Profile defines what "trusted" means (CrowdStrike, SentinelOne, manual verification, native posture, etc.)
+## Configuration Values
+None defined on this page. See individual guides for specific parameters.
 
-**When to use MFA in a Resource Policy:**
-- High and Medium risk Resources per the risk-tier model
-- Avoid MFA in MAR -- enforce at Resource level instead (less prompt fatigue)
+## Gotchas
+- Device-only Resource Policies bypass user/auth checks — only device posture is evaluated
+- Trusted Devices can be set to manual or automatic trust; behavior differs significantly between modes
+- 2FA settings are a sub-component of Authentication settings, not independent top-level policies
 
-**Re-auth Frequency Guidance:**
-- High risk: every 2 hours
-- Medium risk: once a day
-- Low risk: once a week
-- Very Low risk: once a week (or longer)
-
-**Related Docs:**
-- /docs/security-policies -- Policy types overview
-- /docs/security-policies-best-practices -- Worked example with risk tiers
-- /docs/security-policies-migration-guide -- Migration from older policy model
-- /docs/device-security-guide -- Trusted Profiles + device posture
+## Related Docs
+- Authentication settings guide
+- Two-factor Authentication guide
+- Device-only Resource Policies guide
+- Trusted Devices guide (including automatic trust)

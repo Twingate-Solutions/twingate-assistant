@@ -1,59 +1,63 @@
-## Device Security Posture Checks
+# Device Security Posture Checks
 
-Per-platform checks the Twingate Client performs to assess device posture. Used as building blocks in Trusted Profiles and Minimum OS Requirements.
+## Summary
+Twingate desktop and client applications perform device posture checks to enforce trust definitions used in Security Policies. Checks are platform-specific and report security configuration states to determine device trustworthiness. Results feed into Network-level or Resource-level Security Policies.
 
-### Checks by Platform
+## Key Information
+- Posture checks are performed by Twingate desktop/client applications automatically
+- Results are used in **Security Policies** applied to Networks or individual Resources
+- Each platform supports a different subset of posture checks
 
-**Windows** (10, 11, Server 2022)
-- **HD Encryption** -- BitLocker on system disk and other disks
-- **Screen Lock** -- password required after screen saver (via WinAPI `LogonUser`)
-- **Firewall** -- Windows or third-party firewall enabled (via Windows Security Center)
-- **Antivirus** -- AV installed (via Windows Security Center)
-- **Minimum OS Version** -- OS meets configured minimum
+## Platform-Specific Checks
 
-**macOS** (12-15)
-- **Screen Lock** -- password required after sleep / screen saver
-- **Biometric Configuration** -- Touch ID or Face ID configured
-  - Note: in clamshell mode (lid closed), biometric **always** reports as disabled regardless of actual config
-- **Firewall** -- native firewall enabled
-  - Standalone Client only
-  - Note: "Block all incoming connections" causes the device to report firewall as **disabled** (counterintuitive but documented)
-- **HD Encryption** -- FileVault enabled
-  - Standalone Client only
-- **Minimum OS Version**
+### Windows (10, 11, Server 2022)
+| Check | Reports |
+|-------|---------|
+| Hard drive encryption | BitLocker status on system and other disks |
+| Screen lock | Password required on screen saver return (WinAPI `LogonUser`) |
+| Firewall | Windows or third-party firewall via Windows Security Center |
+| Antivirus | Windows or third-party AV via Windows Security Center |
+| Minimum OS version | OS meets configured requirement |
 
-**Linux** (Debian/Ubuntu, CentOS/Fedora, Arch)
-- **Firewall** -- UFW, firewalld, or iptables enabled
-- **HD Encryption** -- all partitions except `/boot` encrypted via LUKS (uses `libcryptsetup`)
+### macOS (12–15)
+| Check | Reports |
+|-------|---------|
+| Screen lock | Password required after sleep/screen saver |
+| Biometric configuration | Touch ID or Face ID configured |
+| Firewall | Native firewall only |
+| HD Encryption | FileVault status |
+| Minimum OS version | OS meets configured requirement |
 
-**iOS** (15-18)
-- **Screen Lock** -- password required
-- **Biometric Configuration** -- Touch ID or Face ID configured
-- **Minimum OS Version**
+> **Note:** HD Encryption and Firewall checks available only in the **macOS standalone Client**
 
-**Android**
-- **Screen Lock** -- any screen lock configured (PIN, pattern, biometric)
-- **Biometric Configuration** -- fingerprint or facial recognition configured
-- **HD Encryption** -- File-Based Encryption (FBE) enabled
+### Linux
+| Check | Reports |
+|-------|---------|
+| Firewall | UFW, firewalld, or iptables enabled |
+| Hard drive encryption | All non-`/boot` partitions encrypted via LUKS (`libcryptsetup`) |
 
-### Gotchas
+### iOS (15–18)
+| Check | Reports |
+|-------|---------|
+| Screen lock | Password required on device |
+| Biometric configuration | Touch ID or Face ID configured |
+| Minimum OS version | OS meets configured requirement |
 
-- **macOS firewall + "Block all incoming"**: counterintuitive — system reports firewall **disabled** in this mode. If your fleet uses Block-all-incoming, don't enforce the Firewall posture check on macOS.
-- **macOS clamshell**: biometric reports disabled when the laptop lid is closed -- accommodates this in policy if your users dock laptops with lids closed
-- **macOS Firewall + HD Encryption**: only available in the **standalone Client**, not the App Store version. If you mandate these checks, deploy the standalone Client via MDM.
-- **Linux HD Encryption**: only LUKS is recognized -- other disk encryption schemes (eCryptfs, native distro tools without LUKS) won't satisfy the check
-- **Windows Screen Lock**: relies on `WinAPI LogonUser` -- password complexity isn't checked, just that *some* password is required
+### Android
+| Check | Reports |
+|-------|---------|
+| Screen lock | Any screen lock configured |
+| Biometric configuration | Fingerprint or facial recognition configured |
+| Hard drive encryption | File-Based Encryption enabled |
 
-### Decision Notes
+## Gotchas
+- **macOS clamshell mode**: Closed lid always reports biometric as **disabled**, regardless of actual config
+- **macOS firewall**: "Block all incoming connections" causes firewall to report as **disabled**
+- **macOS HD Encryption and Firewall**: Only available in the standalone Client app, not the browser extension or other clients
+- **Linux firewall**: Limited to UFW/firewalld/iptables on specific distros (Debian/Ubuntu, CentOS/Fedora, Arch)
+- **Linux encryption**: Uses `libcryptsetup`; only LUKS encryption is detected; `/boot` partition is excluded from check
 
-- Use posture checks in **Minimum OS Requirements** for the broad baseline (e.g., "all devices must have screen lock + encryption")
-- Use posture checks in **Trusted Profiles** when combined with verification methods (CrowdStrike + posture, Manual + posture)
-- Don't enforce checks that aren't available on the deployed Client variant -- e.g., HD Encryption on macOS App Store Client will always fail
-
-### Related Docs
-
-- /docs/device-security-guide -- How posture checks fit into Trusted Profiles + Minimum OS Requirements
-- /docs/trusted-devices -- Trusted Devices policy rule
-- /docs/device-only-resource-policies -- Skip user auth, evaluate posture only
-- /docs/macos-standalone-client -- Standalone macOS Client (required for some macOS checks)
-- /docs/security-policies -- Policy types overview
+## Related Docs
+- macOS standalone Client
+- Security Policies
+- Device Security configuration

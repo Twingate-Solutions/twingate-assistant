@@ -1,72 +1,73 @@
-## Pulumi: Twingate on GCP
+# Pulumi with GCP and Twingate
 
-End-to-end Pulumi (TypeScript) recipe for GCP: VPC, subnet, firewall, two Compute Engine instances (Connector + Nginx demo server), and full Twingate config.
+## Page Title
+How to Use Pulumi with GCP and Twingate
 
-**Setup:**
-- `pulumi new typescript`
-- GCP auth: `gcloud auth application-default login`
-- Pulumi config:
-  - `pulumi config set gcp:project <gcp-project-id>`
-  - `pulumi config set gcp:region europe-west2`
-  - `pulumi config set gcp:zone europe-west2-c`
-  - `pulumi config set twingate:apiToken <token> --secret`
-  - `pulumi config set twingate:network <tenant>`
+## Summary
+Step-by-step guide for automating Twingate deployments on GCP using Pulumi with TypeScript. Creates a complete stack including GCP VPC, subnets, firewall, two VMs (webserver + Twingate connector), and corresponding Twingate resources (remote network, connector, group, resource).
 
-**npm Modules:**
-```
-npm install @pulumi/gcp @twingate/pulumi-twingate
-```
+## Key Information
+- Uses TypeScript/Node.js with `@pulumi/gcp` and `@twingate/pulumi-twingate` packages
+- Deploys two GCP VMs: one nginx webserver, one Twingate connector
+- Connector tokens are injected via `metadataStartupScript` using `pulumi.interpolate`
+- Twingate resource uses the webserver's private IP as its address
+- Additional examples available in Twingate's [GitHub repository](https://github.com/Twingate)
 
-**Connector Bootstrap (via `metadataStartupScript` + `pulumi.interpolate`):**
-```
-const startupScript = pulumi.interpolate`
-#!/bin/bash
-curl "https://binaries.twingate.com/connector/setup.sh" | sudo \
-  TWINGATE_ACCESS_TOKEN="${tokens.accessToken}" \
-  TWINGATE_REFRESH_TOKEN="${tokens.refreshToken}" \
-  TWINGATE_URL="https://${twingate.config.network}.twingate.com" bash
-`;
-```
+## Prerequisites
+- GCP account with permissions to create/delete resources
+- GCP CLI installed and configured
+- Pulumi CLI installed
+- Node.js installed
+- Twingate API token and network name
+- Bash-compatible OS
 
-Both VMs use Ubuntu 22.04 (`ubuntu-os-cloud/ubuntu-2204-lts`) on `e2-micro`.
+## Step-by-Step
 
-**Networking:**
-- VPC: `autoCreateSubnetworks: false`
-- Subnet: `172.16.0.0/24` in `europe-west2`
-- Firewall: ICMP + TCP/80 from instances tagged `demo` (`sourceTags: ["demo"]`)
-- VM `accessConfigs: [{}]` (empty block) -- ephemeral public IP for outbound
+1. `mkdir twingate_pulumi_gcp_demo && cd twingate_pulumi_gcp_demo`
+2. `pulumi new typescript`
+3. `gcloud auth application-default login`
+4. Set Pulumi config (see Configuration Values below)
+5. `npm install @pulumi/gcp @twingate/pulumi-twingate`
+6. Write `index.ts` with resource definitions
+7. `pulumi preview` to validate
+8. `pulumi up` to deploy
+9. Assign Twingate user to the created group manually in admin panel
+10. `pulumi down` to destroy
 
-**Twingate Resource:**
-```
-new twingate.TwingateResource("resource", {
-  name: "gcp demo server",
-  address: webserver.networkInterfaces[0].networkIp,   // private IP
-  remoteNetworkId: network.id,
-  accessGroups: [{ groupId: group.id }],
-  protocols: {
-    allowIcmp: true,
-    tcp: { policy: "RESTRICTED", ports: ["80"] },
-    udp: { policy: "ALLOW_ALL" }
-  }
-});
+## Configuration Values
+
+```bash
+# GCP config
+pulumi config set gcp:project your-gcp-project-id
+pulumi config set gcp:region europe-west2
+pulumi config set gcp:zone europe-west2-c
+
+# Twingate config
+pulumi config set twingate:apiToken YOUR_TOKEN --secret
+pulumi config set twingate:network democompany
 ```
 
-**Webserver Init:**
-- `apt-get install nginx`
-- Custom `/var/www/html/index.html` with simple branding
-- `service nginx start`
+**Connector startup script env vars:**
+- `TWINGATE_ACCESS_TOKEN` — from `TwingateConnectorTokens.accessToken`
+- `TWINGATE_REFRESH_TOKEN` — from `TwingateConnectorTokens.refreshToken`
+- `TWINGATE_URL` — `https://<network>.twingate.com`
 
-**Workflow:**
-1. `pulumi preview` -> `pulumi up`
-2. Add Twingate user to the new group (Admin Console)
-3. Browse the test VM `network_ip` via Twingate Client -> see Nginx demo page
-4. `pulumi down` to tear down
+**Key resource parameters:**
+- VM `machineType`: `e2-micro`
+- VM `image`: `ubuntu-os-cloud/ubuntu-2204-lts`
+- Subnet CIDR: `172.16.0.0/24`
+- Firewall allows: ICMP + TCP port 80, source tag `demo`
+- TwingateResource TCP policy: `RESTRICTED` (port 80), UDP policy: `ALLOW_ALL`
 
-**Gotchas:**
-- Both VMs get ephemeral public IPs in this demo -- in production, use Cloud NAT and remove `accessConfigs` on the test VM (it never needs to be reachable from the internet)
-- Connector VM service account scope is `cloud-platform` (very broad) -- restrict in production
-- Manual user-to-group assignment in Admin Console is intentional in the demo; production should drive via IdP/SCIM
+## Gotchas
+- Use `pulumi.interpolate` (not string interpolation) when embedding Pulumi output values (e.g., connector tokens) into startup scripts
+- `accessConfigs: [{}]` must be empty array entry to request ephemeral IP on GCP VMs
+- User-to-group assignment is **manual** — not handled by this Pulumi config
+- Firewall rules in the example are minimal (port 80 only); adapt for production use
+- `--secret` flag required when setting `apiToken` to encrypt it in Pulumi state
 
-**Related Docs:**
-- /docs/pulumi-getting-started, /docs/pulumi-aws, /docs/pulumi-azure
-- /docs/gcp -- Manual GCP deployment
+## Related Docs
+- Twingate Pulumi provider general prerequisites guide
+- GCP IAM permissions for resource creation
+- [Twingate Pulumi GitHub examples](https://github.com/Twingate)
+- Pulumi TypeScript getting started

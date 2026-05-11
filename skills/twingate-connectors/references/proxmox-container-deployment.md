@@ -1,18 +1,19 @@
-# Deploy Twingate Connector in Proxmox Container
+# Deploy Twingate Connector in a Proxmox Container
 
 ## Summary
-Guide for deploying a Twingate Connector inside a Proxmox VE Linux Container (LXC). Uses Ubuntu 22.04 LTS template as the base, with minimal resource requirements. Connector installation uses the standard Linux deployment script from the Admin Console.
+Deploys a Twingate Connector inside a Proxmox LXC container using Ubuntu 22.04. The process involves creating an LXC container, installing prerequisites, then running the Twingate deployment script from the Admin Console.
 
 ## Key Information
-- Proxmox uses LXC (Linux Containers), not full VMs
-- Minimum requirements: 1 vCPU, 512MB RAM
-- Tested on Proxmox 7.4-3 with Ubuntu 22.04 template
-- Connectors do **not** auto-update; manual update strategy required
+- Proxmox uses LXC containers (lightweight, not full VMs)
+- Minimum resources: 1 vCPU, 512MB RAM
+- Connectors do **not** auto-update; must be manually updated or via cron
+- Stagger updates across multiple Connectors on same Remote Network to avoid downtime
+- Enable peer-to-peer connections to stay within Fair Use Policy bandwidth limits
 
 ## Prerequisites
-- Proxmox VE host with shell access
-- Container template from a [supported distro](https://www.twingate.com/docs/supported-platforms) downloaded to local storage
-- Twingate Admin Console access with an existing Remote Network
+- Proxmox VE installed (tested on 7.4-3)
+- Supported Linux distro template downloaded (guide uses Ubuntu 22.04 LTS)
+- Access to Twingate Admin Console with target Remote Network configured
 
 ## Step-by-Step
 
@@ -23,47 +24,46 @@ pveam list
 pveam download <storageLocation> <templateName>
 ```
 
-### 2. Create Container (via Proxmox UI → "Create CT")
+### 2. Create LXC Container (via Proxmox UI)
 | Tab | Setting |
 |-----|---------|
-| General | Set hostname/password; leave **Nesting** checked; uncheck **Unprivileged container** to allow pings |
-| Template | Select storage ID and downloaded image |
+| General | Set hostname, password; keep **Nesting** checked; uncheck **Unprivileged container** to allow pings |
+| Template | Select storage ID and downloaded template image |
 | Disks | Default 8GB sufficient |
 | CPU | Default 1 vCPU |
 | Memory | Default 512MB |
-| Network | Set bridge + DHCP or static IP (static recommended) |
+| Network | Set bridge interface; DHCP or static IP (static recommended) |
 | DNS | Default or custom |
 
-### 3. Prepare Container
+### 3. Install Prerequisites in Container
 ```bash
 apt update
 apt upgrade -y
 apt install curl -y
 ```
 
-### 4. Install Connector
-1. Open Twingate Admin Console → Remote Network → select Linux deployment
-2. Click **Generate Tokens** (tokens auto-embed in script)
-3. Copy deployment command and paste into container console
-4. Verify Connector shows as connected in Admin Console
+### 4. Deploy Connector
+1. Log into Twingate Admin Console
+2. Navigate to target Remote Network
+3. Select **Linux** deployment method
+4. Click **Generate Tokens** (tokens auto-included in script)
+5. Optionally enable local connection logs (for SIEM)
+6. Copy and paste the generated deployment command into the container console
 
 ## Configuration Values
-- **vCPU:** 1 minimum
-- **RAM:** 512MB minimum
-- **Disk:** 8GB default (sufficient)
-- **Container user:** `root`
-- **Nesting:** Must remain enabled
-- **Unprivileged container:** Uncheck if ICMP/ping to resources is required
+- **Username for console login:** `root`
+- **Storage location:** any Proxmox storage ID that allows container templates as content type
+- **Deployment script:** auto-generated in Admin Console (includes tokens)
 
 ## Gotchas
-- **Unprivileged containers block pings** — uncheck if Resources need to be pinged from the Connector
-- **Static IP strongly recommended** — required if Resources use IP allowlisting or if network logging is in use
-- **No auto-updates** — build Connectors into your patching schedule; stagger updates across multiple Connectors on the same Remote Network to avoid downtime
+- **Unprivileged container** must be **unchecked** if ICMP/ping to Resources is needed
+- **Nesting** must remain **checked**
+- Static IP strongly recommended if Resources need to allowlist the Connector IP or for network logging
 - `curl` must be installed before running the deployment script
-- Peer-to-peer connections should be configured to stay within the Fair Use Policy bandwidth limits
+- Connectors never self-update — plan update strategy explicitly; use cron for automation
 
 ## Related Docs
-- [Supported Distros](https://www.twingate.com/docs/supported-platforms)
-- [Support Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
-- [Automate Updates with Cron](https://www.twingate.com/docs/connector-updates)
-- [Linux Connector Deployment](https://www.twingate.com/docs/linux-connector)
+- [Supported Linux distros](https://www.twingate.com/docs)
+- [Peer-to-peer connections support](https://www.twingate.com/docs)
+- [Fair Use Policy](https://www.twingate.com/docs)
+- [Automating updates with cron](https://www.twingate.com/docs)

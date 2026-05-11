@@ -1,47 +1,44 @@
 # Remotely Access a NAS Device
 
 ## Summary
-Twingate enables secure remote access to NAS devices without port forwarding or dynamic DNS. Traffic stays off the public internet, and the NAS is accessed via its local IP address regardless of location.
+Twingate enables secure remote access to NAS devices without port forwarding or dynamic DNS. Access occurs through the device's local IP address, keeping the NAS off the public internet.
 
 ## Key Information
-- Solves two port-forwarding problems: public internet exposure and dynamic IP issues
-- NAS is accessed using its local network IP (e.g., `192.168.x.x` or `10.x.x.x`)
-- Connector can potentially be installed directly on the NAS device
-- Synology DSM has dedicated setup guides for DSM 6.x and DSM 7.x
+- Replaces port forwarding (which exposes NAS to internet attacks)
+- No dynamic DNS needed — use the NAS's local IP address regardless of ISP's dynamic IP assignment
+- Access controlled via Twingate group management
+- Connector can sometimes be installed directly on the NAS device
 
 ## Prerequisites
 - Twingate account with admin access
-- NAS device with known local IP address
-- A device on the local network capable of running a Twingate Connector (or NAS itself if supported)
-- Twingate client installed on remote devices needing access
+- NAS device with known local IP address (typically `192.168.x.x` or `10.x.x.x`)
+- A device on the local network capable of running a Twingate Connector (or a compatible NAS)
+- Twingate client installed on the remote access device
 
 ## Step-by-Step
 
-1. **Create Remote Network** — In Twingate admin console, add a new Remote Network (e.g., "Home Network" or "Office Network")
-2. **Add NAS as Resource** — Specify the NAS local IP address (e.g., `192.168.x.x` or `10.x.x.x`)
+1. **Create Remote Network** — Add a new Remote Network in Twingate admin (e.g., "Home Network")
+2. **Add NAS as Resource** — Specify the NAS's local IP address as the resource
 3. **Add Connector** — Click "Add connector" on the Remote Network details page
 4. **Provision Connector** — Click "Provision"; re-authentication required
-5. **Install Connector** — Deploy on a local network device following in-console instructions; options include:
-   - The NAS itself (if supported)
-   - Synology DSM 6.x or earlier: use dedicated guide
-   - Synology DSM 7.x or later: use dedicated guide
-6. **Verify Connectivity** — Confirm connector is operational; NAS becomes accessible to authorized users
-7. **Restrict Access (optional)** — Use group management to limit which users can reach the NAS
-8. **Connect Remotely** — Use Twingate client signed into an authorized account; access NAS at its local IP address
+5. **Install Connector** — Install on a local network device (or directly on NAS if supported)
+   - Synology DSM 6.x or earlier: see Synology DSM 6 guide
+   - Synology DSM 7.x or later: see Synology DSM 7 guide
+6. **Verify Connector** — Confirm connector is operational in admin console
+7. **Configure Access Control** — Restrict access via group management if needed
+8. **Connect** — Use Twingate client signed into an authorized account; reach NAS at its local IP
 
 ## Configuration Values
-| Parameter | Example Value |
-|-----------|--------------|
-| NAS Resource IP | `192.168.x.x` or `10.x.x.x` |
+- **Resource address**: Local NAS IP (e.g., `192.168.1.x` or `10.0.0.x`)
+- **Network name**: User-defined (e.g., "Home Network", "Office Network")
 
 ## Gotchas
-- Re-authentication is required during the Provision step
-- Not all NAS devices support running a Connector — a separate local device may be needed
-- Access control is **not automatic**; must configure group management explicitly if restrictions are needed
-- Client device must be signed into an account **authorized** for the NAS resource
+- Re-authentication is required during the connector provisioning step
+- Not all NAS devices support running a Connector directly — may need a separate device (e.g., Raspberry Pi, router) on the same network
+- Connector must remain operational for remote access to work; if the host device goes offline, access is lost
 
 ## Related Docs
+- Connector deployment overview
 - Synology NAS Connector setup (DSM 6.x or earlier)
 - Synology NAS Connector setup (DSM 7.x or later)
-- Connector deployment documentation
-- Group management
+- Group management for access control

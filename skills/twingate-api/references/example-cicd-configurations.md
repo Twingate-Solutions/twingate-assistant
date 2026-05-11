@@ -1,117 +1,62 @@
-## CI/CD Configuration Examples
+# CI/CD Configuration for Twingate
 
-Sample CI/CD pipeline configurations using the Twingate **headless Client** + Service Account keys to access private Resources from build runners.
+## Summary
+Provides sample configurations for integrating Twingate headless Client into CI/CD pipelines via GitHub Actions and CircleCI. A prebuilt GitHub Marketplace action is available for simplified integration. Configurations use Twingate Service Keys for authentication.
 
-### GitHub Actions
+## Key Information
+- Sample configs maintained in a public GitHub repository with automated testing
+- GitHub Marketplace action available: "Connect to Twingate"
+- Supports GitHub Actions and CircleCI (Ubuntu-based)
+- Linux Client compatibility limited — may not work on non-Ubuntu distributions
+- CircleCI requires `SERVICE_KEY` to be base64-encoded due to variable storage requirements
 
-**Marketplace Action**: ["Connect to Twingate"](https://github.com/marketplace/actions/connect-to-twingate) (linked from this doc).
+## Prerequisites
+- Twingate Service Key created and assigned Resources
+- Ubuntu-based runner/machine (required for Linux Client compatibility)
+- Secret storage configured in CI platform (`SERVICE_KEY`, `TEST_URL`)
 
-The action does three things:
-1. Installs the Twingate headless Client
-2. Configures it with your Service Key (passed via env / secret)
-3. Starts the Twingate Client
+## Step-by-Step (GitHub Actions)
 
-After the action completes, the workflow can reach any Resources assigned to the Service Account.
+1. Add Twingate apt repo and install client
+2. Pipe `TWINGATE_SERVICE_KEY` to `twingate setup --headless=-`
+3. Run `sudo twingate start`
+4. Execute workflow steps requiring protected Resource access
+5. Run `sudo twingate stop` at end of job
 
-**Example `github-actions-demo.yaml`:**
+## Step-by-Step (CircleCI)
 
+1. Install `ca-certificates` and Twingate via apt
+2. Decode base64 `SERVICE_KEY`: `echo "$SERVICE_KEY" | base64 --decode | sudo twingate setup --headless=-`
+3. Run `sudo twingate start`
+4. Access protected/public resources
+5. Run `sudo twingate stop`
+
+## Configuration Values
+
+| Variable | Platform | Notes |
+|---|---|---|
+| `TWINGATE_SERVICE_KEY` | GitHub Actions | Plaintext secret |
+| `SERVICE_KEY` | CircleCI | Must be base64-encoded |
+| `TEST_URL` | Both | URL of protected Resource |
+
+**Key CLI flags:**
+- `twingate setup --headless=-` — reads service key from stdin
+- `twingate start` / `twingate stop` / `twingate status`
+
+**Apt repository:**
 ```
-name: Twingate on GitHub Actions Demo
-on: [push]
-jobs:
-  Twingate-GitHub-Actions:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install Twingate
-        run: |
-          echo "deb [trusted=yes] https://packages.twingate.com/apt/ /" | sudo tee /etc/apt/sources.list.d/twingate.list
-          sudo apt update -yq
-          sudo apt install -yq twingate
-
-      - name: Setup and start Twingate
-        env:
-          TWINGATE_SERVICE_KEY: ${{ secrets.SERVICE_KEY }}
-        run: |
-          echo $TWINGATE_SERVICE_KEY | sudo twingate setup --headless=-
-          sudo twingate start
-
-      - name: Access a secure resource
-        env:
-          TEST_URL: http://business.prod.beamreachinc.int/
-        run: curl -v $TEST_URL
-
-      - name: Stop Twingate
-        run: sudo twingate stop
-```
-
-### CircleCI
-
-Three steps: install + start, test, stop. The `$SERVICE_KEY` is **base64-encoded** in CircleCI (required by their variable storage), then decoded before passing to `twingate setup`.
-
-**Example `config.yaml`:**
-
-```
-version: 2.1
-jobs:
-  headless_client:
-    machine:
-      image: ubuntu:jammy-20250530
-    steps:
-      - run:
-          name: Start Twingate
-          command: |
-            sudo apt update -yq
-            sudo apt install -yq ca-certificates
-            echo "deb [trusted=yes] https://packages.twingate.com/apt/ /" | sudo tee /etc/apt/sources.list.d/twingate.list
-            sudo apt update -yq
-            sudo apt install -yq twingate
-            echo "$SERVICE_KEY" | base64 --decode | sudo twingate setup --headless=-
-            sudo twingate start
-            sudo journalctl -u twingate --no-pager | tail -n 20
-
-      - run:
-          name: Test Access
-          command: |
-            curl -v -m 10 "$TEST_URL" > /dev/null
-            curl -v -m 10 http://twingate.com > /dev/null
-
-      - run:
-          name: Stop Twingate
-          command: sudo twingate stop
-
-workflows:
-  test:
-    jobs:
-      - headless_client
+deb [trusted=yes] https://packages.twingate.com/apt/ /
 ```
 
-### Configuration Values
+## Gotchas
+- CircleCI: `SERVICE_KEY` **must be base64-encoded** before storing; decode before passing to setup
+- Linux Client may not be compatible with non-Ubuntu distributions
+- Machine image versions in examples may not be latest — verify current image tags in official docs
+- These are guide configurations only; apply additional security hardening for production use
+- Use `journalctl -u twingate` for debugging connection issues
 
-| Variable | Purpose |
-|---|---|
-| `TWINGATE_SERVICE_KEY` (or `SERVICE_KEY`) | The Twingate Service Account JSON key, stored as a CI/CD secret |
-| `TEST_URL` | A Resource only reachable through Twingate -- proves access works |
-
-For CircleCI, the key is base64-encoded due to platform variable constraints; decode in the pipeline.
-
-### Decision Notes
-
-- Use one Service Account **per pipeline / repo** for clean audit and least-privilege scope
-- Set short Service Key expiry + automate rotation via the Admin API for production
-- Place the `twingate stop` step in a `cleanup` job that always runs (CI failures shouldn't leave the runner connected)
-- Linux Client compatibility: tested on Ubuntu; other distros may not work -- pin Ubuntu base images
-
-### Gotchas
-
-- `apt update` failures are common on fresh runners; run `apt update -yq` again before install
-- The headless setup `--headless=-` reads the JSON key from stdin -- the `echo $TWINGATE_SERVICE_KEY |` pattern is required
-- CircleCI base64 wrap is unique to CircleCI; GitHub Actions doesn't need it
-- Service Keys are sensitive -- always store as masked secrets, never in workflow files
-
-### Related Docs
-
-- /docs/services-headless-clients -- Headless Client modes overview
-- /docs/cicd-pipelines-with-twingate -- Use case overview
-- /docs/service-accounts-guide -- Service Account + Service Key management
-- /docs/linux-headless -- Linux headless install details
-- /docs/aws-ecs-headless-configurations -- ECS-specific pattern (sibling)
+## Related Docs
+- Twingate headless Client mode documentation
+- Twingate Services (Service Keys) documentation
+- [GitHub Marketplace Action](https://github.com/marketplace) — "Connect to Twingate"
+- Public sample repo: referenced in Twingate docs (linked from source page)

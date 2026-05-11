@@ -1,54 +1,55 @@
-## Deploying Twingate Clients with Kandji
+# Deploying Twingate Client with Kandji MDM
 
-How to distribute the Twingate macOS and iOS Clients via Kandji.
+## Summary
+Guide for distributing Twingate macOS and iOS clients via Kandji MDM. macOS deployment uses Kandji's Auto App (recommended) or custom PKG upload. iOS deployment requires Apple Business Manager integration.
 
-**macOS -- Recommended: Twingate Auto App**
-- Kandji has a first-class **Auto App** for Twingate
-- Fastest deployment path -- no PKG upload, no custom config required
-- Auto App handles automatically:
-  - Notifications permission
-  - VPN profile activation
+## Key Information
+
+- **macOS Auto App** automatically handles: notifications permission, VPN profile enablement, system extension approval — no custom configuration needed
+- **macOS custom app** alternative: requires uploading a PKG file from Twingate's download page
+- **iOS** requires Apple Business Manager linked to Kandji before distribution is possible
+- Pre-configuration via configuration profiles can auto-enable VPN, system extension, and pre-populate Network name
+
+## Prerequisites
+
+- Kandji admin access
+- **iOS only**: Devices enrolled in Apple Business Manager; Kandji linked to Apple Business Manager
+- **macOS custom app only**: Twingate PKG installer downloaded from Twingate download page
+
+## Step-by-Step
+
+### macOS (Recommended)
+1. Sign in to Kandji
+2. Select **Library** in the sidebar
+3. Find Twingate Client app for macOS
+4. Select the **Auto App** option — no further configuration required
+
+### iOS
+1. Add Twingate iOS Client to Apple Business Manager
+2. Add devices to Apple Business Manager (follow Kandji's official docs)
+3. Link Kandji with Apple Business Manager
+4. Sign in to Kandji → **Library** → find Twingate iOS app → distribute
+
+### macOS (Custom App Alternative)
+1. Download Twingate PKG from Twingate download page
+2. Upload PKG to Kandji as a custom app
+
+## Configuration Values
+
+- Pre-configuration options available via **configuration profiles** (separate guide):
+  - VPN configuration auto-enable
   - System extension approval
+  - Network name pre-population
 
-**macOS -- Alternative: Custom App**
-- Not recommended unless you need to pin a specific PKG version
-- Upload the Twingate .pkg from the Twingate download page as a Kandji Custom App
-- You'll need to manually configure VPN profile + system extension separately (see "Pre-configuring the macOS Client" below)
+## Gotchas
 
-**iOS:**
-- Add Twingate Client app to **Apple Business Manager** first
-- Link Kandji to ABM (per Kandji's official docs)
-- Then distribute the iOS app from Kandji
+- **Manually installed clients cause conflicts**: If users installed Twingate before MDM rollout, version mismatches can occur
+  - Fix: Create a temporary Kandji policy to remove Twingate from all devices before deploying via Kandji; deactivate the removal policy when ready to roll out
+- Custom app deployment is **not recommended** — lacks Auto App's automatic permission handling
+- iOS distribution will not work without Apple Business Manager linked to Kandji first
 
-**Locating Twingate in Kandji:**
-- Sign in to Kandji
-- **Library** in the sidebar -> find "Twingate Client" for macOS / iOS
+## Related Docs
 
-**Pre-Migration Step (Important):**
-- If end users have manually installed Twingate previously, uninstall those Clients first via a temporary Kandji policy
-- Why: manually-installed versions may differ from the MDM-distributed version, causing config drift
-- Deactivate the cleanup policy before rolling out the MDM-managed Client
-
-**Pre-Configuring the macOS Client (only needed for Custom App path):**
-- Follow the Twingate **Configuration Profiles** guide (linked from this doc)
-- Pre-populates: VPN configuration, system extension allowance, default Twingate network
-- The **Auto App path automates all of this** -- skip this step if using Auto App
-
-**Decision: Auto App vs. Custom App**
-
-| Aspect | Auto App | Custom App |
-|---|---|---|
-| Setup time | Minutes | Hours |
-| Auto-handles permissions | Yes | No (manual config profile) |
-| Version pinning | Latest | You control |
-| Recommended | Yes | Only if version pinning is required |
-
-**Gotchas:**
-- The Auto App auto-updates the Client -- if you need controlled rollouts, use Custom App + version-locked PKGs
-- Custom App without the configuration profile leaves the Client unable to enable its system extension silently -- always pair them
-
-**Related Docs:**
-- /docs/macos-and-ios -- Configuration profile keys
-- /docs/jamf-mdm -- Jamf equivalent (more manual)
-- /docs/intune-configuration -- Intune for Windows fleets
-- /docs/omnissa-workspace-one-mdm -- Workspace ONE equivalent
+- Twingate configuration profiles guide (macOS pre-configuration)
+- Kandji official documentation (Apple Business Manager device enrollment)
+- Twingate client download page (PKG installer)

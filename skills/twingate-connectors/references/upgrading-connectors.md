@@ -1,39 +1,49 @@
 # Updating Twingate Connectors
 
 ## Summary
-Covers best practices and deployment-specific instructions for updating Twingate Connectors. Updates require temporary disconnection, so redundancy and token preservation are critical. Notification emails alert admins weekly when updates are available.
+Connectors can be deployed via Docker, Kubernetes (Helm), or Linux systemd, each with its own update process. Core principles apply across all platforms: update one at a time and preserve authentication tokens. Weekly email notifications alert admins when updates are available.
 
 ## Key Information
-- Connectors run as Docker containers, Kubernetes/Helm deployments, or Linux systemd services
+- Updates require temporary disconnection of the Connector
 - Multiple Connectors in the same Remote network auto-cluster for load balancing and failover
-- Update notifications sent weekly at **00:00 UTC on Mondays** to all admin users
-- Notification lists all Connectors eligible for update
+- Admin users receive weekly update notification emails every Monday at 00:00 UTC
+- Notifications list all Connectors eligible for update
 
 ## Prerequisites
 - Minimum two Connectors deployed per Remote network (for redundancy during updates)
-- Access to existing Connector access and refresh tokens
-- Admin role to receive update notification emails
+- Admin access to receive update notifications
+- Existing access and refresh tokens for the Connector being updated
 
-## Step-by-Step (General Process)
-1. Confirm at least two Connectors exist in the target Remote network
-2. Select one Connector to update first
-3. Preserve existing access and refresh tokens before making changes
-4. Follow deployment-specific update instructions (Docker / systemd / Helm)
-5. Verify Connector reconnects successfully
-6. Repeat for remaining Connectors one at a time
+## Best Practices
 
-## Configuration Values
-| Item | Value |
-|------|-------|
-| Notification schedule | Weekly, Mondays 00:00 UTC |
-| Notification recipients | All users with admin role |
+### Update One at a Time
+- Never update all Connectors in a Remote network simultaneously
+- Keep at least one Connector online during updates to maintain user access
+
+### Preserve Tokens
+- Each Connector has unique access and refresh tokens
+- **Must retain the same tokens** during update — using new tokens creates a new Connector identity and requires re-provisioning
+
+## Deployment-Specific Instructions
+Update procedures differ by deployment type:
+- **Docker**: See Docker-deployed Connectors guide
+- **Systemd**: See Systemd-deployed Connectors guide
+- **Helm/Kubernetes** (GKE, EKS, MicroK8s): See Helm-deployed Connectors guide
+
+## Update Notifications
+- **Trigger**: Any Connector in the environment has an available update
+- **Recipients**: All users with admin role
+- **Frequency**: Weekly
+- **Schedule**: Mondays at 00:00 UTC
+- **Content**: List of Connectors that can be updated
 
 ## Gotchas
-- **Never update all Connectors simultaneously** — causes complete Remote network downtime
-- **Token reuse is required** — generating new tokens during update creates a new Connector identity; old tokens become orphaned and must be re-provisioned
-- Update process differs by deployment type; use the correct platform-specific guide
+- Replacing tokens during update = new Connector identity; old identity is orphaned in Twingate config
+- Single-Connector Remote networks will experience downtime during updates — always deploy pairs
+- Update process is not automated; must be performed manually per deployment type
 
 ## Related Docs
-- Docker Connector deployment/update guide
-- Systemd Connector deployment/update guide
-- Helm Connector deployment/update guide (covers GKE, EKS, MicroK8s)
+- Docker Connector deployment
+- Systemd Connector deployment
+- Helm Chart deployment (Kubernetes/GKE/EKS/MicroK8s)
+- Remote Networks configuration

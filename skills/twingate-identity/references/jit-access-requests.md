@@ -1,68 +1,44 @@
-## JIT Access Requests
+# JIT Access Requests
 
-Just-in-Time access requests gate Resource access behind an explicit request workflow. Useful for sensitive Resources where the goal is **zero standing access** -- users see they have access in the Client, but the Resource is locked until the request is approved (or auto-approved with a reason).
+## Summary
+JIT Access Requests enable an audited, just-in-time access workflow for Groups assigned to a Resource. Resources appear locked to users until access is approved, supporting either auto-approval or explicit admin/reviewer approval. Primary use case is temporary access to sensitive Resources.
 
-**Key Concepts:**
-- Configurable per-Resource or per-Group-on-Resource
-- Group-level config overrides the Resource default
-- Two approval modes: **Auto Approval** (user provides reason) or **Required Approval** (admin/Resource Approver decides)
-- Access is granted for a configurable time window after approval
+## Key Information
+- Configured at **Resource level** (becomes default for all Group assignments) or **per Group assignment** (overrides Resource default)
+- Resource appears visible but **locked** in Client until access is granted
+- Users trigger requests by accessing the Resource address or selecting "Authenticate" from Client submenu
+- Access request page loads in browser
+- Auto-approval requires user to supply a reason; manual approval notifies user via email when approved/denied
+- Maximum custom access period: **7 days**
 
-### User Experience
+## Configuration Options
 
-- Users see the Resource in their Client with a **locked state**
-- To request access:
-  - Try to access the Resource address, **or**
-  - Select **Authenticate** from the Resource's submenu in the Client
-- Browser opens an Access Request page
-- User enters reason (and custom duration if "Custom Request" is enabled)
-- **Auto Approval**: immediate access after submitting (reason is logged)
-- **Required Approval**: user receives email when approved/denied
+| Option | Values |
+|--------|--------|
+| Access Period | Preset durations (e.g., 12 hours) or "Custom Request" (user specifies, up to 7 days) |
+| Approval Method | Auto-Approval (self-approved, reason required) or Manual (Admin or Access Reviewer must approve) |
 
-### Configuration
+## Prerequisites
+- Resource must exist with Group assignments configured
+- For manual approval: Admin or Access Reviewer role required to approve requests
 
-**Per-Resource (default for all Group assignments):**
-- Resource detail page -> enable Access Requests
-- Set the access period (preset durations OR Custom Request -- up to 7 days)
-- Set the approval method (Auto Approval / Required Approval)
+## Configuration Steps
+1. Navigate to the Resource detail page
+2. Enable Access Requests at the Resource level (sets default for all Group assignments)
+3. Select access period: preset duration or "Custom Request"
+4. Select approval method: Auto-Approval or manual approval required
+5. Optionally override settings per individual Group assignment
 
-**Per-Group-on-Resource (override):**
-- Override the Resource default for specific Groups
-- Useful pattern: Resource defaults to "Required Approval, 2-hour", but a trusted Group gets "Auto Approval, 12-hour"
+## Tracking Access
+- Download access summary from Resource, Group, or User page
+- Full details on usage-based access page
 
-**Available Time Periods:**
-- Presets: e.g., 1 hour, 4 hours, 12 hours, 24 hours (per Admin Console)
-- **Custom Request**: user picks at request time, max 7 days
-- Longer durations possible via API
+## Gotchas
+- Resource is **visible** to users in Client even when locked — they just cannot connect until approved
+- Resource-level config is **inherited** by all Group assignments unless explicitly overridden per assignment
+- Auto-approval still requires the user to submit a reason
+- Custom Request periods capped at 7 days maximum
 
-### Approval Workflow
-
-Approvers come from these sources (see /docs/resources-reviewing-access-requests):
-- Twingate **Admin / DevOps / Access Reviewer** roles can approve any request
-- **Resource Approvers** (Groups assigned per-Resource) can approve requests for their assigned Resources -- and only those
-
-Approvers are notified via email; they review on the Access Requests page in the Admin Console.
-
-### Tracking & Audit
-
-- Audit Logs (Access category) capture all configuration changes and request decisions
-- Per-Resource, per-Group, or per-User CSV export shows current access status
-- Resolved requests are visible for 90 days
-
-### Decision Notes
-
-- Use JIT for **production infrastructure**, **break-glass scenarios**, and **vendor/contractor access** to sensitive Resources
-- For most users + low-risk Resources: standard Group assignment (no JIT) is simpler
-- Auto Approval with a reason gives an audit trail without blocking users -- a middle path between "always granted" and "always requires approval"
-- Combine with **Usage-Based Auto-Lock** -- users get JIT access for a window, then auto-lock kicks in if they don't use it
-
-**Gotchas:**
-- Custom Request max is 7 days at the Admin Console -- API can set longer if needed
-- The Resource appears in the Client even when locked -- users see what they could potentially access (this is intentional UX, not a bug)
-- Auto Approval still requires the user to enter a reason -- without a reason the Client cannot proceed
-
-**Related Docs:**
-- /docs/resources-reviewing-access-requests -- Approval workflow + Resource Approvers
-- /docs/usage-based-auto-lock -- Companion: lock based on inactivity instead of time-bounded access
-- /docs/ephemeral-access-to-resources -- Companion: time-bounded Group-on-Resource (no per-request workflow)
-- /docs/security-policies -- Policy types overview
+## Related Docs
+- [Reviewing Access Requests](#) — details on approving/denying and delegating review
+- [Usage-Based Access](#) — tracking configuration details and current access status

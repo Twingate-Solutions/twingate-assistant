@@ -1,72 +1,41 @@
-## Configuring Cisco AnyConnect with Umbrella + Twingate
+# Configuring AnyConnect with Umbrella for Twingate
 
-How to make Cisco AnyConnect (with Umbrella Module) coexist with the Twingate Client. The legacy **Umbrella Roaming Client** is **incompatible** with Twingate; AnyConnect with Umbrella Module **is compatible** with proper config.
+## Page Title
+How to Configure AnyConnect with Umbrella
 
-### Roaming Client vs. AnyConnect — What's What
+## Summary
+Cisco's legacy Umbrella Roaming Client is incompatible with Twingate due to its static DNS resolver approach. AnyConnect with Umbrella Module uses a kernel-level DNS interceptor and **is fully compatible** with Twingate when Internal Domains are properly configured.
 
-- **Umbrella Roaming Client** = Cisco's legacy DNS filtering agent (deprecated; no new development)
-- **AnyConnect with Umbrella Module** = Cisco's current generation; replaces Roaming Client (free upgrade for existing customers)
+## Key Information
+- **Roaming Client** (legacy): Incompatible with Twingate — captures DNS resolvers at startup into a static internal list, replacing first resolver with `127.0.0.1`
+- **AnyConnect with Umbrella Module** (current): Compatible with Twingate — uses kernel module intercepting port 53 traffic directly
+- AnyConnect marks known Internal Domains as "do not intercept" in memory until client restart
+- Customers can upgrade from Roaming Client to AnyConnect for free
 
-### Why the Roaming Client Is Incompatible with Twingate
+## Prerequisites
+- AnyConnect Client with Umbrella Module (not legacy Roaming Client)
+- Access to Cisco Umbrella Management Console
+- Knowledge of your Twingate Resource domains (e.g., `*.example.com`)
 
-The Roaming Client (R.C.):
-1. On startup, snapshots the OS DNS resolver list into an internal config
-2. Replaces the first OS resolver with **127.0.0.1** (loopback)
-3. Routes all DNS through its local proxy -> Umbrella backend for filter decision
-4. Does **not poll the OS** for resolver changes -- the snapshot is static
+## Step-by-Step Configuration
 
-When Twingate adds its own resolver (for private DNS resolution), the R.C. doesn't pick it up. As a result, **the Twingate Client cannot work alongside the Umbrella Roaming Client**.
+1. Open **Cisco Umbrella Management Console**
+2. Navigate to **Deployments → Configuration → Domain Management**
+3. Under **Internal Domains**, add your Twingate Resource domains
+   - Example: add `example.com` (covers `*.example.com` implicitly)
 
-### Why AnyConnect with Umbrella Module Works
+## Configuration Values
 
-AnyConnect operates differently:
-1. Uses a **kernel module** to intercept DNS traffic (port 53) at the network stack level
-2. Does NOT touch the OS resolver list
-3. Does NOT cache an internal resolver list
-4. For each DNS request:
-   - If the destination matches a configured **Internal Domain** -> request returns to the OS network stack as-if-untouched
-   - Otherwise -> sent to Umbrella backend for filter decision
+| Setting | Location | Value |
+|---|---|---|
+| Internal Domains | Umbrella Console → Deployments → Configuration → Domain Management | Your Twingate resource domains (e.g., `example.com`) |
 
-This kernel-level interception is compatible with Twingate's resolver behavior.
+## Gotchas
+- **Wildcard syntax**: AnyConnect does **not** support midfield wildcards (`bla.*.example.com` is invalid). Left-hand wildcards are implied — `example.com` automatically covers `*.example.com`
+- **Publicly resolvable domains**: If Twingate-protected resources are publicly resolvable, they **must** still be added to Internal Domains list or AnyConnect will intercept/forward DNS to Umbrella instead
+- **Roaming Client static resolver issue**: The Roaming Client does not poll the OS for resolver changes after startup — this is why it breaks Twingate and cannot be fixed via configuration
+- AnyConnect's "do not intercept" tag is memory-only and resets on client restart
 
-### Configuration Required: Internal Domains
-
-To prevent AnyConnect from intercepting Twingate-resolved domains, add them to AnyConnect's **Internal Domains** list.
-
-**Steps in Cisco Umbrella Management Console:**
-
-1. **Deployments -> Configuration -> Domain Management**
-2. Under **Internal Domains**, add the domain(s) Twingate resolves
-   - Example: if your Twingate Resources include `*.example.com`, add `example.com`
-3. Save
-
-### Wildcard Behavior
-
-- **Mid-field wildcards NOT supported**: `bla.*.example.com` is **invalid**
-- **Left-hand wildcards are implicit**: adding `example.com` is equivalent to `*.example.com`
-
-So most patterns (`*.acme.internal`, `*.corp.example.com`) just need the base domain entered.
-
-### Important: Publicly Resolvable Domains
-
-If Twingate Resources have addresses that are **publicly resolvable** (e.g., `app.public.example.com` is in public DNS but you want Twingate to handle it), you **must** add them to Internal Domains -- otherwise Umbrella will resolve them publicly and bypass Twingate.
-
-### Decision Notes
-
-- **For new deployments**: never use the Roaming Client; only AnyConnect with Umbrella Module
-- **For migrations from Roaming Client**: upgrade to AnyConnect first, then deploy Twingate
-- Audit your Twingate Resource list and ensure every private domain pattern is in AnyConnect's Internal Domains
-- Test thoroughly: a single missed pattern can cause flaky behavior where some lookups go through Twingate and others don't
-
-### Gotchas
-
-- The "left-hand wildcard implicit" semantics is non-obvious -- experiment with subdomain coverage to confirm
-- AnyConnect's Internal Domain tagging is **in-memory and persists until restart** -- after policy changes, restart the AnyConnect Client on test machines
-- The Roaming Client is silently incompatible -- users may not see clear errors, just intermittent failures
-
-### Related Docs
-
-- /docs/configuring-zscaler-with-twingate -- Sibling pattern for Zscaler
-- /docs/netskope-dlp-config -- Netskope coexistence
-- /docs/dns-ultimate-guide -- DNS in Twingate
-- /docs/private-dns-best-practices -- Private DNS Resource patterns
+## Related Docs
+- [Umbrella Domain Management](https://docs.umbrella.com/deployment-umbrella/docs/domain-management)
+- Twingate Resources configuration (internal)

@@ -1,66 +1,58 @@
-## SaaS App Gating: Google Workspace (Context-Aware Access)
+# SaaS App Gating with Google Workspace
 
-How to require Twingate connection for Google Workspace (Gmail, Drive, Calendar, ...) and SAML-based third-party apps via Google's **Context-Aware Access**.
+## Summary
+Configure Google Workspace Context-Aware Access to require an active Twingate Connector connection before granting access to Google Workspace apps and SAML-based SaaS applications. Traffic is routed through Twingate Connectors, and Google validates the exit IP against an allowlist. Context is checked continuously for core Google apps, and at authentication time for third-party SAML apps.
 
-**Coverage:**
-- **Core Google Workspace apps** (Gmail, Drive, Calendar): context is **continuously checked**
-- **SAML-based third-party apps**: context is checked **at authentication time**
+## Key Information
+- Works with Google Workspace core apps (Gmail, Drive, Calendar) and SAML-based third-party apps
+- Uses Connector exit IP addresses as the trust signal (similar to IP whitelisting, but enforced at IdP level)
+- Multiple Connector IPs form an OR-based allowlist in the access level
 
-**Twingate Admin Console Prerequisites:**
+## Prerequisites
+- Twingate Admin Console access
+- Google Workspace Admin access with Context-Aware Access available
+- Twingate Connector(s) deployed with known static exit IP addresses (e.g., AWS Elastic IPs)
+- **Twingate Resource created** for target domain (e.g., `*.google.com`)
+- **Device-only Policy** applied to that Resource — prevents authentication loop where users can't reach the IdP login page because Twingate auth is required first
 
-**1. Create a Resource for Google IdP Domains**
-- For Google Workspace core apps, a wildcard like `*.google.com` is the simplest
-- The Resource forces traffic through the Connector exit IP
+## Step-by-Step
 
-**2. Apply a Device-only Resource Policy to the IdP Resource**
-- Critical: **without this you create an authentication loop**
-- The user can't authenticate to Google because reaching `*.google.com` requires Twingate auth, but Twingate auth requires Google login...
-- Device-only Policy lets the device reach the Google login page without full user authentication, breaking the loop
+### Twingate Setup
+1. Create a Resource for the target SaaS domain (e.g., `*.google.com`)
+2. Apply a **Device-only Resource Policy** to that Resource to avoid auth loop
 
-### Google Admin Console Setup
+### Google Workspace: Create Access Level
+1. Go to `https://admin.google.com` → Security → Access and data control → Context-Aware Access
+2. Click **Access levels** → **CREATE ACCESS LEVEL**
+3. Fill in:
+   - **Name**: e.g., "Twingate Application Control"
+   - **Condition logic**: "Meets all attributes (AND)"
+   - **Attribute**: IP subnet
+   - **Value**: Each Connector exit IP in CIDR notation (e.g., `8.8.8.8/32`); multiple IPs = OR logic
+4. Click **CREATE**
 
-**Step 1 -- Create an Access Level**
-- Sign in to https://admin.google.com
-- **Security -> Access and data control -> Context-Aware Access**
-- Click **Access levels** -> **CREATE ACCESS LEVEL**
-- Settings:
-  - **Access level name**: e.g., "Twingate Application Control"
-  - **Context conditions** tab: **BASIC** mode, **Meets all attributes (AND)**
-  - **Attribute**: **IP subnet**
-  - Add the Connector(s) public IP(s) in CIDR form -- e.g., `8.8.8.8/32`
-  - Multiple IPs become an OR list -- enter each as a separate IP subnet entry
-- **CREATE**
+### Google Workspace: Assign Access Level
+1. Navigate back → click **Assign access levels**
+2. Select target applications from the list
+3. Click **Assign** → select your access level → **CONTINUE**
+4. Enforcement settings: Block desktop and mobile app access; **leave API access unblocked** (recommended default)
+5. Review and click **ASSIGN**
 
-**Step 2 -- Assign the Access Level to Apps**
-- From Context-Aware Access main screen -> **Assign access levels**
-- Tick the apps to gate (Gmail, Drive, Calendar, etc., or specific SAML SSO apps)
-- **Selected x of y -> Assign**
-- Tick the access level created in Step 1
-- **CONTINUE**
+## Configuration Values
+| Field | Value |
+|---|---|
+| Resource domain | `*.google.com` (or target SaaS domain) |
+| Resource Policy | Device-only |
+| IP Subnet format | `<exit_ip>/32` per Connector |
+| Multiple IPs | Each entered separately (OR logic) |
 
-**Step 3 -- Enforcement Settings**
-- Choose whether to block:
-  - Desktop applications (e.g., Gmail desktop) -- **recommended: block**
-  - Mobile applications -- **recommended: block**
-  - **API-based access** -- **recommended: do NOT block** (would break legitimate API automation)
-- **CONTINUE -> ASSIGN**
+## Gotchas
+- **Auth loop**: Without a Device-only Policy on the IdP Resource, users cannot authenticate because accessing the login page itself requires prior Twingate auth
+- **Multiple Connectors**: Each Connector's exit IP must be added individually to the access level
+- **API access**: Do not block API-based access by default — only block desktop/mobile clients
+- If testing fails after enabling Twingate Client, verify the Resource is correctly capturing and routing traffic through the Connector
 
-### Test
-
-- Without Twingate: try to log in to Gmail -- expect an "access blocked" message
-- With Twingate (Client connected): same login should succeed
-- If still blocked, verify:
-  - Twingate Resources are routing the Google domains through the gating Connector
-  - The Connector's egress IP matches what's configured in the access level
-
-**Gotchas:**
-- Context-Aware Access **continuously** checks core apps -- if the user disconnects from Twingate mid-session, Gmail / Drive may revoke the session
-- Mobile apps and desktop clients see context checks too -- some workflows may break (e.g., Drive sync from a laptop without Twingate)
-- API-based access blocking will break service accounts, third-party tools, and most SaaS-to-SaaS integrations -- leave it unblocked unless you have a specific reason
-- If your Connector NAT gateway IP changes, all Google Workspace users are locked out until you update the access level -- pin static IPs
-
-**Related Docs:**
-- /docs/saas-app-gating-best-practices -- Device-only policy + MAR (essential)
-- /docs/google-workspace-configuration -- Google Workspace as Twingate IdP
-- /docs/entra-id-app-gating-office-365 -- Equivalent pattern for Microsoft
-- /docs/saas-app-gating-with-jumpcloud -- JumpCloud equivalent
+## Related Docs
+- [Create a Twingate Resource](https://www.twingate.com/docs)
+- [Device-only Resource Policy](https://www.twingate.com/docs)
+- [Google Context-Aware Access Help Center](https://support.google.com/a/answer/9275380)

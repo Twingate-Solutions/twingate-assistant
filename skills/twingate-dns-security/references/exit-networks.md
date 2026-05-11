@@ -1,82 +1,53 @@
-## Exit Networks (Full-Tunnel Routing)
+# Exit Networks
 
-**Exit Networks** route ALL user traffic (not just Resource traffic) through Twingate Connectors -- effectively giving Twingate full-tunnel VPN-like behavior on demand.
+## Summary
+Exit Networks route all user traffic through Twingate Connectors acting as exit nodes, providing full traffic encryption beyond just Resource traffic. This is an opt-in feature available on Home, Business, and Enterprise plans that overrides Twingate's default split-tunnel routing behavior.
 
-**Plan Requirement:**
-- **Home, Business, Enterprise** plans only
+## Key Information
+- Routes **all** non-Resource traffic through selected Connectors (full tunnel vs. default split tunnel)
+- Traffic routes through geographically closest Connector in the Exit Network
+- Automatic failover if a Connector goes down
+- Sessions limited to **12 hours** maximum
+- Group-based access control available (optional)
+- Exit Network use **cannot be enforced** — users must manually enable it in the Client
+- IPv6 not supported (AAAA queries blocked when active)
+- DNS filtering continues to work normally
 
-### Default vs. Exit Networks
+## Prerequisites
+- Home, Business, or Enterprise plan
+- Twingate Admin Console access
+- Connectors deployed (minimum 2 recommended per Exit Network)
+- Peer-to-peer compatible network environment for Connectors
 
-| Mode | Behavior |
-|---|---|
-| **Default (split tunnel)** | Only Resource traffic routes through Twingate; public traffic goes direct via the user's local network |
-| **Exit Network (full tunnel)** | All non-Resource traffic ALSO routes through Twingate via a chosen Exit Network's Connectors |
+## Step-by-Step Configuration
 
-Split tunnel is the default and is the right choice for most use cases (best performance / latency).
+1. Navigate to **Admin Console → Internet Security → Exit Networks**
+2. Create a new Exit Network with a descriptive name (e.g., region or use case)
+3. Deploy Connectors within the Exit Network (follow Deploying Connectors guide)
+4. (Optional) Restrict access by clicking **Enabled for Everyone** and selecting specific Groups
+5. Users activate via Client: hover over **"Route All Traffic Through Twingate"** → select Exit Network
 
-### Use Cases for Exit Networks
+## Configuration Values
+- No specific env vars or CLI flags — managed entirely through Admin Console UI
+- Group access: configurable per Exit Network (default: all users)
 
-- **Untrusted networks**: coffee shop / hotel / airport Wi-Fi -- encrypt all egress
-- **Geo-localization testing**: confirm content renders correctly when traffic exits from a specific region
-- **Personal "back home" access**: users traveling who want to appear from their home country
+## Gotchas
 
-### How It Works
+- **Security isolation critical**: Connectors in Exit Networks must be deployed **outside existing infrastructure** (separate VPC). If Exit Network Connectors can reach internal Resources, users bypass authentication checks entirely.
+- **Peer-to-peer required for performance**: Non-P2P connections increase latency and consume relay bandwidth (Fair Use Policy applies).
+- **Egress costs**: Avoid AWS/GCP/Azure for Connector hosting due to high bandwidth costs. Prefer DigitalOcean, Vultr, Linode, or Hetzner (bundled bandwidth included).
+- **IPv6 broken**: Sites requiring IPv6-only connectivity will be unreachable.
+- **No enforcement**: Admins cannot force Exit Network usage — purely user-controlled.
+- **12-hour session cap** requires users to re-enable after expiration.
 
-- An Exit Network is a Remote Network that **also** acts as an exit node
-- All non-Resource traffic on the user's device routes to the Exit Network's nearest Connector
-- Resource traffic continues to its specific Connector as usual
-- Failover: if the chosen Exit Network Connector is unreachable, traffic routes through other Connectors in that Exit Network
-- Geographic Connector selection (closest first), like Resource routing
+## Tips
+- Deploy **at least 2 Connectors** per Exit Network for redundancy/load balancing
+- Validate Connectors are peer-to-peer friendly before production use
+- Use cost-effective providers: DigitalOcean (0.5–11TB), Vultr (0.5–12TB), Linode (1–20TB), Hetzner (1–20TB) bundled bandwidth
 
-### Setup
-
-**Step 1**: Admin Console -> **Internet Security -> Exit Networks** -> create new
-**Step 2**: Deploy 2+ Connectors inside the Exit Network -- treat them like points of presence:
-- **Important: deploy in a SEPARATE VPC from your Resources** (otherwise Exit Network Connectors can reach Resources without auth checks)
-- Make Connectors P2P-friendly (per /docs/troubleshooting-p2p)
-- 2+ Connectors for HA / load balancing
-
-**Step 3**: Optionally restrict access to specific Groups via "Enabled for X Groups" (default: Everyone)
-
-### User Experience
-
-- Twingate Client -> hover **Route All Traffic Through Twingate** -> select an Exit Network
-- Toggleable per-session
-- **Maximum session length: 12 hours** -- after that, must re-toggle
-- Cannot be **enforced** by admins -- always opt-in by the user
-
-### Tips for Connector Placement
-
-**Cost matters**: AWS / GCP / Azure egress is expensive. Lower-cost cloud providers with bundled bandwidth:
-- DigitalOcean: 0.5-11 TB/month bundled per Droplet
-- Vultr: 0.5-12 TB/month
-- Linode: 1-20 TB/month
-- Hetzner: 1 or 20 TB/month per region
-
-These providers also typically have P2P-friendly NAT (verify per deployment).
-
-### FAQ
-
-- **DNS Filtering still works** with Exit Networks -- DNS is resolved by the Client regardless of full/split tunnel
-- **IPv6**: NOT supported. AAAA queries are blocked when full-tunnel is on; IPv6-only sites won't load
-- **Specific site unreachable**: contact support; Exit Networks are still relatively new
-
-### Decision Notes
-
-- **Always deploy Exit Network Connectors OUTSIDE existing Resource VPCs** -- mixing them creates a security loophole (any user with Exit Network access can reach Resources without auth)
-- For globally distributed teams: create per-region Exit Networks (e.g., "US-West", "EU", "APAC") so users get low-latency egress
-- Use cheaper cloud providers for Exit Network Connectors -- this is heavy bandwidth territory
-
-### Gotchas
-
-- Cannot be enforced -- if compliance requires full-tunnel always, this isn't the right tool
-- 12-hour session cap -- users on long sessions see prompts
-- Mixing Exit Network Connectors with Resource Connectors in the same VPC = severe security risk
-
-### Related Docs
-
-- /docs/internet-security -- IS overview
-- /docs/troubleshooting-p2p -- P2P-friendly Connector setup
-- /docs/connector-best-practices -- Connector deployment
-- /docs/dns-filtering -- Continues to work with Exit Networks
-- /docs/peer-to-peer-communication-in-twingate -- P2P fundamentals
+## Related Docs
+- Deploying Connectors guide
+- Peer-to-peer connections setup
+- Troubleshooting peer-to-peer connections
+- Connector selection / split tunnel routing
+- Fair Use Policy

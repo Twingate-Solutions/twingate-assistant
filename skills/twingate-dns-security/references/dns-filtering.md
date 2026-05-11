@@ -1,117 +1,75 @@
-## DNS Filtering
+# DNS Filtering
 
-Twingate-native DNS filtering -- blocks malicious / unwanted domains at the DNS layer for any user running the Twingate Client. **Business / Enterprise add-on**.
+## Page Title
+DNS Filtering Overview
 
-### Platform Support
+## Summary
+Twingate's native DNS filtering intercepts and filters all DNS traffic via DNS-over-HTTPS on macOS, Windows, and Linux clients. Rules are configured through profiles assigned to Groups, with allowlists, denylists, security categories, content categories, and privacy protection options. Available as a Business/Enterprise add-on.
 
-- **macOS, Windows, Linux** Clients only
-- Mobile Clients NOT supported for DNS Filtering at this time
+## Key Information
+- **Platform support**: macOS, Windows, Linux only (no mobile)
+- **Protocol**: DNS-over-HTTPS (DoH) — no client configuration changes required
+- **Activation**: Admin Console → "Internet Security" tab → Enable Secure DNS → Select "Twingate DNS Filtering"
+- **Profile limit**: Max 10 DNS filtering profiles
+- **Default**: Single profile created with "Everyone" group assigned; all security categories enabled except "newly registered domains"
+- **Allowlist takes precedence** over all other rules including security/content categories
+- **Exception Groups** take precedence over Enrolled Groups (user in both = no filtering)
+- **Block pages**: HTTP by default; HTTPS requires Twingate Browser Extension deployed
+- **Log retention**: 90-day analytics; logs exportable to AWS S3 in JSON (one event per line)
+- **Signed-out devices**: Can still filter if configured with "always run Internet Security"
 
-### How It Works
+## Prerequisites
+- Business or Enterprise plan with DNS Filtering add-on
+- Twingate Client running on macOS, Windows, or Linux
+- Secure DNS enabled in Admin Console
+- Browser Extension for HTTPS block pages
 
-When DNS Filtering is enabled:
-- Twingate Client routes all DNS queries through Twingate's DNS servers
-- Twingate evaluates each query against the user's filtering profile
-- Blocked queries return no IP -> client sees connection failure
-- HTTP-blocked sites get redirected to a **block page** explaining why
-- For HTTPS-blocked sites, deploy the **Twingate Browser Extension** to show block pages
+## Step-by-Step: Enable DNS Filtering
+1. Navigate to Admin Console → **Internet Security** tab
+2. If Secure DNS disabled: enable it → select **Twingate DNS Filtering**
+3. If Secure DNS already enabled: change DoH resolver to **Twingate DNS Filtering**
+4. Configure profiles: click profile name → **Manage** → **Edit Filtering Rules**
 
-### Enabling DNS Filtering
+## Configuration Values
 
-1. Admin Console -> **Internet Security** tab
-2. If Secure DNS is disabled: enable Secure DNS, choose **Twingate DNS Filtering** as resolver
-3. If already enabled: change DoH resolver to **Twingate DNS Filtering**
+### Profile Priority
+- Higher-ranked profiles take precedence for users in multiple groups
+- Lowest-ranked profile with "Everyone" group serves as catch-all default
+- Signed-out devices (always-on mode) use lowest-ranked profile
 
-### DNS Filtering Profiles
+### Security Categories (all enabled by default except marked)
+- Threat Intelligence Feeds, Google Safe Browsing, DNS rebinding, IDN homograph attacks, Typosquatting, Domain generation algorithms, Parked domains
+- `newly_registered_domains` — **disabled by default**
 
-**Each profile has rules + Group assignments.** A user belongs to a profile via Group membership:
+### S3 Log Event Schema
+```json
+{
+  "event_type": "dns_filtering",
+  "event": {
+    "version": 1,
+    "time": "<UTC datetime>",
+    "domain": "<queried domain>",
+    "root": "<root domain>",
+    "device": { "id": "<twingate_id or hardware_id>", "name": "<device name>" },
+    "connection": { "client_ip": "<ip>", "protocol": "DNS-over-HTTPS" },
+    "status": "default|blocked|allowed",
+    "reasons": [{ "id": "category:social-networks", "name": "Social Networks" }]
+  }
+}
+```
 
-- Multiple profiles ranked top-to-bottom -- top profile wins for users in multiple Groups
-- Default: one profile assigned to **Everyone** Group
-- Users in no assigned Group = no filtering
-- **Limit: 10 profiles max**
-- **Recommended pattern**: lowest-ranked default profile assigned to Everyone (catch-all); higher-ranked profiles for specific Groups
+## Gotchas
+- Groups can only be assigned to **one** DNS filtering profile at a time
+- A group cannot be both enrolled and excluded simultaneously
+- Blocking tracking links may break email unsubscribe functionality
+- Blocking ads/trackers may break site functionality
+- Client versions before macOS `2024.311` / Windows `2024.351` show generic device info for signed-out devices
+- TLDs can be added to denylist (e.g., `.zip` blocks all `.zip` domains)
+- Users not in any assigned Group have **no filtering applied**
 
-**Exception Groups**: Groups in an exception list bypass DNS Filtering entirely. Exception Groups take precedence over enrolled Groups.
-
-**When a device is configured for always-on Internet Security and signed out**: it uses the **lowest-ranked profile**.
-
-### Configurable Rules per Profile
-
-**Allowlist / Denylist:**
-- Add/remove specific domains
-- TLDs supported in denylist (e.g., `.zip` blocks all `.zip` domains)
-- **Allowlist takes precedence over all other rules**
-
-**Security Categories** (default: all enabled except Newly Registered):
-- Threat Intelligence Feeds (malware, phishing)
-- Google Safe Browsing
-- DNS Rebinding (private IPs in public responses)
-- IDN Homograph Attacks (Cyrillic-Latin lookalikes)
-- Typosquatting
-- Domain Generation Algorithms (DGA)
-- Newly Registered Domains (last 30 days)
-- Parked Domains
-
-**Content Categories** (off by default; enable per profile):
-- Gambling, Dating, Adult Content, Piracy, Social Media, Games, Streaming Sites
-- Force Safe Search (major search engines)
-- YouTube Safe Mode
-
-**Privacy Protection:**
-- Block disguised third-party trackers
-- Block affiliate & tracking links (warning: may break unsubscribe links)
-- Block ads and trackers (general)
-
-### Logging
-
-**Filtering Analytics** (90/30/7-day): total queries, blocked count, block %
-
-**Recent DNS Activity**: real-time event feed; filter by allowed/blocked. Events show device hostname, IP, profile used, block reason.
-
-**S3 Sync**: DNS Filtering logs can sync to AWS S3 for SIEM ingestion. Format: JSON, one event per line. Schema includes:
-- `event_type`: `dns_filtering`
-- `event.time`: UTC datetime
-- `event.domain`, `event.root`: queried domain + root
-- `event.device.id`, `event.device.name`: Twingate device info
-- `event.connection.client_ip`, `event.connection.protocol`
-- `event.status`: `default` (allowed by default), `blocked`, or `allowed` (allowlist match)
-- `event.reasons[]`: array of category/rule IDs that matched
-
-### Signed-Out Device Handling
-
-For devices with always-on Internet Security:
-- Never signed in: hostname shown in logs
-- Signed in once, single user: Twingate device name shown
-- Multi-user device: name of most recently signed-in user
-
-Older Clients (pre-macOS 2024.311 / Windows 2024.351) show "No hostname" / "No device" -- upgrade for full attribution.
-
-### FAQ
-
-- **Domain wrongly blocked?** Add to allowlist (takes precedence).
-- **Always-on filtering?** Set up /docs/internet-security-client-configuration with Machine Keys.
-- **Disable for some users?** Add their Group to the **Exception Group** list.
-
-### Decision Notes
-
-- For most production use: enable Threat categories + Privacy Protection + Force Safe Search; treat Content Categories as optional based on org policy
-- Default Everyone-Group profile is the safety net -- always have one
-- S3 sync is essential for compliance/audit use cases -- enable from day one to build retention
-- Browser Extension is required for HTTPS block pages -- without it, users just see "site can't be reached"
-
-### Gotchas
-
-- Tracking link blocking can break unsubscribe / account verification flows in emails -- communicate to users
-- Mobile devices have NO DNS filtering -- be explicit about this gap
-- Users in NO assigned Group skip filtering entirely -- always have an Everyone-assigned default profile
-- Allowlist > Categories -- a category-blocked domain on the allowlist will pass through
-
-### Related Docs
-
-- /docs/dns-security -- DoH foundation
-- /docs/internet-security -- IS overview
-- /docs/internet-security-client-configuration -- Always-on (Machine Key)
-- /docs/browser-security -- Browser Extension for HTTPS block pages
-- /docs/syncing-data-to-s3 -- S3 log sync
-- /docs/nextdns-configuration, /docs/doh-cloudflare -- Third-party DNS filtering alternatives
+## Related Docs
+- DNS-over-HTTPS (DoH) documentation
+- Internet Security Client Configuration (always-on)
+- Exception Groups configuration
+- Twingate Browser Extension deployment
+- Syncing data to AWS S3

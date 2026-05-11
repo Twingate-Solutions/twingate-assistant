@@ -1,56 +1,53 @@
-## AWS ECS Headless Configurations
+# AWS ECS with Twingate (Headless & Userspace)
 
-How to run the Twingate Client in AWS ECS to give containerized workloads (frontend apps, AI agents, batch jobs) private access to backend Resources via a Service Account.
+## Page Title
+AWS ECS with Twingate (Headless & Userspace Configurations)
 
-**Mode Selection by Launch Type:**
+## Summary
+Twingate supports secure private access for ECS workloads via service accounts, with two networking modes depending on launch type. ECS Fargate is limited to userspace (HTTP/HTTPS proxy) mode due to kernel capability restrictions, while ECS on EC2 supports full headless TUN mode. The recommended deployment for EC2 is one Twingate client per host via systemd, not per-task sidecars.
 
-| ECS Launch Type | Supported Mode | Reason |
-|---|---|---|
-| **Fargate** | Userspace (HTTP proxy) only | Fargate disallows `CAP_NET_ADMIN` and `/dev/net/tun`; full TUN mode not possible |
-| **EC2 / Managed Instances** | Full headless (TUN) **or** userspace | Customer-managed hosts allow kernel capabilities |
+## Key Information
+- **Fargate**: Userspace proxy mode only (`--tun off`); no `/dev/net/tun` or `CAP_NET_ADMIN` available
+- **ECS on EC2**: Full TUN mode supported; recommended as default
+- **Service key path**: `/etc/twingate/service_key.json` (must be a file, not env var)
+- **Init container pattern**: Required on Fargate to write AWS Secrets Manager env var to file before `twingated` starts
+- **Sidecar per task is NOT recommended at scale** on EC2 — use one client per host instead
+- Proxy listens on `0.0.0.0:9999`; apps use `http://127.0.0.1:9999`
 
-**Recommendation:**
-- **Fargate**: userspace HTTP/HTTPS proxy (only option; raw TCP/UDP not supported)
-- **EC2 (recommended at scale)**: install the Client directly on each EC2 host as a `systemd` service (one Client per host) authenticated by a Service Account
-- **EC2 (sidecar)**: possible but not recommended -- adds connection overhead, risks API throttling, increases resource usage
+## Prerequisites
+- Twingate service account with service key stored in AWS Secrets Manager
+- ECS task execution IAM role with Secrets Manager read permissions (`ecsTaskExecutionAndSecretsRead`)
+- For EC2 mode: Linux host with kernel capabilities enabled
 
-### Fargate Pattern (Userspace)
+## Step-by-Step (Fargate Deployment)
+1. Store service key JSON in AWS Secrets Manager
+2. Create shared EFS/volume `twingate-etc`
+3. Deploy **init container** (`alpine`) that writes `$SERVICE_KEY_JSON` env var → `/etc/twingate/service_key.json`
+4. Deploy **Twingate client container** with `dependsOn: init-write-key (SUCCESS)`, entrypoint `twingated`, args `--http-proxy 0.0.0.0:9999 --tun off`
+5. Configure application containers to use proxy `http://127.0.0.1:9999`, `dependsOn: tg-userspace-client (START)`
 
-**Why an init container is required:**
-- AWS Secrets Manager injects secrets only as **environment variables**, not as files
-- The Twingate Client expects the service key at `/etc/twingate/service_key.json`
-- The Client image has no writable entrypoint, so the file must exist before `twingated` starts
+## Configuration Values
 
-**Init container behavior:**
-- Pull the service key from Secrets Manager (env var)
-- Write it to `/etc/twingate/service_key.json` on a shared volume
-- Set permissions `0444` (read-only)
-- Twingate Client container `dependsOn: { condition: SUCCESS, containerName: init-write-key }`
+| Parameter | Value |
+|-----------|-------|
+| Client image | `twingate/client:latest` |
+| Entrypoint | `twingated` |
+| TUN disabled flag | `--tun off` |
+| Proxy binding | `--http-proxy 0.0.0.0:9999` |
+| Service key path | `/etc/twingate/service_key.json` |
+| Network mode | `awsvpc` |
+| Task CPU/Memory | `1024` / `2048` |
+| Secret env var name | `SERVICE_KEY_JSON` |
+| Init file write command | `printf '%s' "$SERVICE_KEY_JSON" > /etc/twingate/service_key.json` |
 
-**Twingate Client container (Fargate):**
-- Image: `twingate/client:latest`
-- `entryPoint`: `["twingated"]`
-- `command`: `["--http-proxy", "0.0.0.0:9999", "--tun", "off"]`
-- Mount shared volume at `/etc/twingate`
-- Expose port 9999/TCP (HTTP proxy)
+## Gotchas
+- Fargate blocks `CAP_NET_ADMIN` and `/dev/net/tun` — TUN mode **will not work**
+- AWS Secrets Manager only injects secrets as env vars, not files — init container is mandatory
+- Applications must **explicitly configure** the HTTP proxy; traffic is not intercepted automatically
+- Running per-task sidecar clients at scale risks API throttling and high resource usage
+- Raw TCP/UDP connections will fail in userspace mode — HTTP/HTTPS only
 
-**Application containers** must explicitly use the proxy: `curl --proxy http://127.0.0.1:9999 http://my-private-backend`
-
-### EC2 Pattern (Full Headless)
-
-- Install the Twingate Client on the EC2 host (apt/yum/rpm package)
-- Authenticate as a `systemd` service using a Service Account key
-- One Client per host services all tasks on that host
-- Full TCP/UDP/ICMP supported
-
-**Gotchas:**
-- Fargate userspace mode supports HTTP/HTTPS only -- no raw TCP/UDP
-- Service key permissions: must be present at `/etc/twingate/service_key.json` before `twingated` starts (init container ordering matters)
-- Verify Secrets Manager IAM permissions on the ECS task execution role
-- Sidecar-per-task at scale increases connection count and risks API throttling -- prefer host-level Client on EC2
-
-**Related Docs:**
-- /docs/services-headless-clients -- Headless Client modes overview
-- /docs/linux-userspace-networking -- Userspace proxy mechanics
-- /docs/service-accounts-guide -- Service Account key management
-- /docs/how-to-troubleshoot -- Diagnostic steps
+## Related Docs
+- [Userspace Networking](https://www.twingate.com/docs/userspace-networking)
+- [How Twingate Works](https://www.twingate.com/docs/how-twingate-works)
+- Twingate Troubleshooting Guide

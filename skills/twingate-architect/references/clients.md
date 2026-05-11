@@ -1,13 +1,13 @@
-# Twingate Client Application
+# Twingate Client Applications
 
 ## Summary
-The Twingate Client enables user access to private network resources across macOS, Windows, Linux, iOS, and Android/ChromeOS. It creates a local VPN connection to `127.0.0.1` to intercept traffic to private resources. Clients older than 12 months cannot connect to the Twingate service.
+The Twingate Client enables user access to private network resources across macOS, Windows, Linux, iOS, and Android/ChromeOS. It establishes a local VPN to `127.0.0.1` to intercept traffic to private resources. Clients older than 12 months cannot connect to the Twingate service.
 
 ## Key Information
-- Users enter only the subdomain (e.g., `autoco` for `autoco.twingate.com`) on first setup
-- No special permissions required, but a local VPN to `127.0.0.1` is established
-- End users can self-install via `get.twingate.com`
-- Managed device deployment requires platform-specific documentation
+- No special permissions required for installation
+- Local VPN set up to `127.0.0.1` for traffic interception
+- Users enter organization subdomain (e.g., `autoco`) on first launch only
+- Clients >12 months old are blocked from connecting
 
 ## Download URLs by Platform
 
@@ -16,39 +16,33 @@ The Twingate Client enables user access to private network resources across macO
 | macOS (PKG) | `https://api.twingate.com/download/darwin?installer=pkg` |
 | Windows (EXE) | `https://api.twingate.com/download/windows` |
 | Windows (MSI) | `https://api.twingate.com/download/windows?installer=msi` |
-| Linux | Convenience script + public repos |
+| Linux | Convenience script via public repos |
 | iOS | `https://api.twingate.com/download/ios` |
 | Android/ChromeOS | `https://api.twingate.com/download/android` |
+| Auto-detect | `get.twingate.com` |
 
-## Minimum Supported Versions (older versions cannot connect)
+## Minimum Supported Versions (as of last update)
+- **macOS:** 2024.57
+- **Windows:** 2024.51
+- **Linux:** 2024.63
+- **iOS:** 2024.57
+- **Android:** 2024.85
 
-| Platform | Minimum Version |
-|----------|----------------|
-| macOS | 2024.57 |
-| Windows | 2024.51 |
-| Linux | 2024.63 |
-| iOS | 2024.57 |
-| Android | 2024.85 |
-
-## Prerequisites
-- Valid Twingate account with a configured subdomain
-- User rights to install software (or MDM/managed device setup for enterprise)
+## Installation Methods
+1. **Self-managed:** Direct users to `get.twingate.com` (auto-detects platform)
+2. **Managed devices:** Use platform-specific MDM/deployment docs
+3. **Linux:** Use published convenience script for any supported distro
 
 ## Gotchas
-- **12-month version cutoff**: Clients older than 12 months are hard-blocked from connecting — enforce update policies
-- Linux updates come from public repositories, not Twingate-hosted servers (unlike other platforms)
-- macOS and Android/iOS updates are distributed via App Store/Play Store, limiting direct distribution control
-- Historical versions available only via the public changelog — direct old-version URLs not provided
-
-## Update Recommendations
-- Automate updates wherever possible
-- When local users have elevated permissions, client can auto-check and install updates
-- For managed/enterprise environments, use platform-specific deployment guides (macOS/iOS, Windows)
+- Clients older than 12 months will fail to connect — enforce update policy
+- Linux updates come from public repositories, not hosted by Twingate directly
+- Historical versions available via public changelog (useful for pinning versions in managed deployments)
+- Automatic updates only work when local users have elevated permissions
 
 ## Related Docs
-- Endpoint Requirements (local VPN/network details)
-- Managed Devices documentation
+- Endpoint Requirements
+- Managed Devices deployment guide
 - Linux client source repositories
-- Client public changelog
+- Client changelog (version history)
 - macOS/iOS deployment guide
 - Windows deployment guide

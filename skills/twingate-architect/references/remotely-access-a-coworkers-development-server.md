@@ -1,34 +1,34 @@
 # Remotely Access a Coworker's Development Server
 
 ## Summary
-Twingate enables secure access to development servers on private home networks without exposing the network to the internet. No port forwarding or VPN server setup is required, and access is restricted to specific resources for specific users.
+Twingate enables secure access to development servers on private home networks without exposing the network to the internet. Unlike port forwarding or VPN setups, Twingate requires no router reconfiguration and restricts access to specific resources only.
 
 ## Key Information
-- Use case: share in-progress dev work for testing/review without requiring others to spin up their own servers
-- Works for servers on home networks (common post-COVID scenario)
-- Access is scoped to individual resources, not entire networks
-- No router port changes or network reconfiguration needed
-- Third parties cannot see or access the home network
+- Access is scoped to individual resources (not the entire home network)
+- No router ports need to be opened
+- No VPN server deployment required
+- No changes to existing home network configuration
+- Access is explicitly granted per-user per-resource
 
-## Why Not Port Forwarding or VPN
-- **Port forwarding**: exposes home network elements to the internet
-- **VPN server**: also exposes network elements, heavier security burden on developer
+## Use Case Context
+- Developers with servers on home networks (post-COVID office closures)
+- Sharing in-progress work for testing/review without coworkers spinning up their own servers
+- Alternative to port forwarding and home VPN setups, both of which expose home network elements to the internet
 
 ## Prerequisites
-- Twingate account with ability to deploy Connectors and manage Resources
-- A development server to share access to
-- Coworkers who need access must be granted explicit permissions in Twingate
+- Twingate account with admin access
+- Development server (physical or VM) to install Connector on
+- Coworkers who need access must have Twingate client installed
 
 ## Implementation Steps
-1. Deploy a **Twingate Connector** on the development server
-2. Add the development server as a **Resource** in Twingate
-3. Grant specific coworkers access to that Resource
+1. **Deploy a Connector** on the development server
+2. **Add the development server as a Resource** in Twingate
+3. **Grant access** to specific coworkers for that resource
 
-## Architecture Notes
-- Twingate does not require inbound internet exposure
-- Connector initiates outbound connections; no open router ports needed
-- Access control is per-resource, not per-network
+## Gotchas
+- The Connector must run on a machine that has network access to the target resource (running it directly on the dev server is simplest)
+- Access control is explicit — coworkers must be granted access before they can connect
 
 ## Related Docs
-- [Deploying a Connector](https://www.twingate.com/docs/connector)
+- [Deploying a Connector](https://www.twingate.com/docs/connectors)
 - [Adding a Resource](https://www.twingate.com/docs/resources)

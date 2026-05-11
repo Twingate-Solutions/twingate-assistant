@@ -1,20 +1,19 @@
 # Cancel Your Subscription
 
 ## Summary
-Instructions for canceling automatic renewal of a Twingate subscription via the Admin Console. Cancellation does not immediately terminate access; the subscription remains active until the end of the current billing term.
+Instructions for canceling automatic renewal of a Twingate subscription. Cancellation stops auto-renewal; access continues until the current subscription term ends. Downgrade to Starter plan constitutes cancellation.
 
 ## Key Information
-- Only cancels **automatic renewal**, not the subscription immediately
-- Access continues until the current subscription term ends
-- Cancellation downgrades the plan to **Twingate Starter**
+- Canceling = disabling automatic renewal, not immediate termination
+- Access remains active until end of current billing period
+- Cancellation is performed by downgrading to the **Twingate Starter** plan
 
 ## Prerequisites
-- Active paid Twingate subscription with automatic renewal enabled
-- Admin Console access with billing permissions
+- Admin Console access
+- Active paid subscription with automatic renewal enabled
 
 ## Step-by-Step
-
-1. Sign into the **Admin Console**
+1. Sign into the Admin Console
 2. Click **Settings**
 3. Click **Billing**
 4. Click **Manage Plan**
@@ -24,11 +23,10 @@ Instructions for canceling automatic renewal of a Twingate subscription via the 
 8. Click **Update Subscription**
 
 ## Gotchas
-- Cancellation is effectively a downgrade to Starter, not a full account deletion
-- No immediate refund or proration mentioned — subscription runs to end of term
-- Ensure you understand Starter plan limitations before canceling (feature loss may be immediate or at term end — not specified in this doc)
+- No immediate cancellation option — cancellation only stops renewal at term end
+- Downgrading to Starter may reduce feature access at term expiration
+- No mention of refund eligibility in this documentation
 
 ## Related Docs
 - Billing settings
-- Plan comparison (Starter vs paid tiers)
-- Subscription management
+- Plan management / upgrades

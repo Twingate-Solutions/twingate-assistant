@@ -1,57 +1,45 @@
-## Manually Verified Devices
+# Manually Verified Devices
 
-How to mark devices as Trusted via Admin Console or API when no MDM/EDR Trust Method is available -- e.g., for contractor BYOD or test devices.
+## Summary
+Twingate admins can manually verify devices via Admin Console or API using two methods: serial number verification (recommended) or device instance verification. Serial number verification applies to any device matching that serial number; device instance verification applies only to a specific user-device combination.
 
-### Two Verification Modes
+## Key Information
+- **Serial number verification**: Verifies all devices sharing a serial number; recommended for most cases
+- **Device instance verification**: Verifies only a specific user-device combination; use when device lacks a unique or any serial number
+- Serial numbers can be bulk uploaded before or after devices sign in (pre-verification supported)
+- Both archived and blocked devices can be manually verified; verification status persists through archive/block actions
 
-**Serial Number Verification** (recommended for most cases)
-- Any device matching that serial number is considered verified
-- Useful for company-issued hardware where the serial is the canonical identifier
-- Bulk-uploadable via the Devices > Serial Numbers tab in Admin Console
-- Can be uploaded **before or after** the device first signs in to Twingate -- pre-verification is supported
+## Configuration Locations
+| Action | Location |
+|--------|----------|
+| Bulk upload serial numbers | Admin Console → Devices → Serial Numbers tab |
+| Device instance verification | Admin Console → Devices tab (per device) or device details page |
 
-**Device Instance Verification** (for edge cases)
-- Verifies a specific user-device combination only
-- Other devices with the same serial number are NOT considered verified
-- Use when:
-  - Device has no serial number
-  - Device has a non-unique serial (rare; mostly virtual machines)
+## Behavior Rules / Gotchas
+- If you serial-number-verify a device that was previously device-instance-verified, it becomes a **serial number verified** device (instance verification is replaced)
+- If you later **delete** that serial number, the device loses verification entirely — it does **not** revert to device instance verified
+- Devices with no serial number can only use device instance verification
+- Verification is retained when a device is archived or blocked, but can still be manually applied to archived/blocked devices
 
-### Workflow
+## Step-by-Step: Serial Number Bulk Upload
+1. Navigate to **Devices** → **Serial Numbers** tab in Admin Console
+2. Upload serial numbers (CSV or similar bulk format)
+3. Devices matching those serial numbers are marked verified immediately
 
-**Bulk Upload Serial Numbers:**
-- Admin Console -> Devices -> Serial Numbers tab -> upload (CSV/list)
+## Step-by-Step: Device Instance Verification
+1. Navigate to **Devices** tab in Admin Console
+2. Select the target device or open its details page
+3. Choose the device instance verification option
 
-**Verify a Specific Device:**
-- Devices tab -> select the device -> Verify
-- OR: device's detail page -> Verify
-- Choose serial number verification or device instance verification
+## Decision Guide
+| Scenario | Use |
+|----------|-----|
+| Standard managed devices with serial numbers | Serial number verification |
+| Device has no serial number | Device instance verification |
+| Device has non-unique serial number | Device instance verification |
+| Pre-provisioning before user enrollment | Serial number verification (bulk upload) |
 
-### State Interactions
-
-| Action | Effect |
-|---|---|
-| Verify a serial number that's also a device instance verified device | Becomes serial-number-verified (more permissive) |
-| Verify the serial then **delete** it | Device loses verification -- **does NOT** revert to instance-verified |
-| Archive or block a verified device | Manual verification is **retained** through state changes |
-| Manually verify an archived/blocked device | Allowed -- verification persists for future activation |
-
-### Decision Notes
-
-- **Always prefer serial number verification** unless the device genuinely lacks a unique serial
-- For BYOD contractors: serial number verification works as long as you can collect serials at onboarding
-- For VMs / cloud workstations without unique serials: device instance verification is the right answer
-- Pre-verification (uploading serials before first sign-in) speeds up onboarding -- new hires can sign in and immediately satisfy Trusted Profiles
-
-### Gotchas
-
-- Deleting a serial doesn't restore the previous instance-verified state -- you'd have to re-verify the instance manually
-- Manual verification is **per device**, not per user -- if the device passes to another user (rare), it remains verified
-- Archived/blocked + manually verified devices retain their verification -- be deliberate about delete-vs-archive
-
-### Related Docs
-
-- /docs/trusted-devices -- Trusted Devices policy rule
-- /docs/device-security-guide -- Trusted Profiles model with Manual Trust as a Trust Method
-- /docs/managing-devices -- Devices tab + active/archived/blocked states
-- /docs/api-overview -- API for programmatic verification
+## Related Docs
+- Device Trust / Device Policies
+- Admin Console – Devices tab
+- Twingate API (for programmatic verification)

@@ -1,41 +1,33 @@
-## Internet Security Overview
+# Internet Security Overview
 
-Twingate's Internet Security feature set focuses on **DNS encryption (DoH)** and **DNS filtering** at the network level on user devices. Available on **macOS, Windows, Linux** desktop Clients only.
+## Page Title
+Internet Security Overview
 
-### Two Core Capabilities
+## Summary
+Twingate offers DNS-over-HTTPS (DoH) as an internet security feature for desktop users, encrypting all DNS traffic system-wide without requiring per-application configuration. The feature operates at the network level on user devices, covering all applications automatically.
 
-| Capability | What It Does | Plan |
-|---|---|---|
-| **DoH (DNS-over-HTTPS)** | Encrypts all device DNS traffic via the Twingate Client | All plans |
-| **DNS Filtering** | Blocks malicious / unwanted domains at the DNS layer | Business / Enterprise (add-on) |
+## Key Information
+- Current capability: DNS encryption via DNS-over-HTTPS (DoH)
+- Supported platforms: Windows, macOS, Linux (desktop only)
+- Operates system-wide — encrypts all DNS traffic regardless of originating application
+- No configuration changes required on end-user side beyond running the Twingate Client
+- More internet security capabilities planned for future releases
 
-### Mobile / Headless Limitations
+## Prerequisites
+- Twingate Client installed on supported desktop OS (Windows, macOS, or Linux)
+- User must be part of a Twingate network
 
-- Mobile Clients (iOS, Android, ChromeOS) **do NOT** currently support DoH or DNS Filtering
-- **Headless Clients** (running with Service Account) never use DoH -- by design, since service workloads typically need direct DNS
+## Exclusions / Gotchas
+- **Headless clients in service account mode will never use DoH** — regardless of platform
+- Mobile platforms not supported for DoH
+- Feature is desktop-only; no mention of support for mobile or browser-based clients
 
-### How It Works
+## Configuration Values
+- No end-user configuration required
+- Admin configuration available via the DoH configuration guide (linked separately)
 
-The Twingate Client operates at the **network level** on the device, intercepting DNS traffic regardless of application. Unlike browser-based DNS encryption (which only protects browser traffic), Twingate DoH protects:
-- Browser DNS lookups
-- App DNS lookups (Slack, Zoom, etc.)
-- CLI DNS lookups (`curl`, `dig` -- when targeting public DNS)
-- OS-level lookups
-
-No per-application configuration required -- run the Client and it works.
-
-### Setup
-
-Both capabilities are configured in **Admin Console -> Internet Security**:
-
-- **DoH**: see /docs/dns-security for resolver options + fallback behavior
-- **DNS Filtering**: see /docs/dns-filtering for blocklist/allowlist + threat categories
-- **Always-on Internet Security**: see /docs/internet-security-client-configuration for keeping protection enabled when users are signed out
-
-### Related Docs
-
-- /docs/dns-security -- DoH configuration
-- /docs/dns-filtering -- DNS filtering rules + threat categories
-- /docs/internet-security-client-configuration -- Machine Keys for always-on
-- /docs/nextdns-configuration, /docs/doh-cloudflare -- Third-party DoH/filter integrations
-- /docs/browser-security -- Browser-layer security (companion)
+## Related Docs
+- [DNS Filtering Guide](https://www.twingate.com/docs/dns-filtering)
+- [DoH Configuration Guide](https://www.twingate.com/docs/doh-configuration)
+- DNS and Twingate (how Twingate handles DNS internally)
+- Headless Clients / Service Accounts documentation

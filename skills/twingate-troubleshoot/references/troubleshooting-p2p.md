@@ -1,92 +1,66 @@
-## Troubleshooting Peer-to-Peer Connections
+# Troubleshooting Peer-to-Peer Connections
 
-Diagnostic playbook for when peer-to-peer (P2P) Twingate connections fail to establish, forcing fallback to **Relay** transport. Diagnoses NAT traversal issues.
+## Summary
+Twingate uses NAT traversal for peer-to-peer connections between Clients and Connectors. Four main conditions can prevent P2P from working: blocked UDP/QUIC, blocked IP/port ranges, double NAT, or incompatible NAT types. No firewall ports need to be opened inbound for either P2P or relay traffic.
 
-### Background
+## Key Information
+- P2P uses UDP/QUIC; relay traffic uses TCP to a shared relay server
+- Both Client and Connector must have endpoint-independent NAT for P2P to function
+- If P2P fails, Twingate falls back to relay transport automatically
+- QUIC is more commonly blocked on the Connector side than Client side
 
-Twingate has two transport mechanisms:
-- **Peer-to-peer**: direct Client <-> Connector via NAT traversal -- preferred for performance
-- **Relay**: indirect via Twingate Relay servers -- fallback when P2P fails
+## Four Root Causes
 
-Neither requires inbound firewall rules. P2P specifically uses **NAT traversal** (UDP/QUIC), which can be blocked by various network conditions.
+### 1. UDP/QUIC Blocked
+- QUIC (UDP-based) must be allowed on both sides
+- Test QUIC support: https://quic.nginx.org/
+- Start troubleshooting on the Connector side
 
-### Four Common Causes of P2P Failure
+### 2. Outbound Rules Too Restrictive
+- Connectors must send UDP to **any IP address** (client IPs unknown in advance)
+- Must allow UDP to **any port** (NAT devices assign random ports)
+- Verify prerequisites from the network requirements doc
 
-1. **UDP or QUIC blocked** (either side)
-2. **Outbound IP/port restrictions** (either side)
-3. **Double NAT** (Client side, typically)
-4. **Incompatible NAT type** (endpoint-dependent)
+### 3. Double NAT
+- Two NAT devices in front of a single Client breaks P2P
+- Common when users add their own router on top of ISP-provided equipment
+- UDP's stateless nature makes multi-layer NAT mappings brittle
 
-### Diagnostic Order
+### 4. Incompatible NAT Type
+- Requires **endpoint-independent NAT** on both sides
+- Endpoint-dependent NAT assigns different ports per destination — breaks P2P
 
-#### 1. Verify UDP & QUIC Are Not Blocked
+## Verification Steps
 
-Twingate uses **QUIC over UDP** for NAT traversal. Some firewalls block QUIC by default.
+**Check Connector NAT type (Admin Console):**
+- Navigate to Connectors → verify `STUN Discovery` shows `Available`
 
-**Test**: visit `https://quic.nginx.org/` from the Connector host (and Client host). Successful connection = QUIC works.
-
-**Most common offender**: Connector-side firewalls. Client-side QUIC blocking is rare.
-
-#### 2. Verify Outbound Rules
-
-Both Client and Connector must be able to send UDP packets to **any IP and any port** (NAT devices map random ports).
-
-Reference: /docs/firewalls-and-twingate has the full prerequisite list. Verify:
-- No outbound UDP block on the Connector side
-- No outbound UDP block on the Client side
-- No port-range filtering preventing high random ports
-
-#### 3. Check for Double NAT (Client Side)
-
-**Double NAT** = two NAT devices on the path (e.g., ISP router + your own router behind it).
-
-UDP is stateless; double NAT introduces brittle multi-hop port mappings that break P2P.
-
-**Resolution**: bridge mode on one of the NAT devices, or remove the second device.
-
-#### 4. Check NAT Types
-
-P2P requires **endpoint-independent NAT** on both ends. Endpoint-dependent NAT assigns different ports per destination -- breaks NAT traversal because the Client doesn't know which port the Connector is using for it.
-
-**Connector NAT type**: Admin Console -> Connector detail page -> **STUN Discovery** should be **Available**.
-
-**Client NAT type**: Client logs -- search for `stun_nat_type`:
+**Check Client NAT type (Client logs):**
 ```
 [INFO] [libsdwan] stun_nat_type: endpoint-independent
 ```
 
-If `endpoint-dependent`, P2P will not work for that Client.
+## Known Incompatible Appliances
 
-### Connector Behind Incompatible NAT
+| Appliance | Issue | Workaround |
+|-----------|-------|------------|
+| AWS NAT Gateway | Incompatible NAT type | Use Cohesive cloud NAT, fck-nat, alterNAT, or custom NAT gateway |
 
-**Known incompatible**: AWS NAT Gateway -- breaks NAT traversal.
+## Firewall Configuration for Endpoint-Independent NAT
 
-**Workarounds:**
-- Use a **third-party NAT solution**: Cohesive Cloud NAT, fck-nat, alterNAT
-- Build a custom NAT gateway (EC2 with `iptables MASQUERADE`)
+| Firewall | Setting |
+|----------|---------|
+| SonicWall | Enable "Consistent NAT" |
+| PaloAlto | Implement "Persistent NAT" |
+| OPNSense | Add Outbound NAT rule |
 
-**For enterprise firewalls** (Sonicwall, Palo Alto, OPNsense, etc.):
-- Sonicwall: configure **Consistent NAT**
-- Palo Alto: implement **Persistent NAT**
-- OPNsense: add an **Outbound NAT rule** with port preservation
-- Other firewalls: contact Twingate Support
+## Gotchas
+- Both sides (Client **and** Connector) must satisfy all conditions — one incompatible end breaks P2P for all sessions
+- QUIC being blocked is often silent; test explicitly with quic.nginx.org
+- Double NAT is easy to miss when users add home routers behind ISP equipment
+- P2P failure doesn't break connectivity (relay fallback exists) but may degrade performance
 
-### Decision Notes
-
-- P2P failure is functional but degrades performance/latency -- diagnose and fix for production
-- Always check **STUN Discovery: Available** in the Connector detail page first -- it's a quick yes/no
-- AWS NAT Gateway is the most common Connector-side issue for cloud deployments -- plan around it
-
-### Gotchas
-
-- Some "fixes" (like opening firewall ports) don't actually help if the NAT type itself is wrong -- always check NAT type before chasing firewall rules
-- Client-side double NAT is invisible to admins -- need to ask the user to check their home network setup
-- Endpoint-dependent NAT can be inherent to ISP equipment -- only fix is bridge mode or different network
-
-### Related Docs
-
-- /docs/how-nat-traversal-works -- Deep dive on NAT traversal
-- /docs/peer-to-peer-communication-in-twingate -- P2P fundamentals
-- /docs/firewalls-and-twingate -- Firewall coexistence + outbound prerequisites
-- /docs/firewall-failures -- Sibling: when firewalls block P2P entirely
-- /docs/connector-best-practices -- Connector network requirements
+## Related Docs
+- How NAT Traversal Works (Twingate internal article)
+- Network Requirements / Prerequisites
+- Twingate Relay documentation

@@ -1,56 +1,61 @@
 # How to Cloak a Bastion Server
 
 ## Summary
-Removes public internet exposure from a bastion server by routing all access through a Twingate Connector deployed on the same private subnet. Users retain their existing workflow (same DNS name, same SSH commands) while the bastion becomes inaccessible without Twingate authentication.
+Removes public internet exposure of a bastion server by routing all access through a Twingate Connector on the same private subnet. Users retain the same workflow (same hostname) while firewall rules restrict ingress to Connector traffic only.
 
 ## Key Information
-- Connector must be on the same private subnet as the bastion
-- Deploy multiple Connectors for failover redundancy
-- Users experience zero workflow disruption throughout transition
-- Private DNS transition is optional but recommended to eliminate all public traces
+- Connector deployed on same private subnet as bastion
+- Firewall modified to allow only Connector IP on port 22
+- Public DNS optionally replaced with private DNS (recommended)
+- Zero workflow disruption for end users throughout transition
 
 ## Prerequisites
-- Existing bastion server on a private subnet with a public DNS record
+- Existing bastion server with public DNS and IP
 - Twingate admin console access
-- Ability to modify firewall rules and DNS records for the bastion
+- Ability to modify bastion firewall/security group rules
+- Ability to manage DNS records (public and private)
 
 ## Step-by-Step
 
 **1. Deploy Twingate Connector**
-- Deploy Connector on same private subnet as bastion (e.g., `10.1.0.50` on `10.1.0.0/24`)
-- Add firewall ingress rule on bastion's public IP interface: allow traffic from Connector IP (`10.1.0.50`) on port 22
+- Deploy Connector on same private subnet as bastion (`10.1.0.0/24`)
+- Deploy multiple Connectors for failover redundancy
+- Add firewall ingress rule: allow Connector IP (`10.1.0.50`) → bastion port 22
 
-**2. Designate Bastion as Resource**
-- Create Resource in Twingate admin console using the public DNS name (e.g., `bastion.beamreachinc.com`)
-- DNS resolution of the bastion name must be available from the Connector host
-- Create or assign a Group (e.g., "Bastion Access") and add authorized users
+**2. Add Bastion as Resource**
+- Create Resource in Twingate admin console using bastion's DNS name (`bastion.beamreachinc.com`)
+- DNS name must be resolvable from the Connector host
+- Assign Resource to a Group; add authorized users to that Group
 
-**3. Block Global Ingress Traffic**
-- Verify Twingate access works first
-- Remove all public ingress rules except the Connector allow rule
-- Bastion is now only reachable via Twingate-authorized connections
+**3. Verify Access via Twingate**
+- Confirm users can connect through Twingate client before blocking public access
 
-**4. [Optional] Transition to Private DNS**
+**4. Block Public Ingress**
+- Remove all public ingress firewall rules except the Connector allow rule
+- Only Twingate-authorized users can now initiate connections
+
+**5. [Optional] Transition to Private DNS**
 - Enable private DNS for the subnet (`10.1.0.0/24`)
 - Create private DNS record: `bastion.beamreachinc.com` → `10.1.0.214`
-- Delete the public DNS record
-- Release the public IP assignment from the bastion
+- Delete public DNS record for `bastion.beamreachinc.com`
+- Release the bastion's public IP assignment
 
-## Configuration Values
-| Parameter | Example Value |
-|-----------|---------------|
+## Configuration Values (Example)
+| Parameter | Value |
+|-----------|-------|
 | Private subnet | `10.1.0.0/24` |
 | Bastion private IP | `10.1.0.214` |
 | Connector IP | `10.1.0.50` |
-| Bastion DNS | `bastion.beamreachinc.com` |
+| Bastion hostname | `bastion.beamreachinc.com` |
 | Allowed port | `22` (SSH) |
 
 ## Gotchas
-- **Firewall routing**: While users still use the public DNS name, ensure firewall rules account for traffic resolving to the public IP—don't block this before private DNS is configured
-- **DNS resolution from Connector**: The Connector host must be able to resolve the bastion's DNS name; verify before completing setup
-- **Order matters**: Verify Twingate connectivity *before* blocking public ingress traffic
+- During transition (before private DNS), bastion's public DNS still resolves to public IP — ensure routing/firewall rules account for this
+- Do not block public ingress until Twingate access is verified working
+- Private DNS must be resolvable from the Connector host for the Resource to function
+- All redundant Connectors need identical firewall allow rules on the bastion
 
 ## Related Docs
-- Create a new Remote Network
-- Create a new Resource
-- Create a new Group
+- [Create a new Remote Network](https://www.twingate.com/docs)
+- [Create a new Resource](https://www.twingate.com/docs)
+- [Create a new Group](https://www.twingate.com/docs)

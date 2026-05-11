@@ -1,14 +1,22 @@
 # AWS: Reference Network Architecture
 
+## Page Title
+AWS: Reference Network Architecture for Secure Access with Twingate
+
 ## Summary
-Reference architecture for deploying Twingate Connectors in AWS VPC with minimal attack surface. Uses a public subnet for NAT/egress and a private subnet for Connectors and Resources. Two main deployment topologies available: public subnet with Elastic IP or private subnet with NAT.
+Reference architecture for deploying Twingate Connectors in AWS VPC with minimal attack surface. Uses a public subnet (NAT gateway only) and private subnet (Connectors + Resources). Two main deployment topologies: public subnet with Elastic IPs or private subnet behind NAT.
 
 ## Key Information
 - **Public subnet**: NAT gateway + Elastic IP + Internet Gateway (egress only)
-- **Private subnet**: Twingate Connector + internal Resources
-- No inbound connections into VPC; NAT gateway is the only public IP resource
+- **Private subnet**: Twingate Connector(s) + internal Resources
+- No inbound connections into VPC; NAT gateway is the only resource with public IP
 - Minimum 2 Connectors recommended for production redundancy
-- Access control policies defined via Twingate Admin Console
+- Standard AWS NAT gateway is **not** fully NAT-traversal friendly for P2P connections
+
+## Prerequisites
+- AWS VPC with at least one public and one private subnet
+- Security Groups configured to allow outbound connections to Twingate servers
+- Twingate Admin Console access for Resource/policy configuration
 
 ## Deployment Options
 
@@ -19,40 +27,23 @@ Reference architecture for deploying Twingate Connectors in AWS VPC with minimal
 | Private Subnet + NAT | Connectors behind NAT; NAT handles egress |
 
 ### Compute Options
-- **EC2**: Manual launch or automated via CloudFormation, Terraform, user data scripts
+- **EC2**: Manual launch or via CloudFormation/Terraform/user-data scripts
 - **ECS**: EC2 launch type (self-managed) or Fargate (serverless)
 
-## P2P Connectivity Gotchas
-- AWS standard NAT Gateway is **not NAT traversal friendly** — breaks Twingate P2P connections in some situations
-- Use alternative NAT solutions for P2P support:
-  - **Cohesive Networks VNS3** (AMI-based)
-  - **alterNAT** (AMI-based)
-  - **fck-nat** (self-hosted EC2, open-source)
-- Same outbound port/protocol rules apply regardless of deployment topology
+## Configuration Values
+- Outbound Security Group rules must permit Twingate relay server traffic (specific ports/protocols per [outbound rules docs])
+- Same outbound rules apply regardless of public vs. private subnet deployment
 
-## Security Group Requirements
-- Block all inbound connections to VPC
-- Allow outbound connections from NAT gateway to Twingate servers
-- Connector can reach Resources via TCP, UDP, ICMP within private subnet
-
-## Configuration Notes
-- NAT gateway should reside in a subnet **without** private Resources
-- Outbound rules for P2P traffic must be explicitly configured (specific ports/protocols — see Twingate firewall docs)
-
-## Infrastructure as Code
-- Terraform is the recommended deployment method
-- Twingate provides official Terraform configs: [Terraform AWS Deployment Guide](https://www.twingate.com/docs/terraform-aws-deployment)
-- Example repo: [Twingate Solutions Engineering Terraform Demo Repository](https://github.com/Twingate-Labs)
-
-## Prerequisites
-- AWS VPC with at least one public and one private subnet
-- Internet Gateway attached to VPC
-- Twingate account with Admin Console access
-- Connector tokens generated from Admin Console
+## Gotchas
+- **AWS NAT Gateway P2P limitation**: Standard AWS NAT gateway does not support NAT traversal reliably; use alternatives for P2P:
+  - AMI-based: Cohesive Networks VNS3, alterNAT
+  - Self-hosted EC2: fck-nat
+- NAT gateway should reside in a subnet without private Resources
+- Missing outbound rules on NAT gateway will break Connector functionality
 
 ## Related Docs
-- Twingate Connector on Amazon EC2
-- Twingate Connector on Amazon ECS
-- Terraform AWS Deployment Guide
-- NAT Traversal documentation
-- Twingate firewall/outbound port requirements
+- [Terraform AWS Deployment Guide](https://www.twingate.com/docs/terraform-aws)
+- [Twingate SE Terraform Demo Repository (GitHub)](https://github.com/Twingate-Labs)
+- [EC2 Connector Deployment](https://www.twingate.com/docs/aws-ec2)
+- [ECS Connector Deployment](https://www.twingate.com/docs/aws-ecs)
+- Twingate P2P / NAT Traversal documentation

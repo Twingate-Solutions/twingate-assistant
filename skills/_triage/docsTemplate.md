@@ -1,53 +1,56 @@
 <!-- triage: unassigned URL: https://www.twingate.com/docs/docsTemplate -->
 
-# Twingate Docs Template
+# Twingate Docs Template Reference
+
+## Page Title
+Article Components / Docs Template
 
 ## Summary
-This is Twingate's internal documentation template page demonstrating available markdown components and formatting conventions for doc authors. It serves as a reference for supported content types, styling rules, and component usage. Not intended as end-user documentation.
+This is Twingate's internal documentation template showcasing supported markdown and custom components for authoring docs pages. It serves as a formatting reference for contributors writing or updating documentation. No functional Twingate feature is described.
 
 ## Key Information
 
-- **Headers**: `#` for section headers, `##` for subsection headers; H5/H6 unsupported (render as body text)
-- **Lists**: Unordered lists for general content; ordered lists only when every item is sequentially followed by another list item (no images inside ordered lists)
-- **Code blocks**: Support click-to-copy behavior; available for both shell commands and JSON
-- **Callout types**: Success, Info, Extreme (use Extreme sparingly); requires blank line above/below body, no leading indentation
-- **Tabbed sections**: Supported for organizing related content into tabs
-- **Images**: Accept caption prop; captions max two lines; do not use captions for step-by-step instructions
-- **Integration logos**: Pre-built set including AWS, Azure AD, GCP, Kubernetes, Okta, Terraform, Jamf, and others
-- **YouTube embeds**: Supported inline
+**Heading Structure:**
+- `#` = Section header (major content chunks)
+- `##` = Subsection header (step-by-step guides, sub-chunks)
+- H5/H6 unsupported — render at body text size
+
+**Supported Markdown:**
+- Unordered lists, ordered lists, inline code, bold, italic
+- Tables with Attribute/Description/Platform columns
+- Fenced code blocks with click-to-copy
+
+**Custom Components:**
+- **Callouts** (3 types): Success, Info, Extreme — require blank line above/below body, no leading indentation
+- **Tabbed sections** for organizing related content (Getting Started / Advanced / Troubleshooting pattern)
+- **Images** with optional caption (max 2 lines; captions not for instructions)
+- **Embedded YouTube** videos
+- **Integration logo links** (Azure AD, AWS, GCP, Okta, Kubernetes, Terraform, etc.)
 
 ## Configuration Values (Example from Template)
 
-| Environment Variable | Description |
+| ENV Variable | Value |
 |---|---|
-| `TWINGATE_NETWORK` | Your Twingate subdomain |
-| `TWINGATE_ACCESS_TOKEN` | Access token for connector auth |
-| `TWINGATE_REFRESH_TOKEN` | Refresh token for connector auth |
+| `TWINGATE_NETWORK` | `<YOUR TWINGATE SUBDOMAIN>` |
+| `TWINGATE_ACCESS_TOKEN` | JWT token string |
+| `TWINGATE_REFRESH_TOKEN` | Refresh token string |
 
-Example container spec targets **Fargate**, `memory: 2048`, `cpu: 1024`, image: `twingate/connector:1`, network mode: `awsvpc`.
+Container spec: `twingate/connector:1`, 2048MB memory, 1024 CPU, `awsvpc` network mode, FARGATE compatible.
+
+## Step-by-Step Authoring Guide
+
+1. **Author content** — make changes only within the `/content` folder
+2. **Check formatting** — follow the Notion formatting guide (internal link referenced in template)
 
 ## Gotchas
 
 - Images inside ordered lists cause rendering issues — avoid
-- Extreme callouts **require** a blank line above and below the body text
-- No leading indentation allowed in callout body lines
-- H5/H6 headings render at body text size — effectively unsupported
-- Captions must not be used as instructional text in step-by-step guides
-
-## Step-by-Step Authoring Guide
-
-1. Author content using supported markdown components within the `/content` folder only
-2. Follow the formatting guide: [Twingate Internal Notion Doc](https://www.notion.so/twingate/How-to-Contribute-to-Docs-21d8a9f223c14af9960c2c0bdc433a5c)
-
-## Device Attribute Reference (Example Table)
-
-| Attribute | Description | Platforms |
-|---|---|---|
-| Name | User-set friendly name | Windows, macOS, iOS |
-| Hostname | DNS hostname (often based on device name) | Windows, macOS, Linux |
-| Make | Device manufacturer | macOS, Linux, iOS |
+- Ordered lists should only be used when every item is sequentially dependent
+- Extreme callouts require blank lines above/below and no line indentation
+- H5/H6 headings render as body text — use H4 or higher
+- Image captions must not be used for step instructions
 
 ## Related Docs
 
-- Twingate Internal Contribution Guide (Notion — internal access required)
-- Connector deployment documentation (ECS/Fargate)
+- Internal contributor guide: `notion.so/twingate/How-to-Contribute-to-Docs-...`
+- Twingate Connector CLI: `/usr/bin/twingate-notifier console`

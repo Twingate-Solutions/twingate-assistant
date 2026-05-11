@@ -1,70 +1,60 @@
-## Device Security Guide
+# Device Security Guide
 
-Reference for Twingate's two-tier device requirement model: **Minimum OS Requirements** (broad baseline) and **Trusted Profiles** (specific verification + posture). Both can gate sign-in and Resource access.
+## Summary
+Twingate device security lets admins define trusted device criteria using Minimum OS Requirements (native posture checks) and Trusted Profiles (advanced verification via MDM/EDR integrations). These definitions are applied at sign-in and/or per-Resource via Security Policies.
 
-### Two Categories of Device Requirements
+## Key Information
+- Two device security categories: **Minimum OS Requirements** (basic posture) and **Trusted Profiles** (advanced verification)
+- Default state: all platforms allowed, no posture checks enforced
+- Device requirements apply at two levels: sign-in authentication and individual Resource access
+- A device can satisfy multiple profiles simultaneously; policies gate which profiles are required per Resource
 
-**Minimum OS Requirements**
-- Configure baseline posture per platform: screen lock, HD encryption, AV, firewall, minimum OS version
-- Used to set the "floor" for any device accessing Twingate
-- Configurable per platform (Windows, macOS, Linux, iOS, Android)
-- Can also be used to **block** entire platforms (e.g., disallow Android entirely)
+## Prerequisites
+- Admin access to Twingate console
+- For Trusted Profiles with integrations: MDM/EDR (CrowdStrike, Intune, Jamf, Kandji, SentinelOne, 1Password) must be configured
 
-**Trusted Profiles**
-- Layered on top of Minimum OS — for Resources requiring stricter trust
-- Requires a **Trust Method** + optional additional posture checks
-- Trust Methods: Manual Trust, CrowdStrike, Intune, Jamf, Kandji, SentinelOne, 1Password
+## Device Posture Checks by Platform
 
-### The Wristband Analogy
+| Platform | Available Checks |
+|----------|-----------------|
+| Windows | HD Encryption, Screen Lock, Firewall, Antivirus, Min OS Version |
+| macOS | Screen Lock, Biometric, Firewall*, HD Encryption*, Min OS Version |
+| Linux | HD Encryption, Firewall |
+| iOS | Screen Lock, Biometric, Min OS Version |
+| Android | HD Encryption, Screen Lock, Biometric |
 
-Each device can have multiple "wristbands" -- one per Profile/Requirement it satisfies:
-- Meets macOS Minimum OS Requirements -> 1 wristband
-- Meets macOS Minimum OS + macOS CrowdStrike Trusted Profile -> 2 wristbands
+*macOS standalone app only
 
-**Sign-in to Twingate**: any wristband suffices.
-**Resource access**: only wristbands explicitly allowed by the Resource Policy work.
+## Trusted Profile Verification Methods
+- Manual Trust
+- CrowdStrike
+- Intune
+- Jamf
+- Kandji
+- SentinelOne
+- 1Password
 
-This means a device can sign in to Twingate but still be blocked from a specific Resource if that Resource requires a Profile the device doesn't satisfy.
+## Resource Policy Device Options
+- **Any Device** – passes if device meets any Minimum OS Requirement or Trusted Profile
+- **Only Trusted Devices** – requires Trusted Profile match only
+- **Custom** – specify exact set of allowed profiles/requirements
 
-### Common Configuration Scenarios
+## Common Configuration Patterns
 
-| Scenario | Minimum OS | Trusted Profiles |
-|---|---|---|
-| Allow only macOS + iOS with basic posture | Block Windows/Android/Linux; configure posture for macOS+iOS | Resource Policy uses "All Devices" |
-| Employees trusted, contractors not | Posture checks for contractor-grade requirements | Trusted Profiles for employee platforms with Manual Trust; Resource Policies separate employee vs. contractor Resources |
-| Allow Android only for specific test devices | Block Android | Trusted Profile for Android with Manual Trust + test devices marked verified |
-| MDM/EDR-only macOS access | Block macOS in Minimum OS | Trusted Profile for macOS requiring CrowdStrike (or Jamf/Kandji/Intune); apply this Profile to Resources macOS users need |
+| Goal | Approach |
+|------|----------|
+| Block specific OS platforms | Set Minimum OS Requirement for that platform to blocked |
+| Employees trusted, contractors not | Trusted Profile (Manual Trust) for employees; Minimum OS Requirements for contractors |
+| MDM/EDR required for access | Block platform in Min OS Requirements; create Trusted Profile requiring MDM integration |
+| Allowlist specific devices on blocked OS | Block OS in Min OS Requirements; create Trusted Profile with Manual Trust for exceptions |
 
-### Resource Policy Device Setting
+## Gotchas
+- Blocking a platform in Minimum OS Requirements does not block devices with a matching Trusted Profile — Trusted Profiles can override OS-level blocks
+- Firewall and HD Encryption checks on macOS are **only available in the standalone app**, not the browser extension
+- Sign-in requires meeting minimum authentication requirements in addition to device security requirements
+- Devices failing any required check are blocked from both sign-in and Resource access
 
-Three options when creating a Resource Policy:
-- **Any Device** -- meets either Minimum OS or any Trusted Profile
-- **Only Trusted Devices** -- meets at least one Trusted Profile (the most common production setting)
-- **Custom** -- meets a specific subset of Profiles/Requirements
-
-If the device fails all required wristbands, it's blocked from the Resource.
-
-### Default Configuration
-
-Out of the box: all platforms allowed, no posture checks. **Tighten this per /docs/security-policies-best-practices** before going to production.
-
-### Decision Notes
-
-- **Most production deployments**: Minimum OS = baseline posture + block unused platforms; Trusted Profiles = per (OS, EDR) combination; Resource Policies = "Only Trusted Devices" for sensitive Resources, "Any Device" for low-risk
-- For BYOD contractors without EDR: create a Trusted Profile with Manual Trust + native posture checks; mark contractor devices verified in the Admin Console
-- Always combine posture checks with Trusted Profiles -- relying on posture alone via Minimum OS doesn't capture EDR/MDM signal
-
-### Gotchas
-
-- Minimum authentication requirements still apply on top of device requirements -- a device can be wristband-eligible but blocked by MAR
-- Manual Trust devices stay verified until explicitly un-verified -- they don't auto-expire; build a process to revoke when devices are decommissioned
-- macOS standalone Client supports more posture checks than the App Store version -- choose deliberately
-
-### Related Docs
-
-- /docs/device-posture-checks -- Per-platform posture check details
-- /docs/trusted-devices -- Trusted Devices policy rule
-- /docs/manually-verified-devices -- Manual Trust workflow
-- /docs/managed-devices -- MDM/EDR Trust Method integrations
-- /docs/security-policies, /docs/security-policies-best-practices -- Policy model + risk-tier design
-- /docs/crowdstrike-configuration, /docs/intune-configuration, /docs/jamf-configuration, /docs/kandji-configuration, /docs/sentinelone-configuration, /docs/1password-configuration -- Per-Trust-Method setup
+## Related Docs
+- Security Policies
+- Device Posture Data Collection
+- MDM/EDR Integration setup (CrowdStrike, Intune, Jamf, Kandji, SentinelOne, 1Password)

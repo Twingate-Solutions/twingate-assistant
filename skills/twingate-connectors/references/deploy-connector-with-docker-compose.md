@@ -1,36 +1,36 @@
 # Deploy Connector with Docker Compose
 
 ## Summary
-Deploys a Twingate Connector as a Docker Compose service using environment variables for authentication. Supports optional configuration for logging, analytics, ping handling, and syslog forwarding.
+Deploys a Twingate Connector as a Docker Compose service. Requires Access Token and Refresh Token generated from the Admin Console. Supports optional parameters for logging, analytics, restart behavior, and syslog forwarding.
 
 ## Prerequisites
-- Docker and Docker Compose installed
 - Access Token and Refresh Token (generated via Connector deployment flow in Admin Console)
 - Twingate tenant name (`<name>` from `https://<name>.twingate.com`)
+- Docker and Docker Compose installed
 
 ## Configuration Values
 
 ### Required Environment Variables
 | Variable | Description |
 |---|---|
-| `TWINGATE_NETWORK` | Tenant name (subdomain only) |
+| `TWINGATE_NETWORK` | Tenant name (not full URL) |
 | `TWINGATE_ACCESS_TOKEN` | Generated connector access token |
 | `TWINGATE_REFRESH_TOKEN` | Generated connector refresh token |
 
 ### Optional Environment Variables
-| Variable | Value | Description |
+| Variable | Value | Purpose |
 |---|---|---|
-| `TWINGATE_LOG_LEVEL` | `3` | Verbose logging for troubleshooting |
-| `TWINGATE_LOG_ANALYTICS` | `v2` | Enable Network Events in container logs |
+| `TWINGATE_LOG_LEVEL` | `3` (recommended) | Detailed logs for troubleshooting |
+| `TWINGATE_LOG_ANALYTICS` | `v2` | Enables Network Events in container logs |
 
-### Optional Compose Fields
-| Field | Value | Description |
+### Optional Compose-Level Settings
+| Setting | Value | Purpose |
 |---|---|---|
 | `restart` | `always` | Auto-restart on crash |
-| `network_mode` | `host` or `bridge` | `host` enables local peer-to-peer |
+| `network_mode` | `host` or `bridge` (default) | `host` enables local peer-to-peer |
 | `sysctls: net.ipv4.ping_group_range` | `"0 2147483647"` | Enables ICMP/ping to Resources |
 
-## Minimal Template
+## Minimal Configuration
 ```yaml
 services:
   twingate-connector:
@@ -41,7 +41,7 @@ services:
       - TWINGATE_REFRESH_TOKEN=<REFRESH TOKEN>
 ```
 
-## Recommended Template
+## Recommended Configuration
 ```yaml
 services:
   twingate_connector:
@@ -59,7 +59,7 @@ services:
       net.ipv4.ping_group_range: "0 2147483647"
 ```
 
-## Syslog Forwarding Addition
+## Syslog Forwarding
 ```yaml
     logging:
       driver: syslog
@@ -71,12 +71,12 @@ services:
 ```
 
 ## Gotchas
-- `network_mode: host` is required for local peer-to-peer connections; default `bridge` mode does not support this
-- `net.ipv4.ping_group_range` sysctl must be set explicitly if using ping-based connectivity testing to Resources
+- `network_mode: host` is required for **local** peer-to-peer connections; default `bridge` mode does not support this
+- `net.ipv4.ping_group_range` sysctl must be explicitly set if using ping for Resource connectivity testing
+- Peer-to-peer connections are recommended to avoid Fair Use Policy bandwidth limits
 - `container_name` should match the Connector name in Admin Console for easier identification
-- Peer-to-peer connections are recommended to stay within Fair Use Policy bandwidth limits
 
 ## Related Docs
-- How to deploy a Connector (token generation)
-- Twingate Connector logs (log level values)
-- Support peer-to-peer connections
+- [How to Deploy a Connector](https://www.twingate.com/docs/connector) (token generation)
+- [Twingate Connector Logs](https://www.twingate.com/docs/connector-logs) (log level options)
+- [Support Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)

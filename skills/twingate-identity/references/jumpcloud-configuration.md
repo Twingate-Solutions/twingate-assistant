@@ -1,71 +1,64 @@
-## JumpCloud Configuration
+# JumpCloud Configuration
 
-How to integrate JumpCloud with Twingate -- SAML user authentication + SCIM user/group sync.
+## Page Title
+JumpCloud Configuration (SAML + SCIM Integration)
 
-**Plan Requirement:**
-- **Business or Enterprise** Twingate plans only
+## Summary
+Twingate integrates with JumpCloud to synchronize user accounts (via SCIM) and delegate authentication (via SAML). Only users and groups assigned to the Twingate app in JumpCloud can access Twingate resources. Available on Business and Enterprise plans only.
 
-### What's Delegated to JumpCloud
+## Key Information
+- **Authentication**: SAML (delegated to JumpCloud)
+- **Provisioning**: SCIM (user/group sync from JumpCloud)
+- **Scope**: Only JumpCloud users/groups associated with the Twingate app gain access
 
-- **User authentication** via SAML
-- **User and group synchronization** via SCIM
+## Prerequisites
+- Twingate Business or Enterprise plan
+- JumpCloud admin console access
+- Twingate Admin Console access
 
-Only users and groups associated with the Twingate app in JumpCloud can use Twingate.
+## Step-by-Step Setup
 
-### Three-Step Setup
+1. **Create Twingate app in JumpCloud** admin console
+2. **Exchange metadata** in Twingate Admin Console:
+   - Upload Twingate-provided `.xml` file to JumpCloud
+   - Enter JumpCloud-provided metadata URL into Twingate
+   - Set login URL within JumpCloud
+   - Select initial group of JumpCloud users to sync
+3. **Configure SCIM provisioning** in JumpCloud:
+   - Copy Twingate-provided SCIM endpoint and token
+   - Paste into the **Identity Management** section of the JumpCloud Twingate application
 
-**Step 1: Create the Twingate Application in JumpCloud Admin Console**
+## Selective Group Sync (Post-Setup)
 
-**Step 2: Complete & Validate Configuration in Twingate Admin Console**
-- Exchange SAML metadata:
-  - Twingate provides a `.xml` metadata file
-  - JumpCloud provides a metadata URL
-- Set the Login URL within JumpCloud
-- Select an initial group of JumpCloud users to sync to Twingate
+**Path**: JumpCloud Admin Portal → User Authentication → SSO Applications → Twingate → User Groups tab
 
-**Step 3: Set Up SCIM in JumpCloud's Twingate Application**
-- Copy the **SCIM endpoint** and **SCIM token** from Twingate
-- Paste into the **Identity Management** section of the Twingate app in JumpCloud
+1. Check boxes next to groups to sync
+2. Click **Save**
+3. Groups and their members sync automatically to Twingate
 
-### Selective Group Sync (Post-Setup)
+- Use **"show bound User Groups"** checkbox to review already-selected groups
 
-After initial integration, change which JumpCloud groups sync to Twingate:
+## Certificate Renewal
 
-1. JumpCloud admin portal -> **User Authentication > SSO Applications**
-2. Open the Twingate application
-3. **User Groups** tab
-4. Check boxes next to groups you want to sync
-5. **Save**
+1. In Twingate Admin Console: select **"Renew Certificate"**
+2. Renew certificate in JumpCloud Twingate application
+3. In Twingate Admin Console modal: select **"Confirm Certificate Renewal"**
 
-Once saved, the selected groups + their members sync automatically to Twingate.
+## Configuration Values
+| Item | Source | Destination |
+|------|--------|-------------|
+| Twingate `.xml` metadata file | Twingate Admin Console | JumpCloud |
+| JumpCloud metadata URL | JumpCloud | Twingate Admin Console |
+| SCIM endpoint | Twingate Admin Console | JumpCloud Identity Management |
+| SCIM token | Twingate Admin Console | JumpCloud Identity Management |
+| Login URL | Twingate | JumpCloud app config |
 
-**Tip**: Use the **show bound User Groups** checkbox on the User Groups page to see what's currently synced.
+## Gotchas
+- Users/groups **not** assigned to the JumpCloud Twingate app cannot use Twingate at all
+- Certificate renewal requires a **specific sequence** — initiate in Twingate first, renew in JumpCloud second, then confirm back in Twingate
+- Plan gating: integration unavailable on Starter plan
 
-### Renewing JumpCloud SAML Certificates
-
-When a SAML certificate is approaching expiry:
-
-1. Twingate Admin Console -> **Renew Certificate**
-2. Renew the certificate in the Twingate application within JumpCloud
-3. Back in Twingate -> **Confirm Certificate Renewal** in the modal
-
-This dual-renewal flow ensures continuity -- old cert remains valid until the new one is confirmed.
-
-### Decision Notes
-
-- JumpCloud is the right IdP if your team already uses it for device + identity management; for IdP-only environments, Okta or Entra ID may be more flexible
-- For SaaS app gating: see /docs/saas-app-gating-with-jumpcloud (uses JumpCloud Conditional Lists)
-- Use Selective Group Sync to keep Twingate's user list scoped -- syncing all JumpCloud groups can clutter the Admin Console
-
-### Gotchas
-
-- SAML cert renewals can break sign-in if not done in lockstep -- always follow the dual-renewal flow
-- SCIM token in JumpCloud is sensitive -- rotate periodically; treat as a credential
-- Users not in the Twingate app's assigned groups cannot sign in -- check JumpCloud group membership if users report sign-in failures
-
-### Related Docs
-
-- /docs/identity-providers -- IdP overview
-- /docs/saas-app-gating-with-jumpcloud -- SaaS app gating with JumpCloud
-- /docs/scim-provisioning-api -- SCIM mechanics
-- /docs/groups -- Synced Groups behavior
+## Related Docs
+- Twingate pricing page (for plan eligibility)
+- SCIM provisioning documentation
+- SAML configuration guides

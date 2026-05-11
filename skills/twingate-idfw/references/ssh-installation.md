@@ -1,57 +1,47 @@
-## Installing Privileged Access for SSH
+# Installing Privileged Access for SSH
 
-How to deploy the Twingate Gateway and configure SSH Resources -- the recommended path is the Twingate Terraform provider, which publishes complete runnable examples.
+## Summary
+Deploy Twingate's SSH Gateway using the Terraform provider across AWS, DigitalOcean, or GCE. The Gateway acts as an SSH certificate authority (CA), signing certificates for access control. Production deployments should use HashiCorp Vault as the CA instead of a local CA.
 
-**Recommended Approach:**
-- Use the Twingate Terraform provider with one of the published quick-start examples
-- Each example includes the full Terraform config + startup scripts + step-by-step instructions
+## Key Information
+- Primary deployment method is Twingate Terraform provider with cloud-specific example configurations
+- Two CA modes: **Local SSH CA** (Gateway holds private key, signs directly) and **Vault SSH CA** (production-recommended)
+- Terraform guides include full configuration, startup scripts, and deployment instructions
+- After deployment, supports remote IDE development via VS Code, JetBrains Gateway, and Cursor
 
-**Prerequisites:**
-- Twingate account with admin privileges
-- An existing Remote Network in Twingate
+## Prerequisites
+- Twingate account with administrator privileges
+- A configured Remote Network in Twingate
+- Twingate Client at minimum required version
 - Terraform installed
-- Twingate Client meeting IDFW SSH minimum versions (see /docs/ssh-privileged-access-overview)
 
-**Quick-Start Guides (Local SSH CA):**
+## Deployment Options
 
-| Guide | Cloud | Notes |
-|---|---|---|
-| Local SSH CA on AWS | AWS EC2 | Fastest to try |
-| Local SSH CA on DigitalOcean | DO Droplets | Lowest-cost option |
-| Local SSH CA on GCE | Google Compute Engine | If you're already in GCP |
+### Local SSH CA (Quick-Start)
+| Cloud | Guide |
+|-------|-------|
+| AWS | Local SSH CA on AWS |
+| DigitalOcean | Local SSH CA on DigitalOcean |
+| Google Compute Engine | Local SSH CA on GCE |
 
-All three use a **Local SSH CA** -- the Gateway holds the SSH CA private key and signs certificates directly. Good for evaluation and simple production setups.
+### Vault SSH CA (Production)
+- Use HashiCorp Vault's SSH secrets engine for certificate signing
+- Requires separate Vault integration setup
 
-**For Production -- Vault as SSH CA:**
-- Use HashiCorp Vault's SSH secrets engine to sign certificates
-- Keeps the SSH CA private key off the Gateway disk
-- Provides audit logging of every certificate issuance
-- See the **Vault integration guide** (linked from this doc)
+## Step-by-Step (General Flow)
+1. Ensure prerequisites are met (admin account, Remote Network, Terraform)
+2. Select cloud provider and follow corresponding Terraform guide
+3. Apply Terraform configuration (includes Gateway setup + startup scripts)
+4. Configure SSH Resources accessible through the Gateway
+5. Optionally configure IDE integration for remote development
 
-**What the Terraform Modules Provision:**
-- Gateway VM/container with the Twingate Gateway image
-- X.509 CA for the Gateway
-- SSH CA (local mode by default; configurable for Vault)
-- Twingate Resources for each SSH host
-- Group / access bindings for SSH Resources
-- The Connector that fronts the Gateway's Remote Network
+## Gotchas
+- Local SSH CA stores the private key on the Gateway itself — not suitable for production use
+- Vault CA integration requires additional setup steps documented separately
+- Twingate Client must meet **minimum version requirements** (check docs for specific version)
 
-**After Installation:**
-- Gateway pod / VM is running
-- SSH Resources appear in the Admin Console with type indicating Gateway-served
-- Users with Group access can `ssh user@<resource-fqdn-or-ip>` after enabling SSH Auto-Sync in their Twingate Client
-- See /docs/ssh-remote-development for VS Code / JetBrains / Cursor IDE setup
-
-**Decision: Local SSH CA vs. Vault**
-- **Local CA**: simpler, fewer moving parts -- pick for getting started
-- **Vault**: production-grade -- pick if you have compliance requirements (key off-disk), already use Vault, or want central CA management across multiple Gateways
-
-**Gotchas:**
-- Don't roll your own Gateway deployment -- use the Terraform modules; they handle Gateway-specific bootstrap (registration with the Twingate Controller, X.509 CA association, log forwarding)
-- Plan for **session log retention** -- Gateway writes asciicast logs to stderr; you must forward + store them externally (Fluent Bit / Vector / SIEM)
-- For HA, deploy multiple Gateways behind the same Connector / Remote Network
-
-**Related Docs:**
-- /docs/ssh-privileged-access-overview -- Concepts + components
-- /docs/ssh-remote-development -- IDE integration after Gateway is running
-- /docs/identity-firewall -- IDFW overview
+## Related Docs
+- Twingate Terraform Provider
+- Vault Integration Guide (SSH CA)
+- Remote Development with Twingate SSH (VS Code, JetBrains, Cursor)
+- Twingate Client minimum version requirements

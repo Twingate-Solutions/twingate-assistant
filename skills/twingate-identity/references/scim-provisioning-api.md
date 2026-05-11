@@ -1,116 +1,80 @@
-## SCIM Provisioning API
+# Twingate SCIM Provisioning API
 
-Reference doc for Twingate's SCIM 2.0 API. **Not for self-serve use** -- this exists to support the supported IdP integrations (Okta, Entra ID, OneLogin, JumpCloud, Google Workspace).
+## Summary
+Twingate supports SCIM 2.0 for automated user provisioning via identity provider integrations. This API enables managing users and groups through standard SCIM endpoints. Not intended for self-serve use—designed for supported IdP integrations.
 
-### Base URL
+## Key Information
+- Base URL: `https://{network}.twingate.com/api/scim/v2/`
+- Supports SCIM 2.0
+- Rate limit: 25 requests/second per account
+- Only most recently generated bearer token is valid
+- Supports both `application/scim+json` and `application/json` content types
 
+## Prerequisites
+- Twingate network name
+- Bearer token generated from Twingate Admin console
+
+## Configuration Values
+
+**Authorization Header:**
 ```
-https://{network}.twingate.com/api/scim/v2/
-```
-
-`{network}` = your Twingate subdomain. Example for `autoco.twingate.com`:
-```
-https://autoco.twingate.com/api/scim/v2/
-```
-
-`v2` = SCIM 2.0 (the only supported version).
-
-### Authentication
-
-- **Long-lived bearer token** required on every request
-- Header: `Authorization: Bearer <token>`
-- Token created and rotated in the Twingate Admin Console
-- **Only the most recent token is valid** -- creating a new token immediately invalidates the prior one
-
-Example:
-```
-GET /Users?count=100
-Host: <network>.twingate.com
-Accept: application/scim+json
-Authorization: Bearer h480dj...s93hd8
+Authorization: Bearer {token}
 ```
 
-### User Resource
+## API Endpoints
 
-**Attributes:**
+### Users
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/Users` | Search/filter users (paginated) |
+| POST | `/Users` | Create user |
+| GET | `/Users/{id}` | Retrieve user |
+| PUT | `/Users/{id}` | Replace user |
+| PATCH | `/Users/{id}` | Modify user |
+| DELETE | `/Users/{id}` | Delete user |
 
-| Twingate User | SCIM Attribute | Required | Unique |
-|---|---|---|---|
-| Twingate ID | `id` | Yes | Yes |
-| Origin ID | `externalId` | Yes | Yes |
-| Email | `emails[primary eq true]` | No | No |
-| First name | `name.givenName` | No | No |
-| Last name | `name.lastName` | No | No |
-| Active | `active` | No | No |
-| Username | `userName` | Yes | Yes |
+**User Attributes:**
+| SCIM Attribute | Required | Unique |
+|----------------|----------|--------|
+| `id` | Yes | Yes |
+| `externalId` | Yes | Yes |
+| `userName` | Yes | Yes |
+| `emails[primary eq true]` | No | No |
+| `name.givenName` | No | No |
+| `name.lastName` | No | No |
+| `active` | No | No |
 
-**Email handling**: Twingate stores **one** email -- looks for `primary=true` first, then `type="work"`.
+### Groups
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/Groups` | Search/filter groups (paginated) |
+| POST | `/Groups` | Create group |
+| GET | `/Groups/{group-id}` | Retrieve group |
+| PUT | `/Groups/{group-id}` | Replace group |
+| PATCH | `/Groups/{group-id}` | Modify group |
+| DELETE | `/Groups/{group-id}` | Delete group |
 
-**Operations:**
-- `GET /Users` -- search/filter users (pagination supported)
-- `POST /Users` -- create a user
-- `GET /Users/{id}` -- retrieve a user
-- `PUT /Users/{id}` -- replace a user
-- `PATCH /Users/{id}` -- modify a user
-- `DELETE /Users/{id}` -- delete a user (hard delete in Twingate)
+**Group Attributes:**
+| SCIM Attribute | Required | Unique |
+|----------------|----------|--------|
+| `displayName` | Yes | No |
+| `id` | Yes | Yes |
+| `members` | No | No |
 
-`{id}` = the Twingate user ID returned in the SCIM `id` field.
+## Gotchas
+- Only one email value stored from multi-valued `emails`; Twingate selects `primary=true` or `type="work"`
+- Only the most recently generated token is valid—rotating tokens invalidates previous ones
+- `{id}` in user endpoints is Twingate's internal ID (from `id` field), not `externalId`
+- `DELETE /Users/{id}` permanently deletes the user in Twingate
 
-### Group Resource
+## Unsupported Operations
+- `/.search` POST endpoint
+- `/Bulk` endpoint
+- `/Me` endpoint
+- Sorting in filter queries
+- `attributes` and `excludedAttributes` query params
 
-**Attributes:**
-
-| Twingate Group | SCIM Attribute | Required | Unique |
-|---|---|---|---|
-| Group name | `displayName` | Yes | No |
-| Members | `members` | No | No |
-| Twingate ID | `id` | Yes | Yes |
-
-**Operations:**
-- `GET /Groups` -- search/filter groups (pagination supported)
-- `POST /Groups` -- create a group
-- `GET /Groups/{group-id}` -- retrieve a group
-- `PUT /Groups/{group-id}` -- replace a group
-- `PATCH /Groups/{group-id}` -- modify a group
-- `DELETE /Groups/{group-id}` -- delete a group (hard delete in Twingate)
-
-### Content Type
-
-Both supported:
-- `application/scim+json` (per RFC-7644 section 8.1)
-- `application/json`
-
-### Errors
-
-Error responses follow **RFC-7644 section 3.12** (standard SCIM error format).
-
-### Rate Limits
-
-- **25 requests/second per Twingate account**
-
-### Limitations (Not Supported)
-
-- `/.search` endpoint (POST-based queries) -- RFC-7644 section 3.4.3
-- `/Bulk` endpoint -- RFC-7644 section 3.7
-- `/Me` endpoint -- RFC-7644 section 3.11
-- Sorting on filter queries -- RFC-7644 section 3.4.2.3
-- `attributes` and `excludedAttributes` query params -- RFC-7644 sections 3.4.2.5 and 3.9
-
-### Decision Notes
-
-- For supported IdPs: use the dedicated configuration guides (Okta SCIM, Entra ID, OneLogin SCIM, etc.) -- they handle the underlying API for you
-- Only use the SCIM API directly for **custom integrations** when no supported IdP fits (rare)
-- Token rotation: deliberately the previous token becomes invalid when generating a new one -- always plan a sync window if rotating in production
-
-### Gotchas
-
-- Rotating the SCIM token invalidates the active token immediately -- coordinate with the IdP to update the token without lost sync
-- Hard deletes (DELETE) cannot be undone -- prefer `active=false` PATCH for soft deletion if your IdP supports it
-- Email handling defaults: only one email is stored; multi-email users may surprise you
-- The 25 req/s rate limit applies per Twingate account; bulk operations need careful pacing
-
-### Related Docs
-
-- /docs/identity-providers -- Supported IdP integrations (preferred over direct SCIM use)
-- /docs/okta-scim-configuration, /docs/onelogin-configuration-scim -- Per-IdP SCIM setup
-- /docs/api-overview -- Twingate Admin GraphQL API (separate from SCIM)
+## Related Docs
+- [SCIM Configuration](https://www.twingate.com/docs/scim-configuration)
+- [Supported IdP Integrations](https://www.twingate.com/docs/identity-provider-integration)
+- RFC-7644 (SCIM Protocol)

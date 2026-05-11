@@ -1,61 +1,47 @@
-## Cloudflare DoH + DNS Filtering with Twingate
+# How to Configure Cloudflare DoH and DNS Filtering with Twingate
 
-How to point Twingate's DoH at a Cloudflare Zero Trust Gateway DNS Location, enabling Cloudflare's DNS filtering policies for DNS traffic flowing through Twingate.
+## Summary
+Integrates Cloudflare Zero Trust DNS-over-HTTPS (DoH) and DNS filtering with Twingate by configuring a Cloudflare DNS location and adding its DoH URL as a custom resolver in Twingate's Admin Console.
 
-### Prerequisites
+## Key Information
+- Requires a Cloudflare Zero Trust account (trial account sufficient)
+- Cloudflare handles DNS filtering via Gateway Policies; Twingate consumes the DoH endpoint
+- DNS filtering rules in Cloudflare are optional — DoH protection works without them
 
-- Cloudflare **Zero Trust** account (a trial account works)
-- Twingate tenant with DoH support
+## Prerequisites
+- Active Cloudflare Zero Trust account (trial acceptable)
+- Access to Twingate Admin Console
+- Familiarity with Twingate custom DoH resolver configuration
 
-### Setup
+## Step-by-Step
 
-**Step 1: Add a DNS Location in Cloudflare**
+1. **Create a DNS Location in Cloudflare**
+   - Navigate to Cloudflare Zero Trust dashboard → **Gateway** → **DNS Locations**
+   - Add a new DNS location and save
 
-- Cloudflare Zero Trust dashboard -> **Gateway -> DNS Locations**
-- Add a new DNS location
-- Save and close
+2. **Retrieve the Custom DoH URL**
+   - Return to **Gateway** → **DNS Locations**
+   - Click the newly created location
+   - Copy the **DNS over HTTPS** URL
 
-**Step 2: Retrieve the DoH URL**
+3. **Configure DNS Filtering Rules (Optional)**
+   - Navigate to **Policies** in Cloudflare Zero Trust dashboard
+   - Create desired filtering policies
 
-- Open the newly created DNS location
-- Copy the **DNS over HTTPS** URL (the custom DoH endpoint Cloudflare assigns to your location)
+4. **Add DoH URL to Twingate**
+   - In Twingate Admin Console, add the Cloudflare DoH URL as a custom DoH provider
+   - Follow Twingate's "Configure a Custom DoH resolver" documentation
 
-**Step 3 (Optional): Set Up DNS Filtering Rules**
+## Configuration Values
+| Parameter | Source | Notes |
+|-----------|--------|-------|
+| DoH URL | Cloudflare DNS Location detail page | Unique per location; format: `https://<id>.cloudflare-gateway.com/dns-query` |
 
-- **Gateway -> Policies**
-- Create policies for content blocking, security filters, etc.
-- These policies apply to all traffic flowing through this DNS Location
+## Gotchas
+- The DoH URL is location-specific — must copy from the correct location after creation, not during
+- DNS filtering policies are Cloudflare-side configuration; Twingate only uses the DoH endpoint
+- Cloudflare Zero Trust trial accounts are sufficient but may have policy or query limits
 
-**Step 4: Configure Twingate with the Cloudflare DoH URL**
-
-- Twingate Admin Console
-- Add the Cloudflare custom DoH URL as a custom DoH provider
-- See /docs/dns-security for the Custom DoH resolver configuration steps
-
-### Result
-
-When users connect to Twingate, their DNS traffic flows:
-- Twingate Client -> Cloudflare DoH endpoint -> Cloudflare Gateway -> filter decision -> resolution
-
-Cloudflare's filter decisions apply (block, allow, log) before the DNS response returns.
-
-### Decision Notes
-
-- Use this pattern when you want **DNS-layer security policies** without standing up your own filter infrastructure
-- Cloudflare's free tier covers basic filtering; advanced features (custom rules, identity-based policies) require paid Zero Trust plans
-- For NextDNS-based filtering: see /docs/nextdns-configuration (similar pattern)
-- For Twingate-native DNS filtering on Business/Enterprise plans: see /docs/dns-filtering
-
-### Gotchas
-
-- DoH URLs are **per DNS Location** in Cloudflare -- if you have multiple locations, each has its own URL; pick one for Twingate or use Cloudflare's network-detection feature
-- DNS-only filtering doesn't catch direct-IP traffic -- combine with HTTPS inspection or block at firewall layer for full coverage
-- The Cloudflare Zero Trust trial is time-limited -- plan paid subscription before relying on this in production
-
-### Related Docs
-
-- /docs/dns-security -- Twingate Custom DoH resolver setup
-- /docs/dns-filtering -- Twingate-native DNS filtering
-- /docs/nextdns-configuration -- NextDNS sibling pattern
-- /docs/internet-security -- Internet Security overview (DoH context)
-- /docs/internet-security-client-configuration -- Client-side DoH config
+## Related Docs
+- [Configure a Custom DoH Resolver in Twingate](https://www.twingate.com/docs/custom-doh) — required next step
+- Cloudflare Zero Trust Gateway DNS Locations documentation
