@@ -1,54 +1,55 @@
 # Reviewing Access Requests
 
 ## Summary
-Access Requests are generated via JIT access workflows or Usage-Based Auto Lock policies. Authorized reviewers approve or deny these requests through the Admin Console or direct email links. The review process is identical regardless of request origin.
+Access Requests occur during JIT access workflows or when a Resource is locked via Usage-Based Auto Lock policy. Designated admins and Resource Approvers can review and approve requests through the Admin Console or via email links. All review workflows use the same process regardless of request origin.
 
 ## Key Information
-- Resolved requests are visible for 90 days after resolution
-- Resource Approvers have **no Admin Console access** except the Access Requests page
-- Resource Approvers always receive email notifications (not configurable)
-- Admin roles receive configurable notifications; Resource Approvers do not
-- Open requests trigger a red dot on the bell icon in Admin Console
+- Access Requests page shows all open requests plus resolved requests from the last 90 days
+- Red dot on bell notification icon in Admin Console indicates pending requests
+- Resource Approvers only see the Access Requests page — no other Admin Console access
+- Email notifications to Resource Approvers always fire and cannot be configured/disabled
+- Admin role notifications can be configured; Resource Approver notifications cannot
 
-## Who Can Review Requests
+## Who Can Approve Requests
 
-| Role | Scope |
-|------|-------|
-| Admin | All users, all resources |
-| DevOps | All users, all resources |
-| Access Reviewer | All users, all resources |
-| Resource Approver | Any user, assigned resources only |
+**Full Admin roles (all Users and Resources):**
+- Admins
+- DevOps
+- Access Reviewer
 
-## Configuring Resource Approvers
+**Resource Approvers:**
+- Members of assigned Groups
+- Can only approve requests for Resources they are explicitly assigned to
+- No Admin Console access beyond Access Requests page
 
-**Prerequisites:** Admin Console access
+## Assigning Resource Approvers
 
 **Steps:**
 1. Navigate to the Resource page in Admin Console
 2. Open the Resource Approvers dialog
-3. Assign one or more Groups as Resource Approvers
+3. Assign one or more Groups as approvers
 
 **Behavior:**
-- All members of assigned Group(s) can review requests for that resource
-- Resource Approvers log in via standard URL (e.g., `https://autoco.twingate.com`)
-- They see only the Access Requests page upon login
+- All members of assigned Group(s) can review requests for that Resource
+- Resource Approvers can still log in via the standard Admin Console URL (e.g., `https://autoco.twingate.com`)
+- Assign purpose-specific Groups to keep delegation scoped appropriately
 
-## Reviewing Requests
+## Reviewing Access Requests
 
 **Access methods:**
-- Bell icon (red dot indicates pending requests) → Access Requests page
-- Direct link in email notification
-- User page in Admin Console (shows open requests per user)
-- Resource page in Admin Console (shows all open requests for all users)
+1. **Bell icon** — Red dot indicates open requests; click to navigate to Access Requests page
+2. **Email link** — Direct link in notification email to log in and review specific request
+3. **User page** — Admins can review open requests per user
+4. **Resource page** — Admins can see all open requests across all users for a Resource
 
 ## Gotchas
-- Resource Approver notifications cannot be disabled or reconfigured — always email
-- Assign purpose-specific Groups as Resource Approvers to avoid over-delegation
-- Resource Approvers cannot access any other Admin Console functionality
-- Email notifications contain direct login links — typical workflow doesn't require navigating the console manually
+- Resource Approvers **always** receive email notifications — no way to suppress or configure this
+- Recommend creating Groups specifically tailored to the delegation use case rather than reusing existing broad Groups
+- Resource Approvers logging into the Admin Console URL will only land on the Access Requests page — no other navigation available
+- Resolved requests are only visible for 90 days
 
 ## Related Docs
-- JIT Access Workflow
-- Usage-Based Auto Lock Policy
-- Admin Roles
-- Notifications Configuration
+- JIT Access workflow
+- Usage-Based Auto Lock policy
+- Admin roles reference
+- Notifications configuration

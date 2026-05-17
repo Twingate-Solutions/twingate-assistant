@@ -7,32 +7,33 @@ VPN Replacement Use Case
 Twingate replaces traditional VPNs by providing zero-trust, application-level access to private corporate resources across office networks, cloud VPCs, and other infrastructure. It deploys in under 15 minutes without hardware procurement or network reconfiguration, and can coexist with existing VPN solutions during testing/migration.
 
 ## Key Information
-- **No open network ports required** — eliminates public internet attack surface present in VPN gateways
-- **Split tunnel by default** — only traffic destined for internal resources routes through Twingate (vs. VPN full-tunnel)
-- **Application-level access control** — more granular than network-level VPN access; reduces lateral movement risk
+- **No open network ports required** — eliminates common public internet attack vectors
+- **Split tunnel by default** — only routes traffic destined for internal resources through corporate network (vs. VPN full tunnel)
+- **Application-level access controls** — more granular than VPN's network-level access; reduces lateral movement risk
+- **Deployment time**: Under 15 minutes using a single lightweight Connector host
 - **MFA and device posture checks** supported for third-party SaaS apps
-- **Deployment time**: under 15 minutes using a single lightweight Connector host
-- **Infrastructure-as-code support**: Terraform, Kubernetes, Pulumi
 - **Central Admin Console** for access management and activity monitoring
+- **Infrastructure-as-code support**: Terraform, Kubernetes, Pulumi
 
 ## Prerequisites
-- A host within the target network to deploy the Connector component
-- Identity Provider (IdP) for user authentication (supported: Okta, JumpCloud, Entra ID/Azure AD, OneLogin, Google)
-- No hardware procurement or network configuration changes needed
+- A host within the target network to deploy the Connector
+- Identity Provider (optional but recommended for rollout): Okta, JumpCloud, Entra ID (Azure AD), OneLogin, or Google
 
-## Deployment Environments
-| Environment | Guide Available |
-|-------------|----------------|
-| AWS | Yes |
-| Azure | Yes |
-| GCP | Yes |
-| Site-to-site | Yes |
-| Vendor/contractor access | Yes |
+## Deployment Environments (Linked Guides)
+- AWS
+- Azure
+- GCP
+- Site-to-site connections
+- Vendor/contractor access management
+
+## Configuration Values
+- No specific env vars or CLI flags listed on this page
+- See environment-specific guides for configuration details
 
 ## Gotchas
-- Twingate is **split tunnel by default** — verify this aligns with policy requirements before full rollout
-- Existing VPN does **not** need to be removed before testing Twingate — safe parallel deployment
-- VPN gateways require frequent patching for vulnerabilities; Twingate's no-open-ports architecture avoids this maintenance burden
+- No need to remove existing VPN before testing — Twingate can run alongside current VPN solution
+- VPNs require frequent patching for gateway vulnerabilities; Twingate avoids this by eliminating open ports
+- Traditional VPNs expose full network access; Twingate scopes access per application/resource
 
 ## Related Docs
 - [How to Replace the AWS VPN with Twingate]
@@ -41,4 +42,4 @@ Twingate replaces traditional VPNs by providing zero-trust, application-level ac
 - [How to Secure Private Resources in AWS / Azure / GCP]
 - [Twingate vs VPN] (architecture comparison)
 - [Twingate vs MeshVPN] (architecture comparison)
-- Identity Provider integration docs: Okta, JumpCloud, Entra ID, OneLogin, Google
+- Identity Provider integrations: Okta, JumpCloud, Entra ID, OneLogin, Google

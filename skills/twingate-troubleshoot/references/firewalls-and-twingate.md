@@ -1,51 +1,50 @@
 # How Firewalls Work with Twingate
 
 ## Summary
-Twingate replaces the traditional VPN+firewall combination for user flows by handling both connectivity and access control in a single solution. Unlike VPNs, Twingate never grants users a network presence—traffic to unauthorized Resources never leaves the device. Firewalls remain recommended for machine-to-machine flows within the same network.
+Twingate replaces the traditional VPN+firewall combination for user flows by handling both connectivity and access control in a single solution. Unlike VPNs, Twingate never places users on the private network, making lateral movement and scanning attacks impossible. Firewalls remain recommended for machine-to-machine flows within the same network.
 
 ## Key Information
 
-- **VPN model**: Connectivity only; firewalls add access control on top via IP-based rules
-- **Twingate model**: Connectivity + access control unified; users never get a local IP on the private network
-- **Lateral movement prevention**: User devices cannot scan or probe the network—unauthorized traffic is blocked at the client before leaving the device
-- **Machine-to-machine flows**: Protected via Twingate Service Accounts for cross-environment communication; firewalls still recommended for same-network app-to-app traffic
-- **Logging**: Real-time connection logs capture identity, source IP, Resource, protocol, port, Connector, Remote Network, and timestamp
-- **Admin Console security**: Dedicated Security Policy for admin access + Admin Actions Report (full audit trail of create/delete/edit/connect events)
-
-## VPN vs. Twingate Firewall Role Comparison
-
-| Concern | VPN + Firewall | Twingate |
-|---|---|---|
-| User connectivity | VPN | Twingate Client |
-| User access control | Firewall (IP rules) | Resources + Security Policies |
-| Lateral movement risk | High without firewall rules | Virtually eliminated |
-| Machine-to-machine (cross-env) | Firewall rules | Service Accounts |
-| Machine-to-machine (same network) | Firewall | **Still use firewall** |
-| Anomaly detection | Firewall alerts | Real-time connection logs → SIEM |
-
-## Configuration Values
-
-- **Resources**: Define with specific protocols and ports (not broad network ranges)
-- **Security Policies**: Applied per Resource; configure auth frequency, 2FA requirements
-- **Admin Console Policy**: Dedicated Security Policy with stricter re-authentication
-- **Logging integration**: Export real-time connection logs to a SIEM
-
-## Gotchas
-
-- Twingate does **not** replace firewalls for same-network machine-to-machine flows—firewalls still needed there
-- Resources should be **tightly scoped** (specific IPs, protocols, ports)—broad Resource definitions undermine access control benefits
-- Only traffic through authorized Connector connections is logged; blocked attempts never reach the network and won't appear in network-layer logs
-- Admin Console is a high-value target; apply a strict dedicated Security Policy to it
+- **VPN limitation**: VPNs handle connectivity only; firewalls must be added separately to enforce access control
+- **Twingate difference**: Users are never assigned a local IP or placed on the private network — unauthorized traffic never leaves the device
+- **Resource model**: Each Resource should be tightly defined with specific protocols and ports (replaces firewall rules for user flows)
+- **Machine-to-machine flows**: Twingate Service Accounts protect cross-environment M2M communication; firewalls still recommended for same-network M2M flows
+- **Logging**: Real-time connection logs capture user identity, device info, source IP, Resource, protocol, port, Connector, Remote Network, and timestamp
+- **Admin Console security**: Dedicated Security Policy for admin access + Admin Actions Report (full audit trail of all create/delete/edit/connect events)
 
 ## Prerequisites
 
-- Resources defined with specific protocols/ports
-- Security Policies configured per Resource and for Admin Console
-- SIEM integration recommended for real-time monitoring of connection logs
+- Twingate Resources defined with specific protocols and ports
+- Security Policies configured per user group or Resource
+- For M2M: Service Accounts configured
+- For monitoring: SIEM integration recommended
+
+## Architecture Comparison
+
+| Concern | VPN Approach | Twingate Approach |
+|---|---|---|
+| Connectivity | VPN | Twingate Client |
+| User access control | Firewall rules on IP ranges | Security Policies + Resource definitions |
+| M2M (cross-environment) | Firewall | Service Accounts |
+| M2M (same network) | Firewall | Firewall (still recommended) |
+| Anomaly detection | Firewall alerts | Real-time connection logs → SIEM |
+
+## Gotchas
+
+- Twingate only logs traffic through authorized connections via Connectors — unauthorized attempts never reach the network so they won't appear in logs
+- Same-network M2M flows are **not** covered by Twingate; firewalls still required there
+- Resources must be tightly scoped (specific ports/protocols) to replicate firewall-level granularity — broad Resource definitions reduce security benefit
+- Admin Console is a high-value target; apply a stricter Security Policy with frequent re-auth and enforce 2FA
+
+## Configuration Values
+
+- **Security Policy**: Assign one specifically for Admin Console access
+- **Real-time connection logs fields**: user email, device info, public IP, Resource, protocol, port, Connector, Remote Network, timestamp, event type
+- **Admin Actions Report**: covers all Twingate objects (Connector, Device, Group, API Keys, Remote Network, Resource, Service Account, User)
 
 ## Related Docs
 
-- [Security Policies](https://www.twingate.com/docs/security-policies)
-- [Real-time Connection Logs](https://www.twingate.com/docs/real-time-logs)
-- [Admin Actions Report](https://www.twingate.com/docs/admin-actions-report)
-- [Service Accounts](https://www.twingate.com/docs/service-accounts)
+- Security Policies
+- Real-time Connection Logs
+- Service Accounts
+- Admin Actions Report

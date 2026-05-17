@@ -1,37 +1,41 @@
 # Twingate & PCI DSS Compliance
 
 ## Summary
-Twingate is not validated as PCI DSS compliant but does not need to be for organizations subject to PCI DSS to use it. Twingate's role as a TPSP (third-party service provider) is limited: relays route end-to-end encrypted traffic without decryption capability, and PCI DSS Requirement 12.8 does not mandate that TPSPs themselves be PCI DSS compliant.
+Twingate is not itself validated as PCI DSS compliant but does not need to be for organizations subject to PCI DSS to use it. Twingate acts as a third-party service provider (TPSP) and its PCI DSS obligations depend on its specific role in handling cardholder data. Organizations must manage Twingate under PCI DSS Requirement 12.8 (TPSP monitoring), not require full compliance validation.
 
 ## Key Information
-- Twingate traffic uses end-to-end encryption; Relays cannot decrypt, store, or process cardholder data content
-- Connections are peer-to-peer when possible; Relays only used under specific network conditions
-- Per PCI DSS v4.0.1 (p.15): TPSPs that route-only encrypted data without cryptographic key access **may have no PCI DSS responsibility** for that data
-- Per PCI DSS v4.0.1 (p.16) and PCI SSC FAQ: Requirement 12.8 requires customers to **monitor** TPSP compliance status, not require TPSPs to be PCI DSS compliant
-- Twingate being "in scope" ≠ Twingate must be fully PCI DSS compliant
-- Twingate can help fulfill **Requirement 7.3** (access control system for in-scope system components)
+- Twingate uses end-to-end encryption; Relays route encrypted traffic but **cannot decrypt, store, or process** cardholder data
+- Connections are peer-to-peer when possible; Relays only involved under certain network conditions
+- Per PCI DSS v4.0.1 (p.15): TPSPs that only route encrypted cardholder data without access to keys **may have no PCI DSS responsibility** for that data
+- Per PCI DSS v4.0.1 (p.16): **Requirement 12.8 does not require TPSPs to be PCI DSS compliant** — only that customers monitor TPSP compliance status
+- If Twingate provides access controls to CDE components, it is "in scope" but that doesn't require full PCI DSS validation
+- Twingate can help satisfy **Requirement 7.3** (access control systems for in-scope components)
 
 ## Scope Determination
 
-| Scenario | Twingate Relay PCI Scope |
-|----------|--------------------------|
-| No cardholder data transits Twingate | Out of scope |
-| Encrypted cardholder data transits Relays (no key access) | May be treated as public/untrusted network |
-| Twingate provides access controls to CDE components | In scope as TPSP (limited requirements) |
+| Scenario | PCI DSS Impact |
+|----------|---------------|
+| No cardholder data transits Twingate | Relays out of scope |
+| Encrypted cardholder data routed through Relays | Twingate has no decryption access; may be treated as untrusted network |
+| Twingate provides access controls to CDE | In scope as TPSP; customer manages via Req. 12.8 |
 
 ## Prerequisites
-- Organization must identify which PCI DSS requirements they intend to fulfill using Twingate
-- Must manage Twingate as a TPSP per **Requirement 12.8** (monitoring compliance status)
+- Identify which PCI DSS requirements you intend Twingate to fulfill
+- Establish TPSP monitoring process per Requirement 12.8
+- Document Twingate's role relative to your cardholder data environment
 
 ## Gotchas
-- If Twingate fulfills a specific PCI DSS requirement on behalf of a customer (e.g., network security controls), that service's compliance **directly impacts the customer's assessment**
-- TPSPs storing cardholder data on behalf of customers face stricter obligations — Twingate does **not** store cardholder data
-- Twingate has no visibility into whether relay traffic contains cardholder data due to end-to-end encryption
+- "In scope" ≠ "must be fully PCI DSS compliant" — these are distinct concepts
+- If Twingate fulfills specific PCI DSS requirements on your behalf (e.g., network security controls), those requirements are in scope for your assessment and Twingate's compliance of **that service** affects your compliance
+- Twingate cannot know if data transiting Relays contains cardholder data due to encryption
+- TPSPs that store cardholder data have additional obligations — Twingate does not store cardholder data
 
 ## Configuration Values
-None applicable — compliance posture is architectural, not configuration-dependent.
+No specific env vars or CLI flags. Relevant PCI controls:
+- **Requirement 7.3**: Access control system management (Twingate can fulfill this)
+- **Requirement 12.8**: TPSP monitoring and management obligations
 
 ## Related Docs
 - [PCI DSS v4.0.1 Requirements and Testing Procedures](https://www.pcisecuritystandards.org) — "Use of Third-Party Service Providers" section
-- PCI SSC FAQ: "How is an entity's PCI DSS compliance impacted by using TPSPs?"
-- Twingate contact: support for PCI-specific questions
+- PCI Security Standards Council FAQ: "How is an entity's PCI DSS compliance impacted by using TPSPs?"
+- Contact Twingate directly for compliance questions

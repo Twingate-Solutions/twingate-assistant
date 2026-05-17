@@ -1,44 +1,39 @@
 # Private Resources in Kubernetes
 
 ## Page Title
-Private Resources in Kubernetes - Access Private Services Within a K8s Cluster
+Private Resources in Kubernetes: Access Private Services Within a K8s Cluster
 
 ## Summary
-Deploy Twingate Connectors inside a Kubernetes cluster via Helm Chart to enable authorized users to access internal K8s services without public internet exposure. Users access services using internal IPs or K8s cluster DNS names through Twingate Resources.
+Deploy Twingate Connectors inside a Kubernetes cluster via Helm Chart to enable access to internal K8s services. Users access services through their internal IPs or cluster DNS names without public internet exposure.
 
 ## Key Information
-- Connectors must be deployed **inside** the K8s cluster (not external)
-- Resources can be defined using internal service IPs or K8s cluster-internal DNS addresses
-- No public internet exposure required for the target services
-- Access control managed via Twingate Resource permissions
+- Connectors must be deployed **inside** the K8s cluster to reach internal services
+- Resources can be defined using either internal service IP or K8s cluster-internal DNS addresses
+- Access is scoped to authorized Twingate users only
 
 ## Prerequisites
-- Kubernetes cluster running
-- Helm installed
-- Twingate account with admin access
-- Twingate Helm Chart (available on GitHub)
+- A Twingate account with a configured network
+- Helm installed and configured for your K8s cluster
+- Access to the Twingate Helm Chart repository (GitHub)
 
 ## Step-by-Step
 
-1. **Deploy Connector(s)** inside the K8s cluster using the Twingate Helm Chart
-   - Reference the Helm Chart deployment guide in the Twingate GitHub repository
-
+1. **Deploy Connector(s)** inside the K8s cluster using the Twingate Helm Chart (see linked GitHub repo for deployment steps)
 2. **Create a Twingate Resource** using either:
    - Internal service IP address
    - K8s cluster-internal DNS address (e.g., `service-name.namespace.svc.cluster.local`)
-
-3. **Grant user access** to the defined Resource — users can then reach the service via its internal IP or DNS name
+3. **Grant user access** to the Resource — authorized users can then reach the service via its internal IP or DNS name
 
 ## Configuration Values
-- **Resource address**: Internal K8s service IP or cluster DNS name
-  - DNS format example: `<service>.<namespace>.svc.cluster.local`
+- **Resource address formats:**
+  - Internal IP: `10.x.x.x`
+  - K8s DNS: `<service>.<namespace>.svc.cluster.local`
 
 ## Gotchas
-- Connector must be deployed **inside** the cluster so it can reach cluster-internal DNS and IPs
-- K8s cluster-internal DNS names are not resolvable outside the cluster — Connector placement inside the cluster is what makes this work
-- Multiple Connectors can be deployed for redundancy (recommended)
+- Connector must be deployed **within** the cluster — external Connectors cannot resolve cluster-internal DNS names or reach internal service IPs
+- No specific port/protocol restrictions mentioned; configure Resource definitions accordingly in the Twingate admin console
 
 ## Related Docs
-- [Twingate Helm Chart deployment guide (GitHub)](https://github.com/Twingate/helm-charts)
-- Twingate Resource creation documentation
-- Connector deployment documentation
+- [Twingate Helm Chart (GitHub)](https://github.com/Twingate/helm-charts) — Connector deployment steps
+- Twingate Resource configuration docs
+- Helm Chart deployment guide

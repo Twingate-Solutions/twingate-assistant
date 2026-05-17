@@ -1,56 +1,56 @@
 # Best Practices for Whitelisting Traffic to Public Resources
 
 ## Summary
-Twingate replaces IP whitelisting for public resources by routing authorized user traffic through Connectors with static IPs. Access control is managed centrally via the Admin Console, eliminating per-user IP management. Users can access resources from any location without admin intervention.
+Twingate replaces legacy IP whitelisting for public resources by routing authorized user traffic through Connectors with static IPs. Access control is managed centrally in the Admin Console, eliminating per-user IP management.
 
 ## Key Information
-- Solves IP whitelisting problems for public internet resources (staging sites, SaaS apps with source whitelisting)
-- Traffic from authorized users routes through Connector hosts with known static IPs
-- Access tied to identity provider authentication, not source IP
-- Works regardless of user's physical location or network
+- Use case: Restrict access to public internet resources (staging sites, SaaS apps with source IP whitelisting)
+- Traffic is routed through Connector hosts with known static IPs, which are whitelisted at the resource
+- Users can access from any location without admin IP updates
+- Access tied to identity (via IdP) rather than device/network IP
 
-## Problems Solved vs Legacy IP Whitelisting
-- No per-user IP collection or updates needed
-- Users can work from any location without admin changes
-- Eliminates overly broad shared IPs (office NAT, coworking spaces)
-- Single source of truth for access control (Admin Console vs IP lists)
-- Easy revocation via group membership changes
+## Problems This Solves
+- User IPs are dynamic (especially remote/home workers)
+- IP changes require admin intervention per user
+- Shared IPs (office NAT) grant overly broad access
+- Large IP lists are hard to maintain and audit
+- No clear signal for when to revoke IP access
 
-## Step-by-Step Implementation
+## Step-by-Step
 
-### Step 1: Configure Connector with Static IP
-1. Create a **Remote Network** in Twingate Admin Console
+**Step 1: Whitelist Connector IPs at the target resource**
+1. Create a Remote Network in Twingate Admin Console
 2. Deploy Connectors in that Remote Network
-3. Assign static external IP(s) to Connector hosts (e.g., static NAT gateway IP in AWS)
-4. Whitelist those static IPs in your public resource or SaaS application
+3. Assign static external IPs to Connector hosts (e.g., via AWS NAT Gateway Elastic IP)
+4. Add those static IPs to the whitelist of your public resource or SaaS app
 
-### Step 2: Restrict Access via Admin Console
-1. Create a **Resource** in Twingate pointing to your public resource URL/address
+**Step 2: Restrict access via Twingate RBAC**
+1. Create a Resource in Twingate pointing to the public resource's address
 2. Associate the Resource with the Remote Network from Step 1
-3. Create a **Group** with authorized users
-4. Associate the Group with the Resource
+3. Create a Group with authorized users
+4. Assign the Group access to the Resource
 
 ## Configuration Values
-| Component | Value |
-|-----------|-------|
-| Remote Network | Maps to Connector deployment location |
-| Static IP source | NAT gateway public IP of Connector's private network |
+| Component | Value/Action |
+|-----------|-------------|
+| Remote Network | Logical grouping for Connectors with static IPs |
+| Resource | Public URL/IP of the target service |
+| Static IP source | NAT gateway public IP (cloud provider dependent) |
 | Access control | Group membership in Admin Console |
 
 ## Prerequisites
-- Twingate Connectors deployed in a cloud environment supporting static IPs
-- Ability to configure IP whitelisting on target public resource/SaaS app
 - Twingate Admin Console access
-- Identity Provider configured in Twingate
+- Connectors deployed in a cloud environment supporting static public IPs
+- Ability to configure IP whitelisting on target resource/SaaS app
+- Identity Provider configured in Twingate (for user authentication)
 
 ## Gotchas
-- Static IP must be assigned at the **NAT gateway level**, not the Connector instance itself — the Connector's egress IP is the gateway's public IP
-- All authorized users share the same egress IPs (the Connector hosts); whitelist at resource must allow those IPs
-- Users must be **both** connected to Twingate **and** in an authorized Group — connection alone is insufficient
-- Cloud-specific configuration required for static IPs (see AWS guide for example)
+- Static IP must be assigned at the **network/NAT gateway level**, not the Connector instance itself — Connector sees private IP
+- Multiple Connectors in one Remote Network may have different public IPs; whitelist **all** of them
+- See separate AWS guide for configuring Elastic IPs on NAT gateways
 
 ## Related Docs
-- [Configuring static public IP addresses in AWS](#) (referenced in page)
+- [Configuring Static Public IPs in AWS](#) (linked in source)
 - Remote Networks configuration
-- Resource creation
-- Group management
+- Groups and Resource access control
+- Identity Provider integration

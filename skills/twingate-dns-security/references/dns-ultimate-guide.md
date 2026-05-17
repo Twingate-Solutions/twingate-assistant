@@ -4,36 +4,41 @@
 The Ultimate Guide to DNS & Twingate
 
 ## Summary
-This is an index/navigation page that consolidates Twingate's DNS documentation into a single reference. It links to five separate guides covering DNS fundamentals, private DNS setup, Twingate DNS resolution mechanics, DNS query troubleshooting, and DNS encryption.
+This is an index/navigation page that consolidates Twingate's DNS documentation into categorized links. It routes users to specific guides based on their DNS knowledge level and use case, covering DNS basics, private DNS setup, FQDN resolution, query troubleshooting, and DNS encryption.
 
 ## Key Information
-- **Five topic areas covered:**
-  1. DNS fundamentals (for users new to DNS)
-  2. Private DNS server benefits and best practices
-  3. How Twingate resolves private FQDNs (CGNAT IP mechanics)
-  4. Running `dig`/`nslookup` queries against actual private IPs (not CGNAT IPs)
-  5. DNS traffic encryption via Twingate
+- Acts as a table of contents for all DNS-related Twingate documentation
+- Five distinct topic areas, each with a dedicated guide
+- Twingate Client assigns CGNAT IP addresses to private FQDNs (not the actual private IP)
+- `dig`/`nslookup` queries require a specific forwarding approach to retrieve actual private IPs
+- Twingate can encrypt DNS traffic for both private Resources and general internet traffic
 
-- Twingate Client assigns **CGNAT IP addresses** to private FQDNs matching Resources — these differ from actual private IPs
-- Twingate can forward DNS queries to retrieve real private IP addresses (useful for troubleshooting)
-- Twingate can encrypt **all** DNS traffic, including traffic not related to private Resources
+## Topic Map
 
-## Prerequisites
-None — page serves as an entry point for all DNS knowledge levels.
+| User Need | Guide |
+|-----------|-------|
+| New to DNS entirely | Complete introduction to DNS |
+| Know DNS, no private DNS server | DNS best practices guide |
+| How Twingate resolves private FQDNs | In-depth practical guide on DNS with Twingate |
+| Troubleshooting with `dig`/`nslookup` | Guide on DNS query forwarding |
+| DNS traffic encryption | Guide to DNS security |
 
-## Step-by-Step
-Not applicable — this is a navigation/index page only.
-
-## Configuration Values
-None defined on this page.
+## Key Concepts Referenced
+- **CGNAT IP**: Twingate Client returns a CGNAT address for matched private FQDNs, not the actual Resource IP
+- **Private FQDN resolution**: Twingate Client intercepts traffic and handles FQDN-to-IP resolution
+- **DNS forwarding**: Required to retrieve actual private IP addresses during troubleshooting
+- **DNS encryption**: Twingate can protect unencrypted DNS traffic for all queries
 
 ## Gotchas
-- When using `dig` or `nslookup` from a machine running the Twingate Client, queries return CGNAT IPs, **not** the actual private IP of the Resource — requires a specific forwarding configuration to retrieve real IPs
-- DNS encryption covers all traffic only when configured; not enabled by default implicitly
+- Running `dig` or `nslookup` against a Twingate Resource FQDN will return the CGNAT IP, not the actual private IP — requires DNS query forwarding configuration to get real IPs
+- Users new to Twingate DNS commonly misunderstand the CGNAT address behavior
+
+## Prerequisites
+None — page is an entry point for all DNS knowledge levels
 
 ## Related Docs
-- Complete introduction to DNS (linked internally)
-- DNS best practices guide (private DNS server setup)
-- In-depth practical guide on DNS with Twingate (FQDN resolution mechanics)
-- Guide on forwarding DNS queries (troubleshooting with `dig`/`nslookup`)
-- Guide to DNS security (encrypting DNS traffic)
+- Complete introduction to DNS
+- DNS best practices guide
+- In-depth practical guide on DNS with Twingate
+- Guide on DNS query forwarding
+- Guide to DNS security

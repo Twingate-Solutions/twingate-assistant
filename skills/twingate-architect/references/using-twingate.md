@@ -1,21 +1,16 @@
 # Using Twingate Client
 
 ## Summary
-Covers end-user operation of the Twingate Client after installation, including connecting to a network, accessing resources, handling resource-level authentication, and managing multiple accounts.
+Guide for end users on connecting to Twingate, accessing resources, and managing authentication. Covers multi-account support, resource-level security policies, and session management.
 
 ## Key Information
-- Network URL format: just the subdomain portion (e.g., `autoco` from `autoco.twingate.com`)
-- Auth via social login (Google, GitHub) or SSO (Okta, Entra ID)
+- Network URL format: subdomain only (e.g., `autoco` from `autoco.twingate.com`)
+- Login via social providers (Google, GitHub) or SSO (Okta, Entra ID)
 - Split tunneling is default behavior — non-Resource traffic bypasses Twingate
-- Client auto-reconnects on network changes; may trigger browser re-auth
-- Only one account can be active at a time even with multiple accounts logged in
+- Client auto-reconnects on network switch/interruption
+- Only one account can be active at a time (multi-account supported)
 
-## Prerequisites
-- Twingate Client installed
-- Network subdomain provided by admin
-- Identity provider credentials
-
-## Multiple Accounts Support
+## Multi-Account Support
 Minimum client versions required:
 | Platform | Version |
 |----------|---------|
@@ -23,31 +18,35 @@ Minimum client versions required:
 | Windows | 2025.232 |
 | iOS | 2025.227 |
 
-- Add account: select **Add Another Account**
-- Remove account: authenticate into account → **More** → **Log Out**
-- Disconnect without removing: toggle icon next to account name
+- Add accounts via "Add Another Account"
+- Remove: authenticate into account → More → "Log Out"
+- Disconnect without removing: toggle icon next to account
 
 ## Resource Authentication
-- Resources with Security Policy requiring MFA show a **lock icon**
+- Resources with stricter Security Policies than user's baseline show a **lock icon**
 - Two ways to authenticate:
   1. Visit the resource normally → click Twingate notification → complete browser auth
   2. Find resource in Client → open menu → select **Authenticate**
-- Authorization expires per Security Policy; re-auth required after expiration
-- Proactive renew: Resource menu → **Renew Session**
+- Security Policy name is not visible in Client
+- Authorization expires per Security Policy settings
 
-## Proactive Reauthentication Notifications (Early Access)
-Minimum versions: macOS/Windows/Linux/iOS/Android **2025.72**
-- Notifies before authorization expires
-- Click notification to reauthenticate without finding resource manually
-- Must be enabled by Twingate support team
+## Proactive Reauthentication
+- **Renew Session**: Resource menu → "Renew Session" (manual)
+- **Proactive notifications** (early access, requires opt-in via Twingate team):
+  - Notifies before authorization expires
+  - Minimum versions: macOS/Windows/Linux/iOS/Android **2025.72**
 
 ## Gotchas
-- Security Policy assigned to a Resource is **not visible** in the Client
-- Multiple accounts are fully isolated — Resources from Account A are invisible when Account B is active
-- Leaving Client connected is intentional and recommended; disconnecting causes unnecessary re-auth
-- Proactive reauthentication notifications require explicit enablement by Twingate team
+- Each authenticated account is isolated — Resources from Account A are inaccessible while Account B is active; must switch accounts explicitly
+- Switching networks may open browser window for re-authentication; if not automatic, manually click **Connect to…**
+- Authorization expiration is Resource-specific based on applied Security Policy — expiry time is not shown in Client
+- Proactive reauthentication notifications require manual enablement by Twingate support team
+
+## Tips
+- Leave Client connected — split tunneling means no performance impact on non-Resource traffic
+- No need to disconnect/reconnect between sessions; avoids forced reauthentication
 
 ## Related Docs
-- Twingate Client Installation
-- Security Policy configuration
-- MFA setup
+- [Installing the Twingate Client](https://www.twingate.com/docs/install-client)
+- [Security Policies](https://www.twingate.com/docs/security-policies)
+- [MFA Configuration](https://www.twingate.com/docs/mfa)

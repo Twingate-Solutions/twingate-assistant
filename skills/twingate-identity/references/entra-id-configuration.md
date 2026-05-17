@@ -1,46 +1,47 @@
-# Entra ID (Azure AD) Configuration – Twingate
+# Entra ID (Azure AD) Configuration
+
+## Page Title
+Entra ID (formerly Azure AD) Configuration
 
 ## Summary
-Integrates Entra ID with Twingate for OpenID Connect authentication and SCIM-based user/group sync. Requires two phases: configuring the identity provider in Twingate Admin Console, then setting up the official Twingate gallery app in Microsoft Entra ID.
-
-**Plan requirement:** Business & Enterprise only.
+Integrates Twingate with Microsoft Entra ID for OpenID Connect authentication and SCIM-based user/group sync. Requires two distinct steps: configuring the identity provider in Twingate Admin Console, then setting up the official Twingate gallery app in Microsoft Entra ID.
 
 ## Key Information
 - Enables both OIDC user authentication and SCIM user/group sync
-- Uses the official Twingate app from the Microsoft Entra ID Gallery
-- SCIM sync is configured from the Microsoft side after Twingate-side setup
+- Business and Enterprise plans only
+- Two-phase setup: Twingate Admin Console first, then Entra ID Gallery app second
+- SCIM sync details handled via Microsoft's official Twingate Entra ID Gallery app documentation
 
 ## Prerequisites
-- Twingate Business or Enterprise plan
-- Azure portal access with permissions to manage Entra ID enterprise applications
+- Business or Enterprise Twingate plan
+- Azure portal access with sufficient permissions to add enterprise applications
 - Entra ID Tenant ID
 
 ## Step-by-Step
 
 ### Phase 1: Twingate Admin Console
-1. Go to **Settings > Identity Provider > Entra ID**
-2. Retrieve Tenant ID: Azure Portal → Entra ID → **Tenant information** box
+1. Navigate to **Settings > Identity Provider > Entra ID**
+2. Retrieve Tenant ID from `https://portal.azure.com` → Entra ID → Tenant information box
 3. Paste Tenant ID into Twingate and click **"Sign in with Entra ID"**
-4. Verify sign-in succeeds before proceeding
 
 ### Phase 2: Entra ID Gallery App
-1. Follow [Microsoft's official Twingate Entra ID Gallery app instructions](https://learn.microsoft.com/en-us/azure/active-directory/saas-apps/) for:
-   - Adding the Twingate gallery app to your Entra ID instance
-   - Configuring which users/groups sync to Twingate
-   - Enabling SCIM provisioning
+1. Follow [Microsoft's Twingate Entra ID Gallery app instructions](https://learn.microsoft.com/en-us/azure/active-directory/saas-apps/twingate-provisioning-tutorial) to:
+   - Add Twingate gallery app to Entra ID instance
+   - Configure SCIM provisioning
+   - Determine user/group sync scope
 
 ## Configuration Values
-| Setting | Location | Notes |
+| Setting | Location | Recommended Value |
 |---|---|---|
-| `Tenant ID` | Azure Portal → Entra ID → Tenant information | Required for Twingate-side setup |
-| `Assignment Required` | Entra ID enterprise app properties | Default: `No` — **change to `Yes`** |
+| Tenant ID | Azure Portal → Entra ID → Tenant information | Copy and paste into Twingate |
+| Assignment Required | Entra ID Enterprise App Properties | **Yes** (change from default `No`) |
 
 ## Gotchas
-- **`Assignment Required` defaults to `No`**: Any Entra ID domain user can log into Twingate even without app assignment, creating unmanaged Twingate users. Set to **`Yes`** to restrict access to assigned users only.
-- **Accounts without email addresses**: Entra ID permits email-less accounts, but Twingate's Help Center requires an email for support access. Fix by setting the `Email` property on the Entra ID account — it will sync to Twingate automatically.
-- Phase 2 (gallery app) cannot be started until Phase 1 (Twingate sign-in) is fully completed.
+- **Assignment Required defaults to `No`**: Any user in the Entra ID domain can log into Twingate, creating unmanaged users outside SCIM control. **Must be changed to `Yes`.**
+- **Accounts without email addresses**: Entra ID permits email-less accounts, but Twingate's Help Center requires an email. Set the `Email` property on affected accounts to enable sync and support access.
+- Phase 1 (Twingate sign-in) must be completed before Phase 2 (Gallery app setup).
 
 ## Related Docs
-- [Microsoft Entra ID Gallery – Twingate App Instructions](https://www.twingate.com/docs/entra-id-configuration)
-- [Twingate Pricing](https://www.twingate.com/pricing)
-- Microsoft Azure Portal: https://portal.azure.com
+- [Microsoft Twingate Entra ID Gallery App Instructions](https://learn.microsoft.com/en-us/azure/active-directory/saas-apps/twingate-provisioning-tutorial)
+- Twingate Pricing Page (for plan eligibility)
+- Twingate Help Center (support access requirements)

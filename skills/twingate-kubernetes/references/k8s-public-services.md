@@ -4,48 +4,50 @@
 Publicly Exposed Resources in Kubernetes - Access an Exposed Service on a K8s Cluster
 
 ## Summary
-This guide covers how to provide controlled external access to a Kubernetes service using Twingate without exposing the service to the public internet. Access is managed through Twingate Resources and Group assignments, with a Connector deployed outside the target cluster acting as the secure access point.
+This pattern enables external access to Kubernetes services using Twingate without exposing them to the public internet. A Connector deployed outside the cluster proxies access to services that have private (non-public) external IPs. Access is controlled via Twingate Resources and Group assignments.
 
 ## Key Information
 - Connector must be deployed **outside** the target K8s cluster
-- The K8s service gets an external (but private/non-public) IP address
-- Access is controlled via Twingate Resource + Group assignments
-- Private DNS can substitute for private IP addressing
+- The K8s service gets an external IP that is **private** (not public internet-facing)
+- Access is controlled through Twingate Resource and Group configuration
+- Private DNS can substitute for IP-based access
 
 ## Prerequisites
-- A Twingate account with admin access
-- A K8s cluster with a service to expose
-- Network infrastructure supporting private (non-public) IP assignment to K8s services
-- A separate host/node outside the cluster to deploy the Twingate Connector
+- Twingate account with ability to create Resources and Groups
+- A K8s cluster with at least one service to expose
+- Network infrastructure that supports private (non-public) external IPs for K8s services
+- Twingate Connector deployable on a host with network access to the K8s API/service endpoint
 
 ## Step-by-Step
 
-1. **Deploy Connector outside the target K8s cluster**
-   - Connector must have network access to the cluster's API/service endpoint
-   - Neither the Connector nor the endpoint should be publicly accessible
+1. **Deploy Connector(s) outside the target cluster**
+   - Connector must have network access to the cluster's service endpoint
+   - Neither the Connector nor the endpoint should be publicly internet-accessible
 
-2. **Configure an external (private) IP for the K8s service**
-   - IP must be reachable from the Connector deployed in step 1
-   - Optionally configure private DNS to use a hostname instead of IP
+2. **Configure a private external IP for the K8s service**
+   - Assign an external IP address that is reachable from the Connector
+   - IP must be private (external to K8s cluster, but not public internet)
+   - Optionally configure private DNS instead of using raw IP address
 
 3. **Create a Twingate Resource**
-   - Use the service's private IP address or private DNS name
+   - Use the service's private IP or private DNS address as the Resource address
    - Assign appropriate Groups to control which users can access the Resource
 
 ## Configuration Values
 | Parameter | Value/Notes |
 |---|---|
-| Resource address | Private IP or private DNS hostname of the K8s service |
-| Connector placement | External to target K8s cluster |
-| Network access requirement | Connector → K8s service endpoint (private network) |
+| Connector placement | Outside the target K8s cluster |
+| Service external IP | Private IP reachable by Connector (not public) |
+| Resource address | Private IP or private DNS of the K8s service |
 
 ## Gotchas
-- Connector must **not** be deployed inside the same K8s cluster as the target service for this pattern
-- The service's external IP must be private (not public internet-routable)
-- If the Connector or service endpoint is internet-accessible, the security model is compromised
-- Private DNS setup is optional but recommended over raw IP addresses for maintainability
+- The Connector must **not** be deployed inside the same cluster it's providing access to in this pattern
+- The external IP must be reachable from the Connector — verify routing between Connector host and K8s service external IP
+- Public internet exposure of either the Connector or the service endpoint invalidates the security model
+- If using DNS, ensure private DNS resolution is configured correctly before creating the Resource
 
 ## Related Docs
-- [Private DNS configuration](https://www.twingate.com/docs) (use private DNS for service access)
-- [Twingate Resource creation](https://www.twingate.com/docs)
-- [Connector deployment](https://www.twingate.com/docs)
+- Twingate Resource creation
+- Private DNS configuration for Resources
+- Connector deployment documentation
+- Group assignment for access control

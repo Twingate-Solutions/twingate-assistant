@@ -1,20 +1,21 @@
 # Cancel Your Subscription
 
 ## Summary
-Instructions for canceling automatic renewal of a Twingate subscription. Cancellation stops auto-renewal; access continues until the current subscription term ends. Downgrade to Starter plan constitutes cancellation.
+Instructions for canceling automatic renewal of a Twingate subscription. Cancellation stops auto-renewal; access continues until the current subscription term ends. Downgrade is achieved by switching to the Starter plan.
 
 ## Key Information
-- Canceling = disabling automatic renewal, not immediate termination
-- Access remains active until end of current billing period
-- Cancellation is performed by downgrading to the **Twingate Starter** plan
+- Canceling does not immediately terminate access — service continues through end of current billing period
+- "Cancellation" is implemented as a downgrade to the **Twingate Starter** plan
+- Only applies to automatically renewing subscriptions
 
 ## Prerequisites
 - Admin Console access
-- Active paid subscription with automatic renewal enabled
+- Active paid subscription with auto-renewal enabled
 
 ## Step-by-Step
-1. Sign into the Admin Console
-2. Click **Settings**
+
+1. Sign into the **Admin Console**
+2. Navigate to **Settings**
 3. Click **Billing**
 4. Click **Manage Plan**
 5. Click on your current subscription
@@ -23,10 +24,10 @@ Instructions for canceling automatic renewal of a Twingate subscription. Cancell
 8. Click **Update Subscription**
 
 ## Gotchas
-- No immediate cancellation option — cancellation only stops renewal at term end
-- Downgrading to Starter may reduce feature access at term expiration
-- No mention of refund eligibility in this documentation
+- There is no direct "cancel" button — cancellation requires explicitly selecting the Starter plan
+- Subscription ends at conclusion of current term, not immediately upon cancellation
+- No mention of refund eligibility for unused portion of subscription term
 
 ## Related Docs
-- Billing settings
-- Plan management / upgrades
+- Billing settings documentation
+- Plan comparison (Starter vs paid tiers)

@@ -4,52 +4,47 @@
 Introduction to DNS
 
 ## Summary
-Foundational reference explaining DNS concepts including resolution hierarchy, record types, zonefiles, and caching. Covers host-level DNS configuration (`/etc/hosts`, resolvers) and how Twingate inserts its own DNS resolver. Serves as prerequisite reading for understanding Twingate's DNS integration.
+Conceptual overview of DNS mechanics for Twingate users. Covers how DNS translates human-readable names to IP addresses through a hierarchical resolution system. Provides foundational knowledge needed to understand how Twingate intercepts and handles DNS queries.
 
 ## Key Information
+- **DNS resolution hierarchy**: Root Servers → TLD Servers → Domain-Level Nameservers
+- **Zonefiles**: Text files containing DNS records for a domain, stored on DNS servers
+- **DNS record types**:
+  - `A` — hostname to IPv4
+  - `AAAA` — hostname to IPv6
+  - `CNAME` — alias to another record
+  - `MX` — mail server with priority
+  - `PTR` — IP to hostname (Reverse DNS)
+  - `SOA` — zone authority/metadata
+  - `SRV` — service location
+  - `TXT` — arbitrary data (SPF, verification)
+- **Resolvers**: OS maintains ordered list; queries fall through sequentially until resolved
+- **Twingate inserts its resolver first** (`100.95.0.25[1-4]`) when client is active
+- **DNS caching**: Controlled by SOA expiry value and per-record TTL values
+- **`/etc/hosts`** always takes precedence over DNS; supports only A-record equivalents
 
-- **DNS purpose**: Translates human-readable names (e.g., `google.com`) to IP addresses and vice versa
-- **Resolution hierarchy**: Root Servers → TLD Servers → Domain Level Nameservers (always top-down)
-- **Twingate DNS resolvers**: `100.95.0.251–254` (injected as resolver #1 when Twingate Client is active)
-- **`/etc/hosts` takes precedence** over DNS; supports only A record equivalents
-- **DNS caching**: Unix = app-level (browser); Windows = OS-level (`ipconfig /displaydns`)
-- **TTL** controls per-record cache expiry; SOA record sets zone-wide default expiry
-
-## DNS Record Types
-
-| Record | Purpose |
-|--------|---------|
-| `A` | Hostname → IPv4 |
-| `AAAA` | Hostname → IPv6 |
-| `CNAME` | Alias one record to another |
-| `MX` | Mail server(s) with priority |
-| `PTR` | IP → hostname (Reverse DNS) |
-| `SOA` | Zone authority/metadata |
-| `SRV` | Service location |
-| `TXT` | Arbitrary data (SPF, verification) |
+## Prerequisites
+- None — purely conceptual/reference content
 
 ## Configuration Values
-
-- **macOS resolver check**: `scutil --dns`
-- **Windows DNS cache**: `ipconfig /displaydns`
-- **Hosts file (Unix)**: `/etc/hosts`
-- **Hosts file (Windows)**: `C:\Windows\System32\drivers\etc\hosts`
-- **Default TTL field** in zonefile: `$TTL 3600` (seconds)
-
-## Reverse DNS
-
-- Reverse octets of IP → append `in-addr.arpa`
-- Example: `22.33.44.55` → query `55.44.33.22.in-addr.arpa`
-- Requires `PTR` records in zonefile
+| Item | Value/Path |
+|------|-----------|
+| Twingate DNS resolver IPs | `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254` |
+| Unix hosts file | `/etc/hosts` |
+| Windows hosts file | `C:\Windows\System32\drivers\etc\hosts` |
+| Unix resolver config | `/etc/resolv.conf` |
+| Check resolvers (macOS) | `scutil --dns` |
+| View DNS cache (Windows) | `ipconfig /displaydns` |
+| Reverse DNS suffix | `<reversed-octets>.in-addr.arpa` |
+| Default TTL field in zonefile | `$TTL <seconds>` |
 
 ## Gotchas
-
-- First 4 lines of `/etc/hosts` are auto-generated; do not modify without expertise
-- DNS record updates can take up to the SOA expiry time (e.g., 24h) to propagate network-wide
-- `/etc/hosts` cannot replace DNS — limited to A record equivalents only
-- Multiple space-separated names on one `/etc/hosts` line all resolve to that IP
-- Twingate Client adds its resolvers **at the top** of the OS resolver list, taking priority
+- `/etc/hosts` only supports A-record equivalents — cannot substitute full DNS
+- First four lines of `/etc/hosts` are auto-generated at boot; don't modify them
+- DNS cache propagation delay = up to the SOA expiry value (can be 24hrs+)
+- Lower TTLs before DNS migrations to reduce propagation lag
+- Unix DNS caching is per-application (e.g., browser cache); Windows caches centrally
+- Private DNS records are not publicly resolvable — requires VPN/Twingate to reach
 
 ## Related Docs
-
 - [How DNS Works with Twingate](https://www.twingate.com/docs/how-dns-works-with-twingate)

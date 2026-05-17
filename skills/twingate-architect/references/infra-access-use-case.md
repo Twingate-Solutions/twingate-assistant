@@ -4,59 +4,60 @@
 Twingate Infrastructure Access Use Case
 
 ## Summary
-Twingate provides secure, zero-trust access to on-premises and cloud infrastructure without public exposure via bastion hosts or VPNs. It supports programmatic configuration through Terraform, Pulumi, and an Admin API, and integrates with Kubernetes and CI/CD pipelines.
+Twingate provides zero-trust network access for engineers and DevOps teams to securely reach on-premises and cloud infrastructure without public exposure. It eliminates the need for jump servers or VPNs while supporting programmatic configuration via Terraform, Pulumi, and Admin API.
 
 ## Key Information
-- No public internet exposure required — eliminates jump servers/bastion hosts
+- No public-facing endpoints required — resources remain hidden from the internet
 - Deployment time: under 15 minutes with a single lightweight Connector host
 - No network reconfiguration or VPN server setup needed
-- Supports simultaneous access to multiple clouds/environments
-- Kubernetes Operator available for GKE, EKS, microK8s integrations
+- Supports simultaneous access to multiple clouds or environments (dev, staging, prod)
+- Kubernetes support: GKE, EKS, microK8s via Twingate Kubernetes Operator
 
 ## Prerequisites
-- A Twingate account with Admin access
+- Twingate account with Admin access
 - A host within the target network to deploy the Connector
-- For IaC: Terraform or Pulumi installed; Twingate Admin API credentials
+- For IaC: Terraform or Pulumi installed; Twingate provider configured
+- For CI/CD: Service account credentials for automated pipelines
 
-## Use Case Categories & Related Guides
+## Use Case Guides (Step-by-Step References)
 
-### Automation / IaC
-- Terraform integration: `Getting Started with Terraform and Twingate`
-- Pulumi integration: `Getting Started with Pulumi and Twingate`
-- Admin API for programmatic management
+### Automation/IaC
+- Pulumi integration → *Getting Started with Pulumi and Twingate*
+- Terraform integration → *Getting Started with Terraform and Twingate*
+- API-driven config → *Automating configuration with Twingate*
 
-### CI/CD Workflows
-- CircleCI & GitHub Actions: `How to Secure CI/CD Pipelines`
-- GitHub Codespaces: `How to Enable Secure Access to Resources from Github Codespaces`
-- Machine-to-machine: `How to Secure Machine-to-machine Communication Using Service Accounts`
+### CI/CD Pipelines
+- CircleCI & GitHub Actions → *How to Secure CI/CD Pipelines*
+- GitHub Codespaces → *How to Enable Secure Access from GitHub Codespaces*
+- Machine-to-machine → *How to Secure Machine-to-machine Communication Using Service Accounts*
 
 ### Kubernetes
-- `How to Route Traffic from a Kubernetes Cluster Using the Twingate Client`
-- `How to Securely Access Private Resources in a Kubernetes Cluster`
-- `How to Securely Access Publicly Exposed Resources in a Kubernetes Cluster`
-- `How to Securely Manage Kubernetes using kubectl`
+- Route traffic from cluster → Twingate Client guide
+- Access private resources in cluster → dedicated guide
+- Access publicly exposed resources in cluster → dedicated guide
+- `kubectl` secure management → dedicated guide
 
 ### Development Environments
-- `Best Practices for Securing Access to Non-production Environments`
-- `How to Add MFA to all Protocols (ssh, RDP, SQL, zOS, etc.)`
-- `Using Private DNS with Twingate`
+- Non-production access best practices
+- MFA for all protocols (SSH, RDP, SQL, zOS)
+- Private DNS usage with Twingate
 
 ## Configuration Values
-| Method | Reference |
-|--------|-----------|
-| IaC | Terraform provider, Pulumi provider |
-| API | Twingate Admin API |
-| K8s | Twingate Kubernetes Operator |
+- **Service Accounts**: Used for automated/machine-to-machine access (CI/CD pipelines)
+- **Kubernetes Operator**: Provides cluster-to-Twingate integration
+- **Admin API**: Programmatic resource and access control management
+- **Groups + Policies**: Granular per-resource permissions (least privilege)
 
 ## Gotchas
-- Connector must be deployed **inside** the target network — it initiates outbound connections, so no inbound firewall rules needed
-- Least-privilege access requires explicit Resource and Group configuration — no implicit broad access
-- CI/CD service access should use **Service Accounts**, not user credentials
+- Each network segment requires its own Connector deployed on a host within that network
+- CI/CD services need narrowly scoped Service Account permissions — avoid over-provisioning
+- Kubernetes deployments have multiple distinct use cases (routing traffic *from* vs. accessing resources *within* a cluster) — consult the appropriate guide
 
 ## Related Docs
-- Twingate Terraform Provider
-- Twingate Pulumi Provider
-- Admin API Reference
 - Twingate Kubernetes Operator
-- Service Accounts documentation
+- Admin API reference
+- Terraform provider docs
+- Pulumi provider docs
 - Private DNS with Twingate
+- MFA for all protocols guide
+- Non-production environment best practices

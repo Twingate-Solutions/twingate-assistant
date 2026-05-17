@@ -1,44 +1,39 @@
 # Azure SQL Database Access with Twingate
 
 ## Summary
-Configure Twingate to provide secure access to Azure SQL Database and other Azure-managed/self-hosted databases. Twingate Connectors route traffic through private networks, eliminating public database exposure. Supports both Private Endpoint (recommended) and public endpoint configurations.
+Securely connect to Azure SQL Database and other Azure-managed databases by routing traffic through Twingate Connectors. Supports both private endpoint (recommended) and public endpoint configurations with IP allowlisting.
 
 ## Key Information
-- Preferred approach: Azure Private Endpoint keeps all traffic on Microsoft's internal backbone
-- Connector placement determines connectivity model (private IP vs. public IP allowlisting)
-- Default SQL Server port: **1433**
-- Azure SQL firewall checks database-level rules before server-level rules
-- Server-level firewall limit: 256 rules maximum
+- Connectors act as secure proxies; Azure SQL sees only the Connector's egress IP
+- Private Endpoint is preferred: traffic stays on Microsoft's internal backbone, no public IP allowlisting needed
+- Supports Azure SQL Database, Cosmos DB, PostgreSQL/MySQL/MariaDB, and self-hosted SQL Server on VMs
+- Azure SQL checks database-level firewall rules before server-level rules
+- Server-level firewall rule limit: 256 rules max
 
 ## Prerequisites
 - Twingate Remote Network created with at least one Connector deployed
+- For Private Endpoint: Connector deployed **inside the same VNet** as the database
+- For public endpoint: Connector's public egress IP captured for allowlisting
 - Azure SQL Database instance or self-hosted SQL Server on Azure VM
-- For private endpoint: Connector deployed inside the same VNet as the database
-- For public endpoint: Connector's public egress IP address identified
 
-## Step-by-Step (Azure SQL Database with Private Endpoint)
+## Step-by-Step (Azure SQL Database)
 
-1. **Disable public access** on the Azure SQL Server (`Networking` settings)
-2. **Create Private Endpoint** — source: Connector's VNet; destination: DB server
-3. **Verify DNS** resolves the server hostname to a private IP address
-4. **Create Twingate Resource**:
+1. **Configure Private Connectivity** — Disable *Allow Azure services* (adds `0.0.0.0/0`); create Private Endpoint with Connector's VNet as source, DB as destination; disable public access
+2. **Create Twingate Resource**
    - Host: `<servername>.database.windows.net`
    - Port: `1433`
-   - Assign to relevant user groups
-5. **Connect** with Twingate Client running:
-   ```bash
-   sqlcmd -S myserver.database.windows.net -U <username> -P <password> -d <database>
-   ```
+   - Assign to relevant user group(s)
+3. **Connect** via Twingate Client using `sqlcmd`, Azure Data Studio, SSMS, or any SQL client
 
 ## Configuration Values
 
 | Parameter | Value |
 |-----------|-------|
 | Default port | `1433` |
-| Resource host | `<servername>.database.windows.net` |
-| Database-level firewall T-SQL | `sp_set_database_firewall_rule` |
+| Host format | `<servername>.database.windows.net` |
+| Public endpoint firewall | Start IP = End IP = Connector public IP |
 
-**Public endpoint firewall rule (T-SQL):**
+**Database-level firewall rule (T-SQL):**
 ```sql
 EXECUTE sp_set_database_firewall_rule
   @name = N'TwingateConnector',
@@ -46,21 +41,27 @@ EXECUTE sp_set_database_firewall_rule
   @end_ip_address = '1.2.3.5';
 ```
 
-## Self-Hosted VMs
-- Assign VM a private IP; deploy Connector in the same VNet
+**Test connection:**
+```bash
+sqlcmd -S myserver.database.windows.net -U <username> -P <password> -d <database>
+```
+
+## Self-Hosted SQL Server on Azure VMs
+- Assign VM a private IP; deploy Connector in same VNet
 - Allow inbound DB port from Connector's private IP in NSG/host firewall
 - Create Twingate Resource using VM's private IP and port
 
 ## Gotchas
-- `Allow Azure services` setting adds `0.0.0.0/0` — disable unless all Azure resources need access
-- Azure SQL firewall sees only the **Connector's** public IP, not the client's IP
-- Exceeding 256 server-level rules requires moving to database-level rules or CIDR aggregation
-- **DNS Failed** in activity logs = Connector can't resolve hostname; check DNS zone association
-- **Connection Failed** = Connector reached destination but was blocked; verify IP allowlists and firewall ports
-- **No Activity** = Client not sending traffic; check Client is running and no other VPN intercepting
+- Enabling *Allow Azure services* adds `0.0.0.0/0` — avoid unless intentional
+- Exceeding 256 server-level rules requires moving to database-level rules or aggregating IPs into CIDRs
+- Port 1433 must be open on local firewall and corporate proxies
+- **DNS Failed** in Activity logs = Connector can't resolve hostname (check DNS zone/routing)
+- **Connection Failed** = Connector reached but can't connect to DB (check IP allowlists, security groups)
+- **No Activity** = Client not sending traffic (check Client is running, no conflicting VPN)
 
 ## Related Docs
-- [Twingate SaaS App Gating](https://www.twingate.com/docs/)
-- [Connector Best Practices](https://www.twingate.com/docs/)
-- [Microsoft: Configure server-level IP firewall rules](https://docs.microsoft.com/azure/azure-sql/database/firewall-configure)
-- [Azure Private Endpoint documentation](https://docs.microsoft.com/azure/private-link/private-endpoint-overview)
+- [Twingate Troubleshooting Guide](https://www.twingate.com/docs/troubleshooting)
+- [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
+- [SaaS App Gating Guide](https://www.twingate.com/docs/saas-app-gating)
+- [Microsoft: Configure server-level IP firewall rule](https://docs.microsoft.com/azure/azure-sql/database/firewall-configure)
+- [Microsoft: Azure Private Endpoint docs](https://docs.microsoft.com/azure/private-link/private-endpoint-overview)

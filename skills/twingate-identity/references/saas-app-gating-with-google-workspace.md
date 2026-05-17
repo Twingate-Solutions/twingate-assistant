@@ -1,56 +1,57 @@
 # SaaS App Gating with Google Workspace
 
 ## Summary
-Configure Google Workspace Context-Aware Access to require an active Twingate Connector connection before granting access to Google Workspace apps and SAML-based SaaS applications. Traffic is routed through Twingate Connectors, and Google validates the exit IP against an allowlist. Context is checked continuously for core Google apps, and at authentication time for third-party SAML apps.
+Configures Google Workspace Context-Aware Access to require an active Twingate Connector connection before granting access to Google Workspace apps and SAML-based SaaS applications. Works by restricting app access to the exit IP addresses of Twingate Connectors. Context is checked continuously for core Google apps and at authentication time for third-party SAML apps.
 
 ## Key Information
-- Works with Google Workspace core apps (Gmail, Drive, Calendar) and SAML-based third-party apps
-- Uses Connector exit IP addresses as the trust signal (similar to IP whitelisting, but enforced at IdP level)
-- Multiple Connector IPs form an OR-based allowlist in the access level
+- Replaces IP whitelisting at the SaaS app level; enforcement happens at the IdP level instead
+- Supports Gmail, Drive, Calendar, and other SAML-based third-party applications
+- Connector exit IP(s) become the authorized IP subnet(s) in Google's access policy
 
 ## Prerequisites
-- Twingate Admin Console access
-- Google Workspace Admin access with Context-Aware Access available
-- Twingate Connector(s) deployed with known static exit IP addresses (e.g., AWS Elastic IPs)
-- **Twingate Resource created** for target domain (e.g., `*.google.com`)
-- **Device-only Policy** applied to that Resource — prevents authentication loop where users can't reach the IdP login page because Twingate auth is required first
+- Twingate Connector deployed with a known static exit IP (e.g., AWS Elastic IP)
+- Google Workspace admin access
+- **Twingate Admin Console setup required:**
+  - Create a Resource for `*.google.com` (or relevant domain)
+  - Apply a **Device-only Policy** to that Resource to prevent authentication loops
 
 ## Step-by-Step
 
 ### Twingate Setup
-1. Create a Resource for the target SaaS domain (e.g., `*.google.com`)
-2. Apply a **Device-only Resource Policy** to that Resource to avoid auth loop
+1. Create a Resource matching the SaaS domain (e.g., `*.google.com`)
+2. Apply a Device-only Resource Policy to that Resource
 
 ### Google Workspace: Create Access Level
 1. Go to `https://admin.google.com` → Security → Access and data control → Context-Aware Access
 2. Click **Access levels** → **CREATE ACCESS LEVEL**
 3. Fill in:
-   - **Name**: e.g., "Twingate Application Control"
-   - **Condition logic**: "Meets all attributes (AND)"
+   - **Name**: e.g., `Twingate Application Control`
+   - **Conditions**: Basic tab, select "Meets all attributes (AND)"
    - **Attribute**: IP subnet
-   - **Value**: Each Connector exit IP in CIDR notation (e.g., `8.8.8.8/32`); multiple IPs = OR logic
+   - **Value**: Enter each Connector exit IP in CIDR notation (e.g., `8.8.8.8/32`); multiple IPs are evaluated as OR
 4. Click **CREATE**
 
-### Google Workspace: Assign Access Level
-1. Navigate back → click **Assign access levels**
+### Google Workspace: Assign Access Level to Apps
+1. Click **Assign access levels**
 2. Select target applications from the list
 3. Click **Assign** → select your access level → **CONTINUE**
-4. Enforcement settings: Block desktop and mobile app access; **leave API access unblocked** (recommended default)
+4. Enforcement settings: Block desktop and mobile app access; leave API access unblocked (recommended default)
 5. Review and click **ASSIGN**
 
 ## Configuration Values
-| Field | Value |
-|---|---|
+| Parameter | Value/Notes |
+|-----------|-------------|
 | Resource domain | `*.google.com` (or target SaaS domain) |
 | Resource Policy | Device-only |
-| IP Subnet format | `<exit_ip>/32` per Connector |
-| Multiple IPs | Each entered separately (OR logic) |
+| IP Subnet format | `<connector-exit-ip>/32` per Connector |
+| Multiple IPs | Enter individually; treated as OR logic |
 
 ## Gotchas
-- **Auth loop**: Without a Device-only Policy on the IdP Resource, users cannot authenticate because accessing the login page itself requires prior Twingate auth
-- **Multiple Connectors**: Each Connector's exit IP must be added individually to the access level
-- **API access**: Do not block API-based access by default — only block desktop/mobile clients
-- If testing fails after enabling Twingate Client, verify the Resource is correctly capturing and routing traffic through the Connector
+- **Authentication loop risk**: Without a Device-only policy on the Google Resource, users can't reach the IdP to authenticate, blocking Twingate access entirely — creating a circular dependency
+- Multiple Connector IPs must each be entered individually in the access level
+- API-based access should generally remain unblocked to avoid breaking integrations
+- Context is checked **continuously** for core Google apps but only **at login** for SAML apps
+- If blocked after connecting Twingate client, verify the Resource is correctly capturing and routing traffic through the Connector
 
 ## Related Docs
 - [Create a Twingate Resource](https://www.twingate.com/docs)

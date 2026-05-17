@@ -1,59 +1,42 @@
-# Twingate & Customer Data
+# Twingate Customer Data Handling
 
 ## Page Title
 Twingate & Customer Data
 
 ## Summary
-Documents what customer data Twingate collects across its three products (Private Access, Identity Firewall, DNS Filtering) and how that data is stored and used. Intended for privacy, legal, and security professionals conducting due diligence. Twingate does not store or inspect encrypted content data traversing its network.
+Documents what customer data Twingate collects across its three products (Private Access, Identity Firewall, DNS Filtering). Intended for privacy, legal, and security professionals. Twingate acts as a routing layer—it does not inspect or store connection payload data.
 
 ## Key Information
 
-### Three Data Categories (All Products)
-- **Services Data**: Control plane data — user details (names/emails), groups, resource definitions, network logs, security policies, access tokens. Stored on Twingate Controller infrastructure (US-based, Google Cloud). Passwords are NOT stored (handled by IdPs).
-- **Content Data**: Data plane payloads between Clients and Resources. End-to-end encrypted. **Not stored by Twingate.** Relays route but cannot decrypt traffic.
-- **Usage Data**: Diagnostic/statistical data — crash reports, UI interactions, bandwidth, telemetry. Stored same as services data. May be published in anonymized/aggregated form.
+**Three Data Categories (all products):**
+- **Services Data**: Control plane data—user details (names, emails), groups, resource definitions, network logs, access tokens, security policies. Stored on Twingate Controller infrastructure (US, Google Cloud). No passwords stored.
+- **Content Data**: Actual payload data between Client and Resource. End-to-end encrypted; Twingate cannot decrypt or read it. **Not stored.**
+- **Usage Data**: Telemetry, crash reports, bandwidth stats, UI interactions. Stored same as Services Data. May be published in anonymized/aggregated form.
 
-### Product-Specific Notes
+**Product-Specific Notes:**
+- **Identity Firewall**: Session recording logs (captured by customer-deployed Gateways) are Content Data. Twingate has no access to these logs; cannot decrypt sessions.
+- **DNS Filtering**: Logs domain names accessed by users, including timestamp, user identity, and device details. Only applies to users running Twingate Client and not excluded by admin.
 
-**Private Access**
-- Twingate inspects no payload content; functions like a sealed-mail postal service
-- Relays used only when peer-to-peer connection cannot be established
+## Storage Locations
+- Services Data, Usage Data, DNS Filtering logs: US-based servers (Google Cloud and others)
+- Content Data: Not stored anywhere by Twingate
+- Session recordings: Customer-controlled infrastructure only
 
-**Identity Firewall (formerly Privileged Access)**
-- Requires Private Access subscription
-- Session recording logs = content data; captured by Gateway deployed in **customer-controlled infrastructure**
-- Twingate has **no access** to session recording logs
-- Cannot decrypt session contents due to end-to-end encryption
-
-**DNS Filtering**
-- Collects: domain names accessed, timestamp, user identity, device details
-- Only applies to users running Twingate Client who aren't excluded by admin
-- Storage: US-based infrastructure (Google Cloud)
-- Use: service provision, support, improvement only
-
-## Infrastructure & Storage
-
-| Data Type | Stored? | Location |
-|-----------|---------|----------|
-| Services Data | Yes | US (Google Cloud, multi-region) |
-| Content Data | No | N/A (in-transit only) |
-| Usage Data | Yes | US (same as services) |
-| DNS Logs | Yes | US (Google Cloud) |
-| Session Recordings | Customer-controlled | Customer infrastructure |
+## Architecture Components
+| Operated by Twingate | Operated by Customer |
+|---|---|
+| Controllers, Relays, Admin Console | Clients, Resources, Connectors, Gateways |
 
 ## Gotchas
-- Twingate does **not** store user passwords — authentication delegated to IdPs (Okta, OneLogin, social logins)
-- Session recording logs are stored **only** in customer infrastructure; Twingate cannot access them
-- Usage data may be published externally if anonymized/de-identified — no opt-out mentioned
-- Twingate has a subsidiary in Israel (development focus); vendor/contractor network spans multiple locations with contractual data obligations
-
-## Prerequisites
-- Identity Firewall requires an active Private Access subscription
-- DNS Filtering requires Twingate Client installed and user not excluded by admin policy
+- Relays may route encrypted traffic when peer-to-peer connection cannot be established, but still cannot see content (end-to-end encrypted)
+- Twingate does **not** store user passwords—authentication delegated to IdPs (Okta, OneLogin, social logins)
+- Identity Firewall requires a Private Access subscription
+- DNS Filtering only logs users running the Twingate Client and not admin-excluded
+- Twingate has a subsidiary in Israel (development); uses third-party vendors globally with contractual data obligations
 
 ## Related Docs
 - [Network Logs](https://www.twingate.com/docs/network-logs)
-- [Twingate Relays](https://www.twingate.com/docs/relays)
-- [Relay peer-to-peer conditions](https://www.twingate.com/docs/relays)
+- [Relays](https://www.twingate.com/docs/relays)
 - [DNS Filtering](https://www.twingate.com/docs/dns-filtering)
 - [Vendors list](https://www.twingate.com/docs/vendors)
+- Certain technical conditions for relay usage (peer-to-peer fallback)

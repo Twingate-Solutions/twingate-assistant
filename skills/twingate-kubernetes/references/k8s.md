@@ -1,46 +1,44 @@
 # Kubernetes Overview - Twingate
 
 ## Summary
-Twingate integrates with Kubernetes to secure cluster access and manage resource permissions within K8s workflows. The recommended approach uses the Twingate Kubernetes Operator to define and manage Twingate components directly in Kubernetes manifests. Privileged Access features add identity propagation and session recording for sensitive infrastructure.
+Twingate provides Kubernetes integration to secure K8s clusters and services while managing access within existing K8s workflows. The recommended approach uses the Twingate Kubernetes Operator to define and manage Twingate components directly from Kubernetes deployments.
 
 ## Key Information
-- **Kubernetes Operator** is the recommended deployment method for Twingate on K8s
-- Operator allows managing Twingate components and access authorizations from within K8s deployments
-- **Privileged Access for Kubernetes** enables identity propagation and session recording
-- Kubernetes Access Gateway is open source (available on GitHub)
+- Twingate Kubernetes Operator is the recommended deployment method
+- Operator manages Twingate components and access authorizations within K8s
+- Supports Privileged Access for K8s: identity propagation + session recording
 - Helm Chart available for deployment
-
-## Prerequisites
-- Existing Kubernetes cluster
-- Twingate account with appropriate admin permissions
-- kubectl access to the cluster
+- Open source Kubernetes Access Gateway available on GitHub
 
 ## Available Guides
-1. Twingate Kubernetes Operator Quick Start Guide
-2. How to Securely Manage Kubernetes using kubectl
-3. How to Route Traffic from a Kubernetes Cluster Using the Twingate Client
-4. How to Securely Access Private Resources in a Kubernetes Cluster
-5. How to Securely Access Publicly Exposed Resources in a Kubernetes Cluster
+- Quick Start Guide (Kubernetes Operator)
+- Securely manage Kubernetes using `kubectl`
+- Route traffic from a K8s cluster using Twingate Client
+- Securely access private resources in a K8s cluster
+- Securely access publicly exposed resources in a K8s cluster
+
+## Privileged Access Features
+- Identity propagation for Kubernetes interactions
+- Session recording for auditable access
+- Targets sensitive infrastructure use cases
+- Requires Kubernetes Operator + Kubernetes Access Gateway
 
 ## Deployment Options
-
 | Method | Use Case |
 |--------|----------|
-| Kubernetes Operator | Full lifecycle management of Twingate within K8s |
-| Helm Chart | Standard K8s package-based deployment |
+| Kubernetes Operator | Recommended; full lifecycle management |
+| Helm Chart | Alternative deployment method |
 
-## Key Features
-- **Operator**: Manages Connectors and access policies as K8s custom resources
-- **Privileged Access**: Session recording + identity propagation for audit trails
-- **Kubernetes Access Gateway**: Open source component enabling privileged access flows
+## External Resources
+- Operator config: [GitHub repo](https://github.com/Twingate/kubernetes-operator)
+- Access Gateway: [GitHub (open source)](https://github.com/Twingate/kubernetes-access-gateway)
 
 ## Gotchas
-- Operator configuration lives in K8s manifests — ensure your GitOps pipeline handles Twingate CRDs appropriately
-- Privileged Access (session recording/identity propagation) requires the separate Kubernetes Access Gateway component
-- Operator docs are hosted on GitHub, not the Twingate docs site — check the repo for up-to-date CRD specs
+- Operator documentation lives in GitHub, not solely in Twingate docs
+- Privileged Access (session recording/identity propagation) requires both the Operator and the separate Kubernetes Access Gateway component
 
 ## Related Docs
-- [Twingate Kubernetes Operator GitHub](https://github.com/Twingate/kubernetes-operator)
-- [Kubernetes Access Gateway GitHub](https://github.com/Twingate/kubernetes-access-gateway)
+- Twingate Kubernetes Operator (GitHub)
 - Kubernetes Access Guide (Privileged Access)
-- Twingate Helm Chart docs
+- Helm Chart documentation
+- Quick Start Guide

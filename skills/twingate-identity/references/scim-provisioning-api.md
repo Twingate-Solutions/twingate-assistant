@@ -1,80 +1,67 @@
-# Twingate SCIM Provisioning API
+# SCIM Provisioning API
 
 ## Summary
-Twingate supports SCIM 2.0 for automated user provisioning via identity provider integrations. This API enables managing users and groups through standard SCIM endpoints. Not intended for self-serve use—designed for supported IdP integrations.
+Twingate supports SCIM 2.0 for automated user/group provisioning via identity providers. The API provides standard CRUD operations on Users and Groups via a bearer token auth scheme. This API is designed for IdP integrations, not direct self-serve use.
 
 ## Key Information
 - Base URL: `https://{network}.twingate.com/api/scim/v2/`
-- Supports SCIM 2.0
-- Rate limit: 25 requests/second per account
-- Only most recently generated bearer token is valid
 - Supports both `application/scim+json` and `application/json` content types
+- Rate limit: **25 requests/second** per account
+- Only the **most recently generated** bearer token is valid
 
 ## Prerequisites
 - Twingate network name
-- Bearer token generated from Twingate Admin console
+- Bearer token generated from Twingate Admin Console
+- Supported identity provider (see IdP integration docs)
 
 ## Configuration Values
 
-**Authorization Header:**
-```
-Authorization: Bearer {token}
-```
+| Parameter | Value |
+|-----------|-------|
+| Auth header | `Authorization: Bearer <token>` |
+| Base URL pattern | `https://{network}.twingate.com/api/scim/v2/` |
+| Content-Type | `application/scim+json` or `application/json` |
 
 ## API Endpoints
 
 ### Users
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/Users` | Search/filter users (paginated) |
-| POST | `/Users` | Create user |
-| GET | `/Users/{id}` | Retrieve user |
-| PUT | `/Users/{id}` | Replace user |
-| PATCH | `/Users/{id}` | Modify user |
-| DELETE | `/Users/{id}` | Delete user |
+| Operation | Endpoint |
+|-----------|----------|
+| List/Search | `GET /Users` |
+| Create | `POST /Users` |
+| Get one | `GET /Users/{id}` |
+| Replace | `PUT /Users/{id}` |
+| Modify | `PATCH /Users/{id}` |
+| Delete | `DELETE /Users/{id}` |
 
-**User Attributes:**
-| SCIM Attribute | Required | Unique |
-|----------------|----------|--------|
-| `id` | Yes | Yes |
-| `externalId` | Yes | Yes |
-| `userName` | Yes | Yes |
-| `emails[primary eq true]` | No | No |
-| `name.givenName` | No | No |
-| `name.lastName` | No | No |
-| `active` | No | No |
+**Required User attributes:** `id`, `externalId`, `userName`
 
 ### Groups
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/Groups` | Search/filter groups (paginated) |
-| POST | `/Groups` | Create group |
-| GET | `/Groups/{group-id}` | Retrieve group |
-| PUT | `/Groups/{group-id}` | Replace group |
-| PATCH | `/Groups/{group-id}` | Modify group |
-| DELETE | `/Groups/{group-id}` | Delete group |
+| Operation | Endpoint |
+|-----------|----------|
+| List/Search | `GET /Groups` |
+| Create | `POST /Groups` |
+| Get one | `GET /Groups/{group-id}` |
+| Replace | `PUT /Groups/{group-id}` |
+| Modify | `PATCH /Groups/{group-id}` |
+| Delete | `DELETE /Groups/{group-id}` |
 
-**Group Attributes:**
-| SCIM Attribute | Required | Unique |
-|----------------|----------|--------|
-| `displayName` | Yes | No |
-| `id` | Yes | Yes |
-| `members` | No | No |
+**Required Group attributes:** `displayName`, `id`
 
 ## Gotchas
-- Only one email value stored from multi-valued `emails`; Twingate selects `primary=true` or `type="work"`
-- Only the most recently generated token is valid—rotating tokens invalidates previous ones
-- `{id}` in user endpoints is Twingate's internal ID (from `id` field), not `externalId`
-- `DELETE /Users/{id}` permanently deletes the user in Twingate
+- Token rotation: generating a new token **immediately invalidates** the previous one
+- Email handling: only stores one email value; prefers `primary=true`, falls back to `type="work"`
+- `{id}` in user endpoints is **Twingate's internal ID** (returned in `id` field of responses), not `externalId`
+- `DELETE /Users/{id}` and `DELETE /Groups/{group-id}` **permanently delete** the resource in Twingate
 
-## Unsupported Operations
+## Unsupported Features
 - `/.search` POST endpoint
-- `/Bulk` endpoint
+- `/Bulk` operations
 - `/Me` endpoint
-- Sorting in filter queries
-- `attributes` and `excludedAttributes` query params
+- Sort in filter queries
+- `attributes` / `excludedAttributes` query params
 
 ## Related Docs
 - [SCIM Configuration](https://www.twingate.com/docs/scim-configuration)
-- [Supported IdP Integrations](https://www.twingate.com/docs/identity-provider-integration)
-- RFC-7644 (SCIM Protocol)
+- [Supported IdP Integrations](https://www.twingate.com/docs/integrations)
+- RFC-7644 (SCIM protocol standard)

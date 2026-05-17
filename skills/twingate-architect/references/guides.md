@@ -1,71 +1,67 @@
 # Twingate Guides Index
 
 ## Page Title
-Twingate Guides — Deployment, Configuration, and Management Reference
+Twingate Guides — Documentation Hub
 
 ## Summary
-This is the top-level index page for all Twingate documentation guides. It organizes deployment, configuration, management, and best practice content across infrastructure types, platforms, and use cases. Use this page to navigate to specific implementation guides.
+Index page listing all Twingate documentation guides organized by category. Covers deployment, configuration, management, and integration topics across cloud, on-premises, homelab, and enterprise environments. Serves as the primary navigation reference for Twingate implementation.
 
 ## Key Information
 
 ### Deployment Targets
 - **Cloud**: AWS EC2, GCP Compute, Azure Compute, Kubernetes, DigitalOcean
-- **On-premises**: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP NAS, TrueNAS SCALE, Proxmox
-- **Homelabs**: Home Assistant, Unraid, ZimaOS, CasaOS
-- **Client MDM**: Jamf, Kandji, Omnissa Workspace ONE, Microsoft Intune
+- **On-premises**: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP, TrueNAS SCALE
+- **Homelab**: Home Assistant, Proxmox, Unraid, ZimaOS, CasaOS
+- **IaC**: Terraform, Pulumi
 
-### Core Feature Guides
-- DNS encryption (DoH) and DNS filtering
-- SaaS App Gating (IP-based access control for SaaS)
-- Security Policies (network-wide and per-resource)
-- Audit logging (view and export)
-- Kubernetes resource management
-
-### IaC Automation
-- Terraform and Pulumi providers available
+### Client Deployment (MDM)
+- Jamf, Kandji, Omnissa Workspace ONE, Microsoft Intune & Endpoint Manager
 
 ### Service Integrations
-- Identity: Active Directory, Okta, JumpCloud, Microsoft Entra ID, OneLogin
-- Security tools: Cisco Umbrella, Cloudflare DNS, Netskope DLP, Zscaler
-- SIEM: Connector log ingestion guide available
+- Identity/SSO: Active Directory, Okta, JumpCloud, Microsoft Entra ID, OneLogin
+- Security tools: Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler
+- SIEM log ingestion for Connector logs
 
-### Use Case Guides
-- CI/CD pipeline security
-- SSH resource access
-- Database access
+### Key Feature Guides
+- **Internet Security**: DNS-over-HTTPS (DoH), DNS filtering
+- **SaaS App Gating**: IP-based access control for SaaS apps
+- **Security Policies**: Per-network and per-resource policies
+- **Kubernetes**: Traffic routing, private/public resources, kubectl management
+- **Exit Networks**: Self-hosted VPN replacement
+
+### Specific Use Cases
+- AI/LLM access, database access, SSH resource management
+- CI/CD pipeline security, site-to-site connections
 - IoT headless client gateway
 - Vendor/contractor access management
-- Site-to-site connections
-- AWS VPN replacement
-- Self-hosted VPN with Exit Networks
+- AWS VPN replacement, AWS Workspaces
+- Bastion server cloaking
 
-### Architecture & Best Practices
-- Connector placement and routing
-- Private DNS configuration
+### Architecture & Planning
+- Private DNS configuration best practices
+- Connector placement optimization
 - Overlapping IP address handling
-- Non-production environment security
-- Security policy design
-- SaaS App Gating design
+- Non-production environment access
+- Peer-to-peer local connections
 
 ### Technical Reference
 - NAT traversal mechanics
 - Encryption implementation
-- Firewall interaction
-- Peer-to-peer troubleshooting
+- Firewall compatibility
 - Service accounts
 - Windows Start Before Logon
 - Connector shutdown process
 
 ## Prerequisites
-None — this is an index/navigation page.
+- None (index page only)
 
 ## Gotchas
-- Page is updated frequently ("last updated 1 day ago"); specific sub-guide URLs should be verified directly
-- SaaS App Gating requires identity provider integration for full functionality (Okta, Entra ID, etc.)
+- Page is a navigation index only — no implementation details here; follow specific guide links for actionable steps
+- "SaaS App Gating" requires separate IdP configuration (Okta, Entra ID, etc.) depending on provider
 
 ## Related Docs
-- Connector Best Practices
-- Remote Network Best Practices
-- Best Practices for Security Policies
-- AWS Reference Network Architecture
-- Twingate Release Stages
+- `/docs/connector-best-practices` — Connector placement and routing
+- `/docs/remote-network-best-practices` — Remote Network organization
+- `/docs/security-policies` — Policy configuration
+- `/docs/kubernetes` — K8s deployment
+- `/docs/client-deployment` — MDM rollout guides

@@ -1,37 +1,27 @@
-# Twingate & FIPS 140 Compliance
+# Twingate FIPS 140 Compliance
 
 ## Summary
-Twingate is not FIPS 140 validated and does not exclusively use FIPS 140-validated cryptographic modules. However, Twingate's transport-layer encapsulation does not decrypt underlying payloads, preserving the FIPS compliance status of end-to-end encrypted communications between customer devices.
+Twingate is not FIPS 140 validated and cannot exclusively use FIPS 140-validated cryptographic modules. However, Twingate's transport-layer encapsulation does not decrypt underlying payloads, so existing FIPS-compliant end-to-end communications between devices remain unaffected by Twingate's presence.
 
 ## Key Information
-- Applies to both FIPS 140-2 and FIPS 140-3
-- Twingate is **not** FIPS 140 validated
-- Twingate **cannot** decrypt customer payload data (e.g., underlying TLS traffic)
-- If endpoint-to-endpoint communications use FIPS-validated crypto (e.g., FIPS-validated OpenSSL), adding Twingate does not break that compliance
-- Twingate wraps communications at the transport layer using non-FIPS-validated modules but does not inspect or decrypt payload content
-- Twingate intentionally avoids FIPS-validated modules in some cases because newer (potentially more secure) versions may not yet have completed the lengthy validation process
-
-## FIPS Compatibility Model
-| Layer | FIPS Status |
-|---|---|
-| Customer endpoint-to-endpoint TLS | Can be FIPS 140-validated (unaffected by Twingate) |
-| Twingate transport encapsulation | Not FIPS 140-validated |
-| Payload decryption by Twingate | Not performed — payload integrity preserved |
+- **Not FIPS 140 validated** — Twingate holds no FIPS 140-2 or 140-3 validation
+- **Cannot enforce FIPS-only crypto** — no mode to restrict to FIPS-validated modules
+- **Transport-layer encapsulation only** — Twingate wraps traffic at the transport layer but cannot decrypt application payloads (e.g., underlying TLS data)
+- **FIPS integrity preserved** — if endpoints communicate using FIPS-validated crypto (e.g., FIPS-validated OpenSSL TLS), adding Twingate does not break that compliance status
+- **Why no FIPS validation**: FIPS validation process is slow; newer crypto module versions with security/bug fixes may exist before validation completes — Twingate prioritizes using more current (potentially more secure) modules
 
 ## FedRAMP Considerations
-- FedRAMP-authorized CSPs do **not** require all vendors to be FedRAMP authorized or use exclusively FIPS-validated modules
-- CSPs must evaluate how Twingate integrates with their FedRAMP-authorized service to determine pass-through requirements
-- Twingate will provide architecture/service details to assist FedRAMP CSPs in their evaluation
+- FedRAMP-authorized CSPs **do not automatically require** their vendors to be FedRAMP authorized or use exclusively FIPS-validated modules
+- FedRAMP CSPs must individually evaluate how Twingate fits within their specific FedRAMP authorization scope
+- Twingate will provide architectural details to assist FedRAMP CSPs in their evaluation
 
 ## Gotchas
-- Twingate cannot be used as the FIPS-validated cryptographic layer itself — it must sit alongside FIPS-compliant endpoint communications
-- "Compatible with FIPS 140" ≠ "FIPS 140 validated" — Twingate makes no claim of validation
-- FedRAMP compliance requires individual CSP assessment; Twingate does not provide a blanket FedRAMP authorization benefit
-
-## Prerequisites
-- For FIPS compatibility claim to apply: both communicating endpoints must independently use FIPS 140-validated cryptographic modules
-- Customer must verify their specific use case qualifies under this model
+- "FIPS compatible" ≠ "FIPS validated" — Twingate's positioning is compatibility (non-interference), not certification
+- Twingate's own encapsulation tunnel uses **non-FIPS-validated crypto** — only the inner application-layer communications retain FIPS status
+- Organizations requiring that **every cryptographic operation** in the data path use FIPS-validated modules will find Twingate non-compliant by that strict definition
+- FIPS 140-2 and FIPS 140-3 are treated identically in Twingate's documentation/policy
 
 ## Related Docs
 - [FIPS 140-validated OpenSSL library](https://www.openssl.org/docs/fips.html) (external reference)
-- Twingate FedRAMP evaluation support: contact Twingate directly for architecture documentation
+- Twingate Security documentation
+- Twingate FedRAMP support contact for CSP-specific evaluation

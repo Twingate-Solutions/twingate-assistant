@@ -1,59 +1,60 @@
 # Netskope DLP Configuration for Twingate Compatibility
 
 ## Summary
-Configures Netskope DLP to bypass inspection for Twingate Client processes, preventing conflicts when both clients run on the same device. Requires creating a certificate pinned app definition and a steering exception in the Netskope console.
+Configures Netskope DLP to bypass inspection for Twingate Client processes when both clients are installed on the same device. Requires creating a certificate pinned app definition in Netskope, then adding a steering exception for Twingate processes.
 
 ## Key Information
-- Both Netskope and Twingate clients can conflict when installed on the same device
-- Solution uses Netskope's "Certificate Pinned Application" exception type to bypass Twingate traffic
+- Both Netskope and Twingate clients can coexist on the same device with proper configuration
+- Configuration is done entirely in the Netskope console + client update
 - Applies to macOS and Windows platforms
 
 ## Prerequisites
 - Access to Netskope admin console
-- Existing or new Netskope Steering Configuration
-- Twingate Client installed on end-user devices
+- Netskope Steering Configuration exists (or ability to create one)
+- Twingate Client installed on target devices
 
 ## Step-by-Step
 
-### 1. Create Certificate Pinned Application
-- Navigate to **Settings → App Definition** in Netskope console
+### 1. Create Certificate Pinned Application in Netskope
+- Navigate to **Settings → App Definition**
 - Create new **Certificate Pinned Application** (recommended name: "Twingate")
-- Add entries per platform using **Exact** match type
+- Add platform entries using **Exact** match type:
+
+| Platform | Process Names |
+|----------|--------------|
+| macOS | `Twingate, Tunnel Provider macos` |
+| Windows | `twingate.exe, twingateupdater.exe, twingate.service.exe` |
 
 ### 2. Create Steering Exception
 - Navigate to **Settings → Steering Configuration**
 - Open existing config or create new one
 - Under **Exceptions** tab, add new exception:
-  - Type: **Certificate Pinned Application**
-  - App: Select the Twingate app created in Step 1
+  - Exception type: **Certificate Pinned Application**
+  - Application: Select the Twingate app created in Step 1
   - Custom app domains: `*`
   - Action per OS: **bypass**
 - Save the exception
 
-### 3. Apply Configuration
+### 3. Apply Configuration to Client
 - Click Netskope client icon → **Configuration → Update**
 - Restart the Twingate Client
 
 ## Configuration Values
 
-| Platform | Match Type | Process Definitions |
-|----------|------------|---------------------|
-| macOS | Exact | `Twingate, Tunnel Provider macos` |
-| Windows | Exact | `twingate.exe, twingate.service.exe, twingateupdater.exe` |
-
-| Exception Field | Value |
-|----------------|-------|
+| Field | Value |
+|-------|-------|
 | Exception Type | Certificate Pinned Application |
 | Custom App Domains | `*` |
 | Action | bypass |
+| macOS processes | `Twingate, Tunnel Provider macos` |
+| Windows processes | `twingate.exe, twingateupdater.exe, twingate.service.exe` |
 
 ## Gotchas
-- Must add entries for **all applicable platform types** in the app definition — omitting a platform leaves that OS unprotected from conflicts
-- After saving console changes, the Netskope client requires a manual **Update** pull before changes take effect
-- Twingate Client must be **restarted** after Netskope configuration is updated
-- Windows requires three separate process names; missing any may cause incomplete bypass
+- Must use **Exact** match type (not partial/regex) for process name definitions
+- Configuration update must be explicitly pulled via the Netskope client UI — it does not auto-apply
+- Twingate Client must be **restarted** after Netskope config update for changes to take effect
+- Wildcard (`*`) is required in the custom app domains field
 
 ## Related Docs
-- Netskope App Definition documentation (Netskope console)
-- Netskope Steering Configuration documentation (Netskope console)
-- Twingate Client installation guides
+- Twingate Client installation documentation
+- Netskope Steering Configuration documentation (Netskope-side)

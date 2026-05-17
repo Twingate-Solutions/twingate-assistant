@@ -4,57 +4,61 @@
 Connector & Client Registration
 
 ## Summary
-Connectors and Clients must register with the Twingate Controller before encrypted traffic can flow to Remote network Resources. Connectors use pre-generated deployment tokens; Clients use identity provider authentication via OpenID Connect. Both receive signed, time-expiring ACLs and Relay routing information from the Controller.
+Connectors and Clients must register with the Twingate Controller before encrypted traffic can flow to Resources. Connectors use pre-generated tokens from the Admin console; Clients use OIDC-based identity provider authentication. Both receive signed ACLs and Relay routing information upon successful registration.
 
 ## Key Information
-- Connector tokens are **one-time use only** — cannot be reused
-- Admin must re-authenticate before receiving Connector setup command
-- Connector operates headless (Docker container) behind firewall — no interactive auth
-- Client token expiry is **inherited from the identity provider's token expiry** — Controller does not set its own expiry
-- Connector periodically reports connected Relays and its TLS certificate digest to Controller (enables TLS certificate pinning for Client connections)
-- Relay never sees TLS certificate pinning information — only Controller and Client
+
+**Connector Registration:**
+- Deployed only by admin users via Admin console
+- Uses two one-time, non-reusable authentication tokens embedded in the deployment command
+- Admin must re-authenticate before receiving the setup command
+- Upon successful auth, Controller returns: whitelist ACL, Relay FQDNs, and signed tokens to authorize Relay connections
+- Connector validates Controller response authenticity before connecting to Relay
+- Relay authorization token includes a hash of Connector ID (no name/location/address leaked)
+- Connector periodically reports to Controller: connected Relay(s) and current TLS certificate digest (enables TLS certificate pinning for Clients)
+- Connector sends ongoing heartbeat to Controller for availability tracking in redundancy scenarios
+
+**Client Registration:**
+- Triggered after end-user authenticates with configured IdP or social identity
+- Follows standard OpenID Connect (OIDC) flow
+- Controller verifies user's verified email matches an active, configured user
+- Upon success, Controller issues: expiring tokens (tied to IdP token expiry) and a signed whitelist ACL
+- ACL specifies accessible Resources (by address) and which Connector serves each Resource
+- Token renewal requires re-authentication with the IdP — Controller does not extend expiry independently
+- Client listens for network connections matching ACL Resource addresses and initiates Client Connection Flow on match
 
 ## Prerequisites
-- Admin console access (admin user role required for Connector deployment)
-- Configured identity provider (IdP) or social identity for Client authentication
-- Docker environment for Connector deployment
+- Admin console access (for Connector deployment)
+- Configured identity provider or social identity (for Client registration)
+- Active, configured user account in Twingate network
 
-## Connector Registration Flow
-1. Connector starts with two auth tokens embedded in its startup command
-2. Authenticates to Controller using those tokens
-3. Controller returns signed, time-expiring message containing:
-   - Whitelist ACL (which Resources Connector may forward to)
-   - FQDN(s) of Relay(s) to connect to
-   - Controller-signed token(s) authorizing Relay connections
-4. Connector validates Controller response authenticity
-5. Connector connects to Relay(s) using Controller-issued token (token includes hash of Connector ID — no name/location/address leaked)
-6. Connector sends periodic heartbeats + reports: active Relay connections, current TLS certificate digest
+## Step-by-Step
 
-## Client Registration Flow
-1. Client connects to Controller to initiate auth request
-2. Controller returns IdP URI (configured IdP or social identity)
-3. User authenticates with IdP → receives redirect to Controller endpoint with time-expiring access token (standard OpenID Connect)
-4. Controller verifies user's email matches an active configured user
-5. Controller issues:
-   - Tokens expiring within IdP-provided expiration period
-   - Signed whitelist ACL (Resources user can access + which Connector serves each Resource)
-6. Client listens for network connections matching ACL Resource addresses → triggers Client Connection Flow
+**Connector:**
+1. Admin re-authenticates in Admin console
+2. Admin deploys Connector with generated token pair
+3. Connector authenticates to Controller with tokens
+4. Controller returns signed message (ACL, Relay FQDNs, Relay auth tokens)
+5. Connector validates Controller response
+6. Connector connects to Relay(s) using Controller-issued tokens
+7. Connector reports Relay connections and TLS cert digest to Controller periodically
 
-## Configuration Values
-| Item | Details |
-|------|---------|
-| Connector tokens | Two tokens, auto-generated per Connector, single-use |
-| Token expiry | Inherited from IdP session expiry (not configurable in Twingate) |
-| Connector transport | Docker container, outbound connections only |
+**Client:**
+1. Client connects to Controller to initiate auth
+2. Controller returns IdP URI
+3. User authenticates with IdP; receives redirect with time-expiring access token
+4. Controller verifies token and matches user to active account
+5. Controller issues expiring tokens and signed ACL
+6. Client configures local listener for matching Resource addresses
 
 ## Gotchas
-- Connector tokens **cannot be reused** — if lost, a new Connector must be created
-- Controller tokens for Clients expire exactly when the IdP token expires — reauthentication requires going back to IdP
-- Relay is explicitly **not** party to TLS certificate pinning information
-- Connector ACL acts as a **second enforcement layer** — Connector independently validates allowed Resources regardless of Client ACL
+- Connector tokens are **single-use only** — cannot be reused if deployment fails
+- Client token expiry is controlled by the IdP, not Twingate — reauthentication policy must be set at the IdP level
+- Relay never sees TLS certificate pinning information; that exchange is Controller↔Connector only
+- TLS connections from Clients go **directly to Connector**, not through Relay
 
 ## Related Docs
 - Connector Deployment
 - Client Connection Flow
 - OpenID Authentication
-- Admin Console / Admin User documentation
+- Admin Users documentation

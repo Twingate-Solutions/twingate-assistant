@@ -4,18 +4,18 @@
 SentinelOne Configuration (Twingate Device Security Integration)
 
 ## Summary
-Twingate integrates with SentinelOne via API to verify device security status as a condition for accessing private Resources. The Twingate Client matches device serial numbers against SentinelOne-managed devices and checks multiple health criteria. Available on Business and Enterprise plans only; supports macOS and Windows.
+Twingate integrates with SentinelOne via API to verify device trust status for macOS and Windows devices. Verified devices can be required as a condition in Security Policies via Trusted Profiles. Device verification is based on serial number matching against the SentinelOne tenant's managed device list.
 
 ## Key Information
-- Integration pulls device list via SentinelOne API using serial number matching
-- Verified devices must: be present in SentinelOne, reported within past hour, not infected, not decommissioned, no threat reboot pending, operational state = `na`
-- Only macOS and Windows devices are supported
-- After setup, expect a brief "Waiting to sync" period before device states are accurate
+- **Plan requirement**: Business & Enterprise only
+- **Supported OS**: macOS and Windows only
+- **Sync mechanism**: Twingate polls SentinelOne API for managed device serial numbers; Client matches local serial number against list
+- **Sync interval**: Near real-time; initial sync shows "Waiting to sync" for a few minutes
 
 ## Prerequisites
-- Twingate Business or Enterprise plan
 - SentinelOne Management Console access
 - SentinelOne Service User API token with **Viewer** access or higher
+- Twingate Business or Enterprise plan
 
 ## Step-by-Step
 
@@ -23,36 +23,42 @@ Twingate integrates with SentinelOne via API to verify device security status as
 1. SentinelOne Console → **Settings** → **Users** → **Service Users**
 2. **Actions** → **Create New Service User**
 3. Set name and expiration date
-4. Assign site/account scope with **Viewer** access minimum
+4. Assign site/account scope; grant **Viewer** access minimum
 5. Save the generated API token
 
-### Configure in Twingate
+### Configure Integration in Twingate
 1. Twingate Admin → **Settings** → **Device Integration**
 2. Click **Connect** next to SentinelOne
-3. Enter Management URL subdomain only (e.g., `abcd` from `https://abcd.sentinelone.net/web/api`)
+3. Enter **Management URL** as subdomain only (e.g., `abcd` from `https://abcd.sentinelone.net/...`)
 4. Enter API token
-5. Verify status on Device Settings page
+5. Confirm integration status on Device Settings page
 
 ### Apply to Security Policies
 1. Create a Trusted Profile for macOS/Windows
-2. Set SentinelOne as a required Trust Method
-3. Incorporate Trusted Profile into Security Policies
+2. Add SentinelOne as a required **Trust Method**
+3. Attach Trusted Profile to a Security Policy
 
 ## Configuration Values
 | Field | Format | Example |
 |-------|--------|---------|
-| Management URL | Subdomain only | `abcd` (not full URL) |
-| API Token | Service User token | From SentinelOne console |
-| Permission Level | Viewer or higher | — |
+| Management URL | Subdomain only | `abcd` (from `https://abcd.sentinelone.net`) |
+| API Token | SentinelOne Service User token | — |
+
+## Device Verification Requirements (all must pass)
+- Serial number present in SentinelOne
+- Reported to SentinelOne within **past hour**
+- Not infected
+- Not decommissioned
+- No threat reboot required
+- Operational state = `na` (agent active and uncorrupted)
 
 ## Gotchas
-- **Subdomain only** in Management URL field — do not paste the full URL
-- Initial sync shows "Waiting to sync" — device states may be incorrect for a few minutes
-- Recoverable errors (API unresponsive): integration shows last successful sync time; auto-resolves when API is reachable
-- Unrecoverable errors (invalid/deleted credentials, changed permissions): integration stops retrying; admin email notification sent; requires manual reconfiguration
-- `SentinelOne not verified` can occur if serial number cannot be retrieved from the device itself
+- Initial sync shows "Waiting to sync"—device states may be incorrect for a few minutes post-setup
+- **Recoverable errors** (API unresponsive): integration shows last successful sync time; auto-resolves when API is reachable
+- **Unrecoverable errors** (invalid/deleted credentials, changed permissions): integration stops retrying; admin email notification sent; requires manual reconfiguration with new API credentials
+- Missing serial number on the Twingate Client side also causes "not verified" status
 
 ## Related Docs
-- Device Security / Trusted Profiles
-- Security Policies
-- Twingate Pricing (Business/Enterprise plans)
+- Twingate Device Security / Trusted Profiles documentation
+- Twingate Security Policies documentation
+- [Twingate Pricing](https://www.twingate.com/pricing)

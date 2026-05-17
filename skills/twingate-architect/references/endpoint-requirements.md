@@ -1,35 +1,35 @@
 # Endpoint Requirements
 
 ## Summary
-The Twingate Client must be installed and running to access protected Resources. It uses the host OS's native VPN functionality to intercept traffic, requiring outbound firewall access on specific ports for Controller, Relay, and peer-to-peer connectivity.
+The Twingate Client must be installed and running on user devices to access protected Resources. It uses the host OS's native VPN functionality to intercept traffic, requiring minimal resources (<10MB). Firewall rules are generally not needed but specific ports must be accessible if connectivity issues arise.
 
 ## Key Information
-- Client size: <10MB, minimal resource usage
-- Download at: `get.twingate.com` (auto-detects platform)
-- Native OS VPN activation is expected behavior, not an error
-- Compatible with most device management (MDM) solutions
+- Client size: <10MB, minimal system resource usage
+- Uses native OS VPN functionality — VPN connection activating on device is expected/normal
+- Download available at `get.twingate.com` (auto-detects platform)
+- Compatible with most MDM/device management solutions
 
 ## Prerequisites
-- Device with supported OS
-- Outbound internet access on required ports
-- Admin rights for installation (implied)
+- Device must have outbound internet access
+- Supported operating system with native VPN capability
 
 ## Firewall Rules (Outbound Only)
 
 | Protocol | Port(s) | Purpose |
 |----------|---------|---------|
-| TCP | 443 | Controller + Relay infrastructure communication |
-| TCP | 30000–31000 | Relay fallback (when P2P unavailable) |
-| UDP/QUIC (HTTP/3) | 1–65535 | Peer-to-peer connectivity (optimal performance) |
+| TCP | 443 | Communication with Twingate Controller and Relay infrastructure |
+| TCP | 30000–31000 | Connections to Relay infrastructure (fallback when P2P unavailable) |
+| UDP + QUIC/HTTP3 | 1–65535 | Peer-to-peer connectivity for optimal performance |
 
-> No special firewall rules are typically required. Use the above list only for troubleshooting connectivity issues.
+All rules are **outbound-initiated** — no inbound rules required.
 
 ## Gotchas
-- VPN indicator appearing on the device is **expected** — not a sign of misconfiguration
-- UDP ports 1–65535 are needed for P2P; restricting these degrades performance but doesn't break connectivity (falls back to TCP Relay on 30000–31000)
-- Port 443 TCP is the minimum required for basic functionality
+- VPN connection appearing on the device is **expected behavior**, not an error
+- Firewall rules are not typically required; only needed for troubleshooting connectivity issues
+- UDP ports 1–65535 are required for P2P; restricting these degrades performance and forces Relay fallback
+- TCP 30000–31000 is the Relay fallback path when P2P (UDP) is blocked
 
 ## Related Docs
 - Download & Installation guide
 - Managed Devices section
-- HTTP/3 / QUIC guide (linked in source for UDP/QUIC details)
+- QUIC/HTTP3 guide (referenced for UDP port usage)

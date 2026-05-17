@@ -4,48 +4,45 @@
 Advanced Connector Management
 
 ## Summary
-This page serves as an index for advanced Connector management topics including logging, monitoring, metadata, health checks, and deployment automation. Each section links to dedicated documentation covering specific operational capabilities.
+This page serves as an index for advanced Connector management features including logging, monitoring, metadata, health checks, and deployment automation. Each topic links to dedicated documentation covering the specific implementation details.
 
 ## Key Information
-- **Real-time connection logs**: Connectors can stream network connection logs to `stdout` for SIEM integration or custom monitoring
-- **Connector details**: State and host machine metadata visible in Admin console Connector management page
-- **Custom metadata**: Deployable at runtime, visible in Admin console
-- **Unqualified domain names**: Supported by configuring search domains on the Connector host (no device-level config required)
-- **Health checks**: Automatic in Docker container deployments; manual checking available for specialized scenarios
+- **Real-time connection logs**: Connectors can output network connection logs to `stdout` for SIEM integration or custom monitoring
+- **Connector details**: State and host machine metadata visible in Admin Console → Connector management page
+- **Custom metadata**: Can be attached to Connectors at deployment time, visible in Admin Console
+- **Unqualified domain names**: Supported by configuring search domains on the Connector host machine (no device-level config required)
+- **Health checks**: Docker deployments report health automatically; specialized scenarios can query health directly
 - **Prometheus metrics**: Connectors can expose Prometheus-compatible metrics endpoint
-- **Deployment automation**: Best practices documented for API-driven or scripted Connector deployments
+- **Deployment automation**: Admin API or custom scripts supported with documented best practices
 
 ## Prerequisites
 - Connector deployed and registered to Twingate network
-- Access to Admin console for viewing details/metadata
-- Docker deployment assumed for automatic health checks; other scenarios need direct health check configuration
+- Access to Admin Console for viewing details/metadata
+- Docker used for automatic health reporting (optional)
 
-## Sub-Topics (with links referenced)
+## Sub-Topics & Links
 | Feature | Reference |
 |---|---|
-| Real-time connection logs | Enable real-time connection logs |
-| Connector details | View Connector details |
-| Custom metadata | Add custom metadata |
-| Unqualified domain names | Supporting unqualified domain names |
-| Health checks | Checking Connector health directly |
-| Prometheus metrics | Connector metrics |
-| Automated deployment | Deployment automation best practices |
+| Real-time connection logs | Enable real-time connection logs doc |
+| Connector details | View Connector details doc |
+| Custom metadata | Add custom metadata doc |
+| Unqualified domain names | Unqualified domain names doc |
+| Health checks | Connector health checks doc |
+| Prometheus metrics | Connector metrics doc |
+| Automated deployment | Deployment automation best practices doc |
 
 ## Configuration Values
-- Connection logs output to: `stdout`
+- Logs output to: `stdout` on host machine
 - Metrics format: Prometheus-compatible
-- Metadata: Set at deployment time (specific flags/env vars documented in sub-pages)
-- Search domains: Configured at OS level on Connector host machine
+- Automation interface: Admin API
 
 ## Gotchas
-- Health checks are **automatic only in Docker**; non-Docker deployments require manual health check configuration
-- Custom metadata must be added **at deployment time** — not post-deployment via console
-- Unqualified domain name support requires search domain config on the **Connector host**, not on client devices
+- Docker deployments get automatic health reporting; **non-Docker deployments require explicit health check configuration**
+- Unqualified domain name support requires search domain configuration on the **Connector host**, not on client devices
+- Custom metadata must be added **at deployment time**, not retroactively via the console
 
 ## Related Docs
-- Real-time connection logs (sub-page)
-- Connector metrics / Prometheus (sub-page)
-- Deployment automation best practices (sub-page)
 - Admin API documentation
-- Connector health checks (sub-page)
-- Custom metadata (sub-page)
+- Connector deployment guides
+- Prometheus monitoring integration
+- SIEM integration guides

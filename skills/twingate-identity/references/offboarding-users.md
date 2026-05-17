@@ -1,17 +1,17 @@
-# Offboarding Users – Twingate
+# Offboarding Users - Twingate
 
 ## Summary
-Covers two offboarding scenarios: social login users (managed directly in Twingate Admin Console) and enterprise IdP users (managed via IdP with Twingate sync). Immediate device blocking in the Admin Console is recommended to bypass sync delays.
+Covers two offboarding scenarios: social login users (managed directly in Twingate Admin Console) and enterprise IdP users (managed in IdP with Twingate sync). Immediate access revocation for IdP users requires blocking devices directly in Twingate Admin Console due to sync delays.
 
 ## Key Information
-- **Disabled users**: Cannot log in, account data retained, still count toward billable users
-- **Deleted users**: Account permanently removed, no longer billable
-- **IdP sync**: Changes propagate automatically but may have delays depending on IdP configuration
-- **Device blocking**: Immediately revokes access regardless of IdP sync status; device cannot access any Resources until unblocked
+- Disabled users **cannot log in** but account data is retained and they **still count toward billable users**
+- Deleted users have account data **permanently removed** and **do not count toward billable users**
+- IdP sync changes may have delays depending on IdP configuration
+- Blocking a device in Twingate immediately revokes all Resource access regardless of IdP sync status
 
 ## Prerequisites
-- Admin Console access with administrative credentials
-- For IdP scenario: admin access to enterprise IdP (Okta, Entra ID, etc.)
+- Admin access to Twingate Admin Console
+- For IdP scenario: Admin access to enterprise IdP (Okta, Entra ID, etc.)
 
 ## Step-by-Step
 
@@ -19,28 +19,26 @@ Covers two offboarding scenarios: social login users (managed directly in Twinga
 1. Log in to Twingate Admin Console
 2. Navigate to **Teams** page
 3. Locate the target user
-4. Select **Disable** (retains data, remains billable) or **Delete** (permanent removal, not billable)
+4. Select **Disable** (retains account, blocks login) or **Delete** (permanently removes account)
 5. Confirm the action
 
 ### Scenario 2: Enterprise IdP (Okta, Entra ID, etc.)
 1. Log in to your IdP
-2. **Full offboard**: Disable or delete the user's IdP account
-   **Access removal only**: Remove user from groups synced to Twingate
-3. Wait for sync propagation to Twingate
-4. **Recommended – immediate revocation**: Log in to Twingate Admin Console → navigate to **Devices** → block the user's device(s)
+2. **Full offboarding**: Disable or delete user account in IdP → syncs to Twingate automatically
+3. **Twingate-only removal**: Remove user from groups synced to Twingate → syncs automatically
+4. **For immediate revocation**: Log in to Twingate Admin Console → navigate to **Devices** → block the user's device(s)
 
 ## Configuration Values
-- No specific env vars or API parameters documented on this page
-- Sync delay varies by IdP and its settings
+- N/A — actions performed via UI only
 
 ## Gotchas
-- Disabled users **still count as billable**; delete if seat reduction is needed
-- IdP sync is **not immediate** — always block devices in Admin Console for time-sensitive offboarding
-- Removing a user from a synced group (not deleting the IdP account) is sufficient if only Twingate access needs to be revoked
-- Blocked devices remain blocked until manually unblocked — verify before re-onboarding
+- **Billing**: Disabled users still count as billable; delete if you want to remove from billing
+- **Sync delay**: IdP changes are not instant — always block the device in Twingate for immediate revocation
+- **Device blocking is independent**: A blocked device cannot access any Resources until explicitly unblocked, even if the user account is later re-enabled in the IdP
+- Deleting a user is **permanent** — no recovery of account data
 
 ## Related Docs
-- Twingate Admin Console – Teams page
-- Twingate Admin Console – Devices page
+- Twingate Teams/Users management
+- Device management in Admin Console
 - IdP integration guides (Okta, Entra ID)
-- Billable user management
+- SCIM provisioning/sync configuration

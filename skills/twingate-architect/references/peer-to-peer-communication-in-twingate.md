@@ -1,43 +1,45 @@
 # Peer-to-Peer Communication in Twingate
 
 ## Summary
-Twingate automatically establishes peer-to-peer connections between Clients and Connectors using NAT traversal (ICE/STUN), with relay infrastructure as fallback. No configuration, open inbound ports, or additional deployment is required. Uses QUIC (UDP-based) as the transport protocol.
+Twingate supports peer-to-peer (P2P) connections between Clients and Connectors using NAT traversal, requiring no open inbound ports or additional configuration. When P2P is unavailable, Twingate automatically falls back to relay infrastructure. The system is transparent to both end users and administrators.
 
 ## Key Information
-- Available to all customers; no additional deployment needed
-- No open inbound ports required on either Client or Connector
-- Twingate auto-selects lowest-latency transport (P2P preferred, relay as fallback)
-- Transport protocol: QUIC (RFC 9000), built on UDP
-- QUIC enforces TLS 1.3+ only
-- Relay infrastructure is globally distributed and always accessible as backup
+- Available to all Twingate customers; no additional deployment required
+- No open inbound ports needed on either Client or Connector
+- Automatically selects lowest-latency transport (P2P preferred, relay as fallback)
+- Uses **QUIC** (RFC 9000) as the transport protocol, built on UDP
+- QUIC enforces TLS 1.3 minimum
 
 ## Connection Establishment Flow
-1. **Signaling channel**: Client and Connector both connect outbound to Twingate's Relay Infrastructure (public, globally available)
-2. **STUN discovery**: Each peer discovers its public IP:port via STUN server (hosted in Twingate relay infra)
-3. **Candidate exchange**: Peers exchange candidate addresses via signaling channel
+1. **Signaling channel**: Client and Connector connect to Twingate's global Relay Infrastructure on startup
+2. **STUN discovery**: Both peers discover their public IP:port via Twingate-hosted STUN servers
+3. **Candidate exchange**: Peers exchange discovered addresses via the signaling channel
 4. **NAT traversal**: Peers attempt direct P2P connection using candidate addresses
-5. **Fallback**: If P2P fails (blocked ports, incompatible NAT), traffic routes through relay infrastructure
+5. **Fallback**: If P2P fails (blocked ports, incompatible NAT), traffic routes through Twingate's relay infrastructure
+
+## Prerequisites
+- No special configuration required
+- Works with existing Client and Connector deployments
 
 ## Configuration Values
-- No configuration required — fully automatic
-- No CLI flags, env vars, or API parameters to set
+- None required — fully automatic
 
-## QUIC Protocol Benefits
-| Feature | Detail |
+## Technical Details (QUIC)
+| Feature | Benefit |
 |---|---|
-| Connection establishment | Single round trip; zero-RTT resumption |
-| Cryptography | TLS 1.3 only |
-| Client roaming | Survives IP/port changes (NAT rebinding, network switching) |
-| Head-of-line blocking | Eliminated (vs. TCP/HTTP2) |
-| Multi-stream | Multiplexes multiple app flows over single connection |
+| UDP-based with reliable delivery | Lower latency than TCP+TLS |
+| Single round-trip initial connection | Faster establishment |
+| TLS 1.3 only | Stronger encryption |
+| Connection ID-based routing | Survives IP/port changes (roaming, NAT rebinding) |
+| Stream multiplexing | No head-of-line blocking (unlike HTTP/2 over TCP) |
 
 ## Gotchas
-- P2P is **not guaranteed** — incompatible NAT types or firewall rules blocking UDP will fall back to relay automatically
-- Relay fallback is transparent; no admin action needed but may have higher latency than direct P2P
-- QUIC runs over UDP — ensure UDP is not blocked on networks where Clients operate
-- Outbound connectivity to Twingate relay infrastructure must be available from both Client and Connector sides
+- P2P is **not always achievable** — incompatible NAT types or firewalls blocking UDP will force relay fallback
+- Relay fallback is automatic; no administrator action needed
+- QUIC runs in user space, meaning it can be updated independently of kernel TCP stack
+- Twingate maps multiple application flows to individual QUIC streams across a single connection
 
 ## Related Docs
 - Twingate Connector documentation
 - Twingate Client documentation
-- Twingate Relay Infrastructure / networking requirements
+- Relay Infrastructure overview

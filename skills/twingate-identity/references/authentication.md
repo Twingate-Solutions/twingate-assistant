@@ -1,39 +1,40 @@
 # Twingate Authentication Policy Rule
 
 ## Page Title
-Authentication (Rule Reference)
+Authentication (Policy Rule)
 
 ## Summary
-The Authentication rule controls how frequently users must re-authenticate to access Resources. It applies to Resource Policies or Minimum Authentication Requirements, but not the Admin Console's authentication policy. Re-authentication behavior depends partly on IdP configuration.
+The Authentication rule controls how frequently users must re-authenticate to access Resources. It applies to Resource Policies or Minimum Authentication Requirements, but cannot be applied to the Admin Console's authentication policy.
 
 ## Key Information
-- **Scope**: Applies to Resource Policies and Minimum Authentication Requirements only; Admin Console auth policy is not editable
-- **Mechanism**: If a user hasn't authenticated within the configured time window, they are prompted to re-authenticate on Resource access
-- **Session reuse**: A valid authentication session satisfies all policies within that window—users are not prompted multiple times for different policies
-- **IdP dependency**: Twingate cannot control whether the IdP actually requires credential re-entry; some providers silently re-authenticate without prompting the user
+- Sets re-authentication frequency (time window) for resource access
+- Twingate does not control IdP behavior during re-authentication — the IdP may not require password re-entry
+- Authentication is shared across policies: a valid session satisfies multiple policy checks within the same time window
+- If authenticated within the window, users won't be prompted again even if different Security Policies apply
 
 ## Prerequisites
-- Resource Policy or Minimum Authentication Requirement configured in Admin Console
-- Identity provider (IdP) integrated with Twingate
+- At least one Resource Policy or Minimum Authentication Requirement configured
+- Identity provider (IdP) connected to Twingate
 
 ## Configuration Values
-| Parameter | Description | Example |
-|-----------|-------------|---------|
-| Authentication frequency | Time window before re-authentication is required | 6 hours, 1 day |
+| Parameter | Description |
+|-----------|-------------|
+| Time window | Duration since last authentication (e.g., 6 hours, 1 day) |
 
-## Behavior Logic
-- User attempts Resource access → check last authentication timestamp
-- If time since last auth **exceeds** the policy window → prompt for re-authentication
-- If time since last auth **is within** the policy window → access granted, no prompt
-- **Interaction between policies**: The most recently satisfied auth timestamp is used across all policies. Example: Minimum Auth Requirement = 1 day, Resource Policy = 6 hours — user who authenticated at T=0 accesses the resource at T=5h (no prompt); accessing at T=7h triggers re-auth
+## How It Works (Step-by-Step)
+1. User attempts to access a Resource with an Authentication rule applied
+2. Twingate checks when the user last authenticated
+3. If last authentication is **within** the defined window → access granted, no prompt
+4. If last authentication is **outside** the window → user is prompted to re-authenticate via IdP
+5. Re-authentication delegates to the IdP (Twingate does not enforce credential entry)
 
 ## Gotchas
-- **IdP silent re-auth**: If your IdP uses SSO session cookies, users may be "re-authenticated" without entering credentials. Configure your IdP to require passwords on each authentication if active verification is required
-- **Cross-policy session sharing**: A single authentication event satisfies multiple overlapping policies simultaneously — a stricter Resource Policy does not force re-auth if the user recently authenticated for a less strict policy
-- **Admin Console excluded**: You cannot modify authentication policy for the Admin Console itself
+- **IdP passthrough**: Twingate cannot force the IdP to require passwords. Some IdPs silently re-authenticate users without credential prompts — configure your IdP to require passwords each session if active re-authentication is critical
+- **Session reuse across policies**: A single authentication satisfies all policy checks within that time window. Example: Minimum Authentication Requirement = 1 day, Resource Policy = 6 hours — a user who authenticated 5 hours ago passes the 6-hour resource check without a second prompt, but would be blocked after 6 hours
+- **Admin Console policy is not editable** via this rule
 
 ## Related Docs
 - Resource Policies
 - Minimum Authentication Requirements
 - Security Policies
-- Identity Provider Integration
+- Identity Provider configuration

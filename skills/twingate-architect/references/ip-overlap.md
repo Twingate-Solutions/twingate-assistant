@@ -1,45 +1,45 @@
 # Best Practices for Overlapping IP Addresses
 
 ## Summary
-When multiple assets across different network subnets share the same IP address, Twingate cannot automatically determine which Remote Network to route traffic through. Three resolution options exist that avoid network restructuring. Overlapping CIDR ranges and wildcard DNS entries are explicitly unsupported.
+When multiple assets across different subnets share the same IP address, Twingate cannot automatically determine which Remote Network to route traffic through. Three solutions exist to resolve this ambiguity without changing network infrastructure or IP assignments.
 
 ## Key Information
 - Resources are attached to Remote Networks and assigned to User Groups
-- Ambiguity occurs when a user belongs to groups containing Resources with identical IP addresses in different Remote Networks
-- More specific Resource definitions (single IP) always take priority over broader ones (CIDR range, wildcard DNS)
-- Overlapping CIDR ranges or wildcard DNS entries across Remote Networks produce undefined routing behavior
-
-## Resolution Options
-
-### Option 1: Resource Aliases (Recommended)
-Assign unique FQDNs as aliases to Resources with overlapping IPs:
-- `10.1.2.3` (dev subnet) → alias `server.dev.autoco.com`
-- `10.1.2.3` (prod subnet) → alias `server.prod.autoco.com`
-- Users connect via FQDN; Twingate routes to correct Remote Network automatically
-
-### Option 2: Private DNS Server
-- Deploy private DNS with separate zones per subnet (e.g., `*.dev.autoco.com`, `*.prod.autoco.com`)
-- Create DNS records mapping FQDNs to overlapping IPs within each zone
-- Redefine Twingate Resources using FQDNs instead of IP addresses
-
-### Option 3: Strict User/Group Segmentation
-- Create separate Resources (same IP, different Remote Networks) in different Groups
-- Ensure no user belongs to two Groups that both contain Resources with the same IP
-- Can be managed via the open-source [Group Profile Manager](https://github.com/Twingate-Labs) (Twingate Labs)
-
-## Gotchas
-- **CIDR/wildcard overlap is unsupported**: No guaranteed routing behavior if two Resources in different Remote Networks share identical or overlapping CIDR ranges or wildcard DNS entries
-- **Specificity wins**: A specific IP `10.0.0.10` always overrides a CIDR `10.0.0.0/24` match—there is no way to force traffic through the broader-scoped Resource once a specific match exists
-- **Option 3 fragility**: Any user added to multiple groups with overlapping IP Resources immediately creates ambiguity; requires ongoing access management discipline
-- Non-overlapping IPs (e.g., dev at `10.1.2.5`, prod at `10.1.2.6`) require no special handling—create two standard Resources
+- Ambiguity occurs when a user belongs to groups with Resources pointing to the same IP in different Remote Networks
+- Overlapping CIDR ranges and wildcard DNS entries across Remote Networks are not recommended
+- More specific Resource definitions (single IP, specific hostname) always take priority over broader ones (CIDR range, wildcard)
 
 ## Prerequisites
-- Understanding of Twingate Remote Networks, Resources, and Groups model
-- For Option 2: ability to deploy and manage internal DNS infrastructure
-- For Option 3: disciplined group membership management
+- Resources must be mapped to distinct Remote Networks
+- User-Group-Resource relationships must be clearly defined
+
+## Three Resolution Options
+
+### Option 1: Resource Aliases (Recommended)
+Add FQDN aliases to each Resource so routing is determined by alias, not IP:
+- `10.1.2.3` (subnet1) → `server.dev.autoco.com`
+- `10.1.2.4` (subnet1) → `db.dev.autoco.com`
+- `10.1.2.3` (subnet2) → `server.prod.autoco.com`
+- `10.1.2.4` (subnet2) → `db.prod.autoco.com`
+
+### Option 2: Private DNS Server
+Deploy a private DNS server with per-subnet DNS zones:
+- Create zones: `*.dev.autoco.com` → development subnet, `*.prod.autoco.com` → production subnet
+- Reconfigure Twingate Resources to use FQDNs instead of IPs
+- DNS resolution disambiguates routing automatically
+
+### Option 3: Strict User-Group Separation
+Create separate Resources with identical IPs in different Remote Networks, but ensure **no user belongs to two groups that both contain Resources with the same IP**:
+- Requires precise User ↔ Group ↔ Resource mapping
+- Can be managed via the open-source [Group Profile Manager](https://github.com/Twingate-Labs) (Labs repo)
+
+## Gotchas
+- **CIDR/wildcard overlap**: If two Resources in different Remote Networks share overlapping CIDR ranges or wildcard DNS entries and a user has access to both, routing behavior is undefined
+- **Specificity priority**: A specific IP (`10.0.0.10`) always wins over a CIDR range (`10.0.0.0/24`); this cannot be overridden — the broader resource becomes unreachable for that specific address
+- Option 3 fails silently if user group membership is not carefully maintained — any user in both groups with conflicting IP Resources will experience ambiguity
 
 ## Related Docs
 - Resource Aliases
-- Private DNS Server configuration
-- DNS Zones
-- Group Profile Manager (Twingate Labs repository)
+- Private DNS configuration
+- Remote Networks
+- Group Profile Manager (Twingate Labs)

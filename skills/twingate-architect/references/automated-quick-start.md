@@ -1,32 +1,29 @@
 # Automated Deployment - Twingate
 
 ## Summary
-Twingate supports Infrastructure-as-Code (IaC) automated deployments via Terraform and Pulumi. Guides are available for AWS, Azure, and GCP. Intended to reduce rollout time across multiple environments including multi-cloud setups.
+Twingate supports automated deployment via Infrastructure-as-Code (IaC) tools, specifically Terraform and Pulumi. Guides are available for AWS, Azure, and GCP. This page serves as an entry point to provider-specific deployment guides.
 
 ## Key Information
 - Supported IaC tools: **Terraform** and **Pulumi**
 - Supported cloud providers: AWS, Azure, GCP (the "big three")
-- Multi-cloud deployments are supported
+- Designed for multi-cloud and multi-environment rollouts
 
 ## Prerequisites
-- Existing Twingate account
-- Familiarity with Terraform or Pulumi
+- Existing IaC toolchain (Terraform or Pulumi)
+- Twingate account with appropriate permissions
 - Cloud provider credentials for target environment(s)
 
-## Step-by-Step
-1. Choose IaC tool (Terraform or Pulumi)
-2. Choose target cloud provider (AWS, Azure, or GCP)
-3. Follow the provider-specific guide (linked from Twingate docs)
-
-## Configuration Values
-- No specific env vars, CLI flags, or API params documented on this page
-- See individual Terraform/Pulumi provider guides for configuration details
+## Available Guides
+| Tool | Providers |
+|------|-----------|
+| Terraform | AWS, Azure, GCP |
+| Pulumi | AWS, Azure, GCP |
 
 ## Gotchas
-- This page is an index/landing page only; actual implementation details are in linked sub-guides
-- No direct configuration examples provided here
+- This page is an index only — actual configuration steps are in the linked provider-specific guides
+- No configuration values or CLI flags are documented at this level
 
 ## Related Docs
-- Terraform deployment guides (AWS, Azure, GCP)
-- Pulumi deployment guides (AWS, Azure, GCP)
-- Twingate webinar: *Best Practices for Secure Infrastructure-as-Code Initiatives*
+- Terraform deployment guides (AWS / Azure / GCP)
+- Pulumi deployment guides (AWS / Azure / GCP)
+- Best Practices for Secure Infrastructure-as-Code Initiatives (webinar resource)

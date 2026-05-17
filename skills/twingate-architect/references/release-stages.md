@@ -6,19 +6,19 @@ Twingate releases features in two stages: Beta and General Availability (GA). Be
 ## Key Information
 
 ### Beta Stage
-- Available for opt-in testing or enabled only for new networks
-- May have bugs, limited functionality, or incomplete features
-- Documentation provided but may be incomplete
-- **No guaranteed support**
-- Breaking changes possible
+- Feature available for testing but may be incomplete or buggy
+- Breaking changes may occur between versions
+- Support **not guaranteed**
+- Documentation may be incomplete
+- Opt-in or enabled only for new networks
 - Not fully optimized for performance
 
 ### General Availability (GA) Stage
-- Fully released for public and production use
-- Available to both new and existing networks
-- Full formal support through regular channels
+- Production-ready, feature-complete with polished UI/UX
 - Breaking changes avoided whenever possible
-- Comprehensive documentation with known feature gaps outlined
+- **Full support** through standard channels
+- Comprehensive documentation provided
+- Available to both new and existing networks
 - Optimized and scalable for production use
 
 ## Comparison Table
@@ -27,17 +27,17 @@ Twingate releases features in two stages: Beta and General Availability (GA). Be
 |------|------|----|
 | Functionality | May be incomplete | Feature-complete |
 | Reliability | Possible minor issues | Thoroughly tested |
-| Stability | Breaking changes possible | Breaking changes avoided |
-| Performance | Not fully optimized | Production-optimized |
+| Stability | May have breaking changes | Breaking changes avoided |
+| Performance | Not optimized | Optimized for production |
 | Support | Not guaranteed | Full formal support |
 | Documentation | May be incomplete | Comprehensive |
 | Availability | Opt-in / new networks only | New and existing networks |
 
 ## Gotchas
-- Beta features may introduce breaking changes — avoid relying on them in production pipelines
+- Do not rely on Beta features in production environments — breaking changes can occur without notice
 - Support requests for Beta features may not be addressed
-- Beta availability may be restricted to new networks only, meaning existing networks must opt-in separately if eligible
-- GA documentation explicitly notes known feature gaps — review before implementation
+- Beta availability may be restricted to new networks only, meaning existing networks may need to opt in explicitly
+- GA features may still have documented known gaps — check release documentation before deploying
 
 ## Related Docs
-- Individual feature documentation (indicates Beta or GA status per feature)
+- Individual feature documentation will indicate Beta or GA status

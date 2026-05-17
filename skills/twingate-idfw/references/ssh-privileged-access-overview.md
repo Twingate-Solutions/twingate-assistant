@@ -1,60 +1,62 @@
-# Privileged Access for SSH Overview
+# Twingate Privileged Access for SSH – Overview
 
 ## Page Title
-Twingate Privileged Access for SSH Overview
+Privileged Access for SSH Overview
 
 ## Summary
-Twingate Privileged Access for SSH is a Layer 7 reverse proxy (Gateway) that adds zero trust SSH access controls without distributing SSH keys to users. It provides short-lived certificate-based auth, full session recording in asciicast v2 format stored on your infrastructure, and works with standard `ssh` clients. Currently early access, free for up to 5 Resources.
+Twingate Privileged Access for SSH adds zero-trust, Layer 7 access controls to SSH sessions via a Gateway (reverse proxy) deployed in your environment. It eliminates SSH key distribution, enforces identity-based authentication using short-lived certificates, and records all sessions in asciicast v2 format on your own infrastructure.
 
 ## Key Information
-- Gateway acts as SSH reverse proxy: terminates inbound sessions, authenticates to targets via certificates, records sessions
-- No SSH keys on user devices; short-lived certificates issued per connection
-- Session recordings exported to Gateway `stderr` in asciicast v2 format — never sent to Twingate
-- One Gateway serves multiple SSH Resources within same Remote Network
-- Visualize recordings at `twingate.com/sessionplayer`
+- **Early Access**: Free for up to 5 Resources; contact Twingate for additional pricing
+- Session recordings stored locally (never sent to Twingate); viewable at `twingate.com/sessionplayer`
+- No bastion host required; Gateway replaces it
+- Users connect with standard `ssh` — no custom CLI
+- File transfer (`sftp`, `rsync`) and port forwarding supported; X11 forwarding is **not** supported
+- File transfer and port forwarding data is **not** recorded
 
 ## Prerequisites
-- Minimum Client versions: macOS `2026.85`, Windows `2026.90`, Linux `2025.342`
-- Minimum Connector version: `1.82.0` (all Connectors associated with SSH Resources)
+- Connector version ≥ `1.82.0` on all Connectors associated with SSH Resources
+- Minimum Client versions:
+  - macOS: `2026.85`
+  - Windows: `2026.90`
+  - Linux: `2025.342`
 - Mobile clients (Android/iOS) not supported
-- Deployment target: Kubernetes cluster or VM
+- Gateway deployed to Kubernetes cluster or VM within target Remote Network
 
 ## Components
 
-### Certificate Authorities (configured in Settings > Certificate Authorities)
-| CA Type | Purpose | Required |
-|---------|---------|----------|
-| X.509 CA | Secures Client ↔ Gateway connection | Always |
-| SSH CA | Issues user/host certificates | For SSH Resources |
+### Gateway
+- Layer 7 reverse proxy; terminates inbound SSH, authenticates to target server, records sessions to `stderr`
+- One Gateway can serve multiple SSH Resources within the same Remote Network
 
-### Gateway Signing Modes
-- **Local SSH CA**: CA private key on Gateway; simpler, good for getting started
-- **HashiCorp Vault**: Uses Vault SSH secrets engine; recommended for production (keys off-disk, audit logging)
+### Certificate Authorities (managed under Settings > Certificate Authorities)
+| CA Type | Purpose | Required For |
+|---------|---------|--------------|
+| X.509 CA | Secures Client↔Gateway connection | Every Gateway |
+| SSH CA | Issues short-lived user/host certs | Any SSH Resource |
 
-## Supported SSH Features
-| Feature | Supported |
-|---------|-----------|
-| Interactive shell | ✅ |
-| Remote command execution | ✅ |
-| SFTP / rsync | ✅ |
-| TCP/IP port forwarding | ✅ |
-| X11 forwarding | ❌ |
+### SSH CA Signing Modes
+- **Local SSH CA**: Gateway holds private key; signs directly. Good for getting started.
+- **HashiCorp Vault**: Uses Vault SSH secrets engine. Recommended for production (keys off-disk, audit logging).
 
-## User Configuration (Avoiding TOFU Prompts)
+## Configuration Values
+- CAs: multiple CAs per type allowed; reusable across Gateways
+- Session log format: `asciicast v2` written to `stderr` on Gateway
+- Known hosts sync: `~/.ssh/known_hosts` (auto-synced via Twingate Client)
+
+## Step-by-Step: Avoid TOFU Prompts (User Setup)
 1. Open Twingate Client
-2. Go to **More** → **SSH Server Configuration Auto-Sync**
-3. This syncs SSH CA public key to `~/.ssh/known_hosts` and keeps it updated
-
-Without this step, OpenSSH shows TOFU warning on first connection.
+2. Navigate to **More** → **SSH Server Configuration Auto-Sync**
+3. Enables automatic sync of SSH CA public key to `~/.ssh/known_hosts`
 
 ## Gotchas
-- File transfer and port forwarding data is **not** recorded in session logs
-- Existing `authorized_keys` entries are unaffected when adding SSH CA — migration is optional
-- You are responsible for forwarding/retaining session logs (SIEM, object storage)
-- Session recording captures terminal I/O for interactive shells; also logs channel open/close events
-- Windows Server supported if OpenSSH is installed
+- Existing `authorized_keys` entries are unaffected; migration to CA-only access is manual
+- Without SSH config auto-sync, users see TOFU warning on first connection
+- Session recording does **not** capture file transfer or port forwarding data
+- Logs are your responsibility to forward/retain (forward to SIEM or object storage)
+- Windows Server supported only with OpenSSH installed
 
 ## Related Docs
-- [Installing Privileged Access for SSH](https://www.twingate.com/docs/installing-privileged-access-for-ssh) — prerequisites and deployment options
-- Remote development guide (VS Code, JetBrains, Cursor)
-- Twingate community subreddit
+- [Installing Privileged Access for SSH](https://www.twingate.com/docs/installing-privileged-access-for-ssh) – prerequisites and deployment options
+- Remote development with Twingate SSH (VS Code, JetBrains, Cursor)
+- Twingate session player: `twingate.com/sessionplayer`

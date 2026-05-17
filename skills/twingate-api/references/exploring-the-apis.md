@@ -4,47 +4,38 @@
 Exploring the APIs
 
 ## Summary
-Twingate's primary API interface is GraphQL, which enables precise data queries but has a steeper learning curve than REST APIs. This page provides video walkthroughs and a Postman collection to help users get started with both queries and mutations.
+Twingate's primary API is GraphQL-based, offering precise data retrieval. This page provides video walkthroughs and a Postman collection to help users get started with queries, mutations, and introspection—even without prior GraphQL experience.
 
 ## Key Information
-- Twingate uses **GraphQL APIs** as the official supported interface
-- A **Postman collection** (JSON template) is provided with pre-built API request examples
-- Content covers: basic queries, nested queries, mutations, and introspection
-- Five video walkthroughs available covering beginner to advanced usage
+- Twingate uses **GraphQL APIs** (not REST)
+- Official **Postman collection** available with pre-built request examples
+- Videos cover: token generation, basic queries, nested queries, mutations, and introspection
+- Introspection can be used to self-discover available queries and mutations
 
 ## Prerequisites
-- Twingate API Token (generated via the Twingate Admin Console)
-- [Postman](https://www.postman.com/) installed (free)
-- Twingate Postman collection JSON imported into Postman
+- **Postman** installed (free download)
+- Twingate **Postman collection** imported (download JSON, import into Postman)
+- **API Token** generated from Twingate admin console (covered in Part 1)
 
-## Step-by-Step Setup
+## Step-by-Step (Video Series)
 
-1. **Install Postman** if not already installed
-2. **Download the Postman collection**: Right-click the provided link → "Save Link As" → save JSON file
-3. **Import JSON** into Postman environment
-4. **Generate an API Token** in Twingate Admin Console (covered in Part 1 video)
-5. Use collection examples to run queries and mutations
-
-## Video Content Structure
-
-| Part | Topic |
-|------|-------|
-| Part 1 | Generate API token, navigate Postman collection, basic queries |
-| Part 2 | Advanced queries, nested query patterns |
-| Part 3 | Mutations, variables in queries/mutations |
-| Bonus 1 | Discovering queries via introspection |
-| Bonus 2 | Discovering mutations via introspection |
+| Part | Topic | Covers |
+|------|-------|--------|
+| Part 1 | Getting Started | Generate API token, navigate Postman collection, basic queries |
+| Part 2 | Nesting | Advanced queries, nested query patterns |
+| Part 3 | Mutations | Create/update/delete operations, using variables in queries/mutations |
+| Bonus 1 | Query Introspection | Self-discover available queries via introspection |
+| Bonus 2 | Mutation Introspection | Self-discover available mutations via introspection |
 
 ## Configuration Values
-- **API Token**: Required for all requests; generated from Twingate Admin Console
-- **Variables**: Supported in both queries and mutations (covered in Part 3)
+- **API Token**: Generated via Twingate admin UI; used to authenticate all API requests
+- **Postman collection**: Imported as JSON; contains working examples for all major operations
 
 ## Gotchas
-- GraphQL requires more intentional query construction than REST — you must specify exactly which fields to return
-- Introspection is the primary method for self-discovering available queries/mutations not documented elsewhere
-- All Postman examples depend on the template collection; custom environments need the token configured separately
+- GraphQL requires precise query construction—missing fields or wrong nesting returns errors, not partial data
+- Must use **variables** in mutations (covered in Part 3) rather than hardcoding values directly in query strings
+- Introspection is the recommended method for discovering undocumented or new API fields
 
 ## Related Docs
-- Twingate GraphQL API reference (introspection-based exploration)
-- API Token generation (Admin Console)
-- Postman collection import documentation
+- Twingate GraphQL API reference (linked via Postman collection examples)
+- API Token generation (covered in Part 1 video)
