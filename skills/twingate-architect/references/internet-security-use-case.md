@@ -1,34 +1,36 @@
 # Internet Security Use Case
 
+## Page Title
+Twingate Internet Security Use Case
+
 ## Summary
-Twingate can secure public internet traffic on employee devices through DNS filtering and DNS-over-HTTPS (DoH). It provides threat blocking, traffic visibility, and encrypted DNS within a single client deployment alongside private resource access.
+Twingate extends its client to secure public internet traffic via DNS filtering and DNS-over-HTTPS (DoH), protecting against malware, phishing, and inappropriate content. A single Twingate client handles both private resource access and public internet security without requiring a separate agent.
 
 ## Key Information
-- DNS filtering blocks malicious domains: malware, phishing, command-and-control servers
-- DNS-over-HTTPS encrypts DNS requests (protects privacy on untrusted networks like hotels/cafes)
+- DNS filtering blocks known malicious domains: malware, phishing, command-and-control servers
+- DoH encrypts DNS requests, protecting privacy on untrusted networks (hotels, coffee shops)
 - Supports BYOD devices with centrally managed DNS-level filtering
-- Shadow IT visibility: see where employee traffic goes, block unwanted content categories (adult, gambling, etc.)
-- Single Twingate client handles both private resource access AND internet security — no separate agent needed
+- Provides shadow IT visibility and content category blocking (adult, gambling, etc.)
+- Single client deployment covers both Zero Trust Network Access (ZTNA) and internet security
 
 ## Prerequisites
 - Twingate client deployed on employee devices
-- Admin access to Twingate management console
-- Optional: Third-party DNS provider (Cloudflare, Umbrella/AnyConnect) if using external filtering
+- Admin access to Twingate console to configure DNS policies
 
 ## Configuration Options
-No direct config values listed on this page. Implementation is via linked guides:
+Four implementation paths available:
 
-| Feature | Guide |
-|---|---|
-| DNS Filtering | "How to enable DNS filtering in Twingate" |
+| Method | Guide |
+|--------|-------|
+| Native DNS filtering | "How to enable DNS filtering in Twingate" |
 | DNS-over-HTTPS | "How to enable DNS-over-HTTPS in Twingate" |
-| AnyConnect + Umbrella integration | "How to configure AnyConnect (with Umbrella) to work with Twingate" |
-| Cloudflare DoH + DNS Filtering | "How to configure Cloudflare for DNS-over-HTTPS and DNS Filtering in Twingate" |
+| Cisco Umbrella (AnyConnect) integration | "How to configure AnyConnect (with Umbrella) to work with Twingate" |
+| Cloudflare integration | "How to configure Cloudflare for DNS-over-HTTPS and DNS Filtering in Twingate" |
 
 ## Gotchas
-- This page is overview only — actual configuration steps are in linked sub-guides
-- BYOD coverage requires Twingate client installed on personal devices (not agentless)
-- DNS filtering provides domain-level blocking, not deep packet inspection
+- No standalone agent needed — avoid deploying a separate DNS filtering agent if Twingate client is already present
+- BYOD coverage requires the Twingate client to be installed and active on personal devices
+- Filtering only applies when the Twingate client is running; no client = no protection
 
 ## Related Docs
 - How to enable DNS filtering in Twingate

@@ -1,51 +1,53 @@
 # Windows Client Migration to .NET 8
 
 ## Summary
-Twingate Windows Client moved to .NET 8 in November 2024 following Microsoft's end of .NET 6 support. EXE installer handles the dependency automatically; MSI deployments require manual .NET 8 Desktop Runtime installation.
+The Twingate Windows Client migrated to .NET 8 in November 2024 following Microsoft's end of .NET 6 support. EXE installer handles the dependency automatically; MSI deployments require manual .NET 8 Desktop Runtime installation.
 
 ## Key Information
-- Migration occurred in **early November 2024** (release date: November 12, 2024)
-- Requires **.NET 8 Desktop Runtime (x64)**
-- EXE installer: automatically installs .NET 8 as prerequisite — no admin action needed
-- MSI installer: admins must manually ensure .NET 8 Desktop Runtime is present on each device
-- Without .NET 8 runtime, future client versions will not launch
+- Migration occurred in **early November 2024** (November 12, 2024 was Microsoft's .NET 6 EOL date)
+- **EXE installer**: automatically installs .NET 8 runtime — no admin action required
+- **MSI installer**: admins must pre-install .NET 8 Desktop Runtime on each device
+- Without .NET 8 Desktop Runtime, future client versions will not run
 
 ## Prerequisites
 - .NET 8 Desktop Runtime x64 (for MSI deployments)
-- Download from: [Microsoft website](https://dotnet.microsoft.com)
+- Download from Microsoft website
+- Local or domain admin permissions for deployment
 
 ## Step-by-Step (MSI Deployment)
 
 1. Download .NET 8 Desktop Runtime x64 from Microsoft
-2. Push via MDM or install manually using silent install flags
-3. Verify installation on target devices
-4. Deploy updated Twingate Windows Client MSI as usual
+2. Push runtime to devices via MDM or install manually
+3. Use silent install flags (see below)
+4. Verify installation on each device
+5. Deploy Twingate Windows Client MSI as usual
 
 ## Configuration Values
 
-**Silent install flags (required for remote/quiet deployment):**
+**Silent install command:**
 ```
 c:\path\to\windowsdesktop-runtime-8.0.10-win-x64.exe /install /quiet /norestart
 ```
 
-**PowerShell command to verify .NET 8 installation:**
+**Flags:**
+- `/install` — install the runtime
+- `/quiet` — silent install, no UI
+- `/norestart` — suppress automatic reboot
+
+**Verify installation (PowerShell):**
 ```powershell
 Get-WmiObject -Query "SELECT * FROM Win32_Product WHERE Name LIKE '%.NET%Runtime%8.%.%'"
 ```
 
-**Manual verification path:**
-```
-Control Panel > Programs > Programs and Features
-```
-Look for "Microsoft .NET Desktop Runtime - 8.x.x (x64)"
+**Manual verification:** Control Panel → Programs → Programs and Features → look for ".NET 8 Desktop Runtime"
 
 ## Gotchas
-- MSI deployments will **break** on future client versions if .NET 8 runtime is not pre-installed
-- Must use x64 runtime variant specifically
-- Silent install flags are required for non-interactive/MDM deployment — omitting them may cause interactive prompts on remote devices
-- Check for `.NET 8 Desktop Runtime` (not just `.NET Runtime`) — desktop apps require the Desktop variant
+- MSI deployments have **no automatic dependency handling** — runtime must be present before deploying updated client versions
+- Filename in silent install example (`8.0.10`) may differ from current runtime version — adjust path accordingly
+- Runtime must be installed **before** upgrading the Twingate client, not after
+- Failure to install runtime = client stops functioning after upgrade
 
 ## Related Docs
-- [Twingate Client Download Page](https://www.twingate.com/downloads)
-- [Windows Client Deployment Documentation](https://www.twingate.com/docs/windows-client-deployment)
-- [Microsoft .NET 6 End of Support](https://dotnet.microsoft.com/en-us/platform/support/policy)
+- [Windows Client Deployment Documentation](https://www.twingate.com/docs/) — managing remote Windows devices
+- [Twingate Client Download Page](https://www.twingate.com/docs/)
+- [Microsoft .NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)

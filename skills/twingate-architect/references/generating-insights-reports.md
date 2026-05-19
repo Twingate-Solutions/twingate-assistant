@@ -4,57 +4,54 @@
 Generating Insights Reports from Network Events
 
 ## Summary
-The Insights Report is a Jupyter Notebook-based tool that processes Twingate Network Events exports to provide admins with detailed visibility into Resource activity, user connections, and network errors. It helps identify misconfigurations, unused Resources, high-traffic patterns, and connectivity issues to support Zero Trust permission modeling and environment optimization.
+The Insights Report is a Jupyter Notebook-based tool that processes Twingate Network Events exports to provide admins with detailed visibility into Resource activity, user behavior, connectivity errors, and Connector performance. It helps identify misconfigurations, unused Resources, and optimization opportunities toward Zero Trust posture.
 
 ## Key Information
-- Output is an `.xlsx` file with multiple tabs covering Resources, users, errors, and Connector activity
-- Notebook is customizable; functions can be combined for additional insights
-- Report is generated locally — requires sufficient RAM to process large Network Events exports
-- Community feedback accepted via Twingate subreddit
+- Output format: Excel (`.xlsx`) with multiple tabs
+- Notebook is customizable; functions can be combined for additional analysis
+- Hosted in [Twingate's GitHub repository](https://github.com/Twingate)
+- Report tabs: Full Resource List, Resource Matching List, User Activity Details, User IP Details, General Error Report, Connection Errors, DNS Errors, Connector Activities, per-Connector tabs
 
 ## Prerequisites
-- Downloaded **Network Events Export** from Twingate Admin Console
-- **Python 3** installed
-- **Jupyter Notebook** installed
-- System RAM sufficient to process the export file
+- Sufficient RAM to process a Network Events Export file
+- Python 3 installed
+- Jupyter Notebook installed
+- Network Events Export downloaded from Admin Console
 - Python/dataframe familiarity required only for customization
 
 ## Step-by-Step
 
-1. Export Network Events from Admin Console and download locally
-2. Install Python 3 and Jupyter Notebook
-3. Pull the Jupyter Notebook from [Twingate's repository](https://www.twingate.com/docs/generating-insights-reports)
-4. Configure the **second code cell** with:
-   - Full path to the downloaded Network Events export
-   - Full path for the output `.xlsx` report
-5. Run all cells in sequence
+1. Export Network Events from Twingate Admin Console → download locally
+2. Install [Python 3](https://www.python.org/) and [Jupyter Notebook](https://jupyter.org/)
+3. Clone/pull the Jupyter Notebook from the Twingate repository
+4. Edit the **second code cell**: set full path to the downloaded Network Events export and the desired output `.xlsx` path
+5. Run all cells sequentially
 
 ## Configuration Values
 | Parameter | Location | Description |
-|-----------|----------|-------------|
-| Input file path | Second code cell | Full path to Network Events export |
+|---|---|---|
+| Input file path | Second code cell | Full path to Network Events export file |
 | Output file path | Second code cell | Full path for generated `.xlsx` report |
 
-## Report Tabs Reference
-| Tab | Key Use Case |
-|-----|-------------|
-| Full Resource List | Active resources, error rates, ports/protocols, traffic |
-| Resource Matching List | Broad access detection, IP-to-resource mapping |
+## Report Tab Reference
+| Tab | Primary Use Case |
+|---|---|
+| Full Resource List | Active resources, errors, ports/protocols, traffic |
+| Resource Matching List | Overly broad resource definitions, IP mapping |
 | User Activity Details | Per-user connections, bandwidth, errors |
 | User IP Details | User source IPs, network diversity |
 | General Error Report | Resources with any connection/DNS errors |
 | Connection Errors | Per-address connection failure counts |
 | DNS Errors | DNS resolution failures per address |
-| Connector Activities | Per-Connector load, errors, DNS errors over time |
-| Connector Name (per connector) | Daily activity trends, capacity planning |
+| Connector Activities | Per-Connector load, errors, DNS errors |
+| Per-Connector tabs | Daily trend analysis per Connector |
 
 ## Gotchas
-- The **second code cell** must be configured before running — paths are not auto-detected
-- RAM requirements scale with export size; large exports may fail on low-memory systems
-- One tab is generated **per Connector** — large deployments produce many tabs
-- Notebook must be run **in sequence** (cells are order-dependent)
+- RAM is a constraint — large Network Events exports may require significant memory; plan accordingly
+- Cells must be run **in sequence**; out-of-order execution will fail
+- No built-in scheduling — this is a manual, on-demand process
+- Customization requires Python/pandas dataframe knowledge
 
 ## Related Docs
 - [Network Events Export](https://www.twingate.com/docs/network-events-export)
-- Twingate GitHub repository (notebook source)
-- Twingate subreddit (feedback)
+- Twingate Subreddit (for feedback on missing insights)

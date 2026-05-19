@@ -4,46 +4,44 @@
 Admin Console Export (Audit Logs Report)
 
 ## Summary
-Twingate allows administrators to export audit logs from the Admin Console Reports page. Exports are generated asynchronously in GZIP-compressed JSON format, with each line representing a single admin action event.
+Twingate allows admins to export audit logs as JSON reports from the Admin Console Settings page. Reports are generated asynchronously and delivered via email when complete. Exports are GZIP-compressed JSON files with UTC timestamps.
 
 ## Key Information
 - Exports available under **Settings → Reports**
 - Time range selector uses local timezone display, but exported timestamps are in **UTC**
-- Export runs in background; completion notification sent via **email**
-- Most exports complete in minutes; large exports may take **a few hours**
-- Output format: **GZIP-compressed JSON** (one event per line)
+- Export format: **GZIP-compressed JSON** (one JSON object per line)
+- Generation time: typically minutes; large exports may take hours
+- Completed reports downloaded from the Reports page (not via email link)
+- JSON schema documentation available (linked from docs page)
+
+## Each Log Entry Contains
+- Timestamp of event
+- Actor (who performed the action)
+- Action type
+- Final state (includes before-state when applicable)
 
 ## Prerequisites
 - Admin Console access
 - Access to Settings → Reports page
-- Email access to receive completion notification
 
-## Step-by-Step
-
+## Step-by-Step: Generate Audit Log Export
 1. Navigate to **Settings → Reports**
 2. Click **Generate Audit Logs Report**
 3. Select **time range** and **category**
-4. Wait for email notification (background processing)
-5. Return to **Reports page** to download completed report
-
-## Export File Format
-
-Each JSON line contains:
-- `when` — event timestamp (UTC)
-- `actor` — who performed the action
-- `action` — what action occurred
-- `final state` — resulting state (includes before-state if applicable)
-
-Full JSON schema available in Twingate docs (linked from source page).
+4. Wait for background processing; email notification sent when ready
+5. Return to **Reports page** to download
 
 ## Configuration Values
-- None (UI-only operation, no CLI flags or API parameters documented on this page)
+- **Time range**: configurable at export creation
+- **Category**: configurable at export creation
+- **Output format**: JSON (GZIP compressed)
+- **Timestamp format**: UTC in export file
 
 ## Gotchas
-- **Safari users**: Safari's auto-unpack feature may cause the file to appear empty. Fix: Go to **Safari → Preferences → General** and **uncheck** "Open 'safe' files after downloading" before downloading
-- Time range display is in **local timezone**, but exported data uses **UTC** — don't confuse the two when filtering
-- Large exports can take **hours**, not minutes — plan accordingly for large time ranges
+- **Safari users**: Safari's auto-unpack feature may cause files to appear empty. Fix: Go to `Safari → Preferences → General` and **uncheck** "Open 'safe' files after downloading" before downloading
+- Display timezone ≠ export timezone — UI shows local time but file contains UTC
+- Large exports can take hours; don't expect immediate availability
 
 ## Related Docs
-- [Twingate Audit Log JSON Schema](https://www.twingate.com/docs/) *(linked from source page)*
-- Twingate Reports/Settings documentation
+- Twingate JSON schema reference (linked inline on source page)
+- Twingate Reports/Settings section of Admin Console

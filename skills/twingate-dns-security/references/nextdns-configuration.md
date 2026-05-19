@@ -1,46 +1,43 @@
-# NextDNS Integration with Twingate
+# NextDNS Configuration - Twingate Integration
 
 ## Summary
-Twingate integrates with NextDNS to provide DNS filtering via DNS-over-HTTPS (DoH). Admins enable the integration from the Admin Console, automatically routing all DNS traffic through a selected NextDNS profile. No additional app installation or network reconfiguration is required.
+Twingate integrates with NextDNS to provide DNS filtering via DNS-over-HTTPS (DoH) for desktop platforms. Admins enable the integration from the Admin Console to route all user DNS traffic through a selected NextDNS profile. No additional app installation or network configuration is required on client devices.
 
 ## Key Information
-- Integration provides DNS filtering/security via NextDNS profiles
-- Uses DNS-over-HTTPS (DoH) as the transport mechanism
-- Automatically pulls configured NextDNS profiles into Twingate Admin Console
-- Sends device details to NextDNS per request: **user first name** and **device model**
-- Billing for NextDNS is **separate** from Twingate and managed in NextDNS directly
+- Integration available on **macOS, Windows, and Linux** only — not mobile
+- Automatically pulls NextDNS profiles into Twingate Admin Console
+- Sends device details with DNS requests: **user's first name** and **device model**
+- Billing for NextDNS is **separate** from Twingate; managed in NextDNS account directly
 
 ## Prerequisites
 - Twingate Admin Console access
-- NextDNS account with API key (create at NextDNS account page if needed)
-- At least one NextDNS profile configured
-- **Platform restriction**: Only available on **macOS, Windows, and Linux** — not mobile
+- NextDNS account with API key (or create one during setup)
+- At least one NextDNS profile configured in NextDNS
 
 ## Step-by-Step Setup
-1. Go to **Settings → Secure DNS** in Twingate Admin Console
+1. Go to **Settings → Secure DNS** in Admin Console
 2. Under **DNS Filtering Integrations**, click **Connect** next to NextDNS
-3. Enter the NextDNS API key (from NextDNS account page)
-4. Select the desired NextDNS profile as the DoH Resolver
-5. Confirm settings — clients will automatically route DNS traffic to selected profile
+3. Enter NextDNS API key (from NextDNS account page)
+4. Select the NextDNS profile to use as the DoH Resolver
+5. Confirm settings — client automatically routes all DNS traffic to selected profile
 
 ## Management Operations
-| Action | Location |
-|--------|----------|
-| Change profile | DoH Resolver section → **Change** next to NextDNS |
-| Disconnect | DNS Filtering Integrations → NextDNS options → **Disconnect** |
+- **Change profile**: Select **Change** next to NextDNS under DoH Resolver section
+- **Disconnect**: Settings → Secure DNS → DNS Filtering Integrations → NextDNS options → **Disconnect**
 
 ## Configuration Values
-- **API Key**: Retrieved from NextDNS account page
-- **DoH Resolver**: Set to NextDNS (selectable from Admin Console)
-- **Profile**: Selected from auto-pulled list of configured NextDNS profiles
+| Parameter | Value/Location |
+|-----------|---------------|
+| NextDNS API Key | NextDNS account page |
+| DoH Resolver | Selected NextDNS profile |
+| Device data sent | User first name + device model |
 
 ## Gotchas
-- Mobile (iOS/Android) is **not supported** — desktop only
-- NextDNS billing is independent; Twingate does not manage or consolidate it
-- Device metadata (user first name, device model) is sent to NextDNS automatically with no opt-out mentioned
-- DNS traffic for **all** users on desktop platforms is routed through the selected profile — no per-user profile assignment documented
+- **Mobile not supported** — Secure DNS/NextDNS integration is desktop-only (macOS, Windows, Linux)
+- Billing is entirely separate; Twingate has no visibility into NextDNS billing
+- Integration sends user PII (first name) and device model to NextDNS by default — review data sharing implications before enabling
 
 ## Related Docs
-- DNS-over-HTTPS (DoH) — Twingate DoH feature overview
-- NextDNS pricing — `nextdns.io/pricing`
-- NextDNS account page — API key retrieval
+- [DNS-over-HTTPS (DoH)](https://www.twingate.com/docs/) — Twingate's DNS resolution feature overview
+- [NextDNS Pricing](https://nextdns.io/pricing)
+- [NextDNS Account Page](https://my.nextdns.io/account)

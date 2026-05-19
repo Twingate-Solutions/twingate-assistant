@@ -1,24 +1,23 @@
 # How to Ingest Connector Logs into a SIEM
 
 ## Summary
-Twingate Connectors log events in real time via `journald` (systemd). Since journald lacks built-in remote forwarding, several methods exist to send logs to SIEMs: AWS S3, Syslog, Vector, or Datadog agent.
+Twingate Connectors log events in real time via `journald` (systemd). Several methods exist to forward these logs to a SIEM: AWS S3, Syslog, Vector, or Datadog agent.
 
 ## Key Information
-- Logs are written via `journald` on Linux systems running the Connector
-- AWS S3 ingestion delivers audit logs, network events, and DNS filtering logs every **5 minutes**
-- Real-time connection logs must be explicitly enabled on Connectors before using Syslog, Vector, or Datadog methods
+- Logs are written via `journald` on Linux systems
+- Real-time connection logs must be explicitly enabled on Connectors before using any method
+- AWS S3 ingestion supports audit logs, network events, and DNS filtering logs (5-minute intervals)
 
 ## Prerequisites
 - Linux system with systemd/journald
-- Real-time connection logs enabled on Connectors (required for Syslog, Vector, Datadog)
-- Connector already installed and running
+- Real-time connection logs enabled on Connectors (required for Syslog, Vector, Datadog methods)
 
 ## Methods
 
-### AWS S3 (Recommended - Easiest)
-- Twingate sends logs directly to your S3 bucket
-- Supports: audit logs, network events, DNS filtering logs
-- Forward from S3 to your SIEM
+### AWS S3
+- Twingate natively sends logs to an S3 bucket every 5 minutes
+- Log types: audit logs, network events, DNS filtering logs
+- Forward from S3 to SIEM as a secondary step
 
 ### Syslog
 1. Enable real-time connection logs on Connectors
@@ -30,31 +29,29 @@ Twingate Connectors log events in real time via `journald` (systemd). Since jour
 ### Vector
 1. Enable real-time connection logs on Connectors
 2. Install Vector on the Connector host machine
-3. Create `vector.toml` with Sources and Transforms (per Twingate docs)
-4. Add Sink configuration for your SIEM
+3. Create `vector.toml` with Sources, Transforms, and Sink configuration
+4. Supported sinks: AWS CloudWatch, AWS S3, Datadog, Elasticsearch, GCP Cloud Monitoring, Honeycomb, New Relic, Prometheus, Splunk, and more
 
-**Supported Sinks:** AWS CloudWatch, AWS S3, Datadog, Elasticsearch, GCP Cloud Monitoring, Honeycomb, New Relic, Prometheus, Splunk, and more
-
-### Datadog Agent
+### Datadog
 1. Enable real-time connection logs on Connectors
-2. Install/configure Datadog agent per Datadog's official documentation
-3. Enables the Twingate analytics dashboard in Datadog
+2. Install and configure Datadog agent per Datadog's official documentation
+3. Enables Twingate analytics dashboard in Datadog
 
 ## Configuration Values
-| File | Key Setting |
-|------|-------------|
-| `/etc/systemd/journald.conf` | `ForwardToSyslog=yes` |
-| `/etc/syslog.conf` | Central syslog server destination |
-| `vector.toml` | Sources, Transforms, Sinks |
+| Method | File/Config |
+|--------|-------------|
+| Syslog | `/etc/systemd/journald.conf` |
+| Syslog forwarding | `/etc/syslog.conf` |
+| Vector config | `vector.toml` (example name) |
 
 ## Gotchas
-- Real-time connection logs are **not enabled by default** — must be configured before Syslog/Vector/Datadog methods will capture connection events
-- AWS S3 method has a 5-minute delivery delay; not truly real-time
-- journald has no native remote forwarding — all methods require an additional agent or service
+- `journald` has no built-in remote log forwarding — requires one of these additional tools
+- Real-time connection logs must be enabled separately before Syslog/Vector/Datadog will capture meaningful data
+- AWS S3 method has a minimum 5-minute delay; not real-time
 
 ## Related Docs
 - Twingate real-time connection logs (Connector configuration)
-- Twingate audit logs documentation
-- DNS filtering logs documentation
-- Vector configuration documentation (Twingate-specific)
-- Datadog official agent documentation
+- Twingate audit logs / network events / DNS filtering logs
+- Vector documentation (Sources, Transforms, Sinks)
+- Datadog agent official documentation
+- Twingate Datadog analytics dashboard setup

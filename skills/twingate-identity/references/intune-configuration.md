@@ -4,55 +4,56 @@
 Intune Configuration (Business & Enterprise only)
 
 ## Summary
-Twingate integrates with Microsoft Intune via the Intune API to verify device compliance as part of Device Security Trusted Profiles. Devices must be Intune-managed, compliant (or in grace period), and have reported to Intune within 7 days to pass verification. Supports macOS and Windows only.
+Twingate integrates with Microsoft Intune via the Intune API to verify device compliance as part of Device Security policies. Devices must be Intune-managed, reported within 7 days, and classified as Compliant or In-grace period to pass verification. Supports macOS and Windows only.
 
 ## Key Information
-- Verification checks: device is Intune-managed + compliance state is `Compliant` or `In-grace period` + reported to Intune within last 7 days
 - Twingate matches device serial numbers against Intune-managed device list
-- After setup, initial sync shows "Waiting to sync" status for a few minutes
-- Integration visible at: **Settings → Device Integration**
+- Verification requires: managed by Intune + reported within last 7 days + status is `Compliant` or `In-grace period`
+- Integration syncs periodically; initial sync shows "Waiting to sync" for a few minutes
+- Recoverable errors (API unresponsive): auto-retry, last successful sync time displayed
+- Unrecoverable errors (invalid credentials/permissions): integration stops, admin email notification sent
 
 ## Prerequisites
 - Business or Enterprise Twingate plan
-- Azure AD App Registration with:
-  - `DeviceManagementManagedDevices.Read.All` (Delegated permission)
-  - `DeviceManagementManagedDevices.Read.All` (Application permission)
-  - Admin consent granted
-- Client Secret, Application (Client) ID, and Directory (Tenant) ID
+- Azure Active Directory access with ability to create App Registrations
+- Admin consent rights in Azure AD
 
 ## Step-by-Step
 
-### Azure Setup
-1. Azure Portal → **Azure Active Directory → App registrations** → New registration
-2. **API permissions** → Add `Microsoft Graph` → Delegated → `DeviceManagementManagedDevices.Read.All`
-3. Add `Microsoft Graph` → Application → `DeviceManagementManagedDevices.Read.All`
+### Azure App Registration Setup
+1. Azure Portal → **Azure Active Directory** → **App registrations** → New registration
+2. **API permissions** → Add **Microsoft Graph** → **Delegated permissions** → `DeviceManagementManagedDevices.Read.All`
+3. Add **Microsoft Graph** → **Application permissions** → `DeviceManagementManagedDevices.Read.All`
 4. Click **Grant admin consent**
-5. **Overview → Client credentials** → New client secret → **save the Value immediately**
-6. Save **Application (client) ID** and **Directory (tenant) ID** from Overview
+5. Go to **Client credentials** → Create new client secret → **Save the Value immediately** (not retrievable later)
+6. From Overview page, save **Application (client) ID** and **Directory (tenant) ID**
 
-### Twingate Setup
-1. Navigate to **Settings → Device Integration**
-2. Click **Connect** next to Intune, input credentials
-3. Confirm sync status on Device Settings page
+### Twingate Configuration
+1. Twingate Admin → **Settings** → **Device Integration**
+2. Click **Connect** next to Intune → Enter credentials
+3. Verify sync status on Device Settings page
 
-### Policy Setup
-1. Create a Trusted Profile for macOS/Windows requiring Intune as Trust Method
-2. Incorporate Trusted Profile into Security Policies
+### Security Policy Integration
+- Create a Trusted Profile for macOS/Windows with Intune as required Trust Method
+- Attach Trusted Profile to Security Policies
 
 ## Configuration Values
 | Field | Source |
-|---|---|
+|-------|--------|
 | Client Secret Value | Azure App Registration → Client credentials |
-| Application (Client) ID | Azure App Registration → Overview |
-| Directory (Tenant) ID | Azure App Registration → Overview |
+| Application (client) ID | Azure App Registration Overview |
+| Directory (tenant) ID | Azure App Registration Overview |
+
+**Required API Permissions:**
+- `DeviceManagementManagedDevices.Read.All` (Delegated)
+- `DeviceManagementManagedDevices.Read.All` (Application)
 
 ## Gotchas
-- Client secret Value is only shown once—save it immediately
-- Both Delegated **and** Application permissions required for `DeviceManagementManagedDevices.Read.All`
-- Serial number must be retrievable from the device; failure to retrieve = `Intune not verified`
-- **Recoverable errors** (API unresponsive): integration shows last successful sync, auto-resolves when API is reachable
-- **Unrecoverable errors** (invalid credentials, altered permissions): integration stops retrying; admin email notification sent; requires full reconfiguration with new credentials
-- iOS/Android devices not supported—macOS and Windows only
+- Serial number must be retrievable from the device — failure to retrieve causes "Intune not verified"
+- Initial sync delay: devices show incorrect state until sync completes (few minutes)
+- Unrecoverable errors require full reconfiguration with new API credentials
+- Client secret value is only shown once at creation time — save immediately
+- Platform support is **Mac and Windows only** (no mobile/Linux)
 
 ## Related Docs
 - Device Security / Trusted Profiles documentation

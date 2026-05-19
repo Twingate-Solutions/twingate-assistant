@@ -4,11 +4,12 @@
 Linux Client Application (Open Source Components & Licenses)
 
 ## Summary
-This page documents the open-source components bundled in the Twingate Linux client application and their respective licenses. It serves as the third-party notice disclosure required by each component's license terms. No installation or configuration guidance is provided.
+This page documents the open-source software components bundled in the Twingate Linux client application. It lists each third-party library along with its applicable license text. No installation or configuration guidance is provided—this is a legal/compliance reference page.
 
 ## Key Information
 
-### Components Included
+### Components and Licenses
+
 | Component | License |
 |-----------|---------|
 | libssl | Apache 2.0 |
@@ -17,29 +18,23 @@ This page documents the open-source components bundled in the Twingate Linux cli
 | libjansson, jwt-cpp, args, pubnub, quicly | MIT |
 | catch2 | Boost Software License 1.0 |
 | zlib, nanopb | zlib License |
-| fmt | MIT-like (with optional embedding exception) |
-
-### License Summary by Type
-- **Apache 2.0** – Requires attribution, license copy on redistribution; patent termination clause applies
-- **BSD 3-Clause** – Requires attribution; no endorsement using contributor names
-- **CC0 1.0** – Effectively public domain; no restrictions
-- **MIT** – Permissive; include copyright notice in copies
-- **Boost 1.0** – Similar to MIT; copyright notice required except in binary-only distributions
-- **zlib** – Cannot misrepresent origin; altered versions must be marked
+| fmt | MIT-style (with embedded object code exception) |
 
 ## Prerequisites
-- None for end users
-- Redistributors must comply with each component's license terms
+- None. This is a reference/compliance document only.
+
+## Step-by-Step
+- N/A (informational page only)
 
 ## Configuration Values
-- None (this is a license disclosure page only)
+- None
 
 ## Gotchas
-- **fmt** has an optional exception: if portions are embedded into machine-executable object code during compilation, you may redistribute without including the copyright/permission notice
-- **Apache 2.0** includes a patent retaliation clause — patent licenses terminate if you file patent litigation against contributors
-- **BSD 3-Clause** prohibits using contributor/project names for endorsement of derived products without permission
-- **CC0** does not waive trademark or patent rights (siphash component)
+- **fmt exception**: Unlike standard MIT, `fmt` includes an optional exception allowing redistribution of embedded object code without copyright notice requirements.
+- **siphash** uses CC0 (public domain dedication), not a traditional license—no attribution required.
+- **catch2** (Boost license) requires copyright notices in all copies unless distributed solely as machine-executable object code.
+- **Apache 2.0 (libssl)** requires NOTICE file preservation and prominent modification notices—stricter than MIT for redistribution scenarios.
 
 ## Related Docs
 - Twingate Linux Client installation documentation
-- Twingate OSS notices for other platforms (macOS, Windows, iOS, Android clients)
+- Twingate general OSS/third-party notices

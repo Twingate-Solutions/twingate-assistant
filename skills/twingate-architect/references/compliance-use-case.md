@@ -1,48 +1,48 @@
 # Twingate Compliance Use Cases
 
 ## Page Title
-Compliance Use Case Overview
+Compliance
 
 ## Summary
-Twingate supports implementation of security controls for major compliance frameworks including SOC 2, PCI DSS, HIPAA, GDPR, FedRAMP, and others. It provides centralized access control, audit logging, least-privilege enforcement, and network visibility to satisfy technical requirements across regulatory regimes.
+Twingate provides security controls that support multiple compliance frameworks including SOC 2, PCI DSS, HIPAA, GDPR, and others. It centralizes access management, enables granular least-privilege controls, and provides audit logging to satisfy compliance requirements. No native compliance certification is claimed; Twingate assists in *implementing* required controls.
 
 ## Key Information
+- Supports granular, per-application access policies (MFA, device posture) regardless of whether the app natively supports them
+- Single management plane for access reviews and audit evidence production
+- Hides network from public internet by eliminating public-facing gateways
+- Rapid offboarding: disable all Twingate-secured resource access in one action
+- Network activity logging and analytics for anomaly detection
 
-**Core Capabilities for Compliance:**
-- Granular least-privilege access controls per resource/application
-- MFA and device posture enforcement (including on apps that don't natively support them)
-- Centralized access management and review dashboard
-- Audit logging and network activity analytics
-- Application-level access control (replaces VPN/network-level)
-- Eliminates public-facing gateways
+## Compliance Program Coverage
 
-**Supported Compliance Frameworks:**
-| Framework | Key Coverage Area |
-|-----------|------------------|
+| Framework | Primary Use |
+|-----------|-------------|
 | SOC 2 | Access controls, network security, risk assessments |
-| PCI DSS | Cardholder data environment, Requirement 7.3 (access control system) |
-| HIPAA | Access controls, authentication, transmission security |
-| HITRUST CSF | Access controls, network monitoring, audit logging |
-| SOX | Access/auth, user account management, network security, monitoring |
-| FIPS 140-2/3 | Compatible; does not compromise FIPS-validated encrypted communications |
-| FedRAMP | Access control, audit/accountability, continuous monitoring, identity |
+| PCI DSS | Secures cardholder data environment; fulfills Requirement 7.3 |
+| HIPAA | Access controls, entity authentication, transmission security |
+| HITRUST CSF | Access controls, audit logging, network traffic monitoring |
+| SOX | Financial system access/auth, user account management, monitoring |
+| FIPS 140-2/3 | Compatible with FIPS-validated encryption (does not break it) |
+| FedRAMP | Access control, audit/accountability, continuous monitoring |
 | GDPR | Technical measures for personal data protection, accountability logging |
-| CPRA | Reasonable security procedures for personal information protection |
+| CPRA | "Reasonable" security procedures for personal information protection |
 
 ## Prerequisites
-- Twingate deployed with Connectors and Relays configured
-- Resources defined within Twingate for access control enforcement
-- Identity provider integration for centralized user management and offboarding
+- Twingate deployed with Connectors protecting target resources
+- Resources grouped and assigned to appropriate Access Policies
+- Identity provider integrated for centralized user/group management
+- Device posture checks configured if required by framework
 
 ## Gotchas
-- Twingate assists with compliance controls but does not itself certify or guarantee compliance — organizations must implement controls appropriately
-- FIPS compatibility is noted as non-compromising, not as a certified FIPS module itself
-- PCI DSS coverage is specifically scoped to Requirement 7.3; other PCI requirements need separate controls
+- Twingate *assists* compliance—it does not make an organization automatically compliant with any framework
+- FIPS 140-2/3 compatibility means Twingate does not interfere with end-to-end encrypted communications; verify your own crypto modules separately
+- PCI DSS Requirement 7.3 specifically addressed; review other PCI DSS requirements independently
+- Offboarding disables Twingate-secured access only—separate accounts on resources require independent deprovisioning
 
 ## Related Docs
-- [Guide to GDPR Compliance for IT Teams](https://www.twingate.com/docs)
-- [Guide to SOC 2](https://www.twingate.com/docs)
-- [Guide to SOX Compliance for IT Teams](https://www.twingate.com/docs)
+- [Guide to GDPR Compliance for IT Teams](https://www.twingate.com/docs/)
+- [Guide to SOC 2](https://www.twingate.com/docs/)
+- [Guide to SOX Compliance for IT Teams](https://www.twingate.com/docs/)
 - Twingate & GDPR
 - Twingate & HIPAA
 - Twingate & PCI DSS

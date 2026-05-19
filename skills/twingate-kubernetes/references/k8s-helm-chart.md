@@ -1,38 +1,37 @@
 # Deploy a Connector with K8s Helm Chart
 
 ## Summary
-Deploys Twingate Connectors to Kubernetes clusters using the official Twingate Helm Chart. Supports GKE, EKS, MicroK8s, and any Helm-compatible cluster. The chart bootstraps a Connector pod in the specified namespace.
+Deploy Twingate Connectors to Kubernetes clusters using the official Helm Chart. Supports GKE, EKS, MicroK8s, and any Helm-compatible cluster. Chart bootstraps a Connector deployment with configurable parameters.
 
 ## Key Information
-- Official chart hosted at: `https://twingate.github.io/helm-charts` (GitHub)
-- Release name convention: `twingate-connector`
-- Updating the Helm chart does **not** automatically update Connector images
+- Official chart hosted at `https://twingate.github.io/helm-charts` (GitHub)
+- Updating the Helm chart does **not** automatically update Connector images/pods
+- Supports peer-to-peer connections (recommended for Fair Use Policy compliance)
 
 ## Prerequisites
 - Helm installed and configured
 - Access to a Kubernetes cluster
-- Twingate Connector tokens (`accessToken`, `refreshToken`) and network name
-- Namespace created in target cluster
+- Twingate `accessToken` and `refreshToken` for the Connector
+- Twingate network name
 
-## Step-by-Step: Install
+## Step-by-Step Installation
 
 ```bash
-# Add Twingate Helm repo
+# Add the Twingate Helm repo
 helm repo add twingate https://twingate.github.io/helm-charts
 
-# Install/upgrade Connector
+# Install/upgrade the connector
 helm upgrade --install twingate-connector twingate/connector -n [namespace] \
   --set connector.network=[network] \
   --set connector.accessToken=[accessToken] \
   --set connector.refreshToken=[refreshToken]
 ```
 
-## Step-by-Step: Uninstall
+## Uninstall
 
 ```bash
 helm del twingate-connector -n [namespace]
 ```
-Removes all Kubernetes components and deletes the release.
 
 ## Configuration Values
 
@@ -42,13 +41,14 @@ Removes all Kubernetes components and deletes the release.
 | `connector.accessToken` | Connector access token |
 | `connector.refreshToken` | Connector refresh token |
 
-Additional parameters documented in the chart's Parameters section on GitHub.
+Additional parameters available in the chart's Parameters section on GitHub.
 
 ## Gotchas
-- **Helm chart updates ≠ Connector image updates**: Must follow the separate Helm Chart updating guide to update Connector pod images
-- Peer-to-peer connections should be enabled to avoid Fair Use Policy bandwidth limits — requires additional configuration
+- Upgrading the Helm chart does **not** update Connector container images — follow the separate [Helm Chart updating guide](https://www.twingate.com/docs) for full updates
+- Namespace must be specified with `-n [namespace]`; no default namespace is assumed in the commands
 
 ## Related Docs
 - [Official Helm Chart (GitHub)](https://github.com/Twingate/helm-charts)
-- Helm Chart updating guide (linked from Twingate docs)
-- Peer-to-peer connections support guide
+- Helm Chart updating guide
+- Peer-to-peer connections setup
+- Fair Use Policy

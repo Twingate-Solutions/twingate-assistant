@@ -3,24 +3,24 @@
 # Deploy Twingate Connector on Ubiquiti Gateways
 
 ## Summary
-Deploys a Twingate Connector inside a systemd-nspawn Debian container on Ubiquiti Gateway hardware. The container is stored on `/data` partition, persisting through firmware upgrades. Setup is fully automated via a community-maintained shell script.
+Deploys a Twingate Connector inside a systemd-nspawn Debian container on Ubiquiti Gateway devices. The container lives on `/data` partition, persisting through firmware upgrades. Setup is automated via a single curl/bash script.
 
 ## Key Information
-- Supported devices: UDM Pro, UDM SE, UXG-Pro, UXG-Max, and similar
-- Requires UniFi OS 3.x or later
-- Container setup (debootstrap) takes 5–10 minutes
-- Multiple Connectors on same Gateway supported via `CONTAINER_NAME`
-- Script source: `https://github.com/Twingate-Community/ubiquiti-connector`
+- Supported devices: UDM Pro, UDM SE, UXG-Pro, UXG-Max, similar UniFi OS devices
+- Container managed via `machinectl` commands
+- Initial debootstrap takes 5–10 minutes (normal)
+- Each Connector requires unique tokens — never reuse token sets
+- Multiple Connectors on same Gateway supported via `CONTAINER_NAME` override
 
 ## Prerequisites
-- Ubiquiti Gateway running UniFi OS 3.x+
-- Root SSH access to Gateway
-- Twingate Admin Console access
+- Ubiquiti Gateway running **UniFi OS 3.x or later**
+- SSH root access to Gateway
+- Twingate account with Admin Console access
 - Internet connectivity on Gateway
 
 ## Step-by-Step
 
-1. **Generate tokens**: Admin Console → Remote Networks → select network → add/select Connector → Manual → Generate Tokens → copy Network name, Access Token, Refresh Token
+1. **Generate tokens**: Admin Console → Remote Networks → select network → select/add Connector → Manual → Generate Tokens → copy Network name, Access Token, Refresh Token
 2. **Deploy via SSH**:
 ```bash
 curl -sSf https://raw.githubusercontent.com/Twingate-Community/ubiquiti-connector/main/setup.sh | \
@@ -33,40 +33,50 @@ curl -sSf https://raw.githubusercontent.com/Twingate-Community/ubiquiti-connecto
 
 ## Configuration Values
 
-| Variable | Required | Description |
-|---|---|---|
-| `TWINGATE_NETWORK` | Yes | Subdomain only (e.g., `mycompany` from `mycompany.twingate.com`) |
-| `TWINGATE_ACCESS_TOKEN` | Yes | Generated per-Connector in Admin Console |
-| `TWINGATE_REFRESH_TOKEN` | Yes | Generated per-Connector in Admin Console |
-| `CONTAINER_NAME` | No | Default: `twingate-connector`; set to deploy multiple Connectors |
+| Variable | Description |
+|---|---|
+| `TWINGATE_NETWORK` | Subdomain only (e.g., `mycompany` from `mycompany.twingate.com`) |
+| `TWINGATE_ACCESS_TOKEN` | Generated from Admin Console |
+| `TWINGATE_REFRESH_TOKEN` | Generated from Admin Console |
+| `CONTAINER_NAME` | Optional; overrides default `twingate-connector` |
 
 ## Container Management Commands
 
 ```bash
-machinectl status twingate-connector   # View status
-machinectl stop twingate-connector     # Stop
-machinectl start twingate-connector    # Start
-machinectl disable twingate-connector  # Disable autostart
+machinectl status twingate-connector
+machinectl start twingate-connector
+machinectl stop twingate-connector
+machinectl disable twingate-connector
 
 # Shell inside container
-nsenter -t $(machinectl show twingate-connector -p Leader --value) \
-  -m -u -i -n -p -- /bin/bash
-
-# Logs
-journalctl -M twingate-connector -xe --no-pager
+nsenter -t $(machinectl show twingate-connector -p Leader --value) -m -u -i -n -p -- /bin/bash
 
 # Uninstall
-sudo ./uninstall.sh
+sudo ./uninstall.sh  # from GitHub repo
 ```
 
 ## Gotchas
-- **Tokens are single-use per Connector** — do not reuse; generate new set for each deployment or redeployment
-- After firmware upgrade, symlink at `/var/lib/machines/` and nspawn config at `/etc/systemd/nspawn/` may need recreation — re-run setup script to fix
-- Container data persists at `/data/custom/machines/` across upgrades
-- `TWINGATE_NETWORK` is the subdomain only, not the full URL
+- **Firmware upgrades**: Symlink at `/var/lib/machines/` and nspawn config at `/etc/systemd/nspawn/` may not survive upgrades — re-run setup script to restore (detects existing container, won't overwrite data)
+- **Token reuse**: Tokens are single-use per Connector; regenerate if redeploying
+- **Network name**: Use subdomain only, not full URL
+- **Bootstrap time**: 5–10 min is expected, not a hang
+
+## Troubleshooting Commands
+```bash
+# Container logs
+journalctl -M twingate-connector -xe --no-pager
+
+# Connector service logs
+nsenter -t $(machinectl show twingate-connector -p Leader --value) -m -u -i -n -p -- \
+  journalctl -u twingate-connector -n 50 --no-pager
+
+# Test DNS/connectivity inside container
+nsenter -t $(machinectl show twingate-connector -p Leader --value) -m -u -i -n -p -- \
+  curl -s https://binaries.twingate.com
+```
 
 ## Related Docs
-- [Twingate Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)
-- [GitHub Repository](https://github.com/Twingate-Community/ubiquiti-connector)
-- Setting Up Resources (Admin Console)
+- [Setting Up Resources](https://www.twingate.com/docs/resources)
 - Proxmox, Home Assistant, Unraid setup guides
+- [GitHub Repository](https://github.com/Twingate-Community/ubiquiti-connector)
+- General Twingate troubleshooting docs

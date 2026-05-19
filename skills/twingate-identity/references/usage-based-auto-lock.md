@@ -1,32 +1,31 @@
-# Usage-based Auto-lock
+# Usage-Based Auto-Lock
 
 ## Summary
-Usage-based auto-lock automatically removes Resource access for users who haven't accessed it within a configured time period. Access can be regained through manual admin approval or automatic approval with a user-provided reason. Changes are tracked in Audit Logs under the Access category.
+Auto-lock removes user access to a Resource after a configured period of inactivity, supporting least-privilege access. Access can be restored via manual admin approval or automatic approval (with user-provided reason). Configuration is available via Admin Console or API.
 
 ## Key Information
-- Auto-lock operates **per-user**, even when configured at Group level
-- Duration options via Admin Console: **1, 7, 30, 60, or 90 days**
-- Additional durations available via **API only**
-- Groups inherit Resource-level auto-lock by default; can be overridden per Group
-- Locked users appear on the user's detail page; admins unlock from there
-- Access reports downloadable from Resource, Group, or User pages
+- Auto-lock operates **per-user**, even when configured at the Group level
+- Admin Console durations: **1, 7, 30, 60, or 90 days**; arbitrary durations available via API
+- Changes logged in **Audit Logs > Access category**
+- Unlocking: admins unlock via the specific user's detail page
+- Reports downloadable from Resource, Group, or User pages
 
 ## Configuration Locations
-- **Resource page**: Sets default for all Groups/users on that Resource
-- **Group page**: Override duration/approval for specific Resources per Group
+| Location | Scope |
+|---|---|
+| Resource page | Applies to all users with access; Groups inherit Resource-level setting by default |
+| Group page | Set per-Resource duration and approval method for that Group |
 
 ## Approval Modes
-| Mode | Locked User Experience | Admin Action Required |
-|------|----------------------|----------------------|
-| Manual | Submit request + reason via block page | Admin must unlock |
-| Automatic | Submit reason, access granted immediately | None (reason logged) |
+- **Manual**: Admin must explicitly unlock access; locked users can submit request with reason via block page
+- **Automatic**: User submits reason, immediately regains access; reason captured in analytics and resolved requests page
 
 ## Notifications Configuration
-- Configured in **Settings → Access Requests**
+- Configure in **Settings > Access Requests**
 - Choose which admin roles receive email: Admins, DevOps, or Access Reviewers
-- Can disable emails and use **webhook** instead
+- Option to disable emails and use webhook instead
 
-### Webhook Payload Fields
+## Webhook Payload Fields
 ```json
 {
   "type": "ACCESS_REQUEST",
@@ -34,27 +33,27 @@ Usage-based auto-lock automatically removes Resource access for users who haven'
   "approval_mode": "MANUAL" | "AUTOMATIC",
   "request_duration_seconds": 2592000,
   "reason": "<user-provided string>",
-  "resource_name": "...",
-  "user_name": "...",
-  "request_url": "...",
-  "timestamp": "<ISO8601>",
-  "tenant": "<tenant>.twingate.com"
+  "user_name", "user_url",
+  "resource_name", "resource_url",
+  "request_id", "request_url",
+  "timestamp", "tenant", "version"
 }
 ```
 
-## Access Reports Include
+## Tracking / Reports
+Downloaded report includes:
 - Groups with access and their policy
 - Expiration dates (if set)
-- Auto-lock duration configured
-- Per-user lock status and last admin-unlock date
+- Auto-lock duration
+- Per-user lock status and last admin-unlock timestamp
 
 ## Gotchas
-- Changing auto-lock duration affects **future** lock calculations; review existing access when modifying
-- Automatic approval still logs the reason—not fully frictionless from an audit standpoint
-- Per-user locking means users in the same Group may have different lock states
-- Admin Console limits durations to 5 preset values; use API for custom durations
+- Group-level auto-lock duration can be **overridden per Group** on the Resource page; new Groups inherit Resource default
+- Duration changes only available beyond the 5 preset values via **API** (not Admin Console)
+- Users notified by email on approval/denial; admins notified per role configuration
+- Webhook and email notifications are mutually exclusive (disabling emails routes to webhook only)
 
 ## Related Docs
 - [Reviewing Access Requests](https://www.twingate.com/docs/reviewing-access-requests)
-- Audit Logs (Admin Console → Access category)
 - Twingate API (for custom auto-lock durations)
+- Audit Logs (Admin Console > Access category)

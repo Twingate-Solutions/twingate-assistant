@@ -1,66 +1,52 @@
 # Network Overview
 
 ## Page Title
-Twingate Network Overview
+Network Overview (Twingate Admin Console)
 
 ## Summary
-The Network Overview tab provides admins a dashboard snapshot of network health, usage metrics, and recent activity. It aggregates device, resource, remote network, and user counts alongside connection history and traffic logs.
+The Network Overview tab provides a dashboard snapshot of your Twingate network's current state, including device counts, resource status, user roles, and connection history. It serves as an entry point for admins to monitor usage and drill down into specific activity details.
 
 ## Key Information
 
-- **Network Insights** displays real-time counts across six categories: Devices, Resources, Remote Networks, and Users/Services
-- **Connection History** graph covers 7, 30, or 90-day windows; 7-day uses hourly bars, 30/90-day use daily bars
-- **Recent Activity** shows traffic across all Remote Networks with drilldown for IP, protocol, connection type, and duration
+**Network Insights Metrics:**
+- **Devices:** Active (status=Active), Online (client logged in), Trusted (meet Trusted Profile requirements)
+- **Resources:** Total, Online (in Online Remote Networks), Disconnected (in Offline Remote Networks)
+- **Remote Networks:** Total, Online (≥1 online Connector), Offline (no online Connectors)
+- **Users by Role:** Admin, DevOps, Support, Member counts displayed separately
+- **Services:** Total Service Account count
 
-## Metrics Reference
+**Connection History Graph:**
+- Time ranges: 7, 30, 90 days
+- 7-day view: bars = per-hour connection counts
+- 30/90-day views: bars = per-day connection counts
+- Tracks successful vs. failed connections separately
 
-### Devices
-| Metric | Definition |
-|--------|------------|
-| Active Devices | Devices with status = Active |
-| Online Devices | Devices with a logged-in Twingate Client user |
-| Trusted Devices | Devices meeting a Trusted Profile's requirements |
-
-### Resources
-| Metric | Definition |
-|--------|------------|
-| Resources | Total Resources added to Twingate |
-| Online Resources | Resources in Online Remote Networks |
-| Disconnected Resources | Resources in Offline Remote Networks |
-
-### Remote Networks
-| Metric | Definition |
-|--------|------------|
-| Remote Networks | Total created |
-| Online Remote Networks | At least one online Connector present |
-| Offline Remote Networks | No online Connectors |
-
-### Users & Services
-| Metric | Definition |
-|--------|------------|
-| Admin/DevOps/Support/Member Users | Count per role |
-| Services | Total Service Accounts created |
+**Recent Activity:**
+- Shows network traffic across all Remote Networks
+- Click individual events for details: Resource IP, protocol, connection type, duration
 
 ## Prerequisites
-- Admin role required to access Network Overview tab
-- Remote Networks and Connectors must be configured for meaningful resource/network metrics
+- Admin role access to Twingate Admin Console
+- Existing network configuration (Remote Networks, Connectors, Resources) to populate metrics
 
-## Step-by-Step: Investigating Connection Issues
-1. Navigate to **Network Overview** tab in Admin console
-2. Check **Offline Remote Networks** count — indicates Connectors are down
-3. Review **Connection History** graph for spike in failed connections
-4. Select time range (7/30/90 days) to scope investigation
-5. Scroll to **Recent Activity**, click a failed event for details (IP, protocol, connection type, duration)
+## Step-by-Step
+1. Navigate to the **Network Overview** tab in the Twingate Admin Console
+2. Review **Network Insights** cards for high-level counts
+3. Select connection history timeframe (7/30/90 days) to view trend data
+4. Click individual entries in **Recent Activity** to inspect connection details
+
+## Configuration Values
+None — this is a read-only dashboard tab with no configurable parameters.
 
 ## Gotchas
-- A Remote Network is **Online** only if *at least one* Connector is online — multiple Connectors required for true HA
-- **Active Devices** ≠ **Online Devices**: Active is a status flag; Online requires an authenticated Client session
-- Connection History bars represent different time resolutions depending on selected range (hourly vs. daily)
-- Recent Activity reflects all Remote Networks aggregated — no per-network filtering shown on this page
+- A Remote Network is **Online** only if it has **at least one** online Connector; any Remote Network with zero online Connectors shows as Offline
+- Resources inherit online/offline status from their parent Remote Network, not from individual health checks
+- Connection history granularity differs by timeframe (hourly vs. daily) — don't conflate bar heights across views
+- "Active Devices" and "Online Devices" are distinct: Active refers to device status flag; Online requires an active user session in the client
 
 ## Related Docs
-- Device Status and Trusted Profiles
+- Devices and Device Status
+- Trusted Profiles
 - Remote Networks and Connectors
-- Resources configuration
 - Service Accounts
-- User Roles (Admin, DevOps, Support, Member)
+- Connection Logs / Activity Logs

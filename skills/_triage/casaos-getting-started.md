@@ -3,7 +3,7 @@
 # Getting Started with CasaOS and Twingate
 
 ## Summary
-Deploy a Twingate Connector on CasaOS via the custom App Store to enable secure remote access to your home network resources. The Connector runs as a Docker container and connects your CasaOS instance to a Twingate Remote Network without exposing services to the internet.
+Deploys a Twingate Connector on CasaOS via custom App Store installation using Docker Compose. Enables secure remote access to CasaOS resources without exposing them to the internet. Connector runs as a container using the `twingate/connector:1` image.
 
 ## Prerequisites
 - Running CasaOS instance with web UI accessible
@@ -12,13 +12,12 @@ Deploy a Twingate Connector on CasaOS via the custom App Store to enable secure 
 
 ## Step-by-Step
 
-1. **Generate Connector Tokens**: Admin Console → Remote Networks → select network → add/select Connector → See More → Manual → Generate Tokens → copy Access Token and Refresh Token
-2. **Deploy via CasaOS App Store**: App Store → Custom Install → Import → paste docker-compose YAML → Submit
-3. **Configure Web UI link**: Set `https://{network_name}.twingate.com/networks/overview` in Web UI dropdown
-4. **Fill Environment Variables**: Enter network name and tokens from step 1
-5. **Install**: Click Install button
-6. **Verify**: Admin Console → Remote Networks → select Connector → confirm Controller and Relay show `Connected`
-7. **Add Resource**: Admin Console → Resources → + Resource → select Remote Network → set name → add private IP (e.g., `192.168.x.x`) → grant group access
+1. **Generate Connector Tokens**: Admin Console → Remote Networks → select network → add/select undeployed Connector → See More → Manual → Step 2 → Generate Tokens → copy Access Token and Refresh Token
+2. **Deploy via CasaOS Custom Install**: App Store → Custom Install → Import → paste docker-compose config → Submit
+3. **Configure Web UI link**: Set to `https://{network_name}.twingate.com/networks/overview`
+4. **Fill environment variables** with tokens and network name from step 1
+5. **Install** and verify Connector shows Controller + Relay status as **Connected** in Admin Console
+6. **Add Resource**: Admin Console → Resources → + Resource → select network → enter CasaOS dashboard private IP (e.g., `192.168.x.x`) → assign group access
 
 ## Configuration Values
 
@@ -27,28 +26,28 @@ Deploy a Twingate Connector on CasaOS via the custom App Store to enable secure 
 | `TWINGATE_NETWORK` | Network subdomain only (e.g., `example` from `example.twingate.com`) |
 | `TWINGATE_ACCESS_TOKEN` | Generated from Admin Console |
 | `TWINGATE_REFRESH_TOKEN` | Generated from Admin Console |
-| `TWINGATE_LABEL_DEPLOYED_BY` | Set to `"casaos"` (hardcoded) |
+| `TWINGATE_LABEL_DEPLOYED_BY` | Hardcode `"casaos"` |
 | `TWINGATE_LABEL_HOSTNAME` | Hostname label for the Connector |
 
 **Docker image**: `twingate/connector:1`  
-**Network mode**: `default`  
-**Memory reservation**: `500M` (adjustable)  
-**Architectures**: amd64, arm64, arm
+**Supported architectures**: `amd64`, `arm64`, `arm`  
+**Memory reservation**: 500M (adjustable)  
+**Restart policy**: `unless-stopped`  
+**Privileged**: `false`
 
 ## Gotchas
-- **Never reuse token sets** — each Connector requires its own unique Access/Refresh token pair
-- `TWINGATE_NETWORK` value is the subdomain only, not the full URL
-- Container runs with `privileged: false` — ensure this is compatible with your network setup
-- After clicking Submit on the docker-compose import, dismiss the warning popup before proceeding to fill environment variables
+- **Do not reuse token sets** — each Connector requires its own unique Access/Refresh token pair
+- `TWINGATE_NETWORK` takes only the subdomain portion, not the full URL
+- `network_mode: default` is set in compose — required for proper connectivity
+- Verify Connector shows both **Controller** and **Relay** as Connected before adding Resources
 
 ## Troubleshooting
-- Token errors: Verify tokens are copied completely and correctly
-- Connectivity issues: Confirm CasaOS web UI is locally accessible and Connector container is running
-- Check Controller and Relay status in Admin Console; both must show `Connected`
+- Token errors: re-check tokens are copied completely and correctly
+- Connectivity issues: confirm CasaOS web UI is accessible locally and the container is running
 
 ## Related Docs
 - [Twingate Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)
 - [Setting Up Resources](https://www.twingate.com/docs/resources)
 - Home Assistant Setup Guide
-- Unraid Helper Script Guide
 - ZimaOS Setup Guide
+- Unraid Helper Script Guide

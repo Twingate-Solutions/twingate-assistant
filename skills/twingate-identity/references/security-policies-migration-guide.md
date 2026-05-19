@@ -4,46 +4,41 @@
 Security Policies Migration Guide
 
 ## Summary
-Twingate introduced Security Policies to replace the older Access Policy system, enabling more granular access control configured directly in the Admin Console without requiring IdP support. Existing networks were automatically migrated on April 21st, 2021, preserving all prior security configurations. Post-migration behavior is identical to pre-migration behavior.
+Twingate migrated all existing networks to Security Policies on April 21st, 2021, preserving all existing security configurations. Security Policies expand access control capabilities beyond IdP-level settings, enabling per-Resource security rules managed directly in the Twingate Admin Console.
 
 ## Key Information
-- Security Policies are assigned to Groups; when a User in a Group accesses a Resource in that Group, the assigned Policy applies
-- New **Policies** section added to Admin Console for configuration
-- New capabilities unavailable previously:
-  - 2FA without an IdP configured
-  - 2FA scoped to specific Resources (not just login)
-  - Custom session lifetimes per Resource
+- Security Policies are configured in a new **Policies** section of the Admin Console
+- Policies are assigned to Resources via Groups; policy applies when a Group member accesses a Group Resource
+- New capabilities include: 2FA without IdP, per-Resource 2FA, per-Resource session lifetimes, future device posture/geolocation support
 
-## Terminology Mapping
+## Terminology Changes
 
-| Old Term | New Term | Notes |
-|---|---|---|
-| Default Access Policy | Network Sign In Policy + Default Policy | Split into two distinct policies |
-| Admin Access Policy (Okta/OneLogin) | Admin Console Sign In Policy | Behavior unchanged |
-| Custom Access Policies | Custom Resource Policies | Expanded capabilities |
+| Old Term | New Term |
+|---|---|
+| Default Access Policy | Network Sign In Policy + Default Policy |
+| Admin Access Policy | Admin Console Sign In Policy |
+| Custom Access Policies | Custom Resource Policies |
 
 ## Migration Behavior by IdP
 
 ### Google, Entra ID, or No IdP
 - **Network Sign In Policy**: inherits session lifetime + 2FA setting from Default Access Policy
-- **Default Policy**: same session lifetime as Default Access Policy; no extra controls added
+- **Default Policy**: same session lifetime as Default Access Policy; no additional controls
 - **Default Policy**: assigned to all existing Groups
-- **Admin Console Sign In Policy**: 2FA enabled if previously enabled in Admin Access Policy
+- **Admin Console Sign In**: 2FA enabled if previously enabled in Admin Access Policy
 
-### Okta and OneLogin (additional steps)
-- All Google/Entra ID migration steps apply, plus:
-  - Each additional custom Access Policy → new Security Policy (same session lifetime, same name)
-  - New Security Policies assigned to same Groups as original Access Policies
-
-## Prerequisites
-- None for migration (automatic); existing configuration preserved
-- For new Security Policy setup: access to Twingate Admin Console
+### Okta and OneLogin (additional changes)
+- All Google/Entra ID changes apply, plus:
+- Additional custom Access Policies → new Security Policies with matching names, session lifetimes, and Group assignments
 
 ## Gotchas
-- The Default Access Policy previously served dual purpose (user auth + Group default); it is now **split** into two separate policies — ensure both are configured as expected post-migration
-- Admin Access Policy only existed separately for Okta and OneLogin; for Google Workspace and Entra ID it was identical to Default Access Policy
-- Custom Resource Policies require a Sign In policy component plus any additional access requirements — different structure from old custom Access Policies
+- The Default Access Policy previously served dual purpose (Client auth + Group default); these are now split into two distinct policies
+- Okta/OneLogin networks may have additional policies created; Google Workspace and Entra ID had identical Default and Admin Access Policies, so no extra policies are created
+- Migration was a one-time event (April 21, 2021); existing networks were already migrated
+
+## Prerequisites
+- No action required for existing networks — migration was automatic
+- Post-migration behavior is identical to pre-migration behavior
 
 ## Related Docs
 - [Security Policies documentation](https://www.twingate.com/docs/security-policies) — full configuration reference
-- Twingate Groups — used for assigning Security Policies to Resources

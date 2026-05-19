@@ -1,49 +1,41 @@
 # MSP Billing
 
 ## Summary
-MSP billing is consolidated monthly, charged on the first of each calendar month, with separate line items per Customer Network. License counts are calculated based on total Users and Service Accounts minus Admins across all subtenants. Billing is managed exclusively through the MSP portal, not individual Customer Network consoles.
+MSP billing is consolidated monthly, charged on the 1st of each calendar month. Invoices are generated per Customer Network with license counts based on total Users and Service Accounts minus Admins across all subtenants.
 
 ## Key Information
-- **Billing cycle**: Charged on the 1st of every calendar month
-- **Snapshot date**: License count taken on the last day of the prior month
-- **Minimum charge**: Each Customer Network is billed for at least 1 license regardless of actual user count
-- **License formula**: `Total Users + Service Accounts - Admins = Licenses charged`
-- **Invoices sent to**: MSP portal signup email address only (not forwarded to end customers)
+- Billing date: 1st of every calendar month
+- Each Customer Network = minimum 1 license (regardless of user count)
+- License count = (Total Users + Service Accounts) − Admins across all subtenants
+- Invoices sent only to MSP portal email; Customer Networks have no billing page
+- Snapshot for billing taken on last day of previous month
 
-## Prerequisites
-- Access to the MSP portal (billing pages are not visible in Customer Network Admin Consoles)
-- Billing management requires navigating to **Settings > Billing > Manage Plan**
+## Billing Navigation
+All billing managed via: **Settings > Billing > Manage Plan**
 
-## Configuration Values / Billing Calculation
-
-| Variable | Description |
+| Modal Button | Function |
 |---|---|
-| Users | All users across all subtenants |
-| Service Accounts | All service accounts across all subtenants |
-| Admins | Subtracted from total (across all subtenants) |
-| **Licenses** | **(Users + Service Accounts) - Admins** |
+| Child subscriptions | View all Customer Networks and monthly prices |
+| Payment Methods | Update credit card |
+| Billing History | View/download past invoices |
 
-**Example:**
-- Feb 28: 100 Users/Service Accounts, 5 Admins → **95 licenses billed March 1**
-- Mar 31: 150 Users/Service Accounts, 5 Admins → **145 licenses billed April 1**
+## Licensing Calculation Example
 
-## Step-by-Step: Managing Billing
-
-1. Log into **MSP portal** (not a Customer Network console)
-2. Navigate to **Settings > Billing**
-3. Click **Manage Plan** to open the Manage Subscriptions modal
-4. From the modal:
-   - **Child subscriptions** → view per-Customer Network pricing
-   - **Payment Methods** → update credit card
-   - **Billing History** → view/download past invoices
+| Date | Users + Service Accounts | Admins | Licenses Charged |
+|---|---|---|---|
+| March 1 | 100 (as of Feb 28) | 5 | 95 |
+| April 1 | 150 (as of Mar 31) | 5 | 145 |
 
 ## Gotchas
-- Billing page **does not exist** in Customer Network Admin Consoles — only visible in the MSP portal
-- Each Customer Network incurs a **minimum 1 license charge** even with zero non-admin users
-- Invoice email is tied to the MSP portal signup email; update via **Billing > Manage > Account Information**
-- Plan changes for individual Customer Networks require contacting **partnersupport@twingate.com** — cannot be self-served
+- Billing page is **only visible in the MSP portal**, not in individual Customer Network Admin Consoles
+- Invoices go to the email used to register the MSP portal account — update via Billing > Manage > Account Information
+- Plan changes for individual Customer Networks require contacting `partnersupport@twingate.com` (cannot self-serve)
+- Each Customer Network incurs at least 1 license charge even with zero non-admin users
+
+## Prerequisites
+- MSP portal access (not standard tenant admin access)
 
 ## Related Docs
-- MSP Portal documentation
-- Customer Network administration
-- Contact: partnersupport@twingate.com for plan changes
+- MSP Portal overview
+- Customer Network management
+- Contact: `partnersupport@twingate.com` for plan changes

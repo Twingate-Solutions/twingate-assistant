@@ -1,42 +1,41 @@
-# SaaS App Gating with Twingate
+# Getting Started with SaaS App Gating
 
 ## Summary
-Twingate can gate SaaS application access by routing IdP authentication traffic through Twingate Connectors, then restricting IdP authentication policies to only allow the Connector's exit IP. This provides consistent access controls across both SaaS and private applications without configuring IP allowlists in each individual SaaS app.
+Twingate can gate SaaS application access by routing IdP authentication traffic through Twingate Connectors, then whitelisting only those Connector exit IPs in your IdP's authentication policy. This approach extends Twingate's authorization controls to SaaS apps without requiring each app to support native IP whitelisting.
 
 ## Key Information
-- Traffic routed: Only IdP authentication requests pass through the Remote network (low volume)
-- Connectors act as the exit point; their public IP becomes the allowlisted IP in IdP policies
-- Works for SaaS apps that don't natively support IP whitelisting
-- Consolidates access control to IdP + Twingate instead of per-app settings
-- Device restrictions can be enforced consistently across platforms
+- Authentication traffic (not application traffic) routes through the selected Remote network
+- Only users authorized in Twingate can reach the IdP login endpoint, blocking unauthorized SaaS access
+- Consolidates IP whitelisting into a single IdP+Twingate configuration
+- Enables device-based restrictions across any platform
 
 ## Prerequisites
-- Twingate Connectors deployed with outbound internet access allowed
-- An IdP (Okta, JumpCloud, OneLogin, Microsoft Entra ID, or Google Workspace)
-- Ability to configure network/IP-based authentication policies in your IdP
+- Twingate Remote network with deployed Connectors (outbound internet allowed)
+- Admin access to your IdP (Okta, JumpCloud, OneLogin, Microsoft Entra ID, or Google Workspace)
+- Known external exit IP(s) for your Connector network
 
 ## Step-by-Step Configuration
 
-1. **Select a Remote network** to route IdP authentication traffic through; ensure Connectors have outbound internet access
-2. **Determine exit IP** — add a resource like `*.whatsmyip.org` to the Remote network, connect via Twingate, and visit the site to reveal the public exit IP
-3. **Use NAT if multiple Connectors** — place a NAT gateway in front of Connectors so all traffic presents a single public IP; avoids managing multiple IPs in IdP rules
+1. **Choose a Remote network** to route IdP authentication traffic through
+2. **Determine external exit IP** — Add a resource like `*.whatsmyip.org` to the Remote network; access it via Twingate to reveal the public IP
+3. **Configure NAT (if multiple Connectors)** — Use a NAT gateway so all Connectors share a single public IP; avoids managing multiple IPs in IdP rules
 4. **Add IdP FQDN as a Resource** in the same Remote network (e.g., `tenant.okta.com`, `login.microsoftonline.com`)
-5. **Apply a Device-only Policy** to the IdP Resource to prevent authentication loops (users can reach IdP without needing prior Twingate auth)
-6. **Configure IdP authentication policy** to only permit logins from the exit IP identified in step 2
+5. **Apply a Device-only Policy** to the IdP Resource — prevents authentication loops where Twingate auth is required before IdP auth can complete
+6. **Configure IdP authentication policy** to only allow access from your Connector exit IP(s)
 
 ## Configuration Values
 
-| Item | Example Value |
+| Item | Example Values |
 |------|---------------|
-| IdP Resource (Okta) | `tenant.okta.com` |
-| IdP Resource (Entra ID) | `login.microsoftonline.com` |
-| IP discovery resource | `*.whatsmyip.org` |
+| Test resource for IP discovery | `*.whatsmyip.org` |
+| Okta IdP FQDN | `tenant.okta.com` |
+| Microsoft Entra FQDN | `login.microsoftonline.com` |
 | Policy type for IdP resource | Device-only Policy |
 
 ## Gotchas
-- **Authentication loop risk**: Without a Device-only Policy on the IdP resource, users cannot authenticate with the IdP to gain Twingate access — creating a chicken-and-egg deadlock
-- **Multiple Connectors = multiple IPs**: Without NAT, load-balanced traffic across Connectors produces multiple exit IPs that all need to be allowlisted in the IdP
-- **Outbound internet required**: Connectors must be able to reach the internet; purely internal-only Connector deployments won't work
+- **Authentication loop risk**: Without a Device-only Policy on the IdP resource, users cannot authenticate with the IdP because Twingate itself requires prior IdP authentication — apply Device-only Policy to break this dependency
+- **Multiple Connectors**: User traffic load-balances across all Connectors; without NAT, multiple exit IPs must all be whitelisted in the IdP
+- **Traffic type**: Only IdP authentication requests transit this Remote network, not full SaaS app traffic
 
 ## Related Docs
 - App Gating with Okta
@@ -45,5 +44,5 @@ Twingate can gate SaaS application access by routing IdP authentication traffic 
 - App Gating with Microsoft Entra ID
 - App Gating with Google Workspace
 - App Gating Best Practices
-- Device-only Resource Policy
-- IP Whitelisting within SaaS applications (alternative approach)
+- Device-only Resource Policy (Twingate docs)
+- Twingate Connectors documentation

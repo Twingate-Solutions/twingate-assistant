@@ -5,27 +5,28 @@ Remote Networks are logical containers in Twingate that group Resources together
 
 ## Key Information
 - Remote Network ≈ one physical network or VPC in your infrastructure
-- Resources inside a Remote Network must be reachable by **all** Connectors in that same Remote Network
-- No running Connector = Resources are inaccessible to end users
+- Resources within a Remote Network must be reachable by all Connectors in that same Remote Network
+- Connectors deploy behind the firewall to proxy access to Resources
 - Load balancing across Connectors is automatic and adjusts as Connectors are added/removed
-- A single Connector can typically handle traffic for hundreds of users
+- A single Connector can handle traffic for hundreds of users depending on usage patterns
 
 ## Prerequisites
 - At least one Connector deployed and running per Remote Network
-- Connectors must be deployed behind the firewall of the target network
+- Connectors must have network-level access to all Resources in the Remote Network
 
-## Best Practices
-- Deploy **minimum two Connectors** per Remote Network for:
+## Recommendations
+- **Deploy minimum 2 Connectors per Remote Network** for:
   - Automatic load balancing
-  - Failover redundancy
-- All Connectors within a Remote Network must share identical network routing and access rules (they are interchangeable)
-- Add Connectors as needed for scalability
+  - Failover redundancy if one Connector fails
+- All Connectors in the same Remote Network must have identical network routing and access rules (they are treated as interchangeable)
 
 ## Gotchas
-- Connectors within the same Remote Network are treated as interchangeable — mismatched routing or firewall rules between Connectors will cause inconsistent behavior
-- Resources become completely inaccessible if all Connectors in a Remote Network go offline
+- Resources are completely inaccessible to end users if no Connector is deployed and running
+- Connectors within the same Remote Network must have the same network routing/access rules — mismatched configurations will cause inconsistent behavior
+- Adding more Connectors triggers automatic load rebalancing
 
 ## Related Docs
-- Connectors (deployment details)
+- Connectors
+- Deploying Connectors
 - Resources
 - Best Practices documentation

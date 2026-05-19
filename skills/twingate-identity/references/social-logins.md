@@ -1,44 +1,44 @@
 # Social Logins
 
 ## Summary
-Twingate supports social identity providers as an alternative when no third-party IdP is available. Users authenticate via social accounts where the email must match the email registered in Twingate. Admins manage users through the Team page in the Admin Console.
+Twingate supports social identity providers as an alternative when no third-party IdP is available. Users authenticate via social accounts where the email must match their Twingate account email. Admins manage users through the Team page in the Admin Console.
 
 ## Key Information
-- Four supported social providers: **Google, Microsoft, LinkedIn, GitHub**
-- Email address from social account must exactly match the user's email in Twingate
-- No external IdP required for this authentication method
-- Users must accept invite email before first sign-in
+- **Supported providers**: Google, Microsoft, LinkedIn, GitHub
+- Email address on social account **must match** the email address registered in Twingate
+- Invitees must accept the invite email before first sign-in
+- Disabled users **are still billed**
 
 ## Prerequisites
 - Admin access to Twingate Admin Console
-- User's email address to send invite
+- No third-party IdP required (social login is the fallback option)
 
 ## Step-by-Step: Inviting Users
-1. Navigate to **Admin Console → Team → Users tab**
-2. Click **"Add User"**
-3. Enter user's email address
-4. Click **"Send Invite Email"**
-5. User accepts invite via email, then downloads Client and logs in
+1. Navigate to Admin Console → Team page → Users tab
+2. Click **Add User**
+3. Enter the user's email address
+4. Click **Send Invite Email**
+5. User receives email with Client download link and must accept invite before logging in
 
 ## User Management Options
-Access via three-dot menu on any user record:
+Access via the three-dot menu on a user's record:
 
 | Option | Action |
 |--------|--------|
 | Edit | Update display name |
 | Manage Role | Change user role |
-| Disable | Temporarily block login (user retained) |
+| Disable | Temporarily block login (user remains, still billed) |
 | Remove | Permanently delete user |
 
 ## Configuration Values
-- No environment variables or API parameters specific to social logins
-- Role assignment options documented in the Admins guide
+- No environment variables or API parameters specific to social login configuration
+- Role management referenced in Admins guide (separate doc)
 
 ## Gotchas
-- **Disabled users are still billed** — disabling does not remove them from billing
-- Social account email must **exactly match** the Twingate-registered email; mismatches will prevent login
-- Invitees cannot sign in until they accept the invite email
+- **Billing**: Disabled users count toward billing — use **Remove** to stop billing for a user
+- **Email matching**: Social account email must exactly match the Twingate-registered email; mismatches prevent login
+- Users cannot log in until they accept the invite email (pending state)
 
 ## Related Docs
-- Admins Guide (Role management)
+- Admins guide (Role management)
 - Offboarding Users page

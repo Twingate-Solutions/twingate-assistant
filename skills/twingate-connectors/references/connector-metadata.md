@@ -1,51 +1,49 @@
 # Connector Metadata
 
 ## Summary
-Twingate Connectors support custom key-value metadata set via environment variables prefixed with `TWINGATE_LABEL_`. Metadata appears in the Connector detail view in the Admin Console. Some labels (hostname, deployed_by) are preset automatically by Twingate deployment scripts.
+Twingate Connectors support custom key-value metadata pairs set via environment variables prefixed with `TWINGATE_LABEL_`. Metadata appears in the Connector detail view in the Admin Console. Some labels (hostname, deployed_by) are preset automatically depending on deployment method.
 
 ## Key Information
-- Metadata is set as environment variables with prefix `TWINGATE_LABEL_`
-- Suffix becomes the display label (underscores converted to spaces, title-cased)
-- Values display on the left-hand side of the Connector detail page
-- Twingate auto-sets `TWINGATE_LABEL_HOSTNAME` and `TWINGATE_LABEL_DEPLOYED_BY` in most deployment scripts
-- Works across all deployment methods (Docker, ECS Fargate, etc.)
+- Metadata displays in Admin Console on the Connector detail page (left-hand side)
+- Environment variable names are transformed for display: `TWINGATE_LABEL_DEV_ENVIRONMENT` → `Dev Environment: dev1`
+- Twingate auto-sets `TWINGATE_LABEL_HOSTNAME` (local hostname) and `TWINGATE_LABEL_DEPLOYED_BY` on many deployment methods
+- Works across all deployment types (Docker, ECS Fargate, etc.)
 
 ## Configuration Values
 
-| Environment Variable | Example Value | Notes |
+| Environment Variable Pattern | Example | Display Output |
 |---|---|---|
-| `TWINGATE_LABEL_<SUFFIX>` | `custom_value` | User-defined metadata |
-| `TWINGATE_LABEL_HOSTNAME` | `` `hostname` `` | Auto-set by Twingate scripts |
-| `TWINGATE_LABEL_DEPLOYED_BY` | `docker`, `ecs` | Auto-set by Twingate scripts |
+| `TWINGATE_LABEL_<KEY>=<VALUE>` | `TWINGATE_LABEL_DEV_ENVIRONMENT=dev1` | `Dev Environment: dev1` |
+| `TWINGATE_LABEL_HOSTNAME` | `` `hostname` `` | Auto-set by Twingate |
+| `TWINGATE_LABEL_DEPLOYED_BY` | `docker` | Auto-set by Twingate |
 
-## Step-by-Step
-
-1. Identify your deployment method (Docker, ECS, systemd, etc.)
-2. Add environment variables prefixed with `TWINGATE_LABEL_` to the deployment script
-3. Run the deployment command
-4. Verify metadata appears in Admin Console → Connector detail view
-
-## Examples
-
-**Docker:**
+## Docker Example
 ```bash
 docker run -d \
+  --env TWINGATE_NETWORK="<network>" \
+  --env TWINGATE_ACCESS_TOKEN="" \
+  --env TWINGATE_REFRESH_TOKEN="" \
   --env TWINGATE_LABEL_HOSTNAME="`hostname`" \
   --env TWINGATE_LABEL_DEPLOYED_BY="docker" \
-  --env TWINGATE_LABEL_DEV_ENVIRONMENT="dev1" \
+  --env TWINGATE_LABEL_CUSTOM_METADATA_1="custom_value_1" \
   twingate/connector:1
 ```
 
-**ECS Fargate (JSON):**
+## ECS Fargate Example
+Add to `environment` array in task definition JSON:
 ```json
-{"name": "TWINGATE_LABEL_CUSTOM_METADATA_1", "value": "custom_value_1"}
+{
+  "name": "TWINGATE_LABEL_CUSTOM_METADATA_1",
+  "value": "custom_value_1"
+}
 ```
 
 ## Gotchas
-- Label suffix format matters: `DEV_ENVIRONMENT` displays as `Dev Environment` — underscores become spaces
-- Custom metadata added manually may be overwritten if regenerating deployment scripts from the Admin Console
-- No validation on metadata values — incorrect prefixes will be silently ignored
+- No documented limit on number of metadata pairs, but keep keys descriptive
+- Underscores in the key suffix become spaces in display (e.g., `CUSTOM_METADATA` → `Custom Metadata`)
+- Metadata is display-only; it has no functional effect on Connector behavior
+- Must be set at deploy time via environment variables — no runtime API to update labels noted in this doc
 
 ## Related Docs
-- Connector deployment methods (Docker, ECS Fargate, systemd)
-- Twingate Admin Console – Connector detail view
+- Connector deployment methods (Docker, ECS Fargate, etc.)
+- Twingate Admin Console: Connector detail view

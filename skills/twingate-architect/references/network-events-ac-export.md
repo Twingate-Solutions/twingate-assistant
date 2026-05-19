@@ -4,50 +4,45 @@
 Network Events Admin Console Export
 
 ## Summary
-Twingate allows administrators to export Network Events from the Admin Console Reports page as GZIP-compressed JSON files. Exports run in the background and cover a user-specified date range and Remote Network scope. Files contain one JSON object per line and may be very large depending on activity volume.
+Twingate allows administrators to export Network Events from the Admin Console Reports page as GZIP-compressed JSON files. Exports run as background jobs with email notification on completion. Files contain one JSON object per line with UTC timestamps.
 
 ## Key Information
 - Export format: GZIP-compressed, newline-delimited JSON (one event per line)
-- Timestamps in export are **UTC**, but the time range selector uses **local timezone**
-- Time range is based on connection **end time**, not start time
-- Remote Networks default to **all** if none selected
-- Export runs asynchronously; notification sent via email when ready
+- Timestamps in export are **UTC**, regardless of local timezone used for selection
+- Time range filter uses **end time** of connection, not start time
+- Remote Networks default to "all" if not specified
 - Export duration: seconds to minutes typically; large exports may take hours
+- File has no `.csv` extension by default — must be renamed manually
 
 ## Prerequisites
-- Admin Console access
-- Access to Settings > Reports page
-- Report Type must be set to **Events** (not another report type)
+- Admin Console access with permissions to view Reports/Settings
+- Report Type must be set to **Events** (not another type)
 
 ## Step-by-Step
 
-1. Navigate to **Settings → Reports**
-2. Click the **Network Events** tab
+1. Go to **Settings → Reports**
+2. Click **Network Events** tab
 3. Click **Generate Network Events Report**
 4. Set **Report Type** to `Events`
-5. Select desired **date & time range** (uses local timezone)
-6. Select **Remote Network(s)** (defaults to all)
-7. Wait for background processing; refresh page or await email notification
-8. Return to Reports page to **download** the completed report
+5. Select date/time range (uses local timezone for selection)
+6. Select Remote Network(s) (defaults to all)
+7. Wait for background processing; optionally wait for email notification
+8. Return to Reports page to download completed export
 
 ## Configuration Values
-| Parameter | Options/Notes |
-|---|---|
+| Parameter | Notes |
+|-----------|-------|
 | Report Type | Must be set to `Events` |
-| Date/Time Range | Local timezone input; UTC output |
-| Remote Networks | Multi-select; defaults to all |
-
-## File Handling
-- Decompress with any standard GZIP/compression tool
-- After decompression, **rename file with `.csv` extension** for spreadsheet compatibility
-- Very large exports (millions of lines) may not open well in spreadsheet editors — use a text processor or data pipeline instead
+| Date/Time Range | Local timezone input; UTC in output |
+| Remote Networks | Optional filter; defaults to all |
 
 ## Gotchas
-- **Safari users**: Disable auto-unpack to prevent empty file issue — uncheck *Open "Safe" files after downloading* in Safari → Preferences → General
-- Time range filter uses connection **end time** — connections that started before the range but ended within it will be included
-- Exported timestamps are UTC regardless of local timezone used during selection
-- File has no `.csv` extension by default; must be manually added after decompression
+- **Safari auto-unpack issue**: If the file appears empty in Safari, disable "Open 'Safe' files after downloading" in Safari → Preferences → General before downloading
+- **Spreadsheet limits**: Large time ranges may produce millions of rows, causing spreadsheet editors to fail or hang — consider scripted processing instead
+- **File extension**: Export has no `.csv` extension; manually append `.csv` after decompression for spreadsheet compatibility
+- **Timezone mismatch**: Selection UI uses local time but exported timestamps are UTC — account for this when correlating with other logs
+- **Connection timing**: Filter captures events by connection *end time*, so connections that started before the range but ended within it will be included
 
 ## Related Docs
-- [Network Events Schema](#) (linked as "detailed schema is available here" — internal link)
-- Network Events tab under Settings → Reports
+- [Network Events Schema](https://www.twingate.com/docs/network-events-schema) (linked as "detailed schema" in source)
+- Reports page (Settings → Reports in Admin Console)

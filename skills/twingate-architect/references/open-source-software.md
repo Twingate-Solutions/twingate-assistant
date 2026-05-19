@@ -1,27 +1,24 @@
 # Twingate Open Source Software
 
 ## Summary
-Twingate provides source code for open source components used in its software. Currently, one open source component is listed: a fork of the tap-windows6 driver under GPLv2 license.
+Twingate publishes source code for open source components used in its software. Currently, one open source package is listed: a fork of `tap-windows6` under GPLv2 license.
 
 ## Key Information
-- Twingate publishes source code for GPL-licensed components to comply with open source license requirements
-- Currently one listed component: **tap-windows6** (GPLv2)
-- tap-windows6 is a Windows TAP virtual network driver used by Twingate's Windows client
+- Twingate maintains and distributes open source software components used in its products
+- Source code is available for download per license obligations
+- `tap-windows6` is a TAP virtual network driver for Windows (GPLv2)
 
-## Available Components
+## Available Packages
 
-| Component | License | Notes |
-|-----------|---------|-------|
-| tap-windows6 | GPLv2 | Windows TAP driver |
-
-## Configuration Values
-- None applicable — this is a source code download page only
+| Package | License | Notes |
+|---------|---------|-------|
+| `twingate/tap-windows6` | GPLv2 | Windows TAP driver, fork of OpenVPN's tap-windows6 |
 
 ## Gotchas
-- This page appears to be updated periodically; check for updates if auditing open source compliance
-- Only GPLv2 (and similarly copyleft) components requiring source distribution are listed here; permissively licensed dependencies (MIT, Apache 2.0, etc.) may not be listed
-- The tap-windows6 source is Twingate's **fork**, not the upstream OpenVPN tap-windows6 repo — differences may exist
+- This page appears to be a compliance/legal disclosure page rather than a developer integration page
+- No API, CLI, or configuration values are provided here
+- Source code links are provided for license compliance; not intended as integration documentation
 
 ## Related Docs
-- [Twingate Client Downloads](https://www.twingate.com/docs/client-downloads)
-- [Twingate Security Overview](https://www.twingate.com/docs/security)
+- Twingate Client installation docs (where tap-windows6 would be used on Windows)
+- OpenVPN's upstream `tap-windows6` repository (reference implementation)

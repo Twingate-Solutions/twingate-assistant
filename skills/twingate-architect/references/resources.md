@@ -1,58 +1,61 @@
 # Twingate Resources
 
 ## Summary
-Resources are network addresses (DNS names, IPs, CIDR ranges) secured via Twingate and accessed through Connectors on a Remote Network. Access is denied by default (Zero Trust); users must be explicitly granted access via Groups. Address resolution occurs from the Connector, enabling private DNS and IP access without client-side configuration changes.
+Resources are network addresses (DNS names, IPs, CIDR ranges) secured via Twingate and accessed through Connectors deployed in Remote Networks. Access is deny-by-default; users must be explicitly granted access via Groups. Resolution occurs from the Connector's perspective, enabling private DNS and IP routing for remote users.
 
 ## Key Information
 - Resource address types: FQDN, wildcard FQDN, single IP, CIDR range
 - Wildcard `*` = 0+ characters; `?` = exactly 1 character
-- `*.autoco.internal` matches subdomains but **not** `autoco.internal` itself
+- `*.autoco.internal` matches subdomains but NOT `autoco.internal` itself
 - Reserved CGNAT subnet `100.96.0.0/12` is blocked by the Twingate client
 - Default traffic forwarding: all TCP, UDP ports + ICMP ping
-- DNS resolution performed **from the Connector**, not the client device
-- Aliases are resolved by the Connector; no DNS entry required for alias address
+- Tags are optional metadata for organization
+- Aliases provide additional addresses without DNS configuration
 
 ## Prerequisites
 - Connector(s) deployed in the associated Remote Network
-- Resource address must be resolvable/routable from the Connector
-- Port restrictions require all Connectors on Remote Network at **v1.20.0+**
-- Client visibility settings require minimum client versions (macOS 1.0.25+, Windows 1.0.23+, Linux 1.0.74+, iOS 1.0.25+, Android 1.0.22+)
+- Resource must be resolvable and routable **from the Connector**, not the end-user device
+- Port restrictions require all Connectors on the Remote Network at **v1.20.0+**
 
 ## Configuration Values
 
 | Field | Options/Notes |
 |-------|--------------|
-| Address | FQDN, wildcard FQDN, IP, CIDR (must use network address, e.g. `10.1.0.0/16` not `10.1.0.1/16`) |
-| Ports | TCP and/or UDP per port; ICMP toggle; default = all |
-| Visibility | `Standard Address`, `Browser Address`, `Background Address` |
-| Tags | Optional metadata key/value |
-| Alias | Extra address; resolved by Connector only |
+| Address | FQDN, wildcard FQDN, IP, CIDR |
+| Invalid CIDR example | `10.1.0.1/16` returns `Invalid IP or FQDN` |
+| Port protocols | TCP, UDP (configurable separately), ICMP (toggle) |
+| Default ports | All TCP + UDP + ICMP |
+| Client visibility | `Standard Address`, `Browser Address`, `Background Address` |
 
-## Overlapping Address Specificity (most → least)
-1. Single IP > CIDR (smaller range > larger range)
-2. Exact FQDN > wildcard FQDN
-3. Wildcard with more non-wildcard characters > broader wildcard
-4. Truly ambiguous = arbitrary selection
+## Address Resolution Best Practices
+For DNS resolving to private IPs (ordered by best practice):
+1. **Private DNS** — configure in private DNS, never exposed publicly
+2. **FQDN Resource** — Connector handles resolution
+3. **Private IP Resource** — direct routing, no DNS flexibility
+4. **CIDR Block** — broad coverage, less access control granularity
+
+## Overlapping Address Resolution (Specificity Rules)
+- Single IP > CIDR (smaller CIDR > larger CIDR)
+- Exact domain > wildcard domain
+- Wildcard with more non-wildcard characters wins
+- Truly ambiguous resources are chosen arbitrarily
+
+## Client Visibility Requirements (minimum versions)
+- macOS 1.0.25, Windows 1.0.23, iOS 1.0.25, Android 1.0.22, Linux 1.0.74
 
 ## Gotchas
-- Invalid CIDR notation (host bits set, e.g. `10.1.0.1/16`) returns `Invalid IP or FQDN` error
-- DNS rebinding protection: define DNS addresses resolving to private IPs as DNS Resources, not IP Resources
-- Unqualified DNS names (e.g. `host`) require additional Connector configuration
-- Overlapping Resources should be avoided; specificity rules determine routing when overlap exists
-- Port restrictions unavailable if any Connector in Remote Network is below v1.20.0
-- CGNAT range `100.96.0.0/12` cannot be used as Resource addresses
-
-## Address Definition Best Practices (ordered)
-1. Private DNS resolution (configure in private DNS)
-2. FQDN-based Resource
-3. Private IP-based Resource
-4. CIDR block Resource (least granular)
+- **DNS rebinding protection**: public DNS names resolving to private IPs should be defined as FQDN Resources, not IP Resources
+- **Invalid CIDR**: host bits set in CIDR notation (e.g., `10.1.0.1/16`) causes an error
+- **CGNAT range** `100.96.0.0/12` is always blocked — cannot create resources in this range
+- Port restrictions apply to **all Connectors** in the Remote Network; mixed versions disable the feature
+- Overlapping resources are discouraged; ambiguous matches are non-deterministic
+- Unqualified DNS names (e.g., `host`) require additional Connector configuration and latest client
 
 ## Related Docs
 - How DNS Works with Twingate
 - Resource Aliases
-- Port Restrictions
 - Whitelisting Traffic to Public Resources
 - IP Overlap Guide
 - Hiding Resources in the Client
 - Upgrading Connectors
+- Port Restrictions

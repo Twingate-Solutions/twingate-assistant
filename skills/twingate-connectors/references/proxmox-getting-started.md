@@ -4,52 +4,61 @@
 Getting Started with Proxmox VE and Twingate
 
 ## Summary
-Deploys a Twingate Connector on Proxmox VE using a community helper script that creates an LXC container. Requires pre-generated Access and Refresh tokens from the Twingate Admin Console before running the script.
+Deploys a Twingate Connector inside a Proxmox VE LXC container using the community helper script. Enables secure remote access to private resources hosted on Proxmox VE without exposing them publicly.
 
 ## Key Information
-- Connector is deployed as an LXC container via the Proxmox VE Helper Scripts community repository
-- Each Connector requires its own unique token pair (do not reuse tokens)
-- Script runs on the Proxmox VE head node
+- Connector runs as an LXC container on the Proxmox VE head node
+- Uses the open-source [Proxmox VE Community Helper Scripts](https://github.com/community-scripts/ProxmoxVE)
+- Each Connector requires its own unique Access/Refresh token pair (never reuse tokens)
+- Verify success by checking Controller and Relay statuses show **connected** in Admin Console
 
 ## Prerequisites
 - Running Proxmox VE instance
 - Twingate account with Admin Console access
 - SSH or web UI access to Proxmox VE server
-- Remote Network already created in Twingate Admin Console
+- An existing Remote Network in Twingate Admin Console
 
 ## Step-by-Step
 
-1. **Generate tokens**: Admin Console → Remote Networks → select network → add/select Connector → Manual → Generate Tokens → copy Access Token and Refresh Token
-2. **Run helper script** on Proxmox head node:
+1. **Generate Connector Tokens**
+   - Admin Console → Remote Networks → select network → add/select Connector
+   - Choose **Manual** deployment option
+   - Click **Generate Tokens** (Step 2 of connector setup)
+   - Copy Access Token and Refresh Token
+
+2. **Deploy via Helper Script** (run on Proxmox VE head node):
    ```bash
    bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/twingate-connector.sh)"
    ```
-3. **Enter when prompted**:
-   - Network: `<network>.twingate.com`
-   - Access Token
-   - Refresh Token
-4. **Verify**: Admin Console → Remote Networks → select network → select Connector → confirm Controller and Relay show `connected`
+   When prompted, enter:
+   - **Network**: your Twingate network hostname (e.g., `network.twingate.com`)
+   - **Access Token**: from step 1
+   - **Refresh Token**: from step 1
+
+3. **Verify Installation**
+   - Admin Console → Remote Networks → select network → select Connector
+   - Confirm **Controller** and **Relay** both show `connected`
 
 ## Configuration Values
 
 | Prompt | Value |
 |--------|-------|
-| Network | `<yournetwork>.twingate.com` |
-| Access Token | From Admin Console token generation |
-| Refresh Token | From Admin Console token generation |
+| Network | `<tenant>.twingate.com` |
+| Access Token | Generated from Admin Console |
+| Refresh Token | Generated from Admin Console |
 
 ## Gotchas
-- **Never reuse token sets** — each Connector must have its own unique Access/Refresh token pair
-- Tokens must be copied immediately after generation (not retrievable later)
-- Script must be run on the head node, not a VM or container
+- **Never reuse token sets** — each Connector must have its own unique Access + Refresh token pair
+- Token entry errors are the most common failure; double-check copy/paste accuracy
+- Verify the Twingate Connector LXC container is running if connectivity issues occur
 
 ## Troubleshooting
-- Token errors: re-verify tokens were entered correctly
-- Connectivity issues: confirm Proxmox web interface is locally accessible and the Twingate LXC container is running
-- See Twingate troubleshooting docs for persistent issues
+- Token errors → re-generate and re-enter tokens
+- Connectivity issues → confirm Proxmox VE web interface is locally accessible and LXC container is running
+- See [Twingate troubleshooting docs](https://www.twingate.com/docs/troubleshooting) for persistent issues
 
 ## Related Docs
-- [Setting Up Resources](https://www.twingate.com/docs) — configure access to private apps/services
-- Home Assistant Setup Guide
-- Unraid Helper Script Guide
+- [Setting Up Resources](https://www.twingate.com/docs/resources) — configure access to private services post-install
+- [Home Assistant Setup Guide](https://www.twingate.com/docs/home-assistant)
+- [Unraid Helper Script Guide](https://www.twingate.com/docs/unraid)
 - [Twingate Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)

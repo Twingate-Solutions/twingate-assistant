@@ -1,41 +1,56 @@
 # Understanding Relays
 
 ## Summary
-Relays facilitate connection establishment between Twingate Clients and Connectors for Resource access. They act as intermediaries in the end-to-end encrypted TLS tunnel but never terminate or store traffic. Twingate operates a global network of Relay clusters for low latency and redundancy.
+Relays facilitate secure connection establishment between Twingate Clients and Connectors for resource access. They act as intermediaries in the end-to-end encrypted TLS tunnel without terminating connections or storing traffic data. Twingate operates a global network of Relay clusters across Google Cloud and DigitalOcean infrastructure.
 
 ## Key Information
-- Relays are used **after** Controller authorization to establish the Client ↔ Connector data connection
-- Connection is end-to-end encrypted via certificate-pinned TLS tunnel
-- Relays may route the encrypted tunnel when direct Client-Connector connection isn't possible
-- Each Connector connects to the **nearest available Relay** to minimize latency
-- Each Relay location runs a **cluster** of multiple Relays for redundancy
-- Failover is automatic: same-cluster first, then nearest alternate cluster
-
-## Data Privacy
-- Relays are **transit-only** — no traffic storage, no network-identifiable information retained
-- Traffic is already encrypted before reaching the Relay
+- Relays serve two functions: connection establishment facilitation and optional traffic routing between Clients and Connectors
+- All traffic through Relays is already encrypted (end-to-end TLS with certificate pinning); Relays cannot decrypt it
+- Connectors connect to the geographically nearest available Relay automatically
+- Each Relay location runs a cluster for redundancy; failover occurs within location first, then to nearest cluster
+- Relays do **not** store traffic or network-identifiable information
 - No connections are terminated at the Relay
 
 ## Relay Cluster Locations
 
-| Provider | Regions |
-|----------|---------|
-| **Google Cloud** | Iowa, Los Angeles, Ohio, Oregon, South Carolina, Toronto, Virginia, São Paulo, Eemshaven, Finland, Frankfurt, London, Zurich, Tel Aviv, Johannesburg, Mumbai, Singapore, Tokyo, Sydney |
-| **DigitalOcean** | Atlanta, New York City, San Francisco, Toronto, Amsterdam, Frankfurt, London, Bengaluru, Singapore, Sydney |
+### Google Cloud
+| Region | Locations |
+|--------|-----------|
+| North America | Iowa, Los Angeles, Ohio, Oregon, South Carolina, Toronto, Virginia |
+| South America | São Paulo |
+| Europe | Eemshaven, Finland, Frankfurt, London, Zurich |
+| Middle East | Tel Aviv |
+| Africa | Johannesburg |
+| Asia | Mumbai, Singapore, Tokyo |
+| Australia | Sydney |
 
-## Gotchas
-- Relays are Twingate-managed infrastructure — no self-hosting or configuration required
-- Connector-to-Relay connectivity must be allowed outbound; check firewall rules if Connectors fail to connect
-- Geographic Relay selection is automatic; no manual Relay assignment is available
-- If an entire cluster fails, the next nearest cluster is used automatically — expect minor latency increase during failover
+### DigitalOcean
+| Region | Locations |
+|--------|-----------|
+| North America | Atlanta, New York City, San Francisco, Toronto |
+| Europe | Amsterdam, Frankfurt, London |
+| Asia | Bengaluru, Singapore |
+| Australia | Sydney |
 
 ## Architecture Flow
-1. Client requests Resource access → Controller authorizes
-2. Client and Connector establish encrypted tunnel **facilitated by** the nearest Relay
-3. If direct connection unavailable, encrypted traffic is **routed through** the Relay
-4. Connector forwards traffic to the Resource
+1. Client requests access to a Resource
+2. Controller authorizes the Client
+3. Client establishes connection to Connector via a Relay
+4. Relay facilitates (and if necessary routes) the encrypted tunnel
+5. Connector forwards traffic to the Resource
+
+## Gotchas
+- Relay selection is automatic; there is no manual Relay selection for Connectors
+- Traffic *may* route through Relays—direct Client-to-Connector connections are attempted first when possible
+- Relay infrastructure is Twingate-managed; customers cannot self-host Relays
+
+## Configuration Values
+None — Relay selection and failover are fully automatic with no user-configurable parameters.
+
+## Prerequisites
+- A deployed Connector connected to the Twingate network (Connector handles Relay association automatically)
 
 ## Related Docs
-- Twingate Connectors
-- Twingate Controller
-- Network/firewall requirements for Connectors
+- Twingate Connectors documentation
+- Twingate Controller documentation
+- Network architecture / firewall requirements (for outbound Relay connectivity from Connectors)

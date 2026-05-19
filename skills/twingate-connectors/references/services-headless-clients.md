@@ -1,20 +1,21 @@
 # Headless Clients
 
 ## Summary
-Twingate clients (Windows and Linux) can operate in headless mode using a Service Key to access Service Resources without a GUI. This enables automated and server-side use cases such as CI/CD pipelines and container deployments.
+Twingate clients (Windows and Linux) can operate in headless mode using a Service Key to access Service Resources without user interaction. This enables automated and non-interactive environments to authenticate with Twingate.
 
 ## Key Information
 - Headless mode uses **Service Keys** (not user credentials) for authentication
 - Both **Windows** and **Linux** clients support headless mode
-- Linux client also supports **userspace networking mode** (alternative to kernel networking)
-- Designed for automated/non-interactive environments
+- Linux supports an additional **userspace networking mode**
+- Designed for automated/non-interactive workloads (CI/CD, containers, etc.)
 
 ## Prerequisites
 - A configured Twingate Service with an associated Service Key
 - Windows or Linux Twingate client installed
-- Access to Service Key credentials
+- Access to Service Resources configured in Twingate admin
 
 ## Platform-Specific Instructions
+
 | Platform | Mode | Reference |
 |----------|------|-----------|
 | Linux | Headless | Linux headless mode instructions |
@@ -22,13 +23,13 @@ Twingate clients (Windows and Linux) can operate in headless mode using a Servic
 | Linux | Userspace networking | Linux userspace networking instructions |
 
 ## Example Use Cases
-- **CI/CD pipelines** — automated build/deploy systems accessing private Resources
-- **AWS ECS** — containerized workloads using Service Keys for Resource access
+- **CI/CD pipelines** — run client headlessly in pipeline steps to access private resources
+- **AWS ECS** — run client as sidecar or task to enable container access to Twingate Resources
 
 ## Gotchas
-- Service Keys are required; standard user auth tokens do not apply in this context
-- Userspace networking mode is Linux-only — use when kernel-level networking is unavailable (e.g., unprivileged containers)
-- No GUI is presented; all configuration is done via CLI flags or config files
+- Service Keys are distinct from user credentials — ensure the Service is granted access to the required Resources in the admin console before deploying
+- Userspace networking mode (Linux only) — relevant when the client cannot use kernel-level networking (e.g., unprivileged containers)
+- No mention of macOS headless support — appears limited to Windows and Linux
 
 ## Related Docs
 - Linux headless mode instructions
