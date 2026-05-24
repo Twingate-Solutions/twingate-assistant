@@ -1,45 +1,54 @@
 # Active Directory Configuration with Twingate
 
 ## Summary
-Configures Twingate to support Active Directory services (SMB/CIFS, LDAP, domain joins) by exposing domain controllers and service discovery endpoints as Twingate Resources. Requires adding specific DNS names and IPs as Resources so clients can authenticate against AD infrastructure.
+Configure Twingate to expose Active Directory services (LDAP, SMB/CIFS, Kerberos) by adding domain controllers and service discovery records as Resources. Clients need access to domain controller IPs/hostnames and SRV records to authenticate via AD over Twingate.
 
 ## Key Information
-- All AD-dependent clients must have access to domain controller Resources
-- Four Resource types are required for full AD functionality
+- Must add multiple Resource types: AD domain, individual DCs, and wildcard service discovery
 - Resources should be assigned to the "Everyone" group (or all Windows users group)
-- For domain joins over Twingate, also configure **Windows Start Before Logon**
+- NetBIOS name resolution does **not** work over Twingate — use IP or DNS names for file sharing
+- Domain joins require additional **Windows Start Before Logon** configuration
 
 ## Prerequisites
-- Active AD domain (e.g., `yourcompany.com`)
-- Admin access to Twingate console
-- Ability to run `nslookup` to identify domain controller hostnames/IPs
+- Twingate admin access to create Resources and Groups
+- AD domain name (e.g., `yourcompany.com`)
+- `nslookup` access to query SRV records
+- If domain joining: Windows Start Before Logon configured separately
 
-## Step-by-Step Configuration
+## Step-by-Step
 
-1. **Discover domain controllers** — run nslookup to find DC hostnames:
+1. **Discover domain controller hostnames** — run nslookup against SRV records:
    - Linux/Mac: `nslookup -type=any _ldap._tcp.dc._msdcs.yourcompany.com`
    - Windows: `nslookup -type=all _ldap._tcp.dc._msdcs.yourcompany.com`
 
-2. **Add four Resources** in Twingate admin console:
+2. **Add Resources in Twingate Admin Console**:
 
-| Label | Resource Address | Purpose |
-|-------|-----------------|---------|
-| AD Domain | `yourcompany.com` | AD domain |
-| Domain Controller 1 | `zr5cdi61eltc73z.yourcompany.com` | DC hostname from nslookup |
-| Domain Controller 2 | `a1ks10fndwoyhax.yourcompany.com` | Additional DC |
-| Domain Service Discovery | `*_tcp*.yourcompany.com` | SRV record discovery |
+| Label | Address | Purpose |
+|---|---|---|
+| AD Domain | `yourcompany.com` | Base AD domain |
+| Domain Controller N | `<hostname>.yourcompany.com` | One entry per DC returned by nslookup |
+| Domain Service Discovery | `*_tcp*.yourcompany.com` | SRV-based service discovery |
 
-3. **Assign all Resources** to the "Everyone" group or equivalent Windows users group.
+3. **Assign all Resources** to the "Everyone" group or equivalent Windows users group
 
-4. **Verify** Resources appear in client Resource lists.
+4. **Verify** Resources appear in client Resource lists
 
-5. **Optionally restrict ports** per [Microsoft's AD firewall guidance](https://support.microsoft.com/en-us/topic/how-to-configure-a-firewall-for-active-directory-domains-and-trusts-7e1db5dc-0cbf-5a06-b13a-4cfea5a9badb).
+5. **Optionally restrict ports** per [Microsoft's firewall guidance for AD](https://support.microsoft.com/en-us/topic/how-to-configure-a-firewall-for-active-directory-domains-and-trusts-7c7a8bcd-abb5-b6b9-0e73-75c4db0a0cba)
+
+## Configuration Values
+
+| Resource Address Pattern | Purpose |
+|---|---|
+| `yourcompany.com` | AD domain root |
+| `*_tcp*.yourcompany.com` | Service discovery wildcard |
+| `*.yourcompany.com` | Debug/catch-all (troubleshooting only) |
 
 ## Gotchas
-- **NetBIOS name resolution** does not work over Twingate (requires LAN broadcast). Use IP or DNS names for file sharing instead.
-- **Azure Container Connectors**: Must manually set Custom DNS Server to a DC IP during deployment. Azure Containers don't inherit correct DNS settings automatically. Linux VM Connectors do not have this issue.
-- **Debugging**: Add `*.yourcompany.com` as a wildcard Resource temporarily; uncaptured AD traffic will appear in Resource Activity logs in Admin Console.
-- Number of domain controllers varies by domain — repeat nslookup step to find all DCs.
+
+- **Azure Container Connectors**: Must manually set Custom DNS Server to a DC IP during deployment — Azure Containers don't inherit correct DNS automatically. Linux VM Connectors handle DNS correctly without extra config.
+- **NetBIOS**: Requires LAN broadcast; not supported over Twingate. Use IP or FQDN instead.
+- **Multiple DCs**: Add each DC hostname returned by nslookup as a separate Resource.
+- **Wildcard `*.yourcompany.com`**: Use only for debugging (check Resource Activity in Admin Console); too broad for production.
 
 ## Related Docs
 - Windows Start Before Logon (required for domain joins)

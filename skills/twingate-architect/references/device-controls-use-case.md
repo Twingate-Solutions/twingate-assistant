@@ -4,42 +4,38 @@
 Device Security Controls Use Case
 
 ## Summary
-Twingate provides granular device-based access controls that screen devices against permitted characteristics (OS type, screen lock, MDM/EDR status) before granting access to private resources. Policies are enforced at the edge on client devices, supporting integrations with major MDM and EDR providers.
+Twingate provides granular device-level access controls that screen users and devices against permitted characteristics (OS type, screen lock, MDM/EDR status, etc.). Policies are enforced at the edge on client devices rather than centrally, reducing latency and user friction compared to VPN-based approaches.
 
 ## Key Information
-- Access policies evaluate device posture characteristics: OS type, screen lock status, MDM enrollment, EDR presence
+- Access policies support device attributes: OS type, screen lock status, MDM enrollment, EDR status
 - Split tunneling enabled by default (unlike traditional VPNs)
-- Policy enforcement happens on client devices (edge), not in the cloud
-- Supports programmatic configuration via Public API
+- Policy enforcement happens on client devices (edge), not cloud
+- Web-based admin console available; programmatic configuration via Public API
+- Principle of least privilege supported with per-resource device requirements
 
-## Integrations Supported
+## Supported Integrations
 **Identity Providers:** Okta, JumpCloud, Entra ID, OneLogin, Google
 
-**MDM Providers:** Intune, Jamf, Kandji
+**MDM Providers:** Intune, Jamf, Iru
 
 **EDR Solutions:** CrowdStrike, SentinelOne
 
 **Other:** 1Password XAM
 
-## Configuration Guides (Linked)
-- Device Security Guide (main reference)
+## Configuration Resources (Linked Guides)
+- Device Security Guide (primary setup reference)
 - List of Device Security Posture Checks
 - Automate Trusting Devices (Python CLI)
 - Automate Trusting Devices (JavaScript CLI)
-- Delegate Device Trust to CrowdStrike
-- Delegate Device Trust to SentinelOne
-- Delegate Device Trust to Intune
-- Delegate Device Trust to Jamf
-- Delegate Device Trust to Kandji
-- Delegate Device Trust to 1Password XAM
+- Delegate Device Trust to: CrowdStrike, SentinelOne, Intune, Jamf, Iru, 1Password XAM
 
 ## Gotchas
-- This page is an overview only — actual configuration requires following provider-specific delegation guides
-- Device trust delegation to third-party MDM/EDR replaces manual device approval workflows
+- Device trust delegation to third-party MDM/EDR requires separate per-integration configuration
+- No inline configuration values on this page — refer to linked guides for specific parameters
+- This is an overview/use-case page; implementation details are in linked documentation
 
 ## Related Docs
-- Device Security Guide
-- Device Security Posture Checks list
-- Resources, Networks, and Policies (admin console)
-- Public API documentation
-- Identity Provider integration docs
+- Identity Provider integrations (Okta, JumpCloud, Entra ID, OneLogin, Google)
+- Resources, Networks, and Policies administration
+- Twingate Public API
+- VPN comparison context (split tunneling behavior)

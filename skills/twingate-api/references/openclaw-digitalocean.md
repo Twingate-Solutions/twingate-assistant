@@ -1,90 +1,73 @@
 # Setup and Secure OpenClaw on DigitalOcean
 
 ## Summary
-Deploy OpenClaw (AI-powered WhatsApp/Telegram assistant) on DigitalOcean using the Marketplace app, then secure access using Twingate Zero Trust. The result is a private gateway with no exposed ports—all access routed through Twingate Connector. Estimated time: 20-30 minutes.
+Deploy OpenClaw (AI-powered WhatsApp/Telegram assistant) on a DigitalOcean Droplet using the Marketplace image, then secure it with Twingate Zero Trust access. The result is a privately-accessible AI gateway with no public ports exposed—all access routed through Twingate Connector.
 
 ## Key Information
-- OpenClaw runs as Node.js app on `localhost:18789`
-- Caddy acts as reverse proxy, restricted to private IP only
-- Twingate Connector installed on same Droplet—creates outbound-only connections
-- No inbound firewall rules needed (not even SSH) once Twingate is configured
+- OpenClaw Gateway runs on `localhost:18789` (Node.js)
+- Caddy reverse proxy restricts access to private IP only
+- Twingate Connector installed on same Droplet handles all remote access
+- No inbound firewall rules needed; Connector uses outbound-only connections
 - Gateway token stored at `/opt/openclaw.env`
+- Total setup time: 20–30 minutes
 
 ## Prerequisites
 - DigitalOcean account with SSH key added
-- Twingate account
-- (Optional) Terraform for automated deployment
+- Twingate account (free tier works)
+- SSH access to Droplet during setup
+- Optional: Terraform for automated deployment
 
 ## Step-by-Step
 
-### 1. Create Droplet (2 min)
-- Use [OpenClaw Marketplace page](https://marketplace.digitalocean.com/apps/openclaw)
-- Size: `s-2vcpu-4gb` minimum; Region: closest to team
-- Note the **private IP address**
+**1. Deploy Droplet** — Create from [DigitalOcean Marketplace](https://marketplace.digitalocean.com/) using OpenClaw image; recommended size: `s-2vcpu-4gb` or larger, Ubuntu 22.04 LTS.
 
-### 2. Configure OpenClaw (2 min)
+**2. Configure Caddy** — SSH in, restrict Caddyfile to private IP only:
 ```bash
-# SSH in
-ssh root@<droplet-private-ip>
-
-# Restrict Caddy to private IP only
 PRIVATE_IP=$(hostname -I | awk '{print $2}')
 sudo tee /etc/caddy/Caddyfile > /dev/null <<EOF
 ${PRIVATE_IP} {
   reverse_proxy localhost:18789
-  header X-DO-MARKETPLACE "openclaw"
 }
 EOF
 sudo systemctl restart caddy
-
-# Get Gateway token
-cat /opt/openclaw.env
 ```
 
-### 3. Deploy Twingate Connector (15 min)
+**3. Get Gateway Token** — `cat /opt/openclaw.env`
+
+**4. Install Twingate Connector** — Generate tokens in Twingate Admin Console, then:
 ```bash
-export TWINGATE_ACCESS_TOKEN="your-access-token"
-export TWINGATE_REFRESH_TOKEN="your-refresh-token"
-export TWINGATE_NETWORK="yourcompany"  # Without .twingate.com
-
 curl "https://binaries.twingate.com/connector/setup.sh" | \
-  sudo TWINGATE_ACCESS_TOKEN="$TWINGATE_ACCESS_TOKEN" \
-  TWINGATE_REFRESH_TOKEN="$TWINGATE_REFRESH_TOKEN" \
-  TWINGATE_NETWORK="$TWINGATE_NETWORK" \
-  TWINGATE_LABEL_DEPLOYED_BY="openclaw" \
-  bash
+sudo TWINGATE_ACCESS_TOKEN="$TOKEN" \
+TWINGATE_REFRESH_TOKEN="$REFRESH" \
+TWINGATE_NETWORK="yourcompany" \
+bash
 ```
 
-**Create Twingate Resource:** Address = `<droplet-private-ip>`, assign to group with access.
+**5. Add Twingate Resource** — In Admin Console: Resources → Add Resource → set Address to `<droplet-private-ip>`, assign to group.
 
-**Access URL:** `https://<droplet-private-ip>/?token=<gateway-token>`
+**6. Lock Down Firewall** — In DigitalOcean: Networking → Firewalls → zero inbound rules, all outbound allowed (TCP/UDP/ICMP).
 
-### 4. Lock Down VPC (5 min)
-- DigitalOcean Console → Networking → Firewalls → Create
-- **Inbound rules:** None (leave empty)
-- **Outbound rules:** Allow all TCP/UDP/ICMP
+**7. Access Gateway** — With Twingate Client connected: `https://<droplet-private-ip>/?token=<gateway-token>`
 
 ## Configuration Values
 
-| Parameter | Value |
-|-----------|-------|
-| App port | `18789` |
-| Gateway token location | `/opt/openclaw.env` |
-| Caddy config | `/etc/caddy/Caddyfile` |
-| Droplet size (min) | `s-2vcpu-4gb` |
-| Marketplace image slug | `openclaw` |
+| Variable | Description |
+|---|---|
+| `TWINGATE_ACCESS_TOKEN` | Connector access token from Admin Console |
+| `TWINGATE_REFRESH_TOKEN` | Connector refresh token from Admin Console |
+| `TWINGATE_NETWORK` | Twingate network name (without `.twingate.com`) |
+| `TWINGATE_LABEL_DEPLOYED_BY` | Set to `openclaw` for labeling |
+| Gateway port | `18789` |
+| Terraform repo | `github.com/Twingate-Community/secure-openclaw` |
 
 ## Gotchas
-- Must configure Caddy to bind to **private IP only** before locking firewall—otherwise you lose access
-- Twingate Resource must be assigned to the **same Remote Network** where Connector is installed
-- SSH after firewall lockdown requires Twingate Client connected; use `ssh root@<private-ip>` not public IP
-- First SSH login prompts for AI provider API key; can skip with Ctrl-C
+- Caddy defaults to public IP; must explicitly reconfigure to private IP only
+- Resource must be assigned to the Remote Network where the Connector is installed (easy to miss with multiple networks)
+- After firewall lockdown, SSH only works via Twingate Client + private IP—public SSH will timeout by design
+- Gateway prompts for AI provider API key on first SSH login; can skip with CTRL-C
+- Terraform does **not** auto-create the Twingate Resource—must be added manually post-deploy
 
-## Terraform Automation
-```bash
-git clone https://github.com/Twingate-Community/secure-openclaw.git
-cd secure-openclaw/terraform/digitalocean
-cp terraform.tfvars.example terraform.tfvars
-terraform init && terraform apply
-```
-Required vars: `do_token`, `twingate_access_token`, `t
+## Related Docs
+- [OpenClaw Documentation](https://openclaw.ai/docs)
+- [Twingate Connector Setup](https://www.twingate.com/docs/connectors)
+- [Terraform Reference Repo](https://github.com/Twingate-Community/secure-openclaw)

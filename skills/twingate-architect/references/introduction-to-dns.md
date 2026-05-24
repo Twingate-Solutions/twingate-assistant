@@ -4,47 +4,34 @@
 Introduction to DNS
 
 ## Summary
-Conceptual overview of DNS mechanics for Twingate users. Covers how DNS translates human-readable names to IP addresses through a hierarchical resolution system. Provides foundational knowledge needed to understand how Twingate intercepts and handles DNS queries.
+Conceptual overview of DNS fundamentals including resolution hierarchy, record types, zonefiles, and caching. Explains how DNS translates human-readable names to IP addresses and introduces how Twingate integrates its own DNS resolver. Foundational reading before implementing Twingate DNS configuration.
 
 ## Key Information
-- **DNS resolution hierarchy**: Root Servers → TLD Servers → Domain-Level Nameservers
-- **Zonefiles**: Text files containing DNS records for a domain, stored on DNS servers
-- **DNS record types**:
-  - `A` — hostname to IPv4
-  - `AAAA` — hostname to IPv6
-  - `CNAME` — alias to another record
-  - `MX` — mail server with priority
-  - `PTR` — IP to hostname (Reverse DNS)
-  - `SOA` — zone authority/metadata
-  - `SRV` — service location
-  - `TXT` — arbitrary data (SPF, verification)
-- **Resolvers**: OS maintains ordered list; queries fall through sequentially until resolved
-- **Twingate inserts its resolver first** (`100.95.0.25[1-4]`) when client is active
-- **DNS caching**: Controlled by SOA expiry value and per-record TTL values
-- **`/etc/hosts`** always takes precedence over DNS; supports only A-record equivalents
-
-## Prerequisites
-- None — purely conceptual/reference content
+- DNS resolution hierarchy: Root Servers → TLD Servers → Domain Level Nameservers
+- **DNS Record Types:**
+  - `A` – hostname to IPv4
+  - `AAAA` – hostname to IPv6
+  - `CNAME` – alias to another record
+  - `MX` – mail server with priority
+  - `PTR` – IP to hostname (Reverse DNS)
+  - `SOA` – zone authority/metadata
+  - `SRV` – service location
+  - `TXT` – arbitrary data (SPF, verification)
+- Twingate inserts its own resolver (`100.95.0.25[1-4]`) at the top of the OS resolver list when client is active
+- `/etc/hosts` (Unix) / `C:\Windows\System32\drivers\etc\hosts` (Windows) takes precedence over DNS; supports only A-record equivalents
+- DNS caching controlled by SOA expiry and per-record TTL values
 
 ## Configuration Values
-| Item | Value/Path |
-|------|-----------|
-| Twingate DNS resolver IPs | `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254` |
-| Unix hosts file | `/etc/hosts` |
-| Windows hosts file | `C:\Windows\System32\drivers\etc\hosts` |
-| Unix resolver config | `/etc/resolv.conf` |
-| Check resolvers (macOS) | `scutil --dns` |
-| View DNS cache (Windows) | `ipconfig /displaydns` |
-| Reverse DNS suffix | `<reversed-octets>.in-addr.arpa` |
-| Default TTL field in zonefile | `$TTL <seconds>` |
+- **Twingate DNS resolver IPs:** `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254` (interface: `utun7`)
+- **Zonefile TTL field:** `$TTL 3600` (seconds; default expiry for all records)
+- **SOA record format:** `( serial refresh retry expire minimum-ttl )`
 
 ## Gotchas
-- `/etc/hosts` only supports A-record equivalents — cannot substitute full DNS
-- First four lines of `/etc/hosts` are auto-generated at boot; don't modify them
-- DNS cache propagation delay = up to the SOA expiry value (can be 24hrs+)
-- Lower TTLs before DNS migrations to reduce propagation lag
-- Unix DNS caching is per-application (e.g., browser cache); Windows caches centrally
-- Private DNS records are not publicly resolvable — requires VPN/Twingate to reach
+- `/etc/hosts` only supports A-record equivalents — cannot replace full DNS functionality
+- DNS propagation delay equals the SOA expiry time (up to 24hrs if set that way); reduce TTL before planned IP changes
+- On Unix/Linux, DNS caching is per-application (e.g., browser cache); on Windows it's OS-level (`ipconfig /displaydns`)
+- First four lines of `/etc/hosts` are auto-generated at boot — do not modify unless intentional
+- Reverse DNS requires PTR records in zonefile; uses reversed octets + `.in-addr.arpa` suffix
 
 ## Related Docs
-- [How DNS Works with Twingate](https://www.twingate.com/docs/how-dns-works-with-twingate)
+- [How DNS Works with Twingate](https://www.twingate.com/docs/how-dns-works-with-twingate) — required follow-up for implementation details

@@ -1,45 +1,42 @@
 # Connector Shutdown Process
 
 ## Summary
-When a Connector shuts down (intentionally or unintentionally), connected Clients automatically failover to other available Connectors. The process involves Relay timeout detection (~20 seconds) before the Client moves to the next Connector-Relay pair in its ordered list.
+When a Connector shuts down, connected Clients attempt to reconnect by iterating through an ordered list of Connector-Relay pairs provided by the Controller. The failover process takes approximately 20 seconds per failed pair before moving to the next option.
 
 ## Key Information
-- Each Connector maintains connections to **4 Relays**
-- Connectors report connected Relays to the Controller via **regular heartbeat**
-- Controller sends each Client an **ordered list of Connector-Relay pairs** on connection
+- Each Connector maintains connections to **4 Relays** simultaneously
+- Connectors report their connected Relays to the Controller via **regular heartbeat**
+- Controller provides each Client an **ordered list of Connector-Relay pairs** at connect time
 - The list is **randomly generated but seeded by unique device ID** — consistent per device, may differ between devices
-- List iterates over all Connectors to ensure failover coverage
+- List iterates over all Connectors to minimize downtime (e.g., alternates A→B→A→B across pairs)
 
-## Failover Process (Step-by-Step)
+## Failover Sequence (2-Connector Example)
 
-Assumes 2 Connectors (A and B) in a Remote Network:
-
-1. Connector A goes down → connections to all Clients terminate
-2. Client attempts to reconnect to first Connector-Relay pair in its list
-3. Relay waits for Connector A to connect — **~20 second timeout**
+1. Connector A goes down → active Client connections terminate
+2. Client attempts reconnection to first Connector-Relay pair in its list
+3. Relay waits ~**20 seconds** for Connector A to establish connection
 4. Relay notifies Client that connection to first pair failed
-5. Client moves to second Connector-Relay pair (Connector B)
+5. Client moves to **second pair** in list (Connector B)
 6. Client successfully connects through Connector B
 
 ## Configuration Values
 | Parameter | Value |
 |-----------|-------|
-| Relay timeout waiting for downed Connector | ~20 seconds |
+| Relay wait timeout per pair | ~20 seconds |
 | Relays per Connector | 4 |
 
 ## Gotchas
-- **~20 second downtime window** is expected during failover — plan accordingly
-- Failover only works if **multiple Connectors** exist in the Remote Network; single-Connector setups have no fallback
-- The ordered list is **device-specific** — different clients may fail over in different sequences
-- Unintentional shutdowns (crashes) follow the same process as intentional ones (upgrades)
+- **~20 second failover delay per failed pair** — with only 1 Connector, downtime equals the full relay timeout before failure is confirmed
+- Clients receive the pair list **at connection time** — if the list becomes stale, behavior may not reflect current Connector state until reconnect
+- Shutdown can be **intentional** (upgrade) or **unintentional** (crash) — both follow the same failover path with no differentiation in client behavior
 
-## Availability Planning Recommendations
-- Deploy **minimum 2 Connectors** per Remote Network to enable automatic failover
-- Expect up to ~20 seconds of connectivity interruption per failover event
-- Active sessions will drop and must reconnect — applications may need to handle reconnection
+## Availability Planning Implications
+- **Minimum 2 Connectors per Remote Network** recommended to reduce failover time impact
+- Single-Connector setups will experience the full ~20s timeout before a definitive failure response
+- Device-specific ordering means different Clients may fail over to different Connectors, distributing load
 
 ## Related Docs
-- Connector deployment/configuration
-- Remote Networks setup
+- Connector deployment and configuration
+- Remote Network setup
 - Relay architecture
 - High availability planning

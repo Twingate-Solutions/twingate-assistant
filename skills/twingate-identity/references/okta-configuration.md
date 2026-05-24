@@ -1,49 +1,40 @@
-# Okta Configuration – Twingate
+# Okta Configuration
+
+## Page Title
+Okta Configuration (Twingate + Okta Integration)
 
 ## Summary
-Twingate integrates with Okta to synchronize user accounts and delegate authentication via OpenID Connect (OIDC) and SCIM. Only users assigned to the Okta Twingate application can access Twingate resources. Configuration requires two phases: setup in Okta Admin console, then validation in Twingate Admin console.
+Twingate integrates with Okta to delegate user authentication via OIDC and synchronize users/groups via SCIM. Only users assigned to the Okta Twingate application can access Twingate resources. Requires Business or Enterprise plan.
 
 ## Key Information
-- **Authentication**: SP-Initiated SSO via OIDC
-- **User/Group sync**: SCIM protocol
-- **Plan requirement**: Business and Enterprise only
-- Users not assigned to the Okta Twingate app cannot use Twingate
-- SCIM sync requires the **Okta Lifecycle Management module**
-- Without Lifecycle Management: users only appear in Twingate Admin panel after first login via Twingate Client; manual group assignment required
+- **Authentication**: SP-Initiated SSO via OpenID Connect (OIDC)
+- **Sync Protocol**: SCIM for user and group synchronization
+- **Plan Requirement**: Business and Enterprise only
+- **Two-step setup**: Configure in Okta Admin console first, then complete in Twingate Admin console
+- **Okta Lifecycle Management Module** required for direct SCIM sync; without it, users only appear in Twingate Admin panel after first login
 
 ## Prerequisites
 - Twingate Business or Enterprise plan
 - Okta admin access
-- Okta Lifecycle Management module (required for automatic SCIM user/group sync)
+- Okta Lifecycle Management Module (for SCIM user/group sync)
 
 ## Step-by-Step
-
-1. **Create Twingate app in Okta Admin console**
-   - Add the Twingate application from the Okta integration catalog
-   - Configure the app (OIDC credentials, sign-in policies)
-
-2. **Configure SCIM synchronization in Okta** (requires Lifecycle Management module)
-   - Set up SCIM provisioning within the Okta Twingate app
-
-3. **Complete integration in Twingate Admin console**
-   - Enter OIDC credentials from the Okta Twingate app
-   - Set up an Authentication Policy using those credentials
-   - Validate the connection
+1. Create and configure the Twingate application in the **Okta Admin console**
+2. Configure SCIM synchronization separately in Okta
+3. Complete and validate integration in the **Twingate Admin console**
+4. Set up an Authentication Policy using credentials from the Okta Twingate application
 
 ## Configuration Values
-| Component | Protocol | Notes |
-|-----------|----------|-------|
-| Authentication | OIDC | SP-Initiated only |
-| User/Group sync | SCIM | Requires Lifecycle Management module |
-| Policy type | Authentication Policy | Configured in Twingate Admin console |
+- **SSO Type**: SP-Initiated (Service Provider Initiated)
+- **Protocol**: OpenID Connect (OIDC)
+- **Sync Protocol**: SCIM
 
 ## Gotchas
-- **No Lifecycle Management module**: Users are invisible in Twingate Admin until they complete their first login through the Twingate Client; groups must be managed manually
-- Only **SP-Initiated SSO** is supported (IdP-Initiated not supported)
-- Okta sign-in policies applied to the Twingate app govern all Twingate client authentication behavior
-- User assignment to the Okta app is a hard gate—unassigned users get no access
+- **Without Lifecycle Management Module**: Users are invisible in Twingate Admin panel until they log into the Twingate Client and authenticate against Okta — manual group assignment required afterward
+- SCIM sync must be configured as a **separate step** after OIDC setup; it is not automatic
+- Authentication policies for Twingate client users are controlled through the Okta Twingate application
 
 ## Related Docs
-- [Twingate Okta Application setup](https://www.twingate.com/docs/okta-configuration)
-- [SCIM synchronization configuration](https://www.twingate.com/docs/okta-configuration)
-- [Twingate pricing page](https://www.twingate.com/pricing)
+- Twingate Okta Application setup guide (linked inline)
+- SCIM synchronization configuration guide (linked inline)
+- Twingate pricing page (plan eligibility)

@@ -1,61 +1,58 @@
 # Device Security Guide
 
 ## Summary
-Twingate device security lets admins define trusted device criteria using Minimum OS Requirements (native posture checks) and Trusted Profiles (MDM/EDR integrations + posture checks). These requirements attach to Security Policies controlling both sign-in access and per-Resource access.
+Twingate device security lets admins define trusted device standards via Minimum OS Requirements and Trusted Profiles, then enforce those standards at sign-in or per-Resource through Security Policies. Devices meeting requirements receive access "wristbands" checked at authentication and resource access points.
 
 ## Key Information
-- Two categories: **Minimum OS Requirements** (basic posture checks per platform) and **Trusted Profiles** (advanced verification via MDM/EDR integrations)
-- Default state: all platforms allowed, no posture checks enforced
-- Device requirements apply at **sign-in level** and/or **per-Resource Policy**
-- A device can satisfy multiple profiles simultaneously ("wristband" model)
-- Sign-in allows any device meeting *any* requirement; Resource access enforces specific policy rules
+- **Two security categories**: Minimum OS Requirements (basic posture checks) and Trusted Profiles (advanced verification + Trust Methods)
+- **Enforcement levels**: Sign-in level and per-Resource Policy level
+- **Default state**: All platforms allowed, no posture checks enabled
+- **Policy options per Resource**: Any Device, Only Trusted Devices, or Custom
 
 ## Device Posture Checks by Platform
 
 | Platform | Available Checks |
 |----------|-----------------|
 | Windows | HD Encryption, Screen Lock, Firewall, Antivirus, Min OS Version |
-| macOS | Screen Lock, Biometric, Firewall*, HD Encryption*, Min OS Version (*standalone app only) |
+| macOS | Screen Lock, Biometric Config, Firewall*, HD Encryption*, Min OS Version |
 | Linux | HD Encryption, Firewall |
-| iOS | Screen Lock, Biometric, Min OS Version |
-| Android | HD Encryption, Screen Lock, Biometric |
+| iOS | Screen Lock, Biometric Config, Min OS Version |
+| Android | HD Encryption, Screen Lock, Biometric Config |
+
+*macOS standalone app only
 
 ## Supported Trust Methods (Trusted Profiles)
 - Manual Trust
 - CrowdStrike
 - Intune
 - Jamf
-- Kandji
+- Iru
 - SentinelOne
 - 1Password
 
-## Resource Policy Device Options
-- **Any Device** – passes if device meets any Minimum OS Requirement or Trusted Profile
-- **Only Trusted Devices** – requires Trusted Profile match only
-- **Custom** – specify exact set of requirement profiles required
+## Common Configuration Scenarios
 
-## Common Configuration Patterns
+| Goal | Device Security Config | Policy Config |
+|------|----------------------|---------------|
+| Allow only macOS/iOS | Block Android/Windows/Linux in Min OS Requirements | Policy allowing macOS/iOS profiles |
+| Employees trusted, contractors not | Min OS Requirements for contractors; Manual Trust Trusted Profiles for employees | Separate Resource policies per group |
+| Block Android except test devices | Block Android in Min OS Requirements; Manual Trust Trusted Profile for test devices | Add Android Trusted Profile as allowed |
+| MDM/EDR-only macOS | Block macOS in Min OS Requirements; configure MDM/EDR integration; create Trusted Profile | Add macOS Trusted Profile to Resource policies |
 
-| Goal | Approach |
-|------|----------|
-| Block specific OS | Set Minimum OS Requirement for that platform to "blocked" |
-| Employees trusted, contractors not | Trusted Profile (Manual Trust) for employees; Minimum OS Requirements for contractors |
-| Allow only MDM-managed macOS | Block macOS in Min OS Requirements; create Trusted Profile requiring MDM integration |
-| Exempt specific Android test devices | Block Android in Min OS Requirements; create Android Trusted Profile with Manual Trust for test devices |
-
-## Prerequisites
-- Twingate desktop or mobile client installed on target devices
-- MDM/EDR integration configured before creating Trusted Profiles requiring it
-- Security Policies configured and assigned to Resources
+## Step-by-Step: Restricting Platform Access
+1. Navigate to Device Security settings
+2. Set Minimum OS Requirements — block unwanted platforms, configure posture checks for allowed platforms
+3. Create Trusted Profiles for platforms requiring advanced verification (select Trust Method)
+4. Assign Trusted Profiles to specific devices if using Manual Trust
+5. Configure Resource Security Policies: choose Any Device / Only Trusted Devices / Custom
 
 ## Gotchas
-- macOS Firewall and HD Encryption posture checks **only available in the standalone app**, not the browser extension
-- Blocking a platform in Minimum OS Requirements does not block it from a Trusted Profile—you must handle both independently (e.g., Android block scenario requires both a block rule and a separate Trusted Profile for exceptions)
-- Sign-in still requires minimum authentication requirements to be met in addition to device security
-- Posture checks are collected natively by the Twingate client—see separate posture collection documentation for details
+- Blocking a platform in Min OS Requirements does NOT block devices in a Trusted Profile for that platform — Trusted Profile overrides
+- Firewall and HD Encryption on macOS **only available in standalone app**, not the browser extension
+- Sign-in requires meeting **both** device security requirements AND minimum authentication requirements
+- Devices failing requirements are blocked entirely (sign-in or resource access)
 
 ## Related Docs
 - Security Policies
-- MDM/EDR Integration setup (CrowdStrike, Intune, Jamf, Kandji, SentinelOne, 1Password)
-- Device posture data collection details
-- macOS standalone app documentation
+- Device Posture Data Collection
+- MDM/EDR Integration Setup (CrowdStrike, Intune, Jamf, SentinelOne, 1Password)

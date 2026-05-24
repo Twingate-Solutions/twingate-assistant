@@ -4,20 +4,21 @@
 Introduction to the Twingate Python CLI
 
 ## Summary
-An open-source Python CLI tool wrapping Twingate's GraphQL APIs to automate administrative functions. Supports CRUD operations on Resources, Devices, Groups, Connectors, Users, Service Accounts, and Remote Networks. Maintained outside Twingate's core engineering team via GitHub.
+An open-source Python CLI tool that wraps Twingate's GraphQL APIs to automate administrative functions available in the Admin Panel. It supports CRUD operations on Resources, Groups, Connectors, Devices, Users, Service Accounts, and Remote Networks. Maintained outside Twingate's product engineering team; support via GitHub Issues.
 
 ## Key Information
-- Open source project; support via GitHub Issues only
-- Wraps Twingate GraphQL API
-- Session-based authentication (stores API key + tenant per named session)
-- Output formats: `JSON` (default), `CSV`, `DF` (dataframe/table)
+- Open-source project on GitHub (not officially product-supported)
+- Wraps Twingate GraphQL APIs
+- Session-based authentication; sessions persist across commands
+- Supports output formats: JSON (default), CSV, DF (dataframes/table)
 - Use `-h` at any level for contextual help
 
 ## Prerequisites
 - Python 3
-- `pandas` library installed
+- `pandas` library
 - Twingate API Key
 - Twingate tenant name
+- Clone the CLI repository from GitHub
 
 ## Step-by-Step
 
@@ -25,7 +26,7 @@ An open-source Python CLI tool wrapping Twingate's GraphQL APIs to automate admi
 ```bash
 git clone <repo>
 cd <repo>
-python3 ./tgcli.py auth list  # should return ['']
+python3 ./tgcli.py auth list  # Should return ['']
 ```
 
 **Authenticate (create session):**
@@ -34,33 +35,33 @@ python3 ./tgcli.py auth login -t <tenant> -a <apikey> [-s <session_name>]
 # Returns auto-generated session name (e.g., OrangeElk) if -s omitted
 ```
 
-**Run commands with session:**
+**Run Commands:**
 ```bash
-python3 ./tgcli.py -s OrangeElk resource list
+python3 ./tgcli.py -s <session_name> [-f CSV|DF] <object> <operation>
+# Example:
 python3 ./tgcli.py -s OrangeElk -f CSV resource list
-python3 ./tgcli.py -s OrangeElk -f DF resource list
 ```
 
-## Configuration Values / CLI Flags
+## Configuration Values
 
 | Flag | Description |
 |------|-------------|
-| `-s SESSIONNAME` | Session name (required for most commands) |
+| `-s SESSIONNAME` | Session name (global or per-auth) |
 | `-f OUTPUTFORMAT` | Output format: `JSON`, `CSV`, `DF` |
-| `-a APIKEY` | API key (used with `auth login`) |
-| `-t TENANT` | Tenant name (used with `auth login`) |
+| `-a APIKEY` | API key for login |
+| `-t TENANT` | Twingate tenant name for login |
 | `-v` | Show version |
 | `-h` | Contextual help at any command level |
 
 **Supported object types:** `auth`, `device`, `connector`, `user`, `group`, `resource`, `network`, `account`
 
 ## Gotchas
-- Commands fail with `error: no session name passed` if `-s` flag is omitted after login
-- Missing `pandas` library causes errors on first run — install manually if needed
+- Commands fail with `no session name passed` if `-s` is omitted after login — must pass session name on every non-auth command
+- Missing `pandas` library causes errors on first run; install manually if needed
+- Session name is auto-generated (random words) unless specified with `-s` during `auth login`
 - Pull latest from GitHub periodically; features are actively added
-- Session name is auto-generated (random words) unless `-s` is specified at login
 
 ## Related Docs
-- [Twingate GraphQL APIs](https://www.twingate.com/docs/graphql)
+- [Twingate GraphQL APIs](https://www.twingate.com/docs/graphql-api)
 - GitHub repository (linked from docs page)
-- GitHub Issues page (for CLI-specific support)
+- GitHub Issues (for support)

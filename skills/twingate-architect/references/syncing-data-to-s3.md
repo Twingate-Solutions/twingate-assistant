@@ -1,41 +1,48 @@
 # Syncing Data to AWS S3
 
-## Page Title
-Syncing Data to AWS S3 (Twingate → S3)
-
 ## Summary
-Twingate can sync audit logs, network events, DNS filtering logs, and DLP events to an AWS S3 bucket in JSON format every 5 minutes. Supports two auth methods: OIDC IAM Role (recommended) or static IAM User credentials. Available on Business and Enterprise plans only.
+Twingate (Business/Enterprise) can sync audit logs, network events, DNS filtering logs, and DLP events to an AWS S3 bucket in JSON format every 5 minutes. Two authentication methods are supported: OIDC IAM Role (recommended) or static IAM User credentials. Configuration is available via the Admin Console or Terraform.
 
 ## Key Information
-- Files written every ~5 minutes; filename format: `2025-07-25T18:20:00+00:00.json`
-- Event types: `network_access`, `dns_filtering`, `audit_log`, `data_loss_prevention`
-- Initial sync delay up to 10 minutes after configuration
-- No file written if no events occurred in the interval
-- Configurable via Admin Console UI or Terraform
+- **Sync frequency**: Every 5 minutes; up to 10 minutes delay for new events
+- **File format**: JSON; filename format: `2025-07-25T18:20:00+00:00.json`
+- **Event types**: `network_access`, `dns_filtering`, `audit_log`, `data_loss_prevention`
+- **No events = no file**: Twingate skips writing if nothing to sync
+- **Plan requirement**: Business & Enterprise only
 
 ## Prerequisites
-- Business or Enterprise Twingate plan
-- AWS S3 bucket
-- IAM permissions to create roles/policies/users in AWS
+- AWS S3 bucket created
+- IAM permissions configured (see below)
+- Twingate Admin Console access
+
+## Authentication Options
+
+### Option 1: OIDC IAM Role (Recommended)
+- Uses short-lived, auto-rotated credentials
+- Requires OIDC Identity Provider setup in AWS
+
+### Option 2: IAM User Credentials
+- Static long-lived access keys
+- Simpler setup; requires manual key rotation
 
 ## Step-by-Step
 
-### Option 1: OIDC (Recommended)
-1. Admin Console → Settings → Reports → Sync to S3 Bucket → OIDC Role → copy IAM Identity Provider URL
-2. AWS IAM → Identity Providers → Add Provider → OpenID Connect
-   - Provider URL: copied URL from step 1
+### OIDC Setup
+1. Admin Console → **Settings → Reports → Sync to S3 Bucket → OIDC Role** → copy IAM Identity Provider URL
+2. AWS IAM → Identity Providers → Add provider → OpenID Connect
+   - Provider URL: copied from Twingate
    - Audience: `<your-network-slug>` (e.g., `acme`)
-3. Create IAM Policy granting `s3:PutObject` on bucket ARN
-4. Create IAM Role → Web Identity → select OIDC provider
-   - Condition: `<network>.twingate.com/oidc:sub` = `events_sync`
-   - Attach policy from step 3
+3. Create IAM Policy granting `s3:PutObject` on bucket
+4. Create IAM Role:
+   - Trusted entity: Web identity
+   - Condition key: `<network>.twingate.com/oidc:sub` = `events_sync`
 5. Admin Console → enter bucket name + IAM Role ARN
 
-### Option 2: IAM User Credentials
-1. AWS IAM → Create User
-2. Create policy granting `s3:PutObject` → attach to user
-3. Create Access Key + Secret Access Key for user
-4. Admin Console → enter bucket name, Access Key, Secret Key
+### IAM User Setup
+1. Create IAM User in AWS
+2. Create policy granting `s3:PutObject`
+3. Generate Access Key + Secret Access Key
+4. Admin Console → enter bucket name, Access Key, Secret
 
 ## Configuration Values
 
@@ -46,22 +53,30 @@ Twingate can sync audit logs, network events, DNS filtering logs, and DLP events
 | Access Key | — | Required |
 | Secret Access Key | — | Required |
 
-**Required IAM policy (both methods):**
+### Required IAM Policy (minimum)
 ```json
 {"Action": "s3:PutObject", "Resource": "arn:aws:s3:::<bucket>/*"}
 ```
-**SSE-KMS additional permissions:** `kms:GenerateDataKey*`, `kms:Decrypt`
+
+### SSE-KMS Additional Permissions
+```
+kms:GenerateDataKey*
+kms:Decrypt
+```
+
+### Terraform Versions Tested
+- Terraform: `v1.12.2`
+- AWS Provider: `~> 6.0.0`
 
 ## Gotchas
-- **Do NOT include `arn:aws:s3:::` prefix** when entering bucket name in Admin Console
-- **Opt-in AWS regions** (Jakarta, Hong Kong, Bahrain) require STS V2 tokens — change in IAM Console → Account Settings → STS Global Endpoint → V2
-- Static IAM credentials require manual rotation; not recommended for production
-- OIDC `sub` condition value must be exactly `events_sync`
-- Terraform tested with: Terraform `v1.12.2`, AWS Provider `~> 6.0.0`
+- **Opt-in AWS regions** (Jakarta, Hong Kong, Bahrain): Require STS V2 tokens. Fix: IAM Console → Account Settings → STS Global endpoint → change to V2
+- **Bucket name entry**: Do NOT include `arn:aws:s3:::` prefix in Admin Console
+- **OIDC condition**: `sub` must be set to `events_sync` exactly
+- **Admin user permissions**: Must include `iam:CreateRole`, `iam:CreateOpenIDConnectProvider`, `iam:CreateUser`, `iam:CreateAccessKey`, `s3:PutObject`, etc.
 
 ## Related Docs
-- Network Events Schema
-- DNS Filtering Logs Schema
-- Audit Logs Schema
-- Twingate Terraform Examples
-- AWS S3 User Guide
+- [Network Events Schema](https://www.twingate.com/docs/network-events-schema)
+- [DNS Filtering Logs Schema](https://www.twingate.com/docs/dns-filtering-logs-schema)
+- [Audit Logs Schema](https://www.twingate.com/docs/audit-logs-schema)
+- [Terraform Examples](https://www.twingate.com/docs/terraform)
+- Twingate Pricing Page

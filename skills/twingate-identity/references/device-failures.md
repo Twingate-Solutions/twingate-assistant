@@ -4,61 +4,56 @@
 Device Failures: How to Troubleshoot User Device Issues
 
 ## Summary
-Covers troubleshooting Twingate Client failures caused by service/daemon issues, missing virtual network adapters, and software conflicts. Applies when the Client UI is stuck, the adapter is missing, or the Resource list is empty despite connection.
-
-## Key Information
-- Client UI is a front-end only; actual work runs as a background service
-- Twingate creates a virtual network interface per OS to handle traffic
-- Software conflicts (VPNs, AV/EDR, network optimizers) are a very common failure cause
-- Empty Resource list while connected typically indicates a DNS issue (not covered here)
+Covers diagnosing and resolving Twingate Client failures caused by service/daemon issues, missing virtual network adapters, or conflicts with third-party software. Applies to Windows, macOS, and Linux. DNS issues are out of scope here (handled separately).
 
 ## Common Symptoms
 - Client UI stuck on "Disconnected" with unresponsive connect button
-- Windows logs show `TapAdapterExistence` errors or "Twingate adapter is missing"
-- Connected but Resource list is empty
+- Client fails to start; Windows logs show `TapAdapterExistence` errors or "Twingate adapter is missing"
+- Client connected but Resource list is empty
 
-## Step-by-Step Troubleshooting
+## Diagnostic Steps
 
 ### 1. Check Background Service
-| OS | Command/Action |
-|----|---------------|
+| Platform | Command/Method |
+|----------|---------------|
 | Windows | `services.msc` → find "Twingate Service" → verify Running + Automatic startup |
 | macOS | `log show --process Twingate --last 1h` |
 | Linux | `sudo journalctl -u twingate --since "1 hour ago"` |
 
 ### 2. Verify Virtual Network Adapter
-| OS | Command | Expected |
-|----|---------|----------|
+| Platform | Command | Expected |
+|----------|---------|----------|
 | Windows | `ipconfig \| findstr "Twingate"` | "Twingate TAP-Windows Adapter" present |
 | macOS | `scutil --nc list` | Twingate network extension listed |
 | Linux | `ip a` | Interface `sdwan0` present |
 
-**Fix:** If adapter missing → reinstall the Twingate Client
+**Fix:** If adapter is missing → reinstall Twingate Client.
 
 ### 3. Check for Software Conflicts
-- Temporarily **uninstall** (not just disable) suspected conflicting software
-- Restart machine, then test Twingate
-- If resolved, reinstall other software and add exceptions for Twingate processes and `*.twingate.com`
+Common conflict sources:
+- **Other VPNs/ZTNA clients** – routing table contention
+- **Antivirus/EDR/Firewall** – deep packet inspection blocking operations
+- **OEM network optimizers** – traffic shaping interference
+
+**Testing conflicts:** Fully *uninstall* (not just disable) suspected software, restart machine, retest. Drivers can remain active in network stack even when software is "disabled."
+
+**Resolution if conflict confirmed:** Reinstall other software and add exceptions for Twingate processes and `*.twingate.com`.
 
 ### 4. Collect Client Logs
-- UI path: **More → Troubleshoot → View Logs**
+**Via UI:** `More > Troubleshoot > View Logs`
 
-| OS | Log Location |
-|----|-------------|
-| Windows | `%LOCALAPPDATA%\Twingate\logs` (`Twingate.log` + `Twingate.Service.log`) |
+| Platform | Log Location |
+|----------|-------------|
+| Windows | `%LOCALAPPDATA%\Twingate\logs` |
+| Windows key files | `Twingate.log` (UI), `Twingate.Service.log` (service) |
 | macOS | `~/Library/Group Containers/6GX8KVTR9H.com.twingate.com/Logs/private/var/log/twingate/` |
 
-## Conflict Sources to Investigate
-- Other VPN or ZTNA clients (routing table conflicts)
-- Antivirus/EDR/Firewall with deep packet inspection
-- OEM-preinstalled network optimization/traffic shaping software
-
 ## Gotchas
-- Disabling security software is insufficient—drivers may remain active in the network stack; full uninstall required for conflict testing
-- Windows Event Viewer (Application Log) needed if service fails to start entirely
-- Empty Resource list = likely DNS issue, not a Client/adapter failure
+- Client UI is frontend only; actual connectivity is handled by background service — UI appearing healthy doesn't mean the service is healthy
+- Disabling security software is insufficient for conflict testing; kernel-level drivers remain active
+- Connected + empty Resource list is a different symptom than disconnected — check DNS docs
+- If client is connected but a specific Resource is unreachable by name → DNS issue, not a device failure
 
 ## Related Docs
-- DNS troubleshooting (implied for empty Resource list scenarios)
-- Client logs reference
-- Twingate Client installation/reinstallation
+- DNS troubleshooting (for Resource-name resolution failures)
+- Client Logs reference

@@ -1,41 +1,48 @@
-# Application Gating (IP-Based Access) - Twingate
+# Application Gating (IP-Based Access)
 
 ## Summary
-Twingate enables IP address-based access control for SaaS applications and private services by routing traffic through Connectors with known IP addresses. This allows organizations to whitelist specific IPs at the service level while applying additional security controls like MFA and device checks. Traffic uses split tunneling, so only relevant traffic routes through the Connector.
+Twingate enables IP address-based access control for SaaS apps and private services by routing traffic through Connectors with static or company-specific IP addresses. Only traffic bound for restricted resources is tunneled, preserving general network performance via split-tunnel architecture.
 
 ## Key Information
-- Route traffic to IP-restricted resources through Twingate Connectors with static/known IPs
-- Apply security controls (MFA, device policy) to SaaS apps that don't natively support them
-- Split tunnel architecture: only restricted-resource traffic routes through Connector
-- Audit logs available for compliance/export
-- Connector options: Twingate-managed (static IPs) or self-hosted in private infrastructure
-
-## Use Cases
-- Third-party SaaS apps that restrict access by IP allowlist
-- Securing staging servers via IP whitelisting
-- Lightweight CASB deployment
+- Routes only relevant traffic through Connectors (split-tunnel), avoiding VPN gateway bottlenecks
+- Connectors can use Twingate-managed static IPs or customer-deployed IPs in private infrastructure
+- Supports layered security controls (MFA, device posture) on top of SaaS apps that lack native support
+- Audit logs available for export/download for compliance purposes
+- Client supports multiple platforms with no end-user technical knowledge required
 
 ## Prerequisites
-- Twingate Connector deployed (cloud-managed or self-hosted)
-- Admin access to Twingate web console
-- Target service must support IP-based access restrictions
+- Twingate account with admin access
+- Connector deployed (cloud-managed or self-hosted in private infrastructure)
+- Target SaaS app or service must support IP allowlisting
 
-## Integration Guides Available
+## Common Use Cases
+- Third-party services restricting access by IP address
+- Securing staging servers
+- Lightweight CASB deployment
+
+## Configuration Approach
+1. Deploy a Connector (Twingate-managed or self-hosted)
+2. Obtain the static egress IP of the Connector
+3. Whitelist that IP in the target SaaS app or service
+4. Create a Twingate Resource pointing to the SaaS app domain/IP
+5. Assign the Resource to appropriate Groups/Users
+
+## Supported Integrations (Documented Guides)
 - Google Workspace
 - JumpCloud
-- Microsoft Entra ID (two guides: general + Office 365)
+- Microsoft Entra ID (including Office 365)
 - Okta
 - OneLogin
-- AWS Exit Nodes with app-native IP filtering
-- AWS CloudFront
+- AWS Exit Nodes / CloudFront
 
 ## Gotchas
-- Self-hosted Connectors use your infrastructure's IP addresses; Twingate-managed Connectors use Twingate-assigned static IPs — choose based on which IPs you whitelist at the target service
-- Split tunneling means general internet traffic is unaffected, but confirm the target service sees Connector egress IP, not the user's local IP
+- Twingate-managed Connector IPs are static but Twingate-controlled; use self-hosted Connectors if company-owned IPs are required for whitelisting
+- Traffic to non-Twingate resources is NOT tunneled — ensure the SaaS resource is explicitly defined in Twingate
+- Review "Best Practices for Whitelisting Traffic to Public Resources" before configuring to avoid split-tunnel misconfigurations
 
 ## Related Docs
-- Getting Started with SaaS App Gating
+- [Getting Started with SaaS App Gating](https://www.twingate.com/docs)
 - Best Practices for Whitelisting Traffic to Public Resources
 - Best Practices for SaaS App Gating
-- Connector deployment documentation
-- Audit logs documentation
+- Deploy Connectors
+- Audit Logs

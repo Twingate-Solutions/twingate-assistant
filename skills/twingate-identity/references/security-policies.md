@@ -1,53 +1,56 @@
 # Security Policies
 
 ## Summary
-Twingate Security Policies control access to network resources through layered authentication, device, and location requirements. Policies are managed in the Admin Console under the **Policies** tab and can be applied at the network level, resource level, or per-group basis.
+Twingate Security Policies control access to network resources through authentication, device, and location requirements. Policies are configured in the Admin Console under the Policies tab and applied at the resource level with optional per-group overrides.
 
 ## Key Information
-- **Four policy types**: Minimum Authentication Requirements, Resource Policies, Application Control Policies, Admin Console Security Policy
-- **Default Policy** automatically applies to all new Resources; additional Resource Policies can be created
-- Group-level policy overrides take precedence over Resource-level policies and persist even if the Resource Policy changes
-- Enterprise customers get Location Requirements (country-based access control)
+- **Three policy types**: Minimum Authentication Requirements, Resource Policies, Application Control Policies
+- **Fourth policy**: Admin Console Security Policy (Settings tab, separate from network policies)
+- Minimum Authentication Requirements apply to all users at login, before any resource access
+- One **Default Policy** always exists and applies to all new resources automatically
+- Resource Policies can be overridden per Group on the Resource page
+- Group-level overrides persist even if the Resource's base policy changes
+- Location Requirements (country-based) available for **Enterprise customers only**
 
-## Policy Types
-
-| Policy | Applied To | Location |
-|--------|-----------|----------|
-| Minimum Authentication Requirements | All users at network login | Policies tab |
-| Resource Policies | Resources at access time | Policies tab |
-| Application Control | Resources (browser restriction) | Policies tab |
-| Admin Console Security | Admins signing into Admin Console | Settings tab |
-
-## Configuration Options Per Policy
-- **Location Requirements**: Allowlist/blocklist countries (Enterprise only)
-- **Authentication Requirements**: MFA enforcement, re-authentication frequency
+## Policy Rule Types
+- **Location Requirements**: Allowlist/blocklist by country
+- **Authentication Requirements**: Auth frequency, MFA requirement (layers on top of Minimum Auth)
 - **Device Security**: All devices, Trusted Devices, or custom profile
 
 ## Policy Application Logic
-1. User must satisfy **Minimum Authentication Requirements** first
-2. Then satisfy the **Resource Policy** (or Group override) at access time
-3. Group-level override persists independently — resetting required to re-inherit Resource Policy
+1. User must pass **Minimum Authentication Requirements** first
+2. Device must meet minimum OS requirements or Trusted Profile
+3. At resource access time, **Resource Policy** is evaluated
+4. If Group has a policy override, that override applies instead of the resource's base policy
+5. Group overrides must be manually reset to re-inherit the resource policy
 
 ## Additional Access Controls
-- **Ephemeral Access**: Set expiration date on Resource or Group access → group auto-removed at expiry
-- **Usage-based Auto-lock**: Lock individual user access after inactivity period; configurable per Resource or Group
+- **Ephemeral Access**: Set expiration date at resource or group level; group is removed from resource at expiry
+- **Usage-based Auto-lock**: Lock individual user access after inactivity period; configured per resource or group
+
+## Configuration Location
+| Policy Type | Admin Console Location |
+|---|---|
+| Minimum Auth Requirements | Policies tab |
+| Resource Policies | Policies tab |
+| Application Control Policies | Policies tab |
+| Admin Console Security | Settings tab |
 
 ## Gotchas
-- Group policy overrides are "sticky" — changing the Resource Policy does NOT update overridden groups; must manually reset the override
-- Minimum Authentication Requirements apply at login, not at resource access; Admin Console logins bypass these (use Admin Console Security Policy instead)
-- Admins don't need Twingate client to access Admin Console, so network policies don't apply to them
-
-## Prerequisites
-- Admin Console access
-- Enterprise plan required for Location Requirements
+- Admins do **not** use Minimum Authentication Requirements when signing into the Admin Console (separate policy applies)
+- Group-level policy overrides are "sticky" — changing the resource's base policy does **not** update overridden groups
+- To remove a group override, explicitly reset it on the Resource page
+- Ephemeral and usage-based access are additive controls alongside policy selection, not part of the policy definition itself
 
 ## Recommendations
-- Keep Minimum Authentication Requirements **less strict** to reduce friction
-- Apply stricter controls at the **Resource Policy level**, especially for sensitive resources
+- Keep **Minimum Authentication Requirements** less strict to reduce user friction
+- Apply stricter controls via **Resource Policies** on sensitive resources
+- Use Group overrides for contractor/third-party access with elevated requirements
 
 ## Related Docs
-- [Device Security Guide](#)
-- [Browser Security / Application Control Policies](#)
-- [Admin Console Security](#)
-- [Ephemeral Access to Resources](#)
-- [Usage-based Auto-lock](#)
+- Device Security Guide
+- Browser Security (Application Control Policies)
+- Admin Console Security
+- Ephemeral Access to Resources
+- Usage-based Auto-lock
+- MFA configuration

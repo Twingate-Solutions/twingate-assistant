@@ -1,47 +1,52 @@
 # Installing Privileged Access for SSH
 
 ## Summary
-Deploy Twingate's SSH Gateway using Terraform provider templates for AWS, DigitalOcean, or GCE. Supports local SSH CA (for testing) or HashiCorp Vault SSH secrets engine (for production). Terraform configs include full configuration, startup scripts, and deployment instructions.
+Deploys Twingate's SSH privileged access by setting up a Gateway that acts as an SSH certificate authority. Uses Terraform provider for deployment across cloud providers. Supports both local CA (testing) and HashiCorp Vault (production) as certificate signers.
 
 ## Key Information
-- Recommended installation method: Twingate Terraform provider
-- Two CA modes: local SSH CA (dev/test) or HashiCorp Vault SSH secrets engine (production)
-- Local SSH CA: Gateway holds private key and signs certificates directly
-- Vault mode: Gateway delegates signing to Vault's SSH secrets engine
+- Terraform is the recommended (and primary documented) installation method
+- Gateway acts as SSH CA, signing certificates for client access
+- Two CA modes: local SSH CA (simple/testing) and HashiCorp Vault SSH secrets engine (production)
+- Cloud-specific Terraform examples include full configs, startup scripts, and deployment steps
 
 ## Prerequisites
 - Twingate account with administrator privileges
-- Existing Remote Network configured
-- Twingate Client at minimum required version
-- Terraform installed
+- Existing Remote Network configured in Twingate
+- Twingate Client at minimum required version for SSH support
+- Terraform installed locally
 
 ## Deployment Options
 
-### Local SSH CA (Quick Start)
+### Local SSH CA (Testing/Simple)
+Gateway holds CA private key and signs certificates directly.
+
 | Cloud | Guide |
 |-------|-------|
 | AWS | Local SSH CA on AWS |
 | DigitalOcean | Local SSH CA on DigitalOcean |
-| GCE (Google Compute Engine) | Local SSH CA on GCE |
+| Google Compute Engine | Local SSH CA on GCE |
 
-### Production (Vault as SSH CA)
-- Use HashiCorp Vault SSH secrets engine for certificate signing
+### Vault as SSH CA (Production)
+- Gateway integrates with HashiCorp Vault's SSH secrets engine
+- Vault signs certificates instead of local key on Gateway
 - See Vault integration guide for setup
 
-## Step-by-Step (High Level)
-1. Choose deployment target (AWS, DigitalOcean, or GCE)
-2. Follow cloud-specific Terraform guide from Twingate provider examples
-3. Apply Terraform config (includes Gateway setup + startup scripts)
-4. Verify SSH Resources are accessible through Gateway
-5. (Optional) Configure IDE integration for remote development
+## Step-by-Step (General Flow)
+1. Ensure prerequisites are met (admin account, Remote Network, compatible Client)
+2. Install Terraform
+3. Select appropriate cloud guide from Twingate Terraform provider examples
+4. Apply Terraform configuration (includes Gateway deployment + SSH resource setup)
+5. Run startup scripts as provided in cloud-specific guide
+6. Verify SSH Resources are accessible through Twingate Client
 
 ## Gotchas
-- Local SSH CA stores private key on the Gateway — **not suitable for production**
-- Must use Vault integration for production deployments to avoid key exposure on Gateway
-- Client version must meet minimum requirements (check docs before deploying)
+- Local SSH CA keeps private key on the Gateway — not suitable for production (key exposure risk if Gateway is compromised)
+- Must use Vault SSH secrets engine for production deployments
+- Twingate Client must meet **minimum version requirements** specific to SSH access — verify before deployment
+- Each cloud guide is self-contained; don't mix configurations across guides
 
 ## Related Docs
-- Twingate Terraform Provider (examples)
-- Vault SSH Integration Guide
-- Remote Development with Twingate SSH (VS Code, JetBrains Gateway, Cursor)
-- Twingate Client minimum version requirements
+- Twingate Terraform Provider (external, publishes runnable examples)
+- Vault Integration Guide (HashiCorp Vault SSH CA setup)
+- Remote Development with Twingate SSH (VS Code, JetBrains Gateway, Cursor IDE setup)
+- Minimum Client Version Requirements for SSH

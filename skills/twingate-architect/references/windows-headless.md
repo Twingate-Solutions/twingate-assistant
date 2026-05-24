@@ -1,27 +1,27 @@
 # Windows Headless Mode
 
 ## Summary
-Twingate's Windows client can run in headless mode using a Service Key, enabling automated/unattended deployments. The client is installed via command line with a `service_secret` parameter and managed through Windows Services.
+Twingate's Windows client can run in headless mode using a Service Key, enabling automated/unattended deployments. Installation is done via command line with the `service_secret` switch, and the client is controlled through Windows Services.
 
 ## Key Information
-- Requires a Service Account and Service Key (created in Twingate Admin Console)
+- Requires a Service Account and Service Key from Twingate Admin Console
 - Download installer from [public changelog](https://www.twingate.com/docs/changelog)
-- Client does **not** auto-start by default; configure startup behavior in Windows Services
-- Service Key is securely stored by the client after installation; original file can be removed
-- A valid Service Key is still required for updates/reinstalls
+- Service Key is securely stored after installation; original file can be removed
+- Client does **not** start automatically by default (modify Windows service settings to change)
+- Log output: `C:\ProgramData\Twingate\logs`
+- Optional config file: `C:\Program Files\Twingate\headless.conf`
 
 ## Prerequisites
-- Service account and Service Key configured in Twingate Admin Console
-- Administrator permissions for installation and key management
-- Windows Client EXE installer
+- Valid Service Key JSON file (from Admin Console → Services)
+- Administrator permissions for install and key management operations
 
-## Step-by-Step Installation
+## Step-by-Step: Installation
 
 ```bash
-# Silent headless install
+# Silent install (basic)
 TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json /qn
 
-# With debug logging
+# Silent install with debug logging
 TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json log_level=debug /qn
 ```
 
@@ -29,40 +29,40 @@ TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json log_leve
 
 | Parameter | Required | Default | Notes |
 |-----------|----------|---------|-------|
-| `service_secret` | Yes | — | Path to Service Key JSON file |
-| `log_level` | No | `info` | Set at install or in `headless.conf` |
+| `service_secret` | Yes | — | Path to Service Key JSON |
+| `log_level` | No | `info` | Available levels in `headless.conf` |
 | `/qn` | No | — | Silent install flag |
 
-**Config file path:** `C:\Program Files\Twingate\headless.conf`  
-**Log path:** `C:\ProgramData\Twingate\logs`
+## Key Rotation
 
-## Key Rotation & Upgrades
-
-**Update Service Key (option 1 — sc command):**
+**Option 1 — sc command (requires Admin):**
 ```bash
 sc stop twingate.service
-sc start twingate.service --config --service_secret C:\path\to\service\secret.json
+sc start twingate.service --config --service_secret C:\path\to\secret.json
 ```
 
-**Update Service Key (option 2 — reinstall):**
+**Option 2 — Re-run installer:**
 ```bash
 TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json
 ```
 
-**Delete stored Service Key:**
+**Delete stored key:**
 ```bash
 sc start twingate.service --config --reset
 ```
 
-**Upgrade client:** Re-run installer with `service_secret` pointing to valid key.
+**Upgrade client:**
+```bash
+TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json
+```
 
 ## Gotchas
-- Must **restart the service** after any key change for it to take effect
-- If originally installed **without** a Service Key, you cannot use `sc` to add one — must do a fresh installation
+- **Must restart service** for any key rotation changes to take effect
+- If originally installed **without** a Service Key, must do a full fresh install with `service_secret`; `sc` command alone won't work
 - Deleting the Service Key disconnects the client immediately; a new key is required to reconnect
-- Client won't auto-start after install; must configure Windows Service startup type manually
+- Auto-start is disabled by default; must manually configure Windows service startup type
 
 ## Related Docs
 - [Services / Service Keys](https://www.twingate.com/docs/services)
-- [Headless Mode Overview](https://www.twingate.com/docs/headless-mode)
 - [Public Changelog / Downloads](https://www.twingate.com/docs/changelog)
+- Linux/Mac Headless Mode documentation

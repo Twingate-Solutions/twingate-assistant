@@ -1,39 +1,41 @@
 # Protect Access to Elasticsearch and Kibana
 
 ## Summary
-Twingate secures Elasticsearch and Kibana by layering SSO and MFA from your identity provider without modifying the Elastic applications or requiring a paid Elastic security tier. Resources are added through the Twingate admin console, hiding servers from the public internet entirely.
+Twingate secures Elasticsearch and Kibana by adding SSO and MFA without modifying the applications or requiring paid Elastic security tiers. It hides Elastic servers from the public internet and centralizes user provisioning through your identity provider.
 
 ## Key Information
-- Elastic's authentication/SSO features require higher-tier paid plans; Twingate provides these capabilities at the network layer regardless of Elastic plan
-- MFA enforcement is handled by your existing identity provider via Twingate access policies
-- User provisioning/deprovisioning managed centrally through your identity provider—no separate Elastic user accounts needed
-- Elasticsearch/Kibana servers can be fully hidden from the public internet within a private network
+- Elasticsearch/Kibana lack built-in authentication by default; security features require higher-cost Elastic paid plans
+- Twingate adds SSO/MFA at the network access layer — no application-level changes required
+- Works with any Elastic deployment tier (no Elastic security subscription needed)
+- Servers are hidden within private network, not publicly accessible or discoverable
+- User provisioning/deprovisioning managed centrally via identity provider — no separate Elastic user accounts needed
 
 ## Prerequisites
 - Twingate account with admin console access
+- Elasticsearch/Kibana deployed on-premise or in private network
 - Identity provider configured with Twingate (for SSO/MFA enforcement)
-- Twingate Connector deployed in the same network as Elasticsearch/Kibana servers
+- Twingate Connector deployed in the same network as Elastic servers
 
 ## Step-by-Step
-1. Add Elasticsearch and/or Kibana servers as **Resources** in the Twingate admin console
-2. Configure access policies on those resources to enforce MFA via your identity provider
-3. Assign user groups to the resources
-4. Users access Elasticsearch/Kibana through the Twingate client—no direct internet exposure
+1. Deploy a Twingate Connector in the network hosting your Elasticsearch/Kibana servers
+2. Add Elasticsearch server(s) as Resources in the Twingate admin console
+3. Add Kibana server(s) as Resources in the Twingate admin console
+4. Configure access policies on those Resources to enforce MFA via your identity provider
+5. Assign user groups to the Resources
 
-*Full step-by-step instructions linked from the doc: [Add resources guide](https://www.twingate.com/docs/)*
+> Full resource setup instructions: See [Add Resources documentation](https://www.twingate.com/docs/adding-access-to-resources)
 
 ## Configuration Values
-- No Elastic-side configuration changes required
-- No specific environment variables or CLI flags documented on this page
-- Access policy settings configured in Twingate admin console UI
+- No specific env vars or CLI flags documented on this page
+- Resource configuration done via Twingate Admin Console UI
+- MFA enforcement set via Access Policy on each Resource
 
 ## Gotchas
-- No native authentication changes are made to Elasticsearch/Kibana—security is entirely at the network/access layer
-- Misconfiguring Elasticsearch security (if exposed directly) has historically caused massive data breaches; Twingate mitigates this by removing public exposure entirely
-- SSO/MFA only applies when users connect via Twingate client; ensure direct network paths to Elastic servers are blocked at the firewall level
+- Elastic's native security features (SSO, user auth) are **not** included in free/basic tiers — Twingate bypasses this requirement entirely
+- Misconfiguring Elastic security directly has historically caused major data exposures; Twingate approach avoids touching Elastic security config
+- Must remember to deprovision users at the identity provider level (Twingate reflects IdP state, but Elastic has no native deprovisioning hook)
 
 ## Related Docs
-- [Adding Resources](https://www.twingate.com/docs/resources) — step-by-step for adding servers as resources
-- Identity Provider / SSO configuration guides
-- Twingate Connector deployment documentation
-- Access Policy configuration
+- [Adding Resources](https://www.twingate.com/docs/adding-access-to-resources)
+- Twingate Identity Provider / SSO setup documentation
+- Twingate Access Policies documentation

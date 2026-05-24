@@ -4,46 +4,52 @@
 Twingate Homelab & Personal Use Cases
 
 ## Summary
-Twingate provides secure remote access to home networks and self-hosted services without requiring port forwarding or static IPs. A free Starter plan is available, with typical setup under 15 minutes via a single Connector deployment on a home device.
+Twingate provides secure remote access to home network services (Home Assistant, Plex, NAS, cameras) without port forwarding or static IPs. A free Starter plan is available, with typical setup under 15 minutes via a single Connector deployment on a home device.
 
 ## Key Information
 - No open inbound ports or port forwarding required
 - No static IP or dynamic DNS needed
-- Connector runs on Raspberry Pi, NAS devices, Linux/Windows servers
+- Free Starter plan available for personal use
+- Connector runs on Raspberry Pi, NAS devices, Linux servers, Windows machines
 - Connector deployment options: Docker container or systemd service (VM)
-- Granular per-resource access control (share specific resources with specific users)
-- Cross-platform client apps: desktop and mobile
+- Granular access control per resource (e.g., share photos but not cameras)
+- Cross-platform client apps (desktop + mobile)
 
 ## Prerequisites
-- Twingate account (free Starter plan available)
-- One device on home network to host the Connector (Raspberry Pi, NAS, Linux server, or Windows machine)
+- A Twingate account (free Starter plan available)
+- One always-on device on the home network to run the Connector (Raspberry Pi, NAS, Linux/Windows server)
 
 ## Step-by-Step (High Level)
-1. Create a Twingate account
+1. Create Twingate account
 2. Deploy a Connector on one home network device
-3. Configure network Resources in the Admin console
-4. Install Twingate client app on devices needing access
-5. Grant access to users with appropriate permissions
+3. Define network Resources in Twingate admin console
+4. Install Twingate client app on remote devices
+5. Connect and access home resources remotely
 
-## Supported Connector Platforms
-- Raspberry Pi
-- Firewalla
-- Proxmox (container)
+## Platform-Specific Guides
+- Firewalla box
+- Proxmox Container
 - QNAP NAS
-- Synology NAS (DSM 6.x and DSM 7.x — separate guides)
+- Synology NAS (DSM 6.x or earlier)
+- Synology NAS (DSM 7.x or later)
 - TrueNAS SCALE
+- Raspberry Pi (Home Assistant guide)
 
 ## Configuration Values
-- Deployment methods: Docker image, systemd service
+- Connector deployment methods: Docker image, systemd service
 - Developer tools available: Admin API, JavaScript CLI, Python CLI, Terraform provider, Pulumi provider
 
 ## Gotchas
-- Synology NAS has separate guides for DSM 6.x vs DSM 7.x — use the correct one
-- Check deployment recommendations if unsure which device to use as Connector host
+- Only one Connector needed per home network; no need to install on every home device
+- Connector must be on a device that stays powered on for persistent remote access
+- DSM version matters for Synology deployments (separate guides for 6.x vs 7.x)
 
 ## Related Docs
-- [Deployment recommendations](#)
-- [Admin API](#)
-- [Terraform integration](#)
-- [Pulumi integration](#)
-- Specific guides: Home Assistant on Raspberry Pi, Synology NAS, Plex Media Server, Proxmox, QNAP, TrueNAS SCALE, Firewalla
+- Connector deployment recommendations
+- Admin API documentation
+- Terraform / Pulumi integration docs
+- JavaScript and Python CLI configuration tools
+- Home Assistant on Raspberry Pi setup guide
+- Synology NAS setup guide
+- Plex Media Server setup guide
+- Homelab protection guide

@@ -1,42 +1,38 @@
-# Windows Client Application - OSS Third Party Notices
+# Twingate Windows Client Application - OSS Third Party Notices
 
 ## Page Title
-Twingate Windows Client Application – Open Source Component Licenses
+Windows Client Application - Open Source Component Licenses
 
 ## Summary
-This page lists all third-party open source components bundled in the Twingate Windows client application, along with their respective license texts. It serves as the legal third-party notice disclosure required by the included licenses. No implementation guidance is provided.
+This page lists all third-party open source components bundled in the Twingate Windows client application. It serves as the legal attribution/notice document required by the respective licenses of each included library.
 
 ## Key Information
 
-- **Total components**: 19 third-party libraries used in the Windows client
-- **License types used**:
-  - Apache 2.0: `libssl`
-  - BSD 3-Clause: `libevent`, `lwip`, `nlog`
-  - CC0 1.0 Universal: `siphash`
-  - MIT: `libjansson`, `jwt-cpp`, `args`, `ModernWpf`, `MVVMLight`, `Newtonsoft JSON.NET`, `Sentry`, `pubnub`, `quicly`
-  - Boost Software License 1.0: `catch2`
-  - zlib License: `zlib`, `nanopb`
-  - Code Project Open License: `wpf-notifyicon`
-  - Microsoft Public License: `CommonServiceLocator`
-  - MIT-variant: `fmt`
+**Components included in Windows client:**
+- **Networking/Protocol:** libevent, lwip, libssl (OpenSSL), quicly, nanopb
+- **UI/WPF:** ModernWpf, MVVMLight, wpf-notifyicon
+- **Data/Serialization:** libjansson, Newtonsoft JSON.NET, fmt, nanopb, protobuf (nanopb)
+- **Auth:** jwt-cpp
+- **Logging/Monitoring:** nlog, Sentry
+- **Messaging:** pubnub
+- **Utilities:** args, siphash, zlib, catch2 (testing), CommonServiceLocator
 
-## Component Inventory
+## License Breakdown
 
-| Component | License | Primary Use |
-|-----------|---------|-------------|
-| libssl | Apache 2.0 | TLS/cryptography |
-| libevent | BSD 3-Clause | Event notification |
-| lwip | BSD 3-Clause | Lightweight TCP/IP |
-| nlog | BSD 3-Clause | Logging (.NET) |
-| jwt-cpp | MIT | JWT handling |
-| quicly | MIT | QUIC protocol |
-| pubnub | MIT | Real-time messaging |
-| nanopb | zlib | Protocol Buffers |
-| Sentry | MIT | Error reporting |
-| wpf-notifyicon | CPOL | System tray UI |
+| License | Components |
+|---------|-----------|
+| Apache 2.0 | libssl (OpenSSL) |
+| BSD 3-Clause | libevent, lwip, nlog |
+| MIT | libjansson, jwt-cpp, args, ModernWpf, MVVMLight, Newtonsoft JSON.NET, Sentry, pubnub, quicly |
+| Boost 1.0 | catch2 |
+| zlib | zlib, nanopb |
+| CC0 1.0 Universal | siphash |
+| Code Project Open License | wpf-notifyicon |
+| Microsoft Public License | CommonServiceLocator |
+| MIT-variant | fmt |
 
 ## Prerequisites
-- N/A — This is a legal disclosure page, not a setup guide.
+- N/A — this is a legal notices/attribution page, not an implementation guide
 
 ## Step-by-Step
 - N/A
@@ -45,11 +41,11 @@ This page lists all third-party open source components bundled in the Twingate W
 - N/A
 
 ## Gotchas
-- **`wpf-notifyicon` (CPOL)**: Has redistribution restrictions — cannot be sold standalone; accompanying articles cannot be redistributed without author consent.
-- **`fmt`**: Uses MIT with an optional exception allowing embedded object-form redistribution without copyright notices.
-- **`CommonServiceLocator`**: Under Microsoft Public License — patent claims against contributors automatically terminate your patent license.
-- **CC0 (`siphash`)**: Trademark and patent rights are explicitly *not* waived under CC0.
+- **wpf-notifyicon (CPOL):** Cannot sell the component standalone; articles accompanying the work cannot be redistributed without author consent
+- **fmt:** Includes an optional exception allowing embedded compiled portions to be redistributed without copyright notices
+- **OpenSSL (Apache 2.0):** Dual copyright — OpenSSL Project (1998–2020) and Eric A. Young/Tim J. Hudson (1995–1998)
+- **siphash (CC0):** Trademark and patent rights are NOT waived under CC0, only copyright
 
 ## Related Docs
-- [Twingate OSS notices for other platforms] (Linux/macOS equivalents would follow similar structure)
-- Twingate Windows Client installation documentation
+- Twingate OSS notices for other platforms (macOS, Linux, iOS, Android clients)
+- Twingate Connector OSS notices

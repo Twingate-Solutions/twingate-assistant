@@ -1,46 +1,40 @@
 # AI and LLM Access with Twingate
 
 ## Summary
-Twingate provides Zero Trust network access to private AI infrastructure including LLM servers, MCP servers, and GPU compute resources. It eliminates public exposure of AI endpoints while enabling distributed team access with audit logging and granular controls.
+Twingate provides Zero Trust network access to private AI infrastructure including LLM servers, GPU instances, and MCP servers. It enables secure access without exposing endpoints publicly, using Connectors deployed near AI resources. Supports tools like Ollama, vLLM, Continue.dev, Cursor, and MCP-compatible AI assistants.
 
 ## Key Information
-- Supports remote LLM inference servers (Ollama, vLLM, etc.) on private GPU infrastructure
-- Supports Model Context Protocol (MCP) servers for AI assistant tool integration
-- Compatible with AI coding assistants: Continue.dev, Cursor, Cody
-- Uses peer-to-peer connections with split tunneling (only AI traffic routed through Twingate)
-- No public IP required on AI servers
+- Supports remote LLM servers (Ollama, vLLM), AI coding assistants (Continue.dev, Cursor, Cody), and MCP servers
+- Traffic uses split tunneling — only AI infrastructure traffic routes through Twingate
+- No public IP required for LLM/MCP servers
+- Peer-to-peer optimized connections for low latency
+- Access control via Groups and Security Policies
+- Usage auditable via Twingate Analytics
 
 ## Prerequisites
 - Twingate account with Admin Console access
-- Connector deployable on same network as AI servers
-- AI infrastructure (LLM server or MCP server) running on private network
+- Connector deployable on same network as AI server
+- AI servers (LLM/MCP) running on private network
 
-## Step-by-Step (Getting Started)
-1. **Deploy a Connector** on the same network as your AI servers
-2. **Create Resources** for your LLM or MCP server endpoints
-3. **Grant Access** to appropriate users or groups
-4. **Configure AI tools** to connect through Twingate
-5. **Monitor usage** through the Twingate Admin Console
+## Step-by-Step
+1. **Deploy a Connector** on the same network as your AI/LLM/MCP server
+2. **Create Resources** pointing to LLM or MCP server endpoints
+3. **Grant Access** to users or groups via Admin Console
+4. **Configure AI tools** (e.g., Continue.dev, Cursor) to use Twingate-resolved endpoints
+5. **Monitor usage** via Twingate Admin Console Analytics
 
 ## Configuration Values
-- No specific env vars or CLI flags documented on this page
-- Refer to sub-guides for endpoint-specific configuration
-
-## Use Cases Covered (Sub-guides)
-| Use Case | Guide |
-|----------|-------|
-| Remote LLM servers (Ollama, vLLM) | Remote LLM Access Guide |
-| MCP server access | Remote MCP Access Guide |
+- No specific env vars or CLI flags listed on this page
+- See sub-guides for endpoint-specific configuration
 
 ## Gotchas
-- This page is an index only — implementation details are in the sub-guides
-- Split tunneling means only AI-destined traffic routes through Twingate; verify tool routing if experiencing connectivity issues
-- MCP server access may require Identity Firewall for protocol-aware security
+- LLM servers must be configured to listen on network interfaces (not just localhost) — covered in Remote LLM Access Guide
+- MCP server deployments have specific security considerations — covered in Remote MCP Access Guide
 
 ## Related Docs
+- [Remote LLM Access Guide](https://www.twingate.com/docs/remote-llm-access)
+- [Remote MCP Access Guide](https://www.twingate.com/docs/remote-mcp-access)
 - [Twingate Architecture](https://www.twingate.com/docs/architecture)
 - [Security Policies](https://www.twingate.com/docs/security-policies)
-- [Identity Firewall](https://www.twingate.com/docs/identity-firewall) — recommended for MCP deployments
+- [Identity Firewall](https://www.twingate.com/docs/identity-firewall)
 - [Service Accounts](https://www.twingate.com/docs/service-accounts) — for headless/automated AI workloads
-- Remote LLM Access Guide
-- Remote MCP Access Guide

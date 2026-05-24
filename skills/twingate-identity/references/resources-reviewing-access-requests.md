@@ -1,55 +1,47 @@
 # Reviewing Access Requests
 
 ## Summary
-Access Requests occur during JIT access workflows or when a Resource is locked via Usage-Based Auto Lock policy. Designated admins and Resource Approvers can review and approve requests through the Admin Console or via email links. All review workflows use the same process regardless of request origin.
+Access Requests are generated via JIT access workflows or Usage-Based Auto Lock policies. Designated roles and Resource Approvers can review and approve these requests through the Admin Console or via email links.
 
 ## Key Information
-- Access Requests page shows all open requests plus resolved requests from the last 90 days
-- Red dot on bell notification icon in Admin Console indicates pending requests
+- Resolved requests are visible for 90 days after resolution
+- Resource Approvers receive **mandatory** email notifications; this cannot be configured/disabled
 - Resource Approvers only see the Access Requests page — no other Admin Console access
-- Email notifications to Resource Approvers always fire and cannot be configured/disabled
-- Admin role notifications can be configured; Resource Approver notifications cannot
+- Requests can be reviewed from User pages, Resource pages, or the main Access Requests page
+- Open requests trigger a red dot on the bell icon in the Admin Console
 
-## Who Can Approve Requests
+## Who Can Approve
 
-**Full Admin roles (all Users and Resources):**
-- Admins
-- DevOps
-- Access Reviewer
+| Role | Scope |
+|------|-------|
+| Admin | All users and resources |
+| DevOps | All users and resources |
+| Access Reviewer | All users and resources |
+| Resource Approver | Only assigned resources |
 
-**Resource Approvers:**
-- Members of assigned Groups
-- Can only approve requests for Resources they are explicitly assigned to
-- No Admin Console access beyond Access Requests page
+## Prerequisites
+- Admin Console access (for Admin roles)
+- Resource Approver group assignment (for delegated approvals)
+- Groups must be created before assigning as Resource Approvers
 
-## Assigning Resource Approvers
-
-**Steps:**
+## Assigning Resource Approvers (Step-by-Step)
 1. Navigate to the Resource page in Admin Console
 2. Open the Resource Approvers dialog
-3. Assign one or more Groups as approvers
+3. Assign one or more Groups as Resource Approvers
+4. All members of assigned Group(s) inherit approval rights for that resource only
 
-**Behavior:**
-- All members of assigned Group(s) can review requests for that Resource
-- Resource Approvers can still log in via the standard Admin Console URL (e.g., `https://autoco.twingate.com`)
-- Assign purpose-specific Groups to keep delegation scoped appropriately
-
-## Reviewing Access Requests
-
-**Access methods:**
-1. **Bell icon** — Red dot indicates open requests; click to navigate to Access Requests page
-2. **Email link** — Direct link in notification email to log in and review specific request
-3. **User page** — Admins can review open requests per user
-4. **Resource page** — Admins can see all open requests across all users for a Resource
+## Configuration Notes
+- Resource Approvers are assigned at the **Resource level**, not user level
+- Assignment uses **Groups**, not individual users — design groups specifically for delegation use case
+- Resource Approvers access the same Admin Console URL (e.g., `https://autoco.twingate.com`) but see only the Access Requests page
 
 ## Gotchas
-- Resource Approvers **always** receive email notifications — no way to suppress or configure this
-- Recommend creating Groups specifically tailored to the delegation use case rather than reusing existing broad Groups
-- Resource Approvers logging into the Admin Console URL will only land on the Access Requests page — no other navigation available
-- Resolved requests are only visible for 90 days
+- Resource Approver email notifications **cannot** be turned off — ensure assigned groups are appropriate recipients
+- Resource Approvers have no other Admin Console visibility; design groups carefully to avoid unintended access delegation
+- Standard admin notification preferences **do not apply** to Resource Approvers
 
 ## Related Docs
 - JIT Access workflow
 - Usage-Based Auto Lock policy
-- Admin roles reference
+- Admin roles documentation
 - Notifications configuration

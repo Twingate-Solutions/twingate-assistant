@@ -1,45 +1,44 @@
-# Two-Factor Authentication
+# Two-Factor Authentication Overview
 
 ## Summary
-Twingate provides native 2FA configured at the Security Policy level, supporting TOTP, biometrics (WebAuthn), and hardware security keys. 2FA frequency is controlled by session lifetime settings. Using both Twingate 2FA and IdP 2FA simultaneously is not recommended as it forces double authentication.
+Twingate provides native 2FA configured at the Security Policy level, supporting TOTP, biometrics, and security keys. Session lifetime controls 2FA frequency. Twingate recommends using their native 2FA instead of IdP 2FA to avoid double authentication prompts.
 
 ## Key Information
 - 2FA is configured per **Security Policy**, not globally per user
-- Three enforcement scopes:
-  - **Network Sign In Policy**: requires 2FA on every login
-  - **Admin Console Security settings**: requires 2FA for admin console access
-  - **Resource-specific Security Policies**: requires 2FA only when accessing specific resources
-- Session lifetime determines 2FA frequency (e.g., 24-hour session = daily 2FA prompt)
-- TOTP is always required as backup even when biometrics/security key is configured
+- Three enforcement contexts:
+  - **Network Sign In Policy** – requires 2FA on every user login
+  - **Admin Console Security settings** – requires 2FA for admin console access
+  - **Resource-specific Security Policies** – requires 2FA only when accessing specific resources
+- Session lifetime determines 2FA frequency (e.g., 24-hour session = daily 2FA prompt even if user stays logged in)
+- Don't configure 2FA in both Twingate and your IdP — users will be prompted twice
 
 ## Supported 2FA Methods
 | Method | Details |
 |--------|---------|
-| TOTP | Third-party authenticator app (time-based codes) |
-| Biometrics (WebAuthn) | TouchID, Windows Hello |
-| Security Keys (WebAuthn) | FIDO2/CTAP2 only (e.g., YubiKey) |
+| TOTP | Time-based one-time codes via authenticator app |
+| Biometrics (WebAuthn) | TouchID, Windows Hello, device-based biometrics |
+| Security Keys (WebAuthn) | YubiKey and other FIDO2/CTAP2 keys only |
 
 ## Prerequisites
 - Security Policy configured in Twingate admin
-- Do **not** enable 2FA at both IdP and Twingate levels (causes double authentication)
-- WebAuthn requires compatible platform/browser (support varies)
+- Users must always configure TOTP even if biometrics/security key is set (backup method requirement)
+- WebAuthn requires supported platform/browser (check [compatibility](https://webauthn.me/browser-support))
 
-## Configuration
-- Navigate to Security Policy settings to enable 2FA
-- Admin Console 2FA: **Settings → Security**
-- Resource 2FA: assign Security Policy with 2FA enabled to specific resources
+## Configuration Notes
+- **Security Keys**: Only FIDO2/CTAP2 keys supported (not older U2F-only keys)
+- **WebAuthn**: Platform and browser support varies — not universally available
 
-## User Management
-- Reset lost 2FA: navigate to user → select authentication option → reset or delete
-- After reset, user goes through initial 2FA setup on next authentication prompt
+## User 2FA Reset (Admin Action)
+1. Navigate to the user in Admin Console
+2. Select the authentication option to reset or delete
+3. User is prompted through initial 2FA setup flow on next authentication
 
 ## Gotchas
-- Users with biometrics/security key **still must configure TOTP** as backup
-- Only **FIDO2/CTAP2** security keys supported — older U2F keys may not work
-- WebAuthn support varies by browser/platform — check [compatibility](https://webauthn.io) for edge cases
-- Session lifetime setting directly controls 2FA prompt frequency, not login state
-- Enabling IdP 2FA + Twingate 2FA simultaneously results in users completing 2FA twice per session
+- Users with biometrics/security keys **still must configure TOTP** as a backup
+- Session lifetime drives re-authentication frequency — short sessions = frequent 2FA prompts
+- WebAuthn may not work in all environments; TOTP is the universal fallback
+- Enabling 2FA at both IdP and Twingate levels causes duplicate 2FA challenges for end users
 
 ## Related Docs
-- Security Policy configuration documentation (linked inline)
-- WebAuthn browser/platform compatibility reference
+- Security Policy configuration documentation (linked in page)
+- WebAuthn browser compatibility reference

@@ -1,71 +1,64 @@
 # Twingate FAQ
 
 ## Page Title
-Frequently Asked Questions
+Frequently Asked Questions (Twingate)
 
 ## Summary
-Reference page covering Twingate core concepts, deployment requirements, performance characteristics, and security model. Defines key terminology and addresses common implementation questions for administrators evaluating or deploying Twingate.
+Reference page covering Twingate's core concepts, deployment model, performance characteristics, and security approach. Provides concise answers to common questions about architecture, integration, and operational considerations. Useful as a quick-reference for evaluating or implementing Twingate.
 
 ## Key Information
 
-### Core Concepts
+### Glossary
 - **Resource**: Any TCP/UDP destination (host, server, app) defined by address
 - **Connector**: Software proxy deployed on destination network; all traffic appears to originate from Connector host
-- **Group**: Logical user grouping tied to a set of Resources and a single Security Policy
-- **Security Policy**: Defines authentication/authorization controls (e.g., MFA) applied per Resource regardless of protocol
+- **Security Policy**: Defines auth controls (e.g., MFA) applied to users accessing a Resource
+- **Group**: Logical user grouping tied to Resources + a single Security Policy
 
 ### Architecture
-- Split tunnel by default — only Twingate Resources route through your infrastructure
-- Connectors make outbound connections; no inbound ports exposed to public internet
-- Transport: TLS v1.2 with standard ciphers
-- WireGuard not currently supported (under monitoring)
+- Split tunnel by default — only Twingate-defined Resource traffic routes through your infrastructure
+- No inbound public internet exposure required; Connectors initiate outbound connections only
+- Transport protocol: **TLS v1.2** with standard ciphers
+- WireGuard not currently supported (monitoring adoption)
 
 ### Platform Support
-- Clients: macOS, Windows, Linux, ChromeOS, Android, iOS, iPadOS
-- Download: `get.twingate.com`
-- Apple M1: Native support via Mac App Store
-- Connector: Docker container or native Linux service; runs on AWS, GCP, Azure, DigitalOcean, on-prem
+- Clients: macOS, Windows, Linux, ChromeOS, Android, iOS, iPadOS (including Apple M1 native)
+- Download: `https://get.twingate.com` or platform app stores
+- Connector: Docker container or native Linux service; no special host privileges required
+
+### Identity Providers
+- Okta, Entra ID (formerly Azure AD), Google Workspace, OneLogin
+- Twingate delegates authentication — does not store passwords
 
 ## Prerequisites
-- Know internal IP addresses or domain names of target Resources
-- Ability to run a Docker container on a host within the target network
-- No firewall rule changes, hardware appliances, or network reconfiguration required
+- Internal IP addresses or domain names of resources to expose
+- Ability to run a Docker container (or Linux service) on a network host
+- Identity provider configured for SSO
 
-## Configuration Notes
+## Deployment Notes
+- **No infrastructure changes required** — overlays existing network
+- **No firewall rule changes, IP remapping, or hardware appliances**
+- Can run **alongside existing VPN** infrastructure (no rip-and-replace)
 - Deploy Connectors in **pairs** for failover redundancy (one minimum per network)
-- Twingate subdomain/URL **cannot be changed** after network creation
-- Coexists with existing VPN infrastructure — no rip-and-replace required
+- Twingate URL/subdomain **cannot be changed** after network creation
+- Users self-onboard: install client → sign in with SSO → access granted per Group membership
 
 ## Configuration Values
-
-| Parameter | Value |
-|-----------|-------|
-| Transport protocol | TLS v1.2 |
-| Connector delivery | Docker container or Linux service |
-| Tunnel mode | Split tunnel (default) |
-| Billing unit | Per user/seat (monthly or annual) |
-
-## Identity Provider Integrations
-- Okta, Entra ID (Azure AD), Google Workspace, OneLogin
-- Twingate delegates authentication; does not store user credentials/passwords
-
-## API
-- Full API available for programmatic configuration
-- Supports automated Resource registration and Group assignment
-- See [API docs](https://www.twingate.com/docs/api)
+- **API available**: Programmatic deployment and configuration supported
+- **Access control model**: Resource × Group combinations (RBAC at resource level)
+- **Billing unit**: Per-user seat (monthly or annual)
 
 ## Gotchas
-- **Subdomain is permanent** — choose Twingate network URL carefully at creation
-- Connector host must have outbound connectivity; Connectors are not publicly accessible
-- One seat = one individual user; exceeding seat count requires purchase or reassignment
-- Groups have a single Security Policy — plan Group structure around policy requirements
+- Subdomain is permanent — choose carefully at network creation
+- One Connector per network is functional minimum, but single point of failure; always deploy pairs
+- Group is tied to exactly one Security Policy; plan Group structure accordingly
+- WireGuard is **not** supported currently
 
 ## Related Docs
 - [How Twingate Works](https://www.twingate.com/docs/how-twingate-works)
-- [Deploying Connectors](https://www.twingate.com/docs/connector)
+- [Deploying Connectors](https://www.twingate.com/docs/connectors)
 - [Connector Deployment Options](https://www.twingate.com/docs/deployment-options)
-- [Identity Provider Integrations](https://www.twingate.com/docs/idp-integrations)
-- [API Documentation](https://www.twingate.com/docs/api)
+- [Identity Provider Integrations](https://www.twingate.com/docs/identity-providers)
+- [Twingate API](https://www.twingate.com/docs/api)
 - [Security Overview](https://www.twingate.com/docs/security)
-- [Service Reliability](https://www.twingate.com/docs/service-reliability)
 - [Subscription Management](https://www.twingate.com/docs/subscription-management)
+- [Service Reliability](https://www.twingate.com/docs/service-reliability)

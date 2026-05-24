@@ -1,23 +1,24 @@
 # Ubuntu 18.04 End of Life
 
 ## Summary
-Ubuntu 18.04 LTS reached end of life on May 31, 2023. Twingate no longer supports Connectors or Clients running on Ubuntu 18.04 and recommends migrating to a supported Ubuntu version.
+Ubuntu 18.04 LTS reached end of life on May 31, 2023. Twingate dropped support for Connectors and Clients on Ubuntu 18.04 after that date. Users must migrate to a supported Ubuntu version to receive future updates and support.
 
 ## Key Information
-- Twingate support for Ubuntu 18.04 Connectors/Clients ended May 31, 2023
-- Migration support for Business/Enterprise plan users extended until July 31, 2023
-- Future Connector/Client versions may not run on Ubuntu 18.04
-- Existing installed versions continue working but will eventually be deprecated
+- **EOL date**: May 31, 2023
+- **Migration support window**: Business and Enterprise plans received migration support until July 31, 2023
+- **Impact**: No support for Connectors or Clients on Ubuntu 18.04 post-EOL
+- **Future versions**: May not be compatible with Ubuntu 18.04
+- **Existing installs**: Continue working but will eventually be deprecated
 
 ## Required Action
 Upgrade all machines running Ubuntu 18.04 to:
-- **Ubuntu 20.04 LTS** (recommended)
-- **Ubuntu 22.04 LTS** (recommended)
+- Ubuntu 20.04 LTS, or
+- Ubuntu 22.04 LTS
 
 ## Gotchas
-- Running future Connector versions on Ubuntu 18.04 is unsupported — Twingate will not assist with issues
-- No explicit deadline given for when existing versions stop functioning, but deprecation is confirmed
-- Business/Enterprise plans had extended migration support window (now also expired as of July 31, 2023)
+- Running future Connector versions on Ubuntu 18.04 is unsupported — Twingate will not provide assistance if issues arise
+- Existing Connector/Client versions remain functional temporarily but face eventual deprecation — no fixed deprecation date provided
+- Migration support (Business/Enterprise) window has already closed (July 31, 2023)
 
 ## Related Docs
 - [Canonical Ubuntu 18.04 EOL information](https://ubuntu.com)

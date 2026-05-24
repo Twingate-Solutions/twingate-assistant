@@ -1,33 +1,27 @@
 # HIPAA Compliance
 
-## Page Title
-HIPAA Compliance – Twingate for Companies Requiring HIPAA Compliance
-
 ## Summary
-Twingate supports HIPAA compliance requirements for covered entities and business associates handling sensitive health information. Organizations can obtain a Business Associate Agreement (BAA) from Twingate. Security details are available separately.
+Twingate supports HIPAA compliance requirements for covered entities and business associates handling sensitive health information. Organizations can request Business Associate Agreements (BAAs) directly from Twingate.
 
 ## Key Information
 - Twingate supports applicable HIPAA compliance requirements
-- Applies to both **covered entities** and **business associates**
+- Available for both **covered entities** and **business associates**
 - Business Associate Agreements (BAAs) are available upon request
-- Security measures documentation available separately
 
 ## Prerequisites
-- Organization must be regulated by HIPAA (as a covered entity or business associate)
-- Contact required to obtain BAA — not self-serve
+- Organization must be regulated by HIPAA (as covered entity or business associate)
+- Contact required to initiate BAA process
+
+## Contact / Action Steps
+1. Email **privacy@twingate.com** to inquire about HIPAA compliance and BAAs
+2. Review Twingate security measures documentation for technical details
 
 ## Configuration Values
-None documented on this page.
-
-## Step-by-Step
-1. Email **privacy@twingate.com** to request information about HIPAA compliance and BAAs
-2. Review Twingate's security measures documentation for technical controls
+None specified — compliance setup is handled through direct communication with Twingate.
 
 ## Gotchas
-- No self-service HIPAA/BAA process — requires direct contact with Twingate
-- Page does not specify which Twingate pricing tiers include HIPAA support (verify with sales/support)
-- No specific technical configuration guidance provided on this page
+- No self-service BAA process; requires direct contact via email
+- No specific HIPAA configuration details provided in this page — additional information provided through direct engagement
 
 ## Related Docs
-- Twingate Security Measures (linked from page as "Learn more")
-- privacy@twingate.com for BAA inquiries
+- Twingate Security Measures (linked from this page)

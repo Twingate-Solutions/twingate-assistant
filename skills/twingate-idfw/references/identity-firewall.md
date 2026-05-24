@@ -1,41 +1,34 @@
 # Twingate Identity Firewall
 
 ## Summary
-Twingate Identity Firewall extends Zero Trust and PAM controls to users, resources, and agents by propagating IdP identity through a Layer 7 reverse proxy (Twingate Gateway). It supports just-in-time access with automatic revocation and session recording. Currently supports Kubernetes API and SSH, with HTTPS, database protocols, and MCP planned.
+Twingate Identity Firewall extends Zero Trust and PAM controls to users, resources, and agents via a Layer 7 reverse proxy (Twingate Gateway). It propagates IdP identity to protected resources (Kubernetes, SSH, future: HTTPS, databases, MCP) without static credentials. Free for up to 5 Resources on all plans.
 
 ## Key Information
-- Free for up to 5 Resources on all plans
-- Uses **Twingate Gateway**: open-source Layer 7 reverse proxy deployed in your environment
-- No static credentials or separate authentication tokens required
-- Provides session recording and forensic-level audit trails per user/agent
-- Identity sourced from existing IdP (single authentication flow)
-- Access is just-in-time; permissions auto-revoked when no longer needed
-
-## Current Protocol Support
-| Protocol | Status |
-|----------|--------|
-| Kubernetes API | Available |
-| SSH | Available |
-| HTTPS | Planned |
-| Database protocols | Planned |
-| Model Context Protocol (MCP) | Planned |
-
-## Architecture
-- Twingate Gateway deployed **within your environment** (not SaaS-side)
-- Acts as reverse proxy between clients and protected resources
-- Authentication and policy enforcement happen **before** requests reach protected resources
-- Identity propagated from IdP through to each resource
+- **Protocol support**: Kubernetes API and SSH (GA); HTTPS, database protocols, MCP (upcoming)
+- **Core component**: Twingate Gateway — open-source Layer 7 reverse proxy deployed in your environment
+- **Auth flow**: User authenticates via existing IdP once; identity propagates to all accessed Resources
+- **Access model**: Just-in-time, zero-standing access based on identity, device posture, location, context
+- **Observability**: Per-user/agent logging of commands, API calls, queries; session replay capability
+- **No hardware appliances** or complex infrastructure required
 
 ## Prerequisites
 - Existing IdP configured with Twingate
 - Twingate account (any plan)
-- Ability to deploy Twingate Gateway in target environment
+- Twingate Gateway deployed in target environment
+
+## Architecture
+```
+User → IdP Auth → Twingate Policy Enforcement → Twingate Gateway (L7 proxy) → Protected Resource
+```
+- Gateway handles identity propagation and session recording
+- No static credentials or separate auth tokens required at the resource level
 
 ## Gotchas
-- Gateway must be self-hosted in your environment — it is not managed by Twingate
-- MCP support not yet available (planned)
-- 5-Resource free tier limit applies across all Identity Firewall resources
+- Free tier limited to **5 Resources** — additional Resources require paid plan
+- MCP, HTTPS, and database protocol support is **not yet available**
+- Gateway must be **self-hosted within your environment** (open-source)
+- Access permissions are **automatically revoked** when context no longer meets policy — ensure applications handle session interruption gracefully
 
 ## Related Docs
-- [Privileged Access for Kubernetes](https://www.twingate.com/docs/kubernetes)
-- [Privileged Access for SSH](https://www.twingate.com/docs/ssh)
+- [Privileged Access for Kubernetes](https://www.twingate.com/docs/privileged-access-kubernetes)
+- [Privileged Access for SSH](https://www.twingate.com/docs/privileged-access-ssh)

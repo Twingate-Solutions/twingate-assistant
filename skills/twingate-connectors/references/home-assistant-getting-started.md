@@ -1,30 +1,27 @@
-# Home Assistant + Twingate Getting Started
+# Home Assistant + Twingate: Getting Started
 
 ## Summary
-Installs a Twingate Connector as a Home Assistant app to enable secure remote access to smart home devices. The connector runs as a Docker container within Home Assistant OS and connects to a Twingate Remote Network using Access/Refresh token pairs.
+Installs the Twingate Connector as a Home Assistant OS app to enable secure remote access to smart home devices. The connector runs as a Docker container and links to a Twingate Remote Network via Access/Refresh token pairs.
 
 ## Key Information
 - Only works on **Home Assistant OS** — containers are not supported
 - Connector is installed via a third-party app repository added to the HA App Store
-- Repository source available on Twingate's Community GitHub page
 - Each Connector requires its own unique token set (do not reuse tokens)
+- Source available on Twingate's Community GitHub page
 
 ## Prerequisites
-- Home Assistant OS (running instance)
+- Running Home Assistant OS instance
 - Twingate account with Admin Console access
-- An existing Remote Network in Twingate Admin Console
+- Existing Remote Network configured in Twingate
 
 ## Step-by-Step
 
-1. **Add Repository**: Add Twingate repository URL via Home Assistant App Store → Repository Manager
-2. **Check for Updates**: Use ellipses menu → "Check for updates"; refresh page if needed
+1. **Add Repository**: Open HA App Store → add Twingate repository URL via repository manager
+2. **Check for Updates**: Use ellipsis menu → "Check for updates"; refresh page if needed
 3. **Install App**: Search "Twingate" in App Store → install from "Twingate Connector app repository" section
 4. **Generate Tokens**: Admin Console → Remote Networks → select network → add/select Connector → Manual → Generate Tokens → copy Access Token and Refresh Token
-5. **Configure App**: In HA Twingate app Configuration tab, enter:
-   - Network domain (e.g., `yournetwork.twingate.com`)
-   - Access Token
-   - Refresh Token
-6. **Start App**: Click Start; verify no errors in Logs tab
+5. **Configure App**: App Configuration tab → enter Network domain, Access Token, Refresh Token
+6. **Start App**: Info tab → click Start → check Logs tab for errors
 7. **Verify**: Admin Console → Remote Networks → Connector → confirm Controller and Relay show **connected**
 
 ## Configuration Values
@@ -36,14 +33,13 @@ Installs a Twingate Connector as a Home Assistant app to enable secure remote ac
 | Refresh Token | Generated from Admin Console |
 
 ## Gotchas
-- **Home Assistant containers not supported** — OS version only
-- After adding repository, must manually trigger "Check for updates" and possibly refresh the page before app appears
-- **Never reuse token sets** across multiple Connectors — each Connector needs unique tokens
-- Tokens must be copied immediately after generation (not retrievable later)
+- **Home Assistant containers not supported** — OS installation required
+- After adding repository, must manually trigger "Check for updates" before app appears; may also require page refresh
+- Token sets must be unique per Connector — never reuse across multiple deployments
+- Connector name in Admin Console must not have been previously deployed
 
 ## Related Docs
-- [Twingate Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)
+- [Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)
+- [Setting Up Resources](https://www.twingate.com/docs/resources)
 - Proxmox Helper Script Guide
 - Unraid Helper Script Guide
-- Setting Up Resources (configuring Twingate resources for private app access)
-- [Community GitHub / Apps GitHub](https://github.com/Twingate-Labs) for issues/feedback

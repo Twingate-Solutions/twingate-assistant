@@ -1,28 +1,34 @@
-# Twingate in GitHub Codespaces
+# Twingate with GitHub Codespaces
 
 ## Summary
-Enables Twingate client access within GitHub Codespaces cloud development environments. Allows developers to reach Twingate-protected resources from browser-based or VS Code-connected Codespaces. Implementation details are maintained in an open source repository.
+Twingate can be run inside GitHub Codespaces to allow access to private resources from cloud-based development environments. Configuration is managed via an open source repository. Works with both browser-based and VS Code Codespaces access.
 
 ## Key Information
-- Runs Twingate client inside a GitHub Codespaces environment
+- Enables Twingate client to run within GitHub Codespaces (cloud dev environment)
 - Accessible via web browser or VS Code
-- Open source implementation available on GitHub
+- Implementation details maintained in Twingate's open source repository
+- Allows developers to reach private/internal resources from Codespaces
 
 ## Prerequisites
 - GitHub Codespaces access
-- Twingate account and network configured
-- VS Code or browser-based Codespace
+- Twingate account with appropriate network/resource configuration
+- Review the [Twingate Open Source repository](https://github.com/Twingate) for current setup scripts/devcontainer config
 
-## Configuration Values
-- Refer to the [Twingate Open Source repository](https://github.com/twingate) for current environment variables, devcontainer configuration, and setup scripts
+## Implementation
+Refer to the **[Twingate Open Source Repository](https://github.com/Twingate)** for:
+- devcontainer configuration files
+- Setup scripts for installing Twingate client in Codespaces
+- Service account or headless authentication setup
 
 ## Gotchas
-- Documentation is sparse — primary implementation reference is the external OSS repository
-- Check the OSS repo for updates as this integration may change independently of core Twingate docs
+- Documentation is sparse on this page — all actionable detail lives in the external OSS repo
+- Headless/service account authentication is required since Codespaces cannot perform interactive browser-based auth flows
+- Page was last updated recently (2 days ago) — check OSS repo for latest changes
 
 ## Related Docs
-- [Twingate Open Source Repository](https://github.com/twingate)
-- GitHub Codespaces documentation (GitHub)
+- Twingate Open Source Repository (primary implementation reference)
+- GitHub Codespaces documentation
+- Twingate headless/service account authentication docs
 
 ---
-*Note: This documentation page contains minimal detail. For full implementation guidance, consult the linked open source repository directly.*
+*Note: This doc page contains minimal detail. For implementation, go directly to the Twingate OSS repository.*

@@ -4,36 +4,35 @@
 VPN Replacement Use Case
 
 ## Summary
-Twingate replaces traditional VPNs by providing zero-trust, application-level access to private corporate resources across office networks, cloud VPCs, and other infrastructure. It deploys in under 15 minutes without hardware procurement or network reconfiguration, and can coexist with existing VPN solutions during testing/migration.
+Twingate replaces traditional VPNs by providing zero-trust, application-level access to private resources across office networks, cloud VPCs, and corporate infrastructure. It deploys in under 15 minutes without hardware procurement or network reconfiguration, and operates as split-tunnel by default.
 
 ## Key Information
-- **No open network ports required** — eliminates common public internet attack vectors
-- **Split tunnel by default** — only routes traffic destined for internal resources through corporate network (vs. VPN full tunnel)
-- **Application-level access controls** — more granular than VPN's network-level access; reduces lateral movement risk
-- **Deployment time**: Under 15 minutes using a single lightweight Connector host
-- **MFA and device posture checks** supported for third-party SaaS apps
-- **Central Admin Console** for access management and activity monitoring
-- **Infrastructure-as-code support**: Terraform, Kubernetes, Pulumi
+- **No open ports required** — eliminates public internet attack surface present in VPN gateways
+- **Split-tunnel by default** — only traffic destined for internal resources routes through Twingate (vs. VPN full-tunnel)
+- **Granular access controls** — application-level rather than network-level access, reducing lateral movement risk
+- **MFA + device posture checks** — works for third-party SaaS apps, not possible with traditional VPNs
+- **Can coexist with existing VPN** — test Twingate without removing current solution first
 
 ## Prerequisites
-- A host within the target network to deploy the Connector
-- Identity Provider (optional but recommended for rollout): Okta, JumpCloud, Entra ID (Azure AD), OneLogin, or Google
+- Single host within target network to deploy the Connector
+- Identity Provider (Okta, JumpCloud, Entra ID/Azure AD, OneLogin, or Google) for user rollout
+- No hardware procurement or network config changes needed
 
-## Deployment Environments (Linked Guides)
+## Deployment Environments
 - AWS
 - Azure
 - GCP
-- Site-to-site connections
-- Vendor/contractor access management
+- On-premise/office networks
 
-## Configuration Values
-- No specific env vars or CLI flags listed on this page
-- See environment-specific guides for configuration details
+## Architecture Advantages Over VPN
 
-## Gotchas
-- No need to remove existing VPN before testing — Twingate can run alongside current VPN solution
-- VPNs require frequent patching for gateway vulnerabilities; Twingate avoids this by eliminating open ports
-- Traditional VPNs expose full network access; Twingate scopes access per application/resource
+| Feature | Twingate | VPN |
+|---|---|---|
+| Open ports | None required | Required |
+| Access scope | Application-level | Network-level |
+| Tunnel mode | Split-tunnel | Full-tunnel |
+| Patch burden | Low | High (frequent CVEs) |
+| Deploy time | ~15 minutes | Hours/days |
 
 ## Related Docs
 - [How to Replace the AWS VPN with Twingate]
@@ -43,3 +42,8 @@ Twingate replaces traditional VPNs by providing zero-trust, application-level ac
 - [Twingate vs VPN] (architecture comparison)
 - [Twingate vs MeshVPN] (architecture comparison)
 - Identity Provider integrations: Okta, JumpCloud, Entra ID, OneLogin, Google
+
+## Gotchas
+- Deployment time claim (~15 min) assumes a single Connector on an existing host; complex multi-network environments will take longer
+- Split-tunnel is default behavior — verify this aligns with your security policy before deployment
+- No specific CLI flags, API params, or env vars documented on this page — see environment-specific guides for configuration details

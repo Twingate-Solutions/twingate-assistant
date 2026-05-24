@@ -1,23 +1,21 @@
 # Google Cloud SQL Access with Twingate
 
 ## Summary
-Twingate enables secure access to GCP managed databases (Cloud SQL, AlloyDB, Memorystore, etc.) by routing traffic through Connectors, eliminating the need for public database exposure. Supports both private IP/PSC (preferred) and public IP with Authorized Networks methods.
+Twingate enables secure private access to GCP managed databases (Cloud SQL, AlloyDB, Memorystore, Spanner, etc.) by routing traffic through Connectors deployed in your VPC. Supports both private IP/PSC (preferred) and public IP with Authorized Networks as a fallback method.
 
 ## Key Information
-- Supports MySQL, PostgreSQL, SQL Server, Redis/Memorystore, BigQuery, Spanner
-- Two connection models: Private IP/PSC (recommended) or Public IP with Authorized Networks
-- Private connectivity keeps all traffic on Google's internal network fabric
-- PSC/PSA requires Connector deployed in same or peered VPC as database
+- Supports MySQL, PostgreSQL, SQL Server, Redis (Memorystore), and API-only services (BigQuery, Spanner via PSC)
+- Two connectivity modes: private IP/PSC (recommended) or public IP with Authorized Networks
+- Private Service Connect (PSC) or Private Service Access (PSA) keeps all traffic on Google's internal network fabric
 
 ## Prerequisites
-- Twingate Remote Network created with Connector(s) deployed
-- For private: Connector inside same VPC as database
-- For public: Connector's public IP captured for Authorized Networks allowlisting
-- Existing GCP database instance (Cloud SQL, AlloyDB, etc.)
+- Twingate Remote Network created with one or more Connectors deployed
+- For private: Connectors inside same VPC as database (or peered VPC)
+- For public: Connector's public IP addresses available for allowlisting
+- Existing GCP database instance (Cloud SQL, AlloyDB, Memorystore, etc.)
 
 ## Configuration Values
 
-**Database Ports:**
 | Database | Port |
 |----------|------|
 | MySQL | 3306 |
@@ -27,40 +25,36 @@ Twingate enables secure access to GCP managed databases (Cloud SQL, AlloyDB, Mem
 
 ## Step-by-Step
 
-### Private IP / PSC Method (Recommended)
-1. Enable Private IP on database: Cloud SQL → Instance → Connections → Networking (or AlloyDB → Cluster → Networking)
-2. Remove Public IP if not needed
-3. Create Twingate Resource using **private IP or private DNS name** + appropriate port
-4. Assign resource to user group(s)
-5. Connect via database client using private IP
+### Private IP / PSC (Recommended)
+1. **Enable private connectivity**: Cloud SQL → Instance → Connections → Networking → enable Private IP; remove Public IP if unused
+2. **Memorystore**: Configure VPC Network Peering at instance creation
+3. **API-only services**: Create PSC endpoint inside your VPC
+4. **Create Twingate Resource**: Use private IP or private DNS name + appropriate port
+5. **Assign access** to relevant user groups
+6. **Connect** using standard DB client with private IP
 
-### Public IP / Authorized Networks Method
-1. Create Twingate Resource using database's **public IP or FQDN** + port
-2. In GCP Console: Cloud SQL → Instance → Connections → Authorized Networks
-3. Add each Connector's public IP in `/32` CIDR format
-4. Connect via database client (traffic must originate from Connector IPs)
-
-## Connection Commands
-```bash
-mysql -h <private-ip> -u <username> -p
-psql -h <private-ip> -U <username> -d <database>
-sqlcmd -S <private-ip> -U <username> -P <password> -d <database>
-```
+### Public IP / Authorized Networks (Fallback)
+1. **Create Twingate Resource**: Use public IP/FQDN + appropriate port
+2. **Add Connector IPs**: Cloud SQL → Connections → Authorized Networks → add each Connector public IP in `/32` CIDR format
+3. **Connect** using standard DB client (traffic routes through Connector)
 
 ## Gotchas
-- Memorystore is **internal IP only** — requires VPC Network Peering at instance creation
-- API-only services (BigQuery, Spanner) require a PSC endpoint created inside VPC
-- GCP Cloud Console has no native IP allowlist — use Twingate SSO + SaaS App Gating instead
-- Authorized Networks: Cloud SQL denies **all** connections not explicitly listed
-- Cloud SQL Auth Proxy: instance connection name must exactly match target instance
+- **Authorized Networks deny all by default** — every Connector IP must be explicitly added
+- **Memorystore** is internal-only; no public IP option exists
+- **Cloud SQL Auth Proxy**: instance connection name must match exactly
+- **No GCP Console IP allowlist natively** — use SSO + Twingate SaaS App Gating instead
 
 ## Troubleshooting
-- **DNS Failed**: Connector can't resolve hostname — check DNS hosted zone VPC binding
-- **Connection Failed**: Connector reached but can't connect — verify routes, IP allowlists, firewall port rules
-- **No Activity**: Client not sending traffic — check Client running, resource access granted, no conflicting VPN
+| Symptom | Check |
+|---------|-------|
+| Connection denied | Connector IP in Authorized Networks? |
+| DNS Failed (Recent Activity) | DNS zone tied to VPC? DNS server defined as Twingate Resource? |
+| Connection Failed (Recent Activity) | Route exists? Firewall allows port on both ends? |
+| No Activity | Client running? Resource access granted? Another VPN intercepting? |
+| Timeouts | Connectors online and reachable? |
 
 ## Related Docs
-- [SaaS App Gating Guide](https://www.twingate.com/docs)
-- [Connector Best Practices](https://www.twingate.com/docs)
-- [Twingate Troubleshooting Guide](https://www.twingate.com/docs)
-- [Google Private Service Connect](https://cloud.google.com/vpc/docs/private-service-connect)
+- [Twingate Troubleshooting Guide](https://www.twingate.com/docs/troubleshooting)
+- [SaaS App Gating Guide](https://www.twingate.com/docs/saas-app-gating)
+- [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
+- [Private Service Connect (Google)](https://cloud.google.com/vpc/docs/private-service-connect)

@@ -1,15 +1,15 @@
 # Twingate Admins
 
 ## Summary
-Twingate supports four admin roles with varying levels of access to the Admin Console. The network creator is the default admin; additional admins must be manually assigned. Role assignment is done per-user through the Admin Console UI.
+Twingate supports four admin roles with varying levels of Admin Console access. The network creator is the only admin by default; additional admins must be manually assigned. Each role has defined write and read permissions scoped to specific console areas.
 
 ## Key Information
 
-- Four admin roles available: **Admin**, **DevOps**, **Support**, **Access Reviewer**
-- Network creator is the only admin by default
-- All non-Admin roles have full read access to the Admin Console
-- Role badge displayed in UI for DevOps, Support, and Access Reviewer users
-- Unauthorized edit attempts show an error message and are blocked
+- **Four admin roles**: Admin, DevOps, Support, Access Reviewer
+- All non-Admin roles have **full read access** to the entire Admin Console
+- Write access is progressively restricted by role
+- Role badge displays next to Twingate logo for non-Admin roles; hover for access details
+- Attempting unauthorized edits shows a blocking error message
 
 ## Role Permissions Matrix
 
@@ -25,30 +25,29 @@ Twingate supports four admin roles with varying levels of access to the Admin Co
 - Must have Admin role to assign roles to other users
 - Users must exist in the Twingate network before role assignment
 
-## Step-by-Step: Assigning an Admin Role
+## Assigning a Role (Step-by-Step)
 
-1. Log in to Admin Console at `https://your-subdomain.twingate.com`
-2. Navigate to **Users** tab
-3. Click the target user's name
-4. Click **Manage**
-5. Select **Manage Role**
-6. Choose the desired role
+1. Navigate to the **Users** tab in the Admin Console
+2. Click the target user's name
+3. Click **Manage**
+4. Select **Manage Role**
+5. Choose the desired role
 
-## Configuration Values
+## Accessing the Admin Console
 
-- Admin Console URL: `https://your-subdomain.twingate.com`
-- Authentication: configured email + identity provider or supported social identities
+- URL: `https://your-subdomain.twingate.com`
+- Authentication: configured email + identity provider or supported social identities for the network
 
 ## Gotchas
 
-- Only **Admin** role has write access outside the Network tab — DevOps cannot modify user settings, billing, or security policies
-- **Access Reviewer** write access is limited solely to the Request Access page
-- Role restrictions are enforced server-side; blocked actions display an error message
-- No CLI or API method mentioned for role assignment — UI only
+- Only **one admin** exists by default (network creator); additional admins require manual assignment
+- DevOps admins can only write to the Network tab — all other tabs are read-only
+- Support admins have **zero write capabilities** — read-only across entire console
+- Blocked actions display an error message but do not explain what role is required
 
 ## Related Docs
 
-- Users tab documentation
-- Request Access management
+- Users tab management
+- Request Access configuration
+- Remote Networks / Connectors setup
 - Identity provider configuration
-- Remote Networks and Connectors setup

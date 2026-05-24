@@ -4,53 +4,59 @@
 Connector Best Practices
 
 ## Summary
-Guidelines for deploying Twingate Connectors effectively, covering deployment topology, redundancy, network requirements, and hardware sizing. Multiple Connectors per Remote Network provide automatic load balancing and failover. Each Connector requires unique tokens and consistent network permissions within a Remote Network.
+Best practices for deploying Twingate Connectors covering redundancy, token management, network requirements, and hardware sizing. Connectors only require outbound internet access and automatically load balance/failover when multiple are deployed in the same Remote Network.
 
 ## Key Information
-- Deploy Connectors close to target Resources to minimize "last mile" latency
-- Minimum 2 Connectors per Remote Network for redundancy and load balancing
-- Connectors in the same Remote Network auto-cluster; any Connector can serve any Resource in that network
-- Each Connector requires its own unique token pair — token reuse causes connection failure
-- All Connectors in the same Remote Network must have identical network scope/permissions
-- Geographic routing: use one Remote Network with Connectors deployed in each region; users auto-route to nearest active Connector
-- Adding CPU/memory to a single Connector does not improve performance — deploy additional Connectors instead
+- Deploy multiple Remote Networks matching your network architecture segments
+- Minimum **2 Connectors per Remote Network** for redundancy (auto load balancing + failover)
+- Each Connector requires **unique token pair** — never reuse tokens across Connectors
+- All Connectors in same Remote Network must have identical network scope/permissions
+- Deploy Connectors co-located with target Resources (minimize "last mile" distance)
+- Geographic routing: single Remote Network + Connectors in each region → users route to nearest
+
+## Prerequisites
+- Twingate Admin Console access to provision Connectors (generates unique tokens)
+- Outbound internet access from Connector host
 
 ## Network Requirements
-- **Only outbound internet access required** — no inbound connections needed
-- Port restrictions if limiting outbound:
-  - TCP `443` — Controller/Relay communication
-  - TCP `30000-31000` — Relay fallback connections
-  - UDP/QUIC ports `1-65535` — peer-to-peer (optimal performance)
-- Connector host must have routing and permission to reach private Resources
-- ICMP must be explicitly permitted if required
-- Public exit nodes require static public IP (direct or via NAT gateway)
+| Traffic Type | Ports | Purpose |
+|---|---|---|
+| Outbound TCP | 443 | Controller + Relay communication |
+| Outbound TCP | 30000–31000 | Relay fallback (non-P2P) |
+| Outbound UDP/QUIC (HTTP/3) | 1–65535 | Peer-to-peer (optimal performance) |
 
-## Hardware Recommendations (Priority: Bandwidth > Memory > CPU)
+- **No inbound internet access required or recommended**
+- Connector host needs routing + permission to reach private Resources
+- ICMP: explicitly grant if required by environment
+- Public exit nodes: require static public IP (direct or via NAT gateway)
 
-| Platform | Recommendation |
-|----------|---------------|
-| AWS | `t3a.micro` Linux EC2 |
-| GCP | `e2-small` |
+## Hardware Recommendations
+**Priority order:** Network bandwidth > Memory > CPU
+
+| Platform | Recommended Spec |
+|---|---|
+| AWS | t3a.micro Linux EC2 |
+| GCP | e2-small |
 | Azure | Container Instance service |
 | On-prem/VPS | 1 CPU, 2GB RAM Linux VM |
 
-- Supports x86, AMD64, ARM via systemd, Docker, or Helm
-- Azure Container Instance with custom VNet DNS: use "Custom DNS" option and specify DNS server manually
+- Supports x86, AMD64, ARM; any Linux distro with systemd, Docker, or Helm
+- Azure Container Instances with custom VNet DNS: use "Custom DNS" option and specify DNS server manually
 
 ## Gotchas
-- Reusing tokens across multiple Connectors causes connection failures
-- Connectors with differing network permissions in the same Remote Network may make Resources intermittently inaccessible
-- Azure Container Instances do not auto-detect custom VNet DNS servers
-- Adding resources to a single Connector host won't improve performance — scale horizontally
+- Reusing tokens across multiple Connectors causes **connection failure**
+- Adding CPU/RAM to a single Connector does **not** improve performance — deploy additional Connectors instead
+- Connectors with mismatched permissions in same Remote Network cause inconsistent Resource access
+- Azure Container Instances do **not** auto-recognize custom VNet DNS servers
 
-## Prerequisites
-- Twingate Admin Console access to provision Connector tokens
-- Outbound internet access from Connector host
-- Routing rules on Connector host to reach target private Resources
+## Load Balancing & Failover
+- Automatic when >1 Connector exists in a Remote Network
+- Clients retry other Connectors if one goes offline
+- Adding/removing Connectors automatically adjusts routing
 
 ## Related Docs
 - Understanding Connectors
 - Help Me Choose (deployment method selector)
-- HTTP/3 / QUIC guide
-- Public exit nodes guide
+- UDP/QUIC/HTTP3 guide
+- Public exit nodes
 - Additional Connectors deployment
