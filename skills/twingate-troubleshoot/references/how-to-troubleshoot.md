@@ -4,66 +4,64 @@
 How to Troubleshoot User Issues with the Twingate Service
 
 ## Summary
-Structured methodology for diagnosing Twingate ZTNA connection failures by tracing the connection chain across identity, DNS, routing, and Connector layers. Distinguishes between control plane (policy) and data plane (connectivity) failures. Provides symptom-to-cause mapping for rapid triage.
+Structured methodology for diagnosing Twingate ZTNA connection failures by tracing the connection chain across five stages: authentication, client/device, DNS resolution, routing/tunnel establishment, and connector-to-resource delivery. Troubleshooting requires interrogating components rather than probing perimeters since infrastructure is invisible by design. Issues fall into either control plane (policy/identity) or data plane (network/connectivity) problems.
 
 ## Key Information
-- **Control plane** (Controller): Decides *if* access is allowed — policy/identity issues
-- **Data plane** (Client + Connectors + Relays): Handles *how* connection is made — network/connectivity issues
-- Connectors make **outbound-only** connections; no inbound ports needed
-- Relays facilitate P2P via NAT traversal; fallback to relayed traffic if P2P fails
-- Traditional tools (`ping`, `tracert`) ineffective for external probing — troubleshoot by interrogating components
-
-## Connection Chain (In Order)
-1. Identity & Authentication (IdP)
-2. Client receives signed ACL from Controller
-3. DNS interception by Client
-4. Encrypted tunnel to Connector (P2P preferred)
-5. Connector forwards traffic to Resource
+- **Connection chain**: Identity Auth → Client/ACL → DNS Resolution → Tunnel/Routing → Connector → Resource
+- **Control plane** (Controller): decides *if* access is allowed (policy, identity, device posture)
+- **Data plane** (Client, Connectors, Relays): handles *how* connection is made
+- Connectors make **outbound-only** connections; no inbound firewall ports required
+- Relays facilitate P2P NAT traversal; act as fallback if P2P fails
+- `ping`/`tracert` ineffective from external networks (no open inbound ports)
 
 ## Diagnostic Quick Reference
 
-| Symptom | Likely Cause | First Tool |
+| Symptom | Likely Failure | First Tool |
 |---|---|---|
-| Can't log in | IdP/Authentication | IdP Console |
-| Client won't connect | Device/Client app | Client logs / OS services |
-| Can't reach internal hostname | DNS resolution | `nslookup`/`dig` + Admin Console Activity |
-| No one can reach a Resource | Connector down | Admin Console → Connector Status |
-| Slow performance | Relayed (not P2P) | Admin Console → Connector Details |
-| Home printer breaks | IP/subnet conflict | `ipconfig` + Resource definitions |
+| Can't log in | IdP authentication | IdP Admin Console |
+| App won't connect | Client/daemon not running | Client logs / OS services |
+| Connected, can't reach internal host | DNS resolution | `nslookup`/`dig` + Admin Console Activity |
+| No one can reach a resource | Connector down | Admin Console → Connector Status |
+| Slow performance | Relayed instead of P2P | Admin Console → Connector Details (connection type) |
+| Local printer breaks | IP/subnet conflict | `ipconfig` + Resource CIDR definitions |
 | SaaS app partially loads | Missing Resource definitions | Browser DevTools Network tab |
 
-## Admin Console Locations
-- **Activity Events**: Network → Overview (real-time connection attempts/errors)
-- **Connector Status**: Network → Connectors (status, P2P vs Relayed, clock drift)
-- **Audit Logs**: Settings → Reports → Audit Logs
-- **Support Tickets**: Help → Support
+## Step-by-Step Methodology
 
-## Activity Event Interpretations
-- **No events logged**: Traffic never reached Connector — Client-side or DNS issue
-- **DNS lookup error**: Connector can't resolve hostname — Connector host DNS misconfigured
-- **Unable to connect**: Connector can't route to Resource — firewall/security group blocking
-- **Successful but app fails**: Application-level issue, not Twingate
-- **Successful but partial load**: Missing domain definitions — add CDN/API subdomains as Resources
+1. **Define scope**: One user vs. all users? One resource vs. all? One location vs. all? When did it start?
+2. **Check known states**: Review [Twingate status page](https://www.twingatestatus.com) for active incidents
+3. **Verify identity/device posture**: Confirm group membership in Admin Console and IdP; check Trusted Device policy compliance
+4. **Trace connection**: Check Resource Activity (`Network > Resources > [Resource] > Activity`)
 
-## Four-Step Troubleshooting Methodology
-1. **Define scope**: One user vs. all? One resource vs. all? One location vs. all?
-2. **Check known states**: Visit [Twingate Status Page](https://status.twingate.com) first
-3. **Verify identity/device posture**: Group membership, Trusted Device policy, IdP sync
-4. **Trace connection**: Use Resource Activity Report in Admin Console
+## Admin Console Diagnostic Locations
+- **Resource Activity Events**: `Network > Overview`
+- **Connector Status/Details**: `Network > Connectors`
+- **Audit Logs**: `Settings > Reports > Audit Logs`
+- **Support Tickets**: `Help > Support`
+
+## Activity Log Interpretations
+- **No events logged**: Traffic never reached Connector → Client, local network, or DNS issue on user side
+- **DNS lookup error**: Connector cannot resolve hostname → DNS config on Connector host
+- **Unable to connect**: Connector cannot route to destination → firewall, security group, or app blocking
+- **Success but app broken**: Missing dependent domain Resources (CDNs, auth endpoints) → add as Resources
 
 ## Gotchas
-- Split-tunnel design means undefined domains bypass the tunnel — web apps requiring CDN/auth subdomains will break unless all dependent domains are added as Resources
-- Twingate is invisible to unauthorized users — external port scanning won't work for diagnosis
-- Clock drift on Connector host causes authentication failures — check under Connector Details
-- Local subnet overlap with Resource CIDR definitions breaks local network access (e.g., printers)
+- Web apps often depend on multiple domains (CDNs, subdomains); all must be defined as Resources or they bypass the tunnel
+- Twingate is **split tunnel by design**; undefined domains route normally and may be blocked by destination services
+- Resource CIDR definitions overlapping with user's local subnet breaks local network access (printers, NAS, etc.)
+- Slow connections usually indicate **Relayed** rather than P2P — check if outbound UDP ports are blocked
+
+## Tools
+- **Client logs**: Enable detailed logging in Client app, upload to Twingate
+- **Connector logs**: `docker logs` (container) or `journalctl` (systemd)
+- **General**: `ping`, `traceroute`, `nslookup`/`dig`, `nmap`, `curl`, `ipconfig`/`ifconfig`, Wireshark, browser DevTools
 
 ## Related Docs
-- How Twingate Works (architecture)
-- Identity Providers
-- Connector Issues
+- How Twingate Works (architecture overview)
+- Identity Providers configuration
+- Device/Client Failures
 - DNS Resolution Problems
+- Connector Issues
 - Firewall Issues
 - Split Tunneling Issues
-- Client Logs guide
-- Connector Logs guide
 - Engaging Technical Support

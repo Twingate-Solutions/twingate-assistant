@@ -1,60 +1,64 @@
-# Kandji Configuration
+# Kandji (Iru) Configuration
 
 ## Page Title
-Kandji Device Integration Configuration for Twingate
+Iru (Kandji) Configuration – Device Integration for macOS Trust Verification
 
 ## Summary
-Twingate integrates with Kandji MDM to verify macOS devices via the Kandji API, matching device serial numbers against managed devices. Verified devices can be used as a trust method in Security Policies. Available on Business and Enterprise plans only.
+Twingate integrates with Iru (formerly Kandji) to verify macOS devices via MDM enrollment status. Device serial numbers are matched against Iru's managed device list to satisfy Trusted Profile requirements in Security Policies. Requires Business or Enterprise plan.
 
 ## Key Information
-- **macOS only** — Kandji verification applies exclusively to macOS devices
-- Twingate polls Kandji API to retrieve managed device list by serial number
-- Sync status visible on Device Settings page; initial sync shows "Waiting to sync" for a few minutes
-- Integration supports EU tenants via separate API subdomain format
+- **macOS only** – Iru verification applies exclusively to macOS devices
+- Twingate pulls device list via Iru API; matches by serial number
+- Sync shows "Waiting to sync" initially; allow a few minutes before device states are accurate
+- Integration status and last sync time visible on Device Settings page
 
 ## Prerequisites
 - Twingate Business or Enterprise plan
-- Kandji admin access to generate API token
-- API token permissions: **Device details** + **Device list** (under Devices)
+- Iru (Kandji) tenant with admin access
+- API token with specific permissions (see below)
 
 ## Step-by-Step
 
-### Generate Kandji API Key
-1. Kandji web app → **Settings** → **Access** tab
+### Generate Iru API Token
+1. In Iru web app → **Settings** → **Access** tab
 2. Scroll to **API Token** → **Add Token**
-3. Name and describe the token, save it
+3. Enter Name and Description; save the token
 4. In **Manage API Permissions** modal → **Configure**
-5. Enable: **Device details** and **Device list**
+5. Under Devices, enable: **Device details** + **Device list**
 
 ### Configure in Twingate
-1. Twingate → **Settings** → **Device Integration**
-2. Click **Connect** next to Kandji
-3. Enter Kandji URL and API token
-4. Incorporate into a macOS **Trusted Profile** via Device Security settings
+1. Navigate to **Settings** → **Device Integration**
+2. Click **Connect** next to Iru
+3. Enter Iru URL and API token
+
+### Incorporate into Security Policy
+1. Create a Trusted Profile for macOS
+2. Set Iru as a required Trust Method
+3. Attach Trusted Profile to a Security Policy
 
 ## Configuration Values
 
-| Parameter | Format |
-|-----------|--------|
-| Kandji URL (US) | `<subdomain>.api.kandji.io` |
-| Kandji URL (EU) | `<subdomain>.api.eu.kandji.io` |
-| Required API Permissions | `Device details`, `Device list` |
+| Field | Format |
+|-------|--------|
+| Iru URL (US) | `<subdomain>.api.kandji.io` |
+| Iru URL (EU) | `<subdomain>.api.eu.kandji.io` |
+| Required API permissions | Device details, Device list |
 
 ## Device Verification Requirements
-A device is considered Kandji-verified only if ALL conditions are met:
-- Serial number present in Kandji
-- Reported to Kandji within the **past 7 days**
-- Kandji agent installed
+A device is considered Iru-verified only if **all** are true:
+- Serial number present in Iru
+- Reported to Iru within the past **7 days**
+- Iru agent installed
 - MDM profile installed
-- Not removed from Kandji
+- Not removed from Iru
 
 ## Gotchas
-- Initial sync delay: devices may show incorrect state for a few minutes after setup
-- **Recoverable errors** (API unresponsive): integration shows last successful sync time; auto-resolves when API is reachable
-- **Unrecoverable errors** (invalid/deleted credentials, altered permissions): sync stops entirely, admin email notification sent — requires full reconfiguration with new API credentials
-- Devices inactive >7 days in Kandji will fail verification even if otherwise managed
+- **Recoverable errors** (e.g., API unresponsive): Integration shows last successful sync time; auto-resolves when API is reachable
+- **Unrecoverable errors** (e.g., invalid/deleted credentials, altered permissions): Integration stops retrying; admin email notification sent; must reconfigure integration with new API credentials
+- During initial sync ("Waiting to sync"), device verification states may be incorrect — wait a few minutes
+- Devices removed from Iru or with uninstalled agents will fail verification immediately
 
 ## Related Docs
-- Twingate Device Security / Trusted Profiles
-- Twingate Security Policies
-- [Twingate Pricing](https://www.twingate.com/pricing)
+- Device Security / Trusted Profiles configuration
+- Security Policies
+- Twingate pricing (plan eligibility)

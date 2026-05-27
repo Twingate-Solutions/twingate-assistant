@@ -1,70 +1,66 @@
 # Oracle Cloud Database Access with Twingate
 
 ## Summary
-Twingate secures access to Oracle Database (on-prem, OCI, or other clouds) and OCI managed services (Autonomous Database, MySQL HeatWave, NoSQL) by routing traffic through Connectors. Private endpoints are strongly preferred to avoid public internet exposure. Firewall and listener rules restrict access to Connector IPs only.
+Twingate enables secure private access to Oracle Database (self-managed or OCI-managed) by routing traffic through Connectors deployed inside your VCN/LAN. Avoids public internet exposure by enforcing private endpoints and firewall restrictions. Supports Autonomous Database, MySQL HeatWave, NoSQL Database, and self-managed Oracle DB.
 
 ## Key Information
 - Default Oracle DB port: **1521**
-- Supported: Oracle DB (self-managed), Autonomous Database, MySQL HeatWave, NoSQL Database
-- Private endpoint deployment eliminates need to allowlist public IPs
-- OCI Console access can be gated via Twingate SSO/SaaS App Gating
+- Connector placement: inside same VCN/LAN as database for private endpoint access
+- Private endpoints eliminate need to allowlist Connector public IPs
+- OCI Console access can be gated via SSO/SaaS App Gating (no native OCI IP allowlist)
 
 ## Prerequisites
-- Twingate Remote Network created with one or more Connectors deployed
-- Connectors placed **inside the same VCN/LAN** as the database (private endpoint setup)
+- Twingate Remote Network created with Connector deployed
+- Connector placed inside VCN (private) or Connector public IP captured (public endpoint fallback)
 - Oracle Database instance accessible on port 1521 (or custom port from `listener.ora`)
 
 ## Step-by-Step
 
-### OCI Managed Databases (Autonomous DB, HeatWave, NoSQL)
-1. Deploy database with **private endpoint** inside VCN
-2. Add Resource in Twingate Admin Console using private IP or FQDN; assign user groups
-3. Set OCI Network Security Group/firewall ACL to allow Connector private IPs or VCN CIDR
-4. Download wallet, configure `sqlnet.ora` with wallet directory, set `TNS_ADMIN`
-5. Connect via `sqlplus username/password@TNS_NAME`
+### OCI Managed Databases (Autonomous DB / MySQL HeatWave / NoSQL)
+1. Create Twingate Resource using database private IP or FQDN; assign user groups
+2. Set OCI Network Security Group/firewall to allow traffic from Connector private IPs or VCN CIDR
+3. Download wallet, configure `sqlnet.ora` `DIRECTORY` to wallet path, set `TNS_ADMIN`, connect via `sqlplus username/password@TNS_NAME`
 
 ### Self-Managed Oracle Database
-1. Add Resource in Twingate Admin Console (private IP/FQDN, port 1521)
-2. Restrict firewall to Connector private IPs / VCN CIDR
-3. Optionally configure `sqlnet.ora` valid node checking and reload listener
+1. Create Twingate Resource with private IP/FQDN and port 1521; assign user groups
+2. Configure firewall/Security List to allow DB port from Connector private IPs
+3. (Optional) Configure `sqlnet.ora` Valid Node Checking, reload listener
 4. Connect: `sqlplus username/password@"//host:1521/orclpdb"`
 
 ## Configuration Values
 
+| Parameter | Value |
+|-----------|-------|
+| Default DB port | `1521` |
+| `TNS_ADMIN` env var | Path to unzipped wallet directory |
+| `sqlnet.ora` DIRECTORY | Absolute path to wallet |
+| `tcp.validnode_checking` | `YES` |
+| `tcp.invited_nodes` | Connector IP addresses |
+
+**Listener reload command:**
 ```bash
-# sqlnet.ora - Valid Node Checking
-tcp.validnode_checking = YES
-tcp.invited_nodes = (1.2.3.4, 1.2.3.5)  # Connector IPs
-
-# Wallet setup for Autonomous DB
-export TNS_ADMIN=/path/to/wallet
-export TNS_NAME=nw0xyz123_high
-
-# Listener reload after sqlnet.ora changes
 lsnrctl reload
-
-# Connection string
-sqlplus username/password@"//host.oraclevcn.com:1521/orclpdb"
 ```
 
 ## Gotchas
 - `sqlnet.ora` changes require `lsnrctl reload` to take effect
-- `tcp.invited_nodes` missing/incorrect causes Oracle to reject connections silently
-- Public IP allowlisting only needed when Connector traverses the internet
-- OCI Console has no native IP allowlist; use Twingate SSO/SaaS App Gating instead
-- If no activity shows in Twingate logs, check that Client is running and no other VPN is intercepting traffic
-- DNS failures indicate Connector cannot resolve hostname — verify DNS zone is tied to VPC and reachable
+- Public endpoint fallback requires allowlisting Connector **public** IPs in OCI NSGs or `tcp.invited_nodes`
+- Private endpoints: use VCN CIDR/subnet CIDR in access control list, not individual IPs
+- OCI has no native console IP allowlist — use Twingate SSO/SaaS App Gating instead
+- If no activity in Recent Activity: check Client is running, user has Resource access, no conflicting VPN
 
 ## Troubleshooting
 | Symptom | Check |
-|---|---|
-| Connection refused | Connector IP in firewall + `tcp.invited_nodes` |
-| DNS Failed | DNS zone tied to VPC, DNS server accessible from Connector |
-| Connection Failed | Route between Connector and DB, firewall port rules |
-| No Activity | Twingate Client running, Resource access granted, no conflicting VPN |
+|---------|-------|
+| Connection refused | Connector IP in firewall / `tcp.invited_nodes` |
+| DNS Failed | DNS zone tied to VPC, DNS server reachable from Connector |
+| Connection Failed | Route exists Connector→DB, firewall allows port both ends |
+| No Activity | Client running, Resource access granted, no VPN conflict |
+| Port mismatch | Twingate Resource port matches `listener.ora` |
 
 ## Related Docs
-- [SaaS App Gating Guide](https://www.twingate.com/docs)
-- [Connector Best Practices](https://www.twingate.com/docs)
-- [Twingate Troubleshooting Guide](https://www.twingate.com/docs)
-- [Oracle Private Endpoints in OCI](https://docs.oracle.com/en-us/iaas/Content/Database/Tasks/adbprivateaccess.htm)
+- [AWS Database Access Guide](https://www.twingate.com/docs/database-access-aws)
+- [Azure Database Access Guide](https://www.twingate.com/docs/database-access-azure)
+- [GCP Database Access Guide](https://www.twingate.com/docs/database-access-gcp)
+- [SaaS App Gating Guide](https://www.twingate.com/docs/saas-app-gating)
+- [Twingate Troubleshooting Guide](https://www.twingate.com/docs/troubleshooting)

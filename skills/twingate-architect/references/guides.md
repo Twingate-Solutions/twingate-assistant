@@ -1,67 +1,62 @@
 # Twingate Guides Index
 
 ## Page Title
-Twingate Guides — Documentation Hub
+Twingate Guides Overview
 
 ## Summary
-Index page listing all Twingate documentation guides organized by category. Covers deployment, configuration, management, and integration topics across cloud, on-premises, homelab, and enterprise environments. Serves as the primary navigation reference for Twingate implementation.
+This is the top-level documentation index for Twingate guides covering deployment, configuration, and management. It serves as a navigation hub organizing guides by category including infrastructure deployment, client rollout, policy configuration, and integrations.
 
 ## Key Information
 
-### Deployment Targets
-- **Cloud**: AWS EC2, GCP Compute, Azure Compute, Kubernetes, DigitalOcean
-- **On-premises**: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP, TrueNAS SCALE
-- **Homelab**: Home Assistant, Proxmox, Unraid, ZimaOS, CasaOS
-- **IaC**: Terraform, Pulumi
+**Deployment Targets:**
+- Cloud: AWS EC2, GCP Compute, Azure Compute, DigitalOcean, Kubernetes
+- On-premises: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP, TrueNAS, Proxmox
+- Homelab: Home Assistant, Unraid, ZimaOS, CasaOS
+- IaC: Terraform, Pulumi
 
-### Client Deployment (MDM)
-- Jamf, Kandji, Omnissa Workspace ONE, Microsoft Intune & Endpoint Manager
+**Client Deployment (MDM):**
+- Jamf, Omnissa Workspace ONE, Microsoft Intune, Iru
 
-### Service Integrations
-- Identity/SSO: Active Directory, Okta, JumpCloud, Microsoft Entra ID, OneLogin
-- Security tools: Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler
-- SIEM log ingestion for Connector logs
+**Database Protection:**
+- MongoDB, AWS, GCP, Azure, Oracle, Snowflake, Redis
 
-### Key Feature Guides
+**SaaS App Gating Integrations:**
+- Google Workspace, JumpCloud, Microsoft Entra ID, Okta, OneLogin
+
+**Service Compatibility:**
+- Active Directory, Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler
+
+**Kubernetes Scenarios:**
+- Route traffic from K8s, private resources, publicly exposed resources, kubectl management
+
+## Key Feature Areas
+
 - **Internet Security**: DNS-over-HTTPS (DoH), DNS filtering
-- **SaaS App Gating**: IP-based access control for SaaS apps
-- **Security Policies**: Per-network and per-resource policies
-- **Kubernetes**: Traffic routing, private/public resources, kubectl management
-- **Exit Networks**: Self-hosted VPN replacement
+- **Security Policies**: Per-network and per-resource policy definitions
+- **Logging**: Audit log viewing, export, SIEM ingestion
+- **SaaS App Gating**: IP-based access control for SaaS applications
 
-### Specific Use Cases
-- AI/LLM access, database access, SSH resource management
-- CI/CD pipeline security, site-to-site connections
+## Notable Use Cases
+- CI/CD pipeline security
+- SSH resource access management
+- Site-to-site connections
 - IoT headless client gateway
 - Vendor/contractor access management
-- AWS VPN replacement, AWS Workspaces
+- AWS VPN replacement
 - Bastion server cloaking
-
-### Architecture & Planning
-- Private DNS configuration best practices
-- Connector placement optimization
-- Overlapping IP address handling
-- Non-production environment access
-- Peer-to-peer local connections
-
-### Technical Reference
-- NAT traversal mechanics
-- Encryption implementation
-- Firewall compatibility
-- Service accounts
-- Windows Start Before Logon
-- Connector shutdown process
-
-## Prerequisites
-- None (index page only)
-
-## Gotchas
-- Page is a navigation index only — no implementation details here; follow specific guide links for actionable steps
-- "SaaS App Gating" requires separate IdP configuration (Okta, Entra ID, etc.) depending on provider
+- Exit nodes for SaaS gating and self-hosted VPN
 
 ## Related Docs
-- `/docs/connector-best-practices` — Connector placement and routing
-- `/docs/remote-network-best-practices` — Remote Network organization
-- `/docs/security-policies` — Policy configuration
-- `/docs/kubernetes` — K8s deployment
-- `/docs/client-deployment` — MDM rollout guides
+- Remote Network Best Practices
+- Connector Best Practices
+- Best Practices for Private DNS Configuration
+- Best Practices for Overlapping IP Addresses
+- Best Practices for Security Policies
+- How NAT Traversal Works
+- How Encryption Works in Twingate
+- How Firewalls Work with Twingate
+- Troubleshooting Peer-to-peer Connections
+- Twingate Release Stages
+
+## Notes
+This page is an index only — no configuration values, CLI flags, or step-by-step procedures are present. Use it to navigate to specific implementation guides for each deployment scenario or integration type.

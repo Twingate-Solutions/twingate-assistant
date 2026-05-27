@@ -1,13 +1,14 @@
 # Remote LLM Access with Twingate
 
 ## Summary
-Twingate enables secure, private access to self-hosted LLM servers (e.g., Ollama) without exposing ports to the public internet. Traffic routes through a Twingate Connector installed on the LLM server, creating an encrypted tunnel accessible only to authorized users. Demonstrated with the Continue VS Code extension.
+Twingate enables secure, private access to self-hosted LLM servers (e.g., Ollama) without exposing ports to the public internet. Traffic between local dev machines and remote LLM servers is routed through Twingate's zero-trust network, eliminating the need for VPNs or public firewall rules. Guide uses VS Code Continue extension as the client example.
 
 ## Key Information
-- Ollama default port: `11434`, bound to `localhost` only
-- Twingate Connector installs on the remote LLM server and makes outbound-only connections (no inbound firewall rules needed)
-- Works with any cloud VM (DigitalOcean, AWS, GCP, Azure) or on-prem server
-- Continue extension supported in VS Code, JetBrains, and Cursor
+- Twingate Connector installs on the LLM server and makes outbound-only connections (no inbound ports needed)
+- Ollama default port: `11434`, binds to `localhost` only — do **not** bind to `0.0.0.0`
+- Traffic flow: Continue → Twingate client → Twingate network → Connector → Ollama
+- Works with any cloud VM (DigitalOcean, AWS, GCP, Azure) or on-premises server
+- Applies beyond VS Code: JetBrains, Cursor also supported
 
 ## Prerequisites
 - Twingate account (free tier available)
@@ -24,23 +25,27 @@ Twingate enables secure, private access to self-hosted LLM servers (e.g., Ollama
    ollama run llama3
    ```
 
-2. **Deploy Twingate Connector on remote server**
+2. **Create Twingate Remote Network** — name it (e.g., `llm-dev-network`), select On-Premise or cloud
+
+3. **Deploy Connector on remote server**
    ```bash
    curl "https://binaries.twingate.com/connector/setup.sh" | sudo \
      TWINGATE_ACCESS_TOKEN="{token}" \
-     TWINGATE_REFRESH_TOKEN="{refresh_token}" \
+     TWINGATE_REFRESH_TOKEN="{token}" \
      TWINGATE_NETWORK="{network_name}" \
      TWINGATE_LABEL_DEPLOYED_BY="linux" bash
    ```
 
-3. **Define Twingate Resource** in admin console:
+4. **Define Resource** in Twingate admin console:
    - Address: internal IP of LLM server
    - Port: `11434`
    - Protocol: TCP
 
-4. **Assign user access** to the Resource in Twingate admin console
+5. **Assign user access** to the Resource
 
-5. **Configure Continue extension** (`config.json`):
+6. **Install Twingate client** on local machine, sign in
+
+7. **Configure Continue** (`config.json`):
    ```json
    {
      "models": [{
@@ -57,17 +62,19 @@ Twingate enables secure, private access to self-hosted LLM servers (e.g., Ollama
 | Parameter | Value |
 |-----------|-------|
 | `apiBase` | `http://{internal_ip}:11434` |
-| `provider` | `ollama` |
-| `model` | `llama3` (or any pulled model) |
-| Ollama default port | `11434` |
+| Ollama port | `11434` |
+| Resource protocol | TCP |
+| Connector env: `TWINGATE_ACCESS_TOKEN` | From admin console |
+| Connector env: `TWINGATE_REFRESH_TOKEN` | From admin console |
+| Connector env: `TWINGATE_NETWORK` | Your network name |
 
 ## Gotchas
-- **Do NOT** configure Ollama to listen on `0.0.0.0` — bind to localhost only; Twingate handles external access
-- Ollama must use the server's **internal IP** in the Twingate Resource definition, not `localhost` or `127.0.0.1`
-- Twingate client must be running and connected on local machine before making LLM requests
-- Each developer needing access must be individually granted access to the Resource
+- **Never bind Ollama to `0.0.0.0`** — keep it on localhost/internal IP only
+- Twingate client must be running and connected on local machine before requests work
+- Use the server's **internal IP** (not public IP) as the Resource address and in `apiBase`
+- Each user needing access must be explicitly granted access to the Resource in admin console
 
 ## Related Docs
 - [Twingate Connector Setup](https://www.twingate.com/docs/connector)
+- [Continue Extension Docs](https://continue.dev/docs)
 - [Ollama Documentation](https://ollama.ai)
-- [Continue Extension Configuration](https://continue.dev/docs)

@@ -1,46 +1,42 @@
 # Device-only Resource Policies
 
 ## Summary
-Device-only Resource Policies skip user authentication requirement checks, validating only device requirements for resource access. Minimum Authentication Requirements (session validity) are always enforced regardless of this setting. This enables frictionless access to low-risk resources and supports pre-login system resource access.
+Device-only Resource Policies bypass user authentication checks, relying solely on device requirement rules for access control. Minimum Authentication Requirements (session validity) are always enforced regardless of this setting. This enables frictionless access to low-risk resources and pre-login system resource access.
 
 ## Key Information
-- Applies only to **Resource Policies** (not other policy types)
-- Disabling auth requirements removes per-resource user authentication checks, but **Minimum Authentication Requirements are always enforced**
-- User must be signed into Twingate client with a valid session
-- Authentication session **persists across restarts** unless user explicitly logs out
-- Standard Resource Policy sessions do **not** persist across restarts — users must re-authenticate each time
+- Default Resource Policies check both user authentication AND device requirements
+- Device-only mode skips user authentication requirement rules but **always** enforces Minimum Authentication Requirements
+- Session is maintained across restarts/client relaunches unless user explicitly logs out
+- Standard Resource Policy sessions are **never** maintained across restarts (users must re-authenticate)
+- Supports use cases like Windows Start Before Logon (pre-interactive session access)
 
 ## Prerequisites
-- Existing Resource Policy to modify
-- Understanding of Minimum Authentication Requirements configuration (session length, device security rules)
+- Must be applied to Resource Policies only (not other policy types)
+- User must be signed in to Twingate client with a valid session
+- Minimum Authentication Requirements must be configured and valid
 
-## Step-by-Step: Enable Device-only Policy
+## Configuration Steps
 1. Navigate to the Resource Policy configuration screen
 2. Locate the **Authentication Requirements** setting
-3. Select **Disable** next to "Authentication Requirements"
-4. Save the policy
-5. To re-enable, return to the same screen and re-enable the option
+3. Select **Disable** option next to "Authentication Requirements"
+4. Save configuration
+5. To re-enable: return to same screen and re-enable Authentication Requirements
 
-## Configuration Values
-| Setting | Behavior |
-|---|---|
-| Authentication Requirements | `Disabled` = device-only mode; `Enabled` = standard mode |
-| Minimum Authentication Requirements | Always enforced; typically configured as session length (e.g., 30 days) |
-
-## Evaluation Logic (Device-only Policy)
-Access is granted when ALL conditions are true:
-1. Minimum Authentication Requirements session is **valid and active** (e.g., user authenticated within last N days)
-2. Device Security requirements are **met**
-3. User is **signed in** to Twingate client
+## How Minimum Authentication Requirements Are Evaluated (Device-Only Mode)
+| Requirement | Behavior |
+|-------------|----------|
+| Session length | User must have authenticated within configured window (e.g., 30 days) |
+| Device Security requirements | Must be met at time of access |
+| Session persistence | Maintained across restarts unless explicit logout |
 
 ## Gotchas
-- Minimum Auth Requirements are **never bypassed** — even with device-only policies, expired sessions block access
-- Device-only policies persist sessions across machine restarts; standard policies do not — important distinction for UX and system automation
-- Use case for pre-login access (e.g., Windows Start Before Logon) requires device-only policy with appropriate Minimum Auth Requirements
-- Explicitly logging out of the Twingate client **invalidates** the persisted session for device-only resources
+- **Session persistence asymmetry**: Device-only policy sessions survive restarts; standard Resource Policy sessions do not — users behind standard policies must always re-authenticate after restart
+- Disabling Authentication Requirements does **not** disable Minimum Authentication Requirements — these are separate controls
+- "Device-only" does not mean no authentication ever occurred; the user must have authenticated within the Minimum Authentication Requirements window
+- Trusted device marking alone is insufficient — session validity is still checked
 
 ## Related Docs
-- [Resource Policies](https://www.twingate.com/docs/resource-policies)
-- [Trusted Devices](https://www.twingate.com/docs/trusted-devices) (marking devices as trusted)
-- [Windows Start Before Logon](https://www.twingate.com/docs/windows-start-before-logon)
-- Minimum Authentication Requirements configuration
+- Resource Policies
+- Trusted Devices
+- Windows Start Before Logon
+- Minimum Authentication Requirements

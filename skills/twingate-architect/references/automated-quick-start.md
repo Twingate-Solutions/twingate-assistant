@@ -1,17 +1,17 @@
 # Automated Deployment - Twingate
 
 ## Summary
-Twingate supports automated deployment via Infrastructure-as-Code (IaC) tools, specifically Terraform and Pulumi. Guides are available for AWS, Azure, and GCP. This page serves as an entry point to provider-specific deployment guides.
+Twingate supports automated deployment via Infrastructure-as-Code (IaC) tools, specifically Terraform and Pulumi. Guides are available for AWS, Azure, and GCP. Intended to reduce rollout time across multi-cloud environments.
 
 ## Key Information
 - Supported IaC tools: **Terraform** and **Pulumi**
-- Supported cloud providers: AWS, Azure, GCP (the "big three")
-- Designed for multi-cloud and multi-environment rollouts
+- Supported cloud providers: AWS, Azure, GCP ("big three")
+- Enables consistent multi-cloud and multi-environment deployments
 
 ## Prerequisites
-- Existing IaC toolchain (Terraform or Pulumi)
-- Twingate account with appropriate permissions
-- Cloud provider credentials for target environment(s)
+- Twingate account
+- Familiarity with Terraform or Pulumi
+- Cloud provider credentials (AWS, Azure, or GCP)
 
 ## Available Guides
 | Tool | Providers |
@@ -20,10 +20,10 @@ Twingate supports automated deployment via Infrastructure-as-Code (IaC) tools, s
 | Pulumi | AWS, Azure, GCP |
 
 ## Gotchas
-- This page is an index only — actual configuration steps are in the linked provider-specific guides
-- No configuration values or CLI flags are documented at this level
+- This page is an index only — actual configuration details are in the provider-specific sub-guides
+- No direct CLI flags or API parameters documented at this level
 
 ## Related Docs
-- Terraform deployment guides (AWS / Azure / GCP)
-- Pulumi deployment guides (AWS / Azure / GCP)
-- Best Practices for Secure Infrastructure-as-Code Initiatives (webinar resource)
+- Terraform deployment guides (per cloud provider)
+- Pulumi deployment guides (per cloud provider)
+- Twingate Best Practices for Secure Infrastructure-as-Code (webinar resource)

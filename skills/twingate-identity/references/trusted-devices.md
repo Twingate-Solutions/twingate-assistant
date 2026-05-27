@@ -1,34 +1,31 @@
 # Trusted Devices
 
 ## Summary
-Trusted Devices is a policy rule in Twingate that restricts access to resources or network sign-in based on whether the device is marked as trusted. Devices not marked as trusted are blocked from accessing protected resources regardless of platform or location.
+Trusted Devices is a policy rule in Twingate that restricts access to Resources or Network Sign In based on whether the device is marked as trusted. Users on untrusted devices are blocked from accessing protected Resources when this rule is enforced.
 
 ## Key Information
-- Can be applied to **Network Sign In Policies** and **Resource Policies**
-- Enforcement is platform-agnostic (works on all platforms)
+- Applies to both **Network Sign In Policies** and **Resource Policies**
+- Enforcement is platform-agnostic (works on any OS/platform)
 - Enforcement is location-agnostic
-- Requires Twingate Client app to be installed on the device
-- Untrusted devices are blocked entirely from accessing protected resources
+- Requires the Twingate Client app to be installed on the device
+- Blocking is enforced at access time, not just authentication time
 
 ## Prerequisites
-- Twingate Client app installed on the device
-- Device must be marked as "Trusted" in Twingate admin settings before policy allows access
+- Twingate Client app installed on end-user devices
+- Device must be enrolled/registered in Twingate
+- Admin access to configure Network Sign In Policies or Resource Policies
 
 ## Configuration
-- Apply as a rule condition within:
-  - **Network Sign In Policies** — controls sign-in access
-  - **Resource Policies** — controls per-resource access
-
-## Step-by-Step (Policy Setup)
-1. Navigate to the relevant Network Sign In Policy or Resource Policy in the Twingate admin console
-2. Add a "Trusted Device" rule condition to the policy
-3. Save/publish the policy
-4. Ensure target devices are marked as trusted via device management settings
+1. Navigate to the target **Resource Policy** or **Network Sign In Policy**
+2. Add the **Trusted Devices** rule to the policy
+3. Mark specific devices as trusted within Twingate admin console
+4. Apply policy to relevant Resources or network sign-in flows
 
 ## Gotchas
-- A user on an untrusted device will be **blocked** even if all other policy conditions are met
-- Marking a device as trusted must be done separately (in device management) — policy enforcement and trust assignment are distinct steps
-- No exceptions based on platform or network location — enforcement is absolute when the rule is active
+- A device must be explicitly **marked as trusted** — enrollment alone does not make a device trusted
+- Users will be **silently blocked** (not prompted to remediate) if accessing from an untrusted device
+- Policy applies regardless of network location — being on a corporate network does not bypass the requirement
+- All platforms are subject to enforcement; no platform exceptions
 
 ## Related Docs
 - Network Sign In Policies

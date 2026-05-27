@@ -1,41 +1,40 @@
-# Android and ChromeOS Client Applications - OSS Component Licenses
+# Android and ChromeOS Client Applications - OSS Notices
 
 ## Page Title
-Twingate Android and ChromeOS Client Applications — Open Source Component Notices
+Open Source Software (OSS) Notices: Android and ChromeOS Client Applications
 
 ## Summary
-This page lists all third-party open source components used in the Twingate Android and ChromeOS client applications, along with their respective licenses and copyright holders. It serves as the legal attribution/notice document required by the included open source licenses.
+This page lists all third-party open source components used in Twingate's Android and ChromeOS client applications, along with their respective licenses. It serves as the legal attribution document required by the included open source licenses. No implementation guidance is provided.
 
 ## Key Information
 
 ### Components by License
 
 | License | Components |
-|---|---|
-| Apache 2.0 | libssl, AndroidX, Dagger 2, Kotlin, Logback Android, Moshi, OkHttp, Retrofit, Retrofit Rx adapter, RxAndroid, RxJava, Timber |
+|---------|-----------|
+| Apache 2.0 | AndroidX, Dagger 2, Kotlin, libssl, Logback Android, Moshi, OkHttp, Retrofit, Retrofit Rx adapter, RxAndroid, RxJava, Timber |
 | BSD 3-Clause | libevent, lwip, Sentry |
-| MIT | libjansson, jwt-cpp, args, Sentry SDK for Java and Android, SLF4J, pubnub, quicly |
-| zlib | zlib, nanopb |
+| MIT | args, jwt-cpp, libjansson, pubnub, quicly, Sentry SDK for Java and Android, SLF4J |
+| zlib | nanopb, zlib |
 | Boost Software License 1.0 | catch2 |
 | CC0 1.0 Universal | siphash |
 | Custom (MIT-like) | fmt |
 
 ## Prerequisites
-- None — this is a reference/compliance document only
+N/A — Reference/legal document only.
 
 ## Step-by-Step
-- N/A — informational page only
+N/A — No implementation steps.
 
 ## Configuration Values
-- None
+N/A
 
 ## Gotchas
-- **Apache 2.0 redistribution** requires including the license text, preserving copyright notices, and noting modifications to source files
-- **BSD 3-Clause** prohibits using contributor names for endorsement without permission
-- **siphash** uses CC0 (public domain dedication), not a standard OSS license — no attribution required but trademarks/patents are not waived
-- **fmt** includes an optional exception allowing embedded object-form redistribution without copyright notices
-- **Sentry** appears under two different licenses: the native SDK uses BSD 3-Clause; the Java/Android SDK uses MIT
+- **fmt** uses a non-standard license with an optional exception: embedded portions in compiled object code may be redistributed without the copyright/permission notice.
+- **Sentry** appears under both BSD 3-Clause (native SDK) and MIT (Java/Android SDK) — two separate components with different licenses.
+- Apache 2.0 components require NOTICE file preservation when redistributing derivative works.
+- BSD 3-Clause components prohibit using contributor names for endorsement without permission.
 
 ## Related Docs
-- Twingate OSS notices for other platforms (iOS, Windows, Linux, macOS clients)
+- Twingate OSS notices for other platforms (iOS, macOS, Windows, Linux clients)
 - [Apache License 2.0](http://www.apache.org/licenses/)

@@ -1,63 +1,71 @@
-# How to Manage Access to SSH Resources (Twingate + Smallstep)
+# SSH Access Management with Twingate + Smallstep CA
 
 ## Summary
-Twingate integrates with Smallstep Certificate Authority to provide application-layer SSH authentication on top of Twingate's network-level access controls. This guide deploys the full stack on AWS using Pulumi, combining Twingate for network access with Smallstep for short-lived SSH certificate issuance via OAuth 2.0.
+Combines Twingate network-level access control with Smallstep Certificate Authority for application-layer SSH authentication. Uses short-lived OAuth2.0-backed SSH certificates alongside Twingate's network invisibility. Deployed via Pulumi on AWS.
 
 ## Key Information
-- Twingate handles **network-layer** protection; Smallstep handles **application-layer** SSH authentication
-- Short-lived SSH certificates are issued via OAuth 2.0 (Google Cloud used in example)
-- Open-source Smallstep does **not** manage user accounts on SSH hosts — manual user creation required
-- Infrastructure includes: VPC, public/private subnets, 2 Twingate Connector EC2s, 1 Smallstep CA EC2, Route53 Private Hosted Zone
+- Twingate handles network access (resource invisibility, least-privilege)
+- Smallstep CA handles SSH authentication via short-lived certificates
+- OAuth2.0 (e.g., Google) used as identity provider for certificate issuance
+- Open-source Smallstep does **not** manage user accounts on SSH hosts — manual account creation required
+- Managed Smallstep SSH service available to avoid self-managing CA and user accounts
 
 ## Prerequisites
-- AWS CLI installed and configured (or AWS CloudShell)
-- Pulumi CLI installed and configured
+- AWS CLI configured (or CloudShell)
+- Pulumi CLI installed
 - Twingate API token with **Read/Write and Provision** permissions
 - Git
 - Twingate Client installed
-- OAuth 2.0 server access (example uses Google Cloud — create **Desktop app** credentials)
-- AWS SSH Keypair (emergency fallback access)
+- OAuth 2.0 credentials (Google Cloud "Desktop app" credentials)
+- AWS SSH Keypair (fallback access)
 
 ## Step-by-Step
 
-1. **Clone repo**: `git clone https://github.com/twingate/pulumi-twingate-smallstep && cd pulumi-twingate-smallstep`
-2. **Create OAuth credentials** in GCP (Desktop app type); note Client ID and Secret
-3. **Init Pulumi stack**: `pulumi stack init dev` and `cp ./Pulumi.example.yaml ./Pulumi.dev.yaml`
-4. **Set config values** (see Configuration Values below)
-5. **Deploy**: `pulumi up`
-6. **Grant user access** in Twingate Admin Console to the connector resource in `smallstep_demo` remote network
-7. **Install step CLI** on client machine
-8. **Log in** to Twingate Client
-9. **Create local user account** on SSH host via keypair SSH: `sudo adduser --quiet --disabled-password --gecos '' YOUR_USERNAME`
-10. **Bootstrap CA trust**: run `./bootstrap_user.sh` on client machine
-11. **Obtain certificate and SSH**:
-    ```bash
-    step ssh login YOUR_USERNAME@YOUR_DOMAIN --provisioner "Google"
-    step ssh config
-    step ssh hosts
-    ssh YOUR_USERNAME@xxx.tgdemo.int
-    ```
+1. Clone repo: `git clone https://github.com/twingate/pulumi-twingate-smallstep`
+2. Create GCP OAuth "Desktop app" credentials; note Client ID and Secret
+3. Initialize Pulumi stack: `pulumi stack init dev`
+4. Copy config: `cp ./Pulumi.example.yaml ./Pulumi.dev.yaml`
+5. Set configuration values (see below)
+6. Deploy: `pulumi up`
+7. Grant user access to Connector Resource in `smallstep_demo` Remote Network via Admin Console
+8. Install `step` CLI on client machine
+9. Log in to Twingate Client
+10. Manually create SSH user account on host: `sudo adduser --quiet --disabled-password --gecos '' YOUR_USERNAME`
+11. Bootstrap CA trust on client: `./bootstrap_user.sh`
+12. Obtain SSH certificate and connect:
+```bash
+step ssh login YOUR_USERNAME@YOUR_DOMAIN --provisioner "Google"
+step ssh config
+step ssh hosts
+ssh YOUR_USERNAME@xxx.tgdemo.int
+```
 
 ## Configuration Values
 
-| Pulumi Config Key | Description |
-|---|---|
-| `ca_config.ca_oauth_client_id` | OAuth2 Client ID |
-| `ca_config.ca_oauth_client_secret` | OAuth2 Client Secret (secret) |
-| `ca_config.ca_oauth_allowed_domain` | Allowed org domain (e.g. `example.com`) |
-| `twingate:apiToken` | Twingate API token (secret) |
-| `twingate:network` | Twingate account name |
-| `ca_config.ca_email` | Email for CA configuration |
-| `data.key_name` | AWS SSH keypair name |
+```bash
+pulumi config set --path ca_config.ca_oauth_client_id "CLIENT_ID"
+pulumi config set --secret --path ca_config.ca_oauth_client_secret "CLIENT_SECRET"
+pulumi config set --path ca_config.ca_oauth_allowed_domain "YOUR_DOMAIN_NAME"
+pulumi config set twingate:apiToken TWINGATE_API_TOKEN --secret
+pulumi config set twingate:network TWINGATE_ACCOUNT_NAME
+pulumi config set --path ca_config.ca_email "YOUR_EMAIL_ADDRESS"
+pulumi config set --path data.key_name "SSH_KEYPAIR_NAME"
+```
+
+## Infrastructure Created
+- AWS VPC with public/private subnets and internet gateway
+- 2 EC2 Twingate Connectors (public subnet)
+- Smallstep CA EC2 instance (private subnet)
+- Route53 Private Hosted Zone (`*.tgdemo.int`)
+- Twingate Remote Network with Resources for Connectors and Smallstep CA
 
 ## Gotchas
-- Open-source Smallstep requires **manual user account creation** on each SSH host — no automated user provisioning
-- Root CA certificate must be distributed to clients; bootstrap script is demo-only — use MDM in production
-- OAuth domain restriction limits access to users with matching email domains only
-- Connector EC2s deploy to **public subnet**; Smallstep CA deploys to **private subnet**
+- Open-source Smallstep requires **manual user account creation** on each SSH host
+- CA root certificate must be distributed to clients (use MDM in production; `bootstrap_user.sh` is demo-only)
+- `ca_oauth_allowed_domain` restricts which OAuth users can authenticate — set to your org's domain
+- Connector Resources are in `smallstep_demo` Remote Network; user access must be explicitly granted
 
 ## Related Docs
-- [Smallstep SSH managed service](https://smallstep.com/ssh/) — eliminates manual user management
-- [Smallstep DIY SSO for SSH blog post](https://smallstep.com/blog/diy-single-sign-on-for-ssh/)
-- [Twingate Zero Trust blog post](https://www.twingate.com/blog/zero-trust)
-- [step CLI installation](https://smallstep.com/docs/step-cli/installation)
+- [Smallstep DIY SSO for SSH](https://smallstep.com/blog/diy-single-sign-on-for-ssh/)
+- [Smallstep Managed SSH](https://smallstep.com/ssh/)
+- Twingate blog: "The Many Layers of Zero Trust"

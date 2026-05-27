@@ -1,17 +1,18 @@
-# Offboarding Users - Twingate
+# Offboarding Users – Twingate
 
 ## Summary
-Covers two offboarding scenarios: social login users (managed directly in Twingate Admin Console) and enterprise IdP users (managed in IdP with Twingate sync). Immediate access revocation for IdP users requires blocking devices directly in Twingate Admin Console due to sync delays.
+Covers two offboarding scenarios: social login users (managed directly in Twingate Admin Console) and enterprise IdP users (managed in IdP with Twingate sync). For immediate access revocation in IdP scenarios, blocking devices in the Admin Console is recommended to bypass sync delays.
 
 ## Key Information
-- Disabled users **cannot log in** but account data is retained and they **still count toward billable users**
-- Deleted users have account data **permanently removed** and **do not count toward billable users**
-- IdP sync changes may have delays depending on IdP configuration
-- Blocking a device in Twingate immediately revokes all Resource access regardless of IdP sync status
+- Two distinct workflows depending on identity source (social login vs. enterprise IdP)
+- Disabled users retain account data and **count toward billable users**
+- Deleted users are permanently removed and **do not count toward billable users**
+- IdP sync may have delays; device blocking provides immediate revocation
+- Blocked devices cannot access any Resources until manually unblocked
 
 ## Prerequisites
-- Admin access to Twingate Admin Console
-- For IdP scenario: Admin access to enterprise IdP (Okta, Entra ID, etc.)
+- Admin Console access with administrative credentials
+- For IdP scenario: admin access to the enterprise identity provider (Okta, Entra ID, etc.)
 
 ## Step-by-Step
 
@@ -19,26 +20,36 @@ Covers two offboarding scenarios: social login users (managed directly in Twinga
 1. Log in to Twingate Admin Console
 2. Navigate to **Teams** page
 3. Locate the target user
-4. Select **Disable** (retains account, blocks login) or **Delete** (permanently removes account)
+4. Select **Disable** (retains data, still billable) or **Delete** (permanent removal, not billable)
 5. Confirm the action
 
 ### Scenario 2: Enterprise IdP (Okta, Entra ID, etc.)
-1. Log in to your IdP
-2. **Full offboarding**: Disable or delete user account in IdP → syncs to Twingate automatically
-3. **Twingate-only removal**: Remove user from groups synced to Twingate → syncs automatically
-4. **For immediate revocation**: Log in to Twingate Admin Console → navigate to **Devices** → block the user's device(s)
+**Full offboard:**
+1. Log in to enterprise IdP
+2. Disable or delete the user account in the IdP
+3. Changes sync automatically to Twingate
+
+**Remove Twingate access only:**
+1. Log in to enterprise IdP
+2. Remove user from any groups synced to Twingate
+3. Changes sync automatically to Twingate
+
+**For immediate revocation (both cases):**
+1. Log in to Twingate Admin Console
+2. Navigate to **Devices** section
+3. Block the user's device(s)
 
 ## Configuration Values
-- N/A — actions performed via UI only
+None (UI-based workflow only)
 
 ## Gotchas
-- **Billing**: Disabled users still count as billable; delete if you want to remove from billing
-- **Sync delay**: IdP changes are not instant — always block the device in Twingate for immediate revocation
-- **Device blocking is independent**: A blocked device cannot access any Resources until explicitly unblocked, even if the user account is later re-enabled in the IdP
-- Deleting a user is **permanent** — no recovery of account data
+- **Sync delay**: IdP changes are not instant in Twingate; always block devices in the console if immediate revocation is required
+- **Billing**: Disabled users still consume a billable seat; delete if the account is no longer needed
+- **Device blocking is independent**: Blocking a device in the console works immediately regardless of IdP sync status
+- Deleted user data is **permanently removed**; no recovery path documented
 
 ## Related Docs
 - Twingate Teams/Users management
 - Device management in Admin Console
 - IdP integration guides (Okta, Entra ID)
-- SCIM provisioning/sync configuration
+- Group sync configuration

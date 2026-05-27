@@ -1,54 +1,61 @@
 # How to Protect Your Home Lab with Twingate
 
 ## Summary
-Step-by-step guide for securing a home lab using Twingate to provide remote access without opening router ports or running a traditional VPN. Covers setup for multi-user environments with granular access control using Groups and Resources.
+Step-by-step guide for setting up Twingate in a home lab to replace VPN/port forwarding with zero-trust remote access. Covers Connector deployment, Resource creation, multi-user access with Groups, and granular permission mapping. Enables remote access without opening router ports.
 
 ## Key Information
-- Replaces port forwarding and VPN server with Twingate Connectors
+- Twingate replaces VPN server + port forwarding rules entirely
 - Zero trust model: no permissions granted by default
-- Connectors deployed in pairs for HA/load balancing (single Connector works but pairs recommended)
-- Connector footprint: 2GB RAM, 2 vCPUs minimum
+- Connectors deployed in pairs for HA/load balancing (single is sufficient but not recommended)
+- Connector footprint: 2GB RAM, 2 vCPUs
 - Resources identified by IP/CIDR or FQDN + port
 
 ## Prerequisites
 - Free Twingate account
 - Twingate Client installed on admin device
-- At least one device in home lab to host a Connector (NAS, Raspberry Pi, Linux/Windows machine)
+- Device in home lab to host Connector (NAS, Raspberry Pi, Linux/Windows machine)
 
 ## Step-by-Step
 
-1. **Create Remote Network**: Admin Console → Network → Remote Networks → `+ Remote Network` → Select `On Premise` → Name it (e.g., "Home Lab")
-2. **Deploy Connector**: Click Remote Network → select a Connector → choose deployment method (Docker container or systemd) → follow console instructions
-3. **Verify Connector**: Confirm Connector shows connected status in Admin Console
-4. **Create Initial Resource**: Network → Resources → `Add Resource` → use CIDR (`192.168.100.0/24`) or DNS pattern (`*.int`) → assign to `Everyone` group
-5. **Invite Users**: Team tab → `Add User` → enter email addresses
-6. **Create Groups**: Team → Groups → `Add Group` → suggested: Standard Users, Power Users, Admin Users
-7. **Map Services to Resources**: Create per-service or per-server Resources with specific ports
-8. **Assign Groups to Resources**: Ensure `Everyone` group is NOT selected for granular Resources
-9. **Delete broad Resource**: Remove the initial "Everything" resource
-10. **Disable router VPN/port forwarding**: No longer needed
+1. **Create Remote Network**: Admin Console → Network → Remote Networks → `+ Remote Network` → Type: `On Premise`
+2. **Deploy Connector**: Click Remote Network → select Connector → choose deployment method (Docker container or systemd)
+3. **Verify Connector**: Confirm active connection to Controller/Relay in Admin Console
+4. **Create initial Resource**: Network → Resources → `Add Resource` → use CIDR (e.g., `192.168.100.0/24`) or DNS pattern (e.g., `*.int`) → assign to `Everyone` group
+5. **Test access**: Use alternate internet connection (mobile tether) to verify connectivity
+6. **Disable VPN/port forwarding** on router
+7. **Invite users**: Team → Add User → enter email
+8. **Create Groups**: Groups tab → `Add Group` (e.g., Standard Users, Power Users, Admin Users)
+9. **Map services to Groups**: Define host:port Resources per service, assign appropriate Groups
+10. **Delete broad "Everything" Resource** after granular Resources created
 
 ## Configuration Values
 
-| Field | Example Value |
-|-------|--------------|
-| Remote Network Location | `On Premise` |
+| Setting | Example Value |
+|---|---|
+| Remote Network type | `On Premise` |
 | CIDR Resource | `192.168.100.0/24` |
-| DNS Pattern Resource | `*.int` |
-| Connector RAM | 2GB |
-| Connector vCPUs | 2 |
+| DNS pattern Resource | `*.int` |
+| Connector RAM | 2GB minimum |
+| Connector vCPUs | 2 minimum |
 
-**Resource Types**: IP (use when users connect via IP addresses), DNS (use when users connect via FQDNs), or both
+**Deployment methods**: Docker container, systemd (Linux/VM), Hyper-V VM (Windows — Docker on Windows noted as unstable)
+
+## Resource Design Pattern
+
+- Combine services on same host with same Group access into single Resource
+- Support both IP and DNS-style Resources if users connect via both methods
+- Recommended Group structure: Standard Users / Power Users / Admin Users
+- Restrict sensitive ports (SSH :22, RDP :3389, Portainer :9000) to Admin Users only
 
 ## Gotchas
-- Twingate Client intercepts traffic based on Resource definitions—if users connect via both IP and FQDN, create Resources for both
-- Do NOT check `Everyone` group when creating granular per-service Resources
-- Docker on Windows can be unstable; prefer Linux-based Connector deployment
-- Single Connector is functional but two are recommended for HA
-- No permissions exist by default—users see nothing until Resources are assigned to their Group
+- Client intercepts traffic based on Resource definitions — must cover all access methods (IP + FQDN) users actually use
+- Do **not** assign granular Resources to `Everyone` group — select specific Groups
+- Docker on Windows is noted as unstable for Connector deployment
+- Two Connectors created by default per Remote Network; only one required but HA requires two
+- After switching to granular Resources, delete the broad CIDR "Everything" Resource
 
 ## Related Docs
-- [Connector deployment options](https://www.twingate.com/docs/) 
-- [Security Policies](https://www.twingate.com/docs/access-policies)
+- [Connector deployment options](https://www.twingate.com/docs/) — additional deployment methods
+- [Security Policies](https://www.twingate.com/docs/) — 2FA, device posture, auth frequency per Group
 - Twingate Client download page
-- Private DNS configuration
+- Private DNS configuration docs

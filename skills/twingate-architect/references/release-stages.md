@@ -6,20 +6,21 @@ Twingate releases features in two stages: Beta and General Availability (GA). Be
 ## Key Information
 
 ### Beta Stage
-- Feature available for testing but may be incomplete or buggy
-- Breaking changes may occur between versions
+- Available for opt-in testing or enabled for new networks only
+- May have bugs, limited functionality, or incomplete features
+- Breaking changes possible
 - Support **not guaranteed**
 - Documentation may be incomplete
-- Opt-in or enabled only for new networks
 - Not fully optimized for performance
 
 ### General Availability (GA) Stage
-- Production-ready, feature-complete with polished UI/UX
+- Fully released for production use
+- Feature-complete with polished UI/UX
 - Breaking changes avoided whenever possible
-- **Full support** through standard channels
+- **Full support** through regular channels
 - Comprehensive documentation provided
+- Optimized and scalable for production
 - Available to both new and existing networks
-- Optimized and scalable for production use
 
 ## Comparison Table
 
@@ -27,7 +28,7 @@ Twingate releases features in two stages: Beta and General Availability (GA). Be
 |------|------|----|
 | Functionality | May be incomplete | Feature-complete |
 | Reliability | Possible minor issues | Thoroughly tested |
-| Stability | May have breaking changes | Breaking changes avoided |
+| Stability | Breaking changes possible | Breaking changes avoided |
 | Performance | Not optimized | Optimized for production |
 | Support | Not guaranteed | Full formal support |
 | Documentation | May be incomplete | Comprehensive |
@@ -35,9 +36,9 @@ Twingate releases features in two stages: Beta and General Availability (GA). Be
 
 ## Gotchas
 - Do not rely on Beta features in production environments — breaking changes can occur without notice
-- Support requests for Beta features may not be addressed
-- Beta availability may be restricted to new networks only, meaning existing networks may need to opt in explicitly
-- GA features may still have documented known gaps — check release documentation before deploying
+- Beta features may only be accessible to new networks; existing networks may need to wait for GA
+- GA documentation notes known feature gaps — check these before implementation
+- No SLA or formal support during Beta stage
 
 ## Related Docs
-- Individual feature documentation will indicate Beta or GA status
+- Individual feature documentation will indicate current release stage (Beta or GA)

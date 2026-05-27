@@ -1,14 +1,14 @@
 # Google Workspace Configuration
 
 ## Summary
-Twingate integrates with Google Workspace to synchronize user accounts and delegate authentication via OAuth and the Google Workspace Directory API. Configuration is initiated from the Twingate Admin Console under Settings > Identity Provider. Group and OU sync are optional and disabled by default.
+Twingate integrates with Google Workspace to sync user accounts, delegate authentication to Google, and optionally sync groups/OUs via the Directory API using OAuth. Configuration is initiated from the Admin Console under Settings > Identity Provider.
 
 ## Key Information
 - Twingate requires **read permission for Google Workspace groups** even if Group Sync is disabled
-- User authentication is delegated to Google; email must match configured domain(s)
+- User authentication is email-domain-based; non-matching domains cannot authenticate (including admin users)
+- Multiple Google Workspace domains supported via Settings > Identity Provider > "+ Add Domain"
 - Only **active** Google Workspace users can sign in; inactive users sync but are blocked
-- Real-time sync applies only to **users** (via webhook); groups/OUs use polling
-- Domain restriction applies to both end users and Twingate admin console users
+- Real-time sync applies to **users only** (webhook); groups/OUs use polling
 
 ## Prerequisites
 - Google Workspace admin account with one of:
@@ -17,43 +17,43 @@ Twingate integrates with Google Workspace to synchronize user accounts and deleg
   - User Management Admin
   - Help Desk Admin
   - Custom role with **Users: Read** + **Groups: Read** under Admin API
-- Third-party API access must not be restricted (check Security > API Controls > Manage Google Services)
+- `Google Workspace Admin` must not be restricted in Security > API Controls
 
 ## Step-by-Step
-1. In Twingate Admin Console: Settings > Identity Provider — enable Google Workspace integration and sign in to Google domain
-2. Configure Twingate application in Google Workspace Admin Console
-3. Enable user/group sync via the ⋯ action menu in Identity Provider settings
-4. (Optional) Enable Selective Sync: enable group/OU sync, then click "Manage Selection"
+1. Enable Google Workspace integration in Twingate Admin Console (Settings > Identity Provider)
+2. Sign in to Google Workspace domain to authorize OAuth access
+3. Configure Twingate app in Google Workspace Admin Console
+4. Enable user and/or group sync via ⋯ action menu
+5. (Optional) Enable Selective Sync via ⋯ action menu, then click "Manage Selection"
 
 ## Configuration Values
 
-| Setting | Location |
-|---|---|
-| Add additional domains | Settings > Identity Provider > "+ Add Domain" |
-| Enable/disable Group or OU Sync | Identity Provider ⋯ action menu |
-| Manual sync trigger | Identity Provider ⋯ action menu > "Manually Sync Now" |
-| Selective Sync management | "Manage Selection" button in Selective Sync panel |
+| Setting | Location | Notes |
+|---|---|---|
+| Group Sync | ⋯ action menu | Disabled by default |
+| OU Sync | ⋯ action menu | Disabled by default |
+| Selective Sync | "Manage Selection" button | Requires Group or OU sync enabled first |
+| Manual Sync | ⋯ action menu > "Manually Sync Now" | May take several minutes to complete |
 
 ## Sync Polling Intervals
-| Plan | Groups/OUs Sync Frequency |
-|---|---|
-| Starter | Every 24 hours |
-| Teams / Business / Enterprise | Every 2 hours |
+- **Starter plan**: Groups/OUs every 24 hours
+- **Teams/Business/Enterprise**: Groups/OUs every 2 hours
+- **Users**: Real-time via webhook
 
 ## Gotchas
-- **API access blocked**: If authorization fails, check Security > API Controls > Manage Google Services — set Google Workspace Admin to "Unrestricted" OR whitelist Twingate as "Trusted" in Manage Third-Party App Access
-- **Disabling Group/OU Sync with Selective Sync enabled**: ALL synced groups/OUs are deleted, even those with Resource access
-- **Disabling Group/OU Sync with Selective Sync disabled**: Groups/OUs with Resource access are converted to Twingate Groups; others are deleted
-- **Selective Sync**: Always include your own admin account in at least one synced group to avoid locking yourself out
-- Manual sync may still take several minutes to complete after triggering
-- Only domains already configured in Google Workspace can be added to Twingate
+- **Disabling Group/OU Sync behavior differs** based on Selective Sync state:
+  - Selective Sync OFF: groups with Resource access → converted to Twingate Groups; others deleted
+  - Selective Sync ON: **all** groups deleted, including those with Resource access
+- Deselecting groups in Selective Sync **deletes them even if they have Resource access**
+- **Always include your own account** in Selective Sync selection or risk locking yourself out
+- API authorization failures likely mean `Google Workspace Admin` is set to **Restricted** — fix via unrestricting it or granting Twingate "Trusted" access in Third-Party App Access settings
+- Only domains already configured in Google Workspace can be added as additional domains
 
 ## Data Synced
-- User first/last names, email addresses, avatars
-- Group membership (only if Group Sync enabled)
+User first/last name, email, avatar; group membership (if Group Sync enabled)
 
 ## Related Docs
-- Twingate Group Membership documentation
-- Twingate Selective Sync
+- Google Workspace multiple domains documentation
 - Google Workspace administrator roles (Google Help Center)
-- Google Workspace domain configuration (Google documentation)
+- Twingate Selective Sync
+- Twingate Group membership / Resources access

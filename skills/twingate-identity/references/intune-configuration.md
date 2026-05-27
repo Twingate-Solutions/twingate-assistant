@@ -4,58 +4,50 @@
 Intune Configuration (Business & Enterprise only)
 
 ## Summary
-Twingate integrates with Microsoft Intune via the Intune API to verify device compliance as part of Device Security policies. Devices must be Intune-managed, reported within 7 days, and classified as Compliant or In-grace period to pass verification. Supports macOS and Windows only.
+Twingate integrates with Microsoft Intune via the Intune API to verify device compliance as part of Device Security policies. Devices must be Intune-managed, compliant (or in grace period), and have reported within the last 7 days to satisfy Trusted Profile requirements. Supports macOS and Windows only.
 
 ## Key Information
-- Twingate matches device serial numbers against Intune-managed device list
-- Verification requires: managed by Intune + reported within last 7 days + status is `Compliant` or `In-grace period`
-- Integration syncs periodically; initial sync shows "Waiting to sync" for a few minutes
-- Recoverable errors (API unresponsive): auto-retry, last successful sync time displayed
-- Unrecoverable errors (invalid credentials/permissions): integration stops, admin email notification sent
+- Matching is done via **device serial number** against Intune-managed device list
+- Device must meet **all three criteria**: managed by Intune + reported within 7 days + status is `Compliant` or `In-grace period`
+- Integration syncs periodically; initial state shows "Waiting to sync" for a few minutes
+- Recoverable errors (API unresponsive): retries automatically, shows last successful sync time
+- Unrecoverable errors (invalid credentials/permissions): stops retrying, sends admin email alert
 
 ## Prerequisites
 - Business or Enterprise Twingate plan
 - Azure Active Directory access with ability to create App Registrations
-- Admin consent rights in Azure AD
+- Admin consent rights for Microsoft Graph API permissions
 
-## Step-by-Step
-
-### Azure App Registration Setup
+## Step-by-Step: Azure App Registration Setup
 1. Azure Portal → **Azure Active Directory** → **App registrations** → New registration
-2. **API permissions** → Add **Microsoft Graph** → **Delegated permissions** → `DeviceManagementManagedDevices.Read.All`
-3. Add **Microsoft Graph** → **Application permissions** → `DeviceManagementManagedDevices.Read.All`
+2. Go to **API permissions** → Add permission → **Microsoft Graph** → **Delegated permissions** → select `DeviceManagementManagedDevices.Read.All`
+3. Add permission → **Microsoft Graph** → **Application permissions** → select `DeviceManagementManagedDevices.Read.All`
 4. Click **Grant admin consent**
-5. Go to **Client credentials** → Create new client secret → **Save the Value immediately** (not retrievable later)
+5. Go to **Client credentials** → Create new client secret → **save the Value immediately** (not accessible again)
 6. From Overview page, save **Application (client) ID** and **Directory (tenant) ID**
 
-### Twingate Configuration
+## Step-by-Step: Twingate Configuration
 1. Twingate Admin → **Settings** → **Device Integration**
-2. Click **Connect** next to Intune → Enter credentials
-3. Verify sync status on Device Settings page
-
-### Security Policy Integration
-- Create a Trusted Profile for macOS/Windows with Intune as required Trust Method
-- Attach Trusted Profile to Security Policies
+2. Click **Connect** next to Intune → enter credentials (Client ID, Tenant ID, Client Secret)
+3. Verify integration status on Device Settings page
 
 ## Configuration Values
-| Field | Source |
+| Value | Source |
 |-------|--------|
-| Client Secret Value | Azure App Registration → Client credentials |
 | Application (client) ID | Azure App Registration Overview |
 | Directory (tenant) ID | Azure App Registration Overview |
+| Client Secret Value | Azure App Registration → Client credentials (save immediately) |
 
-**Required API Permissions:**
-- `DeviceManagementManagedDevices.Read.All` (Delegated)
-- `DeviceManagementManagedDevices.Read.All` (Application)
+**Required API Permission:** `DeviceManagementManagedDevices.Read.All` (both Delegated and Application)
 
 ## Gotchas
-- Serial number must be retrievable from the device — failure to retrieve causes "Intune not verified"
-- Initial sync delay: devices show incorrect state until sync completes (few minutes)
-- Unrecoverable errors require full reconfiguration with new API credentials
-- Client secret value is only shown once at creation time — save immediately
-- Platform support is **Mac and Windows only** (no mobile/Linux)
+- Client secret **Value** is only shown once at creation — save it immediately
+- Both **Delegated** and **Application** permission types are required for the same permission
+- Admin consent must be explicitly granted after adding permissions
+- Serial number retrieval failure on the client side will cause `Intune not verified` regardless of Intune status
+- For unrecoverable errors, must fully reconfigure the integration with new credentials
 
 ## Related Docs
 - Device Security / Trusted Profiles documentation
-- Security Policies documentation
+- Security Policies configuration
 - Twingate pricing page (plan eligibility)

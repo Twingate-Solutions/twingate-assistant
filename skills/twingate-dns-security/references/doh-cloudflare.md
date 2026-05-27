@@ -1,46 +1,47 @@
 # Configure Cloudflare DoH and DNS Filtering with Twingate
 
 ## Summary
-Integrates Cloudflare Zero Trust DNS-over-HTTPS (DoH) with Twingate, enabling DNS filtering alongside DoH protection. Requires retrieving a custom DoH URL from Cloudflare and registering it in the Twingate Admin Console.
+Integrates Cloudflare Zero Trust DNS-over-HTTPS with Twingate, enabling DNS filtering and DoH protection. Requires retrieving a custom DoH URL from Cloudflare and adding it to the Twingate Admin Console as a custom DoH provider.
 
 ## Key Information
-- Cloudflare Zero Trust provides both DoH encryption and optional DNS filtering policies
-- Twingate accepts Cloudflare's custom DoH endpoint as a custom DoH provider
-- DNS filtering policies in Cloudflare are optional but available if needed
+- Cloudflare Zero Trust trial account is sufficient (paid account not required)
+- DNS filtering policies are optional — DoH protection can be used without them
+- Integration is one-way: Cloudflare provides the DoH endpoint; Twingate consumes it
 
 ## Prerequisites
-- Valid Cloudflare Zero Trust account (trial account sufficient)
-- Access to Twingate Admin Console with permissions to configure DoH settings
+- Valid Cloudflare Zero Trust account (trial acceptable)
+- Access to Twingate Admin Console
+- Ability to configure custom DoH resolver in Twingate
 
 ## Step-by-Step
 
-1. **Add a DNS Location in Cloudflare**
+1. **Create a DNS Location in Cloudflare**
    - Navigate to Cloudflare Zero Trust dashboard → **Gateway** → **DNS Locations**
-   - Create a new DNS location
+   - Add a new DNS location
    - Save and close
 
 2. **Retrieve the Custom DoH URL**
    - Go to **Gateway** → **DNS Locations**
-   - Click your newly created location
+   - Click the newly created location
    - Copy the **DNS over HTTPS** URL
 
 3. **Configure DNS Filtering Rules (Optional)**
-   - Navigate to **Policies** in the Cloudflare Zero Trust dashboard
+   - Go to **Gateway** → **Policies**
    - Create desired filtering policies
 
-4. **Register DoH URL in Twingate**
-   - Add the copied Cloudflare DoH URL as a custom DoH provider in the Twingate Admin Console
+4. **Add DoH URL to Twingate**
+   - In Twingate Admin Console, add the copied Cloudflare DoH URL as a custom DoH provider
    - Follow Twingate's "Configure a Custom DoH resolver" documentation
 
 ## Configuration Values
-| Parameter | Value |
-|-----------|-------|
-| DoH URL source | Cloudflare Zero Trust → Gateway → DNS Locations → [location] → DNS over HTTPS field |
+| Parameter | Source | Notes |
+|-----------|--------|-------|
+| DoH URL | Cloudflare DNS Location detail page | Unique per location; format is a Cloudflare subdomain URL |
 
 ## Gotchas
-- The custom DoH URL is location-specific — must be copied from the specific DNS Location you created, not a generic Cloudflare endpoint
-- DNS filtering policies only apply if configured in Cloudflare; no filtering occurs by default
+- DNS filtering policies must be created in Cloudflare separately — they are not automatically applied just by enabling DoH
+- The DoH URL is location-specific; ensure you copy from the correct location if managing multiple
 
 ## Related Docs
-- [Configure a Custom DoH Resolver in Twingate](https://www.twingate.com/docs/custom-doh) — required next step after retrieving the Cloudflare URL
-- Twingate DoH documentation (general custom DoH provider setup)
+- [Configure a Custom DoH Resolver in Twingate](https://www.twingate.com/docs/custom-doh) *(referenced in source)*
+- Cloudflare Zero Trust Gateway DNS Locations documentation

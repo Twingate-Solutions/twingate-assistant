@@ -1,42 +1,42 @@
-# Deploy Twingate Connector in a Proxmox LXC Container
+# Deploy Twingate Connector in a Proxmox Container
 
 ## Summary
-Deploys a Twingate Connector inside a Proxmox LXC container using an Ubuntu 22.04 template. The process covers container creation, configuration, and running the Twingate deployment script. Connectors do not auto-update and require manual update management.
+Guide for deploying a Twingate Connector inside a Proxmox LXC container. Uses standard Linux deployment method after container creation. Connector runs as a service within a lightweight container rather than a full VM.
 
 ## Key Information
-- Minimum resources: 1 vCPU, 512MB RAM
-- Tested on Proxmox 7.4-3 with Ubuntu 22.04 LTS template
-- LXC containers are preferred over full VMs for single-service deployments
-- Static IP recommended if Resources need to allowlist the Connector IP or for logging purposes
-- Connectors do **not** auto-update; stagger updates across Connectors to avoid downtime
+- Proxmox uses LXC containers (not full VMs)
+- Minimum specs: 1 vCPU, 512MB RAM
+- Tested on Proxmox 7.4-3 with Ubuntu 22.04 template
+- Connectors do **not** auto-update — must manage manually or via cron
 
 ## Prerequisites
-- Proxmox VE host with shell access
-- Container template downloaded (Ubuntu 22.04 LTS recommended)
-- Supported Linux distro template
-- Twingate Admin Console access with a configured Remote Network
+- Proxmox host with a downloaded container template (supported distro required)
+- Ubuntu 22.04 LTS recommended
+- Access to Twingate Admin Console with a Remote Network configured
+- `curl` installed in the container
 
 ## Step-by-Step
 
-### 1. Download Container Template
+### 1. Download Container Template (Proxmox Shell)
 ```bash
 pveam update
 pveam list
 pveam download <storageLocation> <templateName>
 ```
 
-### 2. Create Container (`Create CT` button)
+### 2. Create Container (Proxmox UI → "Create CT")
 | Tab | Setting |
 |-----|---------|
-| General | Set hostname, password; keep **Nesting** checked; uncheck **Unprivileged container** to allow pings |
-| Template | Select storage ID and downloaded template image |
+| General | Set hostname, password; leave **Nesting** checked |
+| General | Uncheck **Unprivileged container** to allow pings |
+| Template | Select storage + downloaded template image |
 | Disks | Default 8GB sufficient |
 | CPU | Default 1 vCPU |
 | Memory | Default 512MB |
-| Network | Set bridge interface; DHCP or static IP (static recommended) |
+| Network | Select bridge; DHCP or static IP (static recommended) |
 | DNS | Default or custom |
 
-### 3. Prepare Container
+### 3. Prepare Container (Console as root)
 ```bash
 apt update
 apt upgrade -y
@@ -47,24 +47,22 @@ apt install curl -y
 1. Log in to Twingate Admin Console
 2. Navigate to target Remote Network
 3. Select **Linux** deployment method
-4. Click **Generate Tokens** (tokens are auto-embedded in script)
-5. Optionally enable local connection logs (for SIEM)
-6. Copy and paste the generated deployment command into the container console
+4. Click **Generate Tokens** (tokens auto-included in script)
+5. Copy and paste the deployment command into the container console
 
 ## Configuration Values
-- **Login user**: `root`
-- **Console access**: Proxmox VNC console tab
-- **cURL**: Required dependency for deployment script
+- **Unprivileged container**: Uncheck if ICMP/ping to Resources is needed
+- **Nesting**: Must remain enabled
+- **Static IP**: Recommended if Resources use IP allowlists or logging is required
 
 ## Gotchas
-- **Unprivileged container**: Must be **unchecked** to allow ICMP/pings from the Connector to Resources
-- **Nesting**: Must remain **checked**
-- Auto-updates are not supported — build into existing update strategy
-- `curl` must be installed before running the deployment script or it will fail
-- `storageLocation` must have container templates enabled as a content type
+- Tokens are embedded automatically in the generated deploy script — no manual copying needed
+- Connectors won't self-update; stagger updates across multiple Connectors on the same Remote Network to avoid downtime
+- Must use a [supported distro](https://www.twingate.com/docs) for the container template
+- Enable peer-to-peer connections to avoid Fair Use Policy bandwidth issues
 
 ## Related Docs
-- [Supported Linux distros](https://www.twingate.com/docs)
-- [Peer-to-peer connections setup](https://www.twingate.com/docs)
-- [Fair Use Policy](https://www.twingate.com/docs)
+- [Supported distros](https://www.twingate.com/docs)
+- [Peer-to-peer connections](https://www.twingate.com/docs)
 - [Automate updates with cron job](https://www.twingate.com/docs)
+- [Fair Use Policy](https://www.twingate.com/docs)

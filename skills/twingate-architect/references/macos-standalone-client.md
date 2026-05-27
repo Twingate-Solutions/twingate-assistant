@@ -1,18 +1,19 @@
 # macOS Standalone Client
 
 ## Summary
-Twingate offers a PKG-based macOS client that doesn't require the App Store or Apple ID. It uses a system extension for its VPN adapter that must be explicitly enabled on first use. Supports MDM distribution and pre-configuration via `.mobileconfig` profiles.
+Twingate offers a PKG-based macOS client that installs without the App Store or Apple ID. It uses a system extension for its VPN adapter, which must be explicitly enabled on first use. Supports MDM distribution and pre-configuration via profiles.
 
 ## Key Information
 - Download from [Twingate download page](https://www.twingate.com/docs/macos-standalone-client) or specific versions from Client changelog
-- Requires system extension enabled to connect — without it, Twingate cannot function
-- Auto-updates supported if user has local administrator permissions
-- Clients older than 12 months are unsupported and cannot connect
-- App **must** reside at `/Applications/Twingate.app` — system extension fails from other directories
+- Requires system extension to be enabled before connecting
+- Auto-updates supported if user has local admin permissions
+- **Clients older than 12 months cannot connect** to Twingate service
+- App must be installed at `/Applications/Twingate.app` — system extensions fail from other locations
 
 ## Prerequisites
-- macOS device with local admin rights (for system extension approval and auto-updates)
-- Or MDM with capability to push `.mobileconfig` profiles (for pre-enabling extension)
+- macOS device with admin access (for system extension approval)
+- For MDM distribution: MDM platform (Intune, Jamf, Workspace ONE, Hexnode)
+- Local admin rights required for automatic updates
 
 ## Step-by-Step: Initial Setup
 1. Download PKG from Twingate download page
@@ -22,30 +23,30 @@ Twingate offers a PKG-based macOS client that doesn't require the App Store or A
 5. Find panel: *"System software from application 'Twingate.app' was blocked from loading"*
 6. Click **Allow**
 
-## Step-by-Step: MDM Distribution
-1. Use MDM-specific PKG distribution method:
-   - **Kandji**: Custom App
-   - **Jamf**: Package distribution
-   - **Omnissa Workspace ONE**: Non-App Store app
-   - **Hexnode UEM**: Enterprise app
-2. Deploy provided `.mobileconfig` to pre-enable system extension (avoids end-user prompt)
-3. Apply any existing pre-configuration (network pre-config, disabling auto-updates) — compatible with standalone app
+## MDM Distribution
+| Platform | Method |
+|----------|--------|
+| Intune | Distribute as Custom App |
+| Jamf | Distribute as a package |
+| Omnissa Workspace ONE | Distribute as non-App Store app |
+| Hexnode UEM | Distribute as enterprise app |
 
-## Configuration Values
-| Item | Value |
-|------|-------|
-| Installer format | `.pkg` |
-| Required install path | `/Applications/Twingate.app` |
-| MDM profile type | `.mobileconfig` (system extension pre-approval) |
+- Pre-existing network pre-configuration (including disabling auto-updates) works with standalone app
+- Use provided `.mobileconfig` example to **pre-enable the system extension** via MDM profile before deployment
 
 ## Gotchas
-- System extension **silently fails** if app runs outside `/Applications/Twingate.app`
-- No system extension prompt visible? Check **Privacy & Security → Extensions → Others → Networking** section
-- Clients >12 months old are blocked from service — establish update cadence for managed devices
-- Auto-updates require local admin; managed environments should handle updates via MDM
+- System extension will **not function** if `Twingate.app` is run outside `/Applications/`
+- No system extension prompt visible? Check **Privacy & Security → Extensions → Others → Networking** for Twingate toggle
+- Without local admin rights, auto-updates won't work — managed devices need a manual update process
+- 12-month client expiry means unmanaged/neglected devices will lose connectivity silently
+
+## Troubleshooting: Won't Connect
+1. Confirm system extension is enabled via Privacy & Security settings
+2. Verify app location is exactly `/Applications/Twingate.app`
+3. If no security prompt appears, check **Extensions → Added Extensions → Networking**
 
 ## Related Docs
 - General macOS onboarding guide
-- Client changelog (version-specific downloads)
-- Example `.mobileconfig` for system extension pre-approval
-- MDM-specific guides: Kandji, Jamf, Omnissa Workspace ONE, Hexnode UEM
+- Client changelog (version-specific PKG downloads)
+- Example `.mobileconfig` for MDM system extension pre-enablement
+- Pre-configuration guide (network pre-config, disabling auto-updates)

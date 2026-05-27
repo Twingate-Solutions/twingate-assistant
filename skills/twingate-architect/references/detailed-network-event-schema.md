@@ -1,62 +1,60 @@
-# Detailed Network Event Schema
-
-## Page Title
-Detailed Network Event Schemas
+# Detailed Network Event Schemas
 
 ## Summary
-Twingate exports network events in two formats: CSV (Admin Console download) and JSON (AWS S3 sync). Each event represents a single completed connection. Events are only reported after connections complete.
+Twingate exports network events in two formats: CSV (from Admin Console download) and JSON (synced to AWS S3). Each event represents a single completed connection. Established connections are only reported after completion.
 
 ## Key Information
-- CSV exports: one line per connection event
-- JSON exports: one JSON object per line (newline-delimited)
-- Established connections reported only after completion
-- Both formats support relay, resource, user/service account, and connector metadata
+
+- CSV export: one line per connection event
+- JSON export: newline-delimited JSON to AWS S3
+- Connections only logged after completion (not in real-time)
+- `end_time` / `bytes_*` fields empty on error conditions
+- JSON events include either a `user` OR `service_account` object, not both
+- Relay list is empty array `[]` if connection didn't use a relay
 
 ## CSV Column Reference
 
 | Column | Notes |
-|--------|-------|
+|---|---|
 | `start_time` / `end_time` | `end_time` empty on error |
 | `user` / `user_id` | Email + numeric ID |
 | `device_id` | Device identifier |
 | `client_ip` | Public IPv4 of client |
-| `connector` / `connector_id` | Name + numeric ID |
+| `connector` / `connector_id` | Connector name + numeric ID |
 | `resource_ip` | Empty on DNS error |
-| `resource_port` | Target port |
-| `resource_domain` | FQDN; empty if direct IP |
-| `resource_id` | ID of defined Resource (wildcard resources share one ID) |
+| `resource_port` / `resource_domain` / `resource_id` | Domain empty if direct IP connection |
 | `protocol` | `tcp`, `udp`, or `icmp` |
 | `status` | `NORMAL`, `DNS_ERROR`, `CONNECTION_FAILED` |
 | `bytes_transferred` / `bytes_received` | Empty on error |
-| `remote_network` / `remote_network_id` | |
-| `applied_rule` | Matched Resource definition (e.g., `*.twingate.com`) |
+| `remote_network` / `remote_network_id` | Network name + ID |
+| `applied_rule` | Matched resource rule (e.g., `*.twingate.com`) |
 | `relays` / `relay_ips` / `relay_ports` | Relay identifiers |
 
-## JSON Schema (S3 Export)
+## JSON Field Reference
 
-**Top-level fields:**
+**Event-level fields:**
 - `event_type`: always `"network"`
 - `event.status`: `closed_connection`, `denied_access`, `established_connection`, `failed_to_connect`
-- `event.time`: ISO 8601 UTC timestamp
+- `event.time`: ISO 8601 UTC datetime string
 
 **Nested objects:**
-- `event.connection`: `client_ip`, `protocol`, `bytes_received`, `bytes_transferred`, `error_message` *(optional: only on `denied_access` or `failed_to_connect`)*
-- `event.connector`: `id`, `name`
-- `event.device`: `id`
-- `event.relays`: array of `{ip, name, port}`; empty list if no relay used
-- `event.remote_network`: `id`, `name`
-- `event.resource`: `address`, `applied_rule`, `id`, `ip`, `port`
-- `event.user` OR `event.service_account`: mutually exclusive; user has `email` + `id`; service account has `name`, `id`, `key`, `key_id`
+- `connection`: `client_ip`, `protocol`, `bytes_received`, `bytes_transferred`, `error_message` (optional, only on `denied_access` or `failed_to_connect`)
+- `connector`: `id`, `name`
+- `device`: `id`
+- `relays[]`: `ip`, `name`, `port` (empty array if no relay)
+- `remote_network`: `id`, `name`
+- `resource`: `address`, `applied_rule`, `id`, `ip`, `port`
+- `user` (optional): `email`, `id`
+- `service_account` (optional): `name`, `id`, `key`, `key_id`
 
 ## Gotchas
-- `resource_id` is the **defined** resource ID — wildcard resources (e.g., `*.twingate.com`) give the same ID to all matched connections
-- `applied_rule` shows the **defined** resource pattern, not the actual hostname connected to
-- `end_time`, `resource_ip`, `bytes_transferred`, `bytes_received` are **empty** on error conditions
-- JSON events have **either** `user` or `service_account`, never both
-- Relay list is empty `[]` if connection did not use a relay
-- JSON timestamps always UTC; CSV timestamp format not specified
+
+- `resource_id` and `applied_rule` reflect the **defined** resource pattern (e.g., `*.twingate.com`), not the specific hostname accessed — group by `applied_rule` for wildcard resources
+- `resource_ip` empty on DNS errors; `resource_domain` empty on direct-IP connections
+- JSON `event.status` values differ from CSV `status` values — not interchangeable
+- Service account events have no `user` field; user events have no `service_account` field — handle both cases in parsers
 
 ## Related Docs
-- Network Events reporting (Admin Console)
-- AWS S3 integration for event sync
-- Twingate Connectors and Remote Networks configuration
+- Network Events reporting configuration
+- AWS S3 sync setup
+- Admin Console export

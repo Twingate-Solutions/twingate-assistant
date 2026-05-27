@@ -1,57 +1,57 @@
 # AWS Database Access with Twingate
 
 ## Summary
-Guide for securing access to Amazon RDS, Aurora, and DynamoDB using Twingate Connectors. Traffic is routed through Connectors so databases are never exposed to the public internet. Security is enforced via AWS Security Groups (RDS/Aurora) and VPC endpoints with IAM policies (DynamoDB).
+Guide for securing access to Amazon RDS, Aurora, and DynamoDB using Twingate Connectors. Traffic is routed through Connectors deployed in your VPC, eliminating public database exposure. Security Group rules and VPC endpoints restrict access to Connector IPs only.
 
 ## Key Information
-- Supports RDS, Aurora, DynamoDB, and self-hosted databases
-- Prefer Connector **private IP** for same-VPC databases; use public IP only when crossing networks
-- **Recommended**: Use Security Group referencing (Connector's SG) instead of IP-based rules for resilience and scalability
-- DynamoDB has no native IP allow list—access control requires VPC endpoints + IAM `aws:SourceVpce` conditions
-- For Aurora clusters, use the **cluster endpoint** (not instance endpoint) for failover/load balancing
+- Supports RDS, Aurora (MySQL/PostgreSQL), and DynamoDB
+- Prefer **private IP** of Connector for security rules; use public IP only when database is in different VPC/region
+- Recommended: use Connector's **Security Group** (not IP) for RDS/Aurora rules — more resilient to IP changes, scales better
+- DynamoDB has no native IP allowlist; access control via VPC Gateway Endpoint + IAM `aws:SourceVpce` condition
+- Aurora: use **cluster endpoint**, not individual instance endpoint
 
 ## Prerequisites
 - Remote Network defined in Twingate Admin Console
-- At least one Twingate Connector deployed inside the target VPC
+- At least one Twingate Connector deployed in the target VPC
 
 ## Step-by-Step
 
 ### RDS / Aurora
-1. Create Twingate Resource pointing to DB endpoint (e.g., `mydb.cluster-1234abcd.us-east-1.rds.amazonaws.com`), specify port (3306 MySQL, 5432 PostgreSQL)
-2. In AWS Console → RDS → Databases → VPC Security Group → Edit Inbound Rules → add rule allowing Connector's private IP on the DB port
-3. Connect via CLI or GUI client through Twingate Client
+1. Create Twingate Resource pointing to RDS/Aurora endpoint with correct port (3306 MySQL, 5432 PostgreSQL)
+2. Edit RDS instance's VPC Security Group inbound rules — allow Connector private IP(s) on database port
+3. Connect via Twingate Client using standard DB clients
 
 ### DynamoDB
-1. Create Twingate Resource pointing to `dynamodb.us-east-1.amazonaws.com`, port 443
-2. Create **VPC Gateway Endpoint** for DynamoDB; update endpoint Security Group to allow Connector private IPs
-3. Write IAM policy restricting DynamoDB actions using `aws:SourceVpce` condition
-4. Connect via AWS CLI/SDK through Twingate
+1. Create Twingate Resource for regional endpoint (e.g., `dynamodb.us-east-1.amazonaws.com`), port 443
+2. Create VPC Gateway Endpoint for DynamoDB; update its Security Group to allow Connector private IPs
+3. Write IAM policy restricting DynamoDB access using `aws:SourceVpce` condition
+4. Connect via AWS CLI/SDK through Twingate Client
 
 ## Configuration Values
 | Parameter | Value |
 |-----------|-------|
 | MySQL/Aurora MySQL port | 3306 |
 | PostgreSQL/Aurora PostgreSQL port | 5432 |
-| DynamoDB endpoint port | 443 |
-| DynamoDB regional endpoint format | `dynamodb.us-east-1.amazonaws.com` |
+| DynamoDB HTTPS port | 443 |
+| DynamoDB regional endpoint pattern | `dynamodb.<region>.amazonaws.com` |
 
 ## Gotchas
-- **IP vs. SG referencing**: Connector IPs can change during Terraform lifecycle events—prefer Security Group referencing
-- **DynamoDB**: Cannot restrict via IP allow list; if no VPC endpoint exists, traffic goes public and only IAM controls access
-- **Public IP usage**: Only use Connector public IP when DB is in a different VPC/region or exposed over internet
-- **VPC endpoint CLI**: Must specify `--endpoint-url` explicitly when using VPC endpoint with AWS CLI
+- Without a VPC endpoint, DynamoDB is reachable via public endpoint but **cannot** be IP-restricted — enforce via IAM only
+- Connector IP can change during Terraform lifecycle events if not explicitly pinned — prefer Security Group referencing
+- For cross-VPC/cross-region databases, Connector's public IP may be required in security rules
+- `aws:SourceVpce` IAM condition only works when a VPC endpoint is configured
 
 ## Troubleshooting
-| Symptom | Check |
+| Symptom | Cause |
 |---------|-------|
-| DNS Failed | Connector can't resolve hostname; verify DNS hosted zone is tied to VPC |
-| Connection Failed | Route exists? IP allow lists correct? Security group rules allow port on both ends? |
-| No Activity | Client running? Resource access granted? Another VPN hijacking traffic? |
-| Slow connections | Connector health; firewall blocking |
+| DNS Failed (Recent Activity) | Connector can't resolve hostname; check DNS zone/VPC association |
+| Connection Failed | Connector reached destination but blocked; check Security Group/firewall rules |
+| No Activity | Client not sending traffic; check Client running, resource access, no conflicting VPN |
+| Connection Refused | Connector IP not in database allowlist |
 
 ## Related Docs
-- [SaaS App Gating Guide](https://www.twingate.com/docs/saas-app-gating)
-- [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
-- [Security Policies Guide](https://www.twingate.com/docs/security-policies)
 - [Twingate Troubleshooting Guide](https://www.twingate.com/docs/troubleshooting)
+- GCP Database Guide
+- Azure Database Guide
+- Connector Best Practices
 - [Amazon DynamoDB endpoints and quotas](https://docs.aws.amazon.com/general/latest/gr/ddb.html)

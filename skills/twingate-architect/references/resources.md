@@ -1,61 +1,62 @@
 # Twingate Resources
 
 ## Summary
-Resources are network addresses (DNS names, IPs, CIDR ranges) secured via Twingate and accessed through Connectors deployed in Remote Networks. Access is deny-by-default; users must be explicitly granted access via Groups. Resolution occurs from the Connector's perspective, enabling private DNS and IP routing for remote users.
+Resources are network addresses (IP, CIDR, FQDN, or wildcard DNS) secured via Twingate and accessed through Connectors deployed in Remote Networks. Access follows Zero Trust principles—denied by default unless explicitly granted via Group membership. DNS resolution and routing occur from the Connector's perspective, not the end user's device.
 
 ## Key Information
-- Resource address types: FQDN, wildcard FQDN, single IP, CIDR range
-- Wildcard `*` = 0+ characters; `?` = exactly 1 character
-- `*.autoco.internal` matches subdomains but NOT `autoco.internal` itself
-- Reserved CGNAT subnet `100.96.0.0/12` is blocked by the Twingate client
-- Default traffic forwarding: all TCP, UDP ports + ICMP ping
+- Resource types: FQDN, wildcard FQDN, single IP, CIDR range, or unqualified DNS name
+- Address resolution happens **from the Connector**, enabling private DNS and private IPs to work for remote users
+- CGNAT subnet `100.96.0.0/12` is reserved by Twingate client—resources in this range are blocked
+- Overlapping addresses resolved by specificity: single IP > small CIDR > large CIDR; exact domain > wildcard
+- Ambiguous/identical addresses are resolved arbitrarily
 - Tags are optional metadata for organization
-- Aliases provide additional addresses without DNS configuration
 
 ## Prerequisites
-- Connector(s) deployed in the associated Remote Network
-- Resource must be resolvable and routable **from the Connector**, not the end-user device
+- Connector(s) deployed in associated Remote Network
+- Resource must be resolvable and routable from Connector
 - Port restrictions require all Connectors on the Remote Network at **v1.20.0+**
+- Client visibility settings require minimum client versions (macOS 1.0.25+, Windows 1.0.23+, Linux 1.0.74+, iOS 1.0.25+, Android 1.0.22+)
 
-## Configuration Values
+## Resource Definition Fields
+| Field | Details |
+|-------|---------|
+| Label | Display name in Admin Console and Client |
+| Address | FQDN, wildcard FQDN, IP, or CIDR (must be valid network address, e.g., `10.1.0.0/16` not `10.1.0.1/16`) |
+| Alias | Optional extra address; resolved by Connector, no DNS entry needed |
+| Port Restrictions | Default: all TCP/UDP + ICMP; configurable per protocol |
+| Remote Network | Associated Remote Network with reachable Connector(s) |
+| Tags | Optional metadata |
+| Client Visibility | Standard, Browser (adds Open in Browser shortcut), or Background (hidden) |
 
-| Field | Options/Notes |
-|-------|--------------|
-| Address | FQDN, wildcard FQDN, IP, CIDR |
-| Invalid CIDR example | `10.1.0.1/16` returns `Invalid IP or FQDN` |
-| Port protocols | TCP, UDP (configurable separately), ICMP (toggle) |
-| Default ports | All TCP + UDP + ICMP |
-| Client visibility | `Standard Address`, `Browser Address`, `Background Address` |
+## Configuration Values / Gotchas
 
-## Address Resolution Best Practices
-For DNS resolving to private IPs (ordered by best practice):
-1. **Private DNS** — configure in private DNS, never exposed publicly
-2. **FQDN Resource** — Connector handles resolution
-3. **Private IP Resource** — direct routing, no DNS flexibility
-4. **CIDR Block** — broad coverage, less access control granularity
+**Address format errors:**
+- Invalid CIDR (host bits set): `10.1.0.1/16` → returns `Invalid IP or FQDN`
+- Wildcard `*.autoco.internal` matches `host.autoco.internal` but **not** `autoco.internal` itself
 
-## Overlapping Address Resolution (Specificity Rules)
-- Single IP > CIDR (smaller CIDR > larger CIDR)
-- Exact domain > wildcard domain
-- Wildcard with more non-wildcard characters wins
-- Truly ambiguous resources are chosen arbitrarily
+**DNS best practices (for resources resolving to private IPs):**
+1. Configure private DNS (preferred)
+2. Use FQDN-based Resource
+3. Use private IP-based Resource
+4. Use CIDR block (least granular)
 
-## Client Visibility Requirements (minimum versions)
-- macOS 1.0.25, Windows 1.0.23, iOS 1.0.25, Android 1.0.22, Linux 1.0.74
+**Port restriction split-access pattern:**
+- Create two Resources with same address but different ports (e.g., `host:22`, `host:443`)
+- Assign each to different Groups for granular access control
+
+**ICMP:** Forwarded by default; can be explicitly toggled off via port restrictions
 
 ## Gotchas
-- **DNS rebinding protection**: public DNS names resolving to private IPs should be defined as FQDN Resources, not IP Resources
-- **Invalid CIDR**: host bits set in CIDR notation (e.g., `10.1.0.1/16`) causes an error
-- **CGNAT range** `100.96.0.0/12` is always blocked — cannot create resources in this range
-- Port restrictions apply to **all Connectors** in the Remote Network; mixed versions disable the feature
-- Overlapping resources are discouraged; ambiguous matches are non-deterministic
-- Unqualified DNS names (e.g., `host`) require additional Connector configuration and latest client
+- DNS rebinding protection on modern systems may break public FQDNs resolving to private IPs—use DNS Resources instead
+- Overlapping CIDR Resources can cause unexpected routing; more specific always wins
+- Unqualified DNS names (e.g., `host`) require additional Connector configuration
+- Port restrictions unavailable if any Connector in the Remote Network is below v1.20.0
+- Visibility settings don't affect Admin Console display
 
 ## Related Docs
-- How DNS Works with Twingate
-- Resource Aliases
-- Whitelisting Traffic to Public Resources
-- IP Overlap Guide
-- Hiding Resources in the Client
-- Upgrading Connectors
-- Port Restrictions
+- [How DNS Works with Twingate](#)
+- [Resource Aliases](#)
+- [IP Overlap Guide](#)
+- [Whitelisting Traffic to Public Resources](#)
+- [Upgrading Connectors](#)
+- [Hiding Resources in the Client](#)

@@ -1,35 +1,38 @@
 # PCI Compliance with Twingate
 
-## Page Title
-PCI Compliance — Twingate for PCI DSS Requirements
-
 ## Summary
-Twingate is not PCI DSS validated itself, but can be used by organizations needing PCI compliance. PCI DSS does not require third-party service providers to be independently validated. When used to secure a cardholder data environment (CDE), Twingate is classified as a third-party service provider under Requirement 12.8.
+Twingate can be used by PCI DSS-compliant organizations even though Twingate itself is not validated as PCI DSS compliant. When used to secure access to a cardholder data environment (CDE), Twingate is considered a third-party service provider under PCI DSS Requirement 12.8.
 
 ## Key Information
-- Twingate **is not** validated as PCI DSS compliant, but this is not required for customer compliance
-- When securing CDE access, Twingate is considered "in scope" as a **third-party service provider**
-- PCI DSS **Requirement 12.8** governs third-party service provider relationships
-- PCI DSS **Requirement 7.3** (access control systems for in-scope components) is a specific requirement Twingate can help satisfy
-- The service provider's compliance with *specific applicable requirements* affects the merchant's compliance — not blanket full validation
+- Twingate is **not** validated as PCI DSS compliant, but this is not required for customer compliance
+- PCI DSS does not require third-party service providers to be independently validated as compliant
+- Twingate is considered "in scope" as a third-party service provider when used to secure CDE access
+- Being "in scope" ≠ requiring full PCI DSS validation of the service itself
+- Twingate can help meet **Requirement 7.3** (access control system for in-scope system components)
+- **Requirement 12.8** governs third-party service provider relationships
 
-## Prerequisites
-- Organization must identify which PCI DSS requirements they intend to fulfill using Twingate
-- Organization must understand how Twingate technically satisfies those specific requirements
-- Standard Twingate deployment securing access to CDE components
+## Compliance Scope
 
-## Configuration Considerations
-- Deploy Twingate to control access to CDE system components
-- Map Twingate capabilities to specific PCI requirements (e.g., Req 7.3 for access control)
-- Document Twingate as a third-party service provider per Requirement 12.8 obligations
+| Aspect | Detail |
+|--------|--------|
+| Relevant PCI Requirement | 12.8 (third-party service providers) |
+| Example Use Case Requirement | 7.3 (access control for system components) |
+| Twingate's Role | Third-party service provider for CDE access security |
+
+## Important Caveat
+Per PCI Security Standards Council guidance: if Twingate fails to meet applicable PCI DSS requirements relevant to its service (e.g., access control), those requirements would **not** be considered met for the merchant's compliance. Organizations must verify Twingate's implementation satisfies the specific requirements they rely on it to fulfill.
+
+## Implementation Guidance
+1. Identify which specific PCI DSS requirements you intend to fulfill using Twingate
+2. Understand how Twingate technically satisfies each identified requirement
+3. Document Twingate as a third-party service provider per Requirement 12.8
+4. Assess whether Twingate's controls meet the applicable sub-requirements for your use case
 
 ## Gotchas
-- **Scope creep risk**: If Twingate manages something like firewall rules and doesn't meet Requirement 1, the merchant fails those requirements — the service provider's gaps become the merchant's gaps
-- "In scope" ≠ "must be fully PCI DSS certified" — these are distinct concepts
-- Organizations bear responsibility for identifying and verifying which PCI requirements Twingate fulfills; Twingate does not provide a blanket compliance guarantee
-- No Attestation of Compliance (AOC) or Report on Compliance (ROC) is mentioned as available from Twingate
+- "In scope" does not mean Twingate must be PCI DSS certified — common misconception
+- Compliance responsibility is shared: if Twingate's service doesn't meet applicable requirements, your compliance is affected
+- Organizations must perform their own due diligence mapping Twingate capabilities to specific requirements
 
 ## Related Docs
-- [Twingate Contact Page](https://www.twingate.com/contact) — for detailed PCI DSS compliance inquiries
-- [PCI Security Standards Council guidance on Requirement 12.8](https://www.pcisecuritystandards.org)
-- Internal Twingate docs: Access Control configuration, Resource permissions, Zero Trust architecture
+- Contact Twingate directly for detailed PCI DSS compliance documentation
+- [PCI Security Standards Council guidance on service providers](https://www.pcisecuritystandards.org)

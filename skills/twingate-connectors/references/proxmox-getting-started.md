@@ -1,64 +1,63 @@
 # Getting Started with Proxmox VE and Twingate
 
-## Page Title
-Getting Started with Proxmox VE and Twingate
-
 ## Summary
-Deploys a Twingate Connector inside a Proxmox VE LXC container using the community helper script. Enables secure remote access to private resources hosted on Proxmox VE without exposing them publicly.
+Deploys a Twingate Connector as an LXC container on Proxmox VE using a community helper script. Enables secure remote access to the Proxmox environment through Twingate's zero-trust network. Setup requires generating connector tokens in the Admin Console before running the deployment script.
 
 ## Key Information
-- Connector runs as an LXC container on the Proxmox VE head node
-- Uses the open-source [Proxmox VE Community Helper Scripts](https://github.com/community-scripts/ProxmoxVE)
-- Each Connector requires its own unique Access/Refresh token pair (never reuse tokens)
-- Verify success by checking Controller and Relay statuses show **connected** in Admin Console
+- Connector runs as an LXC container via the Proxmox VE Community Helper Scripts
+- Script is community-maintained (not official Twingate), hosted at `community-scripts/ProxmoxVE`
+- Each Connector requires its own unique Access/Refresh token pair — do not reuse tokens
+- Verify success by checking `Controller` and `Relay` statuses show `connected` in Admin Console
 
 ## Prerequisites
 - Running Proxmox VE instance
 - Twingate account with Admin Console access
 - SSH or web UI access to Proxmox VE server
-- An existing Remote Network in Twingate Admin Console
+- Remote Network already created in Twingate Admin Console
 
 ## Step-by-Step
 
-1. **Generate Connector Tokens**
-   - Admin Console → Remote Networks → select network → add/select Connector
-   - Choose **Manual** deployment option
-   - Click **Generate Tokens** (Step 2 of connector setup)
-   - Copy Access Token and Refresh Token
+### 1. Generate Connector Tokens
+1. Admin Console → **Remote Networks** → select target network
+2. Add new Connector or select undeployed one → choose **Manual** option
+3. Scroll to **Step 2** → click **Generate Tokens** → authenticate
+4. Copy **Access Token** and **Refresh Token**
 
-2. **Deploy via Helper Script** (run on Proxmox VE head node):
-   ```bash
-   bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/twingate-connector.sh)"
-   ```
-   When prompted, enter:
-   - **Network**: your Twingate network hostname (e.g., `network.twingate.com`)
-   - **Access Token**: from step 1
-   - **Refresh Token**: from step 1
+### 2. Deploy Connector
+Run on Proxmox VE head node:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/twingate-connector.sh)"
+```
 
-3. **Verify Installation**
-   - Admin Console → Remote Networks → select network → select Connector
-   - Confirm **Controller** and **Relay** both show `connected`
+When prompted, enter:
+- **Network**: Your Twingate network name (e.g., `yournetwork.twingate.com`)
+- **Access Token**: From step 1
+- **Refresh Token**: From step 1
+
+### 3. Verify
+Admin Console → Remote Networks → select network → select Connector → confirm `Controller` and `Relay` both show **connected**
 
 ## Configuration Values
 
 | Prompt | Value |
 |--------|-------|
-| Network | `<tenant>.twingate.com` |
+| Network | `<networkname>.twingate.com` |
 | Access Token | Generated from Admin Console |
 | Refresh Token | Generated from Admin Console |
 
 ## Gotchas
-- **Never reuse token sets** — each Connector must have its own unique Access + Refresh token pair
-- Token entry errors are the most common failure; double-check copy/paste accuracy
-- Verify the Twingate Connector LXC container is running if connectivity issues occur
+- **Never reuse token sets** — each Connector deployment needs unique tokens
+- Tokens must be copied accurately; token errors are the most common failure
+- Script runs on the **head node** specifically
+- Verify the LXC container is running if connectivity issues occur after deployment
 
 ## Troubleshooting
-- Token errors → re-generate and re-enter tokens
-- Connectivity issues → confirm Proxmox VE web interface is locally accessible and LXC container is running
-- See [Twingate troubleshooting docs](https://www.twingate.com/docs/troubleshooting) for persistent issues
+- Token errors → re-generate fresh tokens, ensure no extra whitespace when pasting
+- Connectivity issues → confirm Proxmox web UI is accessible locally and the Twingate LXC container is running
+- Further help: [Twingate troubleshooting docs](https://www.twingate.com/docs/troubleshooting)
 
 ## Related Docs
-- [Setting Up Resources](https://www.twingate.com/docs/resources) — configure access to private services post-install
+- [Setting Up Resources](https://www.twingate.com/docs/resources)
 - [Home Assistant Setup Guide](https://www.twingate.com/docs/home-assistant)
 - [Unraid Helper Script Guide](https://www.twingate.com/docs/unraid)
-- [Twingate Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)
+- [Community Scripts GitHub](https://github.com/community-scripts/ProxmoxVE)

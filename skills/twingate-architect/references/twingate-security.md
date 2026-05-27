@@ -1,61 +1,74 @@
-# Twingate Security Overview
-
-## Page Title
-Twingate Security Posture, Practices, and Processes
+# Twingate Security Posture
 
 ## Summary
-Documents Twingate's internal security practices and product security architecture as of October 2024. Covers people security, data protection, infrastructure controls, and product-level security design. Intended for customers and prospects evaluating Twingate's security posture.
+Documents Twingate's security practices and product architecture for customers and prospects. Covers both organizational InfoSec practices and product-level security design. Updated October 2024.
+
+---
 
 ## Key Information
 
-### Compliance & Auditing
-- SOC 2 Type 2 report available (annual audits) — request via Twingate contact
-- Third-party security testing by Hacker House (pen testing, reverse engineering, fuzzing, threat modeling)
-- Customer penetration testing permitted with prior written approval from security team
+### Organizational Security
+- **Governance**: CTO owns InfoSec program; cross-disciplinary security team with senior management
+- **Policies**: Written InfoSec plans reviewed annually + periodic risk reviews
+- **Employee checks**: Background checks (SSN, criminal, OFAC/SDN) for US employees; local equivalents elsewhere
+- **Access model**: Least privilege + RBAC; production access via Twingate + SSO + MFA
+- **Developers**: No direct DB access to customer data; generally no SSH into production servers
+- **Encryption in transit**: TLS/SSL; **at rest**: AES-256 on GCP-managed databases with rotating master keys
+- **Cipher selection**: Follows NIST SP 800-52 Rev. 2
+- **Backups**: Automated daily, tested regularly, retained for limited period
+- **Compliance**: SOC 2 Type 2 (annual audits) — request via Twingate account contact
 
-### Data Handling
-- Customer data stored: email addresses, names, group membership, network/resource details, ACLs, event logs
-- **Passwords not stored** — authentication delegated to third-party IdPs
-- Encryption at rest: AES-256+ (GCP managed database, envelope encryption with master key rotation)
-- Encryption in transit: TLS/SSL
-- Cipher selection follows NIST SP 800-52 Rev. 2
-- Daily automated database backups; retention limited to disaster recovery window
-- Data deletion on request per contractual commitments
+### Vendor & Infrastructure
+- Vendor due diligence includes security risk assessment before engagement
+- Infrastructure: GCP multi-region, Kubernetes/Docker, pre-hardened servers
+- Secrets management via commercial third-party system
+- DDoS protection via GCP; 24/7 monitoring; status at `status.twingate.com`
 
-### Access Controls
-- Principle of least privilege; role-based access provisioning
-- Production access via Twingate + IdP SSO + MFA
-- Developers lack direct database access and SSH access to production servers
-- Automated CI/CD deployment reduces need for human production access
+---
 
-### Infrastructure
-- Hosted on GCP across multiple physically separated data centers
-- Docker containers orchestrated with Kubernetes
-- Secrets managed via commercial secrets management system
-- Service status: [status.twingate.com](https://status.twingate.com)
+## Product Security Architecture
 
-### Product Architecture Security Principles
-- No single component independently authorizes traffic — multiple components required
-- User data flows and authentication flows are separate with independent validation
-- End-to-end encrypted user data flows; Twingate **cannot decrypt** relay traffic
-- No public-facing gateway exposed; customer networks invisible to public internet
-- Resource-level access (not network-level)
+### Core Principles
+- Zero-trust: every resource request authenticated, verified, authorized
+- No single component can independently allow traffic — multiple components run multiple checks
+- User data flows and authentication flows handled by **separate components**
+- Authentication delegated to third-party IdP (separation of concerns)
+- **End-to-end encrypted user data flows** — relay infrastructure cannot decrypt traffic
 
-## Prerequisites
-- SOC 2 report: requires contacting Twingate account team
-- Customer pen testing: requires advance notice, scope approval, and possible agreement signing
+### Customer-Facing Security Benefits
+- No public gateway exposure — network invisible to public internet
+- Resource-level (not network-level) access restrictions
+- Centralized access management with audit logging
+- Extensive logging for monitoring and investigation
 
-## Configuration Values
-- None (architecture/policy document, not implementation guide)
+---
+
+## Development & Testing
+- All code requires peer review via PR; at least one approver other than author
+- Static analysis tooling for proprietary code and third-party library CVEs
+- Third-party security testing by **Hacker House**: white-box analysis, reverse engineering, fuzzing, threat modeling, source code review
+- Customer data never used in testing
+
+---
+
+## Customer Data Handled
+- User details: email, name, group membership (no passwords stored)
+- Infrastructure info: network/resource details, ACLs
+- Event logs: logins, token requests
+- Crash/error reports for diagnostics
+
+---
 
 ## Gotchas
-- Twingate controls subdomain allocation under twingate.com; customers cannot unilaterally claim subdomains
-- Relay infrastructure is Twingate-controlled but cannot decrypt user data flows
-- Customer data must not be used in test environments (Twingate policy)
-- Background checks outside the U.S. vary by local law
+- Penetration testing against Twingate systems requires **prior written approval** — contact account manager
+- Subdomain allocation (tenant URLs) is at Twingate's discretion per Customer Agreement
+- No custom cryptographic implementations used
+- Twingate cannot decrypt customer data flows even through its own relay infrastructure
+
+---
 
 ## Related Docs
+- [GCP Physical Security](https://cloud.google.com/security/infrastructure)
 - [Twingate Customer Agreement](https://www.twingate.com/customer-agreement)
-- [GCP Physical Security](https://cloud.google.com/security/physical-security)
-- [status.twingate.com](https://status.twingate.com)
+- [Status Page](https://status.twingate.com)
 - NIST SP 800-52 Rev. 2 (cipher guidance)

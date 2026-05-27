@@ -1,56 +1,72 @@
 # How Twingate Works
 
-## Page Title
-How Twingate Works — Architecture Overview
-
 ## Summary
-Twingate uses four components (Controller, Client, Connector, Relay) to enforce zero-trust access to private resources. No single component independently authorizes traffic; decisions require confirmation across multiple components. Authentication is always delegated to a third-party Identity Provider.
+Twingate uses four components (Controller, Client, Connector, Relay) to enforce zero-trust network access. No single component can independently authorize traffic flow; decisions require confirmation from multiple components. User authentication is always delegated to a third-party Identity Provider.
 
 ## Key Information
 
-- **Four components**: Controller (coordination), Client (user device proxy), Connector (deployed behind firewall), Relay (connection broker)
-- **No single point of authorization**: Access decisions require intersection of Client ACL + Connector ACL
-- **Controller is data-plane agnostic**: Only component that never touches actual data flow
-- **Connector deploys behind firewall**: Maintains outbound connections to Relays; never requires inbound firewall rules
-- **Relay = TURN server equivalent**: No data terminated or stored; no network-identifiable information retained
-- **DNS resolution is local to remote network**: DNS queries for resources forwarded to Connector for local resolution
-- **Transparent proxy**: No application configuration needed on user devices for TCP/UDP traffic
-- **P2P preferred**: Twingate attempts peer-to-peer Client↔Connector first; Relay used as fallback
+### Four Core Components
 
-## Component Responsibilities
+**Controller** (Twingate-hosted, multi-tenant)
+- Central coordination; never touches data flow
+- Delegates authentication to IdP/social identities
+- Generates signed ACLs for both Clients and Connectors
+- Registers/authenticates Connectors via one-time authorization
+- Stores all Admin console configuration
 
-| Component | Key Role |
-|-----------|----------|
-| Controller | Config storage, ACL generation, Connector registration, IdP delegation |
-| Client | Auth proxy, ACL enforcement, DNS proxying, TLS tunnel initiation |
-| Connector | ACL verification, local DNS resolution, traffic forwarding to resources |
-| Relay | Connector registration point, anonymous Client↔Connector matchmaking via hash ID |
+**Client** (installed on user devices)
+- Acts as authentication + authorization proxy
+- Holds user-specific signed ACL from Controller
+- Intercepts DNS requests → forwards to Connector for local resolution
+- Proxies TCP/UDP traffic transparently (no app config needed)
+- Establishes certificate-pinned TLS tunnel to Connector
+- Matches destination addresses against ACL before routing
 
-## Authorization Flow Logic
+**Connector** (deployed behind private network firewall)
+- Maintains outbound connections to Controller and Relay(s)
+- Verifies TLS tunnel integrity, Client signature, and ACL validity on every inbound connection
+- Performs local DNS resolution for FQDN Resources
+- Cannot be deployed without one-time Controller authorization
+- Identified only by anonymized hash-generated unique ID
 
-1. Controller generates **Client ACL** (resources user can access)
-2. Controller generates **Connector ACL** (resources Connector can forward to)
-3. Traffic only flows to resources in the **intersection** of both ACLs
-4. Client establishes **certificate-pinned TLS tunnel** to Connector via anonymous Connector ID
-5. Connector verifies: TLS integrity + Client signature + Client ACL claim validity
+**Relay** (equivalent to WebRTC TURN server)
+- Stores only hash-based Connector IDs — no data, no network info
+- Primary purpose: enable peer-to-peer Client↔Connector connections
+- Relayed connections used as fallback when P2P fails
+- No data-carrying connections terminate at Relay
 
-## Gotchas
+## Security Architecture
 
-- **Connector ID is anonymized**: Only a hash-based ID is shared with Clients/Relays — no private network info exposed
-- **Connectors require one-time Controller authorization** to deploy; cannot self-register
-- **ACL signatures**: Client ACLs are signed by Controller and verified by Connector — tampering is detectable
-- **User must authenticate before accessing any resource**: No unauthenticated access possible even with valid network path
-- **FQDN resources**: DNS resolution happens at the Connector (remote network), not the Client device
+- **Dual ACL check**: Traffic only flows if destination exists in *both* Client ACL and Connector ACL (intersection)
+- **No single point of authorization**: Controller issues signed tokens; Connector independently verifies them
+- **Certificate pinning**: TLS tunnel pinned to specific Connector via signed connection token
+- **Anonymous Connector identity**: Only hash-based ID shared with Clients, never network details
+
+## Connection Flow (High Level)
+1. User authenticates via IdP (redirected by Controller)
+2. Controller issues signed ACL to Client
+3. Client detects connection request matching ACL Resource
+4. Client contacts Controller for signed connection token referencing Connector ID
+5. Client connects to Relay using Connector ID
+6. Relay facilitates Client↔Connector tunnel (P2P attempted first)
+7. Connector verifies Client signature + ACL claim
+8. Traffic forwarded to Resource; DNS resolved locally by Connector
 
 ## Prerequisites
 - Identity Provider configured (or social identity)
-- Connector deployed inside target private network
-- Client installed on user devices
-- Resources and access policies defined in Admin console
+- Connector deployed in target private network with one-time authorization token
+- Twingate Client installed on user devices
+- Resources defined in Admin console
+
+## Gotchas
+- Connector requires outbound connectivity to both Controller and Relay — firewall rules must permit this
+- DNS for protected Resources resolves on the remote network, not the client's local network
+- Users access Resources using addresses **local to the remote network** — no special client-side network knowledge needed
+- Connector ACL acts as a second independent check; misconfigured Connector ACL can block access even if Client ACL permits it
 
 ## Related Docs
 - Connector deployment guide
-- Client installation guide  
 - Identity Provider configuration
-- Relay architecture detail
-- Connection flow walkthrough (referenced as "next article in this guide")
+- Admin console reference
+- Relay architecture deep-dive
+- Client installation guide

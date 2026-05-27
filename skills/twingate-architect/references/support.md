@@ -1,41 +1,37 @@
-# Twingate Support Resources
+# Twingate Support Options
 
 ## Summary
-Overview of support channels available to Twingate users. Technical support is restricted to Business and Enterprise plan subscribers; lower-tier users are directed to community resources.
+Overview of available support channels based on account type. Technical support is only available for Business and Enterprise plan subscribers; other tiers are directed to community resources.
 
 ## Key Information
 - **Help Center**: Primary self-service knowledge base
 - **Community**: Twingate Subreddit for peer support
 - **Billing**: Handled via Subscription Management page
-- **Technical Support**: Break-fix only, Business and Enterprise plans only
-- **Pre-sales**: Route through sales rep or onboarding@twingate.com
+- **Technical Support**: Break-fix only; requires Business or Enterprise plan
 
-## Support Tiers
+## Support by Account Type
 
-| Plan | Technical Support | Community | Docs |
-|------|------------------|-----------|------|
-| Starter | ❌ | ✅ | ✅ |
-| Teams | ❌ | ✅ | ✅ |
-| Trial Business | ❌ | ✅ | ✅ |
-| Business | ✅ | ✅ | ✅ |
-| Enterprise | ✅ | ✅ | ✅ |
+| Account Type | Technical Support | Community | Docs/Help Center |
+|---|---|---|---|
+| Enterprise | ✅ Yes | ✅ Yes | ✅ Yes |
+| Business (paid) | ✅ Yes | ✅ Yes | ✅ Yes |
+| Business (trial) | ❌ No | ✅ Yes | ✅ Yes |
+| Teams | ❌ No | ✅ Yes | ✅ Yes |
+| Starter | ❌ No | ✅ Yes | ✅ Yes |
 
-## Support Channels by Use Case
+## Contact Channels
 
-- **Self-service**: Twingate Docs, Twingate Help Center
-- **Community troubleshooting**: Twingate Subreddit
-- **Paid technical support**: Technical Support Services page (Business/Enterprise)
-- **Billing questions**: Subscription Management page
-- **Pre-sales (with rep)**: Contact sales representative directly
-- **Pre-sales (no rep / self-serve trial)**: onboarding@twingate.com or Subreddit
+- **Technical Support Requests**: Via Technical Support Services page (Business/Enterprise only)
+- **Pre-sales (with sales rep)**: Route through your sales representative
+- **Pre-sales (self-serve trial)**: Email `onboarding@twingate.com`
+- **Community support**: Twingate Subreddit
 
 ## Gotchas
-- Trial Business accounts do **not** qualify for technical support despite the plan name
-- No product support or troubleshooting for Starter or Teams plans — community only
-- Pre-sales customers should consolidate support through one sales rep to avoid fragmented requests
+- Starter, Teams, and trial Business accounts receive **no product support or troubleshooting assistance** from Twingate staff
+- Pre-sales customers with a sales rep should funnel all support requests through that rep, not directly to support channels
 
 ## Related Docs
 - Technical Support Services
 - Subscription Management
 - Twingate Help Center
-- Twingate Subreddit
+- Twingate Docs

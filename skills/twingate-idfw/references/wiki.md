@@ -1,55 +1,49 @@
 # Twingate Kubernetes Access Gateway - Wiki Home
 
 ## Page Title
-Twingate Gateway - Home/Overview
+Twingate Gateway - Wiki Home
 
 ## Summary
-The Twingate Gateway is an open-source Layer 7 reverse proxy deployed within your environment that enables identity propagation and auditing for Zero Trust access. It extends existing Twingate deployments to support Kubernetes, SSH, and (upcoming) web/database protocols. All audit data remains entirely within your infrastructure.
+The Twingate Gateway is an open-source Layer 7 reverse proxy deployed within your environment that extends Zero Trust controls by propagating user identity to upstream services. It supports Kubernetes and SSH protocols (web app and database support coming soon). All audit data remains entirely within your infrastructure.
 
 ## Key Information
-- **Type**: Open-source Layer 7 reverse proxy
-- **Purpose**: Identity propagation + session recording/auditing
-- **Currently supported protocols**: Kubernetes, SSH
-- **Upcoming protocols**: Web App, Database (PostgreSQL, MySQL)
-- **Deployment model**: Self-hosted within your environment
-- **External communication**: Only fetches Twingate's public key for identity verification
-- **Audit logs**: Exported to `stdout`; never sent to Twingate
-- **Session recording format**: Asciicast v2
-- **Session replay URL**: `https://www.twingate.com/sessionplayer`
+- **Type**: Open-source Layer 7 reverse proxy (self-hosted)
+- **Purpose**: Identity propagation + session recording + auditing for internal services
+- **Supported protocols**: Kubernetes (GA), SSH (GA), Web App (coming soon), Database (coming soon)
+- **Identity verification**: Fetches Twingate's public key externally; no other outbound communication
+- **Audit logs**: Written to `stdout` — pipe to SIEM or storage solution
+- **Session recordings**: Captured in Asciicast v2 format; replay at `https://www.twingate.com/sessionplayer`
+- **Isolation**: Gateway has no connection back to Twingate cloud except public key fetch
 
 ## Prerequisites
 - Existing Twingate deployment
-- Kubernetes or SSH infrastructure to protect
-- SIEM or log aggregation solution (recommended for audit logs)
+- Private network infrastructure (Gateway keeps services off public internet)
 
-## Core Capabilities
-| Feature | Description |
-|---|---|
-| Identity Propagation | Passes user identity to upstream services; eliminates double auth and plaintext credentials |
-| Session Recording | Records and replays sessions for forensic/compliance review |
-| Unified Policy | Single policy engine for network + application access |
+## Supported Use Cases
+
+| Protocol | Features |
+|----------|----------|
+| Kubernetes | Identity propagation, RBAC integration, `kubectl` session recording |
+| SSH | Identity propagation, session recording, shell/exec/SFTP/port forwarding |
 
 ## Architecture Notes
-- Gateway is **fully isolated** within customer environment
-- Leverages Twingate private networking (infrastructure not exposed to public internet)
+- Leverages Twingate private networking — upstream services remain hidden from internet
 - Access policies use identity, device posture, and contextual signals
-- Kubernetes integration: supports `kubectl`, RBAC, session recording
-- SSH integration: supports shell, exec, SFTP, port forwarding
-
-## Available Documentation (Wiki Sections)
-- **How It Works** - Architecture overview
-- **Kubernetes**: Overview, Quick Start Guide, Installation, Troubleshooting, Known Issues
-- **SSH**: Overview, Quick Start Guide, Installation, Operations, Monitoring, Session Recordings
-- **Development**: Developers guide
+- Eliminates need for plaintext credentials on end-user machines
+- No double authentication required for upstream services
 
 ## Gotchas
-- Session recordings and audit logs are **never uploaded to Twingate** — you are responsible for retention and storage
-- Web App and Database support are not yet available ("Coming Soon")
-- Gateway is a separate component from core Twingate — requires its own deployment
+- Audit logs and session recordings **never leave your environment** — you are responsible for log retention and storage
+- Session recordings require external replay tool (`https://www.twingate.com/sessionplayer`) — the recordings themselves stay local
+- Web App and Database protocol support not yet available
 
 ## Related Docs
+- [How It Works](https://github.com/Twingate/kubernetes-access-gateway/wiki/How-It-Works)
 - [Kubernetes Overview](https://github.com/Twingate/kubernetes-access-gateway/wiki/Kubernetes-Overview)
 - [Kubernetes Quick Start](https://github.com/Twingate/kubernetes-access-gateway/wiki/Kubernetes-Quick-Start-Guide)
+- [Kubernetes Installation](https://github.com/Twingate/kubernetes-access-gateway/wiki/Kubernetes-Installation)
 - [SSH Overview](https://github.com/Twingate/kubernetes-access-gateway/wiki/SSH-Overview)
-- [How It Works](https://github.com/Twingate/kubernetes-access-gateway/wiki/How-It-Works)
-- [Twingate Identity Firewall](https://www.twingate.com)
+- [SSH Quick Start](https://github.com/Twingate/kubernetes-access-gateway/wiki/SSH-Quick-Start-Guide)
+- [SSH Installation](https://github.com/Twingate/kubernetes-access-gateway/wiki/SSH-Installation)
+- [Troubleshooting](https://github.com/Twingate/kubernetes-access-gateway/wiki/Troubleshooting)
+- [Session Recordings](https://github.com/Twingate/kubernetes-access-gateway/wiki/Session-Recordings)

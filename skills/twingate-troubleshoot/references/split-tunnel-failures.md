@@ -1,73 +1,69 @@
 # Split Tunnel Failures
 
 ## Summary
-Twingate uses split tunneling by default, only routing traffic for explicitly defined Resources. Two failure categories exist: local subnet collisions (Twingate captures traffic it shouldn't) and missing Resource definitions (Twingate misses traffic it should capture).
+Twingate uses split tunneling by default, routing only explicitly defined Resource traffic through the tunnel. Two failure categories exist: local subnet collisions (Twingate captures traffic it shouldn't) and missing Resource definitions (Twingate misses traffic it should capture).
 
 ## Key Information
-- Split tunnel = only defined Resources route through Twingate; all other traffic uses normal path
-- Full-tunnel mode requires explicitly configuring an **Exit Network** (user-selectable)
-- `.local` domains conflict with mDNS/Bonjour; requires special handling
+- Split tunnel = only defined Resources are tunneled; all other traffic uses normal network path
+- Two failure types: **local subnet collisions** and **missing Resource definitions**
+- Exit Networks enable intentional full-tunnel mode (not default)
+- `.local` domains conflict with mDNS/Bonjour protocol
 
 ## Local Subnet Collisions
 
 ### Symptoms
-- Local printer/NAS/file server unreachable when Twingate active
-- Other VPN clients fail when Twingate is running
+- Local printer/NAS inaccessible when Twingate is active
+- Another VPN client stops working alongside Twingate
 
 ### Diagnosis Steps
-1. Get user's local subnet: `ipconfig` (Windows) or `ifconfig`/`ip addr` (macOS/Linux)
-2. Compare against Resource definitions in Admin Console
-3. Overlap = collision (e.g., corporate Resource `192.168.1.0/24` vs user's home network `192.168.1.0/24`)
+1. Get user's local IP/subnet: `ipconfig` (Windows) or `ifconfig`/`ip addr` (macOS/Linux)
+2. Check Admin Console Resource definitions for overlapping CIDR ranges or specific IPs
+3. Overlap = Twingate routes local traffic to corporate Connector → fails
 
 ### Fix
 - Use specific IPs (`10.0.5.23`) or narrow CIDRs (`10.0.5.0/24`) instead of broad ranges (`10.0.0.0/16`)
-- For full-tunnel requirements, deploy an Exit Network with Connectors
+- For full-tunnel requirement: use **Exit Networks** (intentional, user-selectable)
 
 ## Missing Resource Definitions
 
 ### Symptoms
-- App partially loads; features broken or unresponsive
-- HTTP 401/403 errors on gated web applications
-- App works on some pages but not others
+- SaaS app partially loads; features broken
+- HTTP 401/403 errors on gated applications
+- App "works sometimes" or "works on some pages"
 
-### Fix: Browser DevTools Method
+### Diagnosis: Browser Dev Tools
 1. Open app in browser with Twingate active → F12 → Network tab → reload
-2. Filter by error status codes (401, 403, blocked/cancelled)
-3. Note failing domains → add as wildcard DNS Resources (e.g., `*.partnersite.com`)
-4. Assign same Groups/Security Policies as primary Resource
+2. Filter by failed status codes (401, 403, blocked/cancelled)
+3. Note failed request domains → add as wildcard DNS Resources (e.g., `*.partnersite.com`)
+4. Assign same Groups/Security Policies as primary Resource → retest
 
-### Fix: Test Resources Method (when DevTools insufficient)
-**⚠️ Temporary diagnostic only — remove after testing**
-
+### Diagnosis: Test Resources (Temporary Full-Tunnel)
 1. Create two Resources on same Remote Network:
-   - DNS Resource: `*.*` (name: "Test DNS")
-   - IP Resource: `0.0.0.0/0` (name: "Test IP")
-   - No port/protocol restrictions; **assign to no Groups initially**
-2. Create new Group (e.g., "Test Group") → add both test Resources
-3. Add affected user to Test Group; wait for Resources to appear in Client
-4. User reproduces failing workflow (should now work)
-5. **Immediately remove user from Test Group**
-6. Review activity logs on user profile or Resource activity page
-7. Identify domains/IPs captured by test Resources not in existing definitions
+   - DNS Resource: address `*.*` (name: "Test DNS")
+   - IP Resource: address `0.0.0.0/0` (name: "Test IP")
+2. Assign **no Groups** initially
+3. Create new Group (e.g., "Test Group") → add both Resources
+4. Add affected user to Test Group → wait for Resources to appear in Client
+5. User reproduces failing workflow (should now work)
+6. **Immediately remove user from Test Group**
+7. Review activity logs on user profile or test Resource pages for unmatched domains/IPs
 8. Add missing entries as permanent Resources with proper Groups/Policies
-9. **Delete or disable Test Group and test Resources**
+9. **Delete or disable test Group and Resources**
 
 ## Configuration Values
-
-| Resource Type | Wildcard Pattern | Use Case |
-|---|---|---|
-| DNS | `*.partnersite.com` | All subdomains of a domain |
-| DNS | `*.*` | Test only — all DNS |
-| IP | `0.0.0.0/0` | Test only — all IP traffic |
+| Resource Type | Address | Use Case |
+|--------------|---------|----------|
+| Wildcard DNS | `*.example.com` | Cover all subdomains |
+| Catch-all DNS | `*.*` | Diagnostic only |
+| Catch-all IP | `0.0.0.0/0` | Diagnostic only |
 
 ## Gotchas
-- Broad CIDR Resources (e.g., `10.0.0.0/8`) likely to collide with RFC1918 home networks
-- Modern web apps use many domains; single-domain Resources are rarely sufficient
-- `.local` domain Resources conflict with mDNS device discovery
-- Test Resources (`*.*`, `0.0.0.0/0`) route **all** user traffic — never leave assigned permanently
-- New Resources require time to propagate to user's Client before testing
+- Test Resources (`*.*` and `0.0.0.0/0`) **must be deleted after testing** — leaving enabled causes unexpected behavior
+- `.local` domains conflict with mDNS; requires special handling (see separate KB article)
+- Wildcard Resources preferred over individual subdomains (covers future subdomains automatically)
+- Exit Networks are not the default; users must explicitly select them
 
 ## Related Docs
-- Twingate knowledge base article on `.local` domain conflicts
-- Exit Networks documentation
-- Activity logs / user profile page in Admin Console
+- Twingate Exit Networks documentation
+- `.local` domain KB article (linked in source)
+- Activity/logging documentation for network traffic review

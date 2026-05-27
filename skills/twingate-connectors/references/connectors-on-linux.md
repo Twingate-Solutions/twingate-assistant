@@ -1,51 +1,63 @@
-# Twingate Connector Deployment on Linux
+# Deploy a Connector on Linux
 
 ## Summary
-Twingate Connectors on Linux can be deployed via Docker container or as a native systemd service. Docker works on any Linux distro; systemd is more robust but limited to supported distributions. Both methods require tokens generated from the Admin Console.
+Twingate Connectors on Linux can run as Docker containers or as a systemd service. Docker works on any Linux distro; systemd is more robust but limited to supported distributions. Both methods require tokens generated from the Twingate Admin Console.
 
 ## Key Information
 - Two deployment methods: Docker container or systemd service
-- Docker supports any Linux distribution; systemd supports specific distros only
+- Docker works on any Linux distribution
+- systemd service is lower-overhead and more robust
+- Amazon Linux: use pre-built AMI with systemd pre-installed (not Docker)
 - Tokens are per-Connector and cannot be shared between Connectors
-- Config file location (systemd): `/etc/twingate/connector.conf`
 
 ## Prerequisites
 - Access to Twingate Admin Console
-- Remote Network already created in Admin Console
+- A Remote Network configured in Admin Console
 - **Docker method**: Docker installed and running
-- **Systemd method**: Supported Linux distribution
+- **systemd method**: Supported Linux distribution (see below)
 
 ## Supported Distributions (systemd)
-- Ubuntu 22.04 LTS, 24.04 LTS (LTS only)
-- Fedora 39, 40
-- CentOS Stream 9
-- Debian 11 (Bullseye), 12 (Bookworm)
+| Distro | Versions |
+|--------|----------|
+| Ubuntu | 22.04 LTS, 24.04 LTS (LTS only) |
+| Fedora | 39, 40 |
+| CentOS | Stream 9 |
+| Debian | 11 LTS, 12 LTS |
 
 ## Step-by-Step
 
 ### Docker Deployment
-1. Install Docker: `curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh`
-2. In Admin Console: Remote Networks → Select Network → Add Connector
-3. Select connector → Choose **Docker** option → Generate tokens (requires re-auth)
-4. Enable optional features, copy and run generated command
+1. Install Docker via official channel or convenience script:
+   ```bash
+   curl -fsSL https://get.docker.com -o get-docker.sh
+   sudo sh get-docker.sh
+   sudo docker run hello-world
+   ```
+2. In Admin Console: Remote Networks → Remote Network → Add Connector
+3. Open new Connector → select **Docker** option
+4. Generate tokens (requires re-authentication)
+5. Enable optional features
+6. Copy and run the generated command in terminal
 
-### Systemd Deployment
-1. In Admin Console: Remote Networks → Select Network → Add Connector
-2. Select connector → Choose **Linux** option → Generate tokens (requires re-auth)
-3. Enable optional real-time logging if needed, copy and run generated install command
-4. Verify: `sudo systemctl status twingate-connector`
+### systemd Deployment
+1. In Admin Console: Remote Networks → Remote Network → Add Connector
+2. Open new Connector → select **Linux** option
+3. Generate tokens (requires re-authentication)
+4. Optionally enable real-time logging
+5. Copy and run the generated command in terminal
+6. Verify: `sudo systemctl status twingate-connector`
 
 ## Configuration Values
 
-**Config file:** `/etc/twingate/connector.conf`
+**Config file location**: `/etc/twingate/connector.conf`
 
-| Variable | Description |
-|---|---|
-| `TWINGATE_NETWORK` | Full URL, e.g. `https://autoco.twingate.com` |
-| `TWINGATE_ACCESS_TOKEN` | Per-connector access token |
-| `TWINGATE_REFRESH_TOKEN` | Per-connector refresh token |
+```bash
+TWINGATE_NETWORK=https://<account>.twingate.com
+TWINGATE_ACCESS_TOKEN=<access_token>
+TWINGATE_REFRESH_TOKEN=<refresh_token>
+```
 
-## Management Commands
+**systemd Management Commands**:
 ```bash
 sudo systemctl status twingate-connector
 sudo systemctl start|stop|restart twingate-connector
@@ -53,15 +65,16 @@ sudo systemctl enable|disable twingate-connector  # boot behavior
 ```
 
 ## Gotchas
-- Install Docker only via official channel (`get.docker.com`); other channels may have outdated versions incompatible with Connector image
-- Amazon Linux: use pre-built AMI deployment instead
-- Access/refresh tokens are Connector-specific — cannot be reused across Connectors
-- Restart required after editing config file: `sudo systemctl restart twingate-connector`
+- Do **not** install Docker from unofficial/third-party channels — outdated versions may be incompatible with Connector image requirements
+- Access and refresh tokens are unique per Connector — cannot be reused across Connectors
+- Configuration file changes require `systemctl restart` to take effect
+- Ubuntu: only LTS versions officially supported
 - Stagger updates across multiple Connectors to avoid downtime
 
 ## Related Docs
 - Connector Best Practices
 - Systemd Connector Update Guide
 - Docker Connector Update Guide
-- Peer-to-peer connections setup
-- Connector provisioning/re-provisioning
+- Support peer-to-peer connections
+- Amazon Linux AMI deployment
+- Provisioning/re-provisioning Connectors

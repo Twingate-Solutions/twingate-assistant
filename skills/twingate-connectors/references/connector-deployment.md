@@ -1,19 +1,19 @@
-# Connector Deployment
+# Connector Deployment Guide
 
 ## Page Title
-Deploying Connectors - Method Selection Guide
+Deploying Connectors
 
 ## Summary
-Twingate Connectors deploy via Linux systemd packages or OCI (Docker) containers. A single Connector provides access to all reachable resources in its network segment; multiple Connectors enable load-balancing and failover. Deployment method selection depends on environment type (cloud, on-prem, serverless, home).
+Twingate Connectors are deployed via Linux systemd packages or OCI (Docker) containers. A single connector provides access to all reachable resources in its network; multiple connectors enable load-balancing and failover. Supports deployment across cloud VMs, on-premises, serverless, IaC, and home networks.
 
 ## Key Information
-- Connectors do **not** need to be on every host — one Connector covers all reachable resources in its network
-- Multiple Connectors on separate hosts = automatic load-balancing + failover
+- Connectors do **not** need to be on every host — one connector serves all reachable resources in its network
+- Multiple connectors on separate hosts = automatic load-balancing + failover
 - No inbound firewall rules required — only outbound internet access needed
-- Each location/cloud requires its own Remote Network in Twingate
-- Peer-to-peer connections improve UX and reduce bandwidth (Fair Use Policy compliance)
+- Multiple locations require separate Remote Networks per location
+- Peer-to-peer connections improve UX and help stay within Fair Use Policy bandwidth limits
 
-## Supported Platforms
+## Supported Linux Distributions
 
 **x86/AMD64 and ARM64:**
 - Ubuntu 22.04 LTS, 24.04 LTS, 26.04 LTS
@@ -22,33 +22,31 @@ Twingate Connectors deploy via Linux systemd packages or OCI (Docker) containers
 **x86/AMD64 only:**
 - Arch Linux, HP ThinPro, NixOS, Gentoo
 
-## Deployment Methods by Environment
+## Deployment Options by Environment
 
-| Environment | Options |
+| Environment | Methods |
 |-------------|---------|
 | Cloud VMs | AWS EC2, GCP Compute, Azure Compute, Kubernetes |
-| On-prem/Office | Docker Compose, Firewalla, Synology, QNAP, Proxmox, TrueNAS |
+| On-Premises/Office | Docker Compose, Firewalla, Synology, QNAP, Proxmox, TrueNAS |
 | Serverless/PaaS | AWS ECS (Fargate), Azure ACS, Aptible |
 | IaC | Terraform, Pulumi |
-| Home Network | Raspberry Pi, Synology, Linux, Home Assistant, Proxmox, Unraid, CasaOS, Mac VM |
+| Home Network | Raspberry Pi, Synology NAS, Linux, Home Assistant, Unraid, CasaOS, Mac VM |
+
+## Recommendations by Use Case
+
+- **Best performance:** Cloud VMs (consistent resources, sizing control, static IP support)
+- **On-premises redundancy:** Deploy second connector on separate physical machine
+- **Home/dynamic IP/CGNAT (Starlink):** Home network deployment avoids need for inbound rules or static IP
+- **Multi-environment rollout:** IaC (Terraform/Pulumi) for consistency and change control
 
 ## Gotchas
-- Serverless/PaaS deployments offer less control over CPU, memory, and network resources allocated to Connectors
-- Home networks with dynamic IPs, CGNATs (e.g., Starlink) cannot accept inbound connections — Twingate's outbound-only model solves this
-- Cloud VMs recommended over serverless when compute resources already exist in cloud — better sizing control
-
-## Prerequisites
-- Outbound internet access from deployment host
-- Linux-based host (systemd or Docker/OCI runtime)
-- Remote Network configured in Twingate Admin Console for each location
-
-## Recommendations
-- **Cloud:** VM deployment preferred over serverless for performance consistency and resource control
-- **On-prem:** Deploy second Connector on separate physical machine for redundancy
-- **Multi-location:** Create separate Remote Network per location; enable peer-to-peer connections
+- Serverless/PaaS deployments offer less control over CPU, memory, and network resources allocated to connectors
+- CGNAT environments (e.g., Starlink) have no inbound IP — connector deployment is the only viable remote access method
+- Sizing connectors on cloud VMs should account for expected end-user usage patterns
 
 ## Related Docs
 - Peer-to-peer connections support
-- Fair Use Policy
-- Individual deployment guides: AWS EC2, GCP, Azure, Kubernetes, Docker Compose, Terraform, Pulumi, Raspberry Pi, Home Assistant
+- Fair Use Policy (bandwidth)
+- Remote Networks configuration
 - Best Practices for Secure Infrastructure-as-Code (webinar)
+- Platform-specific guides: AWS EC2, GCP Compute, Azure Compute, Kubernetes, Docker Compose, Terraform, Pulumi, Raspberry Pi, Home Assistant, Synology

@@ -1,60 +1,57 @@
 # Database Access with Twingate
 
 ## Summary
-Index page for Twingate database access guides covering private/self-hosted and SaaS databases. Explains the two core connectivity patterns (private IP vs. public egress IP) and links to service-specific guides. Also covers GUI client setup and connection troubleshooting.
+Guide for configuring Twingate to securely access private or public databases. Covers general setup patterns for private/VPC-hosted and SaaS databases, plus specific guides for major cloud and database providers.
 
 ## Key Information
-- **Private/self-hosted DB**: Use Connector's **private IP** in firewall/security group rules; never expose public IPs
-- **SaaS/public DB**: Use Connector's **public egress IP** in service IP allowlists (MongoDB Atlas, RDS public, Snowflake, Redis Cloud, etc.)
-- **Prefer private connectivity** (AWS PrivateLink, VPC endpoints) over public when provider supports it
-- Connector IP addresses are visible on the **Connectors page** in the Admin Console
-- GUI clients (DBeaver, SSMS) work transparently once Twingate Client is active and Resource is defined
+- Two access patterns: **private** (Connector private IP) and **public/SaaS** (Connector public egress IP)
+- Connector acts as outbound-only proxy—no public ports exposed on database host
+- Connector IP addresses visible on the **Connectors** page in Admin Console
+- Prefer private IP routing whenever possible; use public IP only when service requires internet access
+- Supported GUI clients: DBeaver (multi-DB) and SSMS (SQL Server)
 
 ## Prerequisites
-- Remote Network configured
-- Connector deployed inside target network
-- Twingate Resource created for the database endpoint (IP or internal DNS name)
-- Twingate Client active on end-user machine
+- Remote Network defined in Twingate Admin Console
+- Connector deployed within target network/VPC
+- Twingate Client active on end-user device
+- Resource created for database endpoint (IP or DNS)
 
-## Step-by-Step: Private Database Access
-1. Create a Twingate Resource for the DB endpoint (e.g., `10.0.1.15` or `db.internal.example.com`)
-2. Get Connector's private IP from Admin Console → Connectors page
-3. Add Connector private IP to DB host firewall/security group on the appropriate port
+## Step-by-Step
 
-## Step-by-Step: Public/SaaS Database Access
-1. Create a Twingate Resource for the public endpoint (e.g., `cloud.mongodb.com`, `rds.amazonaws.com`)
-2. Get Connector's public egress IP from Admin Console → Connectors page
-3. Add Connector public IP to service's IP access list / network policy / firewall rules
+### Private/Self-hosted Database
+1. Create Twingate Resource using private IP (e.g., `10.0.1.15`) or internal DNS (`db.internal.example.com`)
+2. Get Connector's **private IP** from Connectors page
+3. Add Connector private IP to database firewall/security group rules on required port
 
-## Configuration Values
-| Item | Notes |
-|------|-------|
-| Connector private IP | Found on Connectors page; use for same-VPC/network DBs |
-| Connector public IP | Found on Connectors page; use for SaaS/public DBs |
-| Resource hostname | Private IP, internal DNS, or public FQDN depending on setup |
+### Public/SaaS Database
+1. Create Twingate Resource for database endpoint (e.g., `rds.amazonaws.com`)
+2. Get Connector's **public egress IP** from Connectors page
+3. Add Connector public IP to database service's IP access list / network policy
+
+### DBeaver Connection
+1. Install DBeaver; ensure Connector active and Resource visible in Client
+2. Database → New Database Connection → select DB type
+3. Enter hostname, username, password → Test Connection
+
+### SSMS Connection
+1. Install SSMS; ensure Connector active and Resource visible in Client
+2. Connect → Database Engine → enter Server Name
+3. Select Authentication Method → Connect
 
 ## Troubleshooting
-| Symptom | Cause/Fix |
-|---------|-----------|
-| **Connection Refused** | Connector IP not in DB allowlist |
-| **Slow Connections** | Check Connector health; verify no blocking firewall rules |
-| **Timeouts** | Connector offline or misconfigured |
-| **DNS Failed** (Recent Activity) | Connector can't resolve hostname; check DNS zone/VPC binding or DNS Resource definition |
-| **Connection Failed** (Recent Activity) | Connector reached but can't connect to DB; verify routes, IP allowlists, port rules |
-| **No Activity** (Recent Activity) | Client not running, no Resource access, or another VPN intercepting traffic |
 
-## Gotchas
-- If another VPN is active, it may intercept traffic before Twingate Client can route it
-- For DBeaver/SSMS: Twingate Client must be running **before** launching the client tool
-- Management endpoints (e.g., `rds.amazonaws.com`) may need their own Twingate Resource separate from the DB endpoint
+| Symptom | Check |
+|---|---|
+| Connection Refused | Connector IP in DB allow list (private vs. public) |
+| Slow Connections | Connector health; firewall rules |
+| Timeouts | Connectors online and reachable |
+| DNS Failed (Recent Activity) | DNS zone tied to VPC; DNS server defined as Resource |
+| Connection Failed (Recent Activity) | Route exists Connector→DB; firewall allows port both ends |
+| No Activity (Recent Activity) | Client running; Resource access granted; no conflicting VPN |
 
 ## Related Docs
-- [AWS Database Access Guide](https://www.twingate.com/docs/aws-database-access)
-- [GCP Database Access Guide](https://www.twingate.com/docs/gcp-database-access)
-- [Azure Database Access Guide](https://www.twingate.com/docs/azure-database-access)
-- [MongoDB Access Guide](https://www.twingate.com/docs/mongodb-access)
-- [Redis Access Guide](https://www.twingate.com/docs/redis-access)
-- [Snowflake Access Guide](https://www.twingate.com/docs/snowflake-access)
-- [Twingate Troubleshooting Guide](https://www.twingate.com/docs/troubleshooting)
+- AWS / GCP / Azure / Oracle / Redis / Snowflake Database Access Guides
+- Twingate Troubleshooting Guide
 - Best Practices for Connector Placement
 - Securing Resource Access with Policies
+- How to Ingest Connector Logs into a SIEM
