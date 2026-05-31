@@ -1,66 +1,71 @@
-# Device Security Posture Checks
+# Device Posture Checks
 
 ## Summary
-Twingate desktop and client applications perform device posture checks to define trusted devices and enforce Security Policies at the network or individual Resource level. Supported checks vary by platform and are reported by the Twingate client application.
+Twingate Client collects native device posture data to evaluate devices against Device Profiles (Approved Operating Systems or Trusted Profiles). Available checks vary by platform and OS version.
 
 ## Key Information
-- Posture check results feed into Security Policies applied to Networks or individual Resources
-- Each platform supports a different subset of posture checks
-- Some checks are client-type specific (e.g., macOS standalone Client required for HD Encryption and Firewall)
+
+- Posture checks are collected automatically by the Twingate Client
+- Used within **Device Profiles** to enforce access policies
+- Platform support varies; some checks require specific client types (e.g., macOS standalone Client)
 
 ## Posture Checks by Platform
 
 ### Windows
-| Check | Details |
+| Check | Reports |
 |-------|---------|
-| Hard drive encryption | BitLocker (system + other disks) |
-| Screen lock | Password required on screen saver return (WinAPI `LogonUser`) |
-| Firewall | Windows or third-party, via Windows Security Center |
-| Antivirus | Windows or third-party, via Windows Security Center |
-| Minimum OS version | Windows 10, 11, Windows Server 2022 |
+| HD Encryption | BitLocker status on system and other disks |
+| Screen Lock | Password required after screen saver |
+| Firewall | Windows or third-party firewall via Windows Security Center |
+| Antivirus | Windows or third-party AV via Windows Security Center |
+| Minimum OS Version | Windows 10, 11, Windows Server 2022 |
 
 ### macOS
-| Check | Details |
+| Check | Reports |
 |-------|---------|
-| Screen lock | Password required after sleep/screen saver |
-| Biometric | Touch ID or Face ID configured |
-| Firewall | Native firewall only; **standalone Client only** |
-| HD Encryption | FileVault; **standalone Client only** |
-| Minimum OS version | macOS 12–15 |
+| Screen Lock | Password required after sleep/screen saver |
+| Biometric | Touch ID/Face ID configured (reports disabled in clamshell mode) |
+| Firewall | Native firewall enabled — **standalone Client only** |
+| HD Encryption | FileVault status — **standalone Client only** |
+| Minimum OS Version | macOS 14–26 |
 
 ### Linux
-| Check | Details |
+| Check | Reports |
 |-------|---------|
 | Firewall | UFW, firewalld, or iptables (Debian/Ubuntu, CentOS/Fedora, Arch) |
-| Hard drive encryption | All non-`/boot` partitions via LUKS (`libcryptsetup`) |
+| HD Encryption | LUKS encryption via `libcryptsetup` (all partitions except `/boot`) |
 
 ### iOS
-| Check | Details |
+| Check | Reports |
 |-------|---------|
-| Screen lock | Password required |
-| Biometric | Touch ID or Face ID |
-| Minimum OS version | iOS 15–18 |
+| Screen Lock | Passcode required |
+| Biometric | Touch ID/Face ID configured |
+| Minimum OS Version | iOS 18–26 |
 
 ### Android
-| Check | Details |
+| Check | Reports |
 |-------|---------|
-| Screen lock | Any screen lock type |
-| Biometric | Fingerprint or facial recognition |
-| Hard drive encryption | File-Based Encryption |
+| Screen Lock | Any screen lock configured |
+| Biometric | Fingerprint or facial recognition configured |
+| HD Encryption | File-Based Encryption enabled |
 
 ## Gotchas
-- **macOS clamshell mode**: Closed lid always reports biometric as **disabled**, regardless of actual configuration
-- **macOS "Block all incoming connections"**: Device reports firewall as **disabled** even when firewall is on
-- **macOS Firewall + HD Encryption**: Only available with the macOS standalone Client, not the browser extension
-- **Linux encryption**: Uses `libcryptsetup`; only LUKS-encrypted partitions qualify; `/boot` partition exempted
-- **Linux firewall**: Limited to specific distro families — verify compatibility before enforcing
+
+- **macOS clamshell mode**: Biometric always reports as disabled when lid is closed, regardless of actual configuration
+- **macOS Firewall/FileVault**: Only available with the macOS standalone Client, not the browser extension or other client types
+- **macOS Firewall**: If "Block all incoming connections" is enabled, firewall reports as **disabled**
+- **Linux HD Encryption**: Uses `libcryptsetup`; only LUKS encryption detected; `/boot` partition excluded from check
+- **Windows Antivirus/Firewall**: Detection relies on Windows Security Center reporting — third-party tools must register with Security Center
 
 ## Prerequisites
-- Twingate desktop/mobile client installed on managed devices
-- macOS standalone Client required for Firewall and HD Encryption checks on macOS
-- Security Policies must be configured to use posture check results
+
+- Twingate Client installed on devices
+- macOS Firewall and HD Encryption checks require **macOS standalone Client**
+- Linux firewall checks supported only on Debian/Ubuntu, CentOS/Fedora, and Arch Linux distributions
 
 ## Related Docs
-- macOS Standalone Client
-- Security Policies
-- Device Security configuration
+
+- Device Profiles
+- Approved Operating Systems
+- Trusted Profiles
+- macOS standalone Client setup

@@ -1,47 +1,52 @@
 # Remote Game Streaming with Twingate
 
 ## Summary
-Overview page for setting up remote PC game streaming using Twingate's Zero Trust network with Sunshine, Apollo, or Duo streaming software. Eliminates port forwarding by routing all traffic through Twingate's encrypted tunnel. Serves as an index to three specific setup guides.
+Overview page for setting up remote game streaming (Sunshine, Apollo, or Duo) secured via Twingate's Zero Trust network. Eliminates port forwarding by routing all traffic through Twingate's encrypted tunnel. Three streaming solutions are supported, each suited to different use cases.
 
 ## Key Information
-- Three supported streaming servers: **Sunshine** (general), **Apollo** (headless/virtual display), **Duo** (multi-user)
-- Client application: **Moonlight** on the remote device
-- Twingate Connector runs on gaming PC, establishes outbound-only connection — no inbound ports needed
+- **No port forwarding required** — Twingate Connector uses outbound-only connections
+- **Client**: Moonlight used on remote device to receive stream
+- **Three server options**: Sunshine, Apollo, Duo
 - All traffic is authenticated, encrypted, and auditable with optional MFA
 
 ## Prerequisites
-- Windows PC with gaming-capable GPU (Nvidia/AMD/Intel)
+- Windows PC with gaming-capable GPU (Nvidia, AMD, or Intel)
 - Twingate account (free tier available)
-- Remote streaming device (laptop, phone, tablet)
+- Remote device (laptop, phone, tablet)
 - Stable internet at both ends
-- Wired ethernet on gaming PC (strongly recommended)
+- Wired ethernet on gaming PC strongly recommended
 
 ## Architecture
 1. Streaming server (Sunshine/Apollo/Duo) runs on gaming PC
-2. Twingate Connector on gaming PC makes outbound-only connection to Twingate Cloud
+2. Twingate Connector establishes outbound-only tunnel to Twingate Cloud
 3. Remote device connects via Twingate Client
-4. Moonlight streams game video over encrypted Twingate tunnel
-
-## Configuration Values (Performance Targets)
-| Parameter | Value |
-|-----------|-------|
-| Bandwidth (1080p60) | 15–20 Mbps |
-| Bandwidth (4K60) | 25–40 Mbps |
-| Target latency | <50ms |
-| Encoding | Hardware only: NVENC / AMF / QuickSync |
+4. Moonlight client streams over encrypted Twingate tunnel
 
 ## Solution Comparison
+
 | Feature | Sunshine | Apollo | Duo |
-|---------|----------|--------|-----|
-| Setup complexity | Easy | Easy | Moderate |
-| Virtual displays | Manual | Auto (SudoVDA) | Automatic |
-| Multi-user | No | No | Yes (Patreon) |
+|---|---|---|---|
+| Setup Complexity | Easy | Easy | Moderate |
+| Virtual Displays | Manual | Automatic (SudoVDA) | Automatic |
+| Multi-User | No | No | Yes (Patreon) |
+| HDR Support | Yes | Yes | Yes (Patreon) |
 | Cost | Free | Free | Free (limited) |
 
+## Performance Requirements
+- **1080p60**: 15–20 Mbps
+- **4K60**: 25–40 Mbps
+- **Latency target**: <50ms for responsive gameplay
+- **Encoding**: Hardware encoders required (NVENC/AMF/QuickSync)
+
+## Use Case Selection
+- **Sunshine**: General streaming, simple setup, established community (LizardByte)
+- **Apollo**: Headless PCs without monitor, automatic virtual display/resolution via SudoVDA
+- **Duo**: Families or shared PCs needing simultaneous multi-user access
+
 ## Gotchas
-- Multi-user (Duo) and HDR in Duo require Patreon subscription
-- Software encoders insufficient for real-time streaming — hardware encoder required
-- This page links to sub-guides; no standalone setup steps here
+- Duo multi-user and HDR require Patreon subscription
+- Virtual displays on Sunshine require manual configuration (unlike Apollo/Duo)
+- Hardware encoder required — software encoding insufficient for real-time game streaming
 
 ## Related Docs
 - Sunshine Remote Streaming guide

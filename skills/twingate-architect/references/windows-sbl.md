@@ -1,59 +1,56 @@
 # Windows Start Before Logon (SBL)
 
 ## Summary
-Windows SBL enables Twingate to connect to remote networks at the Windows logon prompt before user authentication, replacing traditional VPN-based domain controller access. It combines Device-only Resource Policies with the Windows Twingate Client to allow pre-login network access while maintaining security controls.
+Windows SBL allows devices to connect to remote networks at the Windows logon prompt before user authentication. Twingate implements this via Device-only Resource Policies combined with session persistence in the Windows Client.
 
 ## Key Information
-- Requires Twingate Windows Client v1.0.14 or later
-- Uses Device-only Resource Policies (no user auth required at logon screen)
+- SBL enables access to domain controllers at Windows logon screen (before user login)
+- Uses device-only authentication (no per-session user auth required)
 - Session persists across restarts unless user explicitly logs out
-- Default session length: 30 days (configurable via Minimum Authentication Requirements)
-- Recommended use case: Active Directory Domain Controller access at logon prompt
+- Default session length: 30 days
+- Recommended for Active Directory domain controller access
 
 ## Prerequisites
-- Twingate Windows Client v1.0.14+
-- Trusted Devices feature (recommended)
-- Admin access to Twingate Admin Console
-- Domain Controller addresses added as Twingate Resources
+- Twingate Windows Client **v1.0.14 or later**
+- Device-only Resource Policy configured
+- (Recommended) Trusted Devices feature enabled
+- Users must have signed into Twingate Client at least once within session window
 
 ## Step-by-Step Configuration
 
 1. **Add Domain Controller as Resource** — Follow Active Directory with Twingate guide
-2. **Create Group** — Add DC Resources and target Users to the group
-3. **Create Resource Policy** — Name it "Windows SBL" via Admin Console → Policies tab → "Create Resource Policy"
-4. **Configure Policy** — Disable user authentication requirements; enable device requirements (can restrict to Windows-only; allow trusted and/or untrusted devices)
-5. **Assign Policy to Resources** — Modify each DC Resource to use the Windows SBL policy for the specific Group
-6. **Verify Session Length** — Check Minimum Authentication Requirements matches your requirements (default: 30 days)
+2. **Create a Group** — Add DC Resources and target Users to the group
+3. **Create Resource Policy** — Name it "Windows SBL" via Admin console → Policies tab → "Create Resource Policy"
+4. **Configure Policy settings**:
+   - Disable user authentication requirements
+   - Enable device requirements
+   - Restrict to Windows devices (trusted and/or untrusted per your requirements)
+5. **Assign Policy to Resources** — Apply the SBL policy to each DC resource for the target group
+6. **Verify session length** — Check Minimum Authentication Requirements; default is 30 days
 
 ## Configuration Values
 
 | Setting | Value |
 |---|---|
-| Min Client Version | v1.0.14 |
+| Min client version | v1.0.14+ |
 | Default session length | 30 days |
-| User auth on Device-only Policy | Disabled |
-| Device auth on Device-only Policy | Required |
+| Auth type for SBL policy | Device-only (no user auth) |
+| Platform restriction | Windows only |
 
-## Runtime Behavior
-
-- **Device-only policies**: Accessible as long as Minimum Auth session is valid + device requirements met
-- **Standard/Default policies**: Require user re-authentication after every restart or Client relaunch
-- SBL resources remain accessible across reboots without re-login (within session window)
+## Gotchas
+- **Device-only policies** skip user auth but still require valid Minimum Authentication Requirements session — user must have logged in within 30 days
+- **Standard/Default policies** require user auth re-validation on every restart or Client relaunch — these will NOT work for SBL
+- Session is invalidated if user explicitly logs out of Twingate Client (not just machine restart)
+- Trusted device requirement is recommended but optional — untrusted devices can be permitted if needed
 
 ## Access Requirements at Logon Screen
 All three must be true:
 1. Windows Client v1.0.14+
-2. User signed into Twingate Client within last 30 days and **not** logged out
-3. Device marked as trusted in Twingate
-
-## Gotchas
-- User must have signed in at least once and must **not** have manually logged out — logout invalidates SBL access
-- Device-only policies bypass per-resource user auth but still require a valid Minimum Auth session
-- Standard/Default policies will NOT work for SBL (require user auth on each restart)
-- Trusted Devices is recommended but untrusted devices can be permitted if configured explicitly
+2. Signed into Twingate within last 30 days, not logged out
+3. Device marked as trusted (if trusted device requirement enabled)
 
 ## Related Docs
-- Active Directory with Twingate
+- [Active Directory with Twingate](https://www.twingate.com/docs/active-directory)
 - Device-only Resource Policies
 - Trusted Devices
 - Minimum Authentication Requirements

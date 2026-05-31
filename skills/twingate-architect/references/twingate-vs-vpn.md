@@ -1,55 +1,63 @@
 # Twingate vs. VPNs
 
 ## Summary
-Twingate implements Zero Trust Networking (ZTN) as an alternative to corporate VPNs. Unlike VPNs which grant network-level access, Twingate provides per-application access control with no public-facing gateway. It deploys as software only (no hardware appliances) and can coexist with existing VPN infrastructure.
+Twingate implements Zero Trust Networking (ZTN) as an alternative to traditional VPNs, providing application-level access control instead of network-level access. Unlike VPNs, Twingate requires no public-facing gateways, eliminates traffic backhauling, and deploys without infrastructure changes.
 
 ## Key Information
 
 **Security Differences**
-- VPNs grant access to entire network; Twingate grants access per-application (least privilege)
-- VPN gateways are publicly visible and attackable; Twingate Connectors make outbound-only connections — no public exposure
-- Twingate authorization supports SSO/MFA, device posture, location, time-of-day, and risk scores vs. VPN's username/password/IP
-- Lateral movement is blocked; attackers cannot see or traverse the network
+- VPNs grant access to entire networks; Twingate grants access per-application (least privilege)
+- VPN gateways are publicly visible and regularly exploited; Twingate Connectors make outbound-only connections, no public exposure
+- Twingate supports contextual authorization: SSO/MFA, device posture, location, time-of-day, risk scores
+- Breach blast radius is limited to specific apps, not entire network
 
 **Performance Differences**
-- VPNs backhaul all traffic through a central server; Twingate routes traffic directly
-- Twingate uses split tunneling by default — only private resource traffic routes internally
-- Twingate clients handle edge processing (authorization, MFA checks) without round-tripping to cloud
+- Twingate uses split tunneling by default; VPNs use full tunnel (all traffic routed through VPN server)
+- No backhauling: traffic routes directly to destination, not through central VPN server
+- Decision processing pushed to client edge, reducing server bottlenecks
 
 **Deployment Differences**
-- VPNs require hardware procurement and network reconfiguration; Twingate deploys via a single lightweight container (Connector) per network
-- No IP/DNS changes required; existing resource names remain unchanged
-- Protocol agnostic — no per-app configuration needed
+- VPNs require hardware procurement, network reconfiguration, segmentation planning
+- Twingate deploys via lightweight container (Connector) on one device per network
+- No IP address/hostname changes required
+- Protocol agnostic; no per-application configuration needed
 
-**Operational Differences**
-- Centralized admin console manages all networks vs. fragmented VPN management
-- Scalability handled by Twingate service; no appliance procurement needed
-- Integrates with SIEM systems for centralized logging
+**Management Differences**
+- Centralized admin console covers all networks (on-prem and cloud)
+- Scales via UI clicks vs. hardware procurement
+- SIEM integration available for centralized logging
 
 ## Prerequisites
-- None for evaluation — free trial available
-- One device per private network to host the Connector container
-- Existing VPN infrastructure does not need to be removed
+- None for evaluation — no infrastructure changes required
+- Existing VPNs can coexist during migration; no rip-and-replace needed
 
-## Deployment Notes
-1. Sign up for Twingate (no hardware required)
-2. Deploy Connector container on one device inside each private network
-3. Define resources and access policies in admin console
-4. Users install client app and self-enroll
-5. Can run in parallel with existing VPN — no cutover required
+## Architecture Components
+| Component | Role |
+|-----------|------|
+| Connector | Installed inside private network; makes outbound connections only |
+| Client (ViPR) | Installed on user devices; handles split tunneling, auth processing, routing |
+| Admin Console | Centralized policy and access management |
+
+## Migration Path
+1. Sign up (no infrastructure changes needed)
+2. Deploy Connector container on one device per network
+3. Pilot with single team on subset of resources
+4. Expand gradually; existing VPN continues operating in parallel
+5. Decommission VPN when ready
 
 ## Configuration Values
-- Connector: delivered as a container image
-- Client: always-on, single-click activation, no server selection required
-- Traffic routing: split tunnel by default
+- No CLI flags or env vars documented on this page
+- Connector delivered as container image
+- Client available for self-service download by end users
 
 ## Gotchas
-- VPN gateways are public attack surfaces; all major vendors have had CVEs exploited in the wild
-- Full-tunnel VPN degrades performance for all traffic, not just private resource access
-- VPN with multi-network setups requires complex mesh of VPN-to-VPN connections
-- Users behind VPNs appear to originate from VPN server location, causing content localization issues
+- VPN gateways must be publicly exposed; this is a persistent attack surface (e.g., Travelex $30M ransomware incident cited)
+- VPN full-tunnel mode causes localization issues (content appears from VPN server's region, not user's)
+- Split tunneling is Twingate's default behavior, not an opt-in feature
+- Twingate handles load balancing, redundancy, and scaling — these are operator responsibilities with VPNs
 
 ## Related Docs
-- [Zero Trust Networking concepts](https://www.twingate.com/docs/)
-- [Quick, simple, low-risk migration guide](https://www.twingate.com/docs/)
-- [Free trial signup](https://www.twingate.com/)
+- Zero Trust Networking concepts
+- Twingate Connector deployment
+- Quick, simple, low-risk migration guide
+- Free trial signup

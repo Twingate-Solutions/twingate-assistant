@@ -1,30 +1,23 @@
-# DIY VPN Setup Guide (Twingate + DigitalOcean)
+# DIY VPN Setup Guide with Twingate and DigitalOcean
 
 ## Summary
-Build a self-managed VPN using Twingate's zero-trust networking and DigitalOcean cloud. Three deployment methods available: local Minikube, DigitalOcean Droplets (Terraform), and DigitalOcean Kubernetes. Internal/personal use only — commercial VPN offerings are prohibited.
+Build a self-managed VPN using Twingate zero-trust networking and DigitalOcean cloud infrastructure. Three deployment methods are offered: local Minikube (learning), DigitalOcean Droplets (simple production), and DigitalOcean Kubernetes (enterprise). For internal/personal use only — commercial VPN services are prohibited.
+
+## Key Information
+- Requires Twingate Home plan or higher (Exit Networks not available on free Starter)
+- Three methods: Minikube (free/local), DO Droplets (low cost), DO Kubernetes (medium-high cost)
+- Repository: `https://github.com/Twingate-Community/diy-vpn`
+- Twingate network name = subdomain from your Twingate URL (e.g., `mycompany` from `mycompany.twingate.com`)
 
 ## Prerequisites
-- **Twingate**: Home plan or higher (Exit Networks not available on free Starter)
-- **DigitalOcean account** + **GitHub account**
-- **Twingate Client** installed on connecting devices
-- Docker Desktop (Minikube method), 4GB+ RAM, 10GB+ disk
+- Accounts: Twingate (Home+), DigitalOcean, GitHub
+- Twingate Client installed on connecting device
+- Twingate API token with **Read, Write, and Provision** permissions
+- DigitalOcean API token with **Full Access**
+- Docker Desktop (Minikube), Terraform (Droplets/K8s), kubectl + Helm (K8s)
+- 4GB+ RAM, 10GB+ disk, WSL2 on Windows
 
-## Deployment Methods
-
-| Method | Use Case | Cost | Complexity |
-|--------|----------|------|------------|
-| Minikube | Local dev/learning | Free | Low |
-| DO Droplets | Personal/small teams | Low | Medium |
-| DO Kubernetes | Enterprise/auto-scale | Medium-High | High |
-
-## API Key Setup
-**Twingate**: Settings → API → Generate Token → requires **Read, Write, and Provision** permissions
-
-**DigitalOcean**: API → Generate New Token → **Full Access**
-
-**Network name**: subdomain from `https://{network}.twingate.com`
-
-## Step-by-Step (Per Method)
+## Step-by-Step
 
 ### Method 1: Minikube
 ```bash
@@ -32,55 +25,55 @@ git clone https://github.com/Twingate-Community/diy-vpn.git
 cd diy-vpn/minikube
 minikube start --cpus=2 --memory=4096 --driver=docker
 cp values-example.yaml values.yaml
-# Edit values.yaml, then:
+# Edit values.yaml with credentials
 ./deploy.sh
+kubectl get pods -n twingate
 ```
 
-### Method 2: DO Droplets
+### Method 2: DigitalOcean Droplets
 ```bash
 cd diy-vpn/digital_ocean/droplet
 cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars, then:
+# Edit terraform.tfvars
 terraform init && terraform plan && terraform apply
 ```
 
-### Method 3: DO Kubernetes
+### Method 3: DigitalOcean Kubernetes
 ```bash
 cd diy-vpn/digital_ocean/kubernetes
 cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars
 terraform init && terraform plan && terraform apply
 doctl kubernetes cluster kubeconfig save <cluster-name>
 ```
 
 ## Configuration Values
 
-**values.yaml (Minikube)**:
-- `twingate-operator.twingateOperator.network` — Twingate network name
-- `twingate-operator.twingateOperator.apiKey` — Twingate API token
-- `twingate-operator.twingateOperator.remoteNetworkId` — Exit network ID
-
-**terraform.tfvars (Droplets/K8s)**:
-- `do_token` — DigitalOcean API token
-- `tg_api_token` — Twingate API token
-- `tg_network` — Twingate network name
-- `droplets`/`clusters` — Region/size config blocks
-
-**DO Regions**: `tor1`, `nyc1`, `nyc3`, `sfo3`, `ams3`, `fra1`, `lon1`, `sgp1`, `blr1`, `syd1`
+| Variable | Description |
+|---|---|
+| `tg_api_token` / `apiKey` | Twingate API token |
+| `tg_network` / `network` | Twingate network subdomain |
+| `do_token` | DigitalOcean API token |
+| `remoteNetworkId` | From `https://{network}.twingate.com/exit-networks/{id}` |
+| `region` | DO region code (e.g., `tor1`, `nyc1`, `fra1`) |
+| `node_size` | Droplet/node size (e.g., `s-1vcpu-1gb`) |
+| `auto_scale` | Boolean; enables K8s autoscaling |
+| `min_count` / `max_count` | Autoscaling node bounds |
 
 ## Gotchas
-- Twingate API token is shown **only once** — save immediately
-- Exit Networks require **paid plan** (not Starter/free)
-- Minikube needs Docker running; reset with `minikube delete && minikube start`
-- Terraform state lock can block reapply if previous run failed
-- Network name in config must match exactly (case-sensitive)
-- Commercial VPN use violates ToS; subject to Fair Use Policy on bandwidth
+- API token displayed only once at creation — save immediately
+- Free Starter plan does not include Exit Networks
+- Minikube needs Docker running before `minikube start`
+- Terraform region availability varies by DigitalOcean account
+- Connector name must match exactly in Twingate console
+- Use `terraform destroy` to avoid charges on test environments
 
 ## Troubleshooting
-- Connector missing in console → check API token permissions, verify network name
-- `terraform apply` fails → confirm DO token has write scope, check region availability
-- K8s issues → `kubectl logs -n twingate deployment/twingate-operator`
+- Connector missing: verify API permissions, exact network name match
+- Minikube issues: `minikube delete && minikube start`, increase `--memory=8192`
+- K8s issues: `kubectl logs -n twingate deployment/twingate-operator`
 
 ## Related Docs
-- [Twingate Connector Troubleshooting](https://www.twingate.com/docs/connector-issues)
-- [Twingate API Reference](https://www.twingate.com/docs/api)
+- [Twingate Connector Troubleshooting](https://www.twingate.com/docs)
+- [Twingate API Reference](https://www.twingate.com/docs)
 - [DigitalOcean Terraform Provider](https://registry

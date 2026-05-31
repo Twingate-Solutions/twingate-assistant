@@ -1,50 +1,50 @@
 # Peer-to-Peer Communication in Twingate
 
 ## Summary
-Twingate enables peer-to-peer connections between Clients and Connectors using NAT traversal, eliminating the need for open inbound ports. When direct P2P isn't possible, Twingate automatically falls back to relay infrastructure. No additional configuration or deployment is required.
+Twingate enables peer-to-peer connections between Clients and Connectors using NAT traversal, eliminating the need for open inbound ports. When direct P2P fails, traffic automatically falls back to Twingate's global relay infrastructure. No additional configuration or deployment is required.
 
 ## Key Information
-- Available to all Twingate customers; no extra deployment needed
+- Available to all customers; no additional deployment needed
 - Transparent to end users and administrators
-- Automatically selects lowest-latency transport option
-- Uses QUIC (UDP-based) as the transport layer protocol
-- Relay infrastructure serves as global backup when P2P fails
+- Uses QUIC (UDP-based) as the transport protocol
+- Automatically selects lowest-latency transport method
+- Relay infrastructure serves as automatic fallback when NAT traversal fails
 
 ## Connection Establishment Flow
-1. **Signaling channel**: Client and Connector both connect to Twingate's Relay Infrastructure (publicly accessible, globally distributed)
-2. **Peer discovery**: STUN server (hosted in Twingate relay infra) discovers public IP:port assigned by NAT
-3. **Address exchange**: Each peer receives candidate addresses for its partner via signaling channel
-4. **NAT traversal**: Peers use candidate addresses to attempt direct P2P connection
+1. **Signaling channel**: Client and Connector connect to Twingate's Relay Infrastructure (publicly accessible)
+2. **Peer discovery**: STUN server (hosted in Twingate relay infra) discovers public IP:port assigned by NAT layer
+3. **Address exchange**: Each peer receives candidate addresses for its partner via the signaling channel
+4. **Connection negotiation**: Peers use candidate addresses to attempt direct P2P connection via NAT traversal
 
 ## Fallback Behavior
-- When NAT traversal fails (blocked ports, incompatible NAT layers), traffic routes through relay infrastructure
-- Relays have public addresses and are globally available
-- Automatic failover — no configuration required
+- Direct P2P fails when: ports are blocked, NAT layers are incompatible
+- Fallback: Twingate's globally distributed relay infrastructure (always reachable)
+- Failover is automatic; no configuration required
 
 ## Technical Implementation (QUIC)
-- Built on **QUIC** protocol (RFC 9000, IETF standardized)
-- QUIC runs over UDP with its own reliable delivery mechanisms
-- Multiple application data flows map to individual QUIC streams over a single connection
+- Protocol: QUIC (RFC 9000), built on UDP
+- Replaces TCP+TLS for transport layer
 
-**QUIC advantages over TCP+TLS:**
-| Feature | Detail |
-|---|---|
-| Connection setup | Single round trip (resumption = zero RTT) |
-| Crypto | TLS 1.3 minimum |
-| Roaming | Survives client IP/port changes (NAT rebinding, network switches) |
-| Head-of-line blocking | Eliminated — packet loss affects only impacted streams |
-| Packet loss recovery | More efficient than TCP |
+**QUIC advantages used by Twingate:**
+- **Faster handshake**: 1 round-trip initial connection; 0-RTT resumption
+- **No head-of-line blocking**: Independent stream delivery; packet loss affects only impacted streams
+- **Client roaming**: Connections survive IP/port changes (NAT rebinding, network switches)
+- **Cryptography**: TLS 1.3 minimum
+- **Multi-app multiplexing**: Individual app data flows map to single QUIC streams per Connector
 
 ## Configuration Values
-- No configuration required on Client or Connector side
-- No inbound ports need to be opened
+- None required — fully automatic
 
 ## Gotchas
-- P2P is **not guaranteed** — incompatible NAT types or firewall rules blocking UDP can prevent direct connections; relay is always the fallback
-- QUIC uses UDP; firewalls that block UDP outbound may impact P2P performance (relay still works)
-- Outbound connectivity to Twingate relay infrastructure must be available from both Client and Connector
+- P2P traversal is **not guaranteed**; symmetric NAT or firewall rules blocking UDP may prevent it, triggering relay fallback
+- Relay fallback adds latency compared to direct P2P — if performance matters, ensure UDP is not blocked between Client and Connector
+- QUIC runs over UDP; environments that block or rate-limit UDP will impact P2P capability
+
+## Prerequisites
+- No special prerequisites; works with existing Twingate Client and Connector deployments
 
 ## Related Docs
-- Twingate Connector deployment
 - Twingate Relay Infrastructure
-- Resource access configuration
+- Twingate Client documentation
+- Twingate Connector documentation
+- [RFC 9000 (QUIC)](https://datatracker.ietf.org/doc/html/rfc9000)

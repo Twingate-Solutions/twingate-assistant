@@ -1,47 +1,46 @@
 # Twingate Windows Client
 
 ## Summary
-Installation guide for the Twingate Windows desktop client. Covers supported OS versions, tunnel driver selection, first-time setup, and common troubleshooting issues. Windows Server is supported only in headless mode.
+Twingate Windows Client installer for desktop and server environments. Supports Windows 10/11 and Windows Server 2022/2025. Windows Server requires headless mode only due to missing posture check dependencies.
 
 ## Key Information
 - Download from `get.twingate.com`
-- Supported platforms: Windows 10, Windows 11, Windows Server 2022, Windows Server 2025
-- Windows Server **only** supports headless mode (no posture checks)
-- Runs from Windows Taskbar Notification Area after install
+- Installation requires local admin rights
+- Two tunnel driver options: **TunTap** (default, recommended) and **Wintun** (experimental, potentially higher throughput)
+- Client runs from system tray (Notification Area) after installation
+- Only intercepts traffic for private Resources; does not affect general internet traffic
 
 ## Prerequisites
-- Local admin rights on the machine
-- .NET Desktop Runtime (x64):
-  - Client versions before November 2024: .NET 6.0+
-  - Client versions from November 2024 onward: .NET 8.0+
-- EXE/update installer auto-installs .NET; **MSI installer requires manual .NET installation**
+- Local administrator rights on the machine
+- **.NET Desktop Runtime (x64)**:
+  - Client versions before November 2024: .NET Desktop Runtime 6.0+
+  - Client versions November 2024+: .NET Desktop Runtime 8.0+
+- EXE installer auto-installs .NET; **MSI installer requires manual .NET installation**
 
 ## Step-by-Step
 
 1. Download installer from `get.twingate.com`
-2. Run installer (requires local admin)
-3. Select tunnel driver: **TunTap** (default, recommended) or **Wintun** (experimental, potentially higher throughput)
+2. Run installer (local admin required)
+3. Select tunnel driver: **TunTap** (default) or **Wintun**
 4. Launch Twingate from desktop shortcut or Start menu
 5. Enter your Twingate network name (e.g., `Beamreach`)
-6. Click **Join Network** → redirected to identity provider
-7. Authenticate with organizational credentials
-8. Client connects; only intercepts traffic for defined private Resources
+6. Click **Join Network** → redirected to configured identity provider
+7. Authenticate with org credentials
 
 ## Configuration Values
-
 | Option | Values | Notes |
 |--------|--------|-------|
-| Tunnel Driver | `TunTap` / `Wintun` | Set at install time; requires reinstall to change |
-| Network Name | Your org's network name | Entered on first launch |
+| Tunnel Driver | `TunTap` / `Wintun` | Set during install; switch by reinstalling |
+| Network Name | `<your-org-name>` | Subdomain of your Twingate network |
 
 ## Gotchas
-- **Switching tunnel drivers requires full reinstall** — no in-app toggle
-- **MSI installs**: Must manually install .NET Desktop Runtime x64 separately
-- **Windows Server**: Posture checks not supported; headless mode only
-- **Intel Ethernet on Windows 10**: May cause slow speeds; update driver manually from Intel's website (not via Windows Update)
-- .NET version requirement changed in November 2024 — older clients need 6.0, newer need 8.0
+- **Windows Server**: Posture checks are unsupported; use headless mode only
+- **MSI installs**: Must manually install .NET Desktop Runtime — not bundled automatically
+- **Driver switching**: Requires full reinstall to change tunnel driver
+- **Intel Ethernet on Windows 10**: May cause slow speeds; update driver manually from Intel's website (Windows Update may not provide latest version)
+- .NET requirement changed in November 2024 (6.0 → 8.0); ensure correct runtime version for your client version
 
 ## Related Docs
-- Twingate headless/service mode (for Windows Server deployments)
-- Posture checks documentation
+- Twingate headless mode (Windows Server usage)
+- Client posture checks
 - [.NET 8.0 Desktop Runtime x64 (Microsoft)](https://dotnet.microsoft.com/download/dotnet/8.0)

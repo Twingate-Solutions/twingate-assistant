@@ -1,14 +1,14 @@
 # Internet Security Client Configuration
 
 ## Summary
-Configures Twingate Clients to run Internet Security features (DNS filtering) even when users are signed out. Requires deploying a Machine Key via MDM to target machines. Also restricts users from quitting, signing out, or switching networks on the Client.
+Configures Twingate Clients to run Internet Security features (DNS filtering) even when users are signed out by deploying Machine Keys via MDM. When configured, users cannot quit, sign out, or switch networks on the Client.
 
 ## Key Information
 - Machine Keys are shared across devices; one key can deploy to all devices
-- Up to 10 keys can be generated simultaneously
+- Up to 10 Machine Keys can be generated simultaneously
 - Devices don't appear in Admin Console until a user signs in at least once
-- DNS filtering setup is **separate** from this configuration
-- macOS App Store client does **not** support this — standalone only
+- DNS filtering setup is separate from this configuration
+- macOS App Store client does **not** support this configuration
 
 ## Prerequisites
 - Minimum Client versions:
@@ -16,42 +16,50 @@ Configures Twingate Clients to run Internet Security features (DNS filtering) ev
   - Windows: 2024.028+
   - Linux: 2024.018+
 - MDM solution (e.g., Jamf, Intune) for deployment
-- Internet Security enabled in Admin Console
+- Internet Security tab access in Admin Console
 
 ## Step-by-Step
 
-1. In Admin Console → **Internet Security** → **Client Configuration** tab
-2. Click **Generate Key** to create a Machine Key
-3. Rename file to `machinekey.conf`
-4. Deploy via MDM to platform-specific path
-5. Deploy KeepAlive configuration to ensure Client stays running
+### Generate Machine Key
+1. Admin Console → **Internet Security** tab → **Client Configuration** sub-tab
+2. Click **Generate Key**
 
-## Configuration Values
+### Deploy Machine Key
+Deploy file via MDM to platform-specific path, renamed to `machinekey.conf`:
 
-**Machine Key File Paths:**
 | Platform | Path |
 |----------|------|
 | macOS | `/Library/Application Support/Twingate/machinekey.conf` |
 | Windows | `%ProgramData%/Twingate/machinekey.conf` |
 | Linux | `/etc/twingate/machinekey.conf` |
 
-**macOS KeepAlive Launch Agent:**
-- File: `com.twingate.macos.plist`
-- Location: `/Library/LaunchAgents/com.twingate.macos.plist`
-- Key settings: `KeepAlive=true`, `RunAtLoad=true`
-- Program path: `/Applications/Twingate.app/Contents/MacOS/Twingate`
+### Keep Client Running (macOS)
+1. Create `/Library/LaunchAgents/com.twingate.macos.plist` with `KeepAlive` Launch Agent
+2. Optionally set immutable flag: `sudo chflags schg /Library/LaunchAgents/com.twingate.macos.plist`
+3. Restart device or load Launch Agent
 
-**Windows KeepAlive:** Use Intune proactive remediation
-- Detection: checks for `twingate` process
-- Remediation: launches `C:\Program Files\Twingate\Twingate.exe`
+### Keep Client Running (Windows)
+Deploy Intune proactive remediation with detection/remediation scripts that check and restart `Twingate.exe`.
+
+## Configuration Values
+
+**File name (required):** `machinekey.conf`
+
+**macOS plist:**
+- Label: `com.twingate.macos`
+- Program: `/Applications/Twingate.app/Contents/MacOS/Twingate`
+- KeepAlive: `true`
+- RunAtLoad: `true`
+
+**Windows process path:** `C:\Program Files\Twingate\Twingate.exe`
 
 ## Gotchas
-- File **must** be named `machinekey.conf` exactly — incorrect filename breaks DNS filtering for signed-out clients
-- Without KeepAlive config, users can still kill the process via Task Manager/Activity Monitor
-- Optionally set immutable flag on macOS plist: `sudo chflags schg /Library/LaunchAgents/com.twingate.macos.plist`
-- Signed-out devices show differently in DNS filtering logs than signed-in devices
+- File **must** be named `machinekey.conf` exactly — wrong filename breaks DNS filtering for signed-out clients
+- Machine Key alone doesn't prevent Client from being killed via Task Manager/Activity Monitor; KeepAlive config is required for true persistence
+- DNS filtering is configured separately — this config only ensures it runs when signed out
+- Signed-out devices show different DNS filtering log entries than signed-in devices
 
 ## Related Docs
-- Internet Security documentation (DNS filtering setup)
-- DNS filtering documentation (signed-out device logs)
-- Intune proactive remediation docs
+- [Internet Security / DNS Filtering documentation](https://www.twingate.com/docs/internet-security)
+- [DNS Filtering logs for signed-out devices](https://www.twingate.com/docs/dns-filtering)
+- [Intune Proactive Remediation](https://learn.microsoft.com/en-us/mem/intune/fundamentals/remediations)

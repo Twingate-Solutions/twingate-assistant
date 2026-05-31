@@ -1,41 +1,37 @@
 # Twingate Authentication Policy
 
 ## Summary
-Controls re-authentication frequency for users accessing Resources. Applies to Resource Policies or Minimum Authentication Requirements. Authentication behavior depends on IdP configuration since Twingate cannot control how the IdP handles the actual authentication challenge.
+Controls how frequently users must re-authenticate to access Resources. Can be applied to Resource Policies or Minimum Authentication Requirements, but not the Admin Console's authentication policy.
 
 ## Key Information
-- Sets time window requiring users to re-authenticate before accessing Resources
-- Single authentication satisfies multiple policies if within the time window (no double-prompting)
-- Twingate cannot force IdPs to require password re-entry; some IdPs may silently re-authenticate
-- Admin Console authentication policy **cannot be edited**
-
-## Applicability
-- Resource Policies
-- Minimum Authentication Requirements
-- ~~Admin Console authentication policy~~ (not configurable)
-
-## Behavior Details
-- If user last authenticated **within** the configured window → no re-auth prompt
-- If user last authenticated **outside** the configured window → re-auth prompted
-- A single login satisfies overlapping policies: authentication timestamp is shared across policies
-  - Example: Minimum Auth Requirement = 1 day, Resource Policy = 6 hours → user who just logged in is **not** double-prompted, but will be prompted if accessing the Resource 6+ hours after login
-
-## Configuration Values
-| Setting | Description |
-|---|---|
-| Authentication window | Duration (e.g., 6 hours, 1 day) since last authentication before re-auth is required |
-
-## Gotchas
-- **IdP passthrough**: Twingate triggers an IdP authentication flow, but the IdP may complete it silently (SSO session still valid). If active credential re-entry is required, configure the IdP to force password prompts on each authentication.
-- **Shared auth timestamp**: The most recent authentication time applies across all policies — the stricter time window governs when the next prompt occurs, but won't cause duplicate prompts within the same session.
-- Admin Console policy is fixed and cannot be modified via authentication rules.
+- Sets a time-based re-authentication window for Resource access
+- Authentication prompts trigger if user's last auth exceeds the configured time threshold
+- Twingate cannot control IdP behavior during re-authentication (IdP may silently re-auth without prompting credentials)
+- Authentication windows are **not** additive — a single valid auth session satisfies multiple policies simultaneously
 
 ## Prerequisites
-- Identity provider configured with Twingate
-- Resource Policies or Minimum Authentication Requirements set up in Admin Console
+- Resource Policy or Minimum Authentication Requirement configured in Admin Console
+- Identity provider connected to Twingate
+
+## Configuration Values
+| Setting | Scope |
+|---|---|
+| Authentication frequency (time window) | Resource Policy or Minimum Authentication Requirement |
+
+## Behavior Details
+- **Single auth session honors multiple policies**: If Minimum Auth Requirement = 1 day and Resource Policy = 6 hours, a user who just authenticated will not be double-prompted — they only re-authenticate if >6 hours have passed since last auth
+- **Policy interaction**: The most restrictive time window in effect determines when re-auth is triggered
+
+## Gotchas
+- **IdP passthrough**: Twingate triggers the auth flow, but the IdP may complete it silently (no password re-entry). If active credential re-entry is required, configure the IdP to always prompt for passwords
+- Admin Console authentication policy is **not editable**
+- Users are not prompted twice even when multiple overlapping policies exist — the single most recent auth timestamp is checked against each policy's window
+
+## Recommendations
+- If strict re-authentication (with credential entry) is required, configure your IdP session policy to require passwords on every authentication event
+- Test IdP behavior with your specific provider to confirm whether silent re-auth occurs
 
 ## Related Docs
 - Resource Policies
 - Minimum Authentication Requirements
 - Security Policies
-- Identity Provider configuration

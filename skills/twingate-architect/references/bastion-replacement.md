@@ -4,45 +4,39 @@
 Bastion Server Cloaking / Bastion Replacement
 
 ## Summary
-Twingate can replace or augment bastion servers by making private resources completely invisible to the internet while providing stronger access controls. It addresses core bastion weaknesses: internet exposure, IdP sync gaps, and 2FA enforcement challenges.
+Twingate can replace or augment bastion servers by making private resources completely invisible to the internet while providing stronger authentication integration. Unlike bastions, Twingate resources have no public internet exposure and integrate directly with Identity Providers for real-time access control and 2FA enforcement.
 
 ## Key Information
+- **Resource invisibility**: Twingate-protected resources are not publicly accessible or discoverable; no public IP/port exposure required
+- **Traffic encryption**: All traffic is encrypted in-transit from user device to destination Connector
+- **Real-time IdP sync**: Access automatically revoked when employee account is disabled in Identity Provider
+- **SSO/2FA support**: Any IdP authentication policy (including MFA) can be applied to any resource type without client/server config changes
+- **OSI Layer 4 authorization**: Twingate authorizes network connections at the transport layer while integrating with IdP
 
-**Bastion server use cases (what Twingate replaces):**
-- Focused security monitoring/logging on a single exposed asset
-- Single source IP to whitelist for private network ingress
-- Centralized access management point
+## Problems Solved vs. Traditional Bastions
 
-**Bastion limitations Twingate solves:**
-- **Internet exposure**: Bastion remains attackable; Twingate Resources and Connectors are fully dark to the internet
-- **IdP coupling**: SSH key management decouples from Active Directory/IdP; Twingate syncs with IdP in real-time
-- **2FA enforcement**: Native SSH 2FA is complex; Twingate applies SSO policies (including 2FA) at the network layer (OSI Layer 4) without client/server config changes
-
-**Twingate advantages:**
-- All forwarded traffic is encrypted in-transit from user device to destination Connector
-- Real-time IdP sync ensures only active employees retain access regardless of resource-level permissions
-- SSO/2FA policies apply to any resource type without requiring application changes
+| Bastion Weakness | Twingate Solution |
+|---|---|
+| Bastion exposed to internet attacks | No public exposure; resources fully cloaked |
+| SSH key management decoupled from IdP | Real-time IdP synchronization |
+| Difficult to enforce 2FA on SSH | SSO/2FA policy applies to any resource type |
 
 ## Prerequisites
-- Twingate Connector deployed in private network
-- Identity Provider (IdP) configured for SSO integration
-- Existing bastion or SSH-accessible private resources
+- Twingate Connector deployed in target private network
+- Identity Provider configured with Twingate
+- Users provisioned through IdP
 
-## Architecture Notes
-- Connector does **not** need to be publicly accessible
-- No inbound firewall rules required for Twingate to function
-- Access control operates at network layer — independent of application-level auth
+## Implementation Notes
+- The Twingate Connector does **not** need to be globally accessible via the internet
+- No client or server configuration changes required to apply authentication policies
+- Access control operates independently of resource-level permissions — IdP account status is a prerequisite gate
 
 ## Gotchas
-- Twingate does not eliminate the need for resource-level authentication (SSH keys, etc.) — it adds network-layer access control on top
-- IdP sync means account deactivation in IdP immediately revokes Twingate access, but existing authenticated sessions behavior should be verified
-- "Completely invisible" applies to Resources and Connectors — the Twingate control plane itself uses Twingate's cloud infrastructure
-
-## Configuration Values
-No specific env vars, CLI flags, or API parameters documented on this page. See Connector deployment docs for setup.
+- Twingate guarantees only *active* IdP accounts can connect, but resource-level permissions are separate — both must be configured correctly
+- This page is conceptual; actual Connector deployment and Resource configuration are covered in separate docs
 
 ## Related Docs
 - Connector setup documentation
 - Identity Provider / SSO integration
-- Resource configuration
-- Network access policies / 2FA enforcement
+- Resource access policies
+- 2FA/MFA configuration

@@ -1,35 +1,29 @@
 # Twingate FIPS 140 Compliance
 
 ## Summary
-Twingate is not FIPS 140 validated and cannot exclusively use FIPS 140-validated cryptographic modules. However, Twingate's transport-layer encapsulation does not decrypt underlying payloads, so it does not compromise end-to-end FIPS-compliant communications between endpoints.
+Twingate is not FIPS 140 validated and cannot exclusively use FIPS 140-validated cryptographic modules. However, Twingate's transport-layer encapsulation does not decrypt underlying payloads, meaning it does not compromise existing end-to-end FIPS-compliant communications between customer devices.
 
 ## Key Information
-- **Not FIPS 140 validated** — Twingate holds no FIPS 140-2 or 140-3 validation
-- **Cannot guarantee exclusive use** of FIPS-validated crypto modules internally
-- **Does not break existing FIPS compliance** — if two endpoints communicate via FIPS-validated crypto (e.g., TLS using FIPS-validated OpenSSL), adding Twingate does not disturb that status
-- Twingate operates at the **transport layer** (encapsulation/routing), and **cannot decrypt** the underlying encrypted payloads
-- FIPS validation process lag means Twingate may use newer, unvalidated-but-potentially-more-secure crypto module versions
-- "FIPS 140" references apply equally to FIPS 140-2 and FIPS 140-3
+
+- **Not FIPS 140 validated** — Twingate holds no FIPS 140-2 or 140-3 certification
+- **Compatible, not compliant** — Twingate is considered *compatible* with FIPS 140 communications, not itself compliant
+- **No payload decryption** — Twingate encapsulates traffic at the transport layer but cannot decrypt underlying encrypted payloads (e.g., TLS data)
+- **Preservation of existing FIPS status** — If endpoint-to-endpoint communication uses FIPS-validated cryptography (e.g., FIPS 140-validated OpenSSL), adding Twingate does not break that compliance posture
+- **Why not validated** — FIPS validation process is slow; newer cryptographic module versions with security/bug fixes may be available but not yet validated; Twingate opts for more current (potentially more secure) implementations
 
 ## FedRAMP Considerations
-- FedRAMP-authorized CSPs are **not required** to use only FedRAMP-authorized vendors
-- FedRAMP authorization does not automatically require vendors to implement exclusively FIPS 140-validated modules
-- CSPs must evaluate their own usage of Twingate to determine what FedRAMP/FIPS requirements apply
-- Twingate will provide architecture/service details to assist FedRAMP CSPs in their evaluation (contact Twingate directly)
+
+- FedRAMP-authorized CSPs **do not automatically require** their vendors to be FedRAMP authorized or exclusively use FIPS 140-validated modules
+- CSPs must independently evaluate how Twingate is used within their FedRAMP authorization boundary
+- Twingate will provide architectural detail to assist FedRAMP CSPs in their evaluation
 
 ## Gotchas
-- Twingate's transport encapsulation layer itself does **not** use FIPS-validated crypto — only the underlying application-layer communications can be FIPS-compliant
-- FIPS compatibility claim is **conditional**: only valid if the endpoint-to-endpoint communication was already FIPS-compliant before Twingate was introduced
-- FedRAMP CSPs cannot assume Twingate covers their FIPS obligations — they must perform their own scoping assessment
 
-## Use Case Summary
-
-| Scenario | FIPS Impact |
-|----------|-------------|
-| FIPS-compliant app-to-resource TLS + Twingate routing | No FIPS impact |
-| Relying on Twingate itself for FIPS-validated crypto | Not supported |
-| FedRAMP authorization requiring FIPS 140 | Requires independent CSP assessment |
+- "FIPS compatible" ≠ "FIPS validated" — Twingate's transport encapsulation layer uses non-validated crypto modules
+- FIPS compliance of the *end-to-end* communication depends entirely on the **customer's own application stack**, not Twingate
+- If your compliance requirement mandates that **all** cryptographic operations in the data path use FIPS-validated modules (including transport encapsulation), Twingate does not currently satisfy that requirement
 
 ## Related Docs
+
 - [FIPS 140-validated OpenSSL library](https://www.openssl.org/docs/fips.html) (external reference)
-- Twingate FedRAMP inquiries: contact Twingate directly for architecture documentation
+- Twingate FedRAMP support contact for architectural details

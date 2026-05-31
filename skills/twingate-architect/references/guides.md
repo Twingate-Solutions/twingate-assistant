@@ -1,62 +1,72 @@
 # Twingate Guides Index
 
 ## Page Title
-Twingate Guides Overview
+Twingate Guides – Documentation Index
 
 ## Summary
-This is the top-level documentation index for Twingate guides covering deployment, configuration, and management. It serves as a navigation hub organizing guides by category including infrastructure deployment, client rollout, policy configuration, and integrations.
+This is the top-level guides index for Twingate documentation, organizing deployment, configuration, and management topics. It serves as a navigation hub covering infrastructure deployment, client rollout, policy configuration, service integrations, and architecture best practices.
 
 ## Key Information
 
-**Deployment Targets:**
-- Cloud: AWS EC2, GCP Compute, Azure Compute, DigitalOcean, Kubernetes
-- On-premises: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP, TrueNAS, Proxmox
-- Homelab: Home Assistant, Unraid, ZimaOS, CasaOS
-- IaC: Terraform, Pulumi
+### Deployment Targets
+- **Cloud**: AWS EC2, GCP Compute, Azure Compute, Kubernetes, DigitalOcean
+- **On-premises**: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP, TrueNAS, Proxmox
+- **Homelab**: Home Assistant, Unraid, ZimaOS, CasaOS
+- **IaC**: Terraform, Pulumi
 
-**Client Deployment (MDM):**
-- Jamf, Omnissa Workspace ONE, Microsoft Intune, Iru
+### Client Deployment (MDM)
+- Jamf, Iru, Omnissa Workspace ONE, Microsoft Intune & Endpoint Manager
 
-**Database Protection:**
-- MongoDB, AWS, GCP, Azure, Oracle, Snowflake, Redis
-
-**SaaS App Gating Integrations:**
-- Google Workspace, JumpCloud, Microsoft Entra ID, Okta, OneLogin
-
-**Service Compatibility:**
+### Service Compatibility
 - Active Directory, Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler
 
-**Kubernetes Scenarios:**
-- Route traffic from K8s, private resources, publicly exposed resources, kubectl management
+### Database Access
+- MongoDB, AWS, GCP, Azure, Oracle, Snowflake, Redis
 
-## Key Feature Areas
+### SaaS App Gating IDPs
+- Google Workspace, JumpCloud, Microsoft Entra ID, Okta, OneLogin
 
-- **Internet Security**: DNS-over-HTTPS (DoH), DNS filtering
-- **Security Policies**: Per-network and per-resource policy definitions
-- **Logging**: Audit log viewing, export, SIEM ingestion
-- **SaaS App Gating**: IP-based access control for SaaS applications
+### Kubernetes-Specific
+- Route traffic from Kubernetes, private/public resources, `kubectl` management
 
 ## Notable Use Cases
-- CI/CD pipeline security
-- SSH resource access management
-- Site-to-site connections
+- Cloak bastion servers / strongDM
+- Secure CI/CD pipelines
 - IoT headless client gateway
 - Vendor/contractor access management
-- AWS VPN replacement
-- Bastion server cloaking
-- Exit nodes for SaaS gating and self-hosted VPN
+- SSH resource access
+- Replace AWS VPN
+- Site-to-site connections
+- AI/LLM access control
+- Remote game streaming
+
+## Architecture & Best Practices Topics
+- Private DNS configuration
+- Connector placement
+- Overlapping IP addresses
+- Security policies
+- Non-production environment access
+- Whitelisting public resources
+- Local peer-to-peer connections
+
+## Technical Reference Topics
+- NAT traversal mechanics
+- Encryption internals
+- Firewall behavior
+- Service accounts
+- Windows Start Before Logon
+- Connector shutdown process
+- Performance evaluation
+- Release stages
 
 ## Related Docs
-- Remote Network Best Practices
-- Connector Best Practices
-- Best Practices for Private DNS Configuration
-- Best Practices for Overlapping IP Addresses
-- Best Practices for Security Policies
-- How NAT Traversal Works
-- How Encryption Works in Twingate
-- How Firewalls Work with Twingate
-- Troubleshooting Peer-to-peer Connections
-- Twingate Release Stages
+- Individual deployment guides linked per platform (see sections above)
+- `Best Practices for Connector Placement` – critical for routing/performance
+- `Best Practices for Security Policies` – policy design reference
+- `How NAT Traversal Works` – useful for troubleshooting connectivity
+- `Troubleshooting Peer-to-peer Connections` – P2P debugging reference
 
-## Notes
-This page is an index only — no configuration values, CLI flags, or step-by-step procedures are present. Use it to navigate to specific implementation guides for each deployment scenario or integration type.
+## Gotchas
+- This page is navigation-only; no configuration values or CLI flags are present here
+- Specific implementation details require navigating to individual guide pages
+- "Iru" MDM listing is likely a niche/regional MDM tool—verify compatibility before planning rollout

@@ -6,29 +6,37 @@ The Twingate Client must be installed and running on user devices to access prot
 ## Key Information
 - Client size: <10MB, minimal system resource usage
 - Uses native OS VPN functionality — VPN connection activating on device is expected/normal
-- Download via `get.twingate.com` (auto-detects platform)
-- Compatible with most MDM/device management solutions
+- Download available at `get.twingate.com` (auto-detects platform)
+- Compatible with most device management (MDM) solutions
 
 ## Prerequisites
-- Device with supported OS
-- Outbound internet connectivity
-- Admin rights for installation (implied by VPN functionality usage)
+- Device access to install software
+- Outbound internet connectivity on required ports (see below)
 
-## Firewall Rules (Outbound Only)
+## Configuration Values
 
-| Protocol | Port(s) | Purpose |
-|----------|---------|---------|
-| TCP | 443 | Communication with Twingate Controller and Relay infrastructure |
-| TCP | 30000–31000 | Relay infrastructure connections (fallback when peer-to-peer unavailable) |
-| UDP/QUIC (HTTP/3) | 1–65535 | Peer-to-peer connectivity for optimal performance |
+### Required Firewall Ports (Outbound Only)
+
+| Port/Range | Protocol | Purpose |
+|---|---|---|
+| `443` | TCP | Communication with Twingate Controller and Relay infrastructure |
+| `30000-31000` | TCP | Relay connections when peer-to-peer is unavailable |
+| `1-65535` | UDP + QUIC (HTTP/3) | Peer-to-peer connectivity (optimal performance) |
+
+All rules are **outbound-initiated** — no inbound rules required.
+
+## Step-by-Step: Client Installation
+1. Navigate to `get.twingate.com`
+2. Client auto-downloads for the detected platform
+3. Install and run the application
+4. For managed/MDM deployment, see Managed Devices documentation
 
 ## Gotchas
-- Firewall rules are **not usually required** — only needed for troubleshooting connectivity issues
-- UDP ports 1–65535 required for P2P; restrictive firewalls blocking UDP will fall back to TCP relay (ports 30000–31000)
-- If TCP 30000–31000 and UDP are both blocked, only TCP 443 remains — may degrade performance
-- Native VPN activation is intentional, not a conflict with existing VPN software (verify compatibility separately)
+- A VPN connection appearing in OS network settings is **expected behavior**, not an error
+- UDP ports `1-65535` are needed for peer-to-peer; restricting these degrades performance but won't break connectivity (falls back to Relay on TCP `30000-31000`)
+- Firewall rules are not required in typical setups — only needed for troubleshooting connectivity issues
 
 ## Related Docs
-- [Download & Installation](#) — detailed installation instructions
-- [Managed Devices](#) — MDM/device management compatibility
-- [HTTP/3 / QUIC guide](#) — UDP/QUIC configuration details
+- Download & Installation (detailed install guide)
+- Managed Devices (MDM/enterprise deployment)
+- HTTP/3 and QUIC guide (UDP/QUIC port details)

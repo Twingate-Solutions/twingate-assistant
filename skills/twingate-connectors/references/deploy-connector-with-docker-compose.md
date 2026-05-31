@@ -1,38 +1,38 @@
 # Deploy Connector with Docker Compose
 
 ## Summary
-Deploys a Twingate Connector using Docker Compose. Requires Access Token, Refresh Token, and tenant name. Supports optional parameters for logging, DNS, restart behavior, and syslog forwarding.
+Deploys a Twingate Connector as a Docker Compose service. Requires Access Token and Refresh Token pre-generated from the Admin Console. Supports optional parameters for logging, DNS, restart behavior, and peer-to-peer connections.
 
 ## Prerequisites
 - Docker and Docker Compose installed
-- Access Token and Refresh Token (generated via Connector deployment flow in Admin Console)
 - Twingate tenant name (`<name>` from `https://<name>.twingate.com`)
+- Access Token and Refresh Token (generated via Admin Console connector deployment flow)
 
 ## Configuration Values
 
 ### Required Environment Variables
 | Variable | Description |
 |---|---|
-| `TWINGATE_NETWORK` | Tenant name (subdomain only) |
-| `TWINGATE_ACCESS_TOKEN` | Connector access token |
-| `TWINGATE_REFRESH_TOKEN` | Connector refresh token |
+| `TWINGATE_NETWORK` | Tenant name (not full URL) |
+| `TWINGATE_ACCESS_TOKEN` | Generated access token |
+| `TWINGATE_REFRESH_TOKEN` | Generated refresh token |
 
 ### Optional Environment Variables
 | Variable | Description |
 |---|---|
 | `TWINGATE_LOG_LEVEL` | Log verbosity (e.g., `3` for detailed) |
 | `TWINGATE_LOG_ANALYTICS` | Set to `v2` to enable Network Events in logs |
-| `TWINGATE_DNS` | Custom DNS server IP (e.g., `8.8.8.8`); rarely needed |
+| `TWINGATE_DNS` | Custom DNS server IP (e.g., `8.8.8.8`); overrides Remote Network DNS |
 
-### Optional Docker Compose Fields
-| Field | Value | Purpose |
+### Optional Compose Parameters
+| Parameter | Value | Purpose |
 |---|---|---|
-| `container_name` | Connector name from Admin Console | Identification |
 | `restart` | `always` | Auto-restart on crash |
-| `network_mode` | `host` or `bridge` (default) | `host` enables local peer-to-peer |
-| `sysctls: net.ipv4.ping_group_range` | `"0 2147483647"` | Enables ICMP/ping support |
+| `network_mode` | `host` | Enables local peer-to-peer connections |
+| `sysctls: net.ipv4.ping_group_range` | `"0 2147483647"` | Enables ICMP/ping to Resources |
+| `container_name` | Connector name from Admin Console | Identification |
 
-## Minimal Compose File
+## Minimal Config
 ```yaml
 services:
   twingate-connector:
@@ -43,7 +43,7 @@ services:
       - TWINGATE_REFRESH_TOKEN=<REFRESH TOKEN>
 ```
 
-## Recommended Full Compose File
+## Recommended Config
 ```yaml
 services:
   twingate_connector:
@@ -56,7 +56,6 @@ services:
       - TWINGATE_REFRESH_TOKEN=<REFRESH TOKEN>
       - TWINGATE_LOG_ANALYTICS=v2
       - TWINGATE_LOG_LEVEL=3
-      - TWINGATE_DNS=8.8.8.8
     network_mode: host
     sysctls:
       net.ipv4.ping_group_range: "0 2147483647"
@@ -74,13 +73,13 @@ services:
 ```
 
 ## Gotchas
-- `network_mode: host` is required for local peer-to-peer connections; default `bridge` mode does not support this
-- `TWINGATE_DNS` overrides the Remote Network's DNS config — only set when explicitly needed
-- `net.ipv4.ping_group_range` sysctl must be set if using ping to test Resource connectivity
-- Tokens must be pre-generated; this guide does not cover token generation (see connector deploy docs)
+- `TWINGATE_DNS` is rarely needed; default uses Remote Network's DNS config—only override if required
+- `network_mode: host` conflicts with Docker's default `bridge` mode; required for local peer-to-peer but changes container networking behavior
+- `net.ipv4.ping_group_range` sysctl only needed if using ping to test Resource connectivity
+- Tokens must be generated fresh per connector from the Admin Console before deployment
 
 ## Related Docs
-- How to Deploy a Connector (token generation)
-- Twingate Connector Logs (log level values)
-- Supporting Peer-to-Peer Connections
-- Fair Use Policy
+- [How to Deploy a Connector](https://www.twingate.com/docs/connector) (token generation)
+- [Twingate Connector Logs](https://www.twingate.com/docs/connector-logs) (log level values)
+- [Support Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
+- [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)

@@ -1,50 +1,68 @@
 # Twingate Admin API Overview
 
 ## Summary
-Twingate provides a GraphQL-based Admin API for managing all core network objects (Resources, Groups, Connectors, Remote Networks, etc.). Access requires an API token generated from the Admin Console. Rate limiting applies with separate read/write limits.
+Twingate provides a GraphQL-based Admin API for managing all core network objects (Remote Networks, Connectors, Resources, Groups, Service Accounts, Devices, Users, Policies). Access requires an API token generated from the Admin Console. The API endpoint is tenant-specific and schema is always current via introspection.
 
 ## Key Information
 - **API type**: GraphQL
 - **Endpoint**: `https://<subdomain>.twingate.com/api/graphql/`
-- **Auth header**: `X-API-KEY: <your-token>`
-- **Schema**: Always current via GraphQL introspection at the endpoint
-- **Supported operations**: Full CRUD on Remote Networks, Connectors, Resources, Groups, Service Accounts/Keys; read/update on Devices, Security Policies, Users; Social Users management; Policy assignment
+- **Auth header**: `X-API-KEY: <your-api-token>`
+- **Schema**: Self-documented via GraphQL introspection at the endpoint
+- **Terraform provider** available for IaC management
 
 ## Prerequisites
-- Access to Twingate Admin Console
-- API token: Settings → API → Generate Token
+- Admin Console access to generate API token
+- Navigate: Settings → API → Generate Token
+- Token can be disabled/re-enabled after creation
 
 ## Configuration Values
 | Parameter | Value |
 |-----------|-------|
 | Endpoint | `https://<subdomain>.twingate.com/api/graphql/` |
 | Auth Header | `X-API-KEY` |
-| Read limit | 60 req/min |
-| Write limit | 20 req/min |
+| Read limit | 60 requests/minute |
+| Write limit | 20 requests/minute |
 | Rate limit response | HTTP `429` |
+
+## Supported Operations by Object
+- **Remote Networks**: CRUD
+- **Connectors**: CRUD + generate tokens
+- **Resources**: CRUD
+- **Groups**: CRUD
+- **Service Accounts/Keys**: CRUD
+- **Devices**: Read, archive, unarchive, block, unblock, update trust status
+- **Security Policies**: Read, update; assign to objects
+- **Users**: Read only
+- **Social Users**: Read, invite, update, delete
 
 ## Example Query
 ```graphql
 {
   remoteNetworks(after: null, first: 10) {
     edges {
-      node { id name }
+      node {
+        id
+        name
+      }
     }
-    pageInfo { startCursor hasNextPage }
+    pageInfo {
+      startCursor
+      hasNextPage
+    }
   }
 }
 ```
 
 ## Recommended Clients
-- **GUI**: GraphiQL (`brew install --cask graphiql`) or Altair (has built-in introspection/schema browser)
+- **GUI**: GraphiQL (`brew install --cask graphiql`), Altair (has built-in introspection)
 - **Python**: `gql` library
 
 ## Gotchas
-- Rate limit: **60 reads / 20 writes per minute** — exceeding returns `429` with retry-after info
-- Terraform users hitting `429` should upgrade to latest Twingate provider (handles retries automatically)
-- Token can be disabled/re-enabled but must be generated from Admin Console (no API bootstrap)
+- Rate limits are per-minute windows; hitting them returns `429` with retry-after info
+- Terraform provider versions prior to latest may not handle `429` retries automatically — upgrade to latest if Terraform runs fail with `429`
+- Pagination required for large result sets (use `after`/`first` + `pageInfo`)
 
 ## Related Docs
 - Terraform Provider documentation
 - Terraform Getting Started guide
-- GraphQL introspection for live schema reference
+- GraphQL introspection (schema discovery)

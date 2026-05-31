@@ -1,61 +1,54 @@
 # DNS-over-HTTPS (DoH) - Twingate
 
 ## Summary
-Twingate provides native DoH capabilities that encrypt all DNS traffic at the network level on macOS, Windows, and Linux clients. No per-application configuration is required. DoH is managed centrally via the Admin Console and disabled by default.
+Twingate provides native DoH capabilities that encrypt all DNS traffic at the network level on macOS, Windows, and Linux clients. Configuration is managed via the Admin Console with options for resolver selection, fallback behavior, and group exceptions. DoH is disabled by default.
 
 ## Key Information
-- **Platform support**: macOS, Windows, Linux only (not mobile)
-- DoH encrypts all DNS A record queries not destined for a Twingate Resource
+- Encrypts all DNS A record queries not destined for Twingate Resources
 - AAAA (IPv6) queries not supported; falls back to IPv4 before DoH encapsulation
+- Only applies when user is logged into the Twingate Client
 - If Client is set to start at login, DoH activates immediately on boot
-- DoH disabled by default; must be explicitly enabled per account
 
 ## Prerequisites
-- Twingate Client versions for "DoH as a Resource" feature:
-  - macOS ≥ 2024.311
-  - Windows ≥ 2024.351
-  - Linux ≥ 2024.331
+- macOS, Windows, or Linux Twingate Client (mobile not supported)
+- For DoH as a Resource: macOS ≥2024.311, Windows ≥2024.351, Linux ≥2024.331
+- Admin Console access (Internet Security → Secure DNS)
 
-## Configuration (Admin Console → Internet Security → Secure DNS)
+## Configuration Values
 
 | Setting | Options | Default |
 |---|---|---|
-| DoH enabled | On/Off | Off |
+| DoH enabled | Toggle on/off | Disabled |
+| Fallback method | `Strict` / `Automatic` | Automatic |
 | Resolver | Pre-configured public resolvers or custom HTTPS URL | — |
-| Fallback method | Strict / Automatic | Automatic |
 | Exception groups | Any number of groups | None |
 
-## Custom Resolver URL Template Fields
-Append device-specific info to custom resolver URLs:
-
+### Custom Resolver URL Template Fields
 ```
-https://doh.example/query?host=${deviceHostname}&user=${userEmail}
+${deviceName}      # Friendly Twingate name
+${deviceId}        # Twingate device ID
+${deviceModel}     # Hardware model string
+${deviceHostname}  # Device hostname
+${userEmail}       # Device owner email
 ```
+Example: `https://doh.example/query?host=${deviceHostname}`
 
-| Field | Example Value |
-|---|---|
-| `${deviceName}` | Alex's MacBook Pro |
-| `${deviceId}` | (Twingate internal ID) |
-| `${deviceModel}` | MacBook Pro (16-inch, M1 Pro, Late 2021) |
-| `${deviceHostname}` | alexs-macbook-pro.local |
-| `${userEmail}` | alex@company.com |
+## Fallback Behavior
+- **Strict**: Never falls back to regular DNS. If DoH resolver unavailable, all DNS fails (including private DNS)
+- **Automatic**: Falls back to regular DNS if resolver unavailable or lookup fails
 
 ## DoH as a Resource
 - When DoH resolver domain matches a Twingate Resource, DoH traffic routes through that Resource
-- Wildcard Resources (e.g., `*.autoco.internal`) are supported
-- **Required**: DoH Resource must use a **Device-only Resource Policy** — users cannot authenticate otherwise, breaking DNS entirely
-
-## Fallback Behavior
-- **Strict**: Never falls back to regular DNS; all queries fail if resolver unavailable (including private DNS)
-- **Automatic**: Falls back to regular DNS if resolver unavailable or lookup fails
+- Wildcard Resources (e.g., `*.autoco.internal`) supported
+- **DoH Resource must use Device-only Resource Policy** — otherwise users cannot authenticate and DNS breaks entirely
 
 ## Gotchas
-- Custom resolver URL is not validated beyond being an HTTPS endpoint — misconfiguration + Strict mode = DNS failure for all users
-- Private DNS names cannot be resolved by public DoH resolvers; use Automatic mode or route via a Resource
-- Exception group membership: if user is in **any** exception group, DoH is disabled for that user
-- DoH Resources without Device-only policy will break DNS for end users
+- Custom resolver URLs are only validated as HTTPS endpoints, not as valid DoH resolvers — misconfiguration with Strict mode will break DNS for all users
+- Private DNS addresses cannot be resolved by public DoH resolvers; use Automatic fallback or route via a Resource
+- If a user belongs to at least one exception group, their client uses device-configured DNS (not DoH)
+- Exception group members receive no DoH configuration at all
 
 ## Related Docs
-- Twingate Client setup
-- Internet Security / Resource Policies
-- Device-only Resource Policy configuration
+- Twingate Client setup (macOS, Windows, Linux)
+- Resource Policy configuration (Device-only policies)
+- Internet Security / Secure DNS Admin Console section

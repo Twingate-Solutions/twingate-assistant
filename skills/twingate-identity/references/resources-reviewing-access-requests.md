@@ -1,47 +1,48 @@
 # Reviewing Access Requests
 
 ## Summary
-Access Requests are generated via JIT access workflows or Usage-Based Auto Lock policies. Designated roles and Resource Approvers can review and approve these requests through the Admin Console or via email links.
+Access Requests arise from JIT access workflows or Usage-Based Auto Lock policies. Designated reviewers can approve or deny these requests via the Admin Console or direct email links. The review process is identical regardless of which workflow triggered the request.
 
 ## Key Information
-- Resolved requests are visible for 90 days after resolution
-- Resource Approvers receive **mandatory** email notifications; this cannot be configured/disabled
-- Resource Approvers only see the Access Requests page — no other Admin Console access
-- Requests can be reviewed from User pages, Resource pages, or the main Access Requests page
-- Open requests trigger a red dot on the bell icon in the Admin Console
+- Requests visible on Admin Console Access Requests page; red dot on bell icon indicates pending requests
+- Resolved requests displayed for last 90 days
+- Resource Approvers can only see the Access Requests page — no other Admin Console access
+- Email notifications always sent to Resource Approvers (non-configurable); Admin role notifications are configurable
 
-## Who Can Approve
+## Who Can Review
 
 | Role | Scope |
 |------|-------|
-| Admin | All users and resources |
-| DevOps | All users and resources |
-| Access Reviewer | All users and resources |
-| Resource Approver | Only assigned resources |
+| Admin, DevOps, Access Reviewer | All users and all resources |
+| Resource Approvers | Only resources they are assigned to |
 
-## Prerequisites
-- Admin Console access (for Admin roles)
-- Resource Approver group assignment (for delegated approvals)
-- Groups must be created before assigning as Resource Approvers
+## Resource Approvers Setup
+- Assigned per Resource via the Resource detail page in Admin Console
+- Approvers are assigned as **Groups** (not individual users); all group members gain approval rights for that resource
+- Recommended: create Groups tailored to specific delegation use cases
+- Login URL for Resource Approvers: `https://<network>.twingate.com` (standard Admin Console URL)
 
-## Assigning Resource Approvers (Step-by-Step)
-1. Navigate to the Resource page in Admin Console
-2. Open the Resource Approvers dialog
-3. Assign one or more Groups as Resource Approvers
-4. All members of assigned Group(s) inherit approval rights for that resource only
+## Step-by-Step: Assigning Resource Approvers
+1. Navigate to the Resource detail page in Admin Console
+2. Open the Resource Approvers assignment dialog
+3. Add one or more Groups as approvers
+4. Save — group members will receive email notifications for pending requests on that resource
 
-## Configuration Notes
-- Resource Approvers are assigned at the **Resource level**, not user level
-- Assignment uses **Groups**, not individual users — design groups specifically for delegation use case
-- Resource Approvers access the same Admin Console URL (e.g., `https://autoco.twingate.com`) but see only the Access Requests page
+## Step-by-Step: Reviewing a Request
+1. **Via email**: Click the direct link in the notification email to log in and review
+2. **Via Admin Console bell icon**: Click red dot → opens Access Requests page showing all open requests
+3. **Via User page**: View open requests scoped to a specific user
+4. **Via Resource page**: View all open requests across all users for that resource
+5. Approve or deny the request from any of these entry points
 
 ## Gotchas
-- Resource Approver email notifications **cannot** be turned off — ensure assigned groups are appropriate recipients
-- Resource Approvers have no other Admin Console visibility; design groups carefully to avoid unintended access delegation
-- Standard admin notification preferences **do not apply** to Resource Approvers
+- Resource Approvers **always** receive email notifications — this cannot be disabled or reconfigured
+- Resource Approvers have **zero** Admin Console access beyond the Access Requests page
+- Assigning individuals as approvers requires putting them in a dedicated Group first
+- Access Requests page shows resolved requests only for the last 90 days — older history not visible here
 
 ## Related Docs
-- JIT Access workflow
-- Usage-Based Auto Lock policy
-- Admin roles documentation
-- Notifications configuration
+- [JIT Access Workflow](https://www.twingate.com/docs/jit-access)
+- [Usage-Based Auto Lock](https://www.twingate.com/docs/usage-based-auto-lock)
+- [Admin Roles](https://www.twingate.com/docs/admin-roles)
+- [Notifications Configuration](https://www.twingate.com/docs/notifications)

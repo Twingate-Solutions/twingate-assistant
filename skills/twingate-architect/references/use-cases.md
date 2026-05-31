@@ -4,45 +4,42 @@
 Use Cases Overview
 
 ## Summary
-This page catalogs the primary deployment scenarios for Twingate, spanning enterprise network security to personal homelab setups. Each use case links to dedicated documentation with implementation details.
+Twingate supports seven primary deployment scenarios ranging from VPN replacement to compliance enforcement. The platform provides zero-trust network access for both enterprise and personal use cases. Each use case leverages Twingate's connector-based architecture without requiring open inbound ports.
 
 ## Key Use Cases
 
-- **VPN Replacement** – Remote access to office networks, cloud VPCs, and private corporate resources from any device
-- **Infrastructure Access** – Engineers/DevOps manage and automate secure access to on-prem and cloud infrastructure
-- **Device Security Controls** – Policy-based access screening by OS type, screen lock status, MDM/EDR enrollment, and other device attributes
-- **Application Gating** – IP whitelisting support for SaaS apps, staging servers, and lightweight CASB deployments
-- **Homelab/Personal Use** – Remote access to home networks and self-hosted services (Home Assistant, Plex, cameras); free Starter plan available
-- **Internet Security** – DNS filtering, DNS-over-HTTPS (DoH) for public internet traffic on employee devices
-- **Compliance** – Security controls supporting CPRA, GDPR, PCI DSS, SOC 2
+- **VPN Replacement**: Remote access to office networks, cloud VPCs, and private corporate resources from any device
+- **Infrastructure Access**: Engineer/DevOps access management and automation for on-prem and cloud infrastructure
+- **Device Security Controls**: Policy enforcement based on device attributes (OS type, screen lock, MDM/EDR status)
+- **Application Gating**: IP allowlisting for SaaS apps, staging servers, and lightweight CASB deployment
+- **Homelab/Personal**: Home network access for self-hosted apps (Home Assistant, Plex, cameras); free Starter plan available
+- **Internet Security**: DNS filtering, DNS-over-HTTPS (DoH) for public internet traffic protection
+- **Compliance**: Controls supporting CPRA, GDPR, PCI DSS, SOC 2
+
+## Prerequisites
+- Twingate account (free Starter plan available for personal use)
+- Twingate Connector deployed on target network
+- Client installed on user devices
 
 ## Configuration Notes
 
-- **DNS Resolvers Supported**: Google, Cloudflare, OpenDNS (configurable)
-- **Connector Platforms (Homelab)**: Raspberry Pi, major NAS devices
-- **Device Policy Attributes**: OS type, screen lock, MDM enrollment, EDR status
-
-## Prerequisites by Use Case
-
-| Use Case | Notes |
-|----------|-------|
-| Homelab | Free Starter plan sufficient; setup ~15 minutes |
-| Device Security | Requires device posture checking configuration |
-| Application Gating | Target service must support IP-based access restrictions |
-| Internet Security | DNS filtering must be enabled in admin settings |
+| Use Case | Key Config |
+|---|---|
+| Device Security | Device posture policies (OS, screen lock, MDM, EDR) |
+| Application Gating | IP allowlist integration with third-party services |
+| Internet Security | DNS resolver selection (Google, Cloudflare, OpenDNS supported) |
+| Homelab | Connector on Raspberry Pi or NAS devices |
 
 ## Gotchas
-
-- Homelab use eliminates need for port forwarding or dynamic DNS management — no inbound ports required
-- Application Gating requires the third-party service to support IP whitelisting; Twingate provides the stable egress IP
-- This page is an index only — each use case links to a dedicated implementation guide
+- Homelab setup eliminates need for port forwarding and dynamic DNS management—no open inbound ports required
+- DNS filtering and DoH are device-level controls, applied per-device not per-resource
+- Application Gating requires the third-party service to support IP-based access restrictions
 
 ## Related Docs
-
-- VPN Replacement (linked)
-- Infrastructure Access (linked)
-- Device Security Controls (linked)
-- Application Gating (linked)
-- Homelab & Personal Use (linked)
-- Internet Security (linked)
-- Compliance (linked)
+- VPN Replacement detail page
+- Infrastructure Access detail page
+- Device Security Controls detail page
+- Application Gating detail page
+- Homelab & Personal Use Cases detail page
+- Internet Security detail page
+- Compliance detail page

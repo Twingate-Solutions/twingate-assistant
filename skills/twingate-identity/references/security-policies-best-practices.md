@@ -1,62 +1,64 @@
 # Security Policies Best Practices
 
 ## Summary
-Twingate provides three types of security policies: Admin Console, Minimum Authentication Requirements, and Resource Policies. This guide covers how to design and implement granular Resource Policies based on risk assessment, device verification, and group-based access control. Includes a naming convention system and complete policy mapping workflow.
+Twingate provides three distinct policy types controlling access at different levels: Admin Console, environment connection, and individual Resources. This guide covers designing a risk-based policy framework using resource cataloging, device verification, and group-based policy exceptions.
 
 ## Key Information
 
-- **Three policy types**: Admin Console (admin users only), Minimum Auth Requirements (all users, no resource access granted), Resource Policies (per-resource access control)
-- **Resource Policy controls**: authentication frequency, device trust requirements, MFA requirement, re-authentication interval
-- **Device verification methods**: EDR/MDM integration (CrowdStrike, SentinelOne, Jamf, etc.) or manual marking in Admin Console
-- **Recommended naming convention**: `<ReAuth>-<MFA>-<DeviceVerif>` (e.g., `2H-MFA-Verif`, `1D-NoMFA-None`)
-- **Everyone Group**: Cannot be deleted; should contain IdP and Active Directory resources with no-auth policies to support infrastructure traffic
+### Policy Types
+| Type | Scope | Component |
+|------|-------|-----------|
+| Admin Console Security Policy | Admin/DevOps/Support roles only | Admin Console |
+| Minimum Authentication Requirements | All users connecting to environment | Client |
+| Resource Policy | Users accessing specific Resources | Client |
 
-## Prerequisites
+### Recommended Defaults
+- **Admin Console Policy**: Re-auth every 1 hour (fixed), enforce MFA, assign Admin role to 2+ users
+- **Minimum Auth Requirements**: Set to 31 days, no MFA (use Resource Policies for MFA instead)
+- **Everyone Group Resources**: No auth required, device trust required; add IdP resource + AD/Domain Controllers (Windows)
 
-- EDR/MDM integrations configured under Device Settings before creating Trusted Profiles
-- At least 2 Admin-role users assigned (lockout prevention)
-- Risk assessment completed for all resources before policy design
+## Policy Design Workflow
 
-## Step-by-Step: Policy Design Workflow
+1. **Catalog Resources** by risk dimensions: data type (PII/non-PII), data volume, business impact of modifications, access method
+2. **Map risk scores to policies** using re-auth frequency + MFA + device verification
+3. **Apply group-based exceptions** (e.g., contractors without EDR, elevated IT access)
 
-1. **Catalog resources** — assess risk dimensions: data type (PII vs non-PII), data volume, business impact of modifications, access method
-2. **Score risk** — assign High/Medium/Low/Very Low to each resource
-3. **Map risk to policy definitions**:
-   - High: re-auth every 2h, MFA required, verified device
-   - Medium: re-auth every 1 day, MFA required, verified device
-   - Low: re-auth every 1 week, MFA required, verified device
-   - Very Low: re-auth every 1 week, no MFA, verified device
-4. **Define device groups** — map OS restrictions and verification methods per group (EDR, MDM, manual serial)
-5. **Create Trusted Profiles** — separate profiles per OS/verification provider combination
-6. **Identify exceptions** — contractor groups without EDR, elevated IT permissions, etc.
-7. **Create policies** — only unique policy combinations needed; reuse across resources
+## Risk-to-Policy Mapping
+| Risk Level | Re-auth | MFA | Device Verification |
+|------------|---------|-----|---------------------|
+| High | 2 hours | Yes | Required |
+| Medium | 1 day | Yes | Required |
+| Low | 1 week | Yes | Required |
+| Very Low | 1 week | No | Required |
 
 ## Configuration Values
 
-| Policy Name | Re-auth | MFA | Device Security |
-|---|---|---|---|
-| `2H-MFA-Verif` | 2 hours | Required | Trusted only |
-| `1D-MFA-Verif` | 1 day | Required | Trusted only |
-| `1D-NoMFA-Verif` | 1 day | Not required | Trusted only |
-| `1D-NoMFA-None` | 1 day | Not required | Any device |
-| `1D-MFA-None` | 1 day | Required | Any device |
-| `7D-MFA-Verif` | 7 days | Required | Trusted only |
-| `7D-NoMFA-Verif` | 7 days | Not required | Trusted only |
+### Policy Naming Convention
+`<Re-auth>-<MFA>-<DeviceVerif>` — e.g., `2H-MFA-Verif`, `1D-NoMFA-None`
 
-**Admin Console Policy**: Re-auth every 1 hour (fixed), MFA enforced  
-**Minimum Auth Requirements**: 31-day session, no MFA (delegate MFA to Resource Policies)
+### Trusted Profile Requirements (create separately per provider)
+- macOS + CrowdStrike
+- Windows + CrowdStrike  
+- Windows + SentinelOne
+- Windows + manual verification
+
+### Windows Device Posture Checks (optional additions to Trusted Profiles)
+- HD Encryption, Screen Lock, Firewall, Antivirus
 
 ## Gotchas
 
-- Minimum Auth Requirements do **not** grant resource access — they only gate client connection
-- Admin Console re-auth interval (1 hour) **cannot be changed**
-- IdP and Active Directory traffic resources (Everyone group) must have **no authentication** to allow pre-logon domain controller access on Windows
-- Multiple verification requirements in one Trusted Profile = **both required** (AND logic, not OR)
-- Selecting a Trusted Profile for a group with no available EDR (e.g., BYOD contractors) requires a separate no-verification policy path
+- **Minimum Auth Requirements do NOT grant Resource access** — only Resource Policies grant access
+- **Everyone Group**: IdP and AD/Domain Controller resources must have auth disabled so Twingate Client can reach Domain Controllers before user logon
+- **Multiple verification requirements in one Trusted Profile** = ALL must be satisfied (AND logic, not OR)
+- **Contractors without EDR**: Use native posture checks (Screen Lock, Biometric) as alternative; block non-applicable OSes via Minimum OS Requirements
+- **Policy exceptions per group**: A Resource can have a primary policy with group-level overrides (e.g., IT staff get stricter policy on POS than Retail group)
+- Admin Console re-auth frequency of 1 hour cannot be modified
+
+## Prerequisites
+- EDR/MDM integrations configured under Device Settings (CrowdStrike, SentinelOne, etc.) before creating Trusted Profiles
+- Groups defined and users assigned before configuring Resource access
 
 ## Related Docs
-
-- Active Directory guide (referenced for Domain Controller setup)
-- Trusted Profiles configuration
-- Device Settings (EDR/MDM integration setup)
-- Everyone Group documentation
+- [Trusted Profiles](https://www.twingate.com/docs)
+- [Active Directory Guide](https://www.twingate.com/docs)
+- [Device Settings](https://www.twingate.com/docs)
