@@ -1,65 +1,71 @@
 # Resource Tags
 
 ## Summary
-Tags are key-value metadata pairs attachable to Twingate Resources for organization and filtering. They enable categorization by owner, environment, purpose, or other attributes. Tags can be managed via Admin Console or API.
+Tags are key-value metadata pairs attachable to Twingate Resources for organization and filtering. Each Resource supports up to 64 tags, manageable via Admin Console or API. Tags enable filtering in the Resource table to quickly locate specific Resource sets.
 
 ## Key Information
-- Each tag is a **key-value pair** (e.g., `environment: production`)
-- Tags appear on Resources in the Admin Console under Network → Resources
-- Filterable via the **Tags** filter in the Resource table (include/exclude by key+value)
-- API support available; Terraform/Pulumi/K8s operator support coming soon
+- Tags are key-value pairs (e.g., `owner: devops`, `environment: production`)
+- Used for: adding context, filtering/searching Resources
+- Managed via Admin Console (UI) or Twingate API
+- Terraform, Pulumi, and Kubernetes operator support coming soon
 
 ## Prerequisites
 - Admin Console access
-- Resources already created in your Network
+- Resources already created in the Network
 
 ## Tag Requirements / Constraints
-- Max **64 tags** per Resource
-- Keys must be **unique per Resource** (no duplicate keys)
-- Keys and values are **case sensitive**
-- Valid UTF-8 characters allowed
-- No leading/trailing whitespace (auto-stripped)
-- Keys **cannot start with `tg`** (e.g., `tg_remote_network` is prohibited)
-- Key length: 1–128 characters
-- Value length: 1–256 characters
+| Property | Constraint |
+|----------|-----------|
+| Max tags per Resource | 64 |
+| Unique keys per Resource | 1 per key (no duplicate keys) |
+| Case sensitivity | Keys and values are case sensitive |
+| Key length | 1–128 characters |
+| Value length | 1–256 characters |
+| Prohibited key prefix | Cannot start with `tg` (e.g., `tg_remote_network` is invalid) |
+| Whitespace | Cannot start/end with whitespace (auto-stripped) |
+| Character set | Any valid UTF-8 |
 
-## Configuration Values
-
-### Common Tag Keys
-| Key | Purpose | Example Values |
-|-----|---------|----------------|
-| `owner` | Resource owner | `devops`, `alex@company.com` |
-| `managed_by` | Management system | `terraform`, `admin_console`, `k8s_operator` |
-| `application` | Running application | `prometheus`, `kafka` |
-| `environment` | Deployment environment | `development`, `staging`, `production` |
-| `location` | Physical/virtual location | `sf-office`, `us-west-2` |
-| `region` | Cloud provider region | `us-west-2`, `eu-central-1` |
-
-## Step-by-Step: Adding Tags
-1. Navigate to Admin Console → Network → Resources
-2. Create or edit a Resource
+## Step-by-Step: Adding Tags via Admin Console
+1. Navigate to **Network → Resources**
+2. Open a Resource (create or edit)
 3. Click **Add Tag**
-4. Enter key (autocomplete suggests existing keys)
+4. Enter key (autocomplete suggests existing keys from Network)
 5. Enter value (autocomplete suggests existing values)
-6. Repeat as needed; click ✕ to remove a tag
-7. Save the Resource
+6. Repeat as needed
+7. Remove tags with the **✕** icon
+8. Save the Resource
 
-## Step-by-Step: Filtering by Tags
-1. Navigate to Admin Console → Network → Resources
-2. Click the **Tags** filter
+## Step-by-Step: Filtering Resources by Tags
+1. Navigate to **Network → Resources**
+2. Click the **Tags** filter in the Resource table
 3. Select **Select Key**, search for desired key
 4. Choose **in** (include) or **not in** (exclude)
-5. Search and select target values
+5. Search and select tag values for the filter
+
+## Common Tag Patterns
+| Key | Example Values | Purpose |
+|-----|---------------|---------|
+| `owner` | `devops`, `it-team`, `alex@example.com` | Ownership |
+| `managed_by` | `terraform`, `pulumi`, `k8s_operator` | Management source |
+| `application` | `prometheus`, `kafka` | Running application |
+| `environment` | `development`, `staging`, `production` | Environment tier |
+| `location` | `sf-office`, `us-west-2` | Physical/virtual location |
+| `region` | `us-west-2`, `eu-central-1` | Cloud provider region |
 
 ## Gotchas
-- Tag keys starting with `tg` are **reserved and prohibited**
-- Keys are unique per Resource — adding a second tag with the same key is not allowed
-- Tag key/value can only be edited **during creation**; to change, remove and re-add
-- Terraform/Pulumi/K8s operator support is **not yet available** (API only for automation)
-- Cloud provider tag import (AWS/GCP → Twingate) requires API/Terraform integration
+- Keys starting with `tg` are **reserved and prohibited**
+- Each Resource can only have **one tag per key** — adding a duplicate key overwrites or is blocked
+- Tag key/value **cannot be edited after creation** — must delete and re-add
+- Trailing/leading whitespace is silently stripped on input
+
+## API / Integration
+- Full tag management available via [Twingate API](https://www.twingate.com/docs/api)
+- Terraform/Pulumi/K8s operator support not yet available (coming soon)
+- API enables bulk tag management and importing tags from AWS/GCP
 
 ## Related Docs
-- Twingate API (for programmatic tag management)
-- Terraform Provider
-- Pulumi Provider
-- Kubernetes Operator
+- Twingate API documentation
+- Resources documentation
+- Terraform integration
+- Pulumi integration
+- Kubernetes operator

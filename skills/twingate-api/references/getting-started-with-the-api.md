@@ -1,27 +1,28 @@
 # Getting Started with the Twingate API
 
 ## Summary
-Twingate exposes GraphQL APIs for automating Admin Console actions, accessible directly or via Python/JavaScript CLIs. All API access requires an API key and tenant name. The API follows standard GraphQL conventions with nodes and edges.
+Twingate provides GraphQL APIs and Python/JavaScript CLIs for automating Admin Console actions. All methods require an API key and tenant name. CLIs are wrappers around the GraphQL API.
 
 ## Key Information
-- API type: GraphQL
-- Endpoint: `https://<tenant_name>.twingate.com/api/graphql/`
-- Authentication: `X-API-KEY` header
-- CLIs (Python and JavaScript) are wrappers around the same GraphQL API
-- Compatible with orchestration platforms: Ansible, Chef, Puppet
+- API type: GraphQL (not REST)
+- GraphQL responses use `node` (single object) and `edges` (collections) structure
+- Responses only return fields explicitly requested in the query
+- API endpoint format: `https://<tenant_name>.twingate.com/api/graphql/`
+- Postman Collection available for download with pre-built examples
+- Recommended clients: Postman or Altair GraphQL Client
 
 ## Prerequisites
 - Active Twingate tenant
-- API Key with appropriate permission level:
-  - **Read** — read-only access
-  - **Read & Write** — modify objects
-  - **Read, Write & Provision** — full provisioning access
+- API key with appropriate permissions:
+  - **Read** – read-only access
+  - **Read & Write** – modify objects
+  - **Read, Write & Provision** – modify + provision objects
 
 ## Generating an API Key
 1. Open Admin Panel → **Settings** → **API**
 2. Click **Generate Token**
-3. Select permission level (Read & Write or Read, Write & Provision for mutations)
-4. Copy and store the token immediately — **it cannot be retrieved again after closing the dialog**
+3. Select permission level (Read & Write or Read, Write & Provision for modifications)
+4. Copy and store the token immediately — **cannot be retrieved after closing the modal**
 5. Tokens can be modified, disabled, or re-enabled after creation
 
 ## Configuration Values
@@ -31,20 +32,9 @@ Twingate exposes GraphQL APIs for automating Admin Console actions, accessible d
 | API endpoint | `https://<tenant>.twingate.com/api/graphql/` |
 | Auth header name | `X-API-KEY` |
 | Auth header value | `<your_api_token>` |
+| Postman variable | `tenant_name` |
 
-## Testing the API
-
-**Postman setup:**
-1. Create a Collection → Authorization tab → Key: `X-API-KEY`, Value: `<token>`
-2. Variables tab → add `tenant_name` variable
-3. Import Twingate's [Postman Collection](https://www.twingate.com/docs/getting-started-with-the-api) for pre-built examples
-
-**Altair GraphQL Client setup:**
-1. Set URL to `https://<subdomain>.twingate.com/api/graphql/`
-2. Add header `X-API-KEY: <token>`
-3. Use schema explorer to build queries
-
-**Example: List Resources**
+## Example: List Resources Query
 ```graphql
 {
   resources {
@@ -66,13 +56,13 @@ Twingate exposes GraphQL APIs for automating Admin Console actions, accessible d
 ```
 
 ## Gotchas
-- API token is shown **only once** at generation time — store it immediately
-- GraphQL responses only return fields explicitly requested in the query
-- Pagination: check `pageInfo.hasNextPage` for large result sets
-- Use `Read, Write & Provision` (not just `Read & Write`) if provisioning resources programmatically
+- API token is shown **only once** — copy it before closing the generation modal
+- Token requires **Read & Write** minimum to make changes; read-only token will not work for mutations
+- GraphQL is not REST — field selection is required in queries; omitting fields means they won't be returned
+- Pagination: check `pageInfo.hasNextPage` to determine if additional results exist
 
 ## Related Docs
-- [Twingate API Reference](https://www.twingate.com/docs/api)
-- [Python CLI](https://www.twingate.com/docs/python-cli)
-- [JavaScript CLI](https://www.twingate.com/docs/javascript-cli)
-- [Postman Collection Download](https://www.twingate.com/docs/getting-started-with-the-api)
+- Twingate API Reference (GraphQL schema)
+- Python CLI documentation
+- JavaScript CLI documentation
+- Twingate Postman Collection (downloadable from the page)

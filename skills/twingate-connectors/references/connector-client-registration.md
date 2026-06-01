@@ -1,57 +1,61 @@
 # Connector & Client Registration
 
+## Page Title
+Connector & Client Registration
+
 ## Summary
-Connectors and Clients must register with the Twingate Controller before encrypted traffic can flow to Remote network Resources. Connectors use pre-generated tokens from the Admin console; Clients use OpenID Connect flow via a configured identity provider. Both processes result in signed ACLs and Relay connection details issued by the Controller.
+Connectors and Clients must register with the Twingate Controller before network traffic can flow. Connectors use pre-generated tokens from the Admin console; Clients use OpenID Connect via a configured identity provider. Both receive signed ACLs and Relay connection details upon successful registration.
 
 ## Key Information
 
-**Connector Registration:**
-- Deployed only by admin users via Admin console; runs in headless Docker containers
-- Uses two unique, non-reusable authentication tokens embedded in the startup command
+### Connector Registration
+- Only admin users can deploy Connectors via Admin console
+- Two unique, non-reusable authentication tokens are generated per Connector and embedded in the startup/deployment command
 - Admin must re-authenticate before receiving the setup command (additional security step)
-- On startup, Connector receives: whitelist ACL, Relay FQDN(s), and Controller-signed tokens
-- Periodically reports to Controller: connected Relay set + current TLS certificate digest (enables certificate pinning for Client→Connector connections)
-- Sends ongoing heartbeat to Controller for availability/redundancy tracking
-- Relay never receives TLS certificate digest — only shared between Connector and Controller
+- Connectors run headless in Docker containers behind the Remote network firewall
 
-**Client Registration:**
-- Triggered after end-user authenticates with configured IdP or social identity
-- Uses standard OpenID Connect (OIDC) flow; redirect includes time-expiring access token
-- Controller verifies user's email matches an active configured user
-- On success, Client receives: Controller tokens (expiry tied to IdP token expiry) + signed whitelist ACL
-- ACL specifies accessible Resource addresses and which Connector serves each Resource
-- Client listens for connections matching ACL Resource addresses, then initiates Client Connection Flow
+**Registration sequence:**
+1. Connector authenticates to Controller with startup tokens
+2. Controller returns signed, time-expiring message containing:
+   - Whitelist ACL (Resources the Connector may forward to)
+   - FQDN(s) of one or more Relays
+   - Controller-signed tokens authorizing Relay connections
+3. Connector validates Controller response authenticity
+4. Connector connects to Relay(s) using Controller-issued tokens; Relay validates token was signed by its associated Controller (token includes hash of Connector ID—no name/location/IP exposed)
+5. Connector periodically reports to Controller:
+   - Connected Relay set (for Client routing)
+   - TLS certificate digest (enables certificate pinning for direct Client→Connector connections)
+6. Connector sends ongoing heartbeat for redundancy/availability signaling
+
+### Client Registration
+- Triggered after successful user authentication with IdP or social identity
+- Follows standard OpenID Connect flow
+
+**Registration sequence:**
+1. Client contacts Controller to initiate auth request
+2. Controller returns IdP URI or social sign-in page
+3. User authenticates; receives redirect to Controller endpoint with time-expiring access token
+4. Controller verifies user email matches an active, configured user
+5. On match, Controller issues:
+   - Tokens expiring within the IdP's original token expiration period (no extension—reauthentication policy follows IdP policy)
+   - Signed whitelist ACL specifying accessible Resources (by address) and which Connector serves each
+6. Client listens for network connections matching ACL Resource addresses and initiates Client Connection Flow on match
 
 ## Prerequisites
 - Admin console access (for Connector deployment)
 - Configured identity provider or social identity (for Client registration)
-- Active, configured user account in Twingate network (email must match)
+- Active, configured user account in Twingate network
 
-## Registration Flow Summary
-
-**Connector:**
-1. Authenticate to Controller with startup tokens
-2. Receive signed message: ACL + Relay FQDNs + Relay auth tokens
-3. Validate Controller response authenticity
-4. Connect to Relay(s) using Controller-issued tokens
-5. Periodically report Relay connections + cert digest to Controller
-
-**Client:**
-1. Connect to Controller to initiate auth request
-2. Receive IdP/social login URI
-3. Authenticate with IdP; receive redirect with access token
-4. Controller validates user identity against configured users
-5. Receive Controller tokens + signed ACL
-6. Listen for connections matching ACL Resources
+## Configuration Values
+- Connector startup command contains two embedded auth tokens (generated at deploy time, single-use)
+- Token expiration follows IdP-issued expiration period exactly
 
 ## Gotchas
-- Connector tokens are **single-use only** — cannot be reused if deployment fails
-- Client token expiry is **controlled by IdP token expiry**, not Twingate — re-auth requires going back through the IdP
-- Connector ID hash is included in Relay auth tokens to prevent leaking Connector name/location/network address
-- Connectors act as a **second enforcement layer** on connections — only forward to ACL-whitelisted Resources
+- Connector tokens cannot be reused—if lost, a new Connector must be generated
+- Relay never receives Client TLS certificate digest; only the Connector and Controller handle that data
+- Controller token expiry is bound to IdP token expiry—renewing requires IdP reauthentication; cannot be extended independently
 
 ## Related Docs
-- Connector Deployment
-- Client Connection Flow
-- OpenID Authentication
-- Admin Console / Admin Users
+- [Connector Deployment](https://www.twingate.com/docs/connector)
+- Client Connection Flow (referenced in page, follow-on doc)
+- OpenID Authentication flow

@@ -1,65 +1,73 @@
 # Deploying Twingate Clients with Jamf MDM
 
 ## Summary
-Instructions for distributing Twingate macOS and iOS clients via Jamf Pro MDM. Covers package deployment, silent installation via Custom Configuration Profiles, and client update procedures.
+Guide for distributing Twingate macOS and iOS clients via Jamf Pro MDM. Covers package deployment, configuration profiles for silent installation, and client update procedures.
 
 ## Key Information
-- macOS: Deploy via PKG package uploaded to Jamf
-- iOS: Requires Apple Business Manager linked to Jamf first
-- Configuration Profile preference domain: `com.twingate.macos`
-- Team Identifier: `6GX8KVTR9H`
-- Bundle IDs: `com.twingate.macos` (app), `com.twingate.macos.tunnelprovider` (system extension)
+- macOS deployment uses `.pkg` installer uploaded to Jamf
+- iOS deployment requires Apple Business Manager linked to Jamf
+- Configuration profiles enable silent deployment by suppressing onboarding screens
+- Team Identifier for Twingate: `6GX8KVTR9H`
+- System extension bundle ID: `com.twingate.macos.tunnelprovider`
+- App bundle ID: `com.twingate.macos`
+- Preference domain: `com.twingate.macos`
 
 ## Prerequisites
 - Jamf Pro admin access
-- macOS: PKG from [Twingate download page](https://www.twingate.com/download)
+- macOS: Twingate `.pkg` from [download page](https://www.twingate.com/download)
 - iOS: Apple Business Manager account linked to Jamf
-- Remove any manually installed Twingate clients before MDM rollout
 
-## Silent Deployment Configuration Profile Settings
-
-| Property Key | Value | Purpose |
-|---|---|---|
-| `PresentedDataPrivacy` | `true` | Suppress data privacy screen |
-| `PresentedEducation` | `true` | Suppress education screen |
-| `automaticallyInstallSystemExtension` | `true` | Auto-install system extension |
-| `network` | `<your-network-name>` | Pre-populate network name |
-| `LaunchApp` | `false` | Disable if using Launch Agent |
-| `SUEnableAutomaticChecks` | `false` | Jamf manages updates |
-| `SUAutomaticallyUpdate` | `false` | Jamf manages updates |
-
-## Step-by-Step: Create Configuration Profile
+## Configuration Profile Setup (Silent Deployment)
 
 1. Jamf Pro → **Computers** → **Configuration Profiles** → **New**
-2. Set display name (e.g., `Twingate Silent Install`)
+2. Name profile (e.g., `Twingate Silent Install`)
 3. **Application & Custom Settings** → **External Applications** → **Add**
-4. Source: **Custom Schema**; Preference domain: `com.twingate.macos`
-5. **Add Schema** → paste JSON schema → Save; configure boolean/string values
-6. **Managed Login Items**: Team ID `6GX8KVTR9H`
-7. **Notifications**: App Name `Twingate`, Bundle ID `com.twingate.macos`, enable Notifications
-8. **System Extensions** → Allowed system extensions, Team ID `6GX8KVTR9H`, add `com.twingate.macos.tunnelprovider`
-9. *(macOS 15+ only)* Add second System Extensions entry: Non-removable from UI, same Team ID and extension ID
-10. **VPN** → Configure:
-    - Type: `VPN`, Connection Type: `Custom SSL`
-    - Identifier: `com.twingate.macos`
-    - Server: `null` (required, any non-blank value)
-    - Provider Bundle ID: `com.twingate.macos.tunnelprovider`
-    - Provider Designated Requirement: `anchor apple generic and identifier "com.twingate.macos.tunnelprovider"...` (full cert chain string)
-11. **Scope** tab: test on small group first → Save
+4. Source: **Custom Schema**, domain: `com.twingate.macos`
+5. Paste JSON schema → configure values below
+6. Add **Managed Login Items**: Team ID `6GX8KVTR9H`
+7. Add **Notifications**: App Name `Twingate`, Bundle ID `com.twingate.macos`, Enabled
+8. Add **System Extensions**: Allowed + Non-removable (macOS 15+), Team ID `6GX8KVTR9H`, extension `com.twingate.macos.tunnelprovider`
+9. Add **VPN** configuration (see values below)
+10. Set **Scope**, then **Save**
+
+## Configuration Values
+
+### Silent Deployment Settings
+| Key | Value |
+|-----|-------|
+| `PresentedDataPrivacy` | `true` |
+| `PresentedEducation` | `true` |
+| `automaticallyInstallSystemExtension` | `true` |
+| `network` | Your Twingate network name |
+| `LaunchApp` | `false` |
+| `SUEnableAutomaticChecks` | `false` |
+| `SUAutomaticallyUpdate` | `false` |
+
+### VPN Profile Settings
+| Field | Value |
+|-------|-------|
+| Connection Name | `Twingate` |
+| VPN Type | `VPN` |
+| Connection Type | `Custom SSL` |
+| Identifier | `com.twingate.macos` |
+| Server | `null` (any non-blank value) |
+| Provider Bundle Identifier | `com.twingate.macos.tunnelprovider` |
+| Provider Designated Requirement | `anchor apple generic and identifier "com.twingate.macos.tunnelprovider"...` (full string in docs) |
 
 ## Updating the Client
-1. Download new PKG; upload to Jamf Pro (match priority of old package)
-2. Edit policy: remove old package, add new package
-3. Test by flushing policy on test device via policy logs
-4. Policy reruns per triggers and updates client
+1. Download new `.pkg` from Twingate website
+2. Upload to Jamf Pro as new package (same priority as previous)
+3. Edit policy: remove old package, add new package
+4. Flush policy on test device(s) to verify
+5. Policy runs on trigger and updates clients
 
 ## Gotchas
-- **macOS 15 (Sequoia)**: Must add separate "Non-removable system extensions from UI" entry; won't apply retroactively on upgrade
-- Manually installed clients must be removed first or version conflicts may occur; use a temporary removal policy
-- `LaunchApp` must be `false` if deploying with Twingate Launch Agent
-- VPN Server field cannot be blank—enter any placeholder value (e.g., `null`)
+- **Pre-existing manual installs**: Remove manually installed clients before Jamf rollout; version conflicts cause issues. Use a temporary removal policy, then deactivate it.
+- **macOS 15 (Sequoia)**: Must add `Non-removable system extensions from UI` entry separately; configuring it on earlier versions is harmless but won't apply retroactively after upgrade.
+- **LaunchApp**: Set to `false` if deploying with the Twingate Launch Agent.
+- **Server field in VPN**: Cannot be blank—use any placeholder value (e.g., `null`).
 
 ## Related Docs
-- [macOS & iOS Client configuration options](https://www.twingate.com/docs/macos-ios)
+- [macOS & iOS client configuration options](https://www.twingate.com/docs/macos-ios)
 - Jamf official package deployment documentation
-- Apple Business Manager linking guide (Jamf docs)
+- Apple Business Manager + Jamf linking documentation

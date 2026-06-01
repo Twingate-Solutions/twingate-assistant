@@ -4,37 +4,37 @@
 Okta Configuration (Twingate + Okta Integration)
 
 ## Summary
-Twingate integrates with Okta to delegate user authentication via OIDC and synchronize users/groups via SCIM. Only users assigned to the Okta Twingate application can access Twingate resources. Requires Business or Enterprise plan.
+Twingate integrates with Okta to synchronize user accounts and delegate authentication via OpenID Connect (OIDC) and SCIM. Only users assigned to the Okta Twingate application can access Twingate resources. Configuration requires setup in both Okta Admin console and Twingate Admin console.
 
 ## Key Information
-- **Authentication**: SP-Initiated SSO via OpenID Connect (OIDC)
-- **Sync Protocol**: SCIM for user and group synchronization
-- **Plan Requirement**: Business and Enterprise only
-- **Two-step setup**: Configure in Okta Admin console first, then complete in Twingate Admin console
-- **Okta Lifecycle Management Module** required for direct SCIM sync; without it, users only appear in Twingate Admin panel after first login
+- **Plan requirement**: Business and Enterprise plans only
+- **Authentication method**: SP-Initiated SSO via OIDC
+- **User/group sync**: SCIM protocol
+- **Delegated functions**: User authentication (OIDC) + User/group synchronization (SCIM)
+- Two-phase setup: configure in Okta first, then complete in Twingate Admin console
 
 ## Prerequisites
 - Twingate Business or Enterprise plan
 - Okta admin access
-- Okta Lifecycle Management Module (for SCIM user/group sync)
+- **Okta Lifecycle Management module** required for direct SCIM sync (otherwise manual workflow applies)
 
 ## Step-by-Step
-1. Create and configure the Twingate application in the **Okta Admin console**
-2. Configure SCIM synchronization separately in Okta
-3. Complete and validate integration in the **Twingate Admin console**
-4. Set up an Authentication Policy using credentials from the Okta Twingate application
+1. Create and configure the Twingate application in the Okta Admin console
+2. Configure SCIM synchronization in Okta (separate step)
+3. Complete and validate integration in the Twingate Admin console
+4. Set up Authentication Policy using credentials from the Okta Twingate application
 
 ## Configuration Values
-- **SSO Type**: SP-Initiated (Service Provider Initiated)
-- **Protocol**: OpenID Connect (OIDC)
+- **SSO Protocol**: OpenID Connect (OIDC)
+- **SSO Type**: Service Provider (SP) Initiated only
 - **Sync Protocol**: SCIM
 
 ## Gotchas
-- **Without Lifecycle Management Module**: Users are invisible in Twingate Admin panel until they log into the Twingate Client and authenticate against Okta — manual group assignment required afterward
-- SCIM sync must be configured as a **separate step** after OIDC setup; it is not automatic
-- Authentication policies for Twingate client users are controlled through the Okta Twingate application
+- **No Lifecycle Management module**: Users will NOT appear in Twingate Admin panel until they first log into the Twingate Client and authenticate via Okta — manual group assignment required afterward
+- SCIM configuration is a **separate step** from OIDC setup; both must be completed independently
+- Authentication policies for the Twingate client app are controlled through the Okta Twingate application, not Twingate directly
 
 ## Related Docs
-- Twingate Okta Application setup guide (linked inline)
-- SCIM synchronization configuration guide (linked inline)
+- [Twingate Okta Application setup](#) (linked inline — Okta-side config)
+- [SCIM synchronization configuration](#) (linked inline — sync setup)
 - Twingate pricing page (plan eligibility)

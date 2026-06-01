@@ -1,38 +1,39 @@
 # Connector Real-Time Logs
 
 ## Summary
-Twingate Connectors support configurable service logging levels and real-time traffic logging output as JSON to stdout. Traffic logs can be ingested by SIEM platforms (CloudWatch, Datadog, Splunk, Loki, etc.) by filtering for lines prefixed with `ANALYTICS`.
+Twingate Connectors support configurable service logging levels and real-time traffic logging output as single-line JSON to stdout. Traffic logs can be ingested by SIEM platforms (CloudWatch, Datadog, Splunk, Loki, etc.) by filtering for lines prefixed with `ANALYTICS`.
 
 ## Key Information
-- Service logs and traffic logs are mixed in stdout; filter on `ANALYTICS` prefix to isolate traffic logs
-- Traffic logs output as single-line JSON per connection event
-- Two event types: `established_connection` and `closed_connection` (errors omit `closed_connection`)
-- `connection.id` links events for the same network connection
-- `connection.client_ip` = internet-facing NAT address; `connection.resource_ip` = private resource IP
+- Service logs and traffic logs are mixed in stdout; filter on `ANALYTICS` prefix for traffic data
+- Traffic logs output as single-line JSON (`event_type`: `established_connection` or `closed_connection`)
+- Error states produce no corresponding `closed_connection` event
+- `connection.id` links related events for the same network connection
+- `connection.client_ip` = internet-facing NAT address (not internal device IP)
+- `connection.resource_ip` = private IP as resolved by Connector (for DNS resources)
+- `location` field is a **stringified JSON** (not a nested object)
 
 ## Prerequisites
-- Connector deployed via Docker, Kubernetes (Helm), or systemd
-- For historical data export, see Exporting Network Traffic docs
+- Connector already deployed (Docker, systemd, or Kubernetes)
+- Log collection agent if exporting to SIEM
 
 ## Configuration Values
 
-### Environment Variables
-| Variable | Values | Description |
+| Variable | Value | Purpose |
 |---|---|---|
 | `TWINGATE_LOG_LEVEL` | `3` (default), `4`, `5`, `7` | Service log verbosity |
-| `TWINGATE_LOG_ANALYTICS` | `v2` | Enables real-time traffic logging |
+| `TWINGATE_LOG_ANALYTICS` | `v2` | Enable real-time traffic logging |
 
-### Log Levels
-- `3` — ERROR only (default)
-- `4` — WARN+
-- `5` — INFO+
-- `7` — DEBUG+ (very verbose, avoid long-term use)
+**Log levels:**
+- `3` = ERROR only (default)
+- `4` = WARN+
+- `5` = INFO+
+- `7` = DEBUG+ (very verbose, avoid long-term use)
 
-## Step-by-Step: Enable Real-Time Traffic Logging
+## Step-by-Step: Enable Traffic Logging
 
 **Docker:**
 ```bash
---env TWINGATE_LOG_ANALYTICS="v2"
+docker run --env TWINGATE_LOG_ANALYTICS="v2" ...
 ```
 
 **systemd** — add to `/etc/twingate/connector.conf`:
@@ -40,40 +41,35 @@ Twingate Connectors support configurable service logging levels and real-time tr
 TWINGATE_LOG_ANALYTICS=v2
 ```
 
-**Kubernetes Helm** — set via `env` parameter in values:
-```yaml
-env:
-  TWINGATE_LOG_ANALYTICS: "v2"
-```
-
-**View systemd logs:**
+Read logs:
 ```bash
 journalctl -u twingate-connector -n 100 -f
 ```
 
+**Kubernetes (Helm):** Set via `env` parameter in values — see Helm Chart README.
+
 ## JSON Schema (v2) Key Fields
-```
-connection.id          - shared across established/closed events for same connection
-connection.client_ip   - client's internet-facing NAT IP
-connection.resource_ip - private IP of accessed resource
-connection.rx/tx       - bytes received/transmitted (lifetime)
-connection.duration    - connection duration
-connection.tunnel_path - direct or relay
-connection.tunnel_proto - e.g., quic/udp
-resource.address       - resource address as defined in Admin console
-resource.applied_rule  - matching wildcard rule
-device.id              - Twingate internal device ID
-location               - stringified JSON with geoip data
-event_type             - established_connection | closed_connection
-timestamp              - Unix milliseconds
+
+```json
+{
+  "connection": { "id", "client_ip", "resource_ip", "resource_port",
+                  "protocol", "duration", "rx", "tx",
+                  "tunnel_path", "tunnel_proto", "cbct_freshness" },
+  "connector":  { "id", "name" },
+  "device":     { "id" },
+  "resource":   { "address", "applied_rule", "id" },
+  "remote_network": { "id", "name" },
+  "user":       { "email", "id" },
+  "event_type": "established_connection | closed_connection",
+  "location":   "<stringified JSON with geoip>",
+  "relays":     [],
+  "timestamp":  1698356150045
+}
 ```
 
-## SIEM Integration (Vector Example)
+## SIEM Filtering Example (Vector)
+
 ```toml
-[sources.twingate_connector]
-type = "journald"
-include_units = ["twingate-connector"]
-
 [transforms.tg_analytics_filter]
 type = "filter"
 inputs = ["twingate_connector"]
@@ -87,13 +83,12 @@ drop_on_abort = true
 ```
 
 ## Gotchas
-- Level 7 logging is very verbose — avoid sustained use if log storage is limited
-- `TWINGATE_LOG_ANALYTICS` must be set **before** Connector starts
+- Log level `7` is extremely verbose — can exhaust disk on low-capacity hosts
 - `device.id` is Twingate-internal and may not match OS-reported device IDs (standardization planned)
-- DNS-defined resources: `resource.address` shows the DNS name; `connection.resource_ip` shows resolved private IP
-- Error states do not emit a `closed_connection` event
+- `location` must be parsed as a string before accessing geoip subfields
+- Must restart Connector after changing env vars for changes to take effect
 
 ## Related Docs
-- Exporting Network Traffic (historical data)
+- Exporting historical network traffic
 - How DNS Works with Twingate
 - Twingate Helm Chart README

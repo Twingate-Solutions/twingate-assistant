@@ -1,66 +1,71 @@
 # Linux Headless Mode
 
 ## Summary
-Twingate's Linux Client can run in headless mode for GUI-less server environments using a Service Key for authentication. It supports systemd-based installation, Docker containers, and Kubernetes sidecar patterns. Requires `NET_ADMIN` capability and `/dev/net/tun` access in containerized deployments.
+Twingate's Linux Client can run in headless mode for server environments without a GUI, using a Service Key for authentication. It supports deployment as a systemd service, Docker container, or Kubernetes sidecar. Requires `systemd` and `glibc` on the host.
 
 ## Key Information
-- Headless mode uses Service Keys (not user credentials) from Twingate Admin console
-- Requires `systemd` and `glibc` on Linux hosts
+- Headless mode uses a **Service Key** (not user credentials) from a Service account in the Admin console
+- Supported architectures: x86/AMD64 and ARM64 (Docker image runs latest stable Debian)
 - Docker image: `twingate/client:latest`
-- Service key must be mounted at `/etc/twingate/service_key.json` in containers
-- AWS Fargate and other compute engines that don't support kernel capabilities are **not supported**
+- Logs available via `journalctl`
+- AWS Fargate is **not supported** (no kernel capability support)
 
 ## Prerequisites
 - Twingate account with permissions to create Services
-- Service Key JSON file from Admin console → Services
-- Supported Linux distribution (Ubuntu 22.04/24.04, Debian 9+, Fedora 40+, CentOS Stream 9+, Oracle Linux 8+, Arch, NixOS, Gentoo, ThinPro)
+- Service Key JSON file downloaded from Admin console
+- For Docker: `/dev/net/tun` device and `NET_ADMIN` capability available on host
 
-## Step-by-Step
+## Supported Distributions
+Ubuntu 22.04/24.04 LTS, Debian 9+, Fedora 40+, CentOS Stream 9+, Oracle Linux 8+, Arch, ThinPro, NixOS, Gentoo (x64 only for last four)
 
-### systemd Installation
+## Step-by-Step: systemd Installation
+
 ```bash
+# Install
 curl https://binaries.twingate.com/client/linux/install.sh | sudo bash
+# Configure headless mode
 sudo twingate setup --headless /path/to/service_key.json
+# Start/stop
 sudo twingate start
 twingate status
 sudo twingate stop
 ```
 
-### Docker Run
-```bash
-docker run -d \
-  -v /path/to/service-key/:/etc/twingate/service_key.json \
-  --device /dev/net/tun \
-  --cap-add NET_ADMIN \
-  twingate/client:latest
-```
+## Configuration Values
 
-### Kubernetes Secret
+| Context | Parameter/Value |
+|---|---|
+| Setup flag | `--headless` |
+| Service key mount path (Docker/K8s) | `/etc/twingate/service_key.json` |
+| Docker required device | `/dev/net/tun` |
+| Docker required capability | `NET_ADMIN` |
+| Twingate DNS resolvers | `100.95.0.251–100.95.0.254` |
+| Share network in Compose | `network_mode: "service:twingate-client"` |
+| Host network mode | `--network host` / `network_mode: host` |
+
+## Kubernetes Setup
 ```bash
 kubectl create secret generic twingate-service-key --from-file=key.json=/path/to/service_key.json
 ```
+Sidecar requires: `NET_ADMIN` capability, `privileged: true`, `runAsUser: 0`, `/dev/net/tun` volume mount as `CharDevice`.
 
-## Configuration Values
-
-| Parameter | Value/Description |
-|-----------|------------------|
-| `--headless` | Flag for `twingate setup` to enable headless mode |
-| Service key mount path | `/etc/twingate/service_key.json` |
-| Required device | `/dev/net/tun` |
-| Required capability | `NET_ADMIN` |
-| Twingate DNS resolvers | `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254` |
-| Docker Compose host networking | `network_mode: host` |
-| Docker Compose service networking | `network_mode: "service:twingate-client"` |
+## CI/CD DNS Fix (Containerized Jobs)
+When containers can't share network namespace, update Docker daemon DNS:
+```bash
+sudo systemctl stop docker
+sudo jq '. + {"dns": ["100.95.0.251","100.95.0.252","100.95.0.253","100.95.0.254"]}' \
+  /etc/docker/daemon.json > tmp && sudo mv tmp /etc/docker/daemon.json
+sudo systemctl start docker
+```
 
 ## Gotchas
-- **Containers sharing networks**: Use `network_mode: "service:twingate-client"` so dependent containers route through Twingate
-- **CI/CD containerized jobs**: If network namespace sharing isn't possible, update `/etc/docker/daemon.json` with Twingate DNS resolvers and restart Docker daemon
-- **Kubernetes**: Must set `privileged: true`, `runAsUser: 0`, drop all capabilities then add `NET_ADMIN`, and mount `/dev/net/tun` as `CharDevice`
-- **Host network capture**: Add `--network host` or `network_mode: host` to capture all host interface traffic
-- Logs available via `journalctl`
+- Docker containers **must** have `--device /dev/net/tun` AND `--cap-add NET_ADMIN` or connection fails
+- AWS Fargate is unsupported
+- Containers using host's `/etc/resolv.conf` won't resolve Twingate Resources—update Docker DNS config
+- For shared networking in Compose, dependent services use `network_mode: "service:twingate-client"` (not a shared bridge network)
 
 ## Related Docs
-- [Linux Client (interactive mode)](https://www.twingate.com/docs/linux-client)
+- [Linux Client](https://www.twingate.com/docs/linux-client)
 - [Services & Service Keys](https://www.twingate.com/docs/services)
-- [Docker headless image](https://www.twingate.com/docs/docker)
-- [GitHub Actions integration](https://www.twingate.com/docs/github-actions)
+- [Docker Image](https://www.twingate.com/docs/docker)
+- [GitHub Action](https://www.twingate.com/docs/github-actions)

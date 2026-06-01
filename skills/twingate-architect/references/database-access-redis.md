@@ -1,59 +1,58 @@
 # Redis Access with Twingate
 
 ## Summary
-Twingate secures Redis (Enterprise Cloud or self-hosted) by routing traffic through Connectors, enabling IP-based access restrictions without public exposure. Supports Redis Enterprise Cloud (managed via CIDR allowlists), subscription admin console gating, and self-hosted Redis instances.
+Configure Twingate to provide secure, private access to Redis Enterprise Cloud or self-hosted Redis instances. Twingate routes Redis traffic through Connectors, enabling IP-based access restrictions without public exposure. Supports both CIDR allowlisting and PrivateLink/Private Service Connect for fully private connectivity.
 
 ## Key Information
-- Redis Enterprise Cloud uses **public endpoints by default**; CIDR allowlists require **paid plans**
-- Self-hosted Redis uses Connector **private IPs** in firewall rules; Cloud uses Connector **public IPs**
-- PrivateLink (AWS/Azure) and Private Service Connect (GCP) bypass public IP allowlisting entirely
-- Admin console (`app.redislabs.com` / `cloud.redis.io`) has no native IP restriction — use Twingate + SSO
-- Default Redis port: `6379`; Redis Cloud port shown in console (e.g., `12345`)
+- Redis Enterprise Cloud requires paid plan for CIDR allow list support
+- Self-hosted Redis Connectors use **private IPs** in firewall rules; Redis Cloud Connectors use **public IPs** in allow lists
+- Admin console (`app.redislabs.com` / `cloud.redis.io`) has no native IP allowlist—gate with Twingate + SSO instead
+- PrivateLink (AWS/Azure) and Private Service Connect (GCP) eliminate need for public IP allowlisting entirely
+- Default Redis port: `6379`; Redis Cloud port varies per instance
 
 ## Prerequisites
-- Twingate Remote Network and deployed Connector(s)
-- Redis Enterprise Cloud instance (paid plan for CIDR allowlist) OR self-hosted Redis server
-- Connector public IPs (for Cloud) or private IPs (for self-hosted)
+- Twingate Remote Network created with Connector(s) deployed
+- Redis Enterprise Cloud (paid plan) or self-hosted Redis instance
+- Connector public IPs (for Redis Cloud) or private IPs (for self-hosted)
 
 ## Step-by-Step
 
-### Redis Enterprise Cloud — Database Access
+### Redis Enterprise Cloud – Database Access
 1. Create Twingate Resource with Redis Cloud hostname and port (from Cloud console)
 2. Record Connector public IP addresses
-3. In Redis Cloud console: **Security → CIDR allow list** → add Connector IPs as `/32` entries
+3. In Redis Cloud console → **Security → CIDR allow list** → add each Connector IP as `/32`
 4. Connect: `redis-cli -h <host> -p <port> -a <password>`
 
-### Redis Enterprise Cloud — Admin Console
-1. Create Twingate Resource for `app.redislabs.com` or `cloud.redis.io`, port `443`, same Remote Network
-2. Restrict Resource access to authorized users/groups only
-3. Users must run Twingate Client to reach the admin console
+### Redis Enterprise Cloud – Admin Console Access
+1. Create Twingate Resource for `app.redislabs.com` or `cloud.redis.io`, port `443`
+2. Use same Remote Network as database Connectors
+3. Restrict Resource access to authorized users/groups only
+4. Users must run Twingate Client to reach the console
 
 ### Self-Hosted Redis
 1. Create Twingate Resource targeting server IP/hostname and port `6379`
-2. Add Connector **private IPs** to firewall/security group rules
+2. Restrict inbound traffic to Connector **private IPs** via firewall/security groups
 3. Harden `redis.conf`: set `protected-mode yes`, configure `bind`, set `requirepass`
 
 ## Configuration Values
-| Setting | Value |
-|---|---|
+| Parameter | Value |
+|-----------|-------|
 | Default Redis port | `6379` |
-| Admin console domains | `app.redislabs.com`, `cloud.redis.io` |
 | Admin console port | `443` |
 | CIDR notation for single IP | `1.2.3.4/32` |
+| redis.conf hardening | `protected-mode yes`, `bind <interface>`, `requirepass <password>` |
 
 ## Gotchas
-- **Cloud vs. self-hosted IP type**: Cloud requires Connector *public* IPs; self-hosted uses Connector *private* IPs
-- **Paid plan required** for CIDR allowlists on Redis Enterprise Cloud
-- PrivateLink removes need for IP allowlisting but requires provider-specific setup
-- If another VPN is active, it may hijack connections (check "No Activity" in Recent Activity logs)
-- `DNS Failed` in Recent Activity = Connector can't resolve hostname; check DNS zone is tied to VPC
+- **PrivateLink bypasses IP allowlisting**—no need to add Connector public IPs when using private endpoints
+- Redis Cloud admin console has **no native IP restriction**—Twingate is the only network-level gate
+- Use public IPs for Connector-to-Redis-Cloud paths; use private IPs for self-hosted paths—mixing these is a common misconfiguration
+- Verify port in Twingate Resource exactly matches Redis instance port (port mismatch is a frequent issue)
 
 ## Troubleshooting
-- **Access denied** → Verify Connector IPs in CIDR allowlist or firewall
-- **Auth error** → Check `requirepass` config and credentials
-- **Port mismatch** → Match Twingate Resource port to actual Redis port
-- **Timeouts** → Verify Connectors are online; check firewall rules on both ends
-- Use **Admin Console → Recent Activity** to diagnose DNS Failed, Connection Failed, or No Activity states
+- **Access denied**: Connector IP not in CIDR allow list or firewall rules
+- **DNS Failed**: Connector cannot resolve hostname—check DNS zone/VPC binding
+- **Connection Failed**: Route or firewall issue between Connector and database
+- **No Activity**: Twingate Client not running, no Resource access, or another VPN intercepting traffic
 
 ## Related Docs
 - [MongoDB Access Guide](https://www.twingate.com/docs/database-access-mongodb)

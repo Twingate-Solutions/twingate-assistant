@@ -1,54 +1,48 @@
 # Connector Metadata
 
 ## Summary
-Twingate Connectors support custom key-value metadata via environment variables prefixed with `TWINGATE_LABEL_`. Metadata appears in the Connector detail view in the Admin Console. Twingate auto-populates some labels (hostname, deployed_by) depending on the deployment method.
+Twingate Connectors support custom key-value metadata pairs set via environment variables prefixed with `TWINGATE_LABEL_`. Metadata appears in the Connector detail view in the Admin Console. Some metadata (hostname, deployed_by) is preset automatically by Twingate deployment scripts.
 
 ## Key Information
-- Metadata is set via environment variables with the `TWINGATE_LABEL_` prefix
-- The suffix becomes the display label (underscores converted to spaces, title-cased)
-- Displayed on the left-hand side of the Connector page in Admin Console
-- Pre-set labels added by Twingate: `TWINGATE_LABEL_HOSTNAME`, `TWINGATE_LABEL_DEPLOYED_BY`
-- Works with any deployment method that supports environment variables
+- Metadata is set as environment variables with prefix `TWINGATE_LABEL_` + custom suffix
+- Displayed in Admin Console as formatted label: `TWINGATE_LABEL_DEV_ENVIRONMENT=dev1` → `Dev Environment: dev1`
+- Twingate auto-sets `TWINGATE_LABEL_HOSTNAME` and `TWINGATE_LABEL_DEPLOYED_BY` in most deployment scripts
+- Metadata visible on left-hand side of Connector detail page
 
 ## Configuration Values
 
-| Environment Variable | Example Value | Notes |
+| Environment Variable | Description | Example Value |
 |---|---|---|
-| `TWINGATE_LABEL_HOSTNAME` | `` `hostname` `` | Auto-set; local device hostname |
-| `TWINGATE_LABEL_DEPLOYED_BY` | `docker`, `ecs` | Auto-set; deployment method |
-| `TWINGATE_LABEL_<CUSTOM_KEY>` | `custom_value` | User-defined; any suffix |
-
-**Display format:** `TWINGATE_LABEL_DEV_ENVIRONMENT=dev1` → displays as `Dev Environment: dev1`
+| `TWINGATE_LABEL_HOSTNAME` | Device hostname (auto-set) | `` `hostname` `` |
+| `TWINGATE_LABEL_DEPLOYED_BY` | Deployment method (auto-set) | `docker`, `ecs` |
+| `TWINGATE_LABEL_<CUSTOM_KEY>` | Any custom metadata | `custom_value_1` |
 
 ## Step-by-Step
 
-1. Identify your deployment method (Docker, ECS Fargate, etc.)
-2. Add environment variables prefixed with `TWINGATE_LABEL_` to the deployment script
-3. Run the deployment command
-4. Verify metadata appears in Admin Console → Connector detail view
+1. Identify deployment method (Docker, ECS Fargate, etc.)
+2. Add `TWINGATE_LABEL_<KEY>=<VALUE>` environment variables to deployment script
+3. Run deployment command — metadata appears automatically in Admin Console
 
 **Docker example:**
 ```bash
 docker run -d \
-  --env TWINGATE_NETWORK="<network>" \
-  --env TWINGATE_ACCESS_TOKEN="" \
-  --env TWINGATE_REFRESH_TOKEN="" \
   --env TWINGATE_LABEL_HOSTNAME="`hostname`" \
   --env TWINGATE_LABEL_DEPLOYED_BY="docker" \
-  --env TWINGATE_LABEL_CUSTOM_METADATA_1="custom_value_1" \
+  --env TWINGATE_LABEL_DEV_ENVIRONMENT="dev1" \
   twingate/connector:1
 ```
 
-**ECS Fargate** — add to the `environment` array in the task definition JSON:
+**ECS Fargate example (within `environment` array):**
 ```json
-{"name": "TWINGATE_LABEL_CUSTOM_METADATA_1", "value": "custom_value_1"}
+{"name": "TWINGATE_LABEL_DEV_ENVIRONMENT", "value": "dev1"}
 ```
 
 ## Gotchas
-- Metadata can only be set at deploy time via environment variables; no runtime update mechanism is documented
-- Label suffix format affects display name — underscores become spaces in the Admin Console
-- Pre-set `TWINGATE_LABEL_HOSTNAME` and `TWINGATE_LABEL_DEPLOYED_BY` may be overwritten if you redefine them
+- Prefix `TWINGATE_LABEL_` is required — variables without this prefix are not treated as metadata
+- Key naming: underscores in the suffix become spaces with title case in the Admin Console display
+- Custom metadata does not override required Connector variables (`TWINGATE_NETWORK`, `TWINGATE_ACCESS_TOKEN`, `TWINGATE_REFRESH_TOKEN`)
 
 ## Related Docs
-- Connector deployment methods (Docker, ECS Fargate, etc.)
-- Connector configuration (`TWINGATE_NETWORK`, `TWINGATE_ACCESS_TOKEN`, `TWINGATE_REFRESH_TOKEN`)
+- Connector deployment methods (Docker, ECS Fargate)
+- Twingate Admin Console — Connector detail view
+- Connector environment variable configuration

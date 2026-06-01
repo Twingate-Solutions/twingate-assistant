@@ -1,52 +1,51 @@
 # How to Upgrade Connectors Running in Kubernetes with Helm
 
 ## Summary
-Guide for upgrading Twingate Connectors deployed in Kubernetes via Helm. Covers checking current connector version, updating the Helm chart, and updating the Connector image. Image updates require a pod restart due to the `Always` pull policy.
+Guide for upgrading Twingate Connectors deployed in Kubernetes via Helm. Covers version checking, Helm chart updates, and Connector image updates. Updating the Helm chart and updating the Connector image are separate operations.
 
 ## Key Information
-- Updating the Helm chart does **not** automatically update the running Connector image
-- The official Twingate Helm chart sets `pullPolicy: Always` — pod restart triggers image pull
-- Helm chart updates are infrequent but recommended when upgrading Connectors
-- Release notes available in Connector Release Notes documentation
+- Helm chart updates do **not** automatically update the Connector image in running Pods
+- The official Helm chart sets `pullPolicy: Always`, so restarting a Pod pulls the latest Connector image
+- Helm chart changes are infrequent; update chart whenever updating Connectors
 
 ## Prerequisites
-- Kubernetes cluster with Twingate Connector deployed via Helm
-- `kubectl` and `helm` CLI tools configured
-- Access to the `twingate` namespace
+- Connectors deployed via Twingate official Helm chart
+- `kubectl` and `helm` CLI access to the cluster
 
 ## Step-by-Step
 
-### 1. Check Current Connector Version
+### Check Current Connector Version
 ```bash
-kubectl exec connector-1 -- ./connectord --version
+kubectl exec <pod-name> -- ./connectord --version
 ```
-Replace `connector-1` with the actual Pod name.
+Replace `<pod-name>` with the actual Pod name (e.g., `connector-1`).
 
-### 2. Update the Helm Chart
+### Update Helm Chart
 ```bash
 helm repo update -n twingate
 ```
 
-### 3. Update the Connector Image
-Restart the pod to trigger image pull (due to `pullPolicy: Always`):
+### Update Connector Image
+Restart the Pod to trigger image pull (due to `pullPolicy: Always`):
 ```bash
 kubectl rollout restart deployment/<connector-deployment-name> -n twingate
 ```
-Or delete the pod to force recreation:
+Or delete the Pod to force recreation:
 ```bash
-kubectl delete pod connector-1 -n twingate
+kubectl delete pod <pod-name> -n twingate
 ```
 
 ## Configuration Values
-| Field | Value | Location |
-|-------|-------|----------|
-| `pullPolicy` | `Always` | Official Twingate Helm Chart |
+| Field | Value | Effect |
+|-------|-------|--------|
+| `pullPolicy` | `Always` | Pulls latest image on every Pod restart |
 
 ## Gotchas
-- **Helm chart update ≠ image update**: Running `helm repo update` only updates chart metadata; the Connector binary is not upgraded until pods are restarted
-- Pod name in `kubectl exec` must match the actual running pod name — verify with `kubectl get pods -n twingate`
-- The `-n twingate` flag assumes the `twingate` namespace; adjust if deployed elsewhere
+- **Two-step process**: Must update Helm chart AND restart Pods separately to get latest Connector version
+- Restarting the Pod is required to apply the new image — chart update alone is insufficient
+- Check [Connector Release Notes](https://www.twingate.com/docs/connector-release-notes) before upgrading to review breaking changes
 
 ## Related Docs
-- Connector Release Notes
-- Official Twingate Helm Chart
+- [Connector Release Notes](https://www.twingate.com/docs/connector-release-notes)
+- [Official Twingate Helm Chart](https://github.com/Twingate/helm-charts)
+- Kubernetes Connector deployment documentation

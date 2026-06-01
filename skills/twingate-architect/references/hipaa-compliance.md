@@ -1,27 +1,28 @@
 # HIPAA Compliance
 
 ## Summary
-Twingate supports HIPAA compliance requirements for covered entities and business associates handling sensitive health information. Organizations can request Business Associate Agreements (BAAs) directly from Twingate.
+Twingate supports HIPAA compliance requirements for covered entities and business associates handling sensitive health information. Organizations can enter into Business Associate Agreements (BAAs) with Twingate. Contact is required to obtain compliance documentation.
 
 ## Key Information
 - Twingate supports applicable HIPAA compliance requirements
 - Available for both **covered entities** and **business associates**
 - Business Associate Agreements (BAAs) are available upon request
+- Security measures documentation available separately
 
 ## Prerequisites
-- Organization must be regulated by HIPAA (as covered entity or business associate)
-- Contact required to initiate BAA process
-
-## Contact / Action Steps
-1. Email **privacy@twingate.com** to inquire about HIPAA compliance and BAAs
-2. Review Twingate security measures documentation for technical details
+- Organization must be regulated by HIPAA (covered entity or business associate)
+- Contact Twingate directly to initiate BAA process
 
 ## Configuration Values
-None specified — compliance setup is handled through direct communication with Twingate.
+None specified on this page.
+
+## Steps to Obtain HIPAA/BAA Support
+1. Email **privacy@twingate.com** to request information about HIPAA compliance and BAAs
+2. Reference Twingate's security documentation for technical security controls
 
 ## Gotchas
-- No self-service BAA process; requires direct contact via email
-- No specific HIPAA configuration details provided in this page — additional information provided through direct engagement
+- No self-serve BAA process — requires direct email contact
+- Page contains minimal technical detail; compliance specifics are handled off-platform
 
 ## Related Docs
-- Twingate Security Measures (linked from this page)
+- [Twingate Security Overview](https://www.twingate.com/docs/security) — details on security measures implemented by Twingate

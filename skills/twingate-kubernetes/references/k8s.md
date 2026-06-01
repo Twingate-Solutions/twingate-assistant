@@ -1,42 +1,46 @@
-# Kubernetes Overview - Twingate
+# Kubernetes Overview – Twingate
 
 ## Summary
-Twingate provides Kubernetes integration for securing K8s clusters and services, managing access within existing K8s workflows. The recommended approach uses the Twingate Kubernetes Operator to define and manage Twingate components directly from Kubernetes deployments.
+Twingate integrates with Kubernetes to secure cluster access and manage resource permissions within K8s workflows. The recommended approach uses the Twingate Kubernetes Operator to co-locate Twingate configuration with cluster configuration. Privileged Access features add identity propagation and session recording for sensitive infrastructure.
 
 ## Key Information
-- Kubernetes Operator is the recommended deployment method for Twingate on K8s
-- Supports Privileged Access with identity propagation and session recording
-- Configuration and cluster access managed from a single location
+- Twingate Kubernetes Operator is the **recommended deployment method**
+- Operator allows defining Twingate components and access authorizations directly in K8s manifests
+- Privileged Access for Kubernetes provides identity propagation + session recording
+- Kubernetes Access Gateway is open source (available on GitHub)
 - Helm Chart available for deployment
-- Open source Kubernetes Access Gateway available on GitHub
 
 ## Prerequisites
-- Existing Kubernetes cluster
-- Access to Twingate account
-- kubectl configured for your cluster
+- Kubernetes cluster
+- Twingate account
+- kubectl access to cluster
 
-## Available Deployment Options
-- **Kubernetes Operator** – Manage Twingate components and access authorizations via K8s manifests
-- **Helm Chart** – Standard Helm-based deployment
-- **Privileged Access / Access Gateway** – Enhanced access with session recording (open source)
+## Available Guides
+1. Kubernetes Operator Quick Start Guide
+2. Securely manage Kubernetes using kubectl
+3. Route traffic from a K8s cluster using Twingate Client
+4. Securely access **private** resources in a K8s cluster
+5. Securely access **publicly exposed** resources in a K8s cluster
+6. Helm Chart deployment
 
-## Use Cases Covered
-| Guide | Purpose |
-|-------|---------|
-| Quick Start | Initial Operator setup |
-| kubectl access | Secure cluster management |
-| Traffic routing | Route traffic from K8s cluster via Twingate Client |
-| Private resources | Access private K8s services |
-| Public resources | Access publicly exposed K8s services |
-| Privileged Access | Identity propagation + session recording |
+## Deployment Options
+| Method | Use Case |
+|--------|----------|
+| Kubernetes Operator | Recommended; manages Twingate config alongside K8s config |
+| Helm Chart | Alternative chart-based deployment |
+
+## Privileged Access Features
+- **Identity propagation**: Passes user identity through to K8s interactions
+- **Session recording**: Auditable logs of K8s sessions
+- Requires Kubernetes Access Gateway (open source, GitHub)
+
+## Gotchas
+- Operator configuration and access rules live in the same K8s deployment — changes to either affect the other
+- Privileged Access requires the separate Kubernetes Access Gateway component
+- Instructions for the Operator are maintained in the GitHub repo, not solely in Twingate docs
 
 ## Related Docs
 - [Twingate Kubernetes Operator GitHub](https://github.com/Twingate/kubernetes-operator)
 - [Kubernetes Access Gateway GitHub](https://github.com/Twingate/kubernetes-access-gateway)
-- Kubernetes Operator Quick Start Guide
-- Helm Chart documentation
-- Kubernetes Privileged Access guide
-
-## Gotchas
-- Operator configuration lives in K8s manifests — changes to access policy must go through K8s deployment workflow
-- Privileged Access (session recording/identity propagation) requires the separate Kubernetes Access Gateway component, not just the base Operator
+- Kubernetes Access Guide (Twingate docs)
+- Helm Chart page

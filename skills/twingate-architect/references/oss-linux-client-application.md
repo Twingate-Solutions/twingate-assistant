@@ -1,45 +1,45 @@
 # Linux Client Application - OSS Third Party Notices
 
 ## Page Title
-Twingate Linux Client Application — Open Source Component Licenses
+Linux Client Application – Open Source Component Licenses
 
 ## Summary
-This page documents the open-source software components bundled in the Twingate Linux client application. It lists all third-party libraries with their applicable licenses and copyright holders. No installation or configuration guidance is provided.
+This page lists all open-source third-party components bundled in the Twingate Linux client application, along with their respective licenses. It serves as the required legal attribution document for OSS components. No installation or configuration guidance is provided.
 
 ## Key Information
 
-**Components and Licenses:**
+### Components and Licenses
 
-| Component | License | Copyright |
-|-----------|---------|-----------|
-| libssl | Apache 2.0 | OpenSSL Project (1998-2020) |
+| Component | License | Copyright Holder |
+|-----------|---------|-----------------|
+| libssl | Apache 2.0 | OpenSSL Project / Eric A. Young |
 | libevent | BSD 3-Clause | Niels Provos, Nick Mathewson |
 | lwip | BSD 3-Clause | Swedish Institute of Computer Science |
-| siphash | CC0 1.0 Universal | — |
-| libjansson | MIT | Petri Lehtinen (2009-2020) |
-| jwt-cpp | MIT | Dominik Thalhammer (2018) |
+| siphash | CC0 1.0 Universal | (public domain dedication) |
+| libjansson | MIT | Petri Lehtinen |
+| jwt-cpp | MIT | Dominik Thalhammer |
 | args | MIT | Taylor C. Richberger, Pavel Belikov |
-| pubnub | MIT | PubNub (2015) |
-| quicly | MIT | Fastly, Kazuho Oku (2017) |
-| catch2 | Boost 1.0 | Catch2 Authors |
+| pubnub | MIT | PubNub |
+| quicly | MIT | Fastly, Kazuho Oku |
+| catch2 | Boost Software License 1.0 | Catch2 Authors |
 | zlib | zlib License | Jean-loup Gailly, Mark Adler |
-| nanopb | zlib License | Petteri Aimonen (2011) |
-| fmt | MIT-variant | Victor Zverovich (2012-present) |
+| nanopb | zlib License | Petteri Aimonen |
+| fmt | MIT-like (with object-code exception) | Victor Zverovich |
 
 ## Prerequisites
-- None (reference/compliance document only)
+- N/A — reference/legal document only
 
 ## Step-by-Step
-N/A — This is a legal/compliance reference page only.
+- N/A — no actionable steps
 
 ## Configuration Values
-None.
+- N/A
 
 ## Gotchas
-- **fmt** uses a non-standard MIT variant with an additional exception: embedded portions in compiled object code may be redistributed without copyright notices
-- **siphash** uses CC0 (public domain dedication), not a traditional license — no attribution required
-- BSD 3-Clause components (libevent, lwip) prohibit using contributor names for endorsement without permission
+- **fmt** has an additional exception: embedded object-code distributions do not require inclusion of copyright notices, unlike standard MIT
+- **siphash** uses CC0 (public domain dedication), not a traditional OSS license — no attribution legally required, but noted for completeness
+- **catch2** (Boost License) requires copyright notices only in source/binary distributions, not in machine-executable object code
 
 ## Related Docs
-- Twingate Linux Client installation documentation
+- Twingate Linux Client installation docs
 - Other platform OSS notices (macOS, Windows, iOS, Android clients)

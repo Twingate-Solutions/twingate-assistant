@@ -1,47 +1,48 @@
 # Deploy Connector on Firewalla Box
 
 ## Summary
-Deploy a Twingate Connector via Docker on Firewalla Gold, Purple, or Blue Plus boxes to enable secure remote access without open inbound ports. Configuration is tested only in Router mode. Enables access to LANs/VLANs managed by the Firewalla box.
+Deploys a Twingate Connector via Docker on Firewalla Gold, Purple, or Blue Plus boxes to enable remote access without open inbound ports. Requires Router mode configuration. Host network mode is mandatory for LAN/VLAN access.
 
 ## Key Information
 - Supported hardware: Firewalla Gold, Purple, Blue Plus (native Docker support required)
-- Router mode only — not tested in other modes
-- Host network mode is **required** for container to access LANs/VLANs
-- Docker and connector containers do **not** auto-start after reboot by default
-- Peer-to-peer connections recommended for Fair Use Policy compliance
+- **Router mode only** — not tested on other Firewalla modes
+- Eliminates need for open inbound ports (unlike traditional VPN)
+- Docker containers do **not** auto-start after reboot by default — requires custom scripting
 
 ## Prerequisites
-- Firewalla box running latest firmware in Router mode with outbound internet access
+- Latest Firewalla firmware installed
+- Firewalla configured in Router mode with outbound internet access
+- Basic Twingate setup complete (Users, Groups, Remote Networks, Resources)
 - SSH access from local network to Firewalla box
-- Twingate account with Remote Network, Resources, Users, and Groups configured
-- Docker enabled on the Firewalla box
 
 ## Step-by-Step
 
-1. SSH into Firewalla box from local network:
+1. **SSH into Firewalla box**
    ```bash
    ssh pi@<firewalla-ip>
    ```
 
-2. Verify Docker is running:
+2. **Verify Docker is running**
    ```bash
    sudo systemctl status docker
    ```
 
-3. In Twingate Admin Console: **Remote Networks → [Your Network] → Add Connector**
+3. **Open Twingate Admin Console** → Remote Networks → Select Network → Add Connector
 
-4. Select **Docker** as deployment method
+4. **Select Docker** as deployment method
 
-5. Click **Generate Tokens** (re-authentication required)
+5. **Generate Tokens** (re-authentication required)
 
-6. Configure Docker command options:
-   - **Make Connector available on local network**: **Enable** (required — runs in host network mode)
-   - **Custom DNS Server**: Optional, for local FQDN resolution
-   - **Local network connection logs**: Optional, for troubleshooting/SIEM
+6. **Configure Docker command options:**
+   - Custom DNS Server — optional, skip for first-time users
+   - **Make Connector available on local network** — **Enable** (required for LAN/VLAN access; runs in host network mode)
+   - Local network connection logs — optional, useful for troubleshooting/SIEM
 
-7. Copy and run the generated Docker command in SSH session
+7. **Paste and run** the generated Docker command in SSH session
 
-8. Verify connector is active in Admin Console and via:
+8. **Verify connection** in Admin Console (Connector shows active)
+
+9. **Verify running containers**
    ```bash
    sudo docker ps
    ```
@@ -50,21 +51,20 @@ Deploy a Twingate Connector via Docker on Firewalla Gold, Purple, or Blue Plus b
 
 | Option | Value | Notes |
 |--------|-------|-------|
-| Deployment method | Docker | |
-| Network mode | Host (`--network=host`) | Required for LAN/VLAN access |
-| Docker image | `twingate/connector:1` | |
-| Container command | `/connectord` | |
+| Deployment method | Docker | — |
+| Network mode | host | Required for LAN/VLAN access |
+| Container image | `twingate/connector:1` | — |
+| Container command | `/connectord` | — |
 
 ## Gotchas
-- **Auto-start on reboot**: Must configure manually via [Firewalla's Customized Scripting](https://help.firewalla.com/hc/en-us/articles/360052819853) — Docker and containers won't restart automatically
-- **Host network mode is mandatory** — without it, the connector cannot reach LANs/VLANs
-- Only tested in **Router mode** — other Firewalla modes are unsupported
-- If connection fails, avoid setting outbound connectivity restrictions until basic connectivity is confirmed; check [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
+- **Host network mode is required** — without enabling "Make Connector available on local network," the container cannot reach Firewalla LANs/VLANs
+- **No auto-start on reboot** — configure via [Firewalla Customized Scripting](https://help.firewalla.com) to restart Docker containers post-reboot
+- Do not restrict outbound connectivity until Connector is confirmed working
+- Only tested in Router mode — other modes unsupported
 
 ## Related Docs
 - [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
-- [Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
+- [Peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer)
 - [Site-to-Site with Twingate](https://www.twingate.com/docs/site-to-site)
-- [Firewalla Router Mode Setup](https://help.firewalla.com)
-- [Firewalla Customized Scripting](https://help.firewalla.com/hc/en-us/articles/360052819853)
 - [Twingate Quick Start](https://www.twingate.com/docs/quick-start)
+- Firewalla Customized Scripting (Firewalla official docs)

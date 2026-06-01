@@ -4,25 +4,36 @@
 Location Requirements via Geoblocking
 
 ## Summary
-Twingate Enterprise allows admins to control Resource access based on user geolocation using IP address-based country detection. Admins configure allowlists or denylists at the Resource Policy level. Certain countries are permanently blocked regardless of configuration.
+Twingate allows admins to control Resource access based on user geolocation using IP address-based country mapping. Admins can configure allowlists or denylists per Resource Policy. This feature is Enterprise tier only.
 
 ## Key Information
 - **Tier**: Enterprise only
-- **Mechanism**: IP address geolocation mapped to country via latitude/longitude (truncated to 2 decimal places)
-- **Data sources**: MaxMind GeoLite2 + Google Cloud load balancers for coordinate data; Natural Earth for country boundary mapping
-- **Accuracy caveat**: IP geolocation is not guaranteed accurate in all cases
+- Location determined via IP geolocation (MaxMind GeoLite2 + Google Cloud load balancers)
+- Coordinates truncated to 2 decimal places, then mapped to country using Natural Earth boundary data
+- IP geolocation is not guaranteed to be 100% accurate
+- Geoblocking is configured at the **Resource Policy** level, not per-Resource directly
+
+## Permanently Blocked Countries (Non-Configurable)
+These countries are always blocked due to embargoes/legal restrictions and cannot be overridden:
+- Cuba
+- Iran
+- North Korea
+- Syria
+
+Certain non-country regions are also always blocked.
 
 ## Prerequisites
-- Enterprise tier Twingate subscription
+- Enterprise tier Twingate account
 - Existing Resource Policy to attach location requirements to
 
 ## Step-by-Step Configuration
-1. Select the target **Resource Policy**
-2. Click **Enable** on location requirements
+1. Navigate to the Resource Policy you want to configure
+2. Click **Enable** for location requirements
 3. Choose restriction type:
    - **Allowlist** — only listed countries can access Resources using this policy
    - **Denylist** — listed countries are blocked from Resources using this policy
-4. Select countries to allow or deny
+4. Select the countries to allow or deny
+5. Save configuration
 
 ## Configuration Values
 | Option | Description |
@@ -30,21 +41,12 @@ Twingate Enterprise allows admins to control Resource access based on user geolo
 | Allowlist | Whitelist specific countries; all others blocked |
 | Denylist | Blacklist specific countries; all others allowed |
 
-## Permanently Blocked Countries
-Always blocked, non-configurable, cannot be overridden (due to embargoes/legal restrictions):
-- Cuba
-- Iran
-- North Korea
-- Syria
-
-These countries do not appear in the country selection UI. Additional non-country regions are also permanently blocked.
-
 ## Gotchas
-- IP geolocation accuracy varies — VPNs, proxies, or ISP routing can cause incorrect country detection
-- Permanently blocked countries cannot be added to allowlists or overridden by any admin action
-- Geoblocking applies at the **Resource Policy** level, not per individual Resource — all Resources sharing a policy inherit the same rules
-- Blocked users see a specific error message on their device
+- Permanently blocked countries (Cuba, Iran, North Korea, Syria) do not appear in the country selection UI and cannot be allowlisted under any circumstances
+- IP geolocation accuracy varies — VPNs, proxies, or mobile networks may cause incorrect country mapping
+- Geoblocking is applied at the Resource Policy level; ensure the correct policy is targeted
+- Blocked devices receive an error message but no granular location feedback to the user
 
 ## Related Docs
-- Resource Policies (configuration entry point)
-- Twingate Pricing Page (tier comparison)
+- Resource Policies documentation
+- Twingate pricing page (Enterprise tier requirements)
