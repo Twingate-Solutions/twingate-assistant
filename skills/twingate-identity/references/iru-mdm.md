@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/iru-mdm -->
-
 # Deploying Twingate Clients with Iru (MDM)
 
 ## Summary

@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/sign-in-policy -->
-
 # Sign In Policy
 
 ## Summary

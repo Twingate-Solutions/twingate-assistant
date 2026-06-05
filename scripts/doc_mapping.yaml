@@ -11,7 +11,7 @@
 # Auto-assign patterns apply to new sitemap URLs not yet in this file.
 # First matching pattern wins; unmatched docs go to _triage/ for review.
 #
-# Last updated: 2026-04-14 (286 entries; docsTemplate, unlisted, WIP excluded)
+# Last updated: 2026-06-05 (292 entries; docsTemplate, unlisted, WIP excluded)
 
 docs:
 
@@ -728,6 +728,18 @@ docs:
     skill: twingate-connectors
     keywords: [AWS ECS, Fargate, headless, userspace, service account]
 
+  - url: https://www.twingate.com/docs/casaos-getting-started
+    skill: twingate-connectors
+    keywords: [CasaOS, homelab, Docker Compose, Connector deployment, NAS, remote access, getting started, "self-hosted"]
+
+  - url: https://www.twingate.com/docs/zimaos-getting-started
+    skill: twingate-connectors
+    keywords: [ZimaOS, homelab, App Store, Connector deployment, NAS, remote access, getting started, "self-hosted"]
+
+  - url: https://www.twingate.com/docs/deploy-connector-on-ubiquiti
+    skill: twingate-connectors
+    keywords: [Ubiquiti, UniFi, UDM Pro, UXG, "systemd-nspawn", Connector deployment, gateway, router]
+
 
   # ── twingate-terraform ──────────────────────────────────────────────────────
 
@@ -1055,6 +1067,18 @@ docs:
     skill: twingate-identity
     keywords: [troubleshooting, device failures, Client, disconnected, daemon, service, adapter]
 
+  - url: https://www.twingate.com/docs/iru-configuration
+    skill: twingate-identity
+    keywords: [Iru, Kandji, MDM, device trust, Trusted Profile, macOS, serial number, Business Enterprise]
+
+  - url: https://www.twingate.com/docs/iru-mdm
+    skill: twingate-identity
+    keywords: [Iru, Kandji, MDM, macOS, iOS, Client deployment, Auto App, Apple Business Manager, mobile device management]
+
+  - url: https://www.twingate.com/docs/sign-in-policy
+    skill: twingate-identity
+    keywords: [sign in policy, security policy, authentication frequency, MFA, device security, session, Admin Console]
+
 
   # ── twingate-api ────────────────────────────────────────────────────────────
 
@@ -1093,6 +1117,10 @@ docs:
   - url: https://www.twingate.com/docs/api-overview
     skill: twingate-api
     keywords: [API, GraphQL, Admin API, resources, connectors, groups, service accounts, developers]
+
+  - url: https://www.twingate.com/docs/api
+    skill: twingate-api
+    keywords: [api, GraphQL, Admin API, endpoint]
 
 
   # ── twingate-dns-security ───────────────────────────────────────────────────
@@ -1183,13 +1211,6 @@ docs:
   - url: https://www.twingate.com/docs/troubleshooting
     skill: twingate-troubleshoot
     keywords: [troubleshooting, knowledge base, logs, client logs, connector logs, help center, community, "self-service"]
-
-
-  # ── _triage (unmatched — review and assign) ─────────────────────────────────
-
-  - url: https://www.twingate.com/docs/api
-    skill: twingate-api
-    keywords: [api]
 
 
   # ── GitHub repositories (manually maintained, not in sitemap) ──────────────

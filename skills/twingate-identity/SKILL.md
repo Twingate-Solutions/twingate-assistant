@@ -81,10 +81,10 @@ memory — IdP UIs and SCIM connectors evolve frequently.
 | Keycloak | `keycloak-configuration.md` |
 | Active Directory | `using-active-directory-with-twingate.md` |
 | SCIM endpoint, provisioning API, attribute mapping | `scim-provisioning-api.md` |
-| Security policies (overview, design, migration) | `security-policies.md`, `security-policies-best-practices.md`, `security-policy-guides.md`, `security-policies-migration-guide.md` |
+| Security policies (overview, design, migration, sign-in) | `security-policies.md`, `security-policies-best-practices.md`, `security-policy-guides.md`, `security-policies-migration-guide.md`, `sign-in-policy.md` |
 | MFA / 2FA enforcement | `two-factor-authentication.md`, `two-factor-authentication-security-policies.md` |
 | Device trust (overview, posture checks, managed devices) | `trusted-devices.md`, `device-posture-checks.md`, `managed-devices.md`, `device-security-guide.md`, `windows-managed-devices.md`, `manually-verified-devices.md`, `managing-devices.md`, `device-failures.md`, `devices.md`, `device-only-resource-policies.md` |
-| MDM / EDR integration (Jamf, Kandji, Intune, etc.) | `jamf-configuration.md`, `jamf-mdm.md`, `kandji-configuration.md`, `kandji-mdm.md`, `intune-configuration.md`, `omnissa-workspace-one-mdm.md`, `crowdstrike-configuration.md`, `sentinelone-configuration.md`, `1password-configuration.md` |
+| MDM / EDR integration (Jamf, Kandji/Iru, Intune, etc.) | `jamf-configuration.md`, `jamf-mdm.md`, `kandji-configuration.md`, `kandji-mdm.md`, `iru-configuration.md`, `iru-mdm.md`, `intune-configuration.md`, `omnissa-workspace-one-mdm.md`, `crowdstrike-configuration.md`, `sentinelone-configuration.md`, `1password-configuration.md` |
 | JIT / ephemeral access, contractor patterns | `jit-access-requests.md`, `resources-reviewing-access-requests.md`, `ephemeral-access-to-resources.md`, `vendor-and-contractor-access-management.md`, `usage-based-auto-lock.md` |
 | Groups, users, admins, offboarding | `groups.md`, `users.md`, `admins.md`, `offboarding-users.md` |
 | Authentication, social logins | `authentication.md`, `social-logins.md` |

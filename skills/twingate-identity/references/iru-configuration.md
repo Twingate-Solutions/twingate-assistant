@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/iru-configuration -->
-
 # Iru (formerly Kandji) Configuration
 
 ## Summary

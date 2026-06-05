@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/deploy-connector-on-ubiquiti -->
-
 # Deploy Twingate Connector on Ubiquiti Gateways
 
 ## Summary

@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/casaos-getting-started -->
-
 # Getting Started with CasaOS and Twingate
 
 ## Summary

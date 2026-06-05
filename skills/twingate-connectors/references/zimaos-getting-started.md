@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/zimaos-getting-started -->
-
 # Getting Started with ZimaOS and Twingate
 
 ## Summary
