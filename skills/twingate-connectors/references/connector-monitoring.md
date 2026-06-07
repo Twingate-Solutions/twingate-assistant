@@ -1,74 +1,56 @@
 # Twingate Connector Monitoring with Prometheus & Grafana
 
 ## Summary
-Guide for setting up metrics collection on Twingate Connectors and visualizing them via Prometheus and Grafana. Connectors expose a Prometheus-compatible metrics endpoint configured via environment variable. A Docker Compose stack runs the full monitoring pipeline.
+Guide for setting up metrics collection from Twingate Connectors using Prometheus and Grafana. Connectors expose a Prometheus-compatible metrics endpoint via a configurable port. The full stack runs via Docker Compose.
 
 ## Key Information
-- Connectors expose metrics at `http://<connector-ip>:<TWINGATE_METRICS_PORT>/metrics`
-- Metrics include: bytes transferred, transfer rates, direct vs relay connection breakdown, uptime, resource counts
+- Connectors export metrics: bytes transferred, transfer rates, direct vs relay connection breakdown, uptime, resource counts
+- Metrics endpoint path: `/metrics` (Prometheus format)
 - Dashboard JSON available at: `https://github.com/Twingate-Community/dashboards` (`grafana/insights.json`)
-- Grafana minimum version: 12.2.1+
+- Minimum Grafana version: 12.2.1+
 
 ## Prerequisites
-- Twingate deployment with ≥1 Connector
+- Twingate deployment with at least one Connector
 - Docker and Docker Compose installed
 - Network access to Connector hosts on the metrics port
 
 ## Configuration Values
 
-### Connector Environment Variable
-| Variable | Value | Notes |
+| Variable | Value | Location |
 |---|---|---|
-| `TWINGATE_METRICS_PORT` | Any unused port (e.g., `9999`) | Enables metrics endpoint |
-
-### Linux Service Config (`/etc/twingate/connector.conf`)
-```
-TWINGATE_METRICS_PORT=9999
-```
-
-### Prometheus (`prometheus.yml`) Key Settings
-```yaml
-scrape_interval: 15s
-scrape_configs:
-  - job_name: 'twingate-connectors'
-    static_configs:
-      - targets: ['connector1-ip:9999']
-    scrape_interval: 30s
-    metrics_path: /metrics
-```
-
-### Grafana Docker Env Vars
-| Variable | Default |
-|---|---|
-| `GF_SECURITY_ADMIN_PASSWORD` | `admin123` |
-| `GF_USERS_ALLOW_SIGN_UP` | `false` |
+| `TWINGATE_METRICS_PORT` | Any unused port (e.g., `9999`) | Docker env or `/etc/twingate/connector.conf` |
+| `GF_SECURITY_ADMIN_PASSWORD` | Set in docker-compose | Grafana container env |
+| `GF_USERS_ALLOW_SIGN_UP` | `false` | Grafana container env |
+| Prometheus scrape interval | `15s` global, `30s` per job | `prometheus.yml` |
+| Prometheus retention | `200h` | CLI flag `--storage.tsdb.retention.time` |
+| Prometheus URL (from Grafana) | `http://prometheus:9090` | Grafana data source config |
 
 ## Step-by-Step
 
-1. **Enable metrics** — Set `TWINGATE_METRICS_PORT=9999` on each Connector; restart service
-2. **Verify endpoint** — `curl http://<connector-ip>:9999/metrics`
-3. **Create `prometheus.yml`** — Add all Connector IPs as targets
-4. **Create `docker-compose.yml`** — Deploy Prometheus (port 9090) + Grafana (port 3000)
-5. **Start stack** — `docker-compose up -d`
-6. **Configure Grafana** — Add Prometheus data source at `http://prometheus:9090`
-7. **Import dashboard** — Upload `grafana/insights.json` from community repo
-8. **Verify** — Check `http://localhost:9090/targets` for UP status
+1. **Enable metrics on Connector**
+   - Docker: Add `TWINGATE_METRICS_PORT=9999` env var and expose port in `docker-compose.yml`
+   - Linux service: Add `TWINGATE_METRICS_PORT=9999` to `/etc/twingate/connector.conf`, then `sudo systemctl restart twingate-connector`
+
+2. **Verify endpoint**: `curl http://<connector-ip>:9999/metrics`
+
+3. **Create `prometheus.yml`** listing all Connector IPs as targets under `job_name: 'twingate-connectors'`
+
+4. **Start stack**: `docker-compose up -d` (Prometheus on `:9090`, Grafana on `:3000`)
+
+5. **Configure Grafana**: Add Prometheus data source → import dashboard JSON from GitHub
+
+6. **Verify**: Check `http://localhost:9090/targets` all show "UP"; confirm dashboard panels populate
+
+## Adding Connectors / Alerting
+- Add IPs to `prometheus.yml` targets, then `docker-compose restart prometheus`
+- Alerting requires separate `alerts.yml` and Alertmanager; example rule checks `up{job="twingate-connectors"} == 0` for 1 minute
 
 ## Gotchas
-- Port `9999` must be open on Connector hosts (firewall rules)
-- Docker Connectors require explicit port mapping (`"9999:9999"` in `ports:`)
-- Connector must be **restarted** after adding `TWINGATE_METRICS_PORT`
-- Prometheus data source URL inside Docker stack must use service name `prometheus:9090`, not `localhost`
-- Adding connectors to Prometheus requires `docker-compose restart prometheus`
-
-## Key Metrics
-```
-twingate_inbound_bytes_total{transport="direct|relay"}
-twingate_outbound_bytes_total{transport="direct|relay"}
-twingate_connector_uptime_seconds
-```
+- Firewall must allow inbound access on the metrics port (e.g., 9999) to each Connector host
+- Grafana data source URL must use container name `prometheus` (not `localhost`) when both run in Docker Compose
+- Connector must be restarted after adding `TWINGATE_METRICS_PORT` for changes to take effect
+- Dashboard import requires Grafana 12.2.1+
 
 ## Related Docs
-- [Twingate Community Dashboards](https://github.com/Twingate-Community/dashboards)
-- Twingate Connector configuration docs (official)
-- Prometheus alerting rules configuration
+- [Twingate Community Dashboards (GitHub)](https://github.com/Twingate-Community/dashboards)
+- Twingate official Connector configuration docs

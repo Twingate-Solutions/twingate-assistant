@@ -1,32 +1,31 @@
 # DNS Failures - Twingate Troubleshooting
 
+## Page Title
+DNS Failures: How to Troubleshoot User DNS Issues
+
 ## Summary
-Twingate intercepts DNS queries for protected Resources and forwards them to a Connector for internal resolution. DNS failures prevent users from reaching Resources even when connected. This guide covers diagnosis and resolution of common DNS failure scenarios.
+Twingate intercepts DNS queries for protected Resources and forwards them to a Connector for internal resolution. DNS failures prevent clients from obtaining correct IP addresses, causing connection errors. Troubleshooting involves checking Client interception, CGNAT conflicts, Connector-side resolution, and network interface issues.
 
 ## Key Information
-- Twingate reserves CGNAT range **`100.96.0.0/12`** (`100.96.0.0`–`100.127.255.255`) for internal virtual IPs
-- Successful Client DNS interception returns an IP in the `100.96.0.0/12` range
+- Twingate reserves `100.96.0.0/12` (range: `100.96.0.0`–`100.127.255.255`) for internal virtual IPs
+- Successful Client interception returns a CGNAT IP (`100.96.0.0/12`) from `nslookup`
 - "DNS lookup error" in Activity report = Connector-side failure (not Client-side)
-- If DNS resolves to `100.x.x.x` but connection still fails → problem is with Connector or network routing
+- Successful DNS to `100.x.x.x` but still failing = Connector/network routing issue
 
 ## Common Symptoms
 - Browser errors: `DNS_PROBE_FINISHED_NXDOMAIN` or "This site can't be reached"
-- App logs: "host not found" or "cannot resolve hostname"
+- App logs: "host not found" / "cannot resolve hostname"
 - Admin Console Activity report shows "DNS lookup error" status
 
-## Diagnostic Steps
+## Step-by-Step Troubleshooting
 
 ### 1. Test DNS on Client Device
 ```bash
 nslookup <resource_fqdn>
+# e.g., nslookup jira.mycompany.internal
 ```
-- **Pass**: Returns IP in `100.96.0.0/12` → Client intercepting correctly
-- **Fail**: Timeout, public IP, or error → Client not intercepting
-
-Possible causes for failure:
-- Resource not defined correctly in Admin Console
-- User not in a Group with access to Resource
-- Client issue
+- **Pass**: Returns IP in `100.96.0.0/12` range → Client intercepting correctly
+- **Fail**: Timeout, public IP, or error → Client not intercepting (check Resource definition, Group membership, or Client health)
 
 ### 2. Check for CGNAT IP Conflicts
 ```bash
@@ -36,47 +35,39 @@ ipconfig /all
 # macOS
 scutil --dns
 ```
-Check assigned IPs and DNS server addresses. If any fall in `100.96.0.0`–`100.127.255.255` (excluding Twingate adapter), there is a conflict.
-
-**Fix**: Manually configure DNS to public resolver outside conflicting range:
-- Google DNS: `8.8.8.8`, `8.8.4.4`
-- Quad9: `9.9.9.9`
+- Look for assigned IPs or DNS server addresses falling in `100.96.0.0`–`100.127.255.255`
+- **Fix**: Set device DNS to public resolver outside conflicting range:
+  - Google DNS: `8.8.8.8`, `8.8.4.4`
+  - Quad9: `9.9.9.9`
 
 ### 3. Test DNS on Connector Host
-Only needed when Activity report shows "DNS lookup error":
 ```bash
 nslookup <resource_fqdn>
 # or
 dig <resource_fqdn>
 ```
-**Fix if failing**: Resolve DNS config on Connector host:
-- Edit `/etc/resolv.conf` (Linux)
-- Check VPC DNS settings (cloud provider)
-- Verify network path to internal DNS servers
-
-> **Best practice**: Disable all but one Connector when troubleshooting to isolate to a single host.
+- Run from the Connector server/container host
+- Failure confirms local DNS misconfiguration on Connector host
+- **Fix**: Edit `/etc/resolv.conf` (Linux), check cloud VPC DNS settings, verify network path to internal DNS servers
+- **Best practice**: Disable all but one Connector to isolate the problem
 
 ### 4. Check Multiple Active Network Interfaces
-Applies to Windows/Linux with simultaneous Ethernet + Wi-Fi on same subnet.
-
-**Fix**:
-- Update NIC drivers (especially Realtek chipsets)
-- Disable one interface (unplug Ethernet or turn off Wi-Fi)
+- Windows/Linux with simultaneous Ethernet + Wi-Fi on same subnet causes routing/DNS conflicts
+- **Fix**: Update NIC drivers (especially Realtek chipsets); disable one interface as workaround
 
 ## Configuration Values
 | Item | Value |
 |------|-------|
-| Twingate CGNAT range | `100.96.0.0/12` |
-| Conflict check range | `100.96.0.0`–`100.127.255.255` |
+| Twingate CGNAT range | `100.96.0.0/12` (`100.96.0.0`–`100.127.255.255`) |
 | Google DNS fallback | `8.8.8.8`, `8.8.4.4` |
 | Quad9 DNS fallback | `9.9.9.9` |
 
 ## Gotchas
-- CGNAT conflicts are common and frequently overlooked—always check DNS server addresses, not just device IPs
-- "DNS lookup error" in Activity log specifically means Connector failed to resolve, not Client
-- Multiple active NICs cause unpredictable routing even when DNS appears correct
+- CGNAT conflict is "often overlooked" — check DNS *server* addresses, not just device IPs
+- "DNS lookup error" in Activity report specifically indicates Connector failure, not Client failure
+- Successful CGNAT resolution with continued failure points to Connector/routing issues, not DNS
 
 ## Related Docs
 - How DNS Works with Twingate
+- Activity Report (Admin Console)
 - Connector deployment guides
-- Activity report documentation

@@ -1,14 +1,14 @@
 # Linux Client Application - OSS Third Party Notices
 
 ## Page Title
-Linux Client Application – Open Source Component Licenses
+Twingate Linux Client Application – Open Source Component Licenses
 
 ## Summary
-This page lists all open-source third-party components bundled in the Twingate Linux client application, along with their respective licenses. It serves as the required legal attribution document for OSS components. No installation or configuration guidance is provided.
+This page documents the open-source software components bundled in the Twingate Linux client application. It lists each third-party library along with its applicable license text. This is a legal compliance/attribution page, not an implementation guide.
 
 ## Key Information
 
-### Components and Licenses
+### Components and Their Licenses
 
 | Component | License | Copyright Holder |
 |-----------|---------|-----------------|
@@ -24,22 +24,23 @@ This page lists all open-source third-party components bundled in the Twingate L
 | catch2 | Boost Software License 1.0 | Catch2 Authors |
 | zlib | zlib License | Jean-loup Gailly, Mark Adler |
 | nanopb | zlib License | Petteri Aimonen |
-| fmt | MIT-like (with object-code exception) | Victor Zverovich |
+| fmt | MIT-like (with embedding exception) | Victor Zverovich |
 
 ## Prerequisites
-- N/A — reference/legal document only
+- N/A – informational/legal page only
 
 ## Step-by-Step
-- N/A — no actionable steps
+- N/A – no implementation steps
 
 ## Configuration Values
 - N/A
 
 ## Gotchas
-- **fmt** has an additional exception: embedded object-code distributions do not require inclusion of copyright notices, unlike standard MIT
-- **siphash** uses CC0 (public domain dedication), not a traditional OSS license — no attribution legally required, but noted for completeness
-- **catch2** (Boost License) requires copyright notices only in source/binary distributions, not in machine-executable object code
+- **fmt** has an additional exception: embedded portions in compiled object form may be redistributed without including copyright/permission notices
+- **siphash** uses CC0 (public domain dedication), not a traditional license; no attribution required but patent/trademark rights are not waived
+- **Apache 2.0** (libssl) has explicit patent license termination clauses if litigation is initiated
+- **BSD 3-Clause** prohibits using contributor names for endorsement without permission
 
 ## Related Docs
-- Twingate Linux Client installation docs
+- Twingate Linux Client installation documentation
 - Other platform OSS notices (macOS, Windows, iOS, Android clients)

@@ -1,39 +1,47 @@
 # Twingate Groups
 
 ## Summary
-Groups are the authorization mechanism in Twingate, linking Users to Resources. A user must belong to a Group that includes a Resource and pass the Resource's Security Policy to gain access. Groups can be managed manually, via API, or synced from an IdP.
+Groups are the authorization mechanism in Twingate that connect users to Resources. A user gains access to a Resource by being a member of a Group that includes that Resource and successfully authenticating against the Resource's Security Policy.
 
 ## Key Information
-- Groups define which users can access which resources
-- Users can belong to multiple groups
-- Per-resource access can include **expiration time** (full revocation) or **usage-based auto-lock** (temporary lock requiring admin unlock)
-- Access requires: group membership + successful Security Policy authentication (may include IdP re-auth or 2FA)
+- Groups have two core components: **members** (users) and **Resources** (what they can access)
+- Users can belong to multiple Groups
+- Resource access within a Group can be time-limited via **expiration time** (full revocation) or **usage-based auto-lock** (temporary lock requiring admin unlock)
+- Three Group types: **Everyone** (built-in), **Custom**, and **Synced**
+
+## Access Requirements
+For a user to access a Resource, they must:
+1. Be a member of a Group that includes the Resource
+2. Successfully authenticate against the Resource's configured Security Policy (may require IdP re-auth or 2FA)
 
 ## Group Types
 
-| Type | Description | Management |
-|------|-------------|------------|
-| **Everyone** | Built-in; all users auto-included | Automatic |
-| **Custom** | Manually created | Admin Console or Admin API |
-| **Synced** | Synced from IdP | IdP controls user membership |
+### Everyone (Built-in)
+- Automatically includes **all users** — no management required
+- Best for: company-wide resources, domain controllers, shared infrastructure
 
-## Built-in Groups
-- `Everyone` group includes all users automatically
-- Use for company-wide resources (metrics dashboards, domain controllers, shared infrastructure)
+### Custom Groups
+- Manually created/managed in Admin console
+- Not modified by automated processes
+- Can also be managed via the **Twingate Admin API**
 
-## Synced Groups (IdP-specific behavior)
-- **Entra ID, Okta, OneLogin**: Support SCIM scoping to limit which users/groups sync
-- **Google Workspace**: No native granular sync control; use Twingate's **Selective Sync** feature to limit users, groups, and OUs
+### Synced Groups
+- Auto-synchronized from a configured IdP
+- Resources and Access policies can be set on Synced groups
+- User membership is managed in IdP, not Twingate
+
+## IdP Sync Behavior
+| IdP | Scoping Method |
+|-----|---------------|
+| Entra ID | SCIM (native scoping) |
+| Okta | SCIM (native scoping) |
+| OneLogin | SCIM (native scoping) |
+| Google Workspace | Twingate Selective Sync (no native granular config) |
 
 ## Gotchas
-- Synced groups: Resources and Access Policies can be assigned, but **user membership cannot be managed in Twingate** — only through the IdP
-- Custom groups will **not** be modified by automated processes (safe from IdP sync overrides)
-- Expiration and auto-lock behave differently: expiration permanently revokes access; auto-lock is temporary and reversible by an admin
-
-## Prerequisites
-- IdP configured for Synced groups
-- Admin console access for Custom group management
-- Admin API access for programmatic group management
+- Synced group user membership **cannot** be modified in Twingate — changes must be made in the IdP
+- Google Workspace requires Twingate's **Selective Sync** feature to limit which users/groups/OUs sync (not configurable natively)
+- Expiration time fully revokes access; usage-based auto-lock only temporarily locks and requires admin action to restore
 
 ## Related Docs
 - Users
@@ -42,4 +50,3 @@ Groups are the authorization mechanism in Twingate, linking Users to Resources. 
 - Admin API
 - IdP Configuration (Entra ID, Okta, OneLogin, Google Workspace)
 - Selective Sync (Google Workspace)
-- SCIM configuration

@@ -1,57 +1,54 @@
-# Twingate Client Application
+# Twingate Client Applications
 
 ## Summary
-The Twingate Client provides users access to private Resources and threat protection across macOS, Windows, Linux, iOS, and Android/ChromeOS. Installation requires only the organization subdomain (e.g., `autoco` for `autoco.twingate.com`). The client uses a local VPN connection to `127.0.0.1` to intercept traffic to private Resources.
+The Twingate Client enables users to access private network Resources and is available on macOS, Windows, Linux, iOS, and Android/ChromeOS. Users authenticate by entering their organization's subdomain (e.g., `autoco` for `autoco.twingate.com`) on first setup. The client creates a local VPN connection to `127.0.0.1` to intercept traffic to private Resources.
 
 ## Key Information
-- No special permissions required on the device
-- Local VPN connection established to `127.0.0.1` for traffic interception
+- No special permissions required, but sets up local VPN to `127.0.0.1`
+- Organization subdomain only needs to be entered once on first use
 - Clients older than 12 months cannot connect to Twingate service
-- Organization subdomain only needs to be entered once on first setup
+- End users can self-install via `get.twingate.com` (auto-detects platform)
 
-## Download URLs by Platform
+## Download Endpoints
 
 | Platform | URL |
 |----------|-----|
-| Auto-detect | `get.twingate.com` |
 | macOS (PKG) | `https://api.twingate.com/download/darwin?installer=pkg` |
 | Windows (EXE) | `https://api.twingate.com/download/windows` |
 | Windows (MSI) | `https://api.twingate.com/download/windows?installer=msi` |
-| Linux | Convenience script + public repos |
 | iOS | `https://api.twingate.com/download/ios` |
 | Android/ChromeOS | `https://api.twingate.com/download/android` |
+| Linux | Convenience script + public repositories |
 
 ## Minimum Supported Versions
 Clients below these versions cannot connect:
-- **macOS**: 2024.57
-- **Windows**: 2024.51
-- **Linux**: 2024.63
-- **iOS**: 2024.57
-- **Android**: 2024.85
+- **macOS:** 2024.57
+- **Windows:** 2024.51
+- **Linux:** 2024.63
+- **iOS:** 2024.57
+- **Android:** 2024.85
 
 ## Installation Methods
-- **End users**: Direct to `get.twingate.com` (auto-detects platform)
-- **Managed devices**: Use platform-specific managed device documentation
-- **Linux**: Use published convenience script for any supported distribution
+- **End users:** Browse to `get.twingate.com` for auto-detected platform download
+- **Managed devices:** Use platform-specific managed device documentation
+- **Linux:** Use published convenience script or configure source repositories
 
 ## Updates
-- macOS/Windows: Hosted by Twingate, pulled from static URLs above
+- macOS/Windows: Hosted by Twingate, pulled automatically when user has elevated permissions
 - Linux: Hosted in public repositories
-- iOS: App Store
-- Android/ChromeOS: Google Play Store
-- Auto-updates available when local users have elevated permissions
-- Managed deployment guides available for macOS/iOS and Windows
+- iOS/Android: Distributed via App Store / Google Play Store
+- Automate updates via software distribution tools (separate guides for macOS/iOS and Windows)
 
 ## Gotchas
-- Clients older than 12 months are hard-blocked from connecting — enforce update policies
-- Historical versions available via public changelog (MSI/macOS only)
+- Clients older than 12 months are **unsupported and will lose connectivity** — enforce update policies
+- Historical versions available in public changelog if pinning is required
 - Linux updates come from external repos, not Twingate-hosted endpoints
-- Auto-update requires elevated local user permissions; managed environments need separate deployment tooling
+- Local VPN to `127.0.0.1` may conflict with other VPN software or local network tools
 
 ## Related Docs
 - Endpoint Requirements
-- Managed Devices documentation
-- Linux client documentation (source repositories)
-- Client changelog
+- Managed Devices (platform-specific deployment)
+- Linux client source repositories
+- Client changelog (version history)
 - macOS/iOS deployment guide
 - Windows deployment guide

@@ -1,12 +1,12 @@
 # Deploy Twingate Connector on TrueNAS SCALE
 
 ## Summary
-Deploy a Twingate Connector as a Docker container on TrueNAS SCALE using the "Launch Docker Image" feature. Requires generating connector tokens from the Admin Console and configuring environment variables in the TrueNAS app setup.
+Deploy a Twingate Connector on TrueNAS SCALE using the "Launch Docker Image" feature. Requires generating connector tokens from the Admin Console and configuring environment variables in the TrueNAS app setup.
 
 ## Key Information
 - Uses `twingate/connector:latest` Docker image via TrueNAS SCALE's app launcher
 - Connectors do **not** auto-update; manual upgrade required via TrueNAS UI
-- Use Linux deployment method in Admin Console to generate tokens (even though it's Docker-based)
+- Token generation uses Linux deployment method in Admin Console (not Docker-specific)
 
 ## Prerequisites
 - Access to Twingate Admin Console
@@ -15,44 +15,48 @@ Deploy a Twingate Connector as a Docker container on TrueNAS SCALE using the "La
 
 ## Step-by-Step
 
-1. **Generate tokens**: Admin Console → Network tab → Remote Network → Add Connector → Linux method → Generate New Tokens → copy both tokens
-2. **Launch app**: TrueNAS SCALE → Apps → Launch Docker Image
-3. **Configure image**:
-   - Application Name: `twingate-connector` (or descriptive name)
-   - Image repository: `twingate/connector`
-   - Image tag: `latest`
-4. **Add environment variables** (click Add 4 times in Container Environment Variables section)
-5. **Save** — pulls image and starts container
+1. In Admin Console → Network tab → select Remote Network → **Add** connector
+2. Select Linux deployment method → click **Generate New Tokens**
+3. Copy and save both Access token and Refresh token (note which is which)
+4. In TrueNAS SCALE UI → **Apps** → **Launch Docker Image**
+5. Set Application Name (e.g., `twingate-connector`), Image repository `twingate/connector`, tag `latest`
+6. Scroll to **Container Environment Variables** → Add 4 variables (see below)
+7. Click **Save** to pull image and start container
 
 ## Configuration Values
 
-| Environment Variable | Value |
-|---|---|
+### Required Environment Variables
+| Name | Value |
+|------|-------|
 | `TWINGATE_NETWORK` | Your network name (e.g., `yournetworkname`) |
 | `TWINGATE_ACCESS_TOKEN` | Access token from Admin Console |
 | `TWINGATE_REFRESH_TOKEN` | Refresh token from Admin Console |
 | `TWINGATE_LABEL_HOSTNAME` | Descriptive label for this connector |
-| `TWINGATE_DNS` | Custom DNS server IP (optional) |
-| `TWINGATE_LOG_ANALYTICS` | `v2` for JSON stdout logging (optional) |
 
-## Optional Configuration
+### Optional Environment Variables
+| Name | Value | Purpose |
+|------|-------|---------|
+| `TWINGATE_DNS` | DNS server IP | Override inherited DNS from host |
+| `TWINGATE_LOG_ANALYTICS` | `v2` | Enable JSON stdout logging for SIEM |
 
-- **Custom DNS**: Add `TWINGATE_DNS` env var with DNS server IP
-- **Local logging/SIEM**: Set `TWINGATE_LOG_ANALYTICS=v2` (outputs single-line JSON to stdout)
-- **Local network visibility**: Set Host Interface in Networking section to host's interface (DHCP or Static)
-- **ICMP/ping support**: Add sysctl on TrueNAS host:
-  - System Settings → Advanced → Sysctl → Add
-  - Variable: `net.ipv4.ping_group_range` / Value: `0 2147483647`
-  - May require server reboot
+## Additional Configuration
+
+**Local Network Visibility** (clients on same LAN as connector):
+- Networking section → set **Host Interface** to host's interface
+- Set IPAM Type to DHCP or Static
+
+**ICMP/Ping Support** (sysctl on host):
+- System Settings → Advanced → Sysctl → Add
+- Variable: `net.ipv4.ping_group_range` | Value: `0 2147483647`
+- Enable checkbox → Save → may require reboot
 
 ## Gotchas
-
-- Distinguish between **Access** token and **Refresh** token — they serve different functions
-- Tokens are only shown once; copy them before leaving the Admin Console page
-- Connector status in Admin Console updates automatically once container is running with correct env vars
-- Updates are manual — use the **Upgrade** option in TrueNAS Apps UI; stagger updates across connectors on same Remote Network to avoid downtime
+- Distinguish Access token vs. Refresh token carefully — they are different fields
+- Container inherits host DNS by default; set `TWINGATE_DNS` to override
+- Connectors must be updated manually; stagger updates across multiple connectors on the same Remote Network to avoid downtime
+- ICMP support requires a host-level sysctl change, not a container setting
 
 ## Related Docs
 - [Peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer)
-- [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)
-- [Local connection logging guide](https://www.twingate.com/docs/connector-logs)
+- [Local connection logging guide](https://www.twingate.com/docs/connector-logging)
+- Twingate Fair Use Policy

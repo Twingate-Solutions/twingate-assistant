@@ -1,72 +1,68 @@
 # Twingate Guides Index
 
 ## Page Title
-Twingate Guides – Documentation Index
+Twingate Guides — Documentation Index
 
 ## Summary
-This is the top-level guides index for Twingate documentation, organizing deployment, configuration, and management topics. It serves as a navigation hub covering infrastructure deployment, client rollout, policy configuration, service integrations, and architecture best practices.
+This is the top-level index page for all Twingate deployment, configuration, and management guides. It organizes documentation into categories covering infrastructure deployment, client management, integrations, Kubernetes, security policies, and architectural best practices.
 
 ## Key Information
 
-### Deployment Targets
-- **Cloud**: AWS EC2, GCP Compute, Azure Compute, Kubernetes, DigitalOcean
-- **On-premises**: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP, TrueNAS, Proxmox
-- **Homelab**: Home Assistant, Unraid, ZimaOS, CasaOS
-- **IaC**: Terraform, Pulumi
+**Deployment Targets:**
+- Cloud: AWS EC2, GCP Compute, Azure Compute, Kubernetes, DigitalOcean
+- On-premises: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP, TrueNAS, Proxmox
+- Homelab: Home Assistant, Unraid, ZimaOS, CasaOS
+- IaC: Terraform, Pulumi
 
-### Client Deployment (MDM)
-- Jamf, Iru, Omnissa Workspace ONE, Microsoft Intune & Endpoint Manager
+**Client Deployment (MDM):**
+- Jamf, Iru, Omnissa Workspace ONE, Microsoft Intune/Endpoint Manager
 
-### Service Compatibility
-- Active Directory, Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler
+**Identity/Service Integrations:**
+- IdP for SaaS App Gating: Google Workspace, JumpCloud, Microsoft Entra ID, Okta, OneLogin
+- Complementary services: Active Directory, Cisco Umbrella, Cloudflare DNS, Netskope DLP, Zscaler
 
-### Database Access
+**Database Access:**
 - MongoDB, AWS, GCP, Azure, Oracle, Snowflake, Redis
 
-### SaaS App Gating IDPs
-- Google Workspace, JumpCloud, Microsoft Entra ID, Okta, OneLogin
+**Kubernetes-Specific:**
+- Route traffic from K8s, private/public resource exposure, kubectl management
 
-### Kubernetes-Specific
-- Route traffic from Kubernetes, private/public resources, `kubectl` management
-
-## Notable Use Cases
-- Cloak bastion servers / strongDM
-- Secure CI/CD pipelines
-- IoT headless client gateway
-- Vendor/contractor access management
-- SSH resource access
-- Replace AWS VPN
-- Site-to-site connections
+## Notable Use Cases Covered
 - AI/LLM access control
-- Remote game streaming
+- CI/CD pipeline security
+- IoT headless client gateway
+- Site-to-site connections
+- Replace AWS VPN
+- SSH resource access management
+- Vendor/contractor access management
+- SaaS App Gating with exit nodes (AWS CloudFront, AWS Exit Nodes)
+- Self-hosted VPN via Exit Networks
 
 ## Architecture & Best Practices Topics
 - Private DNS configuration
 - Connector placement
-- Overlapping IP addresses
-- Security policies
+- Overlapping IP address handling
 - Non-production environment access
-- Whitelisting public resources
-- Local peer-to-peer connections
+- Security policy design
+- Peer-to-peer/local connections
 
 ## Technical Reference Topics
 - NAT traversal mechanics
-- Encryption internals
+- Encryption implementation
 - Firewall behavior
+- Connector shutdown process
 - Service accounts
 - Windows Start Before Logon
-- Connector shutdown process
 - Performance evaluation
-- Release stages
 
 ## Related Docs
-- Individual deployment guides linked per platform (see sections above)
-- `Best Practices for Connector Placement` – critical for routing/performance
-- `Best Practices for Security Policies` – policy design reference
-- `How NAT Traversal Works` – useful for troubleshooting connectivity
-- `Troubleshooting Peer-to-peer Connections` – P2P debugging reference
+- `/docs/internet-security` — DNS-over-HTTPS, DNS filtering
+- `/docs/saas-app-gating` — IP-based SaaS access control
+- `/docs/security-policies` — Policy configuration
+- `/docs/kubernetes` — K8s deployment guides
+- `/docs/logging` — Audit log export
+- `/docs/connector-best-practices` — Connector optimization
+- `/docs/remote-network-best-practices` — Network organization
 
-## Gotchas
-- This page is navigation-only; no configuration values or CLI flags are present here
-- Specific implementation details require navigating to individual guide pages
-- "Iru" MDM listing is likely a niche/regional MDM tool—verify compatibility before planning rollout
+---
+*This page serves as a navigation index only — no configuration values or step-by-step procedures are directly contained here.*

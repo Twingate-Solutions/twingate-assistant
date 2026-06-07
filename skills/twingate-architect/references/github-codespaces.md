@@ -1,28 +1,29 @@
-# Twingate with GitHub Codespaces
+# Access Twingate Resources from GitHub Codespaces
 
 ## Summary
-Twingate can be used within GitHub Codespaces to access protected resources from cloud-based development environments. The implementation is maintained in Twingate's open source repository. This allows developers to connect to Twingate-protected resources without running a local client.
+Enables Twingate client to run inside GitHub Codespaces cloud development environments, allowing access to Twingate-protected resources from browser-based or VS Code-connected Codespaces. Implementation details are maintained in Twingate's open source repository.
 
 ## Key Information
-- Enables access to Twingate resources from GitHub Codespaces (browser or VS Code)
-- Works in fully cloud-hosted development environments
-- Implementation details and configuration are in the Twingate open source repository
+- Supports both browser-based and VS Code-connected Codespaces
+- Full development environment runs in cloud with Twingate access
+- Open source implementation available via Twingate's GitHub repository
 
 ## Prerequisites
 - GitHub Codespaces access
-- Twingate account with appropriate network/resource configuration
-- Refer to the [Twingate Open Source repository](https://github.com/Twingate) for specific dependencies
+- Twingate account and network configured
+- Refer to open source repository for specific dependencies
 
-## Implementation
-Full setup instructions and configuration details are maintained in the **Twingate Open Source repository** — refer to that repository for:
-- Devcontainer configuration
-- Setup scripts
-- Environment-specific configuration values
+## Configuration Values
+- See [Twingate Open Source Repository](https://github.com/Twingate) for environment variables, devcontainer configuration, and setup scripts
+
+## Gotchas
+- Documentation is minimal; primary implementation guidance is in the external open source repository
+- Codespaces runs in a containerized environment — standard Twingate client installation may require custom devcontainer setup
 
 ## Related Docs
 - [Twingate Open Source Repository](https://github.com/Twingate)
-- GitHub Codespaces official documentation
-- Twingate Client documentation
+- GitHub Codespaces documentation (external)
+- Twingate Client installation docs
 
 ---
-**Note:** The documentation page for this topic is sparse — the canonical implementation guidance lives in the Twingate open source repository, not the docs page itself. Check the repository directly for current setup instructions, scripts, and configuration examples.
+*Note: This page has sparse inline documentation. For implementation details, consult the linked open source repository directly.*

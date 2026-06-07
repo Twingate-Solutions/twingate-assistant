@@ -1,50 +1,48 @@
 # macOS Twingate Client
 
 ## Summary
-Twingate client for macOS is available via Mac App Store or as a standalone installer. Initial setup requires configuring VPN permissions and a system extension (standalone only). Once authenticated via identity provider, the client runs in the background intercepting only private resource traffic.
+Twingate client for macOS available via Mac App Store or standalone installer. Requires VPN configuration and system extension (standalone only) to function. Supports Apple Silicon natively.
 
 ## Key Information
+- Two installation methods: Mac App Store or standalone client
 - Native Apple Silicon (M-series) support included
-- Two install paths: Mac App Store or standalone client
-- Standalone client requires enabling a system extension (App Store version does not)
-- Client only intercepts traffic for defined private Resources, not general internet traffic
-- Notifications should be enabled — used for step-up/re-authentication prompts
+- System extension required only for standalone client (not App Store version)
+- Client operates transparently — only intercepts traffic for private Resources, not general internet traffic
+- Notifications are strongly recommended for step-up authentication prompts
 
 ## Prerequisites
-- Mac App Store install: Apple ID required
-- Standalone install: No Apple ID needed
+- Apple ID (Mac App Store method only)
 - Network name (found in welcome email)
 - Identity provider credentials
-- macOS permissions: VPN configuration + notifications (system extension for standalone)
 
-## Step-by-Step
+## Step-by-Step Setup
 
-1. **Install** via [Mac App Store](https://get.twingate.com) or [standalone client](https://www.twingate.com/docs/standalone-client)
-2. **Launch** Twingate — onboarding wizard starts on first run
-3. **Grant permissions** when prompted:
-   - Allow notifications
-   - Allow VPN configuration
-   - Enable system extension *(standalone only)*
+1. **Install** via Mac App Store (search "Twingate" or visit `get.twingate.com`) or install standalone client
+2. **Run** the Twingate application
+3. **Complete onboarding wizard** — grant the following permissions:
+   - Allow notifications (strongly recommended)
+   - Add VPN configuration (**required**)
+   - Enable system extension — standalone client only (**required**)
 4. **Enter network name** (e.g., `autoco`) → click **Join Network**
 5. **Authenticate** via identity provider in the browser window that opens
-6. **Click "Open Twingate.app"** when browser prompts — required to activate the client
-7. Client shows **Online** status; runs in background
+6. **Click "Open Twingate.app"** when browser prompts — this activates the client
+7. Client shows **online** status; runs in background
 
 ## Configuration Values
 | Setting | Required | Notes |
 |---|---|---|
-| Network name | Yes | Subdomain from welcome email |
-| VPN configuration | Yes | Must approve in macOS System Settings |
-| System extension | Standalone only | Must approve in macOS System Settings |
-| Notifications | Strongly recommended | Required for MFA/step-up auth prompts |
+| Network name | Yes | Subdomain format (e.g., `autoco`); pre-filled on return |
+| VPN configuration | Yes | Configured via macOS System Settings |
+| System extension | Standalone only | Configured via macOS System Settings |
+| Notifications | Recommended | Required for step-up auth prompts |
 
 ## Gotchas
-- **Must click "Open Twingate.app"** in browser after IdP auth — skipping this leaves the client inactive
-- System extension requirement applies **only to standalone client**, not App Store version
-- Managed/enterprise deployments require [additional MDM steps](https://www.twingate.com/docs/managed-environments)
-- Network name field is pre-filled on subsequent logins
+- Must click **"Open Twingate.app"** in browser after IdP authentication or client won't activate
+- System extension prompt only appears for standalone client, not App Store version
+- Managed/enterprise deployments require additional steps (separate documentation)
+- If already authenticated with IdP, browser login step may be skipped automatically
 
 ## Related Docs
 - [Standalone Client setup](https://www.twingate.com/docs/standalone-client)
-- [Managed environment deployment](https://www.twingate.com/docs/managed-environments)
-- [get.twingate.com](https://get.twingate.com) — App Store redirect
+- [Managed environment deployment](https://www.twingate.com/docs/macos) (linked as "few additional steps")
+- `get.twingate.com` — auto-redirects to Mac App Store

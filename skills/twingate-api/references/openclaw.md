@@ -1,54 +1,66 @@
 # Secure OpenClaw Deployments with Twingate
 
 ## Summary
-OpenClaw (formerly ClawdBot/MoltBot) is an AI assistant platform integrating with WhatsApp, Telegram, and other messaging services. This page covers securing OpenClaw deployments using Twingate Zero Trust architecture to eliminate public port exposure. The Gateway runs on `localhost:18789` with all access routed through Twingate Connectors.
+OpenClaw (formerly ClawdBot/MoltBot) is an AI-powered assistant platform for WhatsApp/Telegram. This page provides an overview of deploying OpenClaw with Twingate Zero Trust access, eliminating public port exposure and VPN requirements. Specific deployment guides exist for Docker Compose and DigitalOcean.
 
 ## Key Information
-- OpenClaw Gateway runs on `localhost:18789` (not publicly exposed)
+- OpenClaw Gateway runs on `localhost:18789` (never publicly exposed)
 - Twingate Connector uses outbound-only connections to Twingate Cloud
-- Supported deployment platforms: Docker Compose, DigitalOcean
-- No inbound ports required on host infrastructure
-- End-to-end encrypted traffic with full audit trails
+- No inbound ports required on infrastructure
+- Supports MFA enforcement and audit logging per resource
 
 ## Prerequisites
-- Twingate account (free tier available for small teams)
+- Twingate account (free tier available at twingate.com/signup)
 - Cloud account or server access for chosen platform
 - AI provider API key (Anthropic, OpenAI, etc.)
 - Basic Linux/Unix CLI familiarity
 
+## Architecture
+```
+Team Devices (Twingate Client)
+    ↓ Zero Trust auth
+Twingate Cloud
+    ↓ outbound-only tunnel
+Twingate Connector (same network as Gateway)
+    ↓ private network
+OpenClaw Gateway (localhost:18789)
+```
+
 ## Step-by-Step (Common Setup)
-1. Create Twingate account at `twingate.com/signup`
-2. Define a **Remote Network** for OpenClaw infrastructure
-3. Deploy a **Twingate Connector** on same network as Gateway
-4. Create a **Resource** pointing to the OpenClaw Gateway
-5. Configure **Resource Access** policies (who can reach the resource)
-6. Install **Twingate Client** on team member devices
+1. Create Twingate account
+2. Define a Remote Network for OpenClaw infrastructure
+3. Deploy Twingate Connector on same network as Gateway
+4. Create a Resource pointing to the OpenClaw Gateway
+5. Configure Resource Access policies (users/groups)
+6. Install Twingate Client on team member devices
 7. Connect — no public ports needed
 
 ## Configuration Values
-| Component | Value |
-|-----------|-------|
-| OpenClaw Gateway port | `localhost:18789` |
-| Connector connection type | Outbound-only to Twingate Cloud |
+| Value | Detail |
+|-------|--------|
+| Gateway port | `localhost:18789` |
+| Connector connection | Outbound-only to Twingate Cloud |
+| Resource address | Private IP of Gateway host |
 
 ## Security Best Practices
 - Enable MFA for all users accessing production Gateways
-- Use Groups for access management (not individual user permissions)
-- Lock down **all** inbound ports — SSH, HTTP, everything
+- Use Groups for access control (not individual users)
+- Lock down **all** inbound ports — no SSH, HTTP, nothing
 - Enable audit logging; review connection logs regularly
 - Rotate AI provider API keys periodically
-- Use private IP addresses for Resources whenever possible
 - Monitor Connector health for availability
+- Always use private IP addresses for Resources
 
 ## Gotchas
-- No specific platform credentials or env vars documented on this page — refer to platform-specific guides (Docker Compose, DigitalOcean)
-- Gateway must not be publicly accessible; defense-in-depth relies on Twingate auth being the sole access path
-- Even a compromised server won't expose the Gateway without valid Twingate authentication
+- No inbound firewall rules should exist — any open port weakens the model
+- This is an overview page; actual deployment steps are in platform-specific guides (Docker Compose, DigitalOcean)
+- Even a compromised server won't expose the Gateway without valid Twingate auth
 
 ## Related Docs
-- [Twingate Connector Deployment Options](https://www.twingate.com/docs)
+- [Docker Compose Deployment Guide] (linked from page)
+- [DigitalOcean Deployment Guide] (linked from page)
+- Twingate Connector Deployment Options
 - Remote Network Best Practices
-- Connector Monitoring
 - Access Groups and Policies
-- [OpenClaw Documentation](https://docs.openclaw.bot)
-- Platform guides: Docker Compose, DigitalOcean (linked from this page)
+- OpenClaw docs: docs.openclaw.bot
+- Community: r/Twingate

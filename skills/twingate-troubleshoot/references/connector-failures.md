@@ -1,79 +1,85 @@
 # Connector Failures Troubleshooting
 
 ## Summary
-Covers three failure scenarios for Twingate Connectors: offline/flapping status, online but unable to reach Resources, and online but poor performance. Connectors are critical gateways; if one fails, all Resources on that Remote Network are inaccessible unless a backup Connector exists.
+Covers three Connector failure scenarios: offline/flapping status, online but unable to reach Resources, and online with poor performance. Connectors failing affects all Resources in their Remote Network unless a backup Connector exists.
 
 ## Key Information
-- Offline Connector = entire Remote Network affected for all users
-- Time Offset >5 seconds causes authentication token rejection and flapping
-- `chronyd` recommended over `ntpd` for time sync
-- Same tokens used by multiple Connector instances causes conflicts
+- Offline Connector = all Resources in that Remote Network unreachable for all users
+- Two Connectors per Remote Network recommended for redundancy
 - Resource addresses/FQDNs are resolved from the **Connector's perspective**, not the client's
 
-## Prerequisites
-- Access to Admin Console (Connector details page)
-- SSH or `docker exec` access to Connector host
-- Correct Connector tokens (regenerate if needed)
+## Failure Scenario 1: Offline or Flapping
 
-## Diagnostic Steps
+### Common Causes & Fixes
+- **Clock skew**: Time Offset >5 seconds in Admin Console → run `chronyd` (preferred over `ntpd`) on host
+- **Invalid tokens**: Regenerate and reconfigure; never run multiple Connectors with same tokens
+- **Outdated software**: Update Connector to latest version
+- **Outbound firewall blocking**: Requires TCP 443, TCP 30000-31000, UDP/QUIC for HTTP/3
 
-### Offline/Flapping
-1. Check Admin Console → Remote Network → Connector details for Status and **Time Offset**
-2. If Time Offset >5s, fix NTP on host (`chronyd`)
-3. Verify tokens are correct and only one instance uses each token set
-4. Check logs for error patterns (see table below)
-5. Verify outbound connectivity requirements
-
-### Cannot Reach Resources
-1. SSH into Connector host; test TCP: `nc -zv <RESOURCE_ADDRESS> <PORT>`
-2. Test DNS: `nslookup <RESOURCE_FQDN>`
-3. Verify routing between Connector subnet and Resource subnet (VPC peering, route tables)
-4. Check cloud security groups/NSGs/firewall rules for inbound traffic from Connector IP
-5. Check app-level IP allowlists (SSH, PostgreSQL `pg_hba.conf`, RDP, WAFs)
-6. Get Connector private IP: `hostname -I`
-7. Confirm Resource address/port config in Admin Console matches actual service
-
-### Poor Performance
-1. Check if peer-to-peer is failing (forcing relay routing) → see P2P troubleshooting guide
-2. Review Connector host resources (CPU, memory, bandwidth)
-3. Consider deploying additional Connectors on same Remote Network for load balancing
-
-## Configuration Values
-
-| Variable | Value | Purpose |
-|----------|-------|---------|
-| `TWINGATE_LOG_LEVEL` | `7` | Enable detailed logging |
-
-**Log commands:**
+### Log Commands
 ```bash
-journalctl -u twingate-connector -f   # systemd
-docker logs <CONTAINER_NAME> -f        # Docker
+# systemd
+journalctl -u twingate-connector -f
+
+# Docker
+docker logs <CONTAINER_NAME> -f
 ```
 
-**Required outbound ports:**
-- TCP 443 (Controller + Relay)
-- TCP 30000–31000 (Relay fallback)
-- UDP/QUIC for HTTP/3
-
-## Error Reference
-
+### Log Error Reference
 | Error | Cause |
 |-------|-------|
-| `Invalid token` / `failed to get an access token` | Clock drift; check Time Offset in Admin Console |
+| `Invalid token` / `failed to get an access token` | Clock drift |
 | `Gone, code 410` | Token/auth issue |
-| `too many open files` | Host `ulimit` (file descriptor limit) too low |
-| `Failed to preconnect a relay listener` + `Connection timed out` | Outbound firewall blocking Relay ports |
-| `failed to connect` / `could not be reached` | Network path issue between Connector and Resource |
+| `too many open files` | `ulimit` too low |
+| `Failed to preconnect a relay listener` + timeout | No outbound connectivity to Relay |
+
+## Failure Scenario 2: Online but Cannot Reach Resources
+
+### Diagnostic Commands (run on Connector host)
+```bash
+# Test TCP connectivity
+nc -zv <RESOURCE_ADDRESS> <PORT>
+
+# Test DNS resolution
+nslookup <RESOURCE_FQDN>
+
+# Get Connector's private IP
+hostname -I
+```
+
+### Checklist
+- [ ] Connector host can route to Resource subnet (VPC peering, transit gateways, route tables)
+- [ ] Cloud security groups allow inbound traffic from Connector IP on required ports (AWS/Azure/GCP)
+- [ ] Application-level IP allowlists include Connector's private IP (`pg_hba.conf`, SSH `AllowUsers`, WAF rules, etc.)
+- [ ] Resource address/FQDN in Admin Console matches what's reachable from Connector
+- [ ] Port restrictions on Resource config match what the service listens on (default: all TCP/UDP)
+
+## Failure Scenario 3: Poor Performance
+
+### Common Causes
+- Peer-to-peer not establishing → traffic relayed (higher latency) — check UDP connectivity on both Client and Connector networks
+- Connector geographically distant from Resources → deploy in same region/VPC/subnet
+- Host resource constraints (CPU/memory/bandwidth) → scale up or add Connectors for load balancing
+
+### ICMP Note
+Ping failures while SSH/HTTP work = host OS blocking outbound ICMP (not a Twingate setting)
+
+## Configuration Values
+| Setting | Value |
+|---------|-------|
+| `TWINGATE_LOG_LEVEL` | `7` (detailed logging) |
+| Required outbound TCP | `443`, `30000-31000` |
+| Required outbound | UDP/QUIC (HTTP/3) |
+| Max clock skew allowed | 5 seconds |
 
 ## Gotchas
-- ICMP/ping failures while SSH/HTTP work = host OS blocking outbound ICMP (not a Twingate issue)
-- Connector in different VPC/subnet than Resource with no route = silent failure (Connector shows Online)
-- Port restrictions on Resource config override default all-TCP/UDP forwarding
+- Running multiple Connectors with identical tokens causes conflicts — each Connector needs unique tokens
+- `ntpd` is less reliable than `chronyd` for preventing clock drift
+- Default port behavior forwards all TCP/UDP; port restrictions on Resource config silently block other ports
 
 ## Related Docs
-- Firewall Failures
 - Connector Logging
+- Firewall Failures
 - Peer-to-peer troubleshooting guide
 - Hardware and OS requirements
 - Resources configuration
-- Connector software updates

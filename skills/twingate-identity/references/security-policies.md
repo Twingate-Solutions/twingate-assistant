@@ -1,60 +1,69 @@
 # Security Policies
 
 ## Summary
-Twingate Security Policies control access at both the network login level and individual Resource level. Policies are configured in the Admin Console under the **Policies** tab, with a separate Admin Console Security Policy under **Settings**.
+Twingate uses layered policies to control network access, configured under the Admin Console **Policies** tab. Three policy types work together: Resource Policies (per-resource requirements), Sign In Policy (baseline login requirements), and Device Profiles (device trust definitions).
 
 ## Key Information
-- **Three policy types**: Minimum Authentication Requirements, Resource Policies, Application Control Policies
-- One **Default Policy** always exists and applies to all new Resources automatically
-- Resource Policies can be **overridden per Group** on the Resource page
-- Group-level overrides persist even if the parent Resource Policy changes (must be manually reset)
-- Location Requirements (country-based) are **Enterprise tier only**
 
-## Policy Types
+- **Three policy types**: Resource Policies, Sign In Policy, Device Profiles
+- **Evaluation order**: Device Profiles → Sign In Policy → Resource Policy
+- Device posture checked at sign-in and ~every 5 minutes thereafter
+- Admin Console session is fixed at 1 hour (static, non-configurable)
+- Resource Policy re-auth success resets the Sign In Policy session timer (rolling window)
+- IdP session expiry is captured at sign-in and compared on each policy check
 
-| Type | Applied When | Configured Under |
-|------|-------------|-----------------|
-| Minimum Authentication Requirements | User logs into network | Policies tab |
-| Resource Policies | Resource is accessed | Policies tab |
-| Application Control Policies | Resource accessed via browser | Policies tab |
-| Admin Console Security Policy | Admin signs into Admin Console | Settings tab |
+## Resource Policies
 
-## Policy Rules Available
-- **Location Requirements** – allowlist/blocklist countries (Enterprise only)
-- **Authentication Requirements** – MFA requirement, re-authentication frequency
-- **Device Security** – all devices, Trusted Devices, or custom profile
+- Applied per-Resource; controls authentication frequency, MFA, device security, and geoblocking (Enterprise only)
+- Default Policy auto-assigned to new Resources
+- Group-level overrides apply the **more permissive** of the two policies
+- Group overrides persist even if Resource-level policy changes
+- **Best practice**: Set strictest policy at Resource level; use Group overrides to relax for specific teams
+- Authentication requirement can be disabled to create device-only policies (Sign In Policy session must still be valid)
 
-## Policy Application Logic
-1. User must satisfy **Minimum Authentication Requirements** first
-2. When accessing a Resource, user must also satisfy the **Resource Policy**
-3. Group-level policy overrides take precedence over the Resource's default policy
-4. Overrides are sticky — reset manually to re-inherit the Resource Policy
+## Sign In Policy
 
-## Additional Access Controls
-- **Ephemeral Access**: Set expiration date on Resource or per-Group access
-- **Usage-based Auto-lock**: Lock individual user access after inactivity period
-- Both configurable at Resource level or Group-override level
+- Baseline for all users before accessing any Resource
+- Three requirements: Device Security, Authentication Frequency, MFA
+- Authentication frequency uses a **rolling window** (resets on qualifying Resource Policy re-auth)
+- **Best practice**: Set lenient (e.g., 30-day frequency); enforce stricter controls via Resource Policies
 
-## Configuration Steps
-1. Navigate to **Admin Console → Policies tab**
-2. Click **Create Policy** under Resource Policies
-3. Add rules: Location, Authentication, Device Security
-4. Assign policy to a Resource by editing the Resource
-5. Override per Group via the Resource page; reset override to re-inherit
+## Device Profiles
+
+### Trusted Profiles
+- One profile per platform; requires a verification method
+- **Supported integrations**: Manual, CrowdStrike, Intune, Jamf, Kandji, SentinelOne, 1Password
+- Can include additional device posture checks
+- Referenced in both Sign In Policy and Resource Policies
+
+### Approved Operating Systems
+- Enable/disable per platform; blocking a platform prevents sign-in entirely
+- Per-platform posture checks: disk encryption, screen lock, firewall, minimum OS version
+
+## Configuration Values
+
+| Setting | Notes |
+|---|---|
+| Admin Console session | 1 hour (fixed) |
+| Device posture check interval | ~5 minutes |
+| Sign In Policy frequency | Configurable (recommended: 30 days) |
+| Resource Policy auth frequency | Configurable per policy |
+| Geoblocking | Enterprise plan only |
 
 ## Gotchas
-- Minimum Authentication Requirements apply to **all users/resources** — overly strict settings here create friction for every login
-- Admin Console Security Policy is **separate** from Minimum Authentication Requirements (admins don't go through network login)
-- Group policy overrides **do not auto-update** when the Resource Policy changes
-- Device must also meet minimum OS requirements or a Trusted Profile (separate from policy rules)
 
-## Recommendations
-- Keep **Minimum Authentication Requirements** loose to reduce friction
-- Apply strict controls at the **Resource Policy level**, especially for sensitive resources
+- Group-level policy overrides apply the **more permissive** policy — set the strictest policy at Resource level
+- Group overrides are **not** automatically reset when the Resource-level policy changes
+- IdP session expiry (not Twingate session) governs re-auth redirects; short IdP sessions cause frequent re-auth prompts
+- Disabling authentication on a Resource Policy only skips Resource-level re-auth; Sign In Policy session must still be valid
+- Admin Console session is separate from user sessions and cannot be extended
 
 ## Related Docs
-- [Device Security Guide](#)
-- [Browser Security / Application Control Policies](#)
-- [Admin Console Security](#)
-- [Ephemeral Access to Resources](#)
-- [Usage-based Auto-lock](#)
+
+- Resource Policies
+- Device-only Resource Policies
+- How Sessions Work
+- Approved Operating Systems
+- Device Profiles & Device Posture Checks
+- Admin Console Security
+- Policy Overrides

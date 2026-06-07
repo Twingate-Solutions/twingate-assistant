@@ -1,51 +1,52 @@
-# Deployment Semi-Automation
-
-## Page Title
-Deployment Automation (Semi-automated Connector Deployment)
+# Deployment Automation (Semi-Automation)
 
 ## Summary
-Twingate Connectors run as `linux/amd64` Docker containers and support multiple deployment automation approaches: Terraform provider, Admin API, or semi-automated using manually retrieved tokens. Connector tokens are unique per Connector and cannot be reused across multiple Connectors.
+Twingate Connectors run as `linux/amd64` Docker containers and support multiple deployment automation levels: full automation via Terraform, programmatic control via Admin API, or semi-automated deployment using manually generated tokens from the Admin Console. Each Connector has unique, non-reusable tokens.
 
 ## Key Information
-- **Full automation**: Use [Terraform provider](https://www.twingate.com/docs/terraform) or Admin API
-- **Semi-automation**: Retrieve tokens manually from Admin Console, then script the deployment
 - Connector image: `docker.io/twingate/connector:latest` (public Docker Hub)
-- Each Connector requires its own unique token pair — tokens cannot be shared
+- Three automation tiers: Terraform provider, Admin API, manual token + scripted deployment
+- Tokens are Connector-specific and **cannot be reused** across multiple Connectors
+- New Connectors must be provisioned via Admin Console or API (no workaround for semi-automation)
 
 ## Prerequisites
-- Access to Twingate Admin Console or Admin API
-- Docker-compatible environment (`linux/amd64`)
-- Connector provisioned in Admin Console (generates unique tokens)
+- Twingate account with admin access
+- Docker-compatible environment (linux/amd64)
+- For semi-automation: manually retrieve tokens per Connector from Admin Console → "Manual" deployment option
 
 ## Configuration Values
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `TWINGATE_NETWORK` | Env var (required) | Account subdomain (e.g., `acme` for `acme.twingate.com`) |
-| `TWINGATE_ACCESS_TOKEN` | Env var (required, secret) | Connector-specific auth token |
-| `TWINGATE_REFRESH_TOKEN` | Env var (required, secret) | Connector-specific refresh token |
-| `DNS_SERVER` | Env var (optional) | Private DNS server for resolving Resources |
-| `--restart=unless-stopped` | Docker flag (required) | Ensures auto-restart; use equivalent in other container runtimes |
-| `--name` | Docker flag (optional) | Container name; recommend matching Admin Console auto-generated name |
+### Fixed Parameters
+| Parameter | Value/Description |
+|-----------|-------------------|
+| `TWINGATE_NETWORK` | Account subdomain (e.g., `acme` for `acme.twingate.com`) |
+| Docker `--restart` | `unless-stopped` (or equivalent in other runtimes) |
+| Image registry | `docker.io` |
+| Image name | `twingate/connector` |
+| Image tag | `latest` |
 
-**Image reference:** `docker.io/twingate/connector:latest`
+### Connector-Specific Parameters
+| Parameter | Description |
+|-----------|-------------|
+| `TWINGATE_ACCESS_TOKEN` | Auth token unique to this Connector — **treat as secret, never commit to source control** |
+| `TWINGATE_REFRESH_TOKEN` | Auth refresh token unique to this Connector — **treat as secret** |
+| `--name` (Docker) | Container name; recommended to match auto-generated name in Admin Console |
+| `DNS_SERVER` | *(Optional)* DNS server for resolving Resources; must be reachable from Connector host if private |
 
-## Step-by-Step (Semi-automated)
-
-1. Provision each Connector in Admin Console using the "Manual" deployment option
-2. Retrieve the generated `TWINGATE_ACCESS_TOKEN` and `TWINGATE_REFRESH_TOKEN` for that Connector
-3. Store tokens as secrets (never commit to source control)
-4. Deploy container with required env vars and `--restart=unless-stopped`
-5. Repeat steps 1–4 for each additional Connector (tokens cannot be reused)
+## Step-by-Step (Semi-Automated)
+1. Log into Admin Console → create a new Connector using "Manual" deployment option
+2. Capture generated `TWINGATE_ACCESS_TOKEN` and `TWINGATE_REFRESH_TOKEN`
+3. Store tokens as secrets (e.g., in Vault, AWS Secrets Manager, CI/CD secrets)
+4. Deploy container using the per-Connector environment variables
+5. Repeat steps 1–4 for each additional Connector
 
 ## Gotchas
-- **Tokens are Connector-specific** — one set of tokens per Connector, no reuse
-- New Connectors must always be provisioned via Admin Console or API before deployment
-- `TWINGATE_ACCESS_TOKEN` and `TWINGATE_REFRESH_TOKEN` must be treated as secrets
-- If using a private `DNS_SERVER`, it must be network-accessible from the Connector host
-- Always use `--restart=unless-stopped` (or equivalent) to prevent downtime on container restarts
+- Tokens are **single-use per Connector** — cannot template one token set for multiple deployments
+- Semi-automation still requires manual provisioning step per Connector (Admin Console or API)
+- `DNS_SERVER` private DNS must be network-accessible from the Connector host
+- Never store `TWINGATE_ACCESS_TOKEN` or `TWINGATE_REFRESH_TOKEN` in source control
 
 ## Related Docs
-- [Terraform Provider](https://www.twingate.com/docs/terraform)
-- [Admin API](https://www.twingate.com/docs/api)
-- [Helm Charts example](https://github.com/Twingate/helm-charts)
+- [Terraform Provider](https://www.twingate.com/docs/terraform) — full infrastructure-as-code automation
+- [Admin API](https://www.twingate.com/docs/api) — programmatic Connector and token provisioning
+- [Helm Charts Example](https://github.com/Twingate/helm-charts) — reference implementation for Kubernetes

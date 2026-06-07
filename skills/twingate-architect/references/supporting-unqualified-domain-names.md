@@ -1,23 +1,23 @@
 # Supporting Unqualified Domain Names
 
 ## Summary
-Twingate supports access to resources via unqualified domain names (e.g., `http://employeeportal`) with additional configuration. Requires defining the unqualified name as a separate Resource and configuring search domains on the Connector host.
+Twingate supports accessing private resources via unqualified domain names (e.g., `http://employeeportal`) instead of FQDNs. This requires adding the unqualified name as a separate Resource in the Admin Console and configuring search domains on the Connector host.
 
 ## Key Information
-- Unqualified domains must be added as **separate Resources** alongside the FQDN—not as replacements
-- The Connector uses the host machine's search domain settings
+- Unqualified domain Resources must be added **in addition to** the FQDN Resource, not as a replacement
+- The Connector resolves unqualified names using the host machine's configured search domains
 - Twingate virtual IPs resolve in the `100.64.0.0–100.127.255.255` range
 
 ## Prerequisites
-- Existing FQDN Resource already defined in Admin Console
-- Access to Connector host to configure DNS search domains
+- Existing FQDN Resource already defined in Twingate Admin Console
+- Access to Connector host machine to configure DNS search domains
 
 ## Step-by-Step
 
 ### 1. Define Resources in Admin Console
-- Add unqualified name (e.g., `employeeportal`) as a **new, separate Resource**
+- Create a Resource for the unqualified name (e.g., `employeeportal`)
 - Keep the existing FQDN Resource (e.g., `employeeportal.yourcompany.com`)
-- Both must exist to prevent connection errors
+- Both must exist simultaneously
 
 ### 2. Set Search Domain on Connector Host
 
@@ -25,8 +25,6 @@ Twingate supports access to resources via unqualified domain names (e.g., `http:
 ```
 --dns-search yoursearchdomain.com
 ```
-
-**AWS ECS:** Set via Network Settings → Advanced Container Configuration.
 
 **Ubuntu:**
 ```bash
@@ -42,24 +40,28 @@ sudo nmcli con mod "CONNECTION NAME" ipv4.dns-search "yourcompany.com"
 sudo systemctl restart NetworkManager
 ```
 
+**AWS ECS:** Configure under Network Settings → Advanced Container Configuration
+
 ## Configuration Values
 | Platform | Config Location | Parameter |
 |----------|----------------|-----------|
 | Docker | Run command flag | `--dns-search <domain>` |
 | Ubuntu | `/etc/systemd/resolved.conf` | `DOMAINS=<domain>` |
 | CentOS/Fedora | nmcli | `ipv4.dns-search "<domain>"` |
+| AWS ECS | Container Network Settings | DNS Search Domains field |
 
 ## Gotchas
-- **Connector restart not required** for search domain changes (on VM-based deployments)
-- **Both Resource entries required**: omitting the unqualified name means the Client cannot intercept that traffic (split-tunnel limitation)
-- **Browser behavior**: Browsers may interpret unqualified names as search queries. Force URL interpretation by typing `http://employeeportal` explicitly; browser history will cache it afterward
-- Verify the Connector can resolve the unqualified name (`nslookup employeeportal`) before troubleshooting the Client
+- **Must define both** unqualified and FQDN as separate Resources — omitting the unqualified Resource means the Client won't intercept that traffic (split-tunnel limitation)
+- **Browsers may treat unqualified names as search terms** — prefix with `http://` (e.g., `http://employeeportal`) to force URL interpretation; browser history will remember it afterward
+- Connector restart is **not required** after search domain changes on the host
+- Unqualified DNS must resolve on the **Connector machine first** (`nslookup employeeportal`) before Twingate can route it
 
-## Troubleshooting Checklist
-1. SSH into Connector VM → `nslookup employeeportal` must resolve
-2. On Client device → same lookup should return IP in `100.64.x.x–100.127.x.x` range
-3. In browser → prefix with `http://` to force domain interpretation
+## Troubleshooting
+1. Run `nslookup employeeportal` on the Connector VM — must resolve
+2. Run same lookup on Client device — should return IP in `100.64.0.0–100.127.255.255`
+3. Test browser access with explicit `http://` prefix
 
 ## Related Docs
 - Twingate Resources configuration
-- Connector deployment guides (Docker, ECS, Ubuntu, CentOS)
+- Split tunneling behavior
+- Connector deployment guides

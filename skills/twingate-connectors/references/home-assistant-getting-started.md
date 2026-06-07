@@ -1,51 +1,46 @@
-# Getting Started with Home Assistant and Twingate
+# Home Assistant + Twingate Getting Started
 
 ## Summary
-Installs the Twingate Connector as a Home Assistant app to enable secure remote access to smart home devices. The connector runs as a Docker container managed by Home Assistant OS and links to a Twingate Remote Network via token-based authentication.
+Installs a Twingate Connector as a Home Assistant OS app to enable secure remote access to smart home devices. The app runs a Docker container that connects to a Twingate Remote Network using token-based authentication.
 
 ## Key Information
-- Only works on **Home Assistant OS** — containers are not supported
-- Connector runs as a background Docker container
-- Repository source available on Twingate Community GitHub page
+- Deploys Twingate Connector via Home Assistant App Store (third-party repository)
+- Connector runs as a background Docker container within Home Assistant OS
 - Each Connector requires its own unique Access/Refresh token pair
+- Source repository available on Twingate Community GitHub
 
 ## Prerequisites
-- Home Assistant OS (running instance)
+- Home Assistant **OS** (not containers — containers do not support apps)
 - Twingate account with Admin Console access
 - Existing Remote Network configured in Twingate Admin Console
 
 ## Step-by-Step
 
-1. **Add Repository**: Open Home Assistant App Store → repository manager → add Twingate repository URL → close manager
-2. **Check for Updates**: Click ellipses (top right) → "Check for updates" → refresh page if needed
-3. **Install App**: App Store → search "Twingate" → select entry under "Twingate Connector app repository" → Install
-4. **Generate Tokens**: Admin Console → Remote Networks → select network → add/select Connector → choose Manual → Step 2 → Generate Tokens → copy Access Token and Refresh Token
-5. **Configure App**: Configuration tab → enter Network domain, Access Token, Refresh Token
-6. **Start App**: Info tab → click Start → verify no errors in Logs tab
-7. **Verify**: Admin Console → Remote Networks → select Connector → confirm Controller and Relay statuses show **connected**
+1. **Add repository**: Open repository manager in Home Assistant, add Twingate repository URL
+2. **Check for updates**: Use ellipses menu → "Check for updates" in App Store; refresh page if needed
+3. **Install app**: Search "Twingate" in App Store → install from "Twingate Connector app repository" section
+4. **Generate tokens**: Admin Console → Remote Networks → select network → add/select Connector → Manual → "Generate Tokens"
+5. **Configure app**: Enter Network domain, Access Token, Refresh Token in Configuration tab
+6. **Start app**: Click Start on Info tab; verify no errors in Logs tab
+7. **Verify**: Admin Console → Remote Networks → Connector → confirm Controller and Relay show **connected**
 
 ## Configuration Values
 
-| Field | Format | Example |
-|-------|--------|---------|
-| Network | Twingate domain | `network.twingate.com` |
-| Access Token | Generated in Admin Console | (unique per connector) |
-| Refresh Token | Generated in Admin Console | (unique per connector) |
+| Field | Value |
+|-------|-------|
+| Network | `<network-name>.twingate.com` |
+| Access Token | Generated from Admin Console |
+| Refresh Token | Generated from Admin Console |
 
 ## Gotchas
+- **Home Assistant OS only** — container installations are not supported
 - **Do not reuse token sets** — each Connector must have its own unique Access/Refresh token pair
-- After adding the repository, a manual "Check for updates" is required; page refresh may also be needed before the app appears
-- App Store search may not surface the app immediately — look for the "Twingate Connector app repository" section at the bottom
-
-## Troubleshooting
-- Token errors: verify tokens are copied correctly with no extra whitespace
-- Connectivity issues: confirm Home Assistant web UI is accessible locally and app is running
-- Check Logs tab in the Twingate app for error details
-- Refer to Twingate troubleshooting docs for persistent issues
+- After adding the repository, manually trigger "Check for updates" before the app appears in search results
+- Page refresh may be required after adding the repository
 
 ## Related Docs
-- Twingate Troubleshooting Docs
-- Setting Up Resources (configuring private apps/services)
+- [Troubleshooting docs](https://www.twingate.com/docs/troubleshooting)
+- [Setting Up Resources](https://www.twingate.com/docs/resources)
 - Proxmox Helper Script Guide
 - Unraid Helper Script Guide
-- Apps GitHub page (issue reporting)
+- [Apps GitHub page](https://github.com/Twingate) (issue reporting)

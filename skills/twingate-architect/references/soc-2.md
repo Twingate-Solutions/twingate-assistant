@@ -4,31 +4,31 @@
 SOC 2 Report
 
 ## Summary
-Twingate maintains a SOC 2 Type 2 report, audited by an independent third party per AICPA frameworks. The report covers security controls tested over a period of time (not a single point-in-time). Existing customers can request access; prospects can contact the customer team.
+Twingate holds a SOC 2 Type 2 certification, an AICPA-framework audit conducted by an independent third-party auditor covering security controls tested over a period of time. Existing customers can request the full report via Twingate's trust portal.
 
 ## Key Information
-- **SOC 2 Type 2**: Controls tested over a time period, not a snapshot
-- **Scope**: Security controls and Trust Services Criteria
+- **SOC 2 Type 2**: Controls tested over a period of time (not a single point-in-time snapshot)
 - **Auditor**: Independent third party
-- **Access portal**: [trust.twingate.com](https://trust.twingate.com)
-- **Access expiration**: 30 days after granted
-- **Access requests**: Reviewed and manually approved by Twingate team
+- **Framework**: AICPA Trust Services Criteria
+- **Report access**: Available to existing customers at [trust.twingate.com](https://trust.twingate.com)
+- **Access duration**: Expires after 30 days
+- **Access process**: Requests reviewed and manually approved by Twingate team
 
 ## Prerequisites
-- Existing customer status required to request via trust.twingate.com
-- Prospects/non-customers must contact the Twingate customer team directly
+- Must be an existing Twingate customer to request the report directly
+- Non-customers must contact the Twingate sales/customer team for information
 
-## How to Obtain the Report
+## Requesting the Report
 1. Navigate to [trust.twingate.com](https://trust.twingate.com)
 2. Submit an access request
-3. Twingate team reviews and approves the request
-4. Access the report within the 30-day access window
+3. Twingate team reviews and grants access
+4. Download report within 30-day access window
 
 ## Gotchas
-- Access expires after **30 days** — download or note findings before expiration
-- Manual review process means access is not instant
-- Non-customers cannot use the trust portal; must go through the sales/customer team
+- Access expires after **30 days** — download the report promptly after access is granted
+- Access is not automatic; requires manual review and approval
+- Non-customers cannot access the report directly through the portal
 
 ## Related Docs
-- Twingate security and compliance documentation
-- AICPA Trust Services Criteria (external reference)
+- Twingate customer team contact (for pre-sales SOC 2 inquiries)
+- [trust.twingate.com](https://trust.twingate.com) (existing customer report access)

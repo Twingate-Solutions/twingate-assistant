@@ -4,80 +4,66 @@
 Introduction to the Twingate Javascript CLI
 
 ## Summary
-Open-source CLI tool wrapping the Twingate GraphQL API, written in JavaScript. Provides commands for managing users, groups, resources, networks, connectors, devices, service accounts, and policies. Pre-built binaries available for Windows/Mac/Linux; extensible for Node/Deno developers.
+Open-source CLI tool built on Twingate GraphQL APIs, written in JavaScript with pre-built binaries for Windows/Mac/Linux. Supports full CRUD operations on users, groups, networks, connectors, resources, devices, policies, and service accounts. Node/Deno developers can extend it; Python users may prefer the Python CLI alternative.
 
 ## Key Information
-- GitHub releases page provides pre-built binaries (no Node.js required for binary usage)
-- Wraps Twingate GraphQL API; source available for customization
-- Credentials (account name + API key) prompted on first use; can be saved to config file
-- Supports export to: `xlsx`, `json`, `dot`, `png`, `svg`
-- Import only supports Excel (`.xlsx`) format
-- Community-supported via GitHub Issues, not Twingate product engineering
+- **Source**: Open-source, community-maintained (not Twingate product engineering)
+- **Support**: GitHub Issues only
+- **Auth**: Prompts for account name + API key on first run; optionally saves credentials to file
+- **References**: Accepts names OR IDs for most entity arguments (e.g., `groupNameOrId`)
 
 ## Prerequisites
+- Download binary from GitHub releases page
 - Twingate account name and API key
-- GraphViz installed on PATH (only for `png`/`svg` export formats)
-
-## CLI Flags (Global)
-| Flag | Description | Default |
-|------|-------------|---------|
-| `-a, --account-name` | Twingate account name | prompted |
-| `-l, --log-level` | `TRACE|DEBUG|INFO|WARN|ERROR|SEVERE|FATAL|QUIET|SILENT` | `INFO` |
-| `-h, --help` | Show help | — |
-| `-V, --version` | Show version | — |
+- GraphViz installed (only for `png`/`svg` export formats)
 
 ## Commands Reference
 
-### user
-- `list` — list all users (shows id, email, isAdmin, state, groups)
+| Command | Subcommands |
+|---|---|
+| `user` | `list` |
+| `group` | `list`, `create`, `remove`, `remove_bulk`, `add_user`, `remove_user`, `add_resource`, `remove_resource`, `set_policy`, `copy` |
+| `network` | `list`, `create` |
+| `connector` | `list`, `create` |
+| `resource` | `list`, `create`, `remove`, `remove_bulk`, `add_group` |
+| `device` | `list` |
+| `policy` | `list`, `add_group` |
+| `service` | `list`, `create`, `remove`, `add_resource`, `key_create` |
+| `export` | (flags only) |
+| `import` | (flags only) |
 
-### group
-- `list` | `create <name> [UserIds...]` | `remove <id>` | `remove_bulk [ids...]`
-- `add_user <groupNameOrId> [userIds...]` | `remove_user <groupNameOrId> [userIds...]`
-- `add_resource <groupNameOrId> [resourceNamesOrIds...]` | `remove_resource <groupNameOrId> [resourceNamesOrIds...]`
-- `set_policy <groupNameOrId> <securityPolicyNameOrId>`
-- `copy <source> <destination>` — copies all users from source to destination
+## Configuration Values
 
-### network
-- `list` | `create <name>`
+**Global flags:**
+- `-a, --account-name <string>` — Twingate account name
+- `-l, --log-level [level]` — `TRACE|DEBUG|INFO|WARN|ERROR|SEVERE|FATAL|QUIET|SILENT` (default: `INFO`)
 
-### connector
-- `list` | `create <remoteNetworkNameOrId> [name]` — returns `ACCESS_TOKEN` and `REFRESH_TOKEN`
+**Export flags:**
+- `-f, --format` — `xlsx|json|dot|png|svg` (default: `xlsx`)
+- `-o, --output-file` — output filename
+- `-n` networks, `-r` resources, `-g` groups, `-u` users, `-d` devices
 
-### resource
-- `list` | `create <remoteNetworkNameOrId> <name> <address> [groupNamesOrIds...]`
-- `remove <id>` | `remove_bulk [ids...]`
-- `add_group <resourceNameOrId> [groupNamesOrIds...]`
+**Import flags:**
+- `-f, --file <string>` — path to Excel file **(required)**
+- `-n/-r/-g/-d` — entity type filters
+- `-s, --sync` — sync by natural identifier
+- `-y, --assume-yes` — skip prompts
 
-### device
-- `list` — read-only
-
-### policy
-- `list` | `add_group <securityPolicyNameOrId> [groupNamesOrIds...]`
-
-### service
-- `list` | `create <name> [resourceNamesOrIds...]` | `remove <id>`
-- `add_resource <serviceAccountId> [resourceNamesOrIds...]`
-- `key_create <serviceAccountId> <keyName> <expirationTimeInDays>` — returns full key JSON with private key
-
-### export
-| Flag | Description |
-|------|-------------|
-| `-f` | Format: `xlsx`(default), `json`, `dot`, `png`, `svg` |
-| `-o` | Output filename |
-| `-n/-r/-g/-u/-d` | Include: networks/resources/groups/users/devices |
-
-### import
-| Flag | Description |
-|------|-------------|
-| `-f` | Path to Excel file (required) |
-| `-n/-r/-g/-d` | Include: networks/resources/groups/devices |
-| `-s` | Sync entities with same natural identifier |
-| `-y` | Assume yes to all prompts |
+## Step-by-Step: Create Connector with Tokens
+```bash
+./tg connector create "myRemoteNetwork" "myNewConnector"
+# Returns ACCESS_TOKEN and REFRESH_TOKEN for connector auth
+```
 
 ## Gotchas
-- `group add_user` / `resource create` require **user/group IDs**, not names/emails
-- `service remove` fails if service account has active keys
-- `policy add_group` **replaces** any existing policy assigned to those groups
-- `png`/`svg` export requires GraphViz on system PATH
-- Import only supports `.xlsx` format (not JSON
+- **User operations require ID, not email** — use `user list` to get IDs first
+- **Service account removal** — fails if account has active keys (must revoke keys first)
+- **`policy add_group`** — replaces existing security policy on the group (destructive)
+- **`group copy`** — copies users only, not resources
+- **Resource/group/network must pre-exist** before referencing in create commands
+- **png/svg export** requires GraphViz on system PATH
+
+## Related Docs
+- Twingate Python CLI
+- Twingate GraphQL API
+- GitHub Issues (support channel)

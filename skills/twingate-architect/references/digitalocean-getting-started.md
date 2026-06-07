@@ -1,51 +1,49 @@
 # Getting Started with DigitalOcean and Twingate
 
 ## Summary
-Deploys a Twingate Connector on a DigitalOcean Droplet using `doctl` CLI and `cloud-init`. The Connector enables secure remote access to private DigitalOcean resources. Setup takes approximately 4 steps: generate tokens, deploy via `doctl`, and verify connectivity.
+Deploys a Twingate Connector on a DigitalOcean Droplet using `doctl` CLI and `cloud-init`. The Connector enables secure remote access to private DigitalOcean resources. Setup is completed via a pre-generated installation command from the Twingate Admin Console.
 
 ## Key Information
-- Connector is deployed as a DigitalOcean Droplet via `cloud-init` script
-- Twingate Admin Console generates a pre-built `doctl` command with embedded tokens
-- Each Connector **must** have its own unique Access/Refresh token pair — never reuse tokens
-- Verify success by checking both DigitalOcean Droplet status and Twingate Controller/Relay status
+- Connector is deployed as a DigitalOcean Droplet via `doctl` with `cloud-init` configuration
+- Twingate Admin Console generates a complete `doctl` command (including tokens) that you paste directly into terminal
+- Each Connector requires its own unique Access/Refresh token pair — never reuse tokens
+- Verify success in both DigitalOcean Control Panel (Droplet running) and Twingate Admin Console (Controller + Relay show "connected")
 
 ## Prerequisites
 - DigitalOcean account with API access
 - `doctl` CLI installed and authenticated with DigitalOcean credentials
 - Twingate account with Admin Console access
-- Existing Remote Network in Twingate to attach the Connector to
+- Existing Remote Network configured in Twingate
 
 ## Step-by-Step
 
-1. Log in to Twingate Admin Console → **Remote Networks**
-2. Select target Remote Network → Add or select an undeployed Connector
-3. Click **See More** → select **DigitalOcean** option
+1. In Twingate Admin Console → **Remote Networks** → select target network
+2. Add or select an undeployed Connector → **See More**
+3. Select **DigitalOcean** option
 4. Scroll to **Step 2** → click **Generate Tokens** (authenticate when prompted)
 5. Scroll to **Step 4** → copy the generated installation command
-6. Paste command into terminal — `doctl` creates the Droplet with `cloud-init` config
-7. Verify Droplet is running in DigitalOcean Control Panel → Droplets
-8. Verify in Admin Console that Connector shows `Controller` and `Relay` status as **connected**
+6. Paste command into terminal — `doctl` creates Droplet with Connector pre-configured via `cloud-init`
+7. Verify Droplet is running in DigitalOcean Control Panel → **Droplets**
+8. Verify in Admin Console: Connector shows Controller and Relay status as **connected**
 
 ## Configuration Values
-- Tokens are embedded in the generated `doctl` command (Access Token + Refresh Token)
-- No manual env vars to set — all config injected via `cloud-init`
+- Tokens are embedded in the generated `doctl` command — no manual env var setup required
+- Token types: Access Token + Refresh Token (per-Connector, unique)
 
 ## Gotchas
-- **Copy/paste errors**: Terminal whitespace interpretation may corrupt the command — paste into a separate script file if needed
-- **Token reuse**: Each Connector deployment requires freshly generated tokens; reusing tokens will cause failures
-- **doctl not authenticated**: Must run `doctl auth init` before executing the deployment command
+- **Token reuse**: Never share token sets between Connectors
+- **Copy/paste whitespace**: Terminal may misinterpret whitespace; paste into a script file if needed
+- **doctl not authenticated**: Must run `doctl auth init` before using the install command
+- Token errors will prevent Connector from connecting — double-check tokens if status doesn't show "connected"
 
 ## Troubleshooting Commands
 ```bash
-# Check droplet created successfully
+# Check Droplet was created
 doctl compute droplet list
-
-# Verify connector service (on the Droplet)
-# Check Twingate Admin Console for Controller/Relay connected status
 ```
 
 ## Related Docs
 - [Twingate Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)
-- [Connector Management](https://www.twingate.com/docs/connectors)
-- [Setting Up Resources](https://www.twingate.com/docs/resources)
-- [doctl Installation (DigitalOcean)](https://docs.digitalocean.com/reference/doctl/how-to/install/)
+- [DigitalOcean doctl installation](https://docs.digitalocean.com/reference/doctl/how-to/install/)
+- Connector Management (Twingate docs)
+- Setting Up Resources (Twingate docs)

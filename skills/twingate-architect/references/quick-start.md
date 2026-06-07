@@ -1,17 +1,17 @@
 # Twingate Quick Start
 
 ## Page Title
-Quick Start – Configure Twingate Network for Private Resource Access
+Quick Start Guide
 
 ## Summary
-Sets up a functional Twingate network by defining a Remote Network, deploying a Connector, creating a Resource, and installing the Client. Covers the minimal configuration path from account creation to accessing a protected Resource.
+Step-by-step guide to configure a Twingate network by setting up a Remote Network, deploying a Connector, defining Resources, and installing the Client. Covers the minimum configuration needed for users to access protected private resources.
 
 ## Key Information
-- Four-step process: Remote Network → Resource → Connector → Client
-- Resources must be assigned to at least one Group or they are inaccessible to all users
+- Four core components: Remote Networks, Connectors, Resources, and Groups
+- Resources must be assigned to at least one Group to be accessible
 - Connector must be deployed on a host with network access to the target Resources
-- Client is installed from `get.twingate.com`
-- Peer-to-peer connections recommended to improve performance and comply with Fair Use Policy
+- Client app available at `get.twingate.com`
+- Peer-to-peer connections recommended to stay within Fair Use Policy bandwidth limits
 
 ## Prerequisites
 - Active Twingate account (free tier available)
@@ -20,40 +20,36 @@ Sets up a functional Twingate network by defining a Remote Network, deploying a 
 ## Step-by-Step
 
 ### 1. Define a Remote Network
-1. Navigate to **Network** in the nav bar
-2. Click **Add** next to Remote Networks
-3. Select location (e.g., AWS)
-4. Enter a name (e.g., "AWS Production VPC") → click **Add Remote Network**
+- Navigate to **Network** → click **Add** next to Remote Networks
+- Select location (e.g., AWS, GCP)
+- Name the network (e.g., "AWS Production VPC") → click **Add Remote Network**
 
 ### 2. Define a Resource
-1. Click **Network** → **Add Resource**
-2. Enter Resource address details → click **Add Resource**
-3. Assign to a Group (minimum: "Everyone") → click **Add 1 Group**
+- Navigate to **Network** → click **Add Resource**
+- Enter resource address/details → click **Add Resource**
+- Assign to a Group (minimum: "Everyone") → click **Add 1 Group**
 
 ### 3. Deploy a Connector
-1. Open the Remote Network → click **Deploy Connector**
-2. Select deployment method (Docker, Linux service, etc.)
-3. Run deployment on the remote host
-4. Confirm status sidebar shows successful connection to Controller and Relay
+- Within the Remote Network, click **Deploy Connector**
+- Select deployment method for your environment
+- Run deployment on remote host; monitor **Connection Status** sidebar
+- Connector is ready when connected to both Twingate Controller and Relay
 
 ### 4. Install the Client
-1. Visit `get.twingate.com`
-2. Install and authenticate
-3. Access configured Resources directly from the device
+- Visit `get.twingate.com` and install on end-user device
+- Authenticate and connect to access configured Resources
 
 ## Configuration Values
-- No explicit env vars documented on this page
-- Connector deployment options: Docker container or native Linux service (environment-specific tokens shown during UI flow)
+- No specific env vars listed in this page; deployment-specific values shown during Connector setup in the Admin Console
 
 ## Gotchas
-- **Resource must be added to a Group** — omitting this step makes the Resource unreachable
-- Connector host must have direct network access to target Resources (not just internet access)
-- Remote Networks may already exist post-signup; check before creating a duplicate
-- Peer-to-peer connections not enabled by default — requires additional configuration to avoid Fair Use Policy violations
+- **Resource not accessible?** Must explicitly add Resource to a Group — skipping this step means no users can reach it
+- Connector host must have direct network access to the Resources it serves
+- Peer-to-peer connections should be configured to avoid Fair Use Policy violations on bandwidth
 
 ## Related Docs
-- [Resource Definition](#) – allowed address formats for Resources
-- [Deploying Connectors](#) – all connector deployment environments
+- [Resource Definition](#) — full details on allowed address formats
+- [Deploying Connectors](#) — all deployment environment options
 - [Support Peer-to-Peer Connections](#)
-- [Services (CI/CD)](#) – automated/non-human access
 - [Security Policies](#)
+- [Services (CI/CD use cases)](#)

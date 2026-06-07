@@ -4,17 +4,21 @@
 Twingate Gateway - Wiki Home
 
 ## Summary
-The Twingate Gateway is an open-source Layer 7 reverse proxy deployed within your environment that extends Zero Trust controls with identity propagation and auditing. It integrates with existing Twingate deployments to provide identity-aware access to Kubernetes clusters, SSH servers, and (upcoming) web apps and databases. All audit data stays within your infrastructure—nothing is sent to Twingate.
+The Twingate Gateway is an open-source Layer 7 reverse proxy deployed within your environment that enables identity propagation and auditing for Zero Trust access. It extends existing Twingate deployments to support Kubernetes, SSH, and (upcoming) web/database protocols. All audit data remains within your infrastructure—nothing is sent to Twingate.
 
 ## Key Information
 - **Type**: Open-source Layer 7 reverse proxy (self-hosted)
-- **Purpose**: Identity propagation + session recording/auditing for downstream services
+- **Purpose**: Identity propagation + session recording + privileged access auditing
 - **Currently supported protocols**: Kubernetes, SSH
-- **Upcoming protocols**: Web App, Database (PostgreSQL, MySQL)
-- **External communication**: Only fetches Twingate's public key for identity verification
-- **Audit logs**: Written to `stdout`; route to any SIEM or storage solution
+- **Coming soon**: Web App, Database (PostgreSQL, MySQL)
+- **Isolation**: Gateway has no external communication except fetching Twingate's public key for identity verification
+- **Logs**: Exported to `stdout`; stream to any SIEM or storage solution
 - **Session recordings**: Captured in Asciicast v2 format; replay at `https://www.twingate.com/sessionplayer`
-- **Data residency**: Logs and recordings never leave your infrastructure
+
+## Prerequisites
+- Existing Twingate deployment
+- Kubernetes or SSH target infrastructure
+- Access to deploy workloads within your environment
 
 ## Supported Protocol Features
 
@@ -22,29 +26,26 @@ The Twingate Gateway is an open-source Layer 7 reverse proxy deployed within you
 |----------|---------------------|-----------------|-------------------|
 | Kubernetes | ✅ | ✅ | ✅ (`kubectl`) |
 | SSH | ✅ | N/A | ✅ (shell, exec, SFTP, port forwarding) |
+| Web App | 🔜 | — | — |
+| Database | 🔜 | — | — |
 
-## Prerequisites
-- Existing Twingate deployment
-- Kubernetes or SSH target infrastructure accessible via Twingate private network
-
-## Key Capabilities
-- **No double authentication**: Identity passed through to upstream services
-- **No plaintext credentials** stored on end-user machines
-- **Unified policy engine**: Single control plane for network + application access
-- **Forensic compliance**: Session recording with replay support
-
-## Configuration Values
-- Logs exported to: `stdout`
-- Session recording format: Asciicast v2
-- Session replay URL: `https://www.twingate.com/sessionplayer`
+## Architecture Notes
+- Gateway stays entirely within private network; infrastructure never exposed to public internet
+- Access policies use identity, device posture, and contextual signals
+- Eliminates double authentication and plaintext credentials on end-user machines
 
 ## Gotchas
-- Gateway is **completely isolated**—only external call is fetching Twingate's public key
-- You are responsible for log aggregation/storage pipeline from `stdout`
+- Session recordings and audit logs **never leave your environment**—you must configure your own log export pipeline
 - Web App and Database support are not yet available
+- Must have existing Twingate deployment before implementing the Gateway
 
 ## Related Docs
 - [How It Works](https://github.com/Twingate/kubernetes-access-gateway/wiki/How-It-Works)
-- Kubernetes: Overview, Quick Start Guide, Installation, Troubleshooting, Known Issues
-- SSH: Overview, Quick Start Guide, Installation, Operations, Monitoring, Session Recordings
-- [Twingate Identity Firewall](https://www.twingate.com) (product context)
+- [Kubernetes Overview](https://github.com/Twingate/kubernetes-access-gateway/wiki/Kubernetes-Overview)
+- [Kubernetes Quick Start Guide](https://github.com/Twingate/kubernetes-access-gateway/wiki/Kubernetes-Quick-Start-Guide)
+- [Kubernetes Installation](https://github.com/Twingate/kubernetes-access-gateway/wiki/Kubernetes-Installation)
+- [SSH Overview](https://github.com/Twingate/kubernetes-access-gateway/wiki/SSH-Overview)
+- [SSH Quick Start Guide](https://github.com/Twingate/kubernetes-access-gateway/wiki/SSH-Quick-Start-Guide)
+- [SSH Installation](https://github.com/Twingate/kubernetes-access-gateway/wiki/SSH-Installation)
+- [Session Recordings](https://github.com/Twingate/kubernetes-access-gateway/wiki/Session-Recordings)
+- Asciicast web player: `https://www.twingate.com/sessionplayer`

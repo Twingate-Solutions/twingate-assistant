@@ -1,21 +1,21 @@
 # Cancel Your Subscription
 
 ## Summary
-Instructions for canceling automatic renewal of a Twingate subscription via the Admin Console. Cancellation stops auto-renewal; access continues until the end of the current billing term.
+Instructions for canceling automatic renewal of a Twingate subscription. Cancellation stops auto-renewal; access continues until the current subscription term ends. Downgrade is accomplished by switching to the Starter plan.
 
 ## Key Information
-- Cancellation = disabling **automatic renewal**, not immediate termination
-- Service remains active through the end of the current subscription term
-- Downgrade path is to the **Twingate Starter** (free) plan
+- Canceling does **not** immediately terminate access — service continues through end of current billing period
+- "Cancellation" is implemented as a downgrade to the **Twingate Starter** plan
+- Only applies to automatically renewing subscriptions
 
 ## Prerequisites
-- Active automatically renewing Twingate subscription
-- Admin Console access with billing permissions
+- Admin Console access
+- Active paid subscription with auto-renewal enabled
 
 ## Step-by-Step
 
-1. Sign into the **Admin Console**
-2. Click **Settings**
+1. Sign into the Admin Console
+2. Navigate to **Settings**
 3. Click **Billing**
 4. Click **Manage Plan**
 5. Click on your current subscription
@@ -24,9 +24,9 @@ Instructions for canceling automatic renewal of a Twingate subscription via the 
 8. Click **Update Subscription**
 
 ## Gotchas
-- Cancellation is performed by downgrading to Starter, not through a dedicated "cancel" button
-- Access is **not** immediately revoked — service continues until term expiration
-- No mention of refund eligibility for unused subscription time
+- There is no direct "cancel" button — cancellation requires selecting the Starter plan as a downgrade path
+- Subscription ends at conclusion of **current term**, not immediately upon cancellation
+- Manual/non-renewing subscriptions are not covered by this process
 
 ## Related Docs
 - Billing settings

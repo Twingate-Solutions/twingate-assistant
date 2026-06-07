@@ -1,41 +1,33 @@
-# Troubleshooting
-
-## Page Title
-Troubleshooting Overview
+# Twingate Troubleshooting
 
 ## Summary
-Entry point for Twingate troubleshooting resources. Directs users to the Help Center knowledge base, self-service guide, log collection articles, and community support. No direct troubleshooting steps are contained on this page.
+Central troubleshooting hub pointing to Twingate's knowledge base, log collection guides, and community resources. Directs users to the Help Center for detailed issue resolution and the Subreddit for community support.
 
 ## Key Information
-- Primary troubleshooting resource is the **Twingate Help Center** (external knowledge base)
-- **Self Service Troubleshooting Guide** is the recommended starting point for common issues
-- Two dedicated log collection guides exist: one for Client, one for Connector
-- Community support available via official Twingate Subreddit
+- Primary troubleshooting resource: [Twingate Help Center](https://help.twingate.com)
+- Self Service Troubleshooting Guide available in Help Center for common issues
+- Separate log guides exist for Client and Connector components
+- Community support via official Twingate Subreddit
+- Free enablement content available to all users
 
-## Resources Referenced
-| Resource | Purpose |
-|----------|---------|
-| Twingate Help Center | Extensive KB maintained by Technical Support Engineering |
-| Self Service Troubleshooting Guide | Common issues starting point |
-| Twingate Client Logs (KB article) | Reviewing/collecting client-side logs |
-| Twingate Connector Logs (KB article) | Reviewing/collecting connector-side logs |
-| Official Twingate Subreddit | Community support |
-| Free Enablement Content | Self-paced learning resources |
+## Log Collection Resources
+- **Client Logs**: Dedicated KB article for reviewing/collecting Twingate Client logs
+- **Connector Logs**: Dedicated KB article for reviewing/collecting Twingate Connector logs
 
-## Prerequisites
-- Access to Twingate Help Center
-- Twingate Client or Connector installed (for log collection)
-
-## Step-by-Step
-1. Start with the **Self Service Troubleshooting Guide** in the Help Center
-2. If issue involves connectivity, collect **Client Logs** and/or **Connector Logs** per KB articles
-3. If unresolved, post to the **Twingate Subreddit** with collected logs and issue details
+## Troubleshooting Escalation Path
+1. Check [Twingate Docs](https://www.twingate.com/docs)
+2. Search [Twingate Help Center](https://help.twingate.com) knowledge base
+3. Follow Self Service Troubleshooting Guide for common issues
+4. Review relevant logs (Client or Connector)
+5. Post on official Twingate Subreddit for community support
 
 ## Gotchas
-- This docs page is a navigation hub only — actual troubleshooting content lives in the Help Center, not Twingate Docs
-- Log collection procedures are in separate KB articles, not inline here
+- This docs page is a directory/index only — actual troubleshooting content lives in the Help Center, not in the main docs
+- Client logs and Connector logs are documented separately; ensure you're collecting the right log type for your issue
 
 ## Related Docs
-- Twingate Client Logs (KB)
-- Twingate Connector Logs (KB)
-- Twingate Help Center (Self Service Troubleshooting Guide)
+- Twingate Help Center (external KB)
+- Self Service Troubleshooting Guide (in Help Center)
+- Twingate Client Logs (KB article)
+- Twingate Connector Logs (KB article)
+- Official Twingate Subreddit (community support)

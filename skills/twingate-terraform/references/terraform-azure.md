@@ -4,14 +4,14 @@
 How to Use Terraform with Azure and Twingate
 
 ## Summary
-Automates deployment of Twingate on Azure vNet using Terraform, creating all required Twingate components (Remote Network, Connector, Resource, Group) alongside Azure infrastructure (vNet, subnets, container instance running the Connector, test VM). The Connector runs as an Azure Container Instance (ACI) on a delegated subnet.
+Automates Twingate deployment on Azure vNet using Terraform, creating a Remote Network, Connector, Group, and Resource alongside Azure infrastructure (vNet, subnets, container instance running the connector, and a test VM). The connector runs as an Azure Container Instance with private networking.
 
 ## Key Information
-- Providers required: `twingate/twingate`, `hashicorp/azurerm` (3.0.0), `hashicorp/random` (3.3.2)
-- Connector deployed as Azure Container Instance using image `twingate/connector:1`
-- Two subnets needed: container subnet (10.0.2.0/24) with ACI delegation, general subnet (10.0.1.0/24) for VM
-- ACI subnet requires `Microsoft.ContainerInstance/containerGroups` service delegation
-- Connector tokens (`access_token`, `refresh_token`) passed as container environment variables
+- Uses three providers: `twingate/twingate`, `hashicorp/azurerm` (3.0.0), `hashicorp/random` (3.3.2)
+- Connector deployed as Azure Container Instance (`twingate/connector:1`) on a delegated subnet
+- Two subnets required: container subnet (`10.0.2.0/24`) and general/VM subnet (`10.0.1.0/24`)
+- Container subnet must be delegated to `Microsoft.ContainerInstance/containerGroups`
+- Twingate Resource restricts TCP to ports 80 and 22; UDP allows all; ICMP enabled
 
 ## Prerequisites
 - Terraform installed
@@ -21,48 +21,46 @@ Automates deployment of Twingate on Azure vNet using Terraform, creating all req
 
 ## Step-by-Step
 1. `mkdir twingate_azure_demo && cd twingate_azure_demo`
-2. Create `main.tf` with provider blocks
-3. `terraform init`
-4. Create `terraform.tfvars` with credentials
+2. Create `main.tf` with provider blocks and all resources
+3. Create `terraform.tfvars` with credentials
+4. `terraform init` — downloads providers
 5. `terraform plan` — validate config
-6. `terraform apply` — confirm with `yes`
-7. Add Twingate user to the created group in Admin Console
-8. Connect via Twingate client; SSH to VM using `terraform output password`
-9. `terraform destroy` to tear down
+6. `terraform apply` — deploy (~14 resources created)
+7. Add user to the Twingate group in Admin Console
+8. `terraform output password` — retrieve VM password
+9. `terraform destroy` — teardown
 
 ## Configuration Values
 
 **terraform.tfvars:**
 ```
-tg_api_key=""
-tg_network=""          # tenant subdomain only (e.g. "mycorp")
-subscription_id=""
-tenant_id=""
+tg_api_key="<api_token>"
+tg_network="<tenant_name>"
+subscription_id="<azure_sub_id>"
+tenant_id="<azure_tenant_id>"
 client_id=""
 client_secret=""
 ```
 
-**Container environment variables:**
+**Container env vars:**
 | Variable | Value |
 |---|---|
 | `TWINGATE_NETWORK` | `var.tg_network` |
-| `TWINGATE_ACCESS_TOKEN` | `twingate_connector_tokens.*.access_token` |
-| `TWINGATE_REFRESH_TOKEN` | `twingate_connector_tokens.*.refresh_token` |
+| `TWINGATE_ACCESS_TOKEN` | from `twingate_connector_tokens` |
+| `TWINGATE_REFRESH_TOKEN` | from `twingate_connector_tokens` |
 | `TWINGATE_TIMESTAMP_FORMAT` | `"2"` |
 
-**ACI specs:** CPU: 1, Memory: 1.5GB, Port: 9999/UDP
-
-**Twingate Resource ports:** TCP 80, 22 (RESTRICTED); UDP ALLOW_ALL; ICMP allowed
+**Container specs:** CPU: 1, Memory: 1.5GB, Port: 9999/UDP
 
 ## Gotchas
-- `terraform.tfvars` contains secrets — **exclude from source control**
-- Passwords stored in Terraform state file; use Azure Key Vault for production
-- `tg_network` is the subdomain only, not the full URL
-- ACI subnet must have delegation block or deployment fails
-- VM uses password auth (`disable_password_authentication = false`) — consider SSH keys for production
-- Container image tag `twingate/connector:1` may not be latest
+- **Never commit `terraform.tfvars`** — contains plaintext API keys and credentials
+- Passwords stored in Terraform state file — use Azure Key Vault for production
+- `azurerm` version pinned to `=3.0.0`; check compatibility before upgrading
+- Container subnet delegation actions must include both `join/action` and `prepareNetworkPolicies/action`
+- User must be manually added to the Twingate group after deployment for access to work
+- `twingate_connector_tokens` is a separate resource from `twingate_connector` — both required
 
 ## Related Docs
-- Twingate Terraform Provider: registry.terraform.io/providers/twingate/twingate
-- Azure authentication options: registry.terraform.io/providers/hashicorp/azurerm
-- Terraform code structure guides (linked in source)
+- [Twingate Terraform Provider Registry](https://registry.terraform.io/providers/twingate/twingate)
+- [Azure Authentication methods](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs#authenticating-to-azure)
+- Twingate Terraform GCP guide (parallel guide for GCP deployments)

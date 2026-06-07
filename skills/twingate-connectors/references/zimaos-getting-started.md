@@ -1,45 +1,59 @@
 # Getting Started with ZimaOS and Twingate
 
 ## Summary
-Deploys a Twingate Connector on ZimaOS via the ZimaOS App Store to enable secure remote access to the ZimaOS dashboard and private resources. Configuration is done through the ZimaOS app settings using environment variables.
-
-## Key Information
-- Connector is installed as an app from the ZimaOS App Store
-- Tokens must be unique per Connector — never reuse token sets
-- Network name = subdomain of your Twingate URL (e.g., `example` from `example.twingate.com`)
-- After configuration, ZimaOS dashboard is accessible remotely via its local IP through Twingate
+Installs a Twingate Connector on ZimaOS via the ZimaOS App Store to enable secure remote access to the ZimaOS environment. Connector is configured through environment variables in the ZimaOS app settings UI.
 
 ## Prerequisites
-- Running ZimaOS instance with local web UI access
+- Running ZimaOS instance
 - Twingate account with Admin Console access
-- An existing Remote Network in Twingate Admin Console
 
 ## Step-by-Step
 
-1. **Generate Connector Tokens**: Admin Console → Remote Networks → select network → add/select undeployed Connector → See More → Manual → Step 2 → Generate Tokens → copy Access Token and Refresh Token
-2. **Install Connector**: ZimaOS App Store → search "Twingate" → Install
-3. **Configure Connector**: Dashboard → hover Twingate tile → `...` → Settings → set environment variables (tokens + network name) → Save
-4. **Set Web UI link** (optional): Set to `https` + `{network_name}.twingate.com/networks/overview` for quick Admin Console access
-5. **Verify**: Admin Console → Remote Networks → select Connector → confirm `Controller` and `Relay` show **Connected**
-6. **Add Resource**: Admin Console → Resources → `+ Resource` → select remote network → name it → add dashboard private IP (e.g., `192.168.x.x`) → grant group access
+1. **Generate Connector Tokens** (Admin Console)
+   - Go to Remote Networks → select network → add/select undeployed Connector
+   - Click "See More" → choose "Manual" option
+   - Scroll to Step 2 → click "Generate Tokens" → authenticate
+   - Copy **Access Token** and **Refresh Token**
+
+2. **Install Connector** (ZimaOS)
+   - Open ZimaOS web UI → App Store → search "Twingate" → Install
+
+3. **Configure Connector** (ZimaOS)
+   - Hover over Twingate tile → click `…` → Settings
+   - Set Web UI: `https` + `{network_name}.twingate.com/networks/overview`
+   - Fill Environment Variables with tokens and network name
+   - Click Save
+
+4. **Verify** (Admin Console)
+   - Remote Networks → select network → select Connector
+   - Confirm **Controller** and **Relay** statuses show `Connected`
+
+5. **Create Resource for ZimaOS Dashboard**
+   - Admin Console → Resources → `+ Resource`
+   - Select remote network, name resource (e.g., "ZimaOS")
+   - Enter dashboard private IP (typically `192.168.x.x`)
+   - Assign group access → Grant Access
 
 ## Configuration Values
 
 | Field | Value |
 |-------|-------|
-| Access Token | Generated in Admin Console Step 2 |
-| Refresh Token | Generated in Admin Console Step 2 |
-| Network Name | Subdomain of `{name}.twingate.com` |
-| Web UI URL format | `https://{network_name}.twingate.com/networks/overview` |
+| Access Token | From Connector token generation step |
+| Refresh Token | From Connector token generation step |
+| Network Name | Subdomain of `{network_name}.twingate.com` |
+| Web UI URL | `https://{network_name}.twingate.com/networks/overview` |
 
 ## Gotchas
-- **Do not reuse tokens** — each Connector requires its own unique Access/Refresh token pair
-- Install alone is insufficient — must configure environment variables before the Connector connects
-- Resource IP must match the local dashboard IP used for LAN access (typically `192.168.x.x`)
-- Token errors and connectivity issues are the most common failure points; verify local ZimaOS access first
+- **Do not reuse token sets** — each Connector requires its own unique Access/Refresh token pair
+- Must configure environment variables *before* the Connector will connect successfully on first start
+- Dashboard IP for resource should match the local access address (same `192.168.x.x` used locally)
+
+## Troubleshooting
+- Token errors: verify tokens are entered correctly without extra whitespace
+- Connectivity issues: confirm ZimaOS web UI is accessible locally and Connector container is running
+- See [Twingate troubleshooting docs](https://www.twingate.com/docs/troubleshooting)
 
 ## Related Docs
-- [Twingate Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)
 - [CasaOS Setup Guide](https://www.twingate.com/docs/casaos)
 - [Home Assistant Setup Guide](https://www.twingate.com/docs/home-assistant)
 - [Unraid Helper Script Guide](https://www.twingate.com/docs/unraid)
