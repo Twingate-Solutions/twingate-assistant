@@ -1,38 +1,25 @@
 # Deploy Connector with Docker Compose
 
 ## Summary
-Deploys a Twingate Connector as a Docker Compose service. Requires Access Token and Refresh Token pre-generated from the Admin Console. Supports optional parameters for logging, DNS, restart behavior, and peer-to-peer connections.
+Deploys a Twingate Connector as a Docker Compose service. Requires pre-generated Access and Refresh tokens from the Admin Console. Supports optional parameters for logging, DNS, restart behavior, and syslog forwarding.
 
 ## Prerequisites
 - Docker and Docker Compose installed
-- Twingate tenant name (`<name>` from `https://<name>.twingate.com`)
 - Access Token and Refresh Token (generated via Admin Console connector deployment flow)
+- Twingate tenant name (e.g., `<name>` from `https://<name>.twingate.com`)
 
 ## Configuration Values
 
-### Required Environment Variables
-| Variable | Description |
-|---|---|
-| `TWINGATE_NETWORK` | Tenant name (not full URL) |
-| `TWINGATE_ACCESS_TOKEN` | Generated access token |
-| `TWINGATE_REFRESH_TOKEN` | Generated refresh token |
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `TWINGATE_NETWORK` | Yes | Tenant name |
+| `TWINGATE_ACCESS_TOKEN` | Yes | Connector access token |
+| `TWINGATE_REFRESH_TOKEN` | Yes | Connector refresh token |
+| `TWINGATE_LOG_LEVEL` | No | Log verbosity (e.g., `3`) |
+| `TWINGATE_LOG_ANALYTICS` | No | Enable Network Events in logs (`v2`) |
+| `TWINGATE_DNS` | No | Custom DNS server IP; defaults to Remote Network DNS |
 
-### Optional Environment Variables
-| Variable | Description |
-|---|---|
-| `TWINGATE_LOG_LEVEL` | Log verbosity (e.g., `3` for detailed) |
-| `TWINGATE_LOG_ANALYTICS` | Set to `v2` to enable Network Events in logs |
-| `TWINGATE_DNS` | Custom DNS server IP (e.g., `8.8.8.8`); overrides Remote Network DNS |
-
-### Optional Compose Parameters
-| Parameter | Value | Purpose |
-|---|---|---|
-| `restart` | `always` | Auto-restart on crash |
-| `network_mode` | `host` | Enables local peer-to-peer connections |
-| `sysctls: net.ipv4.ping_group_range` | `"0 2147483647"` | Enables ICMP/ping to Resources |
-| `container_name` | Connector name from Admin Console | Identification |
-
-## Minimal Config
+## Minimal Configuration
 ```yaml
 services:
   twingate-connector:
@@ -43,7 +30,7 @@ services:
       - TWINGATE_REFRESH_TOKEN=<REFRESH TOKEN>
 ```
 
-## Recommended Config
+## Recommended Configuration
 ```yaml
 services:
   twingate_connector:
@@ -56,12 +43,13 @@ services:
       - TWINGATE_REFRESH_TOKEN=<REFRESH TOKEN>
       - TWINGATE_LOG_ANALYTICS=v2
       - TWINGATE_LOG_LEVEL=3
+      - TWINGATE_DNS=8.8.8.8
     network_mode: host
     sysctls:
       net.ipv4.ping_group_range: "0 2147483647"
 ```
 
-## Syslog Forwarding Addition
+## Syslog Forwarding Configuration
 ```yaml
     logging:
       driver: syslog
@@ -72,14 +60,19 @@ services:
         tag: "<CONNECTOR NAME>"
 ```
 
+## Key Information
+- `restart: always` ensures the container recovers from crashes automatically
+- `network_mode: host` enables local peer-to-peer connections by sharing the host network stack; default is `bridge`
+- `net.ipv4.ping_group_range: "0 2147483647"` is required if using `ping` for connectivity testing to Twingate Resources
+- `container_name` should match the Connector name in the Admin Console for easier identification
+
 ## Gotchas
-- `TWINGATE_DNS` is rarely needed; default uses Remote Network's DNS config—only override if required
-- `network_mode: host` conflicts with Docker's default `bridge` mode; required for local peer-to-peer but changes container networking behavior
-- `net.ipv4.ping_group_range` sysctl only needed if using ping to test Resource connectivity
-- Tokens must be generated fresh per connector from the Admin Console before deployment
+- `TWINGATE_DNS` is rarely needed; omit unless custom DNS routing is explicitly required
+- `network_mode: host` is Linux-only; not supported on Docker Desktop for Mac/Windows
+- Peer-to-peer connections require additional setup (separate guide); `host` network mode is one prerequisite
 
 ## Related Docs
-- [How to Deploy a Connector](https://www.twingate.com/docs/connector) (token generation)
-- [Twingate Connector Logs](https://www.twingate.com/docs/connector-logs) (log level values)
-- [Support Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
-- [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)
+- How to deploy a Connector (token generation)
+- Twingate Connector logs (log level values)
+- Support peer-to-peer connections
+- Fair Use Policy

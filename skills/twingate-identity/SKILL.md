@@ -87,7 +87,7 @@ memory — IdP UIs and SCIM connectors evolve frequently.
 | MDM / EDR integration (Jamf, Kandji/Iru, Intune, etc.) | `jamf-configuration.md`, `jamf-mdm.md`, `kandji-configuration.md`, `kandji-mdm.md`, `iru-configuration.md`, `iru-mdm.md`, `intune-configuration.md`, `omnissa-workspace-one-mdm.md`, `crowdstrike-configuration.md`, `sentinelone-configuration.md`, `1password-configuration.md` |
 | JIT / ephemeral access, contractor patterns | `jit-access-requests.md`, `resources-reviewing-access-requests.md`, `ephemeral-access-to-resources.md`, `vendor-and-contractor-access-management.md`, `usage-based-auto-lock.md` |
 | Groups, users, admins, offboarding | `groups.md`, `users.md`, `admins.md`, `offboarding-users.md` |
-| Authentication, social logins | `authentication.md`, `social-logins.md` |
+| Authentication, sessions, social logins | `authentication.md`, `how-sessions-work.md`, `social-logins.md` |
 | Service accounts | `service-accounts-guide.md` |
 | SaaS app gating | `saas-app-gating.md`, `saas-app-gating-best-practices.md` |
 

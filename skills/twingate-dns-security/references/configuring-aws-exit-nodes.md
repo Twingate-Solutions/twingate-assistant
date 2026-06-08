@@ -1,64 +1,62 @@
 # Configuring AWS Exit Nodes for SaaS App Gating
 
 ## Summary
-Deploy Twingate Connectors on AWS EC2 instances to route user traffic through known public IPs, enabling IP-based allowlisting for public SaaS applications. Users access IP-restricted resources through Twingate regardless of their physical network location.
+Deploy Twingate Connectors on AWS EC2 instances to act as exit nodes, enabling IP-based access control to public SaaS applications. Outbound traffic routes through EC2 instances with known Elastic IPs, which are whitelisted in third-party SaaS apps. Users are granted access via Twingate Groups and Resources.
 
 ## Key Information
-- Uses AWS EC2 instances as "exit nodes" — traffic egresses from known public IPs
-- Enables IP allowlisting with third-party SaaS apps (e.g., Salesforce) combined with Twingate user-based access control
-- Requires at least one EC2 instance; multiple recommended for redundancy
-- Only outbound internet traffic required from EC2 instances; inbound can be blocked
+- Use case: Control access to public SaaS apps via IP whitelisting combined with Twingate user authentication
+- Requires at least one Linux EC2 instance (multiple recommended for redundancy)
+- EC2 instances serve as Twingate Connectors and traffic exit points
+- Recommended instance type: `t3a.micro` (any general purpose works)
+- Recommended OS: Ubuntu 22.04 (any Linux supporting Docker works)
 
 ## Prerequisites
-- AWS account with ability to deploy EC2 instances and assign Elastic IPs
+- AWS account with ability to launch EC2 instances
 - Twingate admin console access
-- Linux EC2 instance with Docker support (Ubuntu 22.04 recommended)
-- Understanding of your AWS network egress path (NAT gateway vs. IGW affects public IP)
+- Elastic IPs assignable to EC2 instances
+- Understanding of your AWS network topology (NAT gateway vs IGW affects public IP)
 
 ## Step-by-Step
 
-### 1. Deploy EC2 Exit Node(s)
-- Launch Linux EC2 instance (Ubuntu 22.04 recommended)
-- Instance type: `t3a.micro` minimum; any general purpose acceptable
-- Allow outbound internet traffic; block all inbound internet traffic
+### 1. Deploy EC2 Exit Nodes
+- Launch one or more Linux EC2 instances (`t3a.micro` minimum)
 - Assign an **Elastic IP** to each instance
+- Verify actual public egress IP — if traffic exits via NAT gateway, the instance's Elastic IP may be masked; confirm which IP external services will see
+- Allow outbound internet traffic from instances
+- Block all inbound internet traffic (SSH access optional/temporary only)
+- Install Twingate Connector on each instance per [Linux Connector deployment docs]
 
-### 2. Verify Public IP
-- Confirm which public IP egress traffic uses — NAT gateway may mask the instance's Elastic IP
-- This public IP is what gets allowlisted in the SaaS application
+### 2. Whitelist EC2 Public IPs in SaaS Application
+- Use the confirmed public egress IP(s) from Step 1
+- Add these IPs to the IP allowlist in the target SaaS application (e.g., Salesforce, GitHub)
 
-### 3. Install Twingate Connector
-- Follow [deploying Connectors on Linux](https://www.twingate.com/docs/connector) documentation
-- Install on each EC2 exit node instance
+### 3. Create Twingate Resource
+- In Twingate admin console, create a Resource using the FQDN or IP of the protected application
+- Example: `acme.salesforce.com`
+- Twingate uses this FQDN/IP to evaluate authorization on each connection request
 
-### 4. Create Twingate Resource
-- In Twingate admin console, create a Resource using the SaaS app's FQDN (e.g., `acme.salesforce.com`)
-
-### 5. Authorize Users
-- Create a Group in Twingate
+### 4. Authorize Users
+- Create a new Group in Twingate
 - Add the Resource to the Group
-- Assign users to the Group — these users will route through the exit node when accessing the resource
-
-### 6. Configure SaaS Application
-- Add the EC2 instance(s) public IP(s) to the SaaS app's IP allowlist
+- Assign users to the Group
+- Users in the Group can access the SaaS app from any network via Twingate
 
 ## Configuration Values
 | Parameter | Value |
 |-----------|-------|
-| EC2 instance type | `t3a.micro` (minimum) |
-| Recommended OS | Ubuntu 22.04 |
-| Inbound traffic | Not required (block all) |
-| Outbound traffic | Must be allowed |
-| IP assignment | Elastic IP per instance |
+| Instance type | `t3a.micro` (minimum) |
+| OS | Ubuntu 22.04 (recommended) |
+| Inbound ports | None required (block all) |
+| Outbound | All allowed |
 
 ## Gotchas
-- **NAT Gateway masking**: If traffic egresses via NAT gateway rather than IGW, the Elastic IP on the instance may not be the public IP seen by external services — verify actual egress IP before allowlisting
-- **No inbound required**: Do not open inbound ports unless needed for SSH setup; close after configuration
-- **Multiple instances for redundancy**: Single instance is a SPOF; deploy at least two
-- Twingate routes based on FQDN/IP in the request — Resource name must exactly match the domain being protected
+- **NAT Gateway masking**: If EC2 egress routes through a NAT gateway, the Elastic IP on the instance is NOT the IP seen by external services — verify actual egress IP before whitelisting
+- **Multiple instances**: Each instance has its own public IP; all must be whitelisted in the SaaS app
+- **Production use**: This guide is a reference only; apply AWS security best practices for production deployments
+- Software/image versions in examples may not be current; check official docs for latest versions
 
 ## Related Docs
-- [Whitelisting Traffic to Public Resources](https://www.twingate.com/docs/whitelisting-traffic)
-- [Deploying Connectors on Linux](https://www.twingate.com/docs/connector)
-- [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
-- [Creating Resources and Groups](https://www.twingate.com/docs/resources)
+- [Whitelisting Traffic to Public Resources](https://www.twingate.com/docs)
+- [Deploying Connectors on Linux](https://www.twingate.com/docs)
+- [Connector Best Practices](https://www.twingate.com/docs)
+- [Creating Resources and Groups](https://www.twingate.com/docs)

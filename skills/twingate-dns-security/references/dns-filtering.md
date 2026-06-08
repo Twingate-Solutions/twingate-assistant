@@ -4,68 +4,55 @@
 DNS Filtering Overview
 
 ## Summary
-Twingate provides native DNS filtering via DNS-over-HTTPS (DoH) for macOS, Windows, and Linux clients, requiring no client-side configuration changes. Filtering is profile-based and assigned to Groups, blocking threats, content categories, and specific domains. Available as an add-on for Business and Enterprise plans.
+Twingate provides native DNS filtering via DNS-over-HTTPS (DoH) for macOS, Windows, and Linux clients, requiring no client-side configuration changes. Filtering is profile-based, assigned to Groups, and supports security threat blocking, content categories, privacy protection, allowlists/denylists, and S3 log export.
 
 ## Key Information
-- **Platform support**: macOS, Windows, Linux only (no mobile)
-- **Protocol**: DNS-over-HTTPS (DoH) — intercepts all DNS traffic automatically
-- **Block pages**: HTTP sites blocked by default; HTTPS requires Twingate Browser Extension deployment
+- **Availability**: Add-on for Business and Enterprise plans; desktop only (macOS, Windows, Linux) — no mobile support
+- **Mechanism**: Intercepts all DNS traffic via DoH; blocks at DNS layer (affects HTTPS, SSH, all protocols)
+- **Block pages**: HTTP blocked sites redirect to block page by default; HTTPS requires Twingate Browser Extension deployment
 - **Profile limit**: Maximum 10 DNS filtering profiles
-- **Priority**: Allowlist > profile ranking order > default rules
-- **Exception Groups** override Enrolled Groups (excluded user won't be filtered even if in enrolled group)
-- **Signed-out devices**: Use lowest-ranked profile if configured for always-on Internet Security
-- **Log retention**: 90-day analytics; recent activity logs filterable by allowed/blocked status
-- **S3 export**: JSON format, one event per line
+- **Profile priority**: Higher-ranked profiles take precedence; Exception Groups override Enrolled Groups
+- **Signed-out devices**: DNS filtering continues if "always run Internet Security" is configured; uses lowest-ranked profile
+- **Log retention**: 90-day analytics window; recent activity logs with device hostname, IP, profile used, block reason
 
 ## Prerequisites
-- Business or Enterprise plan with DNS Filtering add-on
+- Business or Enterprise plan with DNS filtering add-on
+- Twingate Client running on macOS, Windows, or Linux
 - Secure DNS enabled in Admin Console
-- Twingate Client running on user devices
-- Browser Extension for HTTPS block pages
 
 ## Step-by-Step: Enable DNS Filtering
 1. Navigate to **Internet Security** tab in Admin Console
-2. If Secure DNS disabled → enable it → select **Twingate DNS Filtering**
+2. If Secure DNS is disabled → enable it → select **Twingate DNS Filtering**
 3. If Secure DNS already enabled → change DoH resolver to **Twingate DNS Filtering**
 4. Configure profiles: click profile name or **Manage → Edit Filtering Rules**
 
 ## Configuration Values
 
-### DNS Filtering Profile Rules
-| Category | Options |
-|----------|---------|
-| Allowlist/Denylist | Specific domains or TLDs (e.g., `.zip`) |
-| Security Categories | Threat feeds, Google Safe Browsing, DNS rebinding, IDN homograph, typosquatting, DGA, newly registered domains, parked domains |
-| Content Restrictions | Gambling, Dating, Adult, Piracy, Social Media, Games, Streaming, Force Safe Search, YouTube Safe Mode |
-| Privacy Protection | Block disguised trackers, affiliate/tracking links, ads and trackers |
+### Filtering Rule Categories
+| Type | Options |
+|------|---------|
+| Security | Threat Intelligence Feeds, Google Safe Browsing, DNS rebinding, IDN homograph, Typosquatting, DGA, Newly registered domains (off by default), Parked domains |
+| Content | Gambling, Dating, Adult content, Piracy, Social media, Games, Streaming, Force Safe Search, YouTube safe mode |
+| Privacy | Block disguised 3rd-party trackers, Block affiliate/tracking links, Block ads and trackers |
 
-### S3 Event JSON Fields
-```json
-{
-  "event_type": "dns_filtering",
-  "event": {
-    "version": 1,
-    "time": "<UTC datetime>",
-    "domain": "<queried domain>",
-    "root": "<root domain>",
-    "device": { "id": "<device_id>", "name": "<device_name>" },
-    "connection": { "client_ip": "<ip>", "protocol": "DNS-over-HTTPS" },
-    "status": "default|blocked|allowed",
-    "reasons": [{ "id": "category:social-networks", "name": "Social Networks" }]
-  }
-}
-```
+### S3 Log Export JSON Fields
+- `event_type`: `"dns_filtering"`
+- `status`: `"default"` (allowed lookup) | `"blocked"` | `"allowed"` (allowlist match)
+- `device.id`: Twingate device ID or hardware ID if never logged in
+- `reasons[].id`: e.g., `"category:social-networks"`
 
 ## Gotchas
-- Newly registered domains category is **disabled by default**; all other security categories are enabled by default
-- A Group can only be assigned to **one** DNS filtering profile at a time
-- Blocking ads/trackers/tracking links may break some site functionality and email unsubscribe links
-- Client versions before macOS **2024.311** or Windows **2024.351** show generic device info for signed-out devices (`No hostname`/`No device`)
-- Users not in any assigned Group are **not filtered** at all — create a catch-all profile with Everyone group as lowest priority
+- **Allowlist overrides everything** — domains on allowlist are never blocked regardless of other rules
+- **Group assignment**: A Group can only be in one DNS filtering profile at a time; cannot be both enrolled and excluded simultaneously
+- **No filtering if unassigned**: Users not in any Group assigned to a profile receive no DNS filtering
+- **Blocking tracking links** may break email unsubscribe flows
+- **Blocking ads/trackers** may break some sites
+- **Client version requirement**: macOS < 2024.311 or Windows < 2024.351 shows generic device info (`"No hostname"` / `"No device"`) for signed-out devices
+- **TLD blocking**: Add `.zip` to denylist to block all `.zip` TLD domains
 
 ## Related Docs
 - DNS-over-HTTPS (DoH) documentation
-- Internet Security Client Configuration (always-on filtering)
+- Internet Security Client Configuration (always-on)
+- Twingate Browser Extension (HTTPS block pages)
 - Exception Groups setup
 - Syncing data to S3
-- Twingate Browser Extension deployment

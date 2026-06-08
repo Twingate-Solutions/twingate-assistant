@@ -4,42 +4,40 @@
 Use Cases Overview
 
 ## Summary
-Twingate supports seven primary deployment scenarios ranging from VPN replacement to compliance enforcement. The platform provides zero-trust network access for both enterprise and personal use cases. Each use case leverages Twingate's connector-based architecture without requiring open inbound ports.
+This page provides a high-level overview of the primary use cases Twingate supports, from VPN replacement to compliance. Each use case links to dedicated documentation. Covers both enterprise and personal/homelab scenarios.
 
 ## Key Use Cases
 
-- **VPN Replacement**: Remote access to office networks, cloud VPCs, and private corporate resources from any device
-- **Infrastructure Access**: Engineer/DevOps access management and automation for on-prem and cloud infrastructure
-- **Device Security Controls**: Policy enforcement based on device attributes (OS type, screen lock, MDM/EDR status)
-- **Application Gating**: IP allowlisting for SaaS apps, staging servers, and lightweight CASB deployment
-- **Homelab/Personal**: Home network access for self-hosted apps (Home Assistant, Plex, cameras); free Starter plan available
-- **Internet Security**: DNS filtering, DNS-over-HTTPS (DoH) for public internet traffic protection
-- **Compliance**: Controls supporting CPRA, GDPR, PCI DSS, SOC 2
+- **VPN Replacement** – Remote access to office networks, cloud VPCs, and private corporate resources from any device
+- **Infrastructure Access** – Engineers/DevOps manage and automate secure access to on-prem and cloud infrastructure
+- **Device Security Controls** – Policy enforcement based on device attributes (OS type, screen lock, MDM/EDR status, etc.)
+- **Application Gating** – IP whitelisting support for SaaS apps, staging servers; lightweight CASB deployment
+- **Homelab/Personal Use** – Remote access to home networks, self-hosted apps (Home Assistant, Plex, cameras); free Starter plan available; setup under 15 minutes
+- **Internet Security** – DNS filtering, DNS-over-HTTPS (DoH) for public internet traffic on employee devices
+- **Compliance** – Controls supporting CPRA, GDPR, PCI DSS, SOC 2
+
+## Configuration Notes
+
+- **DNS Resolvers supported**: Google, Cloudflare, OpenDNS (configurable)
+- **Connector platforms**: Raspberry Pi, major NAS devices, cloud/on-prem environments
+- **Device policy attributes**: OS type, screen lock, MDM enrollment, EDR status
 
 ## Prerequisites
 - Twingate account (free Starter plan available for personal use)
 - Twingate Connector deployed on target network
-- Client installed on user devices
-
-## Configuration Notes
-
-| Use Case | Key Config |
-|---|---|
-| Device Security | Device posture policies (OS, screen lock, MDM, EDR) |
-| Application Gating | IP allowlist integration with third-party services |
-| Internet Security | DNS resolver selection (Google, Cloudflare, OpenDNS supported) |
-| Homelab | Connector on Raspberry Pi or NAS devices |
+- Twingate Client installed on end-user devices
 
 ## Gotchas
-- Homelab setup eliminates need for port forwarding and dynamic DNS management—no open inbound ports required
-- DNS filtering and DoH are device-level controls, applied per-device not per-resource
-- Application Gating requires the third-party service to support IP-based access restrictions
+
+- Application Gating requires the third-party service to support IP-based access restrictions; Twingate provides the stable egress IP
+- Homelab use eliminates need for port forwarding or dynamic DNS management — no inbound ports required
+- Internet Security (DNS filtering/DoH) applies at the device level, not per-resource
 
 ## Related Docs
-- VPN Replacement detail page
-- Infrastructure Access detail page
-- Device Security Controls detail page
-- Application Gating detail page
-- Homelab & Personal Use Cases detail page
-- Internet Security detail page
-- Compliance detail page
+- VPN Replacement (linked from page)
+- Infrastructure Access (linked from page)
+- Device Security Controls (linked from page)
+- Application Gating (linked from page)
+- Homelab & Personal Use (linked from page)
+- Internet Security (linked from page)
+- Compliance (linked from page)

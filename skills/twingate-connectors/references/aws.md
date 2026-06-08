@@ -1,58 +1,52 @@
 # Deploy a Connector on AWS
 
 ## Summary
-Twingate supports multiple AWS deployment methods for Connectors: CloudFormation, EC2 (Linux), AMI, ECS Fargate, and EKS. Each method requires the deployment subnet to have outbound internet access. Tokens are generated per-Connector and must not be reused across instances.
+Twingate Connectors can be deployed on AWS via CloudFormation, EC2 (Linux/AMI), ECS Fargate, or EKS. Each method is configured through the Admin Console's Connector deployment page. Subnet must have outbound internet access for image download and Twingate connectivity.
 
 ## Key Information
-- Subnet must have outbound internet access (for container image download and Twingate connectivity)
-- Peer-to-peer connections recommended to improve performance and stay within Fair Use Policy
-- Tokens (`TWINGATE_ACCESS_TOKEN`, `TWINGATE_REFRESH_TOKEN`) are unique per Connector instance
-- AMI is based on Ubuntu x86 with systemd pre-installed
-- ECS Fargate requires extra config to support ICMP ping
+- Four primary deployment methods: CloudFormation, EC2 (Linux), AMI, ECS Fargate
+- EKS deployment available via official Twingate Helm chart
+- IaC options: Terraform, Pulumi, Twingate API
+- Each Connector instance requires unique tokens — do not reuse tokens across instances
+- AWS SSM Agent pre-installed on AMI images for remote shell access
 
 ## Prerequisites
-- Access to Twingate Admin Console
-- Remote Network already created
-- AWS account with permissions to create EC2/ECS/CloudFormation resources
-- SSH key pair and Subnet ID (for CloudFormation)
-- AWS CLI configured (for AMI/ECS deployments)
+- Subnet with outbound internet access
+- Twingate Admin Console access
+- Remote Network configured with a Connector added
+- AWS credentials/CLI configured (for AMI/ECS methods)
+- SSH key and Subnet ID (CloudFormation)
 
-## Deployment Methods
+## Step-by-Step by Method
 
-### CloudFormation (Easiest)
-1. Admin Console → Remote Networks → Select network → Add Connector
-2. Click new Connector → Choose **AWS Quick Start** deployment
-3. Select AWS region → Click **Open AWS**
-4. Select SSH key and Subnet ID → Click **Create stack**
-5. Connector live within ~5 minutes
+**CloudFormation (easiest):**
+1. Admin Console → Remote Networks → Select Network → Add Connector
+2. Select new Connector → Choose AWS Quick Start deployment
+3. Select region → Click Open AWS
+4. Select SSH key and Subnet ID → Create stack (live in ~minutes)
 
-### AMI Deployment
-1. Admin Console → Add Connector → Select **AMI** option
-2. Generate tokens (requires re-authentication)
-3. Fill in AWS environment details and optional features
-4. Select CLI environment → Copy and run generated command
+**AMI:**
+1. Admin Console → Add Connector → Select AMI option
+2. Generate tokens (re-authentication required)
+3. Fill AWS environment configuration
+4. Select CLI environment, copy and run generated command
 
-### ECS Fargate Deployment
-1. Admin Console → Add Connector → Select **ECS** option
+**ECS Fargate:**
+1. Admin Console → Add Connector → Select ECS option
 2. Generate tokens
-3. Fill in AWS environment configuration
-4. Run command to create task definition (AWS CLI)
-5. Run command to launch Connector (AWS CLI)
-
-### EKS
-- Use the [official Twingate Helm chart](https://www.twingate.com/docs/kubernetes)
-
-### EC2 (Manual)
-- Follow standard [Linux Connector deployment](https://www.twingate.com/docs/linux) instructions
-- Supports Docker (any 64-bit Linux) or systemd (Ubuntu, Fedora, Debian, CentOS)
+3. Fill AWS environment configuration
+4. Run task definition creation command via AWS CLI
+5. Run Connector launch command via AWS CLI
 
 ## Configuration Values
-| Variable | Description |
-|---|---|
-| `TWINGATE_ACCESS_TOKEN` | Connector access token (generated in Admin Console) |
-| `TWINGATE_REFRESH_TOKEN` | Connector refresh token (generated in Admin Console) |
 
-### ECS Ping Support (containerDefinitions)
+| Parameter | Notes |
+|-----------|-------|
+| `TWINGATE_ACCESS_TOKEN` | Embedded in user-data by default (AMI) |
+| `TWINGATE_REFRESH_TOKEN` | Embedded in user-data by default (AMI) |
+| `net.ipv4.ping_group_range` | ECS sysctl: `0 2147483647` (required for ping) |
+
+**ECS ping support** — add to `containerDefinitions`:
 ```json
 "systemControls": [
   {
@@ -63,15 +57,19 @@ Twingate supports multiple AWS deployment methods for Connectors: CloudFormation
 ```
 
 ## Gotchas
-- **Security**: AMI/ECS deployment scripts embed tokens in EC2 user-data (readable by any AWS user with EC2 viewer permissions) — use **AWS Secrets Manager** for production
-- **Token reuse**: Never reuse tokens across Connector instances; create separate task definitions per instance
-- **Updates**: Stagger updates across multiple Connectors to avoid downtime
-- AMI uses SSM Agent for remote shell access (requires IAM role assignment)
+- **Security**: AMI user-data embeds tokens in plaintext — any AWS user with EC2 viewer permissions can read them. Use **AWS Secrets Manager** for production.
+- EC2 systemd service supported only on Ubuntu, Fedora, Debian, CentOS (not all distros)
+- Stagger updates across multiple Connectors to avoid downtime
+- ECS: create separate task definitions per Connector instance
+
+## Updates
+- **systemd (EC2/AMI)**: Manual via Linux package manager or scheduled task; see Systemd Connector Update Guide
+- **ECS Fargate**: Via AWS management console or CLI; see ECS Connector Update Guide
 
 ## Related Docs
-- [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
-- [Linux Connector Deployment](https://www.twingate.com/docs/linux)
-- [ECS Connector Update Guide](https://www.twingate.com/docs/ecs-update)
-- [Systemd Connector Update Guide](https://www.twingate.com/docs/systemd-update)
-- [Kubernetes Best Practices](https://www.twingate.com/docs/kubernetes-best-practices)
-- [Terraform/Pulumi/API Deployment](https://www.twingate.com/docs/deployment-automation)
+- Connector Best Practices (hardware recommendations, peer-to-peer)
+- Linux Connector deployment
+- Twingate Helm chart (EKS)
+- Kubernetes Best Practices Guide
+- Systemd/ECS Connector Update Guides
+- Terraform/Pulumi/API deployment guides

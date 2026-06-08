@@ -11,7 +11,7 @@
 # Auto-assign patterns apply to new sitemap URLs not yet in this file.
 # First matching pattern wins; unmatched docs go to _triage/ for review.
 #
-# Last updated: 2026-06-05 (292 entries; docsTemplate, unlisted, WIP excluded)
+# Last updated: 2026-06-08 (293 entries; docsTemplate, unlisted, WIP excluded)
 
 docs:
 
@@ -1078,6 +1078,10 @@ docs:
   - url: https://www.twingate.com/docs/sign-in-policy
     skill: twingate-identity
     keywords: [sign in policy, security policy, authentication frequency, MFA, device security, session, Admin Console]
+
+  - url: https://www.twingate.com/docs/how-sessions-work
+    skill: twingate-identity
+    keywords: [sessions, re-authentication, session lifetime, IdP session, authentication frequency, offboarding, SCIM, security policy]
 
 
   # ── twingate-api ────────────────────────────────────────────────────────────

@@ -1,48 +1,59 @@
 # How DNS Works with Twingate
 
 ## Summary
-Twingate uses a transparent proxy system where the client intercepts DNS queries for defined Resources and resolves them to CGNAT IP addresses (100.64.0.0/10 range) locally, then proxies traffic through a Connector on the private network. The Connector performs actual DNS resolution against the private DNS server, keeping private IP addresses hidden from the client device.
+Twingate uses a transparent proxy architecture where the Client intercepts DNS queries for defined Resources and resolves them to CGNAT IP addresses instead of actual private IPs. The Connector handles real DNS resolution on the private network, so clients never need direct access to private DNS resolvers.
 
 ## Key Information
-- Twingate Client runs a local DNS resolver that responds to Resource FQDN queries with CGNAT-range IPs (not actual private IPs)
-- DNS servers used by Twingate Client: `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254`
-- CGNAT range used: `100.96/12` (subset of `100.64.0.0/10`)
-- Client creates a virtual network interface (`utun7` on macOS) and modifies the local routing table to route CGNAT traffic through it
-- The Connector performs actual DNS resolution against the private network's DNS server
-- Actual private IP addresses are never revealed to the client device
-- Traffic is encrypted client-side; Twingate cannot decrypt it
-- Same flow applies to Resources with public DNS entries — resolution still goes through the Connector
 
-## DNS Resolution Flow (Step-by-Step)
-1. App sends DNS request → intercepted by Twingate Client's local DNS resolver
-2. Client resolves FQDN to a CGNAT IP (e.g., `100.108.194.142`) — not the real private IP
-3. App sends traffic to CGNAT IP → Twingate network interface intercepts via routing table
+- Twingate Client runs a local DNS resolver that intercepts queries for defined Resources
+- Resources resolve to IPs in the `100.64.0.0/10` CGNAT range (specifically `100.96/12` for routing), not actual private IPs
+- Twingate DNS servers: `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254`
+- The Connector performs actual DNS resolution against the private DNS server
+- Works for both private DNS entries and public DNS entries (resolution still routes through Connector)
+- Client traffic is encrypted; Twingate cannot decrypt it
+- Three proxies handle TCP, UDP, and ICMP (ping only)
+
+## DNS Resolution Flow
+
+1. App sends DNS query → intercepted by Twingate Client's local resolver
+2. Client returns a CGNAT IP (e.g., `100.108.194.142`) mapped to the Resource
+3. App sends traffic to CGNAT IP → Client routes via Twingate network interface (`utun7` on macOS)
 4. Client proxy strips source/destination, forwards payload to Connector
-5. Connector queries private DNS server → gets actual private IP (e.g., `192.168.1.50`)
-6. Connector reassembles packet with its own IP as source, private IP as destination
-7. Return traffic flows back through Connector proxy → Client proxy → user application
+5. Connector resolves the original FQDN against private DNS → gets actual private IP
+6. Connector reassembles packet: source = Connector IP, destination = resolved private IP
+7. Response travels back through Connector proxy → Client → application
+
+## Client-Side System Changes
+
+| Change | Detail |
+|--------|--------|
+| Network interface created | `utun7` (macOS) / visible in Windows Control Panel |
+| Primary DNS resolver added | `100.95.0.251-254` prepended to resolver list |
+| Routing table modified | All `100.96/12` traffic directed to Twingate interface |
+| CGNAT IP mapping | Each Resource gets unique CGNAT IP assignment |
 
 ## Configuration Values
-| Item | Value |
-|------|-------|
-| Twingate DNS servers | `100.95.0.251–254` |
-| CGNAT routing range | `100.96/12` |
-| Network interface (macOS) | `utun7` |
 
-## Client-Side Changes Made on Install
-- Adds Twingate DNS resolvers as **primary** (top of resolver list)
-- Creates virtual network interface
-- Modifies routing table: all `100.96/12` traffic → Twingate interface
-- Three proxies for TCP, UDP, and ICMP (ping only)
+- **CGNAT range used**: `100.96/12` (routed to Twingate interface)
+- **DNS resolver IPs**: `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254`
+- **Twingate network interface IP** (macOS example): `172.16.30.1`
 
 ## Gotchas
-- Resources must be resolvable **by the Connector**, not the client — the Connector must have network access to the private DNS server
-- Client only intercepts FQDNs/IPs explicitly defined as Twingate Resources; other traffic passes through normally
-- The assigned CGNAT IP is not the resource's real IP and changes — do not hardcode it
-- Public DNS Resources are also routed through the Connector (overrides direct public DNS lookup from client)
+
+- The CGNAT IP returned by Twingate DNS is **not** the Resource's actual IP — it's a proxy mapping
+- Client only intercepts DNS for Resources it has explicit access to; other hostnames pass through normally
+- Even Resources with **public DNS entries** route through the Connector (overrides direct public lookup)
+- The Connector must be able to resolve the FQDN and route to the destination — if Connector can't resolve it, the connection fails
+- Actual destination IP is never exposed to the client device (hidden behind proxy)
+
+## Prerequisites
+
+- Twingate Client installed on user device
+- Twingate Connector deployed on private network with access to private DNS resolver
+- Resource defined in Twingate admin console as FQDN, IP, or CIDR
 
 ## Related Docs
-- [How DNS Works (primer)](https://www.twingate.com/docs/how-dns-works)
-- [Transparent proxy system](https://www.twingate.com/docs/)
-- [Resources documentation](https://www.twingate.com/docs/resources)
-- CGNAT RFC (100.64.0.0/10 range)
+
+- [Twingate transparent proxy system](https://www.twingate.com/docs)
+- [DNS basics primer](https://www.twingate.com/docs/how-dns-works)
+- CGNAT RFC (shared `100.64.0.0/10` range)

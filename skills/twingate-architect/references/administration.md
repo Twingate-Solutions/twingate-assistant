@@ -4,30 +4,40 @@
 Administration
 
 ## Summary
-Top-level administration page covering Admin Console security configuration, reporting options, and subscription/billing management. Serves as a navigation hub linking to three sub-sections of account administration.
+Top-level administration hub covering Admin Console security configuration, reporting options, and subscription/billing management. Serves as a navigation index to three core administrative areas.
 
 ## Key Information
-- **Three core admin areas:**
-  - Reporting (network-level and user activity)
-  - Admin Console Security (2FA enforcement for admin access)
-  - Subscription Management (billing and licensing FAQ)
+- **Admin Console Security**: Controls authentication policy for admins accessing the Admin Console, including optional 2FA enforcement
+- **Reporting**: Provides network-level and user activity reporting across the account
+- **Subscription Management**: FAQ-based billing and licensing management
 
-## Admin Console Security
-- Admins accessing the Admin Console are governed by a **special authentication policy** separate from regular users
-- 2FA can be configured as **required or optional** for Admin Console access
+## Sub-Sections
 
-## Reporting
-- Provides both **network-level** and **user activity** reporting
-- Details available in dedicated reporting documentation
+### Admin Console Security
+- Admins are governed by a **special authentication policy** separate from standard users
+- 2FA can be set as required or optional for Admin Console access
+- Configured independently from network access policies
 
-## Subscription Management
-- Covers billing and licensing model FAQs
-- Plan changes managed through subscription management section
+### Reporting
+- Covers both **network-level activity** and **user activity**
+- Multiple reporting options available (details in dedicated reporting doc)
+
+### Subscription Management
+- Billing and licensing handled via subscription management section
+- FAQ format for common billing questions
+
+## Prerequisites
+- Must have Admin role to access Admin Console settings
+- Account must exist on Twingate platform
+
+## Configuration Values
+- **2FA enforcement**: Enabled or disabled per Admin Console security policy (boolean toggle)
+
+## Gotchas
+- Admin Console authentication policy is **separate** from policies applied to regular network users — changes here only affect admins
+- 2FA requirement applies specifically to Admin Console access, not necessarily to general Twingate network access
 
 ## Related Docs
 - [Reporting](https://www.twingate.com/docs/reporting)
 - [Admin Console Security](https://www.twingate.com/docs/admin-console-security)
-- [Subscription Management](https://www.twingate.com/docs/subscription-management)
-
----
-*Note: This page is primarily a navigation/index page. Detailed configuration steps are in linked sub-pages.*
+- [Subscription Management](https://www.twingate.com/docs/subscription)

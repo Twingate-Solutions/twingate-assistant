@@ -1,52 +1,42 @@
 # Deploying macOS & iOS Clients with Omnissa Workspace ONE
 
 ## Summary
-Covers distributing the Twingate Client via Omnissa Workspace ONE MDM for macOS (as a non-App Store PKG) and iOS (via Apple Business Manager integration). Includes setup steps for device assignment, auto-updates, and pre-configuration.
+Guide for distributing the Twingate Client via Omnissa Workspace ONE MDM on macOS and iOS platforms. macOS uses a PKG-based non-App Store deployment; iOS uses Apple Business Manager integration.
 
 ## Key Information
-- macOS uses PKG installer distributed as a non-App Store app
-- iOS requires Apple Business Manager (ABM) linked to Workspace ONE
-- Pre-configuration profiles available for macOS to automate VPN setup, system extension, and Network population
+- macOS deployment requires uploading a PKG file to Workspace ONE as a non-App Store app
+- iOS deployment requires Apple Business Manager (ABM) linked to Workspace ONE
+- PKG installer available from the [Twingate download page](https://www.twingate.com/download)
 
 ## Prerequisites
-- **macOS:** Workspace ONE configured to distribute non-App Store apps; Twingate PKG downloaded from [download page](https://www.twingate.com/download)
-- **iOS:** Twingate app added to Apple Business Manager; Workspace ONE linked to ABM via VPP Managed Distribution
+- **macOS**: Workspace ONE admin access; Twingate PKG installer downloaded
+- **iOS**: Apple Business Manager account; Twingate app added to ABM; Workspace ONE linked to ABM via VPP Managed Distribution
 
 ## Step-by-Step
 
 ### macOS
-1. Download Twingate PKG installer from the download page
+1. Download Twingate PKG from the download page
 2. Upload PKG to Workspace ONE as a non-App Store app
-3. Follow Workspace ONE documentation for distribution
+3. Follow Workspace ONE documentation for distribution configuration
+4. Optionally apply pre-configuration via [configuration profiles](https://www.twingate.com/docs/configuration-profiles)
 
-### iOS — Link ABM
-1. Navigate to **Settings → Apple (Devices & Users) → VPP Managed Distribution**
-2. Follow guided steps to link Apple Business Manager
-3. Ensure **"Automatically Send Invites"** is **unchecked**
-
-### iOS — Enable Device Assignment
-1. Navigate to **Applications → Native → Purchased**
-2. Select the Twingate iOS app
-3. From **More Actions**, select **Enable Device Assignment**
-   - Prevents requirement for personal Apple ID to accept app assignments
-
-### iOS — Enable Auto Updates
-1. Select the Twingate iOS app
-2. From **More Actions**, select **Enable Auto Updates**
+### iOS
+1. Navigate to **Settings → Apple (under Devices & Users) → VPP Managed Distribution**
+2. Link Apple Business Manager account (ensure "Automatically Send Invites" is **unchecked**)
+3. Go to **Applications → Native → Purchased**, select Twingate iOS app
+4. From **More Actions**, select **Enable Device Assignment** (prevents personal Apple ID requirement)
+5. Optionally select **Enable Auto Updates** from **More Actions**
 
 ## Configuration Values
-- macOS pre-configuration options (via configuration profiles):
-  - Auto-enable VPN configuration
-  - Enable system extension
-  - Pre-populate Network name
+- Pre-configuration options (macOS): auto-enable VPN, enable system extension, pre-populate Network name — configured via configuration profiles guide
 
 ## Gotchas
-- **Manually installed clients must be removed first** — version conflicts can occur if users already have Twingate installed outside MDM
-  - Create a temporary removal policy targeting all devices; deactivate it before rolling out MDM-managed version
+- **Manually installed clients must be removed first** — version conflicts can occur if users already have Twingate installed; create a temporary removal policy before rollout, then deactivate it
 - "Automatically Send Invites" must be **unchecked** during ABM linking
-- Device assignment must be explicitly enabled; default deployment method requires personal Apple ID
+- Device Assignment must be explicitly enabled; default deployment requires users' personal Apple IDs
 
 ## Related Docs
 - [Twingate Configuration Profiles (macOS)](https://www.twingate.com/docs/configuration-profiles)
+- [Workspace ONE VPP/ABM Integration](https://docs.omnissa.com) (Workspace ONE official docs)
 - [Apple Business Manager](https://business.apple.com)
-- Workspace ONE official documentation (non-App Store app distribution, ABM integration)
+- [Twingate Download Page](https://www.twingate.com/download)

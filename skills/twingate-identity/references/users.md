@@ -1,16 +1,15 @@
 # Twingate Users
 
 ## Summary
-Twingate manages users either via social logins (Google, Microsoft, GitHub, LinkedIn) or a third-party IdP with SCIM sync. New users default to the "Everyone" group with no Resource access until explicitly assigned. Billing applies to all synchronized users and service accounts.
+Twingate users can be managed via social logins or synced automatically from a third-party IdP via SCIM. New users default to the "Everyone" group with no Resource access until explicitly assigned. Billing applies to all synchronized users and service accounts.
 
 ## Key Information
-- Default auth: social logins managed via Admin Console Teams page
-- IdP integration: users sync automatically via SCIM; cannot be modified in Admin Console
-- New users only have access to the "Everyone" group by default
-- Users have **no Resource access** unless Resources are added to Everyone group or users are assigned to a Group with Resources
-- User access can be viewed via detail page (list view or Access Graph)
-- Access Graph shows groups, Resources, paths, and policies; filterable by Group, Remote Network, or Resource
-- Billing covers all synchronized users and service accounts
+- Default auth: Google, Microsoft, GitHub, LinkedIn social logins
+- IdP-connected accounts: users auto-synced via SCIM; cannot be modified in Admin Console
+- All new users start in "Everyone" group only — **no Resource access by default**
+- Resource access requires: adding Resources to Everyone group, OR assigning users to specific Groups
+- User access visibility: detail page shows list view or Access Graph (filterable by Group, Remote Network, Resource)
+- Billing applies to all synchronized users + service accounts
 
 ## Admin Roles
 
@@ -21,22 +20,25 @@ Twingate manages users either via social logins (Google, Microsoft, GitHub, Link
 | Support | Read-only across entire Admin Console |
 
 ## Prerequisites
-- Social logins OR configured IdP (not both simultaneously)
-- SCIM configured if using IdP sync
+- Social logins: no additional setup required
+- IdP sync: requires configured Identity Provider with SCIM enabled
 
-## Configuration Notes
-- **Social login users**: Invite/deactivate via Admin Console → Teams
-- **IdP users**: All lifecycle changes (create/deactivate) must be made in the IdP; changes propagate to Twingate immediately via SCIM
+## User Lifecycle
+1. **Add user** — via Teams page (social login) or auto-sync from IdP
+2. **Assign access** — add to Groups that have Resources, or add Resources to Everyone group
+3. **Verify access** — check user detail page (list or Access Graph view)
+4. **Offboard** — disable or delete user when access no longer needed
 
 ## Gotchas
-- Users added via IdP **cannot** be modified in the Admin Console — changes must be made at the IdP level
-- New users have zero Resource access by default; the Everyone group grants no access unless Resources are explicitly assigned to it
-- Deleting/disabling users is handled separately via the Offboarding Users process
+- Users with **no Group assignments beyond Everyone** cannot access any Resources — this is a common misconfiguration
+- IdP-managed users **cannot be edited** in the Admin Console; all changes must come from IdP via SCIM and apply immediately
+- Deactivated users in IdP are deactivated in Twingate immediately via SCIM
+- All synced users count toward billing — including inactive/pending users
 
 ## Related Docs
 - [Social Logins](#) — managing social login providers
-- [Identity Providers](#) — configuring IdP and SCIM
-- [Groups](#) — assigning users to groups with Resource access
-- [Admins](#) — detailed admin role descriptions and assignment
-- [Offboarding Users](#) — disabling/deleting users
+- [Identity Providers](#) — IdP configuration and SCIM setup
+- [Groups](#) — assigning Resources to groups
+- [Admins](#) — detailed admin role permissions and assignment
+- [Offboarding Users](#) — disable/delete user procedures
 - [Billing](#) — user billing details

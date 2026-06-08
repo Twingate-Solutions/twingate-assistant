@@ -1,17 +1,18 @@
 # Upgrading Twingate Connectors on Linux (systemd)
 
 ## Summary
-Instructions for upgrading Twingate Connector running as a native Linux systemd service. Covers manual upgrades via package managers and automated update strategies using cron jobs.
+Covers upgrading Twingate Connector packages running as native Linux systemd services using `apt` (Ubuntu/Debian) or `dnf` (Fedora/CentOS). Includes manual upgrade steps and automation options via cron jobs.
 
 ## Key Information
 - Check current version: `twingate-connector -V`
-- Supports Ubuntu/Debian (apt) and Fedora/CentOS (dnf)
-- Always deploy 2+ Connectors per Remote Network to avoid downtime during upgrades
+- Restart via systemd after every upgrade
+- Deploy 2+ Connectors per Remote Network to avoid downtime during upgrades
+- Stagger update schedules when multiple Connectors exist in same Remote Network
 
 ## Prerequisites
-- Twingate Connector installed as a systemd service
-- Package manager access (apt or dnf)
-- sudo privileges
+- Twingate Connector installed as systemd service
+- `apt` or `dnf` package manager
+- `sudo` access
 
 ## Step-by-Step
 
@@ -38,7 +39,7 @@ EOF
 sudo chmod +x /etc/cron.weekly/update-twingate-connector
 ```
 
-### Advanced: Stay One Version Behind (Ubuntu/Debian)
+### Advanced: Stay One Version Behind (runs Sundays at 2 AM)
 ```bash
 sudo sh -c '
 curl -fsSL "https://raw.githubusercontent.com/Twingate-Solutions/general-scripts/refs/heads/main/bash-scripts/keep-one-behind.sh" \
@@ -48,26 +49,24 @@ echo "0 2 * * 0 root /usr/local/sbin/keep-one-behind.sh twingate-connector --app
   > /etc/cron.d/twingate-connector-one-behind
 '
 ```
-- Runs every Sunday at 2 AM
-- Logs to `/var/log/keep-one-behind.log`
-- Installs second-latest version (not latest)
 
 ## Configuration Values
-| Item | Value |
-|------|-------|
-| Script install path | `/usr/local/sbin/keep-one-behind.sh` |
-| Cron job path | `/etc/cron.d/twingate-connector-one-behind` |
+| Value | Detail |
+|---|---|
+| Script location | `/usr/local/sbin/keep-one-behind.sh` |
+| Cron job file | `/etc/cron.d/twingate-connector-one-behind` |
 | Log file | `/var/log/keep-one-behind.log` |
+| Cron schedule | `0 2 * * 0` (Sundays 2 AM) |
 | Script flags | `--apply`, `--allow-downgrades` |
 
 ## Gotchas
-- **Never update multiple Connectors in the same Remote Network simultaneously** — stagger schedules to prevent user downtime
-- Schedule updates during off-peak hours
-- The "one version behind" script supports dry-run (omit `--apply`) for testing before applying
-- Monitor `/var/log/keep-one-behind.log` after deploying automated updates
+- Never update multiple Connectors in the same Remote Network simultaneously — causes user downtime
+- The "one version behind" script supports downgrades; useful if latest version has issues
+- Monitor `/var/log/keep-one-behind.log` after enabling advanced automation
+- Adjust cron schedule to match actual maintenance windows
 
 ## Related Docs
-- [Upgrading Connectors best practices](https://www.twingate.com/docs/upgrading-connectors)
-- [Linux systemd deployment](https://www.twingate.com/docs/systemd-service)
-- [Connector Release Notes](https://www.twingate.com/docs/connector-release-notes)
-- [Automated update template script](https://github.com/Twingate-Solutions/general-scripts/blob/main/bash-scripts/keep-one-behind.sh)
+- Upgrading Connectors (best practices)
+- Linux systemd deployment
+- Connector Release Notes
+- [Automated update template script](https://raw.githubusercontent.com/Twingate-Solutions/general-scripts/refs/heads/main/bash-scripts/keep-one-behind.sh)

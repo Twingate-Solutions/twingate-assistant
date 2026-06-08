@@ -1,35 +1,35 @@
 # Deploy Twingate Connector on Synology NAS (DSM 7.x)
 
 ## Summary
-Deploy a Twingate Connector on Synology NAS running DSM 7.0+ using Container Manager's Docker Compose service. The Connector enables secure remote access to the NAS and other local network devices without VPN or port forwarding. DSM 6.x users must use a separate guide.
+Deploy a Twingate Connector on Synology NAS running DSM 7.0+ using Docker Compose via the built-in Container Manager. Enables secure remote access to the NAS and other local network devices without VPN or port forwarding.
 
 ## Key Information
-- Uses DSM 7.2+ built-in Container Manager (Docker Compose)
-- Connector runs with `network_mode: host` to access local network devices
-- Enables remote access to NAS and any other device on the same network
-- Updates are handled in-place via Container Manager without manual intervention
+- Requires DSM 7.0 or later (use separate DSM 6 guide for older versions)
+- Uses Container Manager's Docker Compose (Project) feature
+- Connector runs with `network_mode: host` for local network access
+- After deployment, NAS and other local devices must be added as Resources in Admin Console
 
 ## Prerequisites
-- Synology NAS running DSM 7.0 or later
-- Remote Network created in Twingate Admin Console
-- Connector tokens (Access Token + Refresh Token) generated from Admin Console
-- Container Manager installed on DSM
-- Access to DSM web interface (default: `https://<NAS-IP>:5001`)
+- Synology NAS running DSM 7.0+
+- Twingate Remote Network configured in Admin Console
+- Connector created with Access Token and Refresh Token generated
+- Connected to same local network as NAS during setup
 
 ## Step-by-Step
 
-1. In Twingate Admin Console → Networks → select Remote Network → Deploy Connector → Docker → Generate Tokens
-2. In DSM File Station, create folder: `docker/twingate-connector`
-3. On local computer, create `compose.yaml` (see below)
-4. Open Container Manager → Project → Create
-5. Name project `twingate-connector`, set Path to created folder, upload `compose.yaml`
-6. Replace placeholder values with actual tenant name and tokens
+1. In Twingate Admin Console, create a Remote Network and generate a Connector with Access Token + Refresh Token
+2. On your computer, create `compose.yaml` (see config below)
+3. In DSM File Station, create folder: `docker/twingate-connector`
+4. Open **Container Manager → Project → Create**
+5. Name project `twingate-connector`, set Path to folder, upload `compose.yaml`
+6. Replace placeholder values (tenant name, tokens) in the project config
 7. Click Next → Next → check "Start the project once it is created" → Done
-8. Verify Connector appears as live in Twingate Admin Console
-9. Add NAS as a Resource using its local IP address
+8. Verify Connector appears as live in Admin Console
+9. Add NAS IP as a Resource in Admin Console to enable access
 
-## Configuration Values (`compose.yaml`)
+## Configuration Values
 
+**compose.yaml:**
 ```yaml
 services:
   twingate-connector:
@@ -44,22 +44,21 @@ services:
 | Parameter | Value |
 |---|---|
 | `TWINGATE_NETWORK` | Tenant name from `https://tenant.twingate.com/networks` |
-| `TWINGATE_ACCESS_TOKEN` | Generated in Admin Console |
-| `TWINGATE_REFRESH_TOKEN` | Generated in Admin Console |
-| `network_mode` | Must be `host` |
+| `TWINGATE_ACCESS_TOKEN` | Token from Admin Console Connector setup |
+| `TWINGATE_REFRESH_TOKEN` | Token from Admin Console Connector setup |
 
 ## Update Process
-1. Container Manager → Image → check for "Update Available"
-2. Click "Update Available" → Update → confirm
+1. Container Manager → Image → check for "Update Available" badge
+2. Click "Update available" → Update → confirm
 3. New image downloads and applies automatically; no reconfiguration needed
 
 ## Gotchas
-- DSM 6.x requires a different deployment guide entirely
-- Must add NAS as a Resource in Admin Console separately — deploying the Connector alone doesn't grant access
-- Tokens are single-use; generate new tokens per Connector instance
-- Additional Docker Compose parameters available via Docker Compose examples doc
+- DSM 7.2+ required for Docker Compose/Container Manager Project feature; earlier DSM 7.x may differ
+- Successful deployment shows exit code 0 in Container Manager
+- NAS is **not** automatically a Resource—must be added manually in Admin Console using its local IP
+- Additional Connector options (custom DNS, local logging) can be added as extra environment variables per Docker Compose examples docs
 
 ## Related Docs
-- Synology NAS DSM 6 guide (for older DSM versions)
-- Docker Compose examples (additional Connector configuration options)
-- Twingate Resources guide (adding Resources after Connector deployment)
+- [Synology NAS DSM 6 Guide](https://www.twingate.com/docs/)
+- [Docker Compose Examples](https://www.twingate.com/docs/)
+- [Resources Guide](https://www.twingate.com/docs/)

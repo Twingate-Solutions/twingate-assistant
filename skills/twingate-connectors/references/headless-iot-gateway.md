@@ -1,84 +1,78 @@
 # Twingate Headless IoT Gateway
 
 ## Summary
-Configures a Linux machine as a centralized Twingate gateway for IoT/legacy devices that cannot run the Twingate Client directly. The gateway handles DNS resolution, NAT internet access, and secure Twingate Resource access for all devices on the local network via a headless client and Service Account.
+Configures a Linux machine as a centralized Twingate gateway for IoT devices or legacy systems that cannot run the Twingate Client directly. The gateway handles DNS resolution, NAT internet access, and secure Twingate Resource access for all devices on the local network.
 
 ## Key Information
-- Uses Twingate headless client + Bind9 DNS + IPTables NAT on a single Linux gateway machine
+- Uses Twingate headless Client + Bind9 DNS + IPTables NAT on a single Linux gateway
+- Tested on Ubuntu, Debian, and Fedora-based distros only
+- Requires a Service Account (not a user account) with a generated Service Key Token
 - IoT/legacy devices point their DNS and default gateway to this Linux machine
-- Twingate Resources resolve to CGNAT IP addresses via the gateway's DNS
-- Tested on Ubuntu, Debian, and Fedora; other distros may require manual steps
-- Service Account + Service Key Token used for authentication (no user login required)
+- Twingate Resources return CGNAT IP addresses via DNS
 
 ## Prerequisites
-- Debian-based (Ubuntu/Debian) or Fedora Linux machine
-- `sudo`/admin access
-- Internet connection
-- Twingate account with ability to create Service Accounts
-- `curl` installed
+- Debian/Ubuntu or Fedora Linux machine with admin access
+- Internet connection on the gateway machine
+- Twingate Service Account with a generated Service Key (`service_key.json`)
+- At least one Resource assigned to the Service Account
 
 ## Step-by-Step
 
-1. **Update system and install curl**
+1. **Update system and install curl:**
    ```bash
    sudo apt update && sudo apt upgrade -y
    sudo apt install curl -y
    ```
 
-2. **Download setup script**
+2. **Download setup script:**
    ```bash
    curl https://raw.githubusercontent.com/Twingate-Solutions/general-scripts/main/twingate-headless-client-gateway/twingate-headless-client-gateway.sh -o gateway_config.sh
    ```
 
-3. **Create Service Account**
-   - Admin Console → Teams → Services → New Service Account
-   - Click "Generate Key" → set expiration (0 = unlimited)
-   - Download or copy the Service Key Token
+3. **Create Service Account:** Admin Console → Teams → Services → New Service Account → Generate Key → save as `service_key.json` in same directory as script
 
-4. **Save token file**
-   - Save token as `service_key.json` in the same directory as `gateway_config.sh`
-
-5. **Assign a Resource** to the Service Account for testing (use one with a public DNS name)
-
-6. **Run setup script**
+4. **Run the script:**
    ```bash
    sudo ./gateway_config.sh ./service_key.json 10.0.0.0/24
    ```
+   Parameters: `<path_to_service_key.json>` `<local_network_CIDR>`
 
-7. **Verify services**
+5. **Verify services:**
    ```bash
    sudo systemctl status bind9
    sudo twingate status
    ```
 
-8. **Configure client devices** to use the Linux gateway's IP as both DNS server and default gateway
+6. **Configure client devices:** Set DNS and default gateway to the Linux machine's IP
 
 ## Configuration Values
 
-| Parameter | Description |
-|-----------|-------------|
-| `./service_key.json` | Path to Service Account key file (arg 1) |
-| `10.0.0.0/24` | Local network CIDR block (arg 2) |
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `service_key.json` | Service Account token file path | `./service_key.json` |
+| Local CIDR | Network block for NAT gateway scope | `10.0.0.0/24` |
 
-Script auto-installs and configures: Bind9, IPTables NAT rules, Twingate headless client.
-
-## Verification Tests
-
+## Testing
 ```bash
-# On client device:
-nslookup twingate.resource.internal  # Should return CGNAT IP
-nslookup google.com                   # Should return public IP
-ping 8.8.8.8                          # Internet connectivity
+# DNS for Twingate Resource (expect CGNAT IP)
+nslookup twingate.resource.internal
+
+# External DNS (expect public IP)
+nslookup google.com
+
+# Internet connectivity
+ping 8.8.8.8
 ```
 
 ## Gotchas
-- Script only tested on Ubuntu, Debian, Fedora — other distros need manual configuration
 - `service_key.json` must be in the **same directory** as `gateway_config.sh` before running
-- Set key expiration to `0` for non-expiring tokens (IoT deployments often need this)
-- All IoT devices must be on the **same local network** as the gateway machine
+- Set token expiration to `0` for unlimited — otherwise gateway breaks when key expires
+- Script installs Bind9, IPTables NAT rules, and Twingate headless Client automatically — review before running on production systems
+- Other Linux distros may work but require manual steps from the script
+- Assign a Resource with a **public DNS name** to the Service Account for easiest initial testing
 
 ## Related Docs
 - [Linux Headless Clients](https://www.twingate.com/docs/linux-headless)
-- [Main Script Repository](https://github.com/Twingate-Solutions/general-scripts)
+- [Main Script Repository](https://github.com/Twingate-Solutions/general-scripts/tree/main/twingate-headless-client-gateway)
 - Bind9 DNS Server on Debian
-- IPTables NAT configuration
+- Using IPTables for NAT

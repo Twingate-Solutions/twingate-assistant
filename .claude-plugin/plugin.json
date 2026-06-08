@@ -1,7 +1,7 @@
 {
   "name": "twingate-assistant",
   "description": "Twingate ZTNA implementation assistant \u2014 architecture, deployment, IaC, troubleshooting. Use this plugin whenever working with Twingate, zero trust network access, or any of: connectors, remote networks, resources, security policies, identity providers, device trust, DNS filtering, exit networks, the Twingate API, Twingate Terraform provider, Twingate Pulumi provider, Twingate Kubernetes operator, Twingate gateway, or SSH PAM.",
-  "version": "2026.151.0",
+  "version": "2026.158.0",
   "author": {
     "name": "Twingate Solutions Engineering"
   },

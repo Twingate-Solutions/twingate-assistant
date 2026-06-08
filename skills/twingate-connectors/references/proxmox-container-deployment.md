@@ -1,17 +1,17 @@
-# Deploy Twingate Connector in a Proxmox Container
+# Deploy Twingate Connector in Proxmox Container
 
 ## Summary
-Guide for deploying a Twingate Connector inside a Proxmox LXC container. Uses Ubuntu 22.04 template with minimal resource requirements. Installation follows standard Linux Connector deployment via script from the Admin Console.
+Guide for deploying a Twingate Connector inside a Proxmox LXC container. Uses Ubuntu 22.04 LTS template as the base image. Process covers container creation, configuration, and Connector installation via the standard Linux deployment script.
 
 ## Key Information
-- Proxmox uses LXC containers (lightweight, no separate kernel)
-- Minimum specs: 1 vCPU, 512MB RAM
-- Tested on Proxmox 7.4-3 with Ubuntu 22.04 template
-- Connectors do **not** auto-update — must be managed manually or via cron
+- Minimum requirements: 1 vCPU, 512MB RAM
+- Uses LXC containers (not full VMs)
+- Tested on Proxmox 7.4-3 with Ubuntu 22.04
+- Connectors do **not** auto-update — must be managed manually
 
 ## Prerequisites
-- Proxmox VE installed with shell access
-- LXC container template downloaded (Ubuntu 22.04 recommended)
+- Proxmox VE installed with a node accessible
+- Container template downloaded (Ubuntu 22.04 LTS or other [supported distro](https://www.twingate.com/docs/supported-platforms))
 - Access to Twingate Admin Console with a configured Remote Network
 
 ## Step-by-Step
@@ -23,16 +23,16 @@ pveam list
 pveam download <storageLocation> <templateName>
 ```
 
-### 2. Create LXC Container (via Proxmox UI)
+### 2. Create Container (via Proxmox UI → "Create CT")
 | Tab | Setting |
 |-----|---------|
 | General | Set hostname, password; leave **Nesting** checked |
 | General | Uncheck **Unprivileged container** to allow pings to Resources |
-| Template | Select storage + downloaded image |
+| Template | Select storage ID and Ubuntu 22.04 image |
 | Disks | Default 8GB sufficient |
 | CPU | Default 1 vCPU |
 | Memory | Default 512MB |
-| Network | Set bridge interface; DHCP or static IP |
+| Network | Set bridge; DHCP or static IP |
 | DNS | Default or custom |
 
 ### 3. Prepare Container
@@ -46,21 +46,24 @@ apt install curl -y
 1. Log into Twingate Admin Console
 2. Navigate to target Remote Network
 3. Select **Linux** deployment method
-4. Click **Generate Tokens** (tokens auto-included in script)
-5. Copy deployment command and run in container console
+4. Click **Generate Tokens**
+5. Copy the generated deployment command
+6. Paste and run in container console
 
 ## Configuration Values
-- **storageLocation**: Proxmox storage ID that supports container templates
-- **templateName**: Copied from `pveam list` output
+- **Storage location**: Proxmox storage ID that supports container templates as content type
+- **Container user**: `root` (login via Proxmox VNC/Console tab)
+- **Deployment script**: Auto-includes tokens; sourced from Admin Console
 
 ## Gotchas
-- **Unprivileged container**: Must be **unchecked** if ICMP (ping) to Resources is required
-- **Static IP recommended**: Required if Resources have IP allowlists or if network logging is in use
-- **No auto-updates**: Stagger updates across multiple Connectors on the same Remote Network to avoid downtime
-- `curl` must be installed before running the deployment script
-- Peer-to-peer connections should be configured to avoid Fair Use Policy bandwidth limits
+- **Unprivileged containers block ICMP**: Uncheck "Unprivileged container" if you need to ping Resources through the Connector
+- **Static IP recommended**: Required if Resources use IP allowlists or if you need consistent network logging
+- **cURL is not pre-installed**: Must install before running the deployment script
+- **No auto-updates**: Connector updates must be manually triggered or automated via cron job; stagger updates across multiple Connectors on the same Remote Network to avoid downtime
+- **Peer-to-peer connections**: Should be configured to avoid Fair Use Policy bandwidth limits
 
 ## Related Docs
-- [Supported Linux distros](https://www.twingate.com/docs/supported-platforms)
-- [Support peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer)
-- [Automate updates with cron](https://www.twingate.com/docs/connector-cron-updates)
+- [Supported Distros](https://www.twingate.com/docs/supported-platforms)
+- [Support Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
+- [Automate Updates via Cron Job](https://www.twingate.com/docs/connector-updates)
+- [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)

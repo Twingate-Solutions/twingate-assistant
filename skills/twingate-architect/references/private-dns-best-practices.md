@@ -1,54 +1,40 @@
-# Private DNS Best Practices with Twingate
-
-## Page Title
-Best Practices for Configuring Private DNS with Twingate
+# Best Practices for Configuring Private DNS with Twingate
 
 ## Summary
-Twingate recommends using private DNS exclusively for Resources rather than IP addresses or public DNS entries. DNS zones can be mapped to Twingate Resources and Groups to enable automatic access for new hosts added to a zone. The Connector handles FQDN resolution using its host's configured DNS servers.
+Twingate recommends using private DNS exclusively for Resources rather than IP addresses or public DNS entries. DNS zones can map directly to Twingate Groups, enabling automatic access for new hosts without manual Resource configuration. The Connector handles FQDN resolution using its host's configured DNS servers.
 
 ## Key Information
-- Private DNS preferred over public DNS (security) and IP addresses (usability, overlap issues)
-- DNS zone-based Resources automatically include new hosts added to that zone—no manual Resource updates needed
-- Connector resolves FQDNs the same way any host on the same subnet would
-- Managed DNS services (AWS Route 53, Azure DNS) eliminate need for dedicated DNS server deployment
+- Private DNS is recommended but not required
+- Connectors resolve FQDNs the same way any host on the same subnet would
+- DNS zone wildcards in Twingate Resources automatically include new hosts added to that zone
+- Cloud services (AWS Route 53, Azure DNS) eliminate need for dedicated DNS servers
+- On-premises networks typically need a DNS server deployed on the internal network
 
-## Prerequisites
-- A private DNS zone configured (cloud-managed or on-premises DNS server)
-- Connector deployed on host with access to the internal network's DNS servers
+## Why Private DNS Over IP or Public DNS
+- Public DNS entries for private Resources leak network information to potential attackers
+- IP addresses are error-prone and unfriendly for end users
+- IP overlap (same IP on two different Networks) is resolved by using DNS names — Twingate can distinguish Resources by FQDN even when IPs collide
 
-## Setup Pattern (DNS Zone → Resource → Group)
+## Configuration Pattern: DNS Zone → Twingate Resource → Group
+1. Define a DNS zone scoped to a role/team (e.g., `.engineering.yourcompany.com`)
+2. Create a single Twingate Resource pointing to the DNS zone wildcard
+3. Map that Resource to the corresponding Twingate Group (e.g., Engineering)
+4. New hosts added under that zone are automatically accessible — no additional Resource configuration needed
 
-1. Define a DNS zone (e.g., `.engineering.yourcompany.com`)
-2. Place all relevant hosts as records under that zone (e.g., `host1.engineering.yourcompany.com`)
-3. Create a single Twingate Resource pointing to the DNS zone wildcard
-4. Map that Resource to the appropriate Twingate Group (e.g., Engineering group)
-
-**Result:** Any new host added under `.engineering.yourcompany.com` is automatically accessible to the Engineering group without additional Resource configuration.
-
-## Configuration Values
-| Item | Value/Example |
-|------|---------------|
-| DNS zone format | `.engineering.yourcompany.com` |
-| Resource definition | Wildcard DNS zone (e.g., `*.engineering.yourcompany.com`) |
-| Custom DNS server | Optional on Connector (not recommended) |
-
-## Verification Command
-Test Connector DNS resolution by logging into the Connector host:
-```bash
-nslookup hostX.Y.mycompany.com
-```
+## DNS Resolution Behavior
+- **Who resolves:** The Connector resolves FQDNs using the DNS servers configured on the Connector host
+- **Verify resolution:** SSH into Connector host and run:
+  ```
+  nslookup hostX.Y.mycompany.com
+  ```
+- **Custom DNS server:** Supported but adds configuration complexity — not recommended; prefer the Connector host's existing DNS configuration
 
 ## Gotchas
-- **IP overlap is real:** The same private IP (e.g., `10.0.1.34`) can exist across multiple Networks—DNS names resolve this ambiguity
-- **Public DNS for private Resources is a security risk:** Avoid exposing internal hostnames publicly
-- **Custom DNS on Connector adds complexity:** Use the Connector host's existing DNS configuration instead
-- **Connector placement matters:** Connector must be on a subnet where it can resolve the private DNS zone; verify with `nslookup` before assuming it works
-- **DNS zone design is hard to change later:** Plan zone structure to align with permission/role boundaries upfront
+- Custom DNS server on Connector is possible but complicates setup — avoid unless necessary
+- DNS zone structure should be planned before deployment; retrofitting is harder
+- Connector must be on a subnet where it can resolve the private DNS zone — placement matters
 
 ## Related Docs
-- IP Overlap handling
-- AWS Route 53 integration
-- Azure DNS integration
-- Twingate Resources configuration
-- Twingate Groups configuration
-- Connector deployment
+- [IP Overlap](https://www.twingate.com/docs) (referenced inline)
+- AWS Route 53 documentation
+- Azure DNS documentation

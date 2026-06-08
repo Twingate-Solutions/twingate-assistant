@@ -1,57 +1,62 @@
 # Twingate GraphQL API Reference
 
+## Page Title
+Twingate GraphQL API Reference
+
 ## Summary
-Twingate exposes a GraphQL API for managing all platform resources including networks, connectors, resources, groups, users, devices, and service accounts. All requests require an API token passed via header. The API supports full CRUD operations via queries and mutations with cursor-based pagination.
+Twingate exposes a GraphQL API for programmatic management of network resources, connectors, users, devices, groups, and security policies. All requests require an API token passed via HTTP header to a tenant-specific endpoint. The API supports full CRUD operations on core Twingate objects.
 
 ## Key Information
 - **API Type**: GraphQL (queries + mutations)
-- **Pagination**: Cursor-based using `before`, `after`, `first`, `last` arguments; responses include `pageInfo`, `edges`, `totalCount`
-- **Mutation responses**: Always return `ok` (Boolean) and `error` (String) fields
-- **IDs**: Base64-encoded (e.g., `"YWJjMTIzeHl6Nzg5"`)
-- **Resource types**: AccessRequests, CertificateAuthorities, Connectors, Devices, DNS Filtering Profiles, Gateways, Groups, Remote Networks, Resources, Security Policies, Serial Numbers, Service Accounts, Users
+- **Endpoint**: `https://<network-name>.twingate.com/api/graphql/`
+- **Auth Header**: `X-API-KEY: <YOUR_TOKEN_HERE>`
+- **Pagination**: Cursor-based (`before`, `after`, `first`, `last`) on all list queries
+- **Mutation responses**: Always include `ok` (Boolean) and `error` (String) fields
 
 ## Prerequisites
-- API token generated from the Twingate admin console
+- Twingate account with admin access
+- API token generated from the admin console
 - Network name (subdomain) for your Twingate tenant
 
 ## Configuration Values
 
-| Parameter | Value |
-|-----------|-------|
-| Endpoint | `https://<network_name>.twingate.com/api/graphql/` |
-| Auth Header | `X-API-KEY: <YOUR_TOKEN_HERE>` |
+| Parameter | Description |
+|-----------|-------------|
+| `X-API-KEY` | HTTP header; API token from admin console |
+| `<network name>` | Your Twingate subdomain in the endpoint URL |
 
-## Core Operations Reference
-
-**Queries** (all support pagination filters):
-- `resource(id)` / `resources(filter)` — fetch resources
-- `remoteNetwork(id|name)` / `remoteNetworks(filter)`
-- `connector(id)` / `connectors(filter)`
-- `group(id)` / `groups(filter)`
-- `user(id)` / `users(filter)`
-- `device(id)` / `devices(filter)` + `devicePosture(id)`
-- `serviceAccount(id)` / `serviceAccounts(filter)`
-- `securityPolicy(id|name)` / `securityPolicies(filter)`
+## Available Queries
+- `accessRequest(id)` / `accessRequests(filter, pagination)`
+- `connector(id)` / `connectors(filter, pagination)`
+- `device(id)` / `devices(filter, pagination)` / `devicePosture(id)`
+- `group(id)` / `groups(filter, pagination)`
+- `remoteNetwork(id|name)` / `remoteNetworks(filter, pagination)`
+- `resource(id)` / `resources(filter, pagination)`
+- `securityPolicy(id|name)` / `securityPolicies(filter, pagination)`
+- `serviceAccount(id)` / `serviceAccounts` / `serviceAccountKey(id|name)`
+- `user(id)` / `users(filter, pagination)`
+- `gateway(id)` / `gateways` / `certificateAuthority(id)` / `certificateAuthorities`
 - `dnsFilteringProfile(id)` / `dnsFilteringProfiles`
+- `serialNumbers(filter, pagination)`
 
-**Mutations**:
-- Resource: `resourceCreate`, `resourceUpdate`, `resourceDelete`, `resourceAccessAdd`, `resourceAccessRemove`, `resourceAccessSet`
-- Group: `groupCreate`, `groupUpdate`, `groupDelete`
-- Connector: `connectorCreate`, `connectorUpdate`, `connectorDelete`, `connectorGenerateTokens`
-- Remote Network: `remoteNetworkCreate`, `remoteNetworkUpdate`, `remoteNetworkDelete`
-- Device: `deviceUpdate`, `deviceBlock`, `deviceUnblock`, `deviceArchive`, `deviceUnarchive`
-- Service Account: `serviceAccountCreate`, `serviceAccountDelete`, `serviceAccountKeyCreate`, `serviceAccountKeyRevoke`, `serviceAccountKeyDelete`
-- Access Requests: `accessRequestApprove`, `accessRequestReject`
+## Available Mutations
+- **Access**: `accessRequestApprove`, `accessRequestReject`
+- **Connectors**: `connectorCreate`, `connectorUpdate`, `connectorDelete`, `connectorGenerateTokens`
+- **Devices**: `deviceArchive`, `deviceUnarchive`, `deviceBlock`, `deviceUnblock`, `deviceUpdate`
+- **Groups**: `groupCreate`, `groupUpdate`, `groupDelete`
+- **Remote Networks**: `remoteNetworkCreate`, `remoteNetworkUpdate`, `remoteNetworkDelete`
+- **Resources**: `resourceCreate`, `resourceUpdate`, `resourceDelete`, `resourceAccessAdd`, `resourceAccessRemove`, `resourceAccessSet`
+- **Kubernetes Resources**: `kubernetesResourceCreate`, `kubernetesResourceUpdate`
+- **Service Accounts**: `serviceAccountCreate`, `serviceAccountDelete`, `serviceAccountKeyCreate`, `serviceAccountKeyRevoke`, `serviceAccountKeyUpdate`, `serviceAccountKeyDelete`
+- **Security Policies**: `securityPolicyUpdate`
+- **DNS Filtering**: `dnsFilteringProfileCreate`, `dnsFilteringProfileUpdate`, `dnsFilteringProfileDelete`
+- **Serial Numbers**: `serialNumbersCreate`, `serialNumbersDelete`
+- **Gateways**: `gatewayCreate`, `gatewayUpdate`, `gatewayDelete`
 
 ## Gotchas
-- `groupUpdate` supports both full replacement (`resourceIds`, `userIds`) and incremental (`addedResourceIds`, `removedResourceIds`) — do not mix
-- `resourceUpdate`: passing `null` for `securityPolicyId` resets to default policy; omitting it leaves unchanged
-- `resourceUpdate`: passing `null` for `tags` removes all tags; omitting leaves unchanged; same pattern for `alias`
-- `serviceAccountKeyCreate`: `expirationTime` is in days (0–365 inclusive); token is only returned at creation time
-- `dnsFilteringProfile` queries return `null` when DNS filtering is not enabled
-- `remoteNetwork` can be queried by either `id` OR `name` (both optional)
-- `resourceAccessSet` **replaces all existing access** — use `resourceAccessAdd`/`Remove` for incremental changes
-
-## Related Docs
-- [Getting Started with the API](https://www.twingate.com/docs) (referenced in page intro)
-- [Twingate Support](https://www.twingate.com/support)
+- **`groupUpdate`**: Use `addedUserIds`/`removedUserIds` for incremental changes OR `userIds` for full replacement — not both simultaneously
+- **`resourceUpdate` tags**: Passing `null` removes all tags; omitting the field leaves tags unchanged
+- **`resourceUpdate` alias**: Passing `null` clears the alias; omitting leaves it unchanged
+- **`serviceAccountKeyCreate`**: Token value is only returned at creation time — store it immediately
+- **`serviceAccountKeyCreate` expiration**: `expirationTime` is days (0–365 inclusive)
+- **`securityPolicyId` on update**: Passing `null` resets to default policy; omitting

@@ -1,63 +1,57 @@
-# Device Profiles (Twingate Device Security Guide)
+# Device Profiles (Twingate)
 
 ## Summary
-Device Profiles define trust criteria that devices must meet to access Twingate networks and resources. Configuration includes Trusted Device Profiles (MDM/EDR/manual verification) and Approved Operating Systems (platform-level posture checks). Profiles act additively—all requirements in a profile must be satisfied simultaneously.
+Device Profiles define trust criteria for devices accessing Twingate resources, split into Trusted Device Profiles (MDM/EDR/manual verification) and Approved Operating Systems (baseline posture). Profiles act additively—a device must satisfy all requirements in a profile to earn it. Resources can require specific profiles for access.
 
 ## Key Information
-- **Two components**: Trusted Device Profiles + Approved Operating Systems
-- **Wristband model**: Devices can satisfy multiple profiles; sign-in requires ≥1 profile match; resource access requires the specific profile(s) assigned to that resource
-- **Trusted Device Profile requirements are AND logic**—every check must pass
-- Profiles are automatically available in Sign In Policy and Resource Policies once created
-- Blocked devices receive an in-client error message explaining the failure
+- **Two components**: Trusted Device Profiles (verification-based) + Approved Operating Systems (platform baseline)
+- **Sign-in policy**: Device needs at least one profile match to sign in
+- **Resource policy**: Can require specific profiles via `Only Trusted Devices` or `Custom`
+- All requirements within a single profile are **AND logic** (all must pass)
+- Blocked devices see an in-client error message explaining the failure
 
-## Prerequisites
-- Twingate admin access to Policies page
-- For MDM/EDR verification: configured integration (CrowdStrike, Intune, Jamf, Iru, SentinelOne, 1Password)
-- macOS firewall/HD encryption checks require macOS standalone Client
-
-## Verification Methods
+## Verification Methods (Trusted Device Profiles)
 | Method | Notes |
-|--------|-------|
-| Manual | Serial number or device instance; bulk upload supported; API-configurable |
+|---|---|
+| Manual | By serial number (bulk upload supported) or device instance; API-programmable |
 | CrowdStrike | Falcon API + ZTA score |
-| Intune | Compliance status via Microsoft Intune API |
+| Intune | Microsoft Intune compliance status |
 | Jamf | macOS only |
 | Iru (Kandji) | macOS only |
-| SentinelOne | Falcon API |
+| SentinelOne | Cross-platform |
 | 1Password | Extended Access Management |
 
-## Posture Checks by Platform
-| Platform | Available Checks |
-|----------|-----------------|
+## Posture Checks by Platform (Approved OS)
+| Platform | Checks |
+|---|---|
 | Windows | HD encryption, screen lock, firewall, antivirus, min OS version |
 | macOS | Screen lock, biometric, firewall*, HD encryption*, min OS version |
 | Linux | HD encryption, firewall |
 | iOS | Screen lock, biometric, min OS version |
 | Android | HD encryption, screen lock, biometric |
 
-*Requires macOS standalone Client
+*macOS firewall and HD encryption require **macOS standalone Client** only.
 
 ## Configuration Steps
-1. Navigate to **Policies → Device Profiles**
+1. Navigate to **Policies → Device Profiles tab**
 2. Click **Create** under Trusted Device Profiles
-3. Select target platform
-4. Choose verification method
-5. Configure optional posture checks
-6. Apply profile to Resource Policies via **Device Security → Only Trusted Devices** or **Custom**
-
-## Common Patterns
-- **Block unmanaged platform, allow managed**: Disable platform in Approved OS → create Trusted Profile with MDM verification
-- **Tiered access (employees vs. contractors)**: Approved OS for contractors; Trusted Profiles for employees; assign employee profiles to sensitive resources
-- **Test device exceptions**: Disable platform in Approved OS → create manual Trusted Profile → mark specific devices trusted
+3. Select platform, choose verification method, add posture checks
+4. Configure **Approved Operating Systems**: enable/disable platforms, set posture checks
+5. Apply profiles in **Resource Policies**: set Device Security to `Only Trusted Devices` or `Custom`
 
 ## Gotchas
-- Disabling a platform in Approved OS only blocks sign-in if **no Trusted Device Profile** for that platform exists and is satisfied
-- All posture checks within a single Trusted Device Profile are evaluated as AND—no partial credit
-- macOS firewall and HD encryption posture checks **will not work** without the standalone Client (not the browser extension)
+- Disabling a platform in Approved OS blocks **all** devices on that platform **unless** they match a Trusted Device Profile for that platform
+- macOS firewall/HD encryption posture checks only work with standalone Client, not browser extension
+- Manual verification can be done pre-enrollment via serial number bulk upload
+- Profiles are automatically available in both Sign In and Resource policies once created
+
+## Common Patterns
+- **Block platform except managed devices**: Disable in Approved OS + create Trusted Profile with MDM verification
+- **Tiered access (employee vs contractor)**: Approved OS for contractors, Trusted Profiles for employees; assign Trusted Profiles only to sensitive resources
+- **MDM-required platform**: Disable platform in Approved OS, create Trusted Profile with MDM integration
 
 ## Related Docs
 - Device Posture Checks reference
 - Manually Verified Devices
 - CrowdStrike / Intune / Jamf / Iru / SentinelOne / 1Password configuration guides
-- Sign In Policy
-- Resource Policies
+- Twingate API (for programmatic device trust)

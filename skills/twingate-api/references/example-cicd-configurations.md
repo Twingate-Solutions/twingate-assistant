@@ -1,61 +1,68 @@
-# CI/CD Configuration for Twingate
+# CI/CD Configurations for Twingate
 
 ## Summary
-Provides sample configurations for integrating Twingate headless Client into CI/CD pipelines using GitHub Actions and CircleCI. Workflows install the Twingate client, authenticate with a Service Key, and connect to private Resources. Sample configs are maintained in a public GitHub repository with automated testing.
+Provides sample configurations for integrating Twingate headless Client into CI/CD pipelines using GitHub Actions and CircleCI. Configurations install the Twingate Client, authenticate via a Service Key, and enable access to protected Resources during pipeline execution.
 
 ## Key Information
-- GitHub Marketplace Action available: "Connect to Twingate"
-- Supported platforms: Ubuntu (Jammy tested); other Linux distros may not be compatible
-- Uses Twingate Service Keys for headless authentication
-- APT repo: `https://packages.twingate.com/apt/`
+- Sample configs available in a public GitHub repository and included in Twingate's automated testing
+- Official GitHub Marketplace Action: "Connect to Twingate" available for direct use in workflows
+- Supported platform: Ubuntu (Linux Client may not be compatible with other distributions)
+- Authentication uses Twingate Service Keys (not user credentials)
 
 ## Prerequisites
-- Twingate Service Key (from Twingate Admin Console)
-- Ubuntu-based runner/machine
+- Twingate Service Key configured as a CI/CD secret
+- Ubuntu-based runner/machine image
 - Resources assigned to the Service account
 
-## GitHub Actions — Step-by-Step
+## GitHub Actions Configuration
 
-1. Install Twingate via APT:
-   ```bash
-   echo "deb [trusted=yes] https://packages.twingate.com/apt/ /" | sudo tee /etc/apt/sources.list.d/twingate.list
-   sudo apt update -yq && sudo apt install -yq twingate
-   ```
-2. Configure and start using Service Key:
-   ```bash
-   echo $TWINGATE_SERVICE_KEY | sudo twingate setup --headless=-
-   sudo twingate start
-   ```
-3. Access private Resources in subsequent steps
-4. Stop client when done: `sudo twingate stop`
+**Install Twingate:**
+```bash
+echo "deb [trusted=yes] https://packages.twingate.com/apt/ /" | sudo tee /etc/apt/sources.list.d/twingate.list
+sudo apt update -yq && sudo apt install -yq twingate
+```
 
-## CircleCI — Step-by-Step
+**Setup and start:**
+```bash
+echo $TWINGATE_SERVICE_KEY | sudo twingate setup --headless=-
+sudo twingate start
+```
 
-1. Same APT install as above (also install `ca-certificates` first)
-2. Decode base64 Service Key, then setup:
-   ```bash
-   echo "$SERVICE_KEY" | base64 --decode | sudo twingate setup --headless=-
-   sudo twingate start
-   ```
-3. Test access to protected and public resources
-4. Stop: `sudo twingate stop`
+**Stop:**
+```bash
+sudo twingate stop
+```
+
+**Required secret:** `SERVICE_KEY` → exposed as `TWINGATE_SERVICE_KEY` env var
+
+## CircleCI Configuration
+
+**Key difference:** Service Key must be **base64 encoded** for CircleCI variable storage, then decoded at runtime:
+```bash
+echo "$SERVICE_KEY" | base64 --decode | sudo twingate setup --headless=-
+```
+
+**Recommended image:** `ubuntu:jammy-20250530`
+
+**Install requires** `ca-certificates` before Twingate package.
 
 ## Configuration Values
 
-| Variable | Platform | Notes |
-|---|---|---|
-| `TWINGATE_SERVICE_KEY` | GitHub Actions | Store as repo secret; passed via stdin |
-| `SERVICE_KEY` | CircleCI | Must be **base64-encoded** due to CircleCI variable storage requirements |
-| `TEST_URL` | Both | URL of Twingate-protected Resource for validation |
+| Parameter | Value |
+|-----------|-------|
+| APT repo | `deb [trusted=yes] https://packages.twingate.com/apt/ /` |
+| Sources file | `/etc/apt/sources.list.d/twingate.list` |
+| Setup flag | `--headless=-` (reads key from stdin) |
+| CircleCI env var | `$SERVICE_KEY` (base64 encoded) |
+| GitHub env var | `$TWINGATE_SERVICE_KEY` (plaintext) |
 
 ## Gotchas
-- **CircleCI requires base64-encoded Service Key** — decode before passing to `twingate setup`
-- Service Key is passed via **stdin** (`--headless=-`), not as a CLI argument
-- Linux Client **may not be compatible** with non-Ubuntu distributions
-- Pinned image versions in examples may be outdated — check official docs for current images
-- `sudo` required for install, setup, start, and stop commands
+- CircleCI requires Service Key to be base64 encoded in variable storage — must decode before passing to `twingate setup`
+- Linux Client compatibility is not guaranteed outside Ubuntu
+- Always stop Twingate at end of job (`sudo twingate stop`)
+- Use `twingate status` and `journalctl -u twingate` for debugging connection issues
 
 ## Related Docs
-- [Headless Client / Services documentation](https://www.twingate.com/docs/services)
-- [GitHub Marketplace Action](https://github.com/marketplace/actions/connect-to-twingate)
-- [Twingate public sample repo](https://github.com/Twingate) (referenced but URL not specified)
+- Twingate headless Client mode documentation
+- Twingate Services documentation
+- GitHub Marketplace: "Connect to Twingate" Action

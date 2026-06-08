@@ -4,39 +4,48 @@
 Bastion Server Cloaking / Bastion Replacement
 
 ## Summary
-Twingate can replace or augment bastion servers by making private resources completely invisible to the internet while providing stronger authentication integration. Unlike bastions, Twingate resources have no public internet exposure and integrate directly with Identity Providers for real-time access control and 2FA enforcement.
+Twingate can replace or supplement bastion servers by making private resources completely invisible to the internet. It addresses core bastion weaknesses: internet exposure, IdP synchronization gaps, and 2FA enforcement difficulties.
 
 ## Key Information
-- **Resource invisibility**: Twingate-protected resources are not publicly accessible or discoverable; no public IP/port exposure required
-- **Traffic encryption**: All traffic is encrypted in-transit from user device to destination Connector
-- **Real-time IdP sync**: Access automatically revoked when employee account is disabled in Identity Provider
-- **SSO/2FA support**: Any IdP authentication policy (including MFA) can be applied to any resource type without client/server config changes
-- **OSI Layer 4 authorization**: Twingate authorizes network connections at the transport layer while integrating with IdP
 
-## Problems Solved vs. Traditional Bastions
-
-| Bastion Weakness | Twingate Solution |
-|---|---|
-| Bastion exposed to internet attacks | No public exposure; resources fully cloaked |
-| SSH key management decoupled from IdP | Real-time IdP synchronization |
-| Difficult to enforce 2FA on SSH | SSO/2FA policy applies to any resource type |
+- **Bastion use cases**: Security monitoring/hardening on single asset; single source IP for ingress whitelisting; centralized access management point
+- **Bastion weaknesses Twingate solves**:
+  - Bastions remain internet-exposed and vulnerable to exploits
+  - SSH key management is hard to sync with Active Directory/IdP
+  - Enforcing 2FA on SSH is difficult
+- **Twingate advantages**:
+  - Protected resources are **completely invisible** to the internet — no public exposure required
+  - Connector does not need to be globally accessible
+  - All traffic encrypted in-transit from user device to Connector
+  - Real-time IdP sync: inactive corporate accounts lose access automatically
+  - SSO policies (including 2FA) apply at OSI Layer 4 without client/server config changes
+  - Auth policy can be scoped per Resource
 
 ## Prerequisites
-- Twingate Connector deployed in target private network
-- Identity Provider configured with Twingate
-- Users provisioned through IdP
 
-## Implementation Notes
-- The Twingate Connector does **not** need to be globally accessible via the internet
-- No client or server configuration changes required to apply authentication policies
-- Access control operates independently of resource-level permissions — IdP account status is a prerequisite gate
+- Twingate Connector deployed inside private network
+- Identity Provider (IdP) configured with Twingate for SSO/2FA
+- Resources defined in Twingate (replaces bastion-forwarded hosts)
+
+## Architecture Notes
+
+- No inbound firewall rules required for protected resources
+- Connector initiates outbound connections only — no public IP needed on Connector
+- Access control enforced at network layer (L4) via Twingate, not SSH key management
 
 ## Gotchas
-- Twingate guarantees only *active* IdP accounts can connect, but resource-level permissions are separate — both must be configured correctly
-- This page is conceptual; actual Connector deployment and Resource configuration are covered in separate docs
+
+- Twingate **guarantees** active-employee enforcement via IdP sync, but per-Resource permissions still need to be configured separately — IdP deactivation alone revokes all access, but granular Resource access requires explicit policy
+- This page does not detail SSH key replacement — Twingate cloaks the bastion/resources but SSH keys may still be used for authentication *to* the destination server (Twingate handles network access, not application-layer auth)
+- 2FA enforcement requires IdP to have 2FA policy configured; Twingate applies the IdP's existing policy
+
+## Configuration Values
+
+None specified on this page — implementation details are in Connector setup and Resource/Policy configuration docs.
 
 ## Related Docs
+
 - Connector setup documentation
-- Identity Provider / SSO integration
-- Resource access policies
-- 2FA/MFA configuration
+- Identity Provider integration
+- Resource access policy configuration
+- SSO configuration

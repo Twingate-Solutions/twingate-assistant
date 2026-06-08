@@ -1,24 +1,23 @@
-# Customer Networks (Twingate MSP)
+# Customer Networks (MSP Portal)
 
 ## Summary
-Customer Networks are Twingate network instances managed through an MSP Portal. Each network has its own Admin Console, URL, and user base. MSP partners create and manage these on behalf of their customers.
+Customer Networks are Twingate network instances managed through an MSP Portal. Each network has its own Admin Console, URL, and user base. MSPs create and manage these on behalf of their customers.
 
 ## Key Information
-- Each Customer Network gets its own Admin Console and Client-visible name
-- License usage = total Users + Service Accounts − number of admins
+- Each Customer Network gets its own unique subdomain URL and Admin Console
 - Networks start with a 14-day free trial (POC status), then auto-convert to Active
+- License count = Users + Service Accounts minus admins
 - Deleted Customer Networks remain accessible until end of billing cycle
-- Deleted networks do not appear in the Customer Networks tab
+- Deleted networks are hidden from the Customer Networks tab
 
 ## Prerequisites
 - Active MSP Portal account
-- Unique subdomain for each network (MSP Portal and Customer Networks cannot share URLs)
+- Unique subdomain not used by any other Twingate network (MSP Portal, Customer Network, or standalone)
 
-## Required Attributes for New Network
-
+## Required Attributes for New Customer Network
 | Attribute | Description |
 |-----------|-------------|
-| Customer Network Name | Visible in Admin Console and Client |
+| Customer Network Name | Visible in Admin Console and user Clients |
 | Customer Network URL | Unique subdomain |
 | Admin Email | Initial admin user |
 | Business Legal Name | Customer org name |
@@ -26,28 +25,25 @@ Customer Networks are Twingate network instances managed through an MSP Portal. 
 | Business URL | Customer website |
 | Point of Contact | Customer contact person |
 
-## Network Status Values
-- **POC** – Within initial 14-day free trial
-- **Active** – On active subscription (auto-assigned after trial)
-- **Non-renewing** – Scheduled for deletion at end of billing cycle
-
-## Configuration Values
-- URL uniqueness required across all Twingate network types (MSP Portal, Customer Networks, standalone networks)
-- Recommended naming: `yourcompanymsp` (MSP Portal) / `yourcompany` (Customer Network)
-
-## Step-by-Step: Delete a Network
-1. Navigate to Customer Networks tab in MSP Portal
-2. Click ellipses (`...`) at end of target network's row
-3. Click **Delete Network**
-   - **Trial networks**: Deleted immediately, no charge
-   - **Active networks**: Accessible until end of billing cycle, then deleted
+## Network Statuses
+- **POC**: Within initial 14-day free trial
+- **Active**: Active subscription (auto-assigned after trial)
+- **Non-renewing**: Scheduled for deletion at end of billing cycle
 
 ## Gotchas
-- MSP Customer Networks **cannot** be converted to standalone Twingate Networks
-- **No refunds** issued for deleted Customer Networks
-- End users receive **no notifications** when a network is deleted — only a banner in the Admin Console indicates pending deletion
-- Admins are excluded from license count; regular users and Service Accounts are billed
+- MSP Portal URL and Customer Network URLs **must be unique** — recommended pattern: `yourcompanymsp` (portal) vs `yourcompany` (customer network)
+- Customer Networks **cannot be converted** to standalone Twingate Networks
+- Canceling a trial via "Delete Network" is **immediate** — no end-of-cycle grace period
+- Deleting an active network (non-trial) retains access until billing cycle ends — no refunds issued
+- End users receive **no notifications** when a network is deleted; only admins see a banner in the Admin Console
+
+## Step-by-Step: Delete/Cancel a Customer Network
+1. Navigate to Customer Networks tab in MSP Portal
+2. Click the ellipses (`...`) at the end of the network's row
+3. Click **"Delete Network"**
+   - Trial networks: deleted immediately, no charge
+   - Active networks: access continues until billing cycle ends, then deleted
 
 ## Related Docs
-- MSP Billing page (for license management details)
+- MSP Billing page (for license usage details)
 - MSP Portal documentation

@@ -1,52 +1,46 @@
 # Installing Privileged Access for SSH
 
 ## Summary
-Deploys Twingate's SSH privileged access by setting up a Gateway that acts as an SSH certificate authority. Uses Terraform provider for deployment across cloud providers. Supports both local CA (testing) and HashiCorp Vault (production) as certificate signers.
+Deploy Twingate's SSH privileged access by configuring a Gateway as an SSH Certificate Authority. The recommended installation method uses the Twingate Terraform provider with cloud-specific quick-start guides. Local SSH CA is suitable for testing; HashiCorp Vault SSH secrets engine is recommended for production.
 
 ## Key Information
-- Terraform is the recommended (and primary documented) installation method
 - Gateway acts as SSH CA, signing certificates for client access
-- Two CA modes: local SSH CA (simple/testing) and HashiCorp Vault SSH secrets engine (production)
-- Cloud-specific Terraform examples include full configs, startup scripts, and deployment steps
+- Two CA modes: **Local SSH CA** (Gateway holds private key) and **Vault SSH CA** (production-recommended)
+- Terraform provider provides complete configs including startup scripts
+- Cloud-specific guides available for AWS, DigitalOcean, and GCE
 
 ## Prerequisites
 - Twingate account with administrator privileges
-- Existing Remote Network configured in Twingate
-- Twingate Client at minimum required version for SSH support
+- An existing Remote Network configured in Twingate
+- Twingate Client at minimum required version
 - Terraform installed locally
 
-## Deployment Options
+## Step-by-Step
 
-### Local SSH CA (Testing/Simple)
-Gateway holds CA private key and signs certificates directly.
+### Local SSH CA (Testing)
+1. Choose cloud provider guide (AWS, DigitalOcean, or GCE)
+2. Follow Terraform quick-start guide for that provider
+3. Apply Terraform configuration (includes Gateway setup + SSH CA config)
+4. Verify SSH Resources are accessible through the Gateway
 
-| Cloud | Guide |
-|-------|-------|
-| AWS | Local SSH CA on AWS |
-| DigitalOcean | Local SSH CA on DigitalOcean |
-| Google Compute Engine | Local SSH CA on GCE |
+### Vault SSH CA (Production)
+1. Complete Local SSH CA setup first (or in parallel)
+2. Follow the Vault integration guide to configure HashiCorp Vault SSH secrets engine
+3. Configure Gateway to use Vault for certificate signing instead of local CA
 
-### Vault as SSH CA (Production)
-- Gateway integrates with HashiCorp Vault's SSH secrets engine
-- Vault signs certificates instead of local key on Gateway
-- See Vault integration guide for setup
-
-## Step-by-Step (General Flow)
-1. Ensure prerequisites are met (admin account, Remote Network, compatible Client)
-2. Install Terraform
-3. Select appropriate cloud guide from Twingate Terraform provider examples
-4. Apply Terraform configuration (includes Gateway deployment + SSH resource setup)
-5. Run startup scripts as provided in cloud-specific guide
-6. Verify SSH Resources are accessible through Twingate Client
+## Configuration Values
+- Defined per-cloud in Terraform provider examples (no universal env vars documented here)
+- Full configs available in Twingate Terraform provider repository
 
 ## Gotchas
-- Local SSH CA keeps private key on the Gateway — not suitable for production (key exposure risk if Gateway is compromised)
-- Must use Vault SSH secrets engine for production deployments
-- Twingate Client must meet **minimum version requirements** specific to SSH access — verify before deployment
-- Each cloud guide is self-contained; don't mix configurations across guides
+- Local SSH CA stores private key on the Gateway itself — not suitable for production (key exposure risk if Gateway is compromised)
+- Minimum Client version required; verify before deployment
+- Each cloud provider has its own Terraform configuration — guides are not interchangeable
 
 ## Related Docs
-- Twingate Terraform Provider (external, publishes runnable examples)
-- Vault Integration Guide (HashiCorp Vault SSH CA setup)
-- Remote Development with Twingate SSH (VS Code, JetBrains Gateway, Cursor IDE setup)
-- Minimum Client Version Requirements for SSH
+- [Twingate Terraform Provider](https://www.twingate.com/docs/terraform)
+- Local SSH CA on AWS
+- Local SSH CA on DigitalOcean
+- Local SSH CA on GCE
+- [Vault Integration Guide](https://www.twingate.com/docs/vault-ssh-ca)
+- [Remote Development with Twingate SSH](https://www.twingate.com/docs/ssh-remote-development) (VS Code, JetBrains Gateway, Cursor)

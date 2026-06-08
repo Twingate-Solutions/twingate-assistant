@@ -4,27 +4,31 @@
 Open Source Attributions
 
 ## Summary
-This page provides links to third-party open source notices for each Twingate client application platform. No technical implementation details are included — it serves as a legal/compliance reference page.
+This page provides links to third-party open source notices for each Twingate client application platform. It serves as a legal/compliance reference for open source software used within Twingate clients.
 
 ## Key Information
-- Separate attribution pages exist per platform/OS
-- Covers: macOS, iOS, Windows, Linux, Android, ChromeOS client applications
-- macOS and iOS share one attribution page
-- Android and ChromeOS share one attribution page
+- Separate attribution documents exist per platform
+- Platforms covered:
+  - macOS and iOS Client Applications
+  - Windows Client Application
+  - Linux Client Application
+  - Android and ChromeOS Client Applications
 
-## Attribution Links by Platform
-| Platform | Link Target |
-|----------|-------------|
-| macOS and iOS | Separate linked page |
-| Windows | Separate linked page |
-| Linux | Separate linked page |
-| Android and ChromeOS | Separate linked page |
+## Prerequisites
+None — informational page only.
+
+## Step-by-Step
+Not applicable — navigate to the relevant platform link for the specific attribution list.
+
+## Configuration Values
+None.
 
 ## Gotchas
-- No implementation or configuration content on this page
-- Useful only for compliance/legal review of bundled open source components
-- Follow platform-specific links for actual license/notice details
+- No consolidated single attribution file; must reference platform-specific links individually.
+- ChromeOS attributions are grouped with Android, not Linux.
 
 ## Related Docs
-- Twingate Client application documentation (macOS, Windows, Linux, Android)
-- Twingate release notes (for version-specific dependency changes)
+- macOS/iOS attributions page
+- Windows attributions page
+- Linux attributions page
+- Android/ChromeOS attributions page
