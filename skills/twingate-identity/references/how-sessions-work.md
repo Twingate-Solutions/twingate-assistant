@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/how-sessions-work -->
-
 # How Sessions Work
 
 ## Summary
