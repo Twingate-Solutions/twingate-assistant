@@ -1,28 +1,27 @@
 # Keycloak Configuration
 
 ## Summary
-Twingate integrates with Keycloak to delegate user authentication via OIDC. Only users associated with the Twingate app in Keycloak can access Twingate resources. Configuration requires direct contact with Twingate support.
+Twingate integrates with Keycloak to delegate user authentication via OIDC. Only users associated with the Twingate app in Keycloak can access Twingate and private resources. Full configuration requires contacting Twingate support.
 
 ## Key Information
-- Authentication delegation uses OIDC protocol
-- User access is scoped to users associated with the Twingate app in Keycloak
-- No self-serve configuration available — must contact Twingate to set up
+- Authentication delegation uses **OIDC protocol**
+- Only users assigned to the Twingate app in Keycloak gain access
+- No self-serve configuration available — requires Twingate assistance
 
 ## Prerequisites
-- Business or Enterprise Twingate plan (not available on lower tiers)
+- **Business or Enterprise** Twingate plan required
 - Existing Keycloak instance
 
 ## Step-by-Step
-No public self-serve steps documented. Contact Twingate directly to initiate configuration.
+1. Contact Twingate support to initiate Keycloak integration setup
 
 ## Configuration Values
-None publicly documented.
+- None publicly documented; configuration is handled through Twingate support
 
 ## Gotchas
-- **Plan restriction**: Business and Enterprise only — will not work on free/starter plans
-- **No self-serve setup**: Unlike some other IdP integrations, Keycloak requires contacting Twingate support to configure
-- Only authentication is delegated (OIDC); no mention of SCIM/directory sync support
+- Not available on Starter/Free plans
+- No documented self-service setup path — configuration steps are not published and must be obtained by contacting Twingate directly
 
 ## Related Docs
-- Twingate pricing page (for plan comparison)
-- Other IdP integration docs (Okta, Azure AD, Google Workspace) for self-serve alternatives
+- [Twingate Pricing](https://www.twingate.com/pricing)
+- Twingate OIDC/SSO documentation (other IdP configurations)

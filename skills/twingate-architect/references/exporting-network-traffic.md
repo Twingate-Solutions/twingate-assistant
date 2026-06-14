@@ -1,47 +1,38 @@
 # Exporting Network Traffic
 
 ## Summary
-Twingate allows viewing and exporting network activity that flows through deployed Connectors. Only Connector-proxied traffic is visible; direct internet traffic is not captured. Multiple export methods are available depending on use case.
+Twingate enables viewing and exporting network activity that flows through deployed Connectors. Only Connector-proxied traffic is captured; direct internet traffic is not visible. Multiple export methods are available depending on use case.
 
 ## Key Information
-- Traffic visibility limited to Connector-routed traffic only (not general internet traffic)
-- Four methods to access network traffic data
-- Events viewable per User or per Resource in Admin Console
+- **Scope**: Only traffic flowing through Connectors is logged — not general internet traffic
+- **Four export methods**: Admin Console view, CSV export, AWS S3 JSON sync, real-time Connector logs
+- **Log retention by plan**:
+  - Starter: 24 hours
+  - Teams: 7 days
+  - Business: 30 days
+  - Enterprise: 12 months
+
+## Viewing in Admin Console
+- Access logs via individual **User** or **Resource** pages
 - Event details include: Resource IP, protocol, connection type, duration
-- Client IP address not currently available
-- No access-denied events (zero trust model: denied resources are invisible to clients)
+- Filter by: Resource, user, date, other activity criteria
 
 ## Export Methods
-| Method | Format | Location |
-|--------|--------|----------|
-| View in Admin Console | UI | Admin Console (User/Resource pages) |
-| Manual export | CSV | Admin Console |
-| Sync to AWS S3 | JSON | AWS S3 bucket |
-| Real-time connection logging | Direct output | Connector process |
 
-## Log Retention by Plan
-| Plan | Retention |
-|------|-----------|
-| Starter | 24 hours |
-| Teams | 7 days |
-| Business | 30 days |
-| Enterprise | 12 months |
-
-## Filtering Options
-Filters available in Admin Console:
-- Resource
-- User
-- Date
-- Other activity criteria
+| Method | Format | Reference |
+|--------|--------|-----------|
+| Admin Console view | UI | — |
+| Manual CSV export | CSV | Admin Console |
+| AWS S3 sync | JSON | Separate doc |
+| Real-time Connector logging | — | Separate doc |
 
 ## Gotchas
-- **No client IP**: Not currently exposed in any export; planned for future update
-- **No denied-access events**: Zero trust architecture makes denied resources indistinguishable from non-existent resources from the client perspective
-- **Connector dependency**: Any Connector downtime creates gaps in traffic visibility
-- Retention limits mean historical analysis is plan-dependent; ensure appropriate plan before incident investigation
+- **Client IP not shown** — planned for future update
+- **No access-denied events**: Zero trust model means clients only know about Resources they can access; denied access is indistinguishable from a Resource not existing
+- Traffic must flow through a Connector to be logged — Twingate is not a full-tunnel VPN
 
 ## Related Docs
-- Network Events Schema — field definitions for JSON/CSV exports
-- AWS S3 sync configuration
-- Real-time connection logging (Connector process output)
-- Twingate pricing page (plan comparison)
+- Network Events Schema page
+- AWS S3 sync documentation
+- Real-time connection logging (Connector output)
+- Pricing page (plan retention details)

@@ -1,54 +1,55 @@
-# Getting Started with Unraid and Twingate
+# Twingate on Unraid - Getting Started
 
 ## Summary
-Deploys a Twingate Connector on an Unraid server using the Community Applications plugin to enable secure remote access. Requires generating connector tokens from the Twingate Admin Console and entering them into the Unraid app configuration form.
+Installs a Twingate Connector on Unraid via the Community Applications plugin to enable secure remote access to the Unraid environment. Requires generating connector tokens in the Twingate Admin Console before deploying through Unraid's app store.
 
 ## Key Information
-- Uses the official Twingate Connector app from the Unraid Community Apps store
-- Connector runs as a Community App (Docker container) managed by Unraid
-- Each Connector requires its own unique Access/Refresh token pair — never reuse tokens
-- Verify deployment by checking Controller and Relay statuses show "connected" in Admin Console
+- Uses the official Twingate Connector from the Unraid Community Apps store
+- Connector runs as a plugin managed through Unraid's web UI
+- Each Connector must have its own unique token set — never reuse tokens across Connectors
 
 ## Prerequisites
-- Running Unraid instance with web UI access
+- Running Unraid instance with web UI access (`http://<unraid-ip>/Apps`)
 - Community Applications plugin installed on Unraid
 - Twingate account with Admin Console access
-- Existing Remote Network configured in Twingate
+- Existing Remote Network in Twingate Admin Console
 
 ## Step-by-Step
 
 ### 1. Generate Connector Tokens
 1. Admin Console → **Remote Networks** → select target network
-2. Add new Connector or select undeployed one
-3. Choose **Manual** deployment option
-4. Scroll to Step 2 → click **Generate Tokens**
-5. Copy **Access Token** and **Refresh Token**
+2. Add new Connector or select undeployed Connector → choose **Manual** option
+3. Scroll to Step 2 → click **Generate Tokens** → authenticate
+4. Copy **Access Token** and **Refresh Token**
 
 ### 2. Deploy via Community Apps
-1. Go to `http://<your-unraid-ip>/Apps`
-2. Search for **Twingate Connector** (select official entry)
-3. Click **Install**
-4. Fill configuration form, then click **Apply**
+1. Unraid web UI → **Apps** tab
+2. Search for **Twingate Connector** → select official entry → click **Install**
+3. Fill configuration form:
+   - **Network**: `<network-name>.twingate.com`
+   - **Access Token**: paste from Admin Console
+   - **Refresh Token**: paste from Admin Console
+4. Click **Apply**
 
 ### 3. Verify
-1. Admin Console → Remote Networks → select network → select connector
+1. Admin Console → **Remote Networks** → select network → select Connector
 2. Confirm **Controller** and **Relay** statuses show **connected**
 
 ## Configuration Values
 
 | Field | Value |
 |-------|-------|
-| `Network` | Your Twingate tenant URL (e.g., `network.twingate.com`) |
-| `Access Token` | Generated from Admin Console Step 2 |
-| `Refresh Token` | Generated from Admin Console Step 2 |
+| Network | `<your-network-name>.twingate.com` |
+| Access Token | Generated from Admin Console (unique per Connector) |
+| Refresh Token | Generated from Admin Console (unique per Connector) |
 
 ## Gotchas
-- **Do not reuse token sets** — each Connector must have its own unique token pair
-- Token entry errors are the most common failure point; double-check copy/paste accuracy
-- Community Apps store may have non-official Twingate entries — select the official one
+- **Do not reuse token sets** — each Connector requires its own unique Access/Refresh token pair
+- Token errors are the most common issue; double-check copy/paste accuracy
+- Connectivity issues may indicate the Community App isn't running — verify via Unraid web UI
 
 ## Related Docs
-- [Setting Up Resources](https://www.twingate.com/docs) — configure access to private services after connector is running
+- [Twingate Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)
+- Setting Up Resources (configure access to private apps/services)
 - Home Assistant Setup Guide
 - Proxmox Helper Script Guide
-- Twingate Troubleshooting Docs

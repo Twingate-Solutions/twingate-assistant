@@ -1,21 +1,21 @@
 # Cancel Your Subscription
 
 ## Summary
-Instructions for canceling automatic renewal of a Twingate subscription. Cancellation stops auto-renewal; access continues until the current subscription term ends. Downgrade is accomplished by switching to the Starter plan.
+Instructions for canceling automatic renewal of a Twingate subscription via the Admin Console. Cancellation stops auto-renewal; access continues until the end of the current billing term.
 
 ## Key Information
-- Canceling does **not** immediately terminate access — service continues through end of current billing period
-- "Cancellation" is implemented as a downgrade to the **Twingate Starter** plan
-- Only applies to automatically renewing subscriptions
+- Cancellation stops **automatic renewal only** — subscription remains active until current term expires
+- Downgrade path: canceling moves account to **Twingate Starter** (free tier)
+- Managed entirely through the Admin Console Billing section
 
 ## Prerequisites
+- Active Twingate account with an automatically renewing paid subscription
 - Admin Console access
-- Active paid subscription with auto-renewal enabled
 
 ## Step-by-Step
 
-1. Sign into the Admin Console
-2. Navigate to **Settings**
+1. Sign into the **Admin Console**
+2. Click **Settings**
 3. Click **Billing**
 4. Click **Manage Plan**
 5. Click on your current subscription
@@ -24,10 +24,12 @@ Instructions for canceling automatic renewal of a Twingate subscription. Cancell
 8. Click **Update Subscription**
 
 ## Gotchas
-- There is no direct "cancel" button — cancellation requires selecting the Starter plan as a downgrade path
-- Subscription ends at conclusion of **current term**, not immediately upon cancellation
-- Manual/non-renewing subscriptions are not covered by this process
+- No immediate termination — service continues through end of paid term
+- "Canceling" is effectively a downgrade to Starter, not account deletion
+- No mention of refund eligibility for unused subscription time
+- Manual process only; no API or CLI method documented
 
 ## Related Docs
 - Billing settings
-- Plan comparison (Starter vs paid tiers)
+- Plan comparison (Starter vs. paid tiers)
+- Account management

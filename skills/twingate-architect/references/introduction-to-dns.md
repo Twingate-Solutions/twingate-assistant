@@ -4,46 +4,63 @@
 Introduction to DNS
 
 ## Summary
-Conceptual overview of DNS fundamentals for Twingate users. Covers how DNS translates human-readable names to IP addresses through a hierarchical resolution system. Provides foundation for understanding how Twingate intercepts and handles DNS queries.
+Conceptual overview of DNS mechanics for Twingate users. Covers how domain names resolve to IPs through hierarchical nameservers, DNS record types, zonefiles, caching/TTLs, and private DNS. Establishes foundational knowledge needed to understand how Twingate intercepts and routes DNS queries.
 
 ## Key Information
 
-- **DNS resolution hierarchy**: Root Servers → TLD Servers → Domain Level Nameservers → IP address
-- **Twingate DNS resolvers**: `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254` (inserted as first resolver when client is active)
-- **DNS record types**:
-  - `A` – hostname to IPv4
-  - `AAAA` – hostname to IPv6
-  - `CNAME` – alias to another record
-  - `MX` – mail server
-  - `PTR` – IP to hostname (Reverse DNS)
-  - `SOA` – zone authority metadata
-  - `SRV` – service location
-  - `TXT` – arbitrary data (SPF, verification)
-- **TTL** controls cache expiry per-record; SOA defines zone-wide default
-- **Private DNS**: Internal DNS servers not publicly accessible; used by companies for private resource resolution
+### DNS Resolution Hierarchy
+1. Browser queries Root Server (handles TLD like `.com`)
+2. Root Server returns TLD Server location
+3. TLD Server returns Domain Level Nameserver location
+4. Domain Level Nameserver returns actual IP(s)
 
-## Prerequisites
-- None (conceptual/reference article)
+### DNS Record Types
+| Record | Purpose |
+|--------|---------|
+| A | Hostname → IPv4 |
+| AAAA | Hostname → IPv6 |
+| CNAME | Alias one record to another |
+| MX | Mail server with priority |
+| PTR | IP → hostname (reverse DNS) |
+| SOA | Zone authority, serial, expiry |
+| SRV | Service location (generic) |
+| TXT | Arbitrary data (SPF, verification) |
+
+### Twingate DNS Resolver
+- With Twingate Client active, resolver `100.95.0.25[1-4]` is inserted as **first** resolver
+- Default router resolver becomes second in chain
+- See [How DNS Works with Twingate](https://www.twingate.com/docs/how-dns-works-with-twingate)
 
 ## Configuration Values
 
-| Item | Value/Path |
-|------|-----------|
-| Twingate DNS IPs | `100.95.0.25[1-4]` via `utun7` interface |
-| Hosts file (Unix) | `/etc/hosts` |
-| Hosts file (Windows) | `C:\Windows\System32\drivers\etc\hosts` |
-| Resolver config (Unix) | `/etc/resolv.conf` |
-| View DNS config (macOS) | `scutil --dns` |
-| View DNS cache (Windows) | `ipconfig /displaydns` |
+### Host Files
+- **Linux/Mac**: `/etc/hosts`
+- **Windows**: `C:\Windows\System32\drivers\etc\hosts`
+- Takes **precedence over DNS**; supports only A-record equivalents
+
+### resolv.conf / Resolvers
+- Mac command to inspect resolvers: `scutil --dns`
+- Windows DNS cache: `ipconfig /displaydns`
+- OS maintains **ordered list**; queries fail over sequentially
+
+### Zonefile Directives
+- `$TTL` — default record expiry in seconds
+- SOA record sets zone-wide expiry
+- Per-record TTL overrides SOA expiry
 
 ## Gotchas
 
-- `/etc/hosts` always takes precedence over DNS; only supports A-record equivalents
-- First 4 lines of `/etc/hosts` are auto-generated on Unix — do not modify
-- DNS cache propagation delay = up to SOA expiry time (e.g., 24hr TTL = 24hr max propagation)
-- On Unix/Linux, DNS caching is per-application (e.g., browser cache); on Windows it is OS-level
-- Reverse DNS requires PTR records in zonefile; IP octets are reversed + `.in-addr.arpa` appended
-- When Twingate client is active, its resolvers are prepended to the OS resolver list
+- `/etc/hosts` **cannot** replace DNS — only holds A-record equivalents
+- First four lines of `/etc/hosts` are auto-generated on Unix; do not modify
+- DNS cache propagation delay = up to the TTL/SOA expiry value (can be 24hrs+)
+- On Unix, DNS caching is **per-application** (e.g., browser cache); on Windows it's OS-level
+- Reverse DNS requires PTR records; format: reverse IP octets + `.in-addr.arpa`
+- `www.example.com` resolving same as `example.com` is due to CNAME aliasing
+
+## Private DNS
+- Companies use DNS servers accessible only within private networks
+- Private resources remain unresolvable from public internet
+- Twingate leverages this pattern for resource access
 
 ## Related Docs
 - [How DNS Works with Twingate](https://www.twingate.com/docs/how-dns-works-with-twingate)

@@ -1,52 +1,58 @@
 # Twingate Groups
 
 ## Summary
-Groups are the authorization mechanism in Twingate that connect users to Resources. A user gains access to a Resource by being a member of a Group that includes that Resource and successfully authenticating against the Resource's Security Policy.
+Groups control user authorization to Resources in Twingate. Each group links a set of users to a set of Resources, with optional access expiration or usage-based auto-lock controls. Users must belong to a group containing a Resource and pass the Resource's Security Policy to gain access.
 
 ## Key Information
-- Groups have two core components: **members** (users) and **Resources** (what they can access)
-- Users can belong to multiple Groups
-- Resource access within a Group can be time-limited via **expiration time** (full revocation) or **usage-based auto-lock** (temporary lock requiring admin unlock)
-- Three Group types: **Everyone** (built-in), **Custom**, and **Synced**
-
-## Access Requirements
-For a user to access a Resource, they must:
-1. Be a member of a Group that includes the Resource
-2. Successfully authenticate against the Resource's configured Security Policy (may require IdP re-auth or 2FA)
+- Groups have two components: **members** (users) and **Resources** (what they can access)
+- Users can belong to multiple groups
+- Per-Resource access controls within a group:
+  - **Expiration time**: fully revokes group access after set time
+  - **Usage-based auto-lock**: temporarily locks access until admin unlocks
+- Access requires both group membership AND successful Security Policy authentication (may include IdP re-auth, 2FA)
 
 ## Group Types
 
-### Everyone (Built-in)
-- Automatically includes **all users** — no management required
-- Best for: company-wide resources, domain controllers, shared infrastructure
+### Built-in: `Everyone`
+- Automatically includes **all users**
+- Suitable for company-wide resources (dashboards, domain controllers, shared infrastructure)
+- Cannot be deleted or manually scoped
 
 ### Custom Groups
 - Manually created/managed in Admin console
 - Not modified by automated processes
-- Can also be managed via the **Twingate Admin API**
+- Manageable via [Admin API](https://www.twingate.com/docs/api)
 
 ### Synced Groups
-- Auto-synchronized from a configured IdP
-- Resources and Access policies can be set on Synced groups
-- User membership is managed in IdP, not Twingate
+- Auto-synchronized from configured IdP
+- Resources and Access policies can be set, but **user membership is IdP-controlled**
+- IdP-specific scoping behavior:
+  - **Entra ID, Okta, OneLogin**: Support SCIM-based scoping of synced users/groups
+  - **Google Workspace**: No native granular sync config; use Twingate's **Selective Sync** feature
 
-## IdP Sync Behavior
-| IdP | Scoping Method |
-|-----|---------------|
-| Entra ID | SCIM (native scoping) |
-| Okta | SCIM (native scoping) |
-| OneLogin | SCIM (native scoping) |
-| Google Workspace | Twingate Selective Sync (no native granular config) |
+## Prerequisites
+- Twingate Admin console access
+- IdP configured (for synced groups)
+- SCIM configured (for Entra ID, Okta, OneLogin scoping)
 
 ## Gotchas
-- Synced group user membership **cannot** be modified in Twingate — changes must be made in the IdP
-- Google Workspace requires Twingate's **Selective Sync** feature to limit which users/groups/OUs sync (not configurable natively)
-- Expiration time fully revokes access; usage-based auto-lock only temporarily locks and requires admin action to restore
+- Removing a user from an IdP group propagates to Twingate for synced groups — manage membership at IdP level, not in Twingate console
+- `Everyone` group grants access to **all** users — be cautious assigning sensitive Resources here
+- Expiration revokes access entirely; auto-lock is temporary and reversible by admin
+- Google Workspace requires Selective Sync configuration for group scoping (not SCIM-native)
+
+## Configuration Values
+| Parameter | Notes |
+|---|---|
+| Expiration time | Per Resource within a group; fully revokes on expiry |
+| Usage-based auto-lock | Per Resource within a group; locked until admin unlocks |
+| Security Policy | Per Resource; can require IdP re-auth or 2FA |
 
 ## Related Docs
 - Users
 - Resources
 - Security Policies / 2FA
 - Admin API
-- IdP Configuration (Entra ID, Okta, OneLogin, Google Workspace)
+- IdP Configuration
 - Selective Sync (Google Workspace)
+- SCIM (Entra ID, Okta, OneLogin)

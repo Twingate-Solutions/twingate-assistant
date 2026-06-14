@@ -4,42 +4,45 @@
 Client Connection Flow
 
 ## Summary
-Describes the end-to-end process by which a Twingate Client intercepts network requests, obtains authorization from the Controller, establishes a certificate-pinned TLS tunnel via a Relay to a Connector, and proxies traffic to private Resources. No traffic leaves the client device unless the user is authorized.
+Describes the end-to-end process by which a Twingate Client detects, authorizes, and proxies traffic to a private Resource. The flow involves local traffic interception, two-phase Controller authorization, certificate-pinned TLS tunneling via a Relay to a Connector, and final proxied forwarding to the Resource.
 
 ## Key Information
-- Client maintains a Controller-signed whitelist ACL locally; only matching traffic is intercepted
-- Local VPN tunnel to `127.0.0.1` is used for interception only — not a remote VPN connection
-- Non-matching traffic bypasses Twingate via the host's existing routing table
-- DNS for FQDN-based Resources resolves at the Connector (enables private/local DNS)
-- Proof-of-possession per RFC 7800 protects against MITM attacks on the TLS tunnel
-- TCP and UDP traffic proxied transparently regardless of port/protocol (port restrictions configurable via Admin Console)
-
-## Connection Flow Steps
-
-1. **Detect request** — Client intercepts connection requests matching its whitelist ACL via local transparent proxy; holds connection pending authorization
-2. **Obtain Connector authorization** — Client requests token from Controller; response includes Relay FQDN and Connector certificate digest
-3. **Establish cert-pinned TLS tunnel** — Client connects through Relay (mutual identity verification), then establishes end-to-end TLS to Connector pinned to the certificate digest from step 2
-4. **Present signed ACL to Connector** — Client obtains second Controller-signed token (bound to client public key + user ACL); Connector verifies it matches its own Controller; proof-of-possession (RFC 7800) confirms tunnel integrity
-5. **Proxy traffic** — Connector forwards connection to Resource; if FQDN-based, DNS resolves locally at Connector; source application is unaware of proxying
-
-## Configuration Values
-- Port restrictions: configurable in Admin Console (optional)
-- Local intercept address: `127.0.0.1` (fixed)
-
-## Gotchas
-- The local VPN tunnel to `localhost` may trigger OS-level VPN notifications — this is expected and does not represent a remote VPN connection
-- Intercepted connections to private Resources are **held** at the client until auth completes; slow Controller responses will delay connection establishment
-- DNS resolution occurs at the Connector, not the client — ensure Connector has access to required DNS servers for private Resources
-- Tokens are time-bound; clock skew between components could cause auth failures
+- Client establishes a local VPN tunnel to `127.0.0.1` **only** for traffic interception — this is not a remote VPN connection
+- ACL whitelist is signed by the Controller and stored locally on the Client
+- Two separate Controller authorization requests occur per connection: one to locate the Connector, one to prove Resource access rights
+- TLS tunnel is certificate-pinned using a Connector certificate digest provided by the Controller
+- DNS resolution for FQDN-based Resources occurs **at the Connector** (enables private/local DNS)
+- Traffic not matching the whitelist ACL is bypassed to the host's existing routing table
+- Proof-of-possession (RFC 7800) protects against MITM attacks on the TLS tunnel
 
 ## Prerequisites
-- At least one Connector registered and connected
-- At least one Client authenticated with the Controller
-- Resources configured with access rules in Admin Console
+- At least one Connector registered with the Twingate network
+- At least one Client registered with the Twingate network
+- Resources defined and access rules configured in the Admin Console
+- User authenticated with the Client
+
+## Step-by-Step: Connection Flow
+
+1. **Intercept**: Client detects outbound connection request matching whitelist ACL via local transparent proxy; holds request
+2. **Authorize (Phase 1)**: Client requests authorization token from Controller for the target Resource; receives Relay FQDN and Connector certificate digest
+3. **Establish tunnel**: Client connects to Relay (mutual TLS verification); Relay proxies to Connector; Client pins TLS session using certificate digest
+4. **Authorize (Phase 2)**: Client requests a second Controller-signed ACL token (bound to Client's public key); presents to Connector for verification
+5. **Verify**: Connector validates token chain and proof-of-possession per RFC 7800
+6. **Proxy**: Connector resolves DNS (if FQDN Resource) locally and forwards proxied traffic to Resource
+
+## Configuration Values
+- Port restrictions configurable via Admin Console (optional)
+- No client-side configuration parameters documented on this page
+
+## Gotchas
+- The local `127.0.0.1` tunnel **will trigger OS-level VPN notifications** — this is expected and does not indicate a remote VPN connection
+- Network requests for private Resources **will not leave the Client device** if the user lacks authorization (held by proxy indefinitely)
+- Destination addresses in the ACL do **not** need to be routable from the Client host
+- Both TCP and UDP are supported regardless of port/protocol (unless admin restricts ports)
 
 ## Related Docs
 - Architecture Overview
-- Resources configuration
-- Connector setup
-- Port restrictions (Admin Console)
-- RFC 7800 (proof-of-possession key semantics for JWTs)
+- Connectors
+- Resources
+- Port Restrictions (Admin Console)
+- RFC 7800 (Proof-of-Possession Key Semantics for JWTs)

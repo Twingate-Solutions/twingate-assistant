@@ -1,21 +1,25 @@
 # Linux Client Application - OSS Third Party Notices
 
 ## Page Title
-Twingate Linux Client Application – Open Source Component Licenses
+Twingate Linux Client Application — Open Source Component Licenses
 
 ## Summary
-This page documents the open-source software components bundled in the Twingate Linux client application. It lists each third-party library along with its applicable license text. This is a legal compliance/attribution page, not an implementation guide.
+This page lists all third-party open source components bundled in the Twingate Linux client application, along with their full license texts. It serves as the legal third-party notice disclosure required by the respective open source licenses.
 
 ## Key Information
 
-### Components and Their Licenses
+- **Purpose**: Legal compliance disclosure for OSS components used in the Linux client
+- **Total components**: 13 third-party libraries
+- **License types used**: Apache 2.0, BSD 3-Clause, CC0 1.0 Universal, MIT, Boost Software License 1.0, zlib, and a custom MIT-variant (fmt)
+
+## Component License Matrix
 
 | Component | License | Copyright Holder |
 |-----------|---------|-----------------|
-| libssl | Apache 2.0 | OpenSSL Project / Eric A. Young |
+| libssl | Apache 2.0 | OpenSSL Project |
 | libevent | BSD 3-Clause | Niels Provos, Nick Mathewson |
 | lwip | BSD 3-Clause | Swedish Institute of Computer Science |
-| siphash | CC0 1.0 Universal | (public domain dedication) |
+| siphash | CC0 1.0 Universal | — |
 | libjansson | MIT | Petri Lehtinen |
 | jwt-cpp | MIT | Dominik Thalhammer |
 | args | MIT | Taylor C. Richberger, Pavel Belikov |
@@ -24,22 +28,21 @@ This page documents the open-source software components bundled in the Twingate 
 | catch2 | Boost Software License 1.0 | Catch2 Authors |
 | zlib | zlib License | Jean-loup Gailly, Mark Adler |
 | nanopb | zlib License | Petteri Aimonen |
-| fmt | MIT-like (with embedding exception) | Victor Zverovich |
+| fmt | MIT-variant (custom) | Victor Zverovich |
 
 ## Prerequisites
-- N/A – informational/legal page only
+- N/A — informational/legal page only
 
 ## Step-by-Step
-- N/A – no implementation steps
+- N/A — no actionable steps
 
 ## Configuration Values
 - N/A
 
 ## Gotchas
-- **fmt** has an additional exception: embedded portions in compiled object form may be redistributed without including copyright/permission notices
-- **siphash** uses CC0 (public domain dedication), not a traditional license; no attribution required but patent/trademark rights are not waived
-- **Apache 2.0** (libssl) has explicit patent license termination clauses if litigation is initiated
-- **BSD 3-Clause** prohibits using contributor names for endorsement without permission
+- **fmt exception**: The `fmt` library includes an optional exception allowing embedded portions in machine-executable object code to be redistributed without the copyright notice — differs slightly from standard MIT
+- **BSD 3-Clause restriction**: Components `libevent` and `lwip` prohibit use of copyright holder names for endorsement without written permission
+- **catch2 (Boost)**: Requires copyright notices in all copies unless distributed solely as machine-executable object code
 
 ## Related Docs
 - Twingate Linux Client installation documentation

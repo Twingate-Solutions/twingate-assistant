@@ -1,49 +1,52 @@
 # Remote MCP Access with Twingate
 
 ## Summary
-Twingate secures remote Model Context Protocol (MCP) server connections by creating a private encrypted network between local IDEs and remote servers. This eliminates the need to expose MCP server ports to the public internet while allowing seamless developer access.
+Securely connect a local IDE to a self-hosted remote MCP (Model Context Protocol) server using Twingate as a zero-trust connectivity layer. The MCP server listens only on localhost; Twingate handles encrypted routing without exposing public ports.
 
 ## Key Information
-- MCP server should bind to `localhost` only—never `0.0.0.0`
-- Twingate Connector runs on the remote server and makes outbound-only connections (no inbound firewall ports required)
-- Traffic is routed: IDE → Twingate Client → Twingate Network → Connector → `127.0.0.1:{port}` on remote server
-- Compatible IDEs: VS Code, Cursor, JetBrains IDEs
+- MCP server must listen on `localhost` only — never `0.0.0.0`
+- Twingate Connector runs on the remote server, making outbound-only connections (no inbound firewall rules needed)
+- Traffic is routed: `IDE → Twingate Client → Twingate Network → Connector → localhost:PORT on remote server`
+- Compatible with VS Code, Cursor, JetBrains IDEs, and any MCP-compatible tooling
+- Works with any cloud VM (AWS, GCP, DigitalOcean) or on-prem server
 
 ## Prerequisites
-- Remote server (cloud VM or on-prem) running an MCP-compliant server
 - Twingate account (free tier available)
-- Twingate Client installed on local machine
-- Twingate Connector deployed on remote server
+- Remote server running an MCP-compliant server
+- Twingate client installed on local development machine
+- Admin access to Twingate console
 
 ## Step-by-Step
 
-1. **Configure MCP server** to listen on `localhost` only (not `0.0.0.0`)
-2. **Create Remote Network** in Twingate admin console (e.g., `mcp-dev-network`)
-3. **Deploy Connector** on remote server using generated deployment script from admin console
-4. **Add Resource** in Twingate admin console:
-   - Label: `Remote MCP Server`
-   - Address: internal IP of remote machine
+1. **Configure MCP server** — bind to `localhost` only on the remote machine
+2. **Create Remote Network** in Twingate admin console (e.g., name: `mcp-dev-network`)
+3. **Deploy Connector** — run the generated script on the remote MCP server
+4. **Define Resource** in Twingate admin console:
+   - Label: e.g., `Remote MCP Server`
+   - Address: internal IP of the remote machine
    - Port: MCP server port (e.g., `65432`)
    - Protocol: `TCP`
 5. **Assign users** access to the Resource
-6. **Install Twingate Client** on local machine and sign in
-7. **Configure IDE** to connect to `{internal_ip}:{port}` (e.g., `65432`)—Twingate client handles routing automatically
+6. **Install Twingate client** on local machine, sign in
+7. **Configure IDE** to connect to `{internal_ip}:{port}` — Twingate routes automatically
 
 ## Configuration Values
 
-| Field | Value |
-|-------|-------|
-| MCP server bind address | `127.0.0.1` (localhost only) |
-| Resource Protocol | TCP |
-| Example port | `65432` |
-| IDE connection address | `{internal_ip}:{port}` |
+| Parameter | Example Value | Notes |
+|-----------|---------------|-------|
+| Resource Address | `{internal_ip}` | Internal IP of remote server |
+| Resource Port | `65432` | Port MCP server listens on |
+| Protocol | `TCP` | Required |
+| MCP server bind address | `127.0.0.1` | Never `0.0.0.0` |
 
 ## Gotchas
-- Do **not** bind MCP server to `0.0.0.0`—defeats the security model
-- IDE config format varies (JSON files vs. UI panels)—check IDE-specific docs for exact syntax
-- Twingate Client must be running and authenticated for IDE routing to work
+- **Do not** set MCP server to listen on `0.0.0.0` — defeats the entire security model
+- IDE configuration format varies (JSON files vs. UI panels) — consult IDE-specific docs for exact syntax
+- Twingate client must be running and authenticated on local machine before IDE attempts connection
+- Access must be explicitly granted per user in Twingate admin console
 
 ## Related Docs
-- [Twingate website](https://www.twingate.com) — account creation
-- MCP server documentation — server-specific install/config instructions
-- Twingate admin console — Connector deployment scripts, Resource management
+- [Twingate Getting Started](https://www.twingate.com/docs)
+- [Model Context Protocol specification](https://modelcontextprotocol.io)
+- Twingate Connector deployment documentation
+- IDE-specific MCP configuration guides (VS Code, Cursor, JetBrains)

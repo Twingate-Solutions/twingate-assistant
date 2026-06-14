@@ -1,71 +1,58 @@
-# Twingate Python CLI - Introduction
-
-## Page Title
-Introduction to the Twingate Python CLI
+# Twingate Python CLI
 
 ## Summary
-An open-source CLI tool that wraps Twingate's GraphQL APIs to automate administrative functions available in the Admin Panel. Supports CRUD operations on Resources, Groups, Connectors, Devices, Users, Service Accounts, and Remote Networks. Maintained outside of Twingate's core engineering team; use GitHub Issues for support.
+Open-source CLI tool wrapping Twingate GraphQL APIs for automating administrative tasks. Maintained outside core product engineering; community-supported via GitHub issues. Requires Python 3 and the `pandas` library.
 
 ## Key Information
-- Open-source project on GitHub (not officially supported by Twingate product team)
-- Wraps Twingate GraphQL APIs
-- Output formats: JSON (default), CSV, DF (DataFrame/table)
-- Session-based authentication; sessions persist across commands
+- Supports CRUD operations on: Resources, Devices, Groups, Connectors, Users, Service Accounts, Service Account Keys, Remote Networks, Policies
+- Session-based authentication — authenticate once, reuse session name across commands
+- Three output formats: JSON (default), CSV, DF (dataframe/table)
 - Use `-h` at any command level for contextual help
 
 ## Prerequisites
 - Python 3
-- `pandas` library (`pip install pandas`)
-- Twingate API Key
+- `pandas` Python library
+- Twingate API key
 - Twingate tenant name
-- Clone the CLI repo from GitHub
+- Clone repo: `git clone <twingate-python-cli-repo>`
 
 ## Step-by-Step
 
-### Initial Setup
+**1. Verify installation**
 ```bash
-git clone <twingate-python-cli-repo>
-cd <repo-folder>
-python3 ./tgcli.py auth list  # Should return empty list if setup is correct
+python3 ./tgcli.py auth list
+# Should return [''] — empty list means working
 ```
 
-### Authenticate
+**2. Authenticate and create a session**
 ```bash
-python3 ./tgcli.py auth login -t <tenant> -a <api-key> [-s <session-name>]
-# Returns a session name (random if -s not specified), e.g., "OrangeElk"
+python3 ./tgcli.py auth login -t <tenant> -a <api_key>
+# Returns auto-generated session name (e.g., OrangeElk)
+# Use -s <name> to specify custom session name
 ```
 
-### Run Commands Using Session
+**3. Run commands using session**
 ```bash
 python3 ./tgcli.py -s OrangeElk resource list
-python3 ./tgcli.py -s OrangeElk -f CSV resource list
-python3 ./tgcli.py -s OrangeElk -f DF resource list
 ```
 
-## Configuration Values / CLI Flags
+## Configuration Values
 
-| Flag | Description |
-|------|-------------|
-| `-s SESSIONNAME` | Session name to use |
-| `-f OUTPUTFORMAT` | Output format: `JSON`, `CSV`, `DF` |
-| `-v` | Show version |
-| `-h` | Contextual help (works at every level) |
-| `-a APIKEY` | API key (used with `auth login`) |
-| `-t TENANT` | Tenant name (used with `auth login`) |
-
-### Supported Object Types
-`auth`, `device`, `connector`, `user`, `group`, `resource`, `network`, `account`
-
-### Auth Operations
-`login`, `logout`, `list`
+| Flag | Description | Required |
+|------|-------------|----------|
+| `-a APIKEY` | Twingate API key | Yes (login) |
+| `-t TENANT` | Twingate tenant name | Yes (login) |
+| `-s SESSIONNAME` | Session name | Optional (login), Required (other commands) |
+| `-f OUTPUTFORMAT` | Output format: `JSON`, `CSV`, `DF` | No (default: JSON) |
+| `-v` | Show version | No |
+| `-h` | Contextual help | No |
 
 ## Gotchas
-- Commands fail with `no session name passed` error if `-s` is not provided after authentication
-- Missing `pandas` library causes errors on first run — install before use
-- Session names are randomly generated unless specified with `-s` during login; note the generated name for subsequent commands
-- Pull latest version periodically from GitHub as features are actively added
+- Every non-auth command requires `-s SESSIONNAME` — omitting it returns `error: no session name passed`
+- Missing `pandas` library causes errors on first run — install before using
+- Pull latest version periodically; repo is actively updated
+- Tool is community-maintained — no official Twingate support; use GitHub Issues
 
 ## Related Docs
-- [Twingate GraphQL APIs](https://www.twingate.com/docs/)
-- GitHub repository (linked from docs page)
-- GitHub Issues (primary support channel)
+- [Twingate GraphQL APIs](https://www.twingate.com/docs/api-overview)
+- [Python CLI GitHub Repository](https://github.com/Twingate-Labs/tg-cli)
