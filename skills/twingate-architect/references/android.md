@@ -1,41 +1,42 @@
 # Twingate Android Client
 
+## Page Title
+Android
+
 ## Summary
-Twingate Android client connects users to their Twingate network via the Google Play Store app. Authentication is handled through the configured Identity Provider (IdP) via browser redirect. Once connected, only private Resource traffic is intercepted.
+Install and configure the Twingate Android client to connect to a Twingate network. The client runs in the background, only intercepting traffic for private Resources while leaving regular internet browsing unaffected.
 
 ## Key Information
 - Minimum supported Android version: **Android 10**
-- App available via Google Play Store or **get.twingate.com**
-- Uses VPN-based tunnel; does not affect regular internet traffic
-- Authentication handled by existing IdP (SSO) credentials
-- App can run in background after initial connection
+- Download via Google Play Store (search "Twingate") or go to `get.twingate.com`
+- Client runs silently in background after setup
+- Only intercepts traffic for defined private Resources, not general internet traffic
 
 ## Prerequisites
-- Android 10 or later
-- Twingate network name (provided by admin)
-- Valid IdP credentials for your organization
-- Google Play Store access
+- Android 10 or higher
+- Twingate Network name (provided by admin)
+- Valid credentials for your organization's Identity Provider (IdP)
 
 ## Step-by-Step
 
-1. **Install** – Search "Twingate" on Google Play Store or visit `get.twingate.com`
-2. **Set Network** – Open app, enter your Twingate Network name
-3. **Authenticate** – Tap "Sign in to connect"; browser window opens for IdP login
-4. **Connect** – Browser closes automatically; client shows "online" status
-5. **Background** – Close the app; connection persists, only private Resource traffic is routed through Twingate
+1. Install the Twingate app from Google Play Store or via `get.twingate.com`
+2. Open the app and enter your **Twingate Network name**
+3. Tap **"Sign in to connect"**
+4. Complete authentication in the browser window that opens (uses your existing IdP credentials)
+5. Browser window closes automatically; client shows **"online"** status
+6. Close the app — it remains connected in the background
 
 ## Configuration Values
 | Parameter | Value |
 |-----------|-------|
-| Network name | Your organization's Twingate network identifier (e.g., `yourcompany`) |
+| Network name format | `<your-org>.twingate.com` (org-specific) |
 
 ## Gotchas
-- If already authenticated with IdP, re-login is typically not required (session reuse)
-- Regular internet browsing is **not** routed through Twingate — only configured private Resources
-- No manual split-tunnel configuration needed; handled automatically
+- If already authenticated with your IdP, re-login is typically not required
+- App must remain running in background to maintain Resource access (close the UI, not the service)
+- No manual VPN configuration required — handled automatically by the client
 
 ## Related Docs
-- iOS client setup
-- Twingate network naming conventions
-- Identity Provider configuration
-- Resource access setup
+- [iOS Client](https://www.twingate.com/docs/ios)
+- [get.twingate.com](https://get.twingate.com)
+- Identity Provider configuration (admin-side setup)

@@ -4,16 +4,16 @@
 Introduction to the Twingate Javascript CLI
 
 ## Summary
-Open-source CLI tool built on Twingate GraphQL APIs, written in JavaScript with pre-built binaries for Windows/Mac/Linux. Supports full CRUD operations on users, groups, networks, connectors, resources, devices, policies, and service accounts. Node/Deno developers can extend it; Python users may prefer the Python CLI alternative.
+Open-source CLI tool wrapping Twingate GraphQL APIs, written in JavaScript (Node/Deno compatible). Provides pre-built binaries for Windows/Mac/Linux. Supports full CRUD operations for resources, groups, networks, connectors, devices, service accounts, policies, and export/import workflows.
 
 ## Key Information
-- **Source**: Open-source, community-maintained (not Twingate product engineering)
-- **Support**: GitHub Issues only
-- **Auth**: Prompts for account name + API key on first run; optionally saves credentials to file
-- **References**: Accepts names OR IDs for most entity arguments (e.g., `groupNameOrId`)
+- Binaries available on GitHub releases page; unzip and run directly
+- Prompts for account name and API key on first run; optionally saves credentials to file
+- Accepts names OR IDs for most entity references (e.g., `groupNameOrId`)
+- All IDs are base64-encoded GraphQL node IDs
+- Community-supported; issues via GitHub Issues page
 
 ## Prerequisites
-- Download binary from GitHub releases page
 - Twingate account name and API key
 - GraphViz installed (only for `png`/`svg` export formats)
 
@@ -29,41 +29,41 @@ Open-source CLI tool built on Twingate GraphQL APIs, written in JavaScript with 
 | `device` | `list` |
 | `policy` | `list`, `add_group` |
 | `service` | `list`, `create`, `remove`, `add_resource`, `key_create` |
-| `export` | (flags only) |
-| `import` | (flags only) |
+| `export` | (flags-based) |
+| `import` | (flags-based) |
 
-## Configuration Values
+## Configuration Values / CLI Flags
 
 **Global flags:**
 - `-a, --account-name <string>` — Twingate account name
 - `-l, --log-level [level]` — `TRACE|DEBUG|INFO|WARN|ERROR|SEVERE|FATAL|QUIET|SILENT` (default: `INFO`)
 
 **Export flags:**
-- `-f, --format` — `xlsx|json|dot|png|svg` (default: `xlsx`)
+- `-f, --format` — `xlsx` (default), `json`, `dot`, `png`, `svg`
 - `-o, --output-file` — output filename
-- `-n` networks, `-r` resources, `-g` groups, `-u` users, `-d` devices
+- `-n` remote networks, `-r` resources, `-g` groups, `-u` users, `-d` devices
 
 **Import flags:**
-- `-f, --file <string>` — path to Excel file **(required)**
-- `-n/-r/-g/-d` — entity type filters
-- `-s, --sync` — sync by natural identifier
-- `-y, --assume-yes` — skip prompts
+- `-f, --file <string>` — path to Excel file (required)
+- `-s, --sync` — sync entities by natural identifier
+- `-y, --assume-yes` — skip confirmation prompts
 
-## Step-by-Step: Create Connector with Tokens
+## Step-by-Step: Create Connector (returns tokens)
 ```bash
 ./tg connector create "myRemoteNetwork" "myNewConnector"
-# Returns ACCESS_TOKEN and REFRESH_TOKEN for connector auth
+# Returns ACCESS_TOKEN and REFRESH_TOKEN for connector configuration
 ```
 
 ## Gotchas
-- **User operations require ID, not email** — use `user list` to get IDs first
-- **Service account removal** — fails if account has active keys (must revoke keys first)
-- **`policy add_group`** — replaces existing security policy on the group (destructive)
-- **`group copy`** — copies users only, not resources
-- **Resource/group/network must pre-exist** before referencing in create commands
-- **png/svg export** requires GraphViz on system PATH
+- `group add_user` / `resource create` with users: **must use IDs**, not email addresses
+- Service account cannot be removed if it has active keys
+- `policy add_group`: **replaces** existing security policy on affected groups
+- `png`/`svg` export requires GraphViz on system PATH
+- `group copy` copies all users from source to destination group
+- Remote network must exist before creating connectors or resources
 
 ## Related Docs
-- Twingate Python CLI
-- Twingate GraphQL API
-- GitHub Issues (support channel)
+- Twingate Python CLI (alternative for Python developers)
+- Twingate GraphQL API documentation
+- GitHub releases page (binaries)
+- GitHub Issues page (support)

@@ -4,48 +4,39 @@
 Bastion Server Cloaking / Bastion Replacement
 
 ## Summary
-Twingate can replace or supplement bastion servers by making private resources completely invisible to the internet. It addresses core bastion weaknesses: internet exposure, IdP synchronization gaps, and 2FA enforcement difficulties.
+Twingate can replace or augment bastion servers by making private resources completely invisible to the internet. It addresses key bastion weaknesses: internet exposure, IdP synchronization gaps, and 2FA enforcement difficulties.
 
 ## Key Information
 
-- **Bastion use cases**: Security monitoring/hardening on single asset; single source IP for ingress whitelisting; centralized access management point
-- **Bastion weaknesses Twingate solves**:
-  - Bastions remain internet-exposed and vulnerable to exploits
-  - SSH key management is hard to sync with Active Directory/IdP
-  - Enforcing 2FA on SSH is difficult
-- **Twingate advantages**:
-  - Protected resources are **completely invisible** to the internet — no public exposure required
-  - Connector does not need to be globally accessible
-  - All traffic encrypted in-transit from user device to Connector
-  - Real-time IdP sync: inactive corporate accounts lose access automatically
-  - SSO policies (including 2FA) apply at OSI Layer 4 without client/server config changes
-  - Auth policy can be scoped per Resource
+**Why bastions are used:**
+- Centralize security monitoring/logging on a single exposed asset
+- Single source IP to whitelist for ingress rules
+- Single access management point (disable bastion access = disable all downstream access)
+
+**Bastion limitations Twingate solves:**
+
+| Bastion Problem | Twingate Solution |
+|---|---|
+| Bastion exposed to internet attacks | Resources + Connectors fully invisible/inaccessible from internet |
+| SSH key management decoupled from IdP/AD | Real-time IdP sync; inactive accounts immediately lose access |
+| 2FA on SSH is difficult to enforce | SSO policies (including 2FA) applied at network layer (OSI Layer 4) to any resource |
 
 ## Prerequisites
-
-- Twingate Connector deployed inside private network
-- Identity Provider (IdP) configured with Twingate for SSO/2FA
-- Resources defined in Twingate (replaces bastion-forwarded hosts)
+- Twingate Connector deployed in private network
+- Identity Provider configured for Twingate SSO integration
 
 ## Architecture Notes
-
-- No inbound firewall rules required for protected resources
-- Connector initiates outbound connections only — no public IP needed on Connector
-- Access control enforced at network layer (L4) via Twingate, not SSH key management
+- Twingate Connector does **not** need to be publicly accessible
+- All traffic is encrypted in-transit from user device to destination Connector
+- Access control operates at OSI Layer 4 (network connections), not application layer
+- No client or server configuration changes required to apply authentication policies
 
 ## Gotchas
-
-- Twingate **guarantees** active-employee enforcement via IdP sync, but per-Resource permissions still need to be configured separately — IdP deactivation alone revokes all access, but granular Resource access requires explicit policy
-- This page does not detail SSH key replacement — Twingate cloaks the bastion/resources but SSH keys may still be used for authentication *to* the destination server (Twingate handles network access, not application-layer auth)
-- 2FA enforcement requires IdP to have 2FA policy configured; Twingate applies the IdP's existing policy
-
-## Configuration Values
-
-None specified on this page — implementation details are in Connector setup and Resource/Policy configuration docs.
+- Twingate guarantees only **active** IdP accounts can access resources — but this applies regardless of resource-level permissions (IdP account status is a prerequisite gate)
+- SSH key management is bypassed entirely; access authorization moves to IdP
+- This is architectural replacement guidance, not a step-by-step migration guide — actual Connector setup is covered in separate docs
 
 ## Related Docs
-
-- Connector setup documentation
-- Identity Provider integration
-- Resource access policy configuration
-- SSO configuration
+- Connector deployment documentation
+- Identity Provider integration/SSO setup
+- Resource access policies

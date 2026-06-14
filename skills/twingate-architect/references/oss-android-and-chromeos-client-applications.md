@@ -1,40 +1,39 @@
-# Android and ChromeOS Client Applications - OSS Components
+# Twingate Android and ChromeOS Client Applications — OSS Components
 
 ## Page Title
-Twingate Android and ChromeOS Client Applications – Open Source Components & Third-Party Notices
+Android and ChromeOS Client Applications (Open Source Components / Third Party Notices)
 
 ## Summary
-This page lists all open-source third-party components used in Twingate's Android and ChromeOS client applications, along with their respective licenses. It serves as the legal third-party notice document for the client. No implementation guidance is provided.
+This page lists all third-party open source components used in the Twingate Android and ChromeOS client applications. It provides full license texts for each dependency grouped by license type. This is a legal/compliance reference page, not an implementation guide.
 
 ## Key Information
 
-### Components by License
+**Components by License:**
 
 | License | Components |
 |---------|-----------|
-| Apache 2.0 | libssl, AndroidX, Dagger 2, Kotlin, Logback Android, Moshi, OkHttp, Retrofit, Retrofit Rx adapter, RxAndroid, RxJava, Timber |
-| BSD 3-Clause | libevent, lwip, Sentry |
-| MIT | libjansson, jwt-cpp, args, Sentry SDK for Java and Android, SLF4J, pubnub, quicly |
+| Apache 2.0 | AndroidX, Dagger 2, Kotlin, libssl (OpenSSL), Logback Android, Moshi, OkHttp, Retrofit, Retrofit Rx adapter, RxAndroid, RxJava, Timber |
+| BSD 3-Clause | libevent, lwip, Sentry (native) |
+| MIT | libjansson, jwt-cpp, args, Sentry SDK for Java/Android, SLF4J, pubnub, quicly |
+| Boost 1.0 | catch2 |
 | zlib | zlib, nanopb |
-| Boost Software License 1.0 | catch2 |
 | CC0 1.0 Universal | siphash |
-| Other (MIT-like) | fmt |
+| Custom (MIT-like) | fmt |
 
 ## Prerequisites
-- N/A (informational/legal page only)
+- N/A — this is a reference/compliance page only
 
 ## Step-by-Step
-- N/A
+- N/A — no actionable implementation steps
 
 ## Configuration Values
 - N/A
 
 ## Gotchas
-- `siphash` uses CC0 1.0 (public domain dedication), not a standard OSI license — no attribution legally required, but trademark/patent rights are **not** waived under CC0.
-- `fmt` includes an optional embedded-binary exception to its MIT-style license, permitting redistribution of embedded portions without copyright notices.
-- BSD 3-Clause components (`libevent`, `lwip`, `Sentry`) prohibit use of contributor names for endorsement without permission.
-- Apache 2.0 redistribution requires including a copy of the license and marking modified files.
+- **fmt** uses a non-standard license (MIT-like with an object code embedding exception) — verify compliance separately if redistributing
+- **siphash** uses CC0 1.0 (public domain dedication), not a traditional OSS license
+- **Sentry** appears twice under different licenses: the native SDK is BSD 3-Clause; the Java/Android SDK is MIT
 
 ## Related Docs
-- Twingate OSS notices for other platforms (iOS, Windows, Linux, macOS clients)
-- [Apache License 2.0](http://www.apache.org/licenses/)
+- [Twingate OSS iOS Client Applications](https://www.twingate.com/docs/oss-ios-client-applications) *(likely counterpart page)*
+- [Twingate OSS Desktop Client Applications](https://www.twingate.com/docs/oss-desktop-client-applications) *(likely counterpart page)*

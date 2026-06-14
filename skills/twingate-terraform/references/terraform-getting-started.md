@@ -1,46 +1,42 @@
 # Getting Started with Terraform and Twingate
 
 ## Summary
-Introductory page for using Terraform (IaC) to automate Twingate environment deployments across major cloud providers. Links to cloud-specific guides for GCP, AWS, and Azure. Covers deploying a complete Twingate + cloud networking stack via declarative code.
+Overview page for deploying Twingate infrastructure using Terraform (IaC) across major cloud providers. Guides cover full-stack deployment including Twingate configuration and cloud provider networking. Links out to provider-specific guides for GCP, AWS, and Azure.
 
 ## Key Information
 - Three cloud provider guides available: GCP, AWS, Azure
-- Each guide deploys a full Twingate + cloud infrastructure stack
-- Uses Twingate's official Terraform Provider with the Twingate API
+- Each guide deploys both Twingate objects and cloud infrastructure via Terraform
+- Uses Twingate Terraform Provider alongside the Twingate API
 
 ## Prerequisites
-- VS Code or any text editor installed
-- Terraform CLI installed
+- VS Code (or any text editor)
+- Terraform installed locally
 - Twingate client installed
-- Twingate account with API access
+- Twingate API access (for Terraform Provider)
 
 ## What Each Guide Deploys
 
-**Twingate Resources:**
+**Twingate Objects:**
 - New Remote Network
 - New Connector (attached to Remote Network)
-- Access and refresh tokens for the Connector
+- Connector access and refresh tokens
 - New Resource (pointing to Nginx VM)
-- New Group with access to network and resource
+- New Group (with access to network and resource)
 
-**Cloud Provider Resources (GCP/AWS/Azure):**
+**Cloud Provider Infrastructure (GCP/AWS/Azure):**
 - New VPC
-- New subnet in the VPC
+- New subnet
 - Firewall rules
 - VM with Twingate Connector installed and configured
 - VM with Nginx installed and running
 
-## Configuration Values
-- Twingate API credentials required (access/refresh tokens generated via Terraform)
-- Cloud provider credentials required (GCP, AWS, or Azure service account/credentials)
-
 ## Gotchas
-- Peer-to-peer connections are recommended to improve user experience and stay within the Fair Use Policy for bandwidth consumption — enable this when deploying Connectors
+- Peer-to-peer connections are recommended to avoid hitting the Fair Use Policy for bandwidth consumption — guides cover enabling this
+- No Terraform code is shown on this page; it's an index/intro page only
 
 ## Related Docs
-- [GCP Terraform Guide](https://www.twingate.com/docs/terraform-gcp)
-- [AWS Terraform Guide](https://www.twingate.com/docs/terraform-aws)
-- [Azure Terraform Guide](https://www.twingate.com/docs/terraform-azure)
-- Twingate Terraform Provider (HashiCorp Registry)
-- Peer-to-peer connections support guide
+- [GCP Guide](https://www.twingate.com/docs/gcp)
+- [AWS Guide](https://www.twingate.com/docs/aws)
+- [Azure Guide](https://www.twingate.com/docs/azure)
+- Peer-to-peer connections support doc
 - Twingate Fair Use Policy

@@ -1,32 +1,31 @@
 # Terraform with AWS and Twingate
 
 ## Summary
-Step-by-step guide to deploying Twingate on AWS using Terraform, creating a Remote Network, Connector, Group, and Resource alongside AWS VPC infrastructure. The setup provisions two EC2 instances: a private test VM and a Twingate Connector with outbound internet access.
+Step-by-step guide to deploying Twingate on AWS using Terraform. Creates a complete setup including VPC, two EC2 instances (Connector + test VM), and all Twingate configuration (Remote Network, Connector, Group, Resource). Connector uses Twingate's official AMI with cloud-init configuration.
 
 ## Key Information
-- Uses two Terraform providers: `hashicorp/aws` (~> 4.0) and `twingate/twingate`
-- Connector VM uses official Twingate AMI (owner: `617935088040`)
-- Connector configured via `user_data` bash script writing to `/etc/twingate/connector.conf`
-- Connector requires outbound internet only; no inbound public access needed
-- Total resources created: 13 (4 Twingate + 9 AWS)
+- Two providers required: `hashicorp/aws` (~> 4.0) and `twingate/twingate`
+- Twingate AMI owner ID: `617935088040`; Ubuntu AMI owner: `099720109477`
+- Connector needs outbound internet access only (no inbound); test VM is fully private
+- Connector configured via `/etc/twingate/connector.conf` using `user_data`
+- Demo restricts Resource to TCP port 22 only; ICMP allowed
 
 ## Prerequisites
 - Terraform installed
-- AWS account with Access Key ID and Secret Access Key
-- Twingate API key with **Read, Write & Provision** permissions
-- SSH key pair generated (`ssh-keygen`)
-- Twingate tenant name (e.g., `mycorp` from `mycorp.twingate.com`)
+- AWS account with Access Key ID + Secret Access Key
+- Twingate API token with **Read, Write & Provision** permissions
+- SSH key pair generated locally (`~/.ssh/aws_id_rsa`)
 
 ## Step-by-Step
 1. `mkdir twingate_aws_demo && cd twingate_aws_demo`
 2. Generate SSH key: `ssh-keygen` → save to `~/.ssh/aws_id_rsa`
-3. Create `main.tf` with providers, variables, and all resources
-4. Create `terraform.tfvars` with credentials
+3. Create `main.tf` with provider blocks, variables, and all resources
+4. Create `terraform.tfvars` with credentials (exclude from source control)
 5. `terraform init` — downloads providers
 6. `terraform plan` — validate (expect 13 resources)
 7. `terraform apply` — deploy
 8. Add Twingate user to the created group in Admin Console
-9. Test: `ssh -i ~/.ssh/aws_id_rsa ubuntu@<private_ip>`
+9. Connect: `ssh -i ~/.ssh/aws_id_rsa ubuntu@<private_ip>`
 10. Teardown: `terraform destroy`
 
 ## Configuration Values
@@ -35,34 +34,42 @@ Step-by-step guide to deploying Twingate on AWS using Terraform, creating a Remo
 ```
 AWS_ACCESS_KEY_ID=""
 AWS_SECRET_ACCESS_KEY=""
-tg_api_key="<api_token>"
-tg_network="<tenant_name>"
+tg_api_key="<twingate_api_token>"
+tg_network="<tenant_name>"  # e.g. "mycorp" from mycorp.twingate.com
 ```
 
-**Connector user_data env vars** (written to `/etc/twingate/connector.conf`):
+**Connector user_data environment variables:**
 ```
-TWINGATE_URL="https://<network>.twingate.com"
-TWINGATE_ACCESS_TOKEN="<access_token>"
-TWINGATE_REFRESH_TOKEN="<refresh_token>"
+TWINGATE_URL="https://${var.tg_network}.twingate.com"
+TWINGATE_ACCESS_TOKEN="<from twingate_connector_tokens>"
+TWINGATE_REFRESH_TOKEN="<from twingate_connector_tokens>"
 ```
 
-**Key resource parameters:**
+**Key Terraform resources:**
+| Resource | Type |
+|---|---|
+| `twingate_remote_network` | Remote Network |
+| `twingate_connector` | Connector (requires `remote_network_id`) |
+| `twingate_connector_tokens` | Auth tokens (requires `connector_id`) |
+| `twingate_group` | User Group |
+| `twingate_resource` | Protected Resource |
+
+**AWS defaults in demo:**
+- Region: `eu-west-1`
 - VPC CIDR: `10.0.0.0/16`
-- Subnet CIDR: `10.0.1.0/24`
-- AWS region: `eu-west-1`
-- Instance type: `t3.micro`
-- Ubuntu AMI owner: `099720109477` (Canonical), filter: `ubuntu-jammy-22.04-amd64`
-- Twingate AMI owner: `617935088040`, filter: `twingate-amd64-*`
-- Resource protocol: TCP port 22 restricted, UDP allow all, ICMP allowed
+- Subnet: `10.0.1.0/24`
+- Instance type: `t3.micro` for both VMs
 
 ## Gotchas
-- **Exclude `terraform.tfvars` from source control** — contains plaintext credentials
-- Test VM has no public IP; access only via Twingate after user is added to the group
-- Connector VM needs `associate_public_ip_address = true` for outbound connectivity
-- `twingate_connector_tokens` outputs are marked sensitive in plan output
-- Image versions in the guide may be outdated; verify AMI filters against current releases
+- `terraform.tfvars` contains secrets — add to `.gitignore`
+- Connector instance needs `associate_public_ip_address = true`; test VM should not
+- `twingate_connector_tokens` outputs are marked sensitive; reference via `access_token`/`refresh_token` attributes
+- AMI filters use wildcards — versions may change; verify latest available
+- Must manually assign users to the Twingate group post-deploy for access to work
+- Demo uses single `main.tf` — not recommended for production (split into modules)
 
 ## Related Docs
-- [Twingate Terraform Provider (Terraform Registry)](https://registry.terraform.io/providers/Twingate/twingate/latest)
-- Twingate Admin Console: Settings → API → Generate Token
-- AWS authentication methods documentation
+- [Twingate Terraform Provider Registry](https://registry.terraform.io/providers/Twingate/twingate)
+- [AWS Provider Authentication](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+- Twingate Connector configuration reference
+- Terraform code structure best practices

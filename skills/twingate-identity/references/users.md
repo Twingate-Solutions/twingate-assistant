@@ -1,44 +1,38 @@
 # Twingate Users
 
 ## Summary
-Twingate users can be managed via social logins or synced automatically from a third-party IdP via SCIM. New users default to the "Everyone" group with no Resource access until explicitly assigned. Billing applies to all synchronized users and service accounts.
+Twingate user management supports social logins (Google, Microsoft, GitHub, LinkedIn) or IdP synchronization via SCIM. New users only receive access to the "Everyone" group by default and have no Resource access until explicitly assigned. Users can be managed through the Admin Console or automatically via IdP.
 
 ## Key Information
-- Default auth: Google, Microsoft, GitHub, LinkedIn social logins
-- IdP-connected accounts: users auto-synced via SCIM; cannot be modified in Admin Console
-- All new users start in "Everyone" group only — **no Resource access by default**
-- Resource access requires: adding Resources to Everyone group, OR assigning users to specific Groups
-- User access visibility: detail page shows list view or Access Graph (filterable by Group, Remote Network, Resource)
-- Billing applies to all synchronized users + service accounts
+- Default auth: social logins (Google, Microsoft, GitHub, LinkedIn)
+- IdP integration syncs users automatically via SCIM; Admin Console cannot modify synced users
+- New users default to "Everyone" group only — no Resource access without explicit assignment
+- User Resource access viewable via detail page (list view or Access Graph)
+- Access Graph shows groups, Resources, paths, and policies; filterable by Group, Remote Network, or Resource
+- Billing applies to all synchronized users and service accounts
 
 ## Admin Roles
 
 | Role | Permissions |
 |------|-------------|
 | Admin | Full read/write across entire Admin Console |
-| DevOps | Read/write on Network tab only; read-only elsewhere |
+| DevOps | Read/write on Network tab; read-only elsewhere |
 | Support | Read-only across entire Admin Console |
 
-## Prerequisites
-- Social logins: no additional setup required
-- IdP sync: requires configured Identity Provider with SCIM enabled
-
 ## User Lifecycle
-1. **Add user** — via Teams page (social login) or auto-sync from IdP
-2. **Assign access** — add to Groups that have Resources, or add Resources to Everyone group
-3. **Verify access** — check user detail page (list or Access Graph view)
-4. **Offboard** — disable or delete user when access no longer needed
+1. **Invite** users via Teams page in Admin Console (social login mode)
+2. **Assign** users to Groups with Resource access (Everyone group has none by default)
+3. **Offboard** by disabling or deleting users when access no longer needed
 
 ## Gotchas
-- Users with **no Group assignments beyond Everyone** cannot access any Resources — this is a common misconfiguration
-- IdP-managed users **cannot be edited** in the Admin Console; all changes must come from IdP via SCIM and apply immediately
-- Deactivated users in IdP are deactivated in Twingate immediately via SCIM
-- All synced users count toward billing — including inactive/pending users
+- Users added to Twingate have **zero Resource access** until Resources are added to the Everyone group or users are assigned to a Group with Resources
+- With IdP/SCIM configured, user creation/deactivation **must** be managed in the IdP — Admin Console changes are not possible
+- All synchronized users and service accounts count toward billing regardless of Resource access
 
 ## Related Docs
-- [Social Logins](#) — managing social login providers
-- [Identity Providers](#) — IdP configuration and SCIM setup
-- [Groups](#) — assigning Resources to groups
-- [Admins](#) — detailed admin role permissions and assignment
-- [Offboarding Users](#) — disable/delete user procedures
-- [Billing](#) — user billing details
+- [Social Logins](https://www.twingate.com/docs/social-logins)
+- [Identity Providers](https://www.twingate.com/docs/identity-providers)
+- [Groups](https://www.twingate.com/docs/groups)
+- [Admins](https://www.twingate.com/docs/admins)
+- [Offboarding Users](https://www.twingate.com/docs/offboarding-users)
+- [Billing](https://www.twingate.com/docs/billing)

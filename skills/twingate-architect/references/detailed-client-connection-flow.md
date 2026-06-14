@@ -4,42 +4,44 @@
 Detailed Client Connection Flow
 
 ## Summary
-Describes the end-to-end process by which a Twingate Client detects, authorizes, and establishes a secure proxied connection to a Resource. The flow involves the Client, Controller, Relay, and Connector components working together with mutual certificate pinning and cryptographic proof-of-possession. No actual VPN connection is made to remote destinations—only a local tunnel to `127.0.0.1` is established on the device.
+Describes the end-to-end process by which a Twingate Client intercepts network requests, obtains authorization from the Controller, establishes a certificate-pinned TLS tunnel through a Relay to a Connector, and proxies traffic to private Resources. The flow ensures no private traffic leaves the client device unless the user is explicitly authorized.
 
 ## Key Information
-- Client intercepts traffic via a local VPN tunnel to `127.0.0.1` (OS-level; not a real VPN)
-- Whitelist ACL is signed by Controller, stored on Client, and updated on changes
-- Non-matching traffic is bypassed to the device's existing routing table/DNS resolvers
-- Network requests for private Resources **do not leave the device** unless user is authorized
-- DNS resolution for FQDN-based Resources occurs **at the Connector** (supports private/local DNS)
-- Connections use certificate-pinned TLS end-to-end (Client → Relay → Connector)
-- Proof-of-possession per [RFC 7800](https://www.rfc-editor.org/rfc/rfc7800) prevents intermediary interference
+- Client establishes a local VPN tunnel to `127.0.0.1` **only** for traffic interception — this is not a remote VPN connection
+- Non-matching traffic (not in whitelist ACL) bypasses Twingate entirely via existing routing table
+- DNS resolution for FQDN-based Resources occurs **at the Connector**, enabling private/local DNS usage for off-network users
+- Certificate pinning is enforced end-to-end: Client pins the Connector's certificate digest provided by the Controller
+- Every Client generates its own public/private key pair used for proof-of-possession validation
+- Implements RFC 7800 proof-of-possession to prevent intermediary tampering
 
 ## Connection Flow Steps
 
-1. **Detect request** — Client's local proxy intercepts traffic matching the signed whitelist ACL by destination address (does not need to be routable from client)
-2. **Get Connector authorization** — Client requests token from Controller; response includes:
-   - Relay FQDN
-   - Hash of Connector ID
-   - Digest of Connector's certificate
-3. **Establish cert-pinned TLS tunnel** — Client connects to Relay (validated by FQDN cert); Relay verifies Controller-signed token and that target Connector is connected; Client and Connector establish TLS with pinned cert
-4. **Present Resource authorization** — Client requests a connection-specific token from Controller (includes Client's public key); Controller returns signed time-bound ACL token with Client's public key; Client signs a TLS-session-derived secret with its private key; both token and signed secret sent to Connector
-5. **Connector validates** — Verifies Controller signature, uses Client's public key to validate the TLS session secret (proof-of-possession), confirms ACL entitlement
-6. **Proxy traffic** — If Resource is FQDN-based, DNS resolves at Connector; connection forwarded from Client through encrypted tunnel to Resource; source application unaware of proxying
+1. **Detect resource request** — Client intercepts TCP/UDP connections matching whitelist ACL (signed by Controller); holds request until auth completes
+2. **Obtain Connector authorization** — Client requests token from Controller; receives: Relay FQDN, hashed Connector ID, Connector certificate digest
+3. **Connect to Relay** — Client connects to Relay, validates Relay TLS cert against FQDN; Relay verifies Controller-signed token and confirms Connector is connected
+4. **Establish certificate-pinned TLS tunnel** — Client-Connector TLS tunnel negotiated; pinned against Connector cert digest from step 2
+5. **Present Controller-signed auth to Connector** — Client fetches connection-specific token (includes Client public key) from Controller; signs a TLS-session-derived secret; sends both to Connector over tunnel
+6. **Connector validates** — Verifies Controller signature, uses embedded Client public key to validate signed secret (proof-of-possession)
+7. **Proxy traffic** — FQDN DNS resolved at Connector; connection forwarded to Resource; source application unaware of proxying
+
+## Configuration Values
+- Whitelist ACL: signed by Controller, delivered at Client registration and on updates
+- Authorization tokens: time-bound, connection-specific, bound to Client public key
+- Connector identification at Relay: SHA hash of Connector ID (not raw ID)
 
 ## Gotchas
-- The local `127.0.0.1` VPN tunnel may trigger OS-level VPN notifications—this is **not** a VPN to any remote host
-- Authorization tokens are **time-bound**; clients must re-obtain tokens for continued access
-- Each Client generates its own public/private key pair; this is critical to the proof-of-possession mechanism
-- Connection requests are **held** (not dropped or forwarded) until security checks complete—latency expected on first connection to a Resource
+- The local `127.0.0.1` tunnel may trigger OS-level VPN notifications — this is expected and does not represent a remote VPN connection
+- Private Resource traffic is held at the Client until all auth steps complete; it **never leaves the device** if authorization fails
+- Relay only brokers the connection setup — it cannot inspect traffic due to certificate pinning between Client and Connector
+- Connector cert digest is provided by Controller, not discovered at connection time — Controller is the trust anchor
 
 ## Prerequisites
 - At least one Connector registered with the Twingate network
-- Client authenticated and registered with the Controller
-- Resources configured with access rules in the Admin console
+- Client registered and authenticated with the Controller
+- Resources configured with access rules in Admin console
 
 ## Related Docs
 - Architecture Overview
 - Connector Registration Process
-- Resources Configuration
-- RFC 7800 (Proof-of-Possession Key Semantics for JSON Web Tokens)
+- Resource Configuration
+- RFC 7800 (Proof-of-Possession Key Semantics for JWTs)

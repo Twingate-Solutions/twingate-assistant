@@ -1,38 +1,36 @@
-# Twingate & HIPAA
+# Twingate & HIPAA Compliance
 
 ## Summary
-Twingate provides network access control and traffic routing but does not process or store PHI, qualifying for the HIPAA "conduit exception." Twingate's position is that it is not a business associate under HIPAA and prefers not to sign BAAs. BAA review is available for enterprise customers meeting spend thresholds.
+Twingate provides network access control and traffic routing but does not store, decrypt, or process PHI content. Twingate asserts it qualifies for the HIPAA "conduit exception" and is not a business associate, though it will review BAAs under specific conditions.
 
 ## Key Information
-- Twingate acts as a **conduit** (like an ISP or postal service), routing encrypted traffic without decrypting or storing contents
-- Traffic through relays is **end-to-end encrypted**; Twingate cannot inspect contents
-- Relays do **not store traffic** — data is transient (sub-second contact duration)
-- Twingate **supports peer-to-peer connections**, meaning traffic may not even touch Twingate relays at all
-- Relays are only used as fallback when P2P connections cannot be established
-- DHHS conduit exception applies to **subcontractors of business associates** as well
-
-## Prerequisites
-- N/A (compliance/legal reference page, not implementation)
-
-## Configuration Values
-- None applicable
-
-## BAA Review Conditions
-If compliance team requires a BAA:
-1. BAA applies **only to the extent HIPAA actually applies** to Twingate services
-2. Liability under BAA is **tied to limitation of liability** in the main services agreement
-3. BAA review only available for **annual plans above $75,000**
-4. Contact your **account manager** to initiate
-
-## Gotchas
-- Signing a BAA could incorrectly imply Twingate is a business associate — Twingate considers this potentially undesirable for both parties
-- PHI may only contact Twingate infrastructure when a user device transmits PHI to/from a protected resource via a relay (not P2P path)
-- Twingate's non-HIPAA-applicability stance does **not reduce** their security commitments
+- Twingate's position: qualifies as a **conduit** (like an ISP), not a business associate under HIPAA
+- Traffic through relays is **end-to-end encrypted** — Twingate does not decrypt or inspect content
+- Relays do **not store traffic** — data is transient (milliseconds of contact)
+- Twingate **prefers not to sign BAAs** as it may imply incorrect regulatory obligations
+- Peer-to-peer connections (when available) bypass Twingate relays entirely — zero PHI contact
+- Conduit exception applies to both covered entities and subcontractors of business associates per DHHS guidance
 
 ## Legal Basis
-- DHHS Omnibus Rule commentary — conduit exception
-- Applies equally to subcontractors of business associates per DHHS clarification
+- **Conduit Exception**: Defined in DHHS commentary on the HIPAA Omnibus Rule
+- Applies because Twingate does not require "access on a routine basis" to PHI
+- DHHS confirmed conduit exception extends to **subcontractors** of business associates
+
+## BAA Review Conditions
+Twingate will review customer-provided BAAs only if:
+1. BAA scope is limited to where HIPAA **actually applies** to Twingate services
+2. BAA liability is tied to the **limitation of liability** in the main services agreement
+3. Customer is on an **annual plan above $75,000**
+
+## Gotchas
+- Twingate will not provide its own BAA form — review is of **customer's standard form only**
+- Signing a BAA may create misleading compliance implications for both parties
+- Relay contact with PHI only occurs when P2P connection is unavailable (fallback scenario)
+- BAA review is subject to legal resource prioritization — not guaranteed for all enterprise customers
+
+## Contact
+Reach account manager for BAA and HIPAA questions.
 
 ## Related Docs
-- [Twingate Security](https://www.twingate.com/docs/security) — security measures overview
-- Contact: Account manager for BAA/HIPAA questions
+- [Twingate Security](https://www.twingate.com/docs/security) — security controls and measures
+- DHHS Omnibus Rule commentary (external)

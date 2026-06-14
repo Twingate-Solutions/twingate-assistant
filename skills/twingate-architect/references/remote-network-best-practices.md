@@ -4,46 +4,49 @@
 Remote Network Best Practices
 
 ## Summary
-Guidelines for structuring Twingate Remote networks around network segments, DNS configuration, routing, and firewall rules. Proper configuration avoids performance penalties and keeps internal infrastructure hidden from the internet.
+Guidelines for structuring Twingate Remote Networks around network segments, DNS configuration, routing, and firewall rules. Proper configuration avoids performance penalties and keeps internal networks hidden from the internet.
 
 ## Key Information
 
 ### Network Segmentation
-- Configure **one Remote network per network segment** (any address space accessible from deployed Connectors)
-- Peered VPCs with combined accessible address space can share a single Remote network
-- No performance penalty for multiple Remote networks; separate networks may **improve performance** by avoiding unnecessary network traversal
-- Deploy separate Connector sets per VPC when VPCs don't need to be peered
+- One Remote Network per accessible network segment (logical grouping, not necessarily physical)
+- Peered VPCs sharing an address space can be a **single** Remote Network
+- No performance penalty for multiple Remote Networks
+- Separate Remote Networks with dedicated Connectors per VPC often **improves** performance by eliminating cross-VPC traversal
 
 ### Private DNS
-- Not required, but **recommended** for better UX and to avoid address space collisions
-- Twingate resolves internal addresses via Connectors—no public DNS entries needed
+- Not required, but strongly recommended
+- Connectors resolve internal addresses locally — no public DNS entries needed
 - Users connect via private DNS names (e.g., `resource.company.int`)
-- Private DNS names become **unresolvable** when Twingate is disconnected or access is revoked
-- Internal network remains fully hidden from the internet
+- DNS names become unresolvable if Twingate is disconnected or access is revoked
+- Prevents IP address space collisions during deployment expansion
 
 ### Routing
-- **No routing rule changes required** when deploying Twingate
-- Deploy one Connector per subnet when subnets are isolated from each other
-- Each Connector resolves local addresses on its own subnet independently
+- No changes to existing network routing rules required
+- Deploy separate Connectors per isolated subnet instead of bridging subnets
+- Example: Two isolated subnets (`10.1.0.0/16`, `10.2.0.0/16`) each get their own Connector — no cross-subnet routing needed
 
 ### Firewall Rules
-- **No inbound traffic required** from internet or any source for Connectors or Resources
-- Connectors only initiate **outbound connections** to Twingate to authenticate and receive Resource lists
+- **No inbound traffic required** for Connectors or Resources
+- Connectors initiate **outbound-only** connections to Twingate
 - User-to-Resource traffic flows over the established outbound connection
 
-## Configuration Pattern
+## Prerequisites
+- Connectors deployed within each target network segment
+- Network accessibility confirmed between Connectors and target Resources
 
+## Configuration Values
 | Scenario | Recommendation |
-|----------|---------------|
-| Two peered VPCs, shared address space | Single Remote network, shared Connectors |
-| Two isolated VPCs | Separate Remote networks, separate Connectors |
-| Isolated subnets (e.g., `10.1.0.0/16`, `10.2.0.0/16`) | One Connector per subnet |
+|---|---|
+| Peered VPCs, shared address space | Single Remote Network |
+| Isolated VPCs/subnets | Separate Remote Network per segment |
+| DNS format | `resource.company.int` (internal only) |
 
 ## Gotchas
-- Peering VPCs solely for remote access introduces unnecessary network traversal—use separate Remote networks instead
-- Private DNS names fail silently (unresolvable) when access is revoked, which is by design but may confuse users
-- Connectors must have outbound internet access to reach Twingate services
+- "Network segment" = any address space routable from deployed Connectors, regardless of physical topology
+- Private DNS names only resolve while Twingate is active and access is authorized — plan user communication accordingly
+- Routing traffic through a single Connector to reach multiple isolated subnets introduces unnecessary latency; deploy per-subnet instead
 
 ## Related Docs
-- [How DNS works with Twingate](#)
-- [Deploying Connectors](#) (Connector network requirements)
+- [How DNS works with Twingate](#) — DNS resolution details
+- [Deploying Connectors](#) — Connector network requirements and outbound connection specs

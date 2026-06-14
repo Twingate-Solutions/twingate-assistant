@@ -1,36 +1,39 @@
 # Two-Factor Authentication Security Policies
 
 ## Summary
-Twingate's 2FA security rule controls whether users are prompted for two-factor authentication when accessing Resources, signing into Networks, or the Admin Console. It uses TOTP-based authentication and supports additional methods like biometrics and security keys after initial setup.
+Controls whether users are prompted for 2FA when accessing Resources, signing into Networks, or accessing the Admin Console. Uses industry-standard TOTP format, with optional biometric or security key methods as alternatives.
 
 ## Key Information
-- Applicable to: Resource Policies, Minimum Authentication Requirements, and Admin Console Security
-- Uses industry-standard TOTP format
-- Supports biometric methods (Touch ID, Windows Hello) and hardware security keys (YubiKey) as additional options after TOTP enrollment
-- 2FA prompt appears after credential authentication when not yet configured
+- **Applicability**: Resource Policies, Minimum Authentication Requirements, Admin Console Security
+- TOTP-based; compatible with any TOTP authenticator app (Google Authenticator, etc.)
+- After TOTP setup, users can optionally enroll biometric (Touch ID, Windows Hello) or security key (YubiKey) as additional 2FA methods
+- Biometric/security key enrollment is completed via browser flow
 
 ## Prerequisites
-- A TOTP-compatible authenticator app (e.g., Google Authenticator for Android/iOS)
-- OR identity provider mobile app with TOTP support
-- Admin must configure 2FA rule on either Minimum Authentication Requirements OR Resource Policies (not both)
+- A TOTP-compatible authenticator app installed on Android or iOS
+- Admin must configure 2FA rule on either Resource Policies **or** Minimum Authentication Requirements (not both)
 
 ## Configuration Steps
-1. Trigger 2FA setup by accessing a 2FA-protected Resource or Network
-2. Open authenticator app and add a new application
-3. Scan the QR code shown (or manually enter the alphanumeric ID if on mobile)
+1. Trigger 2FA setup by authenticating — a notification prompts setup if 2FA is required but not configured
+2. Open authenticator app and add a new account
+3. Scan the QR code (or enter alphanumeric ID manually if on mobile)
 4. Confirm setup by entering the generated code
-5. After TOTP setup, optionally enroll biometric method or security key via browser flow
+5. Optionally enroll a biometric method or security key via browser prompt
 
 ## Gotchas
-- **Do not apply 2FA rules to both Minimum Authentication Requirements AND Resource Policies** — users will be prompted twice
-- **Do not delete the authenticator app or Twingate entry** — losing access requires an Admin to reset 2FA for that user
-- Lost authenticator access = locked out of all 2FA-protected Resources/Networks until Admin resets
+- **Do not set 2FA on both Minimum Authentication Requirements AND Resource Policies** — users will be prompted twice
+- **Do not delete the authenticator app or Twingate entry** — loss of access requires Admin to reset 2FA for the user
+- If TOTP access is lost, only an Admin can reset; self-service recovery is not available
 
-## Admin Actions
-- Admins can reset a user's 2FA if they lose access to their authenticator app
+## Configuration Values
+| Method | Details |
+|--------|---------|
+| TOTP | Industry-standard; any TOTP app supported |
+| Biometric | Touch ID, Windows Hello (browser-enrolled) |
+| Security Key | YubiKey and similar (browser-enrolled) |
 
 ## Related Docs
-- [Two-Factor Authentication (general)](https://www.twingate.com/docs/)
+- [Two-Factor Authentication general documentation](https://www.twingate.com/docs/two-factor-authentication-security-policies)
 - Resource Policies configuration
-- Minimum Authentication Requirements
+- Minimum Authentication Requirements configuration
 - Admin Console Security settings
