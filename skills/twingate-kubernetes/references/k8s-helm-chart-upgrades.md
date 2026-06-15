@@ -1,18 +1,17 @@
 # How to Upgrade Connectors Running in Kubernetes with Helm
 
 ## Summary
-Covers the process for checking Connector versions and upgrading Twingate Connectors deployed in Kubernetes via Helm. Helm chart updates and Connector image updates are separate operations. Restarting pods triggers a fresh image pull due to the default `pullPolicy: Always` setting.
+Guide for upgrading Twingate Connectors deployed in Kubernetes via Helm. Covers checking current connector version, updating the Helm chart, and updating the Connector image. Image updates require a pod restart due to the `Always` pull policy.
 
 ## Key Information
-- Helm chart update ≠ Connector image update; these are independent steps
-- Default `pullPolicy` is `Always` in the official Twingate Helm chart
-- Restarting the pod is sufficient to pull and run the latest Connector image
-- Release notes available in Connector Release Notes documentation
+- Updating the Helm chart does **not** automatically update the Connector image
+- Official Helm chart uses `pullPolicy: Always` — pod restart triggers image pull
+- Helm chart updates are infrequent but recommended when updating Connectors
+- Latest version info available in Connector Release Notes
 
 ## Prerequisites
-- Twingate Connector deployed in Kubernetes using the official Helm chart
+- Connector deployed in Kubernetes using Helm
 - `kubectl` and `helm` CLI access to the cluster
-- Namespace `twingate` (used in examples)
 
 ## Step-by-Step
 
@@ -26,30 +25,27 @@ Replace `<pod-name>` with the actual Pod name (e.g., `connector-1`).
 ```bash
 helm repo update -n twingate
 ```
-Run before upgrading Connectors; recommended but does not update running Connector images.
 
 ### Update the Connector Image
-Restart the pod to trigger an image pull:
+Restart the Pod to trigger image pull (due to `pullPolicy: Always`):
 ```bash
 kubectl rollout restart deployment/<connector-deployment-name> -n twingate
 ```
-Or delete the pod to let it recreate:
+Or delete the pod to force recreation:
 ```bash
 kubectl delete pod <pod-name> -n twingate
 ```
-The `pullPolicy: Always` setting ensures the latest image is pulled on restart.
 
 ## Configuration Values
-
-| Field | Value | Location |
-|-------|-------|----------|
-| `pullPolicy` | `Always` | Official Twingate Helm chart (image spec) |
+| Field | Value | Effect |
+|-------|-------|--------|
+| `image.pullPolicy` | `Always` | Pulls latest image on pod restart |
 
 ## Gotchas
-- **Helm chart update does not update running pods** — must restart pods separately after updating the chart
-- Helm chart changes are infrequent; image updates are the primary upgrade path
-- Pod name must be specified exactly in `kubectl exec` commands
+- **Helm chart update ≠ image update**: Running `helm repo update` only updates the chart definition, not running pod images
+- Pod must be restarted to pull and apply the latest Connector image
+- Namespace flag `-n twingate` assumes default namespace; adjust if deployed elsewhere
 
 ## Related Docs
-- Connector Release Notes (for version numbers and changelog)
-- Official Twingate Helm Chart repository
+- Connector Release Notes (for version numbers and update notes)
+- [Official Twingate Helm Chart](https://www.twingate.com/docs/k8s-helm-chart-upgrades)

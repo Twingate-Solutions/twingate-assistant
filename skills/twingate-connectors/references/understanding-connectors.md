@@ -4,36 +4,39 @@
 Understanding Connectors
 
 ## Summary
-Connectors are software-defined proxies that form the backbone of Twingate's network access, routing authorized user traffic to protected Resources without exposing them to the public internet. They differ fundamentally from VPN gateways by acting as narrow, centrally-coordinated proxies rather than network gateways. Connectors handle name/address resolution locally and are automatically clustered for redundancy.
+Connectors are software-defined proxies that form the backbone of Twingate's network, enabling secure access to protected Resources without acting as VPN gateways. They reside inside private networks, handle name/address resolution locally, and are automatically clustered for redundancy. Users never interact with Connectors directly—Twingate routes traffic transparently.
 
 ## Key Information
-- Connectors must reside **behind a firewall** within the private network—never publicly accessible
-- Users never directly connect to Connectors; routing is handled transparently by Twingate
-- Connectors do **not** allow users to join the private network—only specific authorized connections pass through
-- DNS/IP resolution happens at the Connector (Remote network side), not on the user's device
-- Connectors are automatically clustered within the same Remote network for redundancy
-- Traffic is routed to the **geographically nearest** Connector automatically
-- Only traffic destined for authorized Resources flows through a Connector (precise split tunneling)
+- Connectors must **never** be exposed to the public internet; always deploy behind a firewall within the private network
+- Users never connect directly to a Connector—routing is transparent and automatic
+- Connectors do **not** join users to the private network; they act as narrow proxies for authorized Resources only
+- DNS and IP resolution happens **at the Connector**, not on the user's device—enables private DNS names and IPs
 - Multiple Connectors across networks add no user-facing complexity
-
-## Architecture Implications
-- Deploy Connectors **inside** private subnets alongside the Resources they protect
-- Multiple Connectors on separate networks = users can access multiple networks without routing changes
-- Connectors scale horizontally—add more as demand grows, no reconfiguration required
-- Replicated services across regions: deploy one Connector per region for latency optimization
-
-## Gotchas
-- Connectors are **not** VPN gateways—do not place them in DMZs or expose them publicly
-- Network infrastructure changes are not required to support remote access; Connectors handle routing internally
-- Users are unaware of which Connector handles their connection—don't design workflows assuming Connector visibility
-- Private DNS names/IPs work for users without direct network connectivity because resolution is forwarded to the Connector's network
+- Connectors within the same Remote Network are **automatically clustered** for redundancy
+- Traffic is routed to the **geographically nearest** Connector automatically
+- Precise split tunneling: only authorized Resource traffic flows through a Connector
 
 ## Prerequisites
-- Firewall/private network environment for Connector placement
-- Twingate Remote network configured before deploying Connectors
-- See environment-specific deployment guides for cloud or on-prem setup
+- A private network (cloud or on-prem) to deploy Connectors within
+- Firewall in place to prevent public internet exposure of Connectors
+- Twingate Remote Network configured
+
+## Architecture Gotchas
+- **Not a VPN gateway**: Do not treat Connectors like traditional VPN endpoints—no network-level access is granted to users
+- **Firewall requirement**: Connectors initiate outbound connections; inbound access from the internet is not needed and should be blocked
+- **Separate Connectors per subnet**: Deploy individual Connectors within each network segment rather than routing across subnets to a single Connector
+- **Redundancy requires same Remote Network**: Auto-clustering only applies to Connectors within the same Twingate Remote Network
+- **No routing changes needed**: Twingate handles multi-network routing automatically; no infrastructure changes required for remote access segmentation
+
+## Configuration Values
+| Concern | Guidance |
+|---|---|
+| Network placement | Inside private subnet, behind firewall |
+| Internet exposure | None (outbound only) |
+| Redundancy | Deploy 2+ Connectors per Remote Network |
+| Geographic routing | Deploy one Connector per region for replicated services |
 
 ## Related Docs
-- Connectors Best Practices (geographic routing details)
-- Access Control for Staging Environments (multi-network segmentation example)
-- Environment-specific Connector deployment guides (cloud/on-prem)
+- Connectors Best Practices
+- Access Control for Staging Environments
+- Environment-specific deployment guides (cloud and on-prem)

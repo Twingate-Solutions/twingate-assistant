@@ -1,44 +1,33 @@
 # Admin Console Security
 
 ## Summary
-Twingate allows administrators to enforce MFA requirements specifically for Admin Console access. This setting is separate from user-facing authentication policies (Minimum Authentication Requirements and Device Security) which do not apply to admin console access.
+Twingate allows administrators to configure MFA requirements specifically for Admin Console access. This setting is separate from end-user authentication policies and only applies to administrators signing into the Admin Console.
 
 ## Key Information
-- Configured under **Settings** tab in the Admin Console
-- Applies **only to Twingate administrators** signing into the Admin Console
-- MFA policy here is independent from end-user authentication requirements
-- When MFA is set to "required," admins must configure **biometrics or a security key**
+- Located under the **Settings** tab in the Admin Console
+- Applies **only to Twingate administrators** accessing the Admin Console
+- Minimum Authentication Requirements and Device Security policies do **not** apply to Admin Console access
+- MFA can be set to "required" for Admin Console logins
+- Supported MFA methods: **biometrics** or **security key**
 
-## Prerequisites
-- Twingate Admin role
-- Access to Settings tab in Admin Console
-
-## Step-by-Step: Configuring MFA for Admin Console
-
-1. Navigate to **Settings** tab in Admin Console
-2. Locate Admin Console Security section
-3. Set MFA to **"required"**
-4. On next login, admins will be prompted to configure biometrics or a security key
-
-## Configuration Options
-
-| Option | Description |
-|--------|-------------|
-| MFA Required | Admins must authenticate with biometrics or security key |
-| MFA Not Required | Standard authentication only |
-
-## MFA Setup Behavior
-
-- **"Don't ask me again"** — suppresses the MFA setup prompt on future logins (MFA not configured)
-- **Configure MFA later** — accessible via account dropdown → **"Configure MFA"** (upper right corner)
+## MFA Configuration
+- When MFA is set to "required," admins are prompted to configure biometrics or a security key after first successful authentication
+- Admins can skip setup by selecting "Don't ask me again"
+- MFA can be configured later via **account dropdown → Configure MFA** (upper right corner)
 
 ## Gotchas
+- **Biometric isolation**: Biometrics configured for the Admin Console cannot be reused for the Twingate Client, and vice versa — **exception**: biometrics previously configured on the Twingate Client *can* be used to sign into the Admin Console (one-way compatibility)
+- Admin Console security is completely independent from network/resource access policies; changes here don't affect end-user Twingate Client authentication
+- Admins do not need a Twingate Client session to access the Admin Console
 
-- **Biometric isolation**: Biometrics configured for Admin Console access **cannot** be reused for the Twingate Client, but the reverse is allowed — biometrics previously set up on the Twingate Client **can** be used for Admin Console login
-- Admins do **not** need to sign into the Twingate Client to access the Admin Console, so Device Security and Minimum Authentication Requirements policies are bypassed entirely
-- Dismissing the MFA setup prompt with "Don't ask me again" does not enforce MFA — admins can skip configuration indefinitely unless the policy enforcement mechanism prevents login without MFA
+## Step-by-Step: Enable MFA for Admin Console
+1. Sign into the Admin Console
+2. Navigate to **Settings** tab
+3. Locate Admin Console Security section
+4. Set MFA to **Required**
+5. Admins will be prompted to configure biometrics or security key on next login
 
 ## Related Docs
 - Minimum Authentication Requirements
 - Device Security policies
-- Twingate Client authentication configuration
+- Twingate Client authentication

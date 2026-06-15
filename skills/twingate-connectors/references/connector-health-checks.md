@@ -1,14 +1,20 @@
 # Connector Health Checks
 
+## Page Title
+Connector Health Checks
+
 ## Summary
-Twingate Connectors expose an internal health check to verify the Connector service is running correctly. Health checks only validate service state—not network connectivity to Twingate infrastructure. Returns `OK` with exit code `0` on success; any other response or nonzero exit code indicates failure.
+Twingate Connectors expose an internal health check to verify the Connector service is running correctly. Health checks confirm service status only—they do not validate network connectivity to Twingate infrastructure. Returns `OK` with exit code `0` on success; any other response or nonzero exit code indicates failure.
 
 ## Key Information
-- Health checks confirm the Connector service is running, **not** that it has established network connectivity to Twingate
+- Health checks verify **service health only**, not network/connectivity status to Twingate
 - Success response: `OK` + exit code `0`
 - Failure: any other response or nonzero exit code
 
-## Running a Health Check by Deployment Type
+## Prerequisites
+- A running Twingate Connector deployed via systemd, Docker, or container orchestration
+
+## Step-by-Step by Deployment Type
 
 ### systemd
 ```bash
@@ -16,31 +22,36 @@ twingate-connectorctl health
 ```
 
 ### Docker
-Health check is built into the container image.
 ```bash
-# View status
-docker ps
+# Quick status
+docker ps  # check "Status" column
 
 # Detailed health info
 docker inspect --format "{{json .State.Health }}" <container-name>
 ```
 
-### Other Container Orchestration (e.g., AWS ECS)
-- Services that natively support Docker image health check definitions require no additional configuration
-- Otherwise, exec into the container:
+### Other Container Orchestration (ECS, etc.)
 ```bash
+# Execute inside container
 connectorctl health
 ```
+- AWS ECS and similar services natively support Docker image health check definitions—no extra config needed
 
-## Automating Actions Based on Health Check
+## Configuration Values
 
-Override the `Dockerfile HEALTHCHECK` directive in the Twingate container image, or use your orchestration platform's equivalent health check mechanism.
+| Context | Command/Config |
+|---|---|
+| systemd | `twingate-connectorctl health` |
+| Docker (in-container) | `connectorctl health` |
+| Docker (host) | `docker inspect --format "{{json .State.Health }}" <container-name>` |
+| Custom automation | Override `Dockerfile HEALTHCHECK` directive |
 
 ## Gotchas
-- A healthy response does **not** mean the Connector is connected to Twingate's network infrastructure
-- `twingate-connectorctl` (with prefix) is used for systemd; `connectorctl` (no prefix) is used inside containers
-- Docker deployment shows health status automatically via `docker ps`—no manual invocation needed
+- Health check returning **healthy ≠ network connectivity established** — a passing check only means the service process is running
+- For non-Docker orchestration without native Docker health check support, you must explicitly call `connectorctl health` inside the container
+- Automated actions require overriding the `Dockerfile HEALTHCHECK` or using your orchestration platform's equivalent mechanism
 
 ## Related Docs
-- Connector deployment (systemd, Docker, container orchestration)
-- Dockerfile HEALTHCHECK override documentation
+- Connector deployment (systemd, Docker)
+- Docker `HEALTHCHECK` directive documentation
+- AWS ECS health check configuration

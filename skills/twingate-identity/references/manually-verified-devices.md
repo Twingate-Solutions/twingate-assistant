@@ -1,42 +1,41 @@
 # Manually Verified Devices
 
 ## Summary
-Admins can manually verify devices to satisfy Trusted Profile requirements using either serial number or device instance verification. Serial number verification applies to any device matching a serial number; device instance verification applies to a specific user-device pair.
+Admins can manually verify devices to satisfy Trusted Profile requirements using two methods: serial number verification (recommended) or device instance verification. Verification can be done via Admin Console or API.
 
 ## Key Information
-- Two verification types: **serial number** (recommended) and **device instance**
-- Serial number verification: any device with a matching serial number is verified
-- Device instance verification: a specific user+device combination is verified
-- Serial numbers managed in **Devices > Serial Numbers** tab in Admin Console
-- Bulk upload supported for serial numbers (pre-deployment or post-deployment)
-- Both methods satisfy Trusted Profile requirements
+- **Serial number verification**: Any device matching a specified serial number is verified — recommended for most cases
+- **Device instance verification**: Verifies a specific user-device combination — use when device lacks a unique or any serial number
+- Serial numbers managed under **Devices > Serial Numbers** tab in Admin Console
+- Serial numbers can be bulk-uploaded before or after devices sign in (supports pre-deployment verification)
+- Device instance verification available on **Devices** tab or individual device detail page
+
+## Configuration Values
+- No env vars or CLI flags documented; management via Admin Console UI or API
+
+## Behavior / Edge Cases (Gotchas)
+- Devices with **no serial number** can only use device instance verification
+- Archived or blocked devices **can** be manually verified; verification is retained through archive/block actions
+- If a serial number is added for a device instance-verified device → device is **reclassified** as serial number verified (instance verification dropped)
+- If that serial number is then **deleted** → device loses verified status entirely and does **not** revert to device instance verified state
+- Deletion of a serial number is a one-way action regarding verification state — previous instance verification is not restored
 
 ## Prerequisites
-- Admin Console access
-- Trusted Profiles configured (manual verification is a method within Trusted Profiles)
+- Admin role in Twingate Admin Console
+- Trusted Profile configured to use manual verification as a verification method
 
 ## Step-by-Step
 
-### Serial Number Verification
+**Serial Number Verification (Bulk Upload):**
 1. Navigate to **Devices > Serial Numbers** tab in Admin Console
-2. Upload serial numbers (bulk upload supported via CSV or API)
+2. Upload serial numbers (CSV or similar bulk method)
+3. Devices matching those serial numbers are considered verified
 
-### Device Instance Verification
+**Device Instance Verification:**
 1. Navigate to **Devices** tab or a specific device's detail page
 2. Open the device verification modal
-3. Select the option to verify the device instance (specific user-device combination)
-
-## Configuration Values
-- Verification methods available via: Admin Console or API
-- Bulk upload location: **Devices > Serial Numbers** tab
-
-## Gotchas
-- Devices with **no serial number** can only use device instance verification
-- Archived/blocked devices **can** be manually verified; verification is retained when archived or blocked
-- If a serial number is added for a device that was previously device instance verified → device is **reclassified** as serial number verified
-- If that serial number is later **deleted** → device loses verified status entirely; does **not** revert to device instance verified state
-- Serial number takes precedence over device instance verification; deletion of the serial number does not restore the prior state
+3. Select the option to verify the device instance
 
 ## Related Docs
-- Trusted Profiles
+- Trusted Profiles (verification method configuration)
 - Devices tab (Admin Console)

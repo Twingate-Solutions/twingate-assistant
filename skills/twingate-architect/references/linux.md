@@ -1,22 +1,22 @@
 # Twingate Linux Client
 
 ## Summary
-Installs and manages the Twingate client on Linux via CLI. Supports major distributions with systemd and glibc. Headless/non-interactive mode available for servers and containers.
+Installs and manages the Twingate Client on Linux via CLI. Supports major distributions with systemd and glibc dependencies. A headless/non-interactive mode is available for servers and containers.
 
 ## Key Information
 - Supported (x86/AMD64 + ARM64): Ubuntu 22.04/24.04/26.04 LTS, Debian 11+, Fedora 41+, CentOS Stream 9+, Oracle Linux 8+
 - Supported (x86/AMD64 only): Arch Linux, HP ThinPro, NixOS, Gentoo
-- Requires `systemd` and `glibc`; DNS requires `systemd-resolved` OR `NetworkManager`
-- Two release channels: `twingate` (stable) and `twingate-latest` (early release) — mutually exclusive
+- Requires `systemd` and `glibc`; upstream distros (e.g., RHEL 10) likely work but untested
+- Two release channels: `twingate` (stable) and `twingate-latest` (early release); mutually exclusive
 
 ## Prerequisites
-- `systemd-resolved` or `NetworkManager` enabled and running
+- `systemd-resolved` OR `NetworkManager` configured as DNS service
 - Notification service for interactive auth (console fallback available)
 - `curl`, `gpg`, `ca-certificates` for manual APT install
 
 ## Installation
 
-**One-liner (all supported distros):**
+**Quick install (all supported distros):**
 ```bash
 curl -s https://binaries.twingate.com/client/linux/install.sh | sudo bash
 sudo twingate setup
@@ -44,30 +44,26 @@ dnf install -y twingate
 | `sudo twingate setup` | Initial configuration |
 | `twingate start` | Start client (no sudo) |
 | `twingate stop` | Stop client |
-| `twingate status` | Check status |
-| `twingate resources` | List available resources |
-| `sudo twingate config [setting] [value]` | Change config setting |
+| `twingate status` | Show status |
+| `twingate resources` | List accessible resources |
+| `sudo twingate config [setting] [value]` | Change config (e.g., `network`, `autostart`, `save-auth-data`, `log-level`) |
 | `twingate desktop-start` | Start desktop notifications |
-| `/usr/bin/twingate-notifier console` | Console-based auth (headless) |
-| `sudo twingate report` | Export diagnostics ZIP |
+| `/usr/bin/twingate-notifier console` | Console-based auth (no desktop) |
+| `sudo twingate report` | Export diagnostic ZIP |
 
-## Configuration Values
-- `sudo twingate config network <value>`
-- `sudo twingate config autostart <value>`
-- `sudo twingate config save-auth-data <value>`
-- `sudo twingate config log-level [error|warn|info|debug|trace]`
-
-## Logs
+## Logging
 ```bash
 sudo journalctl -u twingate --since "1 hour ago"
-# Fallback (containers): /var/log/twingated.log
+# Fallback log path (containers): /var/log/twingated.log
+sudo twingate config log-level debug   # Set for troubleshooting
 ```
+Log levels: `error`, `warn`, `info`, `debug`, `trace`
 
 ## Gotchas
-- **Do not use `sudo twingate start`** — desktop auth notifications will be hidden from the logged-in user
-- `twingate` and `twingate-latest` conflict; only one can be installed at a time
-- For headless auth, copy URL from `/usr/bin/twingate-notifier console` output and open in browser
-- Set log level to `debug` before contacting support
+- **Do not use `sudo twingate start`** — runs as root, hides desktop auth notifications from logged-in user
+- `twingate` and `twingate-latest` packages conflict; only one can be installed
+- GPG signing only applies to APT-based systems; RPM repos have GPG check disabled
+- In containers without `journalctl`, logs fall back to `/var/log/twingated.log`
 
 ## Related Docs
 - Headless/non-interactive mode

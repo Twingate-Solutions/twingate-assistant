@@ -1,57 +1,57 @@
-# AWS CloudFront SaaS App Gate via Twingate
+# AWS CloudFront SaaS App Gate
 
 ## Summary
-Restricts AWS CloudFront distribution access to Twingate exit node IPs using AWS WAF IP sets. Users must connect through Twingate (routed via AWS Exit Nodes) to reach protected CloudFront content.
+Configure IP whitelisting for AWS CloudFront using Twingate AWS Exit Nodes. Traffic is restricted via AWS WAF IP Sets scoped to CloudFront (Global), ensuring only requests from designated Elastic IPs (exit nodes) reach your CloudFront distribution.
 
 ## Key Information
-- Uses AWS Firewall Manager WAF IP sets to whitelist exit node Elastic IPs
-- WAF ACL must be scoped to **Global (CloudFront)** region
-- S3-backed CloudFront distributions may require additional Origin Access Identity (OAI) configuration
-- Twingate resource name must match the CloudFront FQDN exactly (e.g., `beamreach.cloudfront.net`)
+- Uses AWS Firewall Manager WAF + CloudFront WAF Web ACL for IP restriction
+- Exit Node Elastic IPs are the allowlisted IPs in the WAF IP Set
+- CloudFront WAF IP Sets must use **Global (CloudFront)** region, not a regional setting
+- Twingate Resource name must match the CloudFront FQDN (e.g., `beamreach.cloudfront.net`)
+- S3-backed CloudFront may require additional Origin Access Identity (OAI) configuration
 
 ## Prerequisites
-- AWS Exit Nodes provisioned with Elastic IPs assigned to EC2 instances
-- Access to AWS Firewall Manager and CloudFront console
+- AWS Exit Nodes created with Elastic IPs assigned ([AWS Exit Nodes docs](https://www.twingate.com/docs/aws-exit-nodes))
+- Access to AWS Firewall Manager and AWS CloudFront console
 - Twingate admin console access
 
 ## Step-by-Step
 
-### 1. Create IP Set in AWS Firewall Manager
-- Navigate to AWS Firewall Manager → IP Sets
-- Create new IP Set, set Region to **Global (CloudFront)**
-- Add exit node Elastic IPs in CIDR notation (e.g., `35.164.107.72/32`)
+1. **Create WAF IP Set** in AWS Firewall Manager
+   - Region: `Global (CloudFront)`
+   - Add Elastic IPs of all exit node EC2 instances in CIDR format (e.g., `35.164.107.72/32`)
 
-### 2. Assign WAF ACL to CloudFront Distribution
-- In AWS CloudFront, open your Distribution settings
-- Set **AWS WAF Web ACL** field to the IP Set created above
+2. **Assign WAF ACL to CloudFront Distribution**
+   - In CloudFront Distribution settings, set `AWS WAF Web ACL` to the IP Set created above
 
-### 3. (Optional) Restrict S3 Origin Access
-- Create an Origin Access Identity (OAI) to ensure S3 content is only accessible via CloudFront + WAF
-- Consult AWS S3 documentation for OAI setup
+3. **(S3 only) Restrict S3 origin access**
+   - Create an Origin Access Identity to limit S3 content access exclusively to CloudFront + WAF ACL
+   - Consult AWS S3 documentation for OAI setup
 
-### 4. Create Twingate Resource
-- In Twingate admin console, create a Resource using the CloudFront FQDN (e.g., `beamreach.cloudfront.net`)
+4. **Create Twingate Resource**
+   - Resource name/address = CloudFront FQDN (e.g., `beamreach.cloudfront.net`)
 
-### 5. Authorize Users
-- Create a Group in Twingate
-- Add the CloudFront Resource to the Group
-- Assign users to the Group
+5. **Authorize Users**
+   - Create a Twingate Group
+   - Add the CloudFront Resource to the Group
+   - Assign users to the Group
 
 ## Configuration Values
-| Field | Value |
-|-------|-------|
+
+| Parameter | Value |
+|-----------|-------|
 | WAF IP Set Region | `Global (CloudFront)` |
 | IP format | CIDR (e.g., `35.164.107.72/32`) |
 | CloudFront setting | `AWS WAF Web ACL` |
-| Twingate Resource name | Exact CloudFront FQDN |
+| Twingate Resource identifier | CloudFront FQDN or IP |
 
 ## Gotchas
-- IP Set region **must** be `Global (CloudFront)` — regional IP sets won't work with CloudFront
-- Each exit node EC2 instance needs its own `/32` CIDR entry
-- Twingate matches on exact FQDN/IP in connection requests — resource name mismatch will deny access
-- S3 origins without OAI can be accessed directly, bypassing WAF — OAI is required to fully lock down S3-backed distributions
+- WAF IP Set **must** be set to `Global (CloudFront)` — regional IP sets will not work with CloudFront
+- Each exit node Elastic IP must be added individually as `/32` CIDR entries
+- Without OAI on S3 origins, users may bypass CloudFront WAF by accessing S3 directly
+- Twingate authorizes based on exact FQDN/IP match in the connection request — Resource name must match the actual CloudFront domain
 
 ## Related Docs
 - [AWS Exit Nodes setup](https://www.twingate.com/docs/aws-exit-nodes)
-- [Create Twingate Resources](https://www.twingate.com/docs/resources)
+- [Creating Twingate Resources](https://www.twingate.com/docs/resources)
 - AWS S3 Origin Access Identity documentation

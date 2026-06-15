@@ -1,46 +1,55 @@
-# Twingate macOS and iOS Client Applications – OSS Third-Party Notices
+# macOS and iOS Client Applications — OSS Third-Party Notices
 
 ## Page Title
-macOS and iOS Client Applications (Open Source Components & Licenses)
+Twingate macOS and iOS Client Applications — Open Source Component Licenses
 
 ## Summary
-This page lists all third-party open source components bundled in Twingate's macOS and iOS client applications, along with their respective licenses. It serves as the required legal attribution/notice document for OSS compliance. No implementation guidance is provided.
+This page lists all third-party open source components bundled in Twingate's macOS and iOS client applications, along with their full license texts. It serves as the required legal attribution notice for redistributed open source software.
 
 ## Key Information
 
-### Components and Licenses
+### Component Inventory by License
 
-| Component | License | Copyright Holder |
-|-----------|---------|-----------------|
-| libssl | Apache 2.0 | OpenSSL Project |
-| libevent | BSD 3-Clause | Niels Provos, Nick Mathewson |
-| lwip | BSD 3-Clause | Swedish Institute of Computer Science |
-| siphash | CC0 1.0 Universal | (public domain dedication) |
-| libjansson | MIT | Petri Lehtinen |
-| jwt-cpp | MIT | Dominik Thalhammer |
-| args | MIT | Taylor C. Richberger, Pavel Belikov |
-| Sentry-cocoa | MIT | Sentry |
-| pubnub | MIT | PubNub |
-| quicly | MIT | Fastly, Kazuho Oku |
-| catch2 | Boost Software License 1.0 | Catch2 Authors |
-| zlib | zlib License | Jean-loup Gailly, Mark Adler |
-| nanopb | zlib License | Petteri Aimonen |
-| fmt | MIT-variant (with object code exception) | Victor Zverovich |
+| License | Components |
+|---------|------------|
+| Apache 2.0 | libssl |
+| BSD 3-Clause | libevent, lwip |
+| CC0 1.0 Universal | siphash |
+| MIT | libjansson, jwt-cpp, args, Sentry-cocoa, pubnub, quicly |
+| Boost Software License 1.0 | catch2 |
+| zlib | zlib, nanopb |
+| Custom (MIT-like) | fmt |
+
+### Component Purposes
+- **args** — CLI argument parsing
+- **catch2** — C++ testing framework
+- **fmt** — String formatting
+- **jwt-cpp** — JWT token handling
+- **libevent** — Event notification library
+- **libjansson** — JSON library
+- **libssl** — TLS/SSL (OpenSSL)
+- **lwip** — Lightweight TCP/IP stack
+- **nanopb** — Protocol Buffers for embedded systems
+- **pubnub** — Real-time messaging
+- **quicly** — QUIC protocol implementation
+- **Sentry-cocoa** — Crash reporting (iOS/macOS)
+- **siphash** — Hash function
+- **zlib** — Data compression
 
 ## Prerequisites
-- N/A (legal reference document only)
+- N/A — Reference/legal documentation only
 
 ## Step-by-Step
-- N/A
+- N/A — No implementation steps; informational page only
 
 ## Configuration Values
 - N/A
 
 ## Gotchas
-- **fmt** uses a non-standard MIT variant: includes an exception allowing redistribution of embedded object code without copyright notices — differs from standard MIT
-- **siphash** is CC0 (public domain dedication), not a traditional license; trademark/patent rights are explicitly **not** waived under CC0
-- BSD 3-Clause components (libevent, lwip) prohibit use of contributor names for endorsement without permission
+- **fmt** uses a custom license (MIT-like) with an added exception: embedded portions in compiled object code may be redistributed without the copyright notice
+- **siphash** uses CC0 1.0 (public domain dedication), not a traditional OSS license — no attribution required but trademark/patent rights are explicitly not waived
+- **libssl** is Apache 2.0 (OpenSSL project), not the historical OpenSSL license — redistribution requires NOTICE file inclusion
 
 ## Related Docs
-- Twingate OSS notices for other platforms (Linux, Windows clients)
-- [Apache License 2.0](http://www.apache.org/licenses/)
+- [Twingate OSS notices for other platforms] (see sibling pages in the OSS section)
+- Apache License 2.0: http://www.apache.org/licenses/

@@ -1,68 +1,67 @@
 # Twingate Guides Index
 
 ## Page Title
-Twingate Guides — Documentation Index
+Twingate Guides Overview
 
 ## Summary
-This is the top-level index page for all Twingate deployment, configuration, and management guides. It organizes documentation into categories covering infrastructure deployment, client management, integrations, Kubernetes, security policies, and architectural best practices.
+This is the Twingate documentation guides index page, organizing deployment, configuration, and management documentation across infrastructure types, use cases, and integrations. It serves as the top-level navigation hub for all Twingate implementation guides.
 
 ## Key Information
 
-**Deployment Targets:**
-- Cloud: AWS EC2, GCP Compute, Azure Compute, Kubernetes, DigitalOcean
-- On-premises: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP, TrueNAS, Proxmox
-- Homelab: Home Assistant, Unraid, ZimaOS, CasaOS
-- IaC: Terraform, Pulumi
+### Deployment Targets
+- **Cloud**: AWS EC2, GCP Compute, Azure Compute, Kubernetes, DigitalOcean
+- **On-premises**: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP NAS, TrueNAS SCALE, Proxmox
+- **Homelabs**: Home Assistant, Unraid, ZimaOS, CasaOS
+- **IaC**: Terraform, Pulumi
 
-**Client Deployment (MDM):**
-- Jamf, Iru, Omnissa Workspace ONE, Microsoft Intune/Endpoint Manager
+### Client Deployment (MDM)
+- Jamf, Iru, Omnissa Workspace ONE, Microsoft Intune & Endpoint Manager
 
-**Identity/Service Integrations:**
-- IdP for SaaS App Gating: Google Workspace, JumpCloud, Microsoft Entra ID, Okta, OneLogin
-- Complementary services: Active Directory, Cisco Umbrella, Cloudflare DNS, Netskope DLP, Zscaler
+### Service Integrations
+- Identity: Active Directory, Okta, Microsoft Entra ID, JumpCloud, OneLogin
+- DNS/Security: Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler
+- Databases: MongoDB, AWS RDS, GCP, Azure, Oracle, Snowflake, Redis
 
-**Database Access:**
-- MongoDB, AWS, GCP, Azure, Oracle, Snowflake, Redis
+### SaaS App Gating
+- IP-based access control for SaaS applications
+- IdP integrations: Google Workspace, JumpCloud, Entra ID, Okta, OneLogin
+- Use cases: AWS CloudFront, Office 365
 
-**Kubernetes-Specific:**
+### Kubernetes
 - Route traffic from K8s, private/public resource exposure, kubectl management
 
-## Notable Use Cases Covered
-- AI/LLM access control
-- CI/CD pipeline security
-- IoT headless client gateway
-- Site-to-site connections
-- Replace AWS VPN
-- SSH resource access management
-- Vendor/contractor access management
-- SaaS App Gating with exit nodes (AWS CloudFront, AWS Exit Nodes)
-- Self-hosted VPN via Exit Networks
+### Notable Use Cases
+- AI/LLM access, CI/CD pipeline security, site-to-site connections
+- SSH resource management, IoT headless client gateway
+- Replace AWS VPN, vendor/contractor access management
+- Self-hosted VPN with Exit Networks
 
-## Architecture & Best Practices Topics
+## Best Practices Docs Available
+- Connector placement and configuration
 - Private DNS configuration
-- Connector placement
-- Overlapping IP address handling
+- Overlapping IP addresses
+- Security policies
 - Non-production environment access
-- Security policy design
-- Peer-to-peer/local connections
+- SaaS App Gating
+- Internal network design with peer-to-peer
 
-## Technical Reference Topics
-- NAT traversal mechanics
-- Encryption implementation
-- Firewall behavior
+## Technical Reference Docs Available
+- NAT traversal, encryption, firewall behavior
+- Peer-to-peer troubleshooting
 - Connector shutdown process
-- Service accounts
-- Windows Start Before Logon
+- Service accounts, Windows Start Before Logon
 - Performance evaluation
+- Release stages
+
+## Gotchas
+- This page is navigation-only; no configuration values are defined here
+- Specific implementation details require navigating to individual guide pages
 
 ## Related Docs
-- `/docs/internet-security` — DNS-over-HTTPS, DNS filtering
-- `/docs/saas-app-gating` — IP-based SaaS access control
-- `/docs/security-policies` — Policy configuration
-- `/docs/kubernetes` — K8s deployment guides
-- `/docs/logging` — Audit log export
-- `/docs/connector-best-practices` — Connector optimization
-- `/docs/remote-network-best-practices` — Network organization
-
----
-*This page serves as a navigation index only — no configuration values or step-by-step procedures are directly contained here.*
+- `/docs/connector-best-practices`
+- `/docs/remote-network-best-practices`
+- `/docs/security-policies`
+- `/docs/kubernetes`
+- `/docs/saas-app-gating`
+- `/docs/logging`
+- `/docs/client-deployment`

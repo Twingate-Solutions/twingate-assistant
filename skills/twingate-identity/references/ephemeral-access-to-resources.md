@@ -1,18 +1,15 @@
 # Ephemeral Access to Resources
 
-## Page Title
-Ephemeral Access to Resources
-
 ## Summary
-Ephemeral Access grants time-bounded access to Resources for specific Groups, with automatic revocation at expiration. Configured via the Admin Console on Resource or Group pages, it supports expiration windows from 1 hour to 1 year. When expired, the Group is automatically removed from the Resource and users lose access.
+Ephemeral Access grants time-bounded access to Resources for specific Groups, with automatic revocation at expiration. Configured via the Admin Console on either Resource or Group pages, it removes the Group from the Resource automatically when the expiration is reached.
 
 ## Key Information
-- Access expiration range: **1 hour to 1 year** from current date
-- Expiration is set **per Group per Resource** (not globally)
-- Expired Groups are **automatically removed** from the Resource
-- Expiration changes are logged in **audit logs** (Access category)
-- Expiration can be **removed without revoking** the Group's access entirely
-- Visual indicator: `Expires [date]` pill on Group rows
+- Access is granted at the **Group level**, not individual user level
+- Expiration range: **1 hour to 1 year** from current date
+- At expiration: Group is automatically removed from Resource; all users in that Group lose access
+- Active expirations display an **"Expires [date]" pill** in the UI
+- All expiration changes are logged in **audit logs** under the Access category
+- Expiration can be **removed without revoking access** (via "Remove Expiration" link in date picker)
 
 ## Prerequisites
 - Admin Console access
@@ -20,22 +17,22 @@ Ephemeral Access grants time-bounded access to Resources for specific Groups, wi
 
 ## Step-by-Step
 
-### From a Resource Page (New Group)
+### Set Expiration on New Group Access (from Resource page)
 1. Navigate to the Resource page
 2. Begin granting access to a new Group
 3. Click **Set Expiration** in the access configuration
-4. Select date and time in the date picker
-5. Click **Set Expiration Time** to confirm
+4. Choose date and time in the date picker
+5. Click **Set Expiration Time** to apply
 6. Click **Grant Access** to finalize
 
-### From a Resource Page (Existing Group)
+### Modify Expiration on Existing Group Access (from Resource page)
 1. Navigate to the Resource page
 2. Click the **options menu** on the Group's row
 3. Select **Set Expiration**
-4. Choose date/time or click **Remove Expiration** to clear without revoking access
+4. Modify the date/time, or click **Remove Expiration** to clear without revoking access
 
-### From a Group Page
-- Same patterns apply: use **Set Expiration** when adding new Resources, or **options menu → Set Expiration** for existing Resources
+### From Group Page
+- Same patterns apply: **Set Expiration** when adding new Resources; **options menu → Set Expiration** for existing Resources
 
 ## Configuration Values
 | Parameter | Range | Notes |
@@ -43,15 +40,14 @@ Ephemeral Access grants time-bounded access to Resources for specific Groups, wi
 | Expiration time | 1 hour – 1 year | From current date/time |
 
 ## Gotchas
-- Expiration removes the **entire Group** from the Resource — all users in that Group lose access simultaneously
-- No partial/per-user expiration within a Group
-- No built-in notification to users before expiration occurs (not mentioned in docs)
-- Must use **Remove Expiration** (not delete) to clear a timer without revoking access
+- Access is Group-scoped — cannot set per-user expiration directly; user loses access only when the Group is removed
+- Removing expiration ≠ removing access; the Group retains access indefinitely until manually removed or a new expiration is set
+- No notification mechanism mentioned — users are not warned before expiration
 
-## Common Use Cases
+## Use Cases
 - Projects with defined end dates
 - Contractor engagements with fixed duration
-- "Break glass" scenarios for sensitive Resource access
+- Break-glass access to sensitive Resources
 
 ## Related Docs
 - Twingate Groups documentation

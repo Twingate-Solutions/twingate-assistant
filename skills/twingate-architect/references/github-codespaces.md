@@ -1,29 +1,33 @@
-# Access Twingate Resources from GitHub Codespaces
+# Twingate in GitHub Codespaces
 
 ## Summary
-Enables Twingate client to run inside GitHub Codespaces cloud development environments, allowing access to Twingate-protected resources from browser-based or VS Code-connected Codespaces. Implementation details are maintained in Twingate's open source repository.
+Enables Twingate client access from within GitHub Codespaces cloud development environments. Configuration is managed via an open source repository. Supports both browser-based and VS Code access to Codespaces.
 
 ## Key Information
-- Supports both browser-based and VS Code-connected Codespaces
-- Full development environment runs in cloud with Twingate access
-- Open source implementation available via Twingate's GitHub repository
+- Allows Twingate-protected resources to be accessed from GitHub Codespaces
+- Works with both browser-based Codespaces and VS Code-connected Codespaces
+- Implementation details and scripts are maintained in Twingate's open source repository
 
 ## Prerequisites
-- GitHub Codespaces access
-- Twingate account and network configured
-- Refer to open source repository for specific dependencies
+- Active Twingate account with configured network/resources
+- GitHub account with Codespaces access
+- Reference the [Twingate Open Source repository](https://github.com/Twingate) for current setup scripts
 
-## Configuration Values
-- See [Twingate Open Source Repository](https://github.com/Twingate) for environment variables, devcontainer configuration, and setup scripts
+## Implementation
+Full setup instructions and configuration files are located in Twingate's open source repository (not fully documented on this page). Refer to the repository for:
+- Devcontainer configuration snippets
+- Setup scripts for installing Twingate client in Codespaces
+- Service account or auth token configuration
 
 ## Gotchas
-- Documentation is minimal; primary implementation guidance is in the external open source repository
-- Codespaces runs in a containerized environment — standard Twingate client installation may require custom devcontainer setup
+- Documentation is sparse on this page; the open source repository is the primary reference
+- Codespaces environments are ephemeral — Twingate client must be re-initialized on each new Codespace unless baked into the devcontainer config
+- Service account credentials (not interactive login) are typically required for automated/headless environments like Codespaces
 
 ## Related Docs
 - [Twingate Open Source Repository](https://github.com/Twingate)
-- GitHub Codespaces documentation (external)
-- Twingate Client installation docs
+- Twingate Service Accounts documentation
+- GitHub Codespaces devcontainer documentation
 
 ---
-*Note: This page has sparse inline documentation. For implementation details, consult the linked open source repository directly.*
+*Note: This documentation page has minimal content and defers to the open source repository for implementation details. Check the repository directly for current configuration examples.*

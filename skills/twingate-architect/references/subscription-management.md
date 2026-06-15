@@ -1,59 +1,48 @@
 # Subscription Management
 
 ## Summary
-Twingate billing is based on total number of Users and Service Accounts, billed monthly or annually. Monthly customers pay based on count at end of billing cycle; annual customers pay prorated charges for mid-cycle additions. Enterprise and invoice customers have separate arrangements.
+Twingate billing is usage-based on total Users and Service Accounts, billed monthly or annually. Monthly customers are billed at renewal based on end-of-cycle counts; annual customers receive prorated mid-cycle charges. Enterprise and invoice customers have separate billing arrangements.
 
 ## Key Information
-- **License counting**: All Users (including Pending and Disabled) + Service Accounts count toward license total
-- **IdP-synced users**: Counted regardless of sync source or manual addition method
-- **Service Accounts**: Each counts as one license regardless of number of Service Keys or key status
-- **Billing timezone**: Transactions process at midnight UTC — may appear as end-of-month charges depending on locale
+- **License unit**: Each User (including Pending/Disabled) and each Service Account = 1 license
+- **Users counted**: IdP-synced users, manually added users, Pending users, Disabled users
+- **Service Accounts**: Count as 1 license regardless of number of Service Keys or key status
+- **Monthly billing**: Charged at renewal based on user count on last day of previous cycle
+- **Annual billing**: Mid-cycle additions → prorated charge on 1st of following month; removals apply at next annual renewal
+- **Timezone note**: Billing transactions occur at midnight UTC; may appear as end-of-month charge depending on local timezone
 
-## Billing Models
+## Plan Management Steps
 
-### Monthly
-- Billed at renewal based on User/Service Account count on **last day of previous cycle**
-
-### Annual
-- Renewal billed based on count on **last day of previous cycle**
-- Mid-cycle additions: prorated charge billed on **1st of the following calendar month**
-- Mid-cycle reductions: applied at **start of next billing cycle** (no mid-cycle credit)
-
-### Invoice Customers
-- Contact account manager directly for changes
-
-## Step-by-Step: Downgrade Subscription
+### Downgrade Subscription
 1. Admin Console → **Settings** → **Manage Plan**
 2. Click your subscription → **Edit Subscription**
-3. Choose new plan → **Update Subscription**
-4. Downgrade takes effect on **next billing date**
+3. Select new plan → **Update Subscription**
+4. Downgrade takes effect on next billing date
 
-To verify downgrade is scheduled: Settings → Manage Plan → subscription → **View scheduled changes** (also allows canceling the downgrade)
+### Verify Scheduled Downgrade
+1. Admin Console → **Settings** → **Manage Plan**
+2. Click subscription → **View scheduled changes**
+3. Option to cancel downgrade is available here
 
-## Step-by-Step: Change Plan (Starter/Business/Teams)
-Same path as downgrade: Settings → Manage Plan → Edit Subscription → select plan → Update Subscription
+### Change Billing Email
+Admin Console → **Settings** → **Manage Plan** → **Billing & Shipping Addresses**
 
-**Enterprise plan changes**: Contact `sales@twingate.com`
+### Access Past Invoices
+Admin Console → **Settings** → **Manage Plan** → **Billing History** (PDF download)
 
-## Billing Administration
-| Task | Path |
-|------|------|
-| Change invoice email | Settings → Manage Plan → Billing & Shipping Addresses |
-| Download past invoices | Settings → Manage Plan → Billing History (PDF) |
-| Redeem Home promo code | Settings → Billing tab under current plan |
+## Configuration Notes
+- Starter, Business, Teams plan changes: self-serve via Admin Console
+- Enterprise plan changes: contact `sales@twingate.com`
+- Invoice customers: contact account manager directly
+- Billing questions: `billing@twingate.com`
 
 ## Gotchas
-- **Pending and Disabled users still consume licenses** — remove explicitly to reduce count
-- Annual customers get **no credit for mid-cycle user removals**; reduction only applies at next renewal
-- Annual additions are prorated from **April 1** (start of next calendar month), not from the date added
-- Billing contact email is set at purchase; must be manually updated post-activation
-- All downgrades (including Annual → Monthly frequency changes) are deferred to next billing date
-
-## Contact
-- Billing questions: `billing@twingate.com`
-- Enterprise/invoice: account manager or `sales@twingate.com`
+- **Pending and Disabled users consume licenses** — removing access does not reduce count until users are fully removed
+- Annual plan reductions only take effect at next renewal, not immediately
+- Downgrading from Annual to Monthly also follows the "next billing date" rule
+- Mid-cycle annual additions generate a prorated charge on the 1st of the *following* calendar month, not immediately
 
 ## Related Docs
-- [Users management](https://www.twingate.com/docs/users)
+- [Users Management](https://www.twingate.com/docs/users)
 - [How to Cancel Your Subscription](https://www.twingate.com/docs/cancel-subscription)
 - [Upgrading to Twingate Home](https://www.twingate.com/docs/twingate-home)
