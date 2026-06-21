@@ -1,46 +1,49 @@
 # Remotely Access a NAS Device
 
 ## Summary
-Twingate enables secure remote access to NAS devices without port forwarding or dynamic DNS. Traffic routes through Twingate's network rather than exposing the NAS directly to the internet. Users access the NAS via its local IP address regardless of physical location.
+Twingate enables secure remote access to NAS devices without port forwarding or dynamic DNS. Traffic is not exposed to the public internet, and the NAS is accessed via its local IP address regardless of remote location.
 
 ## Key Information
-- Replaces port forwarding approach which exposes NAS to public internet
-- No dynamic DNS needed — access NAS via its existing local IP (e.g., `192.168.x.x` or `10.x.x.x`)
-- Connector must be installed on a device on the same local network as the NAS (or on the NAS itself if supported)
+- Replaces port forwarding (which exposes NAS to internet attacks)
+- Eliminates dynamic IP/dynamic DNS issues
+- NAS is accessed using its local LAN IP address (e.g., `192.168.x.x` or `10.x.x.x`)
 - Access control managed via Twingate group management
 
 ## Prerequisites
 - Active Twingate account with admin access
-- NAS device with a known static local IP address
-- A device on the same local network capable of running a Twingate Connector (or NAS itself if compatible)
-- Twingate client installed on end-user devices
+- NAS device on local network with a known static local IP
+- A device on the same local network capable of running a Twingate Connector (can be the NAS itself if supported)
+- Twingate client installed on remote access device
 
 ## Step-by-Step
 
-1. Create a **Remote Network** in Twingate admin console (e.g., "Home Network")
-2. Add the NAS as a **Resource** using its local IP address (`192.168.x.x` or `10.x.x.x`)
-3. Add a **Connector** to the Remote Network via its details page
-4. **Provision** the connector (requires re-authentication)
-5. Install the connector on a local network device:
-   - Synology DSM 6.x or earlier: see Synology DSM 6 connector guide
-   - Synology DSM 7.x or later: see Synology DSM 7 connector guide
-   - Other devices: see general connector deployment docs
-6. Verify connector is operational
-7. Optionally restrict access via **group management**
-8. Connect using Twingate client with an authorized account; use the NAS's local IP to reach it
+1. **Create Remote Network** — In Twingate admin console, add a new Remote Network (e.g., "Home Network")
+2. **Add NAS as Resource** — Specify the NAS local IP address (e.g., `192.168.1.50`)
+3. **Add Connector** — Click "Add connector" on the Remote Network details page
+4. **Provision Connector** — Click "Provision"; re-authentication required
+5. **Install Connector** — Deploy on a local network device (options below)
+6. **Verify** — Confirm connector is operational in admin console
+7. **Restrict Access (optional)** — Configure via group management
+8. **Connect** — Use Twingate client on remote device; access NAS via its local IP
+
+## Connector Installation Options for Synology NAS
+- DSM 6.x or earlier: See Synology DSM 6.x connector guide
+- DSM 7.x or later: See Synology DSM 7.x connector guide
+- General connector deployment: See connector deployment docs
 
 ## Configuration Values
-- Resource IP: local network address of NAS (typically `192.168.x.x` or `10.x.x.x`)
-- No additional ports or firewall rules required on the router
+| Parameter | Example Value |
+|-----------|--------------|
+| Remote Network name | "Home Network", "Office Network" |
+| NAS IP (Resource address) | `192.168.x.x` or `10.x.x.x` |
 
 ## Gotchas
-- NAS must have a **static local IP** — if its local IP changes, the Twingate resource definition becomes invalid
-- Connector must be on the **same local network** as the NAS to route traffic correctly
-- Not all NAS devices support running a Connector directly — may need a separate machine (e.g., always-on PC or router)
-- Re-authentication required during connector provisioning step
+- Connector can be installed on the NAS itself **only if** the NAS supports it — otherwise needs a separate local device
+- Re-authentication is required during the Provision step
+- NAS must have a stable local IP (configure static DHCP lease or static IP on NAS to prevent local IP changes)
 
 ## Related Docs
-- Synology NAS Connector setup (DSM 6.x or earlier)
-- Synology NAS Connector setup (DSM 7.x or later)
-- Connector deployment general guide
-- Group management for access control
+- Synology DSM 6.x Connector Setup
+- Synology DSM 7.x Connector Setup
+- Connector Deployment (general)
+- Group Management

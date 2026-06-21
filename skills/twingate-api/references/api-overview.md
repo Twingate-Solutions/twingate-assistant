@@ -1,18 +1,32 @@
 # Twingate Admin API Overview
 
 ## Summary
-Twingate provides a GraphQL-based Admin API for managing all core network resources including Remote Networks, Connectors, Resources, Groups, Service Accounts, Devices, and Users. Access requires an API token generated from the Admin Console and is available at a tenant-specific endpoint.
+Twingate provides a GraphQL-based Admin API for managing all core resources (networks, connectors, resources, groups, users, devices, service accounts, policies). Access requires an API token generated from the Admin Console. The API endpoint is tenant-specific and uses a custom header for authentication.
 
 ## Key Information
-- **API Type**: GraphQL
+- **API type**: GraphQL
 - **Endpoint**: `https://<subdomain>.twingate.com/api/graphql/`
-- **Auth Header**: `X-API-KEY: <your-api-token>`
+- **Auth header**: `X-API-KEY: <token>`
 - **Schema**: Available via GraphQL introspection at the endpoint
-- **Terraform Provider**: Available for infrastructure-as-code management
+- **Rate limits**: 60 reads/min, 20 writes/min; exceeding returns HTTP `429`
+- **Terraform provider** available for IaC management
+
+## Prerequisites
+- Admin Console access to generate API token
+- Navigate: Settings → API → Generate Token
+
+## Configuration Values
+| Parameter | Value |
+|-----------|-------|
+| Endpoint URL | `https://<subdomain>.twingate.com/api/graphql/` |
+| Auth header name | `X-API-KEY` |
+| Read limit | 60 requests/min |
+| Write limit | 20 requests/min |
+| Rate limit response | HTTP `429` |
 
 ## Supported Operations
 | Resource | Operations |
-|---|---|
+|----------|-----------|
 | Remote Networks | CRUD |
 | Connectors | CRUD + generate tokens |
 | Resources | CRUD |
@@ -20,26 +34,8 @@ Twingate provides a GraphQL-based Admin API for managing all core network resour
 | Service Accounts/Keys | CRUD |
 | Devices | Read, archive, unarchive, block, unblock, update trust |
 | Security Policies | Read, update |
-| Users | Read only |
+| Users | Read |
 | Social Users | Read, invite, update, delete |
-
-## Prerequisites
-- Twingate Admin Console access
-- API token: **Settings → API → Generate Token**
-
-## Configuration Values
-| Parameter | Value |
-|---|---|
-| Endpoint URL | `https://<subdomain>.twingate.com/api/graphql/` |
-| HTTP Header | `X-API-KEY` |
-| Read limit | 60 requests/minute |
-| Write limit | 20 requests/minute |
-
-## Rate Limiting
-- **429** status returned when limits exceeded
-- Response includes retry-after timing
-- Reads: 60/min; Writes: 20/min
-- Terraform users: upgrade to latest provider version for automatic retry handling
 
 ## Example Query
 ```graphql
@@ -60,15 +56,16 @@ Twingate provides a GraphQL-based Admin API for managing all core network resour
 ```
 
 ## Recommended Clients
-- **GUI**: GraphiQL (`brew install --cask graphiql`) or Altair (has built-in introspection)
+- **GUI**: GraphiQL (`brew install --cask graphiql`), Altair (has built-in introspection)
 - **Python**: `gql` library
 
 ## Gotchas
-- Token can be disabled/re-enabled after creation — verify token is active if requests fail
-- Terraform provider versions below latest do not auto-retry on 429 — upgrade to avoid failed runs
-- Pagination required for large datasets; use `after`/`first` parameters with `pageInfo`
+- Rate limit `429` responses include a retry-after period in the response body — respect it
+- Terraform users hitting `429` errors should upgrade to the latest Twingate provider version, which handles retries automatically
+- API tokens can be disabled/re-enabled in the Admin Console after creation
+- Pagination required for large result sets; use `pageInfo.hasNextPage` and cursors
 
 ## Related Docs
 - Terraform Provider documentation
 - Terraform Getting Started guide
-- GraphQL introspection (schema discovery)
+- GraphQL introspection (for live schema)

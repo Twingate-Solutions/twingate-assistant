@@ -1,46 +1,42 @@
-# Native MFA - Twingate
+# Native MFA (Twingate)
 
 ## Summary
-Twingate provides native MFA independent of your identity provider, configurable at sign-in, per Resource Policy, or for Admin Console access. Supports TOTP, biometrics (WebAuthn), and physical security keys. MFA should be configured in either Twingate or your IdP, not both.
+Twingate provides native MFA configurable independently of your identity provider, applicable at sign-in, on specific Resources, or for Admin Console access. MFA is managed at the policy level with per-scope authentication frequency settings.
 
 ## Key Information
-- MFA is policy-scoped, not globally toggled
-- Authentication frequency is inherited from the associated policy's settings
-- TOTP is always configured as a backup even when biometrics/security keys are primary
-- WebAuthn compatibility varies by platform/browser
-
-## Supported MFA Methods
-| Method | Details |
-|--------|---------|
-| TOTP | Google Authenticator, Authy, 1Password, etc. |
-| Biometrics (WebAuthn) | Touch ID, Windows Hello |
-| Security Keys (WebAuthn) | FIDO2/CTAP2 keys only (e.g., YubiKey) |
-
-## Configuration Locations
-- **Sign In Policy** → MFA required on every Client sign-in; frequency tied to Sign In Policy
-- **Resource Policies** → MFA required on first access to protected Resource; frequency tied to Resource Policy (e.g., once per 24 hours)
-- **Settings → Admin Console Security** → MFA required for admin sign-ins
+- MFA can be enforced at three scopes: Sign In Policy, Resource Policies, Admin Console (Settings)
+- Authentication frequency is inherited from the policy where MFA is enabled
+- TOTP is always configured as a backup even when biometrics/security keys are primary method
+- Admins can reset individual user MFA methods from the user detail page in Admin Console
 
 ## Prerequisites
 - Admin access to Twingate Admin Console
-- Users must have a compatible authenticator app or WebAuthn-capable device/key
+- Security policies already configured (Sign In Policy and/or Resource Policies)
 
-## Step-by-Step
-1. Navigate to the target policy (Sign In Policy, Resource Policy, or Admin Console Security settings)
-2. Enable MFA within that policy
-3. Set authentication frequency as needed
-4. Users complete MFA setup on next prompted sign-in or Resource access
+## Configuration Locations
+
+| Scope | Location | Effect |
+|-------|----------|--------|
+| Sign-in | Sign In Policy | MFA required on every Client sign-in |
+| Resource access | Resource Policy | MFA required when accessing specific Resources |
+| Admin Console | Settings → Security | MFA required for admin console login |
+
+## Supported MFA Methods
+- **TOTP**: Google Authenticator, Authy, 1Password (always required as backup)
+- **Biometrics (WebAuthn)**: Touch ID, Windows Hello
+- **Security Keys (WebAuthn)**: YubiKey — FIDO2/CTAP2 only
 
 ## Gotchas
-- **Double MFA**: If IdP already enforces MFA, enabling Twingate native MFA causes users to complete MFA twice — configure in one place only
-- **FIDO2/CTAP2 only**: Non-FIDO2 security keys are not supported
-- **TOTP always required as backup**: Users with biometrics/security keys must also configure TOTP
-- **WebAuthn limitations**: Browser/platform compatibility is not universal; check [webauthn.me/browser-support](https://webauthn.me/browser-support)
-- **Lost device recovery**: Admin must manually reset MFA from the user's detail page in Admin Console; user re-enrolls on next MFA prompt
+- **Do not enable MFA in both Twingate and your IdP** — users will be prompted twice per authentication
+- WebAuthn support varies by platform/browser; some environments may not support biometrics or security keys (check [webauthn.me/browser-support](https://webauthn.me/browser-support))
+- Only FIDO2/CTAP2 security keys are supported — older FIDO U2F-only keys will not work
+- Users with biometrics/security key configured still must set up TOTP as fallback
 
-## Admin Actions
-- Reset/delete a user's MFA method: Admin Console → User detail page → select method → reset or delete
+## Managing MFA Resets
+1. Navigate to the user's detail page in Admin Console
+2. Select the MFA method to reset or delete
+3. User is guided through MFA setup on next authentication prompt
 
 ## Related Docs
-- [Security Policies](https://www.twingate.com/docs/security-policies)
-- [WebAuthn Browser Support](https://webauthn.me/browser-support)
+- Security Policies (linked in source)
+- [WebAuthn browser compatibility](https://webauthn.me/browser-support)

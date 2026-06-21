@@ -1,55 +1,57 @@
 # DNS-over-HTTPS (DoH) - Twingate
 
 ## Summary
-Twingate provides native DoH capabilities on macOS, Windows, and Linux clients, encrypting all DNS traffic at the network level with no per-application configuration. Configuration is managed via the Admin Console under **Internet Security > Secure DNS**.
+Twingate provides native DoH capabilities that encrypt all DNS traffic at the network level on macOS, Windows, and Linux clients. No per-application configuration is required. DoH is configured account-wide via the Admin Console with group-level exceptions.
 
 ## Key Information
-- DoH is **disabled by default**
-- Only supports **DNS A queries** (IPv4); AAAA/IPv6 queries fall back to IPv4 first
-- DoH encrypts all non-Twingate-Resource DNS traffic automatically when client is logged in
-- If client is set to start at login, DoH protection begins at machine boot
+- **Platform support**: macOS, Windows, Linux only (not mobile)
+- **Default state**: DoH is **disabled** by default
+- **Scope**: Encrypts all DNS A queries not destined for a Twingate Resource
+- **IPv6**: AAAA queries not supported; falls back to IPv4 before DoH encapsulation
+- **Activation**: If client starts at login, DoH activates immediately on boot
 
 ## Prerequisites
-- Twingate Client running on macOS, Windows, or Linux (not available on mobile)
-- Admin Console access
+- Twingate Client running on macOS, Windows, or Linux
+- Admin Console access (Internet Security → Secure DNS)
 - For DoH as a Resource: macOS 2024.311+, Windows 2024.351+, Linux 2024.331+
 
-## Configuration Steps
-1. Navigate to Admin Console → **Internet Security** → **Secure DNS**
-2. Toggle DoH enabled for the account
-3. Select a pre-configured public resolver or enter a custom DoH resolver URL
-4. Set fallback behavior (Strict or Automatic)
-5. Optionally add exception groups to exclude from DoH
+## Configuration Options (Admin Console)
+| Setting | Options | Default |
+|---|---|---|
+| DoH enabled | On/Off | Off |
+| Resolver | Pre-configured public resolvers or custom HTTPS URL | — |
+| Fallback method | Strict / Automatic | Automatic |
+| Exception groups | Any number of groups | None |
 
-## Configuration Values
+## Fallback Modes
+- **Automatic**: Falls back to regular DNS if resolver unavailable or lookup fails
+- **Strict**: Never falls back; all DNS fails if resolver is unavailable (including private DNS)
 
-**Fallback Modes:**
-- `Strict` — Never falls back to regular DNS; all queries fail if DoH resolver unavailable (including private DNS)
-- `Automatic` *(default)* — Falls back to regular DNS if resolver unavailable or lookup fails
-
-**Custom Resolver URL Template Fields:**
-| Field | Description |
-|---|---|
-| `${deviceName}` | Device's friendly Twingate name |
-| `${deviceId}` | Device's Twingate ID |
-| `${deviceModel}` | Device model string |
-| `${deviceHostname}` | Device hostname |
-| `${userEmail}` | Device owner's email |
-
-Example: `https://doh.example/query?deviceHostname=${deviceHostname}`
+## Custom Resolver Template Variables
+Append device-specific info to custom resolver URLs:
+```
+${deviceName}       # Friendly Twingate name
+${deviceId}         # Twingate device ID
+${deviceModel}      # Hardware model string
+${deviceHostname}   # Device hostname
+${userEmail}        # Device owner email
+```
+Example: `https://doh.example/query?host=${deviceHostname}`
 
 ## DoH as a Resource
-- When DoH resolver domain matches a Twingate Resource, DoH traffic routes through that Resource
+- If DoH resolver domain matches a Twingate Resource, DoH traffic routes through that Resource
 - Wildcard Resources (e.g., `*.autoco.internal`) are supported
-- **Required:** DoH Resource must use a **Device-only Resource Policy** — users cannot authenticate otherwise, causing DNS failure
+- **Required**: DoH Resource must use a **Device-only Resource Policy** — otherwise users lose DNS entirely
 
 ## Gotchas
-- Custom resolver URLs are only validated as HTTPS endpoints — misconfigured URLs + Strict mode = DNS failure for all users
-- Strict mode blocks **private DNS resolution** (private names can't resolve via public DoH resolvers)
-- Exception group membership: if a user is in *any* exception group, DoH is fully disabled for that user
-- AAAA (IPv6) queries are not supported
+- Custom resolver URL is only validated as an HTTPS endpoint — misconfiguration + Strict mode = DNS failure for all users
+- Strict mode breaks private DNS resolution (public DoH resolvers can't resolve internal names)
+- Exception group membership is OR logic: one exception group membership disables DoH for that user
+- DoH Resources without Device-only policy cause authentication failures, breaking DNS for end users
+- Private DoH resolvers are common with DNS filtering services; use custom resolver field for these
 
 ## Related Docs
-- Twingate Client setup (macOS, Windows, Linux)
+- Twingate Client setup
 - Resource Policies (Device-only policy)
 - Internet Security configuration
+- DNS filtering service integration

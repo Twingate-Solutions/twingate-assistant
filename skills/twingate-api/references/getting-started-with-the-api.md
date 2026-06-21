@@ -1,28 +1,28 @@
 # Getting Started with the Twingate API
 
 ## Summary
-Twingate exposes a GraphQL API for automating Admin Console actions, accessible directly or via Python/JavaScript CLIs. All access requires an API key and tenant name. The API follows standard GraphQL conventions with nodes and edges.
+Twingate provides GraphQL APIs and Python/JavaScript CLIs for automating Admin Console actions. All automation methods require an API key and tenant name. The API follows GraphQL conventions where objects are returned as `nodes` within `edges`.
 
 ## Key Information
-- API type: GraphQL (not REST)
-- Endpoint: `https://<tenant_name>.twingate.com/api/graphql/`
-- Auth header: `X-API-KEY: <token>`
-- CLIs (Python, JavaScript) are wrappers around the same GraphQL API
-- Responses use GraphQL structure: objects = `node`, collections = `edges`
+- API endpoint: `https://<tenant_name>.twingate.com/api/graphql/`
+- Authentication header: `X-API-KEY: <token>`
+- CLIs are wrappers around the GraphQL API
+- Compatible with orchestration platforms (Ansible, Chef, Puppet)
 - Postman collection available for download with pre-built examples
 
 ## Prerequisites
 - Active Twingate tenant
 - API key with appropriate permissions:
-  - **Read & Write** — modify existing objects
-  - **Read, Write & Provision** — create/provision new objects
+  - **Read & Write** — for querying and modifying objects
+  - **Read, Write & Provision** — for provisioning operations
+- API client (Postman or Altair GraphQL Client)
 
 ## Generating an API Key
 1. Open Admin Panel → **Settings** → **API**
 2. Click **Generate Token**
 3. Select permission level (Read & Write or Read, Write & Provision)
-4. **Copy token immediately** — cannot be retrieved after closing the modal
-5. Token can be disabled/re-enabled or have details modified after creation
+4. Copy and store token immediately — cannot be retrieved after closing the dialog
+5. Tokens can later be modified, disabled, or re-enabled
 
 ## Configuration Values
 
@@ -55,17 +55,13 @@ Twingate exposes a GraphQL API for automating Admin Console actions, accessible 
 ```
 
 ## Gotchas
-- Token is shown **only once** at generation time — store it securely immediately
-- GraphQL queries are field-selective; only requested fields are returned — be explicit about needed fields
-- Altair will show schema validation errors (red highlights) if query fields don't match schema
-- Pagination: check `pageInfo.hasNextPage` to determine if additional results exist
-
-## Recommended API Clients
-- **Postman** — better for REST-familiar users; import pre-built collection
-- **Altair GraphQL Client** — better for GraphQL-native workflow, schema browser included
+- **Token is shown only once** — copy immediately before closing the Generate Token dialog; no way to retrieve it afterward
+- GraphQL responses only return fields explicitly requested in the query (by design)
+- Results are paginated; check `pageInfo.hasNextPage` for additional pages
+- Replace `subdomain` placeholder in all URLs with actual tenant name
 
 ## Related Docs
 - Twingate API Reference
 - Python CLI documentation
 - JavaScript CLI documentation
-- Twingate API Key management
+- Postman Collection (downloadable from docs page)

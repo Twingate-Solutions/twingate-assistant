@@ -1,37 +1,37 @@
 # Deploy Connector with Docker Compose
 
 ## Summary
-Deploys a Twingate Connector using Docker Compose with environment variables for authentication. Requires pre-generated tokens from the Admin Console. Supports optional parameters for logging, DNS, networking, and log forwarding.
+Deploys a Twingate Connector using Docker Compose. Requires Access Token, Refresh Token, and tenant name. Supports optional parameters for logging, DNS, restart behavior, and peer-to-peer connections.
 
 ## Prerequisites
-- Access Token and Refresh Token (generated via [deploy a Connector](https://www.twingate.com/docs/deploy-connector) flow)
+- Access Token and Refresh Token (generated via Connector deployment flow in Admin Console)
 - Twingate tenant name (`<name>` from `https://<name>.twingate.com`)
-- Docker Compose installed
+- Docker and Docker Compose installed
 
 ## Configuration Values
 
 ### Required Environment Variables
 | Variable | Description |
-|---|---|
+|----------|-------------|
 | `TWINGATE_NETWORK` | Tenant name (not full URL) |
-| `TWINGATE_ACCESS_TOKEN` | Generated connector access token |
-| `TWINGATE_REFRESH_TOKEN` | Generated connector refresh token |
+| `TWINGATE_ACCESS_TOKEN` | Connector access token |
+| `TWINGATE_REFRESH_TOKEN` | Connector refresh token |
 
 ### Optional Environment Variables
 | Variable | Description |
-|---|---|
+|----------|-------------|
 | `TWINGATE_LOG_LEVEL` | Log verbosity (e.g., `3` for detailed) |
 | `TWINGATE_LOG_ANALYTICS` | Set to `v2` to enable Network Events in logs |
-| `TWINGATE_DNS` | Custom DNS server IP (e.g., `8.8.8.8`); overrides Remote Network DNS |
+| `TWINGATE_DNS` | Custom DNS server IP (e.g., `8.8.8.8`); overrides Remote Network default |
 
-### Optional Compose Fields
-| Field | Value | Purpose |
-|---|---|---|
+### Docker Compose Parameters
+| Parameter | Value | Purpose |
+|-----------|-------|---------|
+| `restart` | `always` | Auto-restart on crash |
 | `network_mode` | `host` | Enables local peer-to-peer connections |
 | `sysctls: net.ipv4.ping_group_range` | `"0 2147483647"` | Enables ICMP/ping to Resources |
-| `restart` | `always` | Auto-restart on crash |
 
-## Minimal Template
+## Minimal Config
 ```yaml
 services:
   twingate-connector:
@@ -42,7 +42,7 @@ services:
       - TWINGATE_REFRESH_TOKEN=<REFRESH TOKEN>
 ```
 
-## Recommended Template
+## Recommended Config
 ```yaml
 services:
   twingate_connector:
@@ -72,12 +72,12 @@ services:
 ```
 
 ## Gotchas
-- `TWINGATE_DNS` overrides the Remote Network's DNS config — only use if explicitly needed
-- `network_mode: host` required for local peer-to-peer connections; default (`bridge`) does not support this
-- `container_name` should match the Connector name in Admin Console for correlation
-- Peer-to-peer connections are recommended to stay within Fair Use Policy bandwidth limits
+- `TWINGATE_DNS` is rarely needed; omit unless overriding Remote Network DNS
+- `network_mode: host` is required for local peer-to-peer connections; default is `bridge`
+- `container_name` should match the Connector name in Admin Console for easy identification
+- Peer-to-peer connections affect Fair Use Policy bandwidth — configure to support them
 
 ## Related Docs
-- [Deploy a Connector](https://www.twingate.com/docs/deploy-connector) (token generation)
-- [Twingate Connector Logs](https://www.twingate.com/docs/connector-logs)
-- [Support Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
+- How to deploy a Connector (token generation)
+- Twingate Connector logs (log level values)
+- Support peer-to-peer connections

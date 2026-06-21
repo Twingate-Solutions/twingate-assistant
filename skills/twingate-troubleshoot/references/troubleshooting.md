@@ -1,34 +1,36 @@
 # Twingate Troubleshooting
 
 ## Summary
-Central troubleshooting hub pointing to Twingate's knowledge base, log collection guides, and community resources. Directs users to the Help Center for detailed issue resolution and the Subreddit for community support.
+Landing page for Twingate troubleshooting resources. Directs users to the Help Center knowledge base, self-service guide, log collection articles, and community support channels.
 
 ## Key Information
-- Primary troubleshooting resource is the **Twingate Help Center** (separate from main Docs)
-- **Self Service Troubleshooting Guide** is the recommended starting point for common issues
-- Two dedicated log collection articles exist: one for Client logs, one for Connector logs
+- Primary troubleshooting resource: [Twingate Help Center](https://help.twingate.com)
+- Self-Service Troubleshooting Guide covers common issues
+- Log collection covered in separate KB articles for Client and Connector
 - Community support available via official Twingate Subreddit
-- Free enablement content available to all users
 
-## Log Resources
-| Component | Resource |
-|-----------|----------|
-| Twingate Client | Twingate Client Logs (KB article) |
-| Twingate Connector | Twingate Connector Logs (KB article) |
+## Troubleshooting Resources
 
-## Troubleshooting Path
-1. Check **Twingate Docs** for configuration/setup guidance
-2. Use **Self Service Troubleshooting Guide** in Help Center for common issues
-3. Review **Client or Connector logs** using KB articles for diagnosis
-4. Post to **Twingate Subreddit** if unresolved
+| Resource | Purpose |
+|---|---|
+| Help Center | Detailed KB articles maintained by Support Engineering |
+| Self-Service Guide | Starting point for common issues |
+| Client Logs KB | Reviewing/collecting Twingate Client logs |
+| Connector Logs KB | Reviewing/collecting Connector logs |
+| Subreddit | Community support |
+| Free enablement content | Self-paced learning |
+
+## Log Collection
+- **Client logs**: See "Twingate Client Logs" KB article in Help Center
+- **Connector logs**: See "Twingate Connector Logs" KB article in Help Center
 
 ## Gotchas
-- This page is a navigation hub only — actual troubleshooting content lives in the Help Center, not the main Docs site
-- Log collection procedures differ between Client and Connector — use the appropriate KB article for each
+- This docs page is a directory only — actual troubleshooting steps live in the Help Center, not in the main docs site
+- No direct log paths or CLI commands listed here; consult the specific KB articles
 
 ## Related Docs
-- Twingate Help Center (external)
-- Self Service Troubleshooting Guide (Help Center)
-- Twingate Client Logs (KB article)
-- Twingate Connector Logs (KB article)
-- Twingate Subreddit (community support)
+- Twingate Help Center (help.twingate.com)
+- Twingate Client Logs KB
+- Twingate Connector Logs KB
+- Self-Service Troubleshooting Guide
+- Twingate Subreddit

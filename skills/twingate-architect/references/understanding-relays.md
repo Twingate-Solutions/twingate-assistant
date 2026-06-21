@@ -1,39 +1,39 @@
 # Understanding Relays
 
+## Page Title
+Understanding Relays
+
 ## Summary
-Relays facilitate secure connection establishment between Twingate Clients and Connectors for Resource access. They serve as intermediaries for encrypted tunnel routing without terminating or storing any traffic data. Twingate operates a global network of Relay clusters for low-latency, redundant connectivity.
+Relays facilitate connection establishment between Twingate Clients and Connectors for Resource access. They operate as hops within end-to-end encrypted TLS tunnels and may route encrypted traffic when direct connections aren't possible. Relays are Twingate-managed infrastructure requiring no customer configuration.
 
 ## Key Information
-- Relays facilitate (not terminate) the end-to-end encrypted TLS tunnel between Clients and Connectors
-- Connection is certificate-pinned TLS; encryption is applied before reaching the Relay
-- Connectors automatically connect to the geographically nearest available Relay
-- Failover hierarchy: same-location cluster → next nearest cluster location
+- Relays facilitate (and sometimes route) the encrypted tunnel between Client and Connector
+- Connections are end-to-end encrypted via certificate-pinned TLS tunnels
+- Relays do **not** terminate connections or decrypt traffic
 - Relays do **not** store traffic or network-identifiable information
-- Data passing through Relays is already encrypted — Relays cannot read it
+- Each Connector connects to the geographically nearest available Relay
+- Relay clusters provide redundancy: failure within a cluster falls over to another node; full cluster failure falls over to next nearest cluster
+
+## Prerequisites
+- No customer action required — Relays are fully managed by Twingate
+- Connectors must be able to reach Twingate Relay infrastructure (outbound connectivity required)
 
 ## Relay Cluster Locations
 
-**Google Cloud:** Iowa, Los Angeles, Ohio, Oregon, South Carolina, Toronto, Virginia, São Paulo, Eemshaven, Finland, Frankfurt, London, Zurich, Tel Aviv, Johannesburg, Hong Kong, Mumbai, Singapore, Taiwan, Tokyo, Sydney
+| Provider | Regions |
+|---|---|
+| **Google Cloud** | Iowa, Los Angeles, Ohio, Oregon, South Carolina, Toronto, Virginia, São Paulo, Eemshaven, Finland, Frankfurt, London, Zurich, Tel Aviv, Johannesburg, Hong Kong, Mumbai, Singapore, Taiwan, Tokyo, Sydney |
+| **DigitalOcean** | Atlanta, New York City, San Francisco, Toronto, Amsterdam, Frankfurt, London, Bengaluru, Singapore, Sydney |
 
-**DigitalOcean:** Atlanta, New York City, San Francisco, Toronto, Amsterdam, Frankfurt, London, Bengaluru, Singapore, Sydney
-
-## Architecture Notes
-- Relays are Twingate-managed infrastructure (no self-hosting required)
-- Connectors initiate outbound connections to Relays
-- When direct peer-to-peer Client↔Connector path is unavailable, traffic routes through the Relay
-- No inbound firewall rules needed for Relay connectivity (Connectors connect outbound)
+## Configuration Values
+None — Relay selection is automatic. No environment variables, CLI flags, or API parameters are exposed for Relay configuration.
 
 ## Gotchas
-- Relay routing is automatic — no configuration required or available for Relay selection
-- Traffic *may* route through a Relay but doesn't always (direct connections are preferred when possible)
-- Relay clusters are shared infrastructure; no dedicated Relay option exists
-- Latency impact depends on geographic distance to nearest cluster — review cluster locations when planning Connector placement
-
-## Prerequisites
-- No direct prerequisites; Relay connectivity is handled automatically when a Connector is deployed
+- Traffic **may** pass through a Relay (not guaranteed direct); depends on network topology between Client and Connector
+- Relay routing is transparent to the end-to-end encryption — Relays cannot inspect payload data
+- Connector connects to nearest Relay at startup; no manual override documented
 
 ## Related Docs
-- Connector deployment and configuration
-- Understanding Connectors
-- Network/firewall requirements (outbound Connector ports)
-- Controller documentation
+- Connector deployment documentation
+- Controller/authorization flow documentation
+- Network architecture / firewall requirements (outbound ports for Relay connectivity)

@@ -1,41 +1,44 @@
-# Manage Access for Vendors and Contractors
+# Vendor and Contractor Access Management
+
+## Page Title
+How to Manage Access for Vendors and Contractors
 
 ## Summary
-Twingate addresses vendor/contractor access management challenges including transient relationships, need for scoped access, and unmanaged devices. It provides granular, time-limited access controls that integrate with existing identity providers without requiring changes to protected resources.
+Twingate addresses the unique challenges of vendor/contractor access including transient relationships, need for targeted permissions, and unmanaged devices. It provides granular, time-limited access controls that overlay existing resources without requiring changes to those resources.
 
 ## Key Information
-- Vendor access challenges differ from employee access: higher onboarding/offboarding frequency, more targeted resource needs, and unmanaged devices
-- Twingate overlays access controls without modifying underlying resources
-- Access can be provisioned at the application level (least privilege), not network level
-- Group-based permissions simplify bulk management of contractor cohorts
+- Vendor access differs from employee access in three ways: higher onboarding/offboarding frequency, need for more targeted resource access, and use of unmanaged personal devices
+- Twingate applies access controls without modifying underlying resources
+- SSO integration means disabling a contractor's IdP account revokes all Twingate-secured resource access — even resources without native SSO support
+- Access is granted at the application level (not network level), enabling least-privilege without network segmentation projects
+- Network activity logging provides visibility into contractor devices, locations, and security posture
 
 ## Prerequisites
-- Twingate network with at least one Resource configured
-- (Recommended) SSO/identity provider integration (Okta, Google Workspace, etc.) for centralized deprovisioning
+- Identity Provider (Okta, Google Workspace, etc.) configured for SSO delegation
+- Resources defined in Twingate
+- Groups configured for contractor/vendor assignment
 
-## Core Features for Vendor Management
+## Configuration Options by Use Case
 
-| Feature | Purpose | Docs |
+| Use Case | Twingate Feature | Reference |
 |---|---|---|
-| SSO/IdP Integration | Disabling SSO account revokes all Twingate-secured resource access | Identity Providers guide |
-| Granular Resource Access | Assign specific resources to groups; contractors see only what they need | Resources guide |
-| Network Traffic Logging | Monitor devices, locations, and security posture including contractor-owned devices | Network Traffic guide |
-| Ephemeral Access | Set time-limited access on Resources; auto-revokes after period expires | Ephemeral Access guide |
-| Auto-lock | Automatically lock users out after period of inactivity on a Resource | Auto-lock guide |
+| Onboarding/offboarding | SSO/IdP integration | Identity Providers guide |
+| Least-privilege access | Resource-level permissions + Groups | Resources guide |
+| Device visibility | Network traffic logging | Network Traffic guide |
+| Time-limited engagements | Ephemeral Access (time-based auto-revoke) | Ephemeral Access guide |
+| Over-provisioning prevention | Auto-lock (usage-based lockout) | Auto-lock guide |
 
-## Implementation Approach
-1. Create a dedicated Group for vendor/contractor users
+## Step-by-Step: Recommended Vendor Setup
+1. Create a dedicated Group for vendors/contractors
 2. Assign only required Resources to that Group
-3. Integrate with SSO/IdP so deprovisioning happens at the identity layer
-4. Configure Ephemeral Access on Resources for fixed-term engagements
-5. Enable Auto-lock to handle over-provisioning drift
-6. Enable Network Traffic logging to audit contractor device activity
+3. Configure Ephemeral Access on Resources for fixed-term engagements
+4. Enable Auto-lock on Resources to handle inactive accounts
+5. Provision contractor via IdP — disable IdP account to offboard
 
 ## Gotchas
-- SSO deprovisioning disables Twingate access even for resources that don't natively support SSO — this is intentional and is the recommended offboarding path
-- Traditional VPN cannot easily replicate application-level segmentation; Twingate removes the need for network segmentation projects to scope contractor access
-- Contractor devices are unmanaged — use traffic logging to gain visibility since you cannot control device security posture directly
-- Without Ephemeral Access or Auto-lock configured, contractor accounts may retain access after engagement ends
+- Disabling access via IdP only works if Twingate is configured to delegate authentication to that IdP — verify integration is active
+- Auto-lock and Ephemeral Access are separate mechanisms; Ephemeral Access revokes after a set time period, Auto-lock revokes after inactivity — use the appropriate one for the scenario
+- Contractors using personal devices will be visible in logs, but device posture enforcement depends on additional configuration
 
 ## Related Docs
 - Identity Providers

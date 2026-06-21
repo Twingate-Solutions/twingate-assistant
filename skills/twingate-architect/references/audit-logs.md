@@ -1,38 +1,37 @@
 # Audit Logs
 
 ## Summary
-Twingate provides audit log activity tracking for account events including create, delete, edit, and connect operations. Logs can be manually exported via the Admin Console or automatically synced to an AWS S3 bucket in JSON format.
+Twingate audit logs track account activity across multiple categories including access, devices, network, and users. Logs can be manually exported via the Admin Console or automatically synced to an AWS S3 bucket in JSON format.
 
 ## Key Information
-- **Event types tracked:** create, delete, edit, connect
-- **Categories covered:**
+- **Event types captured**: create, delete, edit, and connect events
+- **Categories covered**:
   - Access, API Keys, Devices, Device Integrations, Device Security
   - Secure DNS (DNS-over-HTTPS and DNS filtering)
   - Network (Remote Networks, Connectors, Resources)
   - Policies, Service Accounts, Users & Groups
   - Machine Keys, Data Exports, MFA Configurations
-- **Export format:** JSON
-- **Export methods:** Manual (Admin Console) or automated sync to AWS S3
+- **Output format**: JSON
+- **Export methods**: Manual (Admin Console) or automated sync to AWS S3
+
+## Prerequisites
+- Admin Console access
+- For S3 sync: AWS S3 bucket configured with appropriate permissions
 
 ## Export Methods
 
 ### Manual Export
-- Accessible via the Admin Console UI
+- Access via Admin Console
+- Download JSON report on demand
 
-### Automated Export
-- Sync to AWS S3 bucket in JSON format
-- See AWS S3 integration docs for setup
-
-## Configuration Values
-- Output format: JSON
-- Destination options: Admin Console download, AWS S3 bucket
+### Automated S3 Sync
+- Syncs logs in JSON format to an AWS S3 bucket
+- Requires separate S3 bucket configuration (see related docs)
 
 ## Related Docs
-- [Audit Logs Schema](https://www.twingate.com/docs/audit-logs-schema) — JSON field definitions
-- AWS S3 bucket sync configuration
-- Admin Console export guide
+- [Audit Logs Schema](https://www.twingate.com/docs/audit-log-schema) — JSON field definitions
+- [AWS S3 Bucket Sync](https://www.twingate.com/docs/audit-logs-s3) — S3 integration setup
 
 ## Gotchas
-- Only JSON format is supported; no CSV or syslog native export
-- S3 sync requires separate configuration (not enabled by default)
-- Schema details are on a separate page — reference before building log parsers or SIEM integrations
+- Use cases limited to troubleshooting and investigation; no real-time streaming mentioned
+- JSON schema details are on a separate page — review before building integrations against the log format

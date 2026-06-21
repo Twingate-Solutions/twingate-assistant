@@ -1,41 +1,42 @@
-# Service Reliability
+# Twingate Service Reliability
 
 ## Page Title
-Service Reliability – How Twingate Ensures Infrastructure and Service Reliability
+Service Reliability - How Reliable is Twingate's Infrastructure and Service?
 
 ## Summary
-Twingate provides high availability, performance, and scalability through GCP-hosted infrastructure, multi-region redundancy, and a distributed architecture. Unlike traditional VPNs, traffic takes direct routes without backhauling, and authorization processing is distributed rather than centralized. Customers are abstracted from scaling concerns.
+Twingate ensures high availability and performance through redundant GCP-hosted infrastructure across geographically separated data centers. Performance is optimized by eliminating backhaul routing, supporting split tunneling, and distributing authorization processing to clients rather than centralizing it.
 
 ## Key Information
 
 **Availability:**
 - Hosted on Google Cloud Platform (GCP) with multi-datacenter redundancy
-- Automatic failover if one datacenter experiences issues
-- Geographically separated datacenters to mitigate location-specific disasters
-- Service status monitoring: [status.twingate.com](https://status.twingate.com)
+- Automatic failover between data centers if one experiences issues
+- Geographically separated data centers reduce location-specific disaster risk
+- Service status monitoring at `status.twingate.com`
 - DDoS mitigation measures in place
 - 24/7 automated monitoring with alerting
 
 **Performance & Scalability:**
-- **No backhauling**: Traffic routes directly between endpoints; clients auto-select lowest-latency controllers/relays based on user location
-- **Split tunneling**: Non-Twingate traffic bypasses the service entirely, reducing unnecessary hops
-- **Load balancing**: Controllers and relays distributed across regions; co-hosted within AWS, Azure, and GCP to reduce latency
-- **Connector-level load balancing**: Deploy multiple Connectors per network; Twingate auto-balances access requests across them
-- **Distributed authorization**: Auth processing occurs at the client level, not a central bottleneck
+- No backhaul: traffic takes direct routes rather than through a central gateway
+- Clients auto-select best controller/relay based on user location and target resource
+- Split tunneling: non-Twingate traffic bypasses the service entirely
+- Controllers and relays co-hosted within AWS, Azure, and GCP to reduce latency
+- Multiple connectors per network supported; Twingate auto-load-balances between them
+- Authorization processing distributed to client level, avoiding central bottleneck
 
 ## Configuration Values
-- Multiple Connectors per Remote Network supported for load balancing (no special flag; deploy additional Connectors to same network)
+- Multiple connectors can be deployed within the same Remote Network for automatic load balancing — no additional configuration required
 
 ## Prerequisites
-- None specific to reliability configuration; multi-connector load balancing is automatic
+- None specific to reliability architecture; this is managed infrastructure
 
 ## Gotchas
-- Load balancing between Connectors is automatic — no manual configuration required, but you must deploy multiple Connectors to the same Remote Network to enable it
-- Split tunneling must be explicitly configured; by default, only resources defined in Twingate are routed through the service
-- Twingate manages infrastructure scaling; customers do not need to provision relay/controller capacity
+- Load balancing between connectors is automatic — deploying multiple connectors in the same network is sufficient, no manual configuration needed
+- Organizations must opt into split tunneling; traffic not explicitly excluded will route through Twingate
+- Scaling of controllers/relays is handled by Twingate, but connector scaling within customer networks is the customer's responsibility
 
 ## Related Docs
-- [GCP Infrastructure](https://cloud.google.com/docs) (external)
-- [status.twingate.com](https://status.twingate.com) – live service status
-- Connector deployment documentation (multiple Connectors per network)
+- [Twingate Status Page](https://status.twingate.com)
+- [Google Cloud Platform](https://cloud.google.com)
+- Connector deployment documentation
 - Split tunneling configuration

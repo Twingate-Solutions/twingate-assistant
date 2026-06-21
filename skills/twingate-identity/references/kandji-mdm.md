@@ -1,49 +1,49 @@
-# Deploying Twingate Clients with Iru (Kandji) MDM
+# Deploying Twingate Client with Iru (Kandji) MDM
 
 ## Summary
-Guide for deploying Twingate macOS and iOS clients via Iru (formerly Kandji) MDM. macOS deployment uses the Twingate Auto App (recommended) or a custom PKG upload. iOS deployment requires Apple Business Manager integration.
+Covers distributing the Twingate macOS and iOS clients via Iru (formerly Kandji) MDM. macOS deployment is best handled via the Twingate Auto App; iOS requires Apple Business Manager integration.
 
 ## Key Information
-- **Iru** is the current name for what was previously called Kandji
+- **Iru** is the current name for what was previously Kandji MDM
 - macOS Auto App automatically handles: notifications, VPN profile, and system extension — no custom config needed
 - iOS distribution requires Apple Business Manager to be linked to Iru first
-- Custom PKG option available for macOS (not recommended over Auto App)
+- PKG installer available from Twingate download page for custom app deployments
 
 ## Prerequisites
-- Iru MDM account with Library access
+- Access to Iru admin console
 - **iOS only**: Devices enrolled in Apple Business Manager; Iru linked to Apple Business Manager
-- **macOS custom app only**: Twingate PKG downloaded from [Twingate download page](https://www.twingate.com/downloads)
+- **macOS custom app only**: Twingate PKG installer downloaded
 
 ## Step-by-Step
 
 ### macOS (Recommended — Auto App)
 1. Sign in to Iru
-2. Select **Library** in sidebar
-3. Find Twingate Client app for macOS
-4. Select it — Auto App handles VPN profile, notifications, and system extension automatically
+2. Select **Library** in the sidebar
+3. Find Twingate Client app for macOS and select it
+4. Deploy via Auto App (no additional configuration required)
 
-### macOS (Custom App — Not Recommended)
+### macOS (Alternative — Custom App)
 1. Download Twingate PKG from the download page
 2. Upload PKG to Iru as a custom app
 
 ### iOS
-1. Add Twingate iOS Client to Apple Business Manager
-2. Enroll devices in Apple Business Manager (follow Iru official docs)
-3. Link Iru to Apple Business Manager
-4. Distribute Twingate iOS app from Iru Library
+1. Add Twingate iOS app to Apple Business Manager
+2. Enroll devices in Apple Business Manager (follow Iru's official docs)
+3. Link Iru with Apple Business Manager
+4. Sign in to Iru → **Library** → find Twingate iOS Client → distribute
 
 ## Configuration Values
-- No CLI flags or env vars specific to Iru deployment
-- Pre-configuration (VPN config, system extension, Network pre-population) done via [configuration profiles guide](https://www.twingate.com/docs/configuration-profiles)
+- Pre-configuration of macOS client (VPN config, system extension, network pre-population) done via **configuration profiles** — see separate configuration profiles guide
 
 ## Gotchas
-- **Manually installed clients must be removed first** — version conflicts can occur if users have self-installed Twingate before MDM rollout
+- **Manually installed clients must be removed before MDM rollout** — version mismatches cause issues
   - Create a temporary removal policy targeting all devices
-  - Deactivate the removal policy before rolling out the MDM-distributed version
-- iOS deployment **will not work** without Apple Business Manager linked to Iru
-- Custom PKG approach does **not** automatically configure VPN profile or system extension (requires manual configuration profiles)
+  - Deactivate the removal policy before rolling out via Iru
+- Custom app deployment (PKG) is not recommended; use Auto App when possible
+- Auto App handles VPN profile and system extension automatically — custom app deployments require manual configuration profile setup
 
 ## Related Docs
-- [Twingate Configuration Profiles](https://www.twingate.com/docs/configuration-profiles) — pre-configure VPN, system extension, Network name
-- [Iru official documentation](https://support.kandji.io) — Apple Business Manager device enrollment
-- [Twingate Download Page](https://www.twingate.com/downloads) — PKG installer for custom app deployment
+- Twingate macOS configuration profiles guide
+- Twingate client download page
+- Iru official documentation (Apple Business Manager enrollment)
+- Apple Business Manager setup

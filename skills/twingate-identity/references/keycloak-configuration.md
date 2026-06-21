@@ -1,27 +1,29 @@
 # Keycloak Configuration
 
+## Page Title
+Keycloak Configuration
+
 ## Summary
-Twingate integrates with Keycloak to delegate user authentication via OIDC. Only users associated with the Twingate app in Keycloak can access Twingate and private resources. Full configuration requires contacting Twingate support.
+Twingate integrates with Keycloak to delegate user authentication via OIDC. Only users associated with the Twingate app in Keycloak can authenticate and access private resources. Configuration requires direct engagement with Twingate support.
 
 ## Key Information
-- Authentication delegation uses **OIDC protocol**
-- Only users assigned to the Twingate app in Keycloak gain access
-- No self-serve configuration available — requires Twingate assistance
+- Integration uses OIDC for user authentication delegation
+- Only users assigned to the Twingate app in Keycloak can access Twingate resources
+- Twingate handles: user authentication via OIDC (no mention of SCIM/provisioning)
 
 ## Prerequisites
-- **Business or Enterprise** Twingate plan required
-- Existing Keycloak instance
+- Business or Enterprise plan required (not available on lower tiers)
 
 ## Step-by-Step
-1. Contact Twingate support to initiate Keycloak integration setup
+No self-service configuration steps are documented. Contact Twingate directly to configure Keycloak integration.
 
 ## Configuration Values
-- None publicly documented; configuration is handled through Twingate support
+None published in documentation.
 
 ## Gotchas
-- Not available on Starter/Free plans
-- No documented self-service setup path — configuration steps are not published and must be obtained by contacting Twingate directly
+- No self-serve setup — must contact Twingate to initiate configuration
+- Integration scope is limited to OIDC authentication only; automated user provisioning (SCIM) is not mentioned as supported for Keycloak
 
 ## Related Docs
-- [Twingate Pricing](https://www.twingate.com/pricing)
-- Twingate OIDC/SSO documentation (other IdP configurations)
+- Twingate pricing page (for plan eligibility)
+- Other IdP configuration docs (e.g., Okta, Azure AD) for comparison

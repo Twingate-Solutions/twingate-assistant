@@ -1,40 +1,51 @@
 # Using Twingate
 
 ## Summary
-Covers how to connect the Twingate Client to a network, access Resources, manage multiple accounts, and handle Resource authentication/re-authentication. Includes tips on split tunneling behavior and network switching.
+Covers end-user operation of the Twingate Client after installation, including connecting to a network, accessing Resources, handling Resource-level authentication requirements, and managing sessions. Also covers multi-account support and reauthentication workflows.
 
 ## Key Information
-- Initial connection requires your network URL subdomain (e.g., `autoco` from `autoco.twingate.com`) and login via SSO/social provider
-- Split tunneling is default behavior — non-Resource traffic bypasses Twingate; no performance impact from leaving Client connected
-- Client auto-reconnects on network changes; may trigger browser auth window automatically
-- Only one account can be active at a time; accounts are fully isolated from each other
+- Network URL format: just the subdomain (e.g., `autoco` from `autoco.twingate.com`)
+- Login via social providers (Google, GitHub) or SSO (Okta, Entra ID)
+- Twingate uses **split tunneling** — only Resource-destined traffic is routed through Twingate; no performance impact on other traffic
+- Client auto-reconnects on network switches; may open browser for IdP re-authentication
 - Resources with additional auth requirements show a **lock icon** in the Client
-- Authorization expiry is determined by the Resource's Security Policy (not visible in Client UI)
+- Security Policy applied to a Resource is not visible in the Client UI
 
-## Multiple Account Support
-| Platform | Minimum Version |
-|----------|----------------|
+## Multi-Account Support
+Minimum Client versions required:
+| Platform | Version |
+|----------|---------|
 | macOS | 2025.227 |
 | Windows | 2025.232 |
 | iOS | 2025.227 |
 
+- Only **one account active at a time**; accounts have no visibility into each other
+- Add account: "Add Another Account"
+- Remove account: authenticate → More submenu → "Log Out"
+- Disconnect (without logging out): toggle icon next to account
+
 ## Resource Authentication
-- **Trigger automatically**: Visit the Resource — Twingate sends a notification to click and complete auth in browser
-- **Trigger manually**: Find Resource in Client → open menu → select **Authenticate**
-- **Renew before expiry**: Find Resource in Client → open menu → select **Renew Session**
+- Resources may require MFA or step-up auth based on their Security Policy
+- **Trigger auth**: visit the Resource normally → click Twingate notification → complete browser auth
+- **Manual auth**: find Resource in Client → open menu → select **Authenticate**
+- **Renew session proactively**: Resource menu → **Renew Session**
 
 ## Proactive Reauthentication Notifications (Early Access)
-- Notifies before authorization expires; click notification to renew without finding Resource manually
-- Supported on macOS/Windows/Linux/iOS/Android version **2025.72+**
-- Must be enabled by Twingate team — requires contacting support
+Minimum Client versions required:
+| Platform | Version |
+|----------|---------|
+| macOS/Windows/Linux/iOS/Android | 2025.72 |
+
+- Notifies before authorization expires; click notification to reauthenticate without interruption
+- Must be **enabled by Twingate team** — contact support to activate
 
 ## Gotchas
-- Security Policy applied to a Resource is **not visible** in the Client — users won't know why additional auth is triggered
-- Switching accounts requires manually toggling the active account; Resources from inactive accounts are inaccessible until you switch
-- "Log Out" removes the account entirely; the disconnect toggle only suspends the active session
-- If auto-reconnect doesn't trigger browser auth, manually click **Connect to…** in the Client
+- Switching accounts is required before accessing Resources on another account — no cross-account Resource visibility
+- Authorization expires per Security Policy; expiration timing is not shown in the Client
+- Proactive reauthentication notifications are early access and off by default — requires manual enablement by Twingate
+- Do not disconnect the Client unnecessarily; leaving it connected avoids forced reauthentication
 
 ## Related Docs
 - Twingate Client installation
-- Security Policy configuration
-- MFA setup
+- Security Policies
+- MFA configuration

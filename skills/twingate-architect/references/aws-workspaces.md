@@ -1,47 +1,47 @@
 # How to Use Twingate with AWS Workspaces
 
 ## Summary
-Two workflows exist for Twingate with AWS Workspaces: installing Twingate inside a Workspace to access protected resources, or using Twingate to protect access to the Workspace itself. The second workflow requires configuring Twingate Resources and restricting AWS Workspaces to only allow Twingate egress IPs.
+Two workflows exist for Twingate + AWS Workspaces: installing Twingate inside a Workspace to access protected resources, or using Twingate to gate access to the Workspace itself. The second workflow requires creating specific Twingate Resources and restricting AWS Workspaces to Twingate egress IPs.
 
 ## Key Information
 - **Workflow 1**: Install Twingate Client inside the Workspace (standard install, optionally via MDM)
-- **Workflow 2**: Gate access to AWS Workspaces through Twingate by combining Resource configuration + AWS IP Group restrictions
+- **Workflow 2**: Protect access *to* AWS Workspaces by routing traffic through Twingate tunnel and whitelisting Connector egress IPs in AWS
 
 ## Prerequisites
-- Twingate Remote Network configured with Connectors deployed
-- AWS Workspaces environment already set up with a VPC
-- Twingate Connector egress IP addresses (for AWS IP Group rules)
+- Twingate Remote Network configured and associated with Connectors
+- AWS Workspaces environment deployed with a VPC
+- Twingate Connectors have known public egress IPs
+- Access to AWS Workspaces IP Group settings
 
-## Step-by-Step: Protecting AWS Workspaces Access (Workflow 2)
+## Step-by-Step (Workflow 2: Protecting AWS Workspaces Access)
 
 ### In Twingate
-1. Select the applicable Remote Network for AWS Workspaces access
+1. Select the Remote Network applicable for AWS Workspaces access
 2. Create Resources for:
-   - Private AWS IPv4 CIDR block used during VPC creation for AWS Workspaces
+   - Private AWS IPv4 CIDR block used during VPC creation for the Workspace
    - AWS Workspaces Endpoints
    - AWS Workspaces Auth Service
    - AWS Workspaces Broker Service (e.g., `ws-broker-service.us-east-1.amazonaws.com`)
-3. Grant access to these Resources via Group Membership
+3. Grant access to these Resources via Group membership for applicable users
 
 ### In AWS
 1. Create an IP Group in AWS Workspaces
 2. Add a rule to the IP Group
-3. Add the internet egress IP address(es) used by the Twingate Connectors associated with the Remote Network
+3. Add the public egress IP(s) of Twingate Connectors associated with the Remote Network
 
 ## Configuration Values
-| Item | Value/Notes |
-|------|-------------|
-| Broker Service DNS pattern | `ws-broker-service.<region>.amazonaws.com` |
-| VPC CIDR | Private IPv4 CIDR from Workspaces VPC setup |
-| Egress IPs | Twingate Connector outbound IPs for the Remote Network |
+| Item | Example |
+|------|---------|
+| Broker Service DNS | `ws-broker-service.us-east-1.amazonaws.com` |
+| IP source to whitelist | Public egress IP of Twingate Connector(s) |
 
 ## Gotchas
-- IP and DNS requirements vary by AWS region — consult [AWS IP address and port requirements documentation](https://docs.aws.amazon.com/workspaces/latest/adminguide/workspaces-port-requirements.html) for exact values
-- Must include **all** required endpoints (Auth, Broker, general Workspaces endpoints) or connectivity will fail
-- The egress IP added to the AWS IP Group must be the **Connector's internet-facing IP**, not the internal IP
+- Must cover all required AWS Workspaces endpoints (Auth, Broker, general endpoints) — missing any will break connectivity
+- Connector egress IPs must be static/known; dynamic IPs require IP Group updates when they change
+- Use [AWS IP address and port requirements docs](https://docs.aws.amazon.com/workspaces/latest/adminguide/workspaces-port-requirements.html) to find current endpoint IPs/DNS
 
 ## Related Docs
-- AWS IP address and port requirements (external AWS documentation)
-- Twingate MDM deployment (for Workflow 1 Client deployment)
-- Twingate Remote Networks and Connectors configuration
-- Twingate Group Membership and Resource access control
+- AWS IP address and port requirements documentation (linked in source)
+- Twingate MDM deployment guides (for Workflow 1)
+- Twingate Connector egress IP documentation
+- Twingate Remote Networks and Groups/Resources configuration

@@ -1,80 +1,73 @@
 # Deploy Twingate Connector on Ubiquiti Gateways
 
 ## Summary
-Deploys a Twingate Connector inside a systemd-nspawn Debian container on Ubiquiti Gateway hardware (UDM Pro, UDM SE, UXG-Pro, UXG-Max). The container persists on `/data` partition across firmware upgrades. Setup is automated via a single curl/bash command.
+Deploys a Twingate Connector inside a systemd-nspawn Debian container on Ubiquiti Gateway hardware (UDM Pro, UDM SE, UXG-Pro, UXG-Max). The container lives on `/data` partition, persisting through firmware upgrades. Setup is automated via a bash script from the Admin Console.
 
 ## Key Information
-- Supported devices: UDM Pro, UDM SE, UXG-Pro, UXG-Max running UniFi OS 3.x+
-- Container stored at `/data/custom/machines/` (firmware-upgrade safe)
-- Initial debootstrap takes 5–10 minutes — expected behavior
-- Multiple connectors supported via `CONTAINER_NAME` variable
+- Container uses `systemd-nspawn` (not Docker)
+- Stored at `/data/custom/machines/` — survives firmware upgrades
+- Symlink at `/var/lib/machines/` and nspawn config at `/etc/systemd/nspawn/` may need recreation after firmware upgrade (re-run setup script)
+- Initial `debootstrap` takes **5–10 minutes** — expected behavior
+- Each Connector requires its own unique token set (tokens are single-use per Connector)
 
 ## Prerequisites
-- Ubiquiti Gateway with UniFi OS 3.x or later
-- Root SSH access to the Gateway
-- Twingate Admin Console access
-- Internet connectivity on Gateway
+- Ubiquiti Gateway running **UniFi OS 3.x or later**
+- SSH root access to the Gateway
+- Twingate account with Admin Console access
+- Internet connectivity on the Gateway
 
 ## Step-by-Step
 
-1. **Generate tokens**: Admin Console → Remote Networks → select network → add/select Connector → Manual → Generate Tokens
-2. **Copy**: Network name (subdomain only, e.g., `mycompany`), Access Token, Refresh Token
-3. **Deploy via SSH**:
-```bash
-curl -sSf https://raw.githubusercontent.com/Twingate-Community/ubiquiti-connector/main/setup.sh | \
-  sudo TWINGATE_NETWORK="mycompany" \
-  TWINGATE_ACCESS_TOKEN="<token>" \
-  TWINGATE_REFRESH_TOKEN="<token>" bash
-```
-4. **Verify**: Admin Console → Remote Networks → Connector → confirm Controller and Relay show `connected`
-5. **Add Resource**: Create a Resource with Gateway's private IP (e.g., `192.168.x.x`) for remote UI access
-
-## Configuration Values
-
-| Variable | Required | Description |
-|---|---|---|
-| `TWINGATE_NETWORK` | Yes | Subdomain only (not full URL) |
-| `TWINGATE_ACCESS_TOKEN` | Yes | Per-connector access token |
-| `TWINGATE_REFRESH_TOKEN` | Yes | Per-connector refresh token |
-| `CONTAINER_NAME` | No | Default: `twingate-connector` |
+1. **Generate tokens**: Admin Console → Remote Networks → select network → add/select Connector → choose Ubiquiti option → Step 2 → Generate Tokens
+2. **Copy bash command** (includes Network name, Access token, Refresh token)
+3. **SSH into Gateway**, run the copied command
+4. **Verify**: Admin Console → Remote Networks → select Connector → confirm Controller and Relay show `connected`
+5. **Optional**: Add Gateway's private IP (`192.168.x.x`) as a Twingate Resource for remote UniFi dashboard access
 
 ## Container Management Commands
 
-```bash
-machinectl status twingate-connector    # View status
-machinectl stop twingate-connector      # Stop
-machinectl start twingate-connector     # Start
-machinectl disable twingate-connector   # Disable autostart
+| Command | Description |
+|---------|-------------|
+| `machinectl status twingate-connector` | View status |
+| `machinectl stop twingate-connector` | Stop container |
+| `machinectl start twingate-connector` | Start container |
+| `machinectl disable twingate-connector` | Disable auto-start |
 
-# Shell access inside container:
+**Shell access inside container:**
+```bash
 nsenter -t $(machinectl show twingate-connector -p Leader --value) \
   -m -u -i -n -p -- /bin/bash
+```
 
-# Uninstall:
+**Uninstall:**
+```bash
 sudo ./uninstall.sh  # from GitHub repo
 ```
 
-## Gotchas
-- **Tokens are single-use per connector** — never reuse; regenerate for redeployment
-- After firmware upgrade, symlink at `/var/lib/machines/` and nspawn config at `/etc/systemd/nspawn/` may be lost — re-run setup script to restore (detects existing container data)
-- Network name is subdomain only, not the full URL
-- Each connector requires its own unique token pair
-
 ## Troubleshooting
+
+**Container fails to start:**
 ```bash
-# Container logs:
 journalctl -M twingate-connector -xe --no-pager
-
-# Connector service logs:
-nsenter -t $(machinectl show twingate-connector -p Leader --value) \
-  -m -u -i -n -p -- journalctl -u twingate-connector -n 50 --no-pager
-
-# DNS check inside container:
-nsenter -t $(machinectl show twingate-connector -p Leader --value) \
-  -m -u -i -n -p -- curl -s https://binaries.twingate.com
 ```
 
+**Connector not connecting — check DNS/connectivity:**
+```bash
+nsenter -t $(machinectl show twingate-connector -p Leader --value) -m -u -i -n -p -- curl -s https://binaries.twingate.com
+```
+
+**Check Connector logs:**
+```bash
+nsenter -t $(machinectl show twingate-connector -p Leader --value) -m -u -i -n -p -- journalctl -u twingate-connector -n 50 --no-pager
+```
+
+## Gotchas
+- Custom `CONTAINER_NAME` during setup: replace `twingate-connector` in all commands
+- After firmware upgrade, re-run setup script to recreate symlink and nspawn config (container data preserved)
+- Do not reuse token sets across Connectors — regenerate if redeploying
+
 ## Related Docs
+- [Twingate General Troubleshooting](#)
 - [Proxmox Setup Guide](https://www.twingate.com/docs/deploy-connector-on-proxmox)
 - [Home Assistant Setup Guide](https://www.twingate.com/docs/deploy-connector-on-home-assistant)
-- [Unraid Setup Guide](https://www.twingate
+- [GitHub Repository](https://github.com/twingate) (uninstall script, issue tracking)

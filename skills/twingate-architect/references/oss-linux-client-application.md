@@ -1,48 +1,44 @@
 # Linux Client Application - OSS Third Party Notices
 
 ## Page Title
-Twingate Linux Client Application — Open Source Component Licenses
+Linux Client Application (Open Source Components / Third Party Notices)
 
 ## Summary
-This page lists all third-party open source components bundled in the Twingate Linux client application, along with their full license texts. It serves as the legal third-party notice disclosure required by the respective open source licenses.
+This page lists all open source components bundled in the Twingate Linux client application along with their respective licenses. It serves as the legal attribution document required for OSS license compliance. No implementation guidance is provided.
 
 ## Key Information
 
-- **Purpose**: Legal compliance disclosure for OSS components used in the Linux client
-- **Total components**: 13 third-party libraries
-- **License types used**: Apache 2.0, BSD 3-Clause, CC0 1.0 Universal, MIT, Boost Software License 1.0, zlib, and a custom MIT-variant (fmt)
+### Components and Licenses
 
-## Component License Matrix
-
-| Component | License | Copyright Holder |
-|-----------|---------|-----------------|
-| libssl | Apache 2.0 | OpenSSL Project |
-| libevent | BSD 3-Clause | Niels Provos, Nick Mathewson |
-| lwip | BSD 3-Clause | Swedish Institute of Computer Science |
-| siphash | CC0 1.0 Universal | — |
-| libjansson | MIT | Petri Lehtinen |
-| jwt-cpp | MIT | Dominik Thalhammer |
-| args | MIT | Taylor C. Richberger, Pavel Belikov |
-| pubnub | MIT | PubNub |
-| quicly | MIT | Fastly, Kazuho Oku |
+| Component | License | Copyright |
+|-----------|---------|-----------|
+| libssl | Apache 2.0 | OpenSSL Project 1998-2020 |
+| libevent | BSD 3-Clause | Niels Provos 2000-2012 |
+| lwip | BSD 3-Clause | Swedish Institute of Computer Science 2001-2002 |
+| siphash | CC0 1.0 Universal | (public domain dedication) |
+| libjansson | MIT | Petri Lehtinen 2009-2020 |
+| jwt-cpp | MIT | Dominik Thalhammer 2018 |
+| args | MIT | Taylor C. Richberger 2016-2017 |
+| pubnub | MIT | PubNub 2015 |
+| quicly | MIT | Fastly, Kazuho Oku 2017 |
 | catch2 | Boost Software License 1.0 | Catch2 Authors |
-| zlib | zlib License | Jean-loup Gailly, Mark Adler |
-| nanopb | zlib License | Petteri Aimonen |
-| fmt | MIT-variant (custom) | Victor Zverovich |
+| zlib | zlib License | Jean-loup Gailly & Mark Adler 1995-2017 |
+| nanopb | zlib License | Petteri Aimonen 2011 |
+| fmt | MIT-style (with embedding exception) | Victor Zverovich 2012-present |
 
 ## Prerequisites
-- N/A — informational/legal page only
+- N/A (informational/legal page only)
 
 ## Step-by-Step
-- N/A — no actionable steps
+- N/A
 
 ## Configuration Values
 - N/A
 
 ## Gotchas
-- **fmt exception**: The `fmt` library includes an optional exception allowing embedded portions in machine-executable object code to be redistributed without the copyright notice — differs slightly from standard MIT
-- **BSD 3-Clause restriction**: Components `libevent` and `lwip` prohibit use of copyright holder names for endorsement without written permission
-- **catch2 (Boost)**: Requires copyright notices in all copies unless distributed solely as machine-executable object code
+- **fmt** has a non-standard license exception: embedded portions in compiled object code may be redistributed without including copyright notices
+- **siphash** uses CC0 (public domain dedication), not a traditional OSS license — no attribution required but trademark/patent rights are not waived
+- BSD 3-Clause components (libevent, lwip) prohibit using contributor names for endorsement without permission
 
 ## Related Docs
 - Twingate Linux Client installation documentation

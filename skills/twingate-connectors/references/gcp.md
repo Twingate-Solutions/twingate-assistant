@@ -1,26 +1,26 @@
 # Deploy a Connector on GCP
 
 ## Summary
-Covers deployment options for Twingate Connectors on Google Cloud Platform, including Compute Engine (manual and automated), GKE, and IaC approaches. Subnets must have outbound internet access for container image downloads and Twingate connectivity.
+Covers multiple deployment options for Twingate Connectors on Google Cloud Platform including Compute Engine, GKE, and IaC methods. Requires outbound internet access from the subnet. Supports Docker-based and systemd service deployments.
 
 ## Key Information
-- Multiple deployment methods: Compute Engine (manual/automated), GKE (Helm), IaC (Terraform/Pulumi/API)
-- Docker-based deployment works on any 64-bit Linux distro Docker supports
+- Multiple deployment paths: Compute Engine (manual or automated), GKE (Helm chart), IaC (Terraform/Pulumi/API)
+- Docker deployment works on any 64-bit Linux distro Docker supports
 - systemd service supported on: Ubuntu, Fedora, Debian, CentOS
 - Access and refresh tokens are **per-Connector** — cannot be shared between Connectors
-- Updates run via systemd; stagger updates across Connectors to avoid downtime
 
 ## Prerequisites
-- Subnet with outbound internet access (for container image pull + Twingate connection)
-- If using Cloud NAT: review `min_ports_per_vm` setting — GCP defaults may be insufficient for smaller deployments
-- Remote Network already configured in Twingate Admin Console
+- Subnet with outbound internet access (for container image download and Twingate connectivity)
+- If using Cloud NAT: review `min_ports_per_vm` setting on NAT gateway (GCP default may be insufficient for smaller deployments)
+- Google Cloud CLI (for automated Compute Engine deployment)
+- Twingate Admin Console access
 
 ## Step-by-Step: Automated Compute Engine Deployment
 1. Admin Console → Remote Networks → select Remote Network → **Add Connector**
-2. Click new Connector → deployment page → select **Google Cloud** option
-3. Generate tokens (requires re-authentication)
-4. Fill out GCP environment configuration (step 3 on deployment page)
-5. Copy generated CLI command (step 5) → run in Google Cloud CLI
+2. Click the new Connector → deployment page → select **Google Cloud** option
+3. Scroll to Step 2 → generate tokens (requires re-authentication)
+4. Scroll to Step 3 → fill in GCP environment details and configure optional features
+5. Scroll to Step 5 → copy and run the launch command in Google Cloud CLI
 
 ## Configuration Values
 | Setting | Notes |
@@ -30,23 +30,27 @@ Covers deployment options for Twingate Connectors on Google Cloud Platform, incl
 | Refresh token | Connector-specific, generated in Admin Console |
 
 ## Deployment Options Summary
-| Method | Reference |
+| Method | Guide |
 |---|---|
-| Compute Engine (manual) | Linux Connector deployment docs |
-| Compute Engine (automated) | Steps above via Admin Console |
-| GKE | Official Twingate Helm chart + K8s Best Practices Guide |
-| Terraform/Pulumi/API | Deployment automation docs |
+| Compute Engine (manual) | Linux Connector deployment instructions |
+| Compute Engine (automated) | Steps above |
+| GKE | Official Twingate Helm chart |
+| Terraform/Pulumi/API | IaC deployment docs |
+
+## Updates
+- Connectors run as a **systemd service**
+- Update manually via Linux package manager or automated scheduled task
+- **Stagger updates** across multiple Connectors to avoid downtime
+- See: Systemd Connector Update Guide
 
 ## Gotchas
-- Cloud NAT `min_ports_per_vm` default is tuned for large fleets — may be too low for small GCP deployments sharing a NAT gateway with analytics/batch workloads
-- Tokens are Connector-specific; generating tokens for one Connector won't work for another
-- Peer-to-peer connections should be enabled to stay within Fair Use Policy bandwidth limits
+- Cloud NAT `min_ports_per_vm` default is tuned for large fleets — may cause issues in smaller deployments
+- Tokens are Connector-specific and non-shareable; generate separately for each Connector
+- Subnet must have outbound internet access — verify before deploying
 
 ## Related Docs
-- [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices) — hardware recommendations for GCP
-- [Linux Connector Deployment](https://www.twingate.com/docs/linux)
-- [Twingate Helm Chart](https://www.twingate.com/docs/kubernetes)
-- [Kubernetes Best Practices](https://www.twingate.com/docs/kubernetes-best-practices)
+- [Best Practices for Connectors](https://www.twingate.com/docs/connector-best-practices)
+- [Kubernetes Best Practices Guide](https://www.twingate.com/docs/k8s-best-practices)
 - [Systemd Connector Update Guide](https://www.twingate.com/docs/systemd-connector-update)
-- [Support Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
-- [GCP Tune NAT Configuration](https://cloud.google.com/nat/docs/tune-nat)
+- [Support peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer)
+- [GCP Tune NAT configuration](https://cloud.google.com/nat/docs/tune-nat)
