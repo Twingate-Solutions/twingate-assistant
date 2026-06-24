@@ -1,64 +1,66 @@
 # Database Access with Twingate
 
+## Page Title
+Database Access Guide
+
 ## Summary
-Twingate secures database connections by routing traffic through a Connector deployed in your network, eliminating the need for public database exposure. Supports both private/self-hosted databases (using Connector's private IP) and public/SaaS databases (using Connector's public egress IP). Covers AWS, GCP, Azure, Oracle, Redis, and Snowflake.
+Overview guide for configuring Twingate to secure database connections, covering both private/self-hosted and public/SaaS databases. Explains the two core access patterns (private IP vs. public egress IP) and links to service-specific guides. Includes client tool setup and troubleshooting steps.
 
 ## Key Information
-- Connector acts as outbound-only proxy; databases never need public exposure for private deployments
-- Two access models: **private** (same VPC/network) and **public** (SaaS/managed services)
-- Connector IP addresses are visible in the Admin Console → Connectors page
-- Use private IP whenever possible; fall back to public IP only when required by the service
-- Supported GUI clients: DBeaver (multi-DB) and SSMS (SQL Server)
+- Two access patterns based on database location:
+  - **Private/self-hosted**: Use Connector's **private IP** in firewall/security group rules
+  - **Public/SaaS**: Use Connector's **public egress IP** in IP access lists/network policies
+- Connector private IP visible on the **Connectors page** in Admin Console
+- Connector public IP also visible on **Connectors page**
+- Supported service-specific guides: AWS RDS/Aurora, GCP Cloud SQL, Azure SQL, Oracle, Redis, Snowflake
+- GUI client support: DBeaver (multi-DB) and SSMS (SQL Server)
 
 ## Prerequisites
 - Remote Network defined in Twingate Admin Console
 - Connector deployed within the target network
-- Twingate Client active on end-user machine
-- Resource created in Twingate for the database endpoint
+- Twingate Resource created for the database endpoint (IP or DNS name)
+- Twingate Client active on end-user device with Resource visible
 
-## Step-by-Step
+## Step-by-Step (General Setup)
 
-### Private Database Setup
-1. Create a Twingate Resource using private IP (e.g., `10.0.1.15`) or internal DNS (`db.internal.example.com`)
-2. Note the Connector's **private IP** from Admin Console → Connectors
-3. Update database host/VPC firewall/security group to allow traffic from Connector's private IP on the database port
+**Private Database:**
+1. Create a Twingate Resource for the database (e.g., `10.0.1.15` or `db.internal.example.com`)
+2. Note the Connector's private IP from the Connectors page
+3. Add Connector's private IP to database firewall/security group on the appropriate port
 
-### Public/SaaS Database Setup
-1. Create a Twingate Resource for the database's public endpoint (e.g., `rds.amazonaws.com`)
-2. Note the Connector's **public egress IP** from Admin Console → Connectors
-3. Add Connector's public IP to the database service's IP access list/network policy/firewall rules
+**Public/SaaS Database:**
+1. Create a Twingate Resource for the public endpoint (e.g., `rds.amazonaws.com`)
+2. Note the Connector's public egress IP from the Connectors page
+3. Add public IP to the database service's IP access list/network policy
 
-### DBeaver Connection
-1. Install DBeaver; ensure Connector is active and Resource appears in Twingate Client
-2. Database → New Database Connection → select DB type
-3. Enter hostname, username, password → Test Connection → Finish
-
-### SSMS Connection
-1. Install SSMS; ensure Connector is active and Resource appears in Twingate Client
-2. Connect → Database Engine → enter Server Name and credentials → Connect
-
-## Troubleshooting
-
-| Symptom | Fix |
+## Configuration Values
+| Context | Value to Use |
 |---|---|
-| **Connection Refused** | Verify Connector IP is in database allow list (private vs. public) |
-| **Slow Connections** | Check Connector health; verify no blocking firewall rules |
-| **Timeouts** | Confirm Connectors are online and reachable |
-| **DNS Failed** (Recent Activity) | Check DNS zone is tied to VPC; DNS server defined as Twingate Resource |
-| **Connection Failed** (Recent Activity) | Verify route exists Connector→DB; check IP allow lists and port rules both ends |
-| **No Activity** (Recent Activity) | Confirm Client is running, user has Resource access, no other VPN intercepting traffic |
+| Private/VPC database | Connector private IP |
+| SaaS/public database | Connector public egress IP |
+| AWS VPC endpoints / PrivateLink available | Use private IP instead |
 
 ## Gotchas
-- If another VPN is active, it may hijack traffic before Twingate captures it (check "No Activity" in Recent Activity)
-- SaaS databases that support PrivateLink/VPC endpoints should use private IP even for managed services
-- DNS resolution failures mean the Connector—not the client—cannot resolve the hostname
+- Never expose public IPs for private-network databases — route through Connector private IP only
+- If a DNS server is self-hosted, it must also be defined as a Twingate Resource for hostname resolution to work
+- Other active VPNs can intercept traffic before it reaches the Twingate Client ("No Activity" in logs)
+- "DNS Failed" in Recent Activity = Connector can't resolve hostname; check DNS zone is tied to VPC
+- "Connection Failed" = Connector reached destination attempt but was blocked; check both firewall ends and IP allowlists
+- "No Activity" = Client never sent traffic; check Client is running and Resource is accessible
+
+## Troubleshooting Quick Reference
+- **Connection Refused**: Wrong IP in database allowlist
+- **Slow Connections**: Connector health or firewall blocking
+- **Timeouts**: Connector offline or misconfigured
+- Use **Admin Console → Resource → Recent Activity** for diagnostic events
 
 ## Related Docs
-- [AWS Database Access Guide](https://www.twingate.com/docs/aws-database-access)
-- [GCP Database Access Guide](https://www.twingate.com/docs/gcp-database-access)
-- [Azure Database Access Guide](https://www.twingate.com/docs/azure-database-access)
-- [Oracle Database Access Guide](https://www.twingate.com/docs/oracle-database-access)
-- [Redis Access Guide](https://www.twingate.com/docs/redis-access)
-- [Snowflake Access Guide](https://www.twingate.com/docs/snowflake-access)
+- AWS Database Access Guide
+- GCP Database Access Guide
+- Azure Database Access Guide
+- Oracle Database Access Guide
+- Redis Access Guide
+- Snowflake Access Guide
 - Twingate Troubleshooting Guide
 - Best Practices for Connector Placement
+- Securing Resource Access with Policies

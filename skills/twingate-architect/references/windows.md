@@ -1,45 +1,47 @@
 # Twingate Windows Client
 
 ## Summary
-Twingate Windows Client installs as a system tray application for accessing private Resources. Supports Windows 10, Windows 11, Windows Server 2022, and Windows Server 2025, with Windows Server limited to headless mode only.
+Installation and configuration guide for the Twingate Windows desktop client. Covers installer download, tunnel driver selection, first-time setup, and common troubleshooting issues.
 
 ## Key Information
-- Download from `get.twingate.com`
-- Runs from Windows Notification Area (system tray)
-- Only intercepts traffic for configured private Resources; does not affect general internet browsing
+- Supported OS: Windows 10, Windows 11, Windows Server 2022, Windows Server 2025
+- Windows Server only supports **headless mode** (no posture checks)
+- Client runs from the Windows Taskbar Notification Area after install
 - Two tunnel driver options: **TunTap** (default, recommended) and **Wintun** (experimental, potentially higher throughput)
-- To switch drivers, reinstall and select at the install dialog
 
 ## Prerequisites
-- Local admin rights required for installation
-- **.NET Desktop Runtime (x64)**:
-  - Client versions before November 2024: .NET Desktop Runtime 6.0+
-  - Client versions from November 2024 onward: .NET Desktop Runtime 8.0+
-  - EXE installer auto-installs .NET; **MSI installer requires manual .NET installation**
+- Local admin rights on the machine
+- .NET Desktop Runtime (x64):
+  - Client versions before November 2024: .NET 6.0+
+  - Client versions November 2024+: .NET 8.0+
+- EXE/update installer auto-installs .NET; **MSI installer requires manual .NET installation**
 
 ## Step-by-Step
 
 1. Download installer from `get.twingate.com`
 2. Run installer (requires local admin)
-3. Select tunnel driver (TunTap recommended)
-4. Launch from desktop shortcut or Start menu
-5. Enter your Twingate network name when prompted
-6. Click **Join Network** → redirected to your identity provider
-7. Authenticate with org credentials
+3. Select tunnel driver: choose **TunTap** (default) or Wintun
+4. Launch Twingate from desktop shortcut or Start menu
+5. Enter your Twingate network name (e.g., `Beamreach`)
+6. Click **Join Network** → redirected to org identity provider
+7. Authenticate with normal credentials
 
 ## Configuration Values
-| Setting | Options | Notes |
-|---|---|---|
-| Tunnel Driver | `TunTap` (default), `Wintun` | Selected at install; change requires reinstall |
-| Windows Server mode | Headless only | GUI/posture checks not supported |
+| Setting | Value |
+|---|---|
+| Installer download | `get.twingate.com` |
+| Default tunnel driver | TunTap |
+| Alternative tunnel driver | Wintun |
+| Required .NET runtime | Desktop Runtime x64 (8.0+ for Nov 2024+ clients) |
 
 ## Gotchas
-- **Windows Server**: Posture checks are unsupported; headless mode is the only supported deployment method
-- **MSI installs**: .NET Desktop Runtime must be manually installed; EXE/update handles this automatically
-- **Intel Ethernet on Windows 10**: May experience slow speeds due to outdated drivers; update manually from Intel's website (Windows 10 does not auto-update these)
-- Switching tunnel drivers requires full reinstall
+- **Switching tunnel drivers requires full reinstall** — select preferred driver during install dialog
+- **MSI installs**: must manually install .NET Desktop Runtime; EXE installs handle this automatically
+- **Windows Server**: posture checks are unsupported; use headless mode only
+- **Intel Ethernet on Windows 10**: may cause slow speeds — update driver manually from Intel's website (Windows Update may not provide latest version)
+- Twingate only intercepts traffic for configured private Resources; normal internet browsing is unaffected
 
 ## Related Docs
-- Headless mode configuration (for Windows Server deployments)
-- Twingate Client posture checks
-- Network Resources configuration
+- Headless mode (Windows Server usage)
+- Posture checks
+- Twingate network configuration / identity provider setup

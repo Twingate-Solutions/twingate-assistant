@@ -1,44 +1,45 @@
 # Protect Legacy Apps with Multi-Factor Authentication
 
-## Page Title
-How to Protect Legacy Technologies with MFA
-
 ## Summary
-Twingate enables MFA enforcement on legacy technologies (SSH, RDP, databases, file servers) that were never designed to support it. Security Policies intercept network requests and enforce MFA via your Identity Provider before allowing access. No changes to the legacy application or infrastructure are required.
+Twingate enables MFA enforcement on legacy technologies (SSH, RDP, databases, file servers) that lack native MFA support by intercepting requests at the network level. Security Policies are applied to resources, requiring IdP authentication before access is granted. No changes to the legacy application itself are required.
 
 ## Key Information
-- MFA is applied via **Security Policies** at the network level—no app reconfiguration needed
-- Works with any legacy technology: SSH, RDP, Citrix, MSSQL, MySQL, Oracle, PostgreSQL, file shares, custom web apps
-- Twingate intercepts requests **on the device** before they leave; unauthorized requests never reach the network
-- Identity Provider integration means revoking SSO account removes access to all protected resources automatically
-- If MFA is required by policy, Twingate prompts the user and only forwards the request upon successful authentication
+- Works with any resource regardless of whether it natively supports MFA or SSO
+- MFA enforcement happens at the network layer, not the application layer
+- Twingate intercepts requests on the client device before they leave; unauthorized requests never reach the network
+- Revoking SSO/IdP account immediately removes access to all protected resources — no per-app intervention needed
+- Covered resource types:
+  - SSH servers
+  - RDP, Citrix, Windows Remote Desktop Services
+  - Database servers (MSSQL, MySQL, Oracle, PostgreSQL)
+  - File sharing servers
+  - Custom web applications
 
 ## Prerequisites
-- Twingate deployed with at least one Connector
-- Identity Provider (IdP) configured and integrated with Twingate
-- MFA enabled in your IdP
-- Resources defined in Twingate admin console
-- Security Policy created with MFA requirement
+- Twingate account with at least one configured Resource
+- Identity Provider (IdP) integrated with Twingate
+- Security Policy configured with MFA requirement
+- Twingate Client installed on user devices
 
-## Step-by-Step
-1. Define the legacy resource in Twingate (IP/hostname, port, protocol)
-2. Create or edit a **Security Policy** to require MFA
-3. Assign the Security Policy to the resource
-4. Assign user/group access to the resource
-5. When a user attempts access, Twingate intercepts the request and prompts for MFA via IdP
-6. On successful MFA, request is forwarded to the resource
+## How It Works (Step-by-Step)
+1. User device makes a request to a resource protected by Twingate
+2. Twingate client intercepts the request at the network level
+3. Twingate checks the applicable Security Policy for that resource
+4. If policy requires MFA, Twingate prompts the user for MFA via the configured IdP
+5. On successful MFA: request is forwarded to the resource
+6. On failed MFA or no authorization: request is dropped on the device; resource is unreachable
 
 ## Configuration Values
-- **Security Policy**: Set MFA requirement (configured in Twingate Admin Console under Policies)
-- No CLI flags, env vars, or API parameters specific to this feature documented on this page
+- **Security Policy**: Must have MFA requirement enabled and be assigned to the target Resource
+- **Identity Provider**: Must be connected to Twingate (handles authentication challenges)
 
 ## Gotchas
-- MFA prompt is triggered by Twingate's client, not the legacy app—users must have Twingate client installed and running
-- Disabling an SSO account removes access, but **only if** access is gated through Twingate; any direct network paths to the resource bypass this protection
-- Legacy app credentials (e.g., database passwords) still exist independently—Twingate prevents network access but does not manage app-level credentials
+- MFA prompt is triggered by Twingate's Security Policy, not the application — ensure the correct policy is assigned to each resource
+- If a user's IdP account is disabled, access is revoked immediately across all Twingate-protected resources; no additional cleanup needed per legacy app
+- Unauthorized users receive no network-level response — the resource appears completely inaccessible, providing resource hiding in addition to MFA
 
 ## Related Docs
 - Security Policies
-- Identity Provider configuration
-- Resource configuration
-- Twingate Connector setup
+- Identity Provider integration
+- Resources configuration
+- Twingate Client setup

@@ -1,19 +1,18 @@
-# SCIM Provisioning API
+# Twingate SCIM Provisioning API
 
 ## Summary
-Twingate supports SCIM 2.0 for automated user provisioning via identity provider integrations. The API provides CRUD operations for Users and Groups. This API is intended for IdP integrations, not direct self-serve use.
+Twingate implements SCIM 2.0 for automated user provisioning via identity provider integrations. The API supports standard CRUD operations on Users and Groups. This API is intended for use with supported IdP integrations, not direct self-serve implementation.
 
 ## Key Information
 - Base URL: `https://{network}.twingate.com/api/scim/v2/`
-- Supports SCIM 2.0 (`v2` in URL path)
-- Content types: `application/scim+json` or `application/json`
-- Rate limit: **25 requests/second per account**
-- Only the **most recently generated** bearer token is valid
+- SCIM version: 2.0
+- Rate limit: 25 requests/second per account
+- Supports `application/scim+json` and `application/json` content types
+- Errors follow RFC-7644 section 3.12
 
 ## Prerequisites
-- Twingate Admin console access to generate bearer token
-- Existing IdP integration configured
-- Network name (subdomain) for base URL construction
+- Twingate network name
+- Bearer token generated from Twingate Admin console (only most recently generated token is valid)
 
 ## Configuration Values
 
@@ -21,49 +20,59 @@ Twingate supports SCIM 2.0 for automated user provisioning via identity provider
 |-----------|-------|
 | Auth header | `Authorization: Bearer <token>` |
 | Content-Type | `application/scim+json` or `application/json` |
-| Rate limit | 25 req/sec |
+| Base URL pattern | `https://{network}.twingate.com/api/scim/v2/` |
 
 ## User Attributes
 
-| Twingate Field | SCIM Attribute | Required | Unique |
-|---|---|---|---|
-| Twingate ID | `id` | Yes | Yes |
-| Origin ID | `externalId` | Yes | Yes |
-| Username | `userName` | Yes | Yes |
-| Email | `emails[primary eq true]` | No | No |
-| First name | `name.givenName` | No | No |
-| Last name | `name.lastName` | No | No |
-| Active | `active` | No | No |
+| SCIM Attribute | Required | Unique |
+|----------------|----------|--------|
+| `id` | Yes | Yes |
+| `externalId` | Yes | Yes |
+| `userName` | Yes | Yes |
+| `emails[primary eq true]` | No | No |
+| `name.givenName` | No | No |
+| `name.lastName` | No | No |
+| `active` | No | No |
 
 ## Group Attributes
 
-| Twingate Field | SCIM Attribute | Required | Unique |
-|---|---|---|---|
-| Group name | `displayName` | Yes | No |
-| Members | `members` | No | No |
-| Twingate ID | `id` | Yes | Yes |
+| SCIM Attribute | Required | Unique |
+|----------------|----------|--------|
+| `displayName` | Yes | No |
+| `id` | Yes | Yes |
+| `members` | No | No |
 
-## Supported Endpoints
-**Users:** `GET /Users`, `POST /Users`, `GET /Users/{id}`, `PUT /Users/{id}`, `PATCH /Users/{id}`, `DELETE /Users/{id}`
+## Endpoints
 
-**Groups:** `GET /Groups`, `POST /Groups`, `GET /Groups/{id}`, `PUT /Groups/{id}`, `PATCH /Groups/{id}`, `DELETE /Groups/{id}`
+**Users:**
+- `GET /Users` — list/filter (paginated)
+- `POST /Users` — create
+- `GET /Users/{id}` — retrieve
+- `PUT /Users/{id}` — replace
+- `PATCH /Users/{id}` — modify
+- `DELETE /Users/{id}` — delete permanently
 
-Pagination supported on `GET /Users` and `GET /Groups`.
+**Groups:**
+- `GET /Groups` — list/filter (paginated)
+- `POST /Groups` — create
+- `GET /Groups/{group-id}` — retrieve
+- `PUT /Groups/{group-id}` — replace
+- `PATCH /Groups/{group-id}` — modify
+- `DELETE /Groups/{group-id}` — delete permanently
 
 ## Gotchas
-- Only one email stored; API looks for `primary=true` first, then `type="work"`
-- `DELETE /Users/{id}` and `DELETE /Groups/{id}` **permanently delete** in Twingate
-- `{id}` path param is the Twingate internal ID (from `id` field in responses), not `externalId`
-- Token rotation invalidates all previous tokens immediately
-- `lastName` maps to `name.lastName` (not `name.familyName` per strict SCIM spec—verify behavior)
+- Only the **most recently generated** bearer token is valid; generating a new token invalidates the previous one
+- Email: only one email stored; priority is `primary=true`, fallback is `type="work"`
+- `{id}` in path must be the Twingate-assigned ID (returned in SCIM `id` field), not `externalId`
+- `DELETE` on users/groups is **permanent** deletion in Twingate
 
 ## Unsupported Operations
 - `POST /.search` (RFC-7644 §3.4.3)
-- `POST /Bulk` (RFC-7644 §3.7)
-- `/Me` endpoint
-- Sorting on filter queries
-- `attributes` / `excludedAttributes` query params
+- `/Bulk` endpoint (RFC-7644 §3.7)
+- `/Me` endpoint (RFC-7644 §3.11)
+- Sorting in filter queries (RFC-7644 §3.4.2.3)
+- `attributes` and `excludedAttributes` query params
 
 ## Related Docs
-- [Supported IdP Integrations](https://www.twingate.com/docs/scim-provisioning-api) (see "here" link in source)
-- RFC-7644 §8.1 (content types), §3.12 (error format), §3.4.2 (filtering)
+- [Supported IdP Integrations](https://www.twingate.com/docs/scim-provisioning-api) (see "here" link in original)
+- RFC-7644 (SCIM Protocol specification)

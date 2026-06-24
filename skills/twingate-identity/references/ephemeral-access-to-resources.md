@@ -1,55 +1,47 @@
 # Ephemeral Access to Resources
 
 ## Summary
-Ephemeral Access grants time-bounded access to Resources for specific Groups, with automatic revocation at expiration. Configured via the Admin Console on either Resource or Group pages, it removes the Group from the Resource automatically when the expiration is reached.
+Ephemeral Access grants time-bounded access to Resources for specific Groups, with automatic revocation at expiration. Configured via "Set Expiration" in the Admin Console, it removes the Group from the Resource when the time window expires.
 
 ## Key Information
-- Access is granted at the **Group level**, not individual user level
-- Expiration range: **1 hour to 1 year** from current date
-- At expiration: Group is automatically removed from Resource; all users in that Group lose access
-- Active expirations display an **"Expires [date]" pill** in the UI
+- Access is scoped to **Group-Resource relationships**, not individual users
+- Expiration range: **1 hour to 1 year** from current date/time
+- At expiration, the Group is **automatically removed** from the Resource
+- Active expirations display an **"Expires [date]" pill** on the Group row
 - All expiration changes are logged in **audit logs** under the Access category
-- Expiration can be **removed without revoking access** (via "Remove Expiration" link in date picker)
+- Expirations can be **cleared without removing access** via "Remove Expiration" link in the date picker
 
 ## Prerequisites
 - Admin Console access
 - Existing Groups and Resources configured in Twingate
 
-## Step-by-Step
+## Configuration Steps
 
-### Set Expiration on New Group Access (from Resource page)
+### From a Resource Page
 1. Navigate to the Resource page
-2. Begin granting access to a new Group
-3. Click **Set Expiration** in the access configuration
-4. Choose date and time in the date picker
-5. Click **Set Expiration Time** to apply
-6. Click **Grant Access** to finalize
+2. **New Group**: Click "Set Expiration" during access configuration → select date/time → click "Set Expiration Time" → click "Grant Access"
+3. **Existing Group**: Click options menu on Group row → "Set Expiration" → select date/time
 
-### Modify Expiration on Existing Group Access (from Resource page)
-1. Navigate to the Resource page
-2. Click the **options menu** on the Group's row
-3. Select **Set Expiration**
-4. Modify the date/time, or click **Remove Expiration** to clear without revoking access
+### From a Group Page
+1. Navigate to the Group detail page
+2. **New Resource**: Click "Set Expiration" during access configuration
+3. **Existing Resource**: Click options menu on Resource row → "Set Expiration"
 
-### From Group Page
-- Same patterns apply: **Set Expiration** when adding new Resources; **options menu → Set Expiration** for existing Resources
+### Remove an Expiration (Without Revoking Access)
+- Open the date picker via "Set Expiration" → click "Remove Expiration" link inside the picker
 
-## Configuration Values
-| Parameter | Range | Notes |
-|-----------|-------|-------|
-| Expiration time | 1 hour – 1 year | From current date/time |
+## Common Use Cases
+- Projects with defined end dates
+- Contractor engagements with fixed durations
+- "Break glass" scenarios requiring temporary sensitive Resource access
 
 ## Gotchas
-- Access is Group-scoped — cannot set per-user expiration directly; user loses access only when the Group is removed
-- Removing expiration ≠ removing access; the Group retains access indefinitely until manually removed or a new expiration is set
-- No notification mechanism mentioned — users are not warned before expiration
-
-## Use Cases
-- Projects with defined end dates
-- Contractor engagements with fixed duration
-- Break-glass access to sensitive Resources
+- Expiration removes the **entire Group** from the Resource — all users in that Group lose access simultaneously
+- No per-user expiration; granularity is at the Group level only
+- No mention of notification/warning before expiration triggers
+- Minimum expiration is 1 hour; cannot set sub-hour windows
 
 ## Related Docs
-- Twingate Groups documentation
-- Twingate Resources documentation
 - Audit Logs (Access category)
+- Group management
+- Resource access configuration

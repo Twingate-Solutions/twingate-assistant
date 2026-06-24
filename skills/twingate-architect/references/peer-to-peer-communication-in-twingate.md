@@ -1,47 +1,55 @@
 # Peer-to-Peer Communication in Twingate
 
 ## Summary
-Twingate enables peer-to-peer connections between Clients and Connectors using NAT traversal, with relay infrastructure as a fallback. No configuration, open inbound ports, or additional deployment is required. The feature uses QUIC (UDP-based) as the transport protocol.
+Twingate enables peer-to-peer connections between Clients and Connectors using NAT traversal, with automatic fallback to relay infrastructure when direct connections aren't possible. Uses QUIC (UDP-based) as the transport protocol. No configuration required; works transparently for all customers.
 
 ## Key Information
-- Available to all customers; no additional deployment needed
-- Transparent to end users and administrators
-- No open inbound ports required
-- Automatically selects lowest-latency transport option
-- Uses QUIC protocol (RFC 9000, IETF standardized)
+- Available to all Twingate customers; no additional deployment needed
+- No open inbound ports required on either Client or Connector
+- Automatically selects lowest-latency transport (P2P preferred, relay as fallback)
+- Uses QUIC protocol (RFC 9000) over UDP
+- Relay infrastructure is globally distributed and always accessible as backup
 
-## Connection Flow
-1. **Signaling channel**: Client and Connector both connect to Twingate's globally distributed Relay Infrastructure on startup
-2. **Peer discovery**: STUN server (hosted in Twingate relay infra) discovers public IP:port assigned by NAT
-3. **Address exchange**: Each peer receives candidate addresses for the other via signaling channel
-4. **Negotiation**: Peers attempt direct P2P connection using candidate addresses (NAT traversal)
-5. **Fallback**: If P2P fails (blocked ports, incompatible NAT), traffic routes through relay infrastructure
+## Connection Establishment Flow
+1. **Signaling channel**: Client and Connector both connect to Twingate's Relay Infrastructure (publicly accessible)
+2. **Peer discovery**: STUN server (hosted in Twingate relay infra) discovers public IP:port behind NAT
+3. **Address exchange**: Each peer receives candidate addresses for its partner via signaling channel
+4. **NAT traversal**: Peers attempt direct connection using candidate addresses
 
-## Configuration Values
-- None required — fully automatic
+## When P2P Fails
+- Fallback: Twingate relay infrastructure (transport layer)
+- Triggers: blocked ports, incompatible NAT configurations
+- Automatic — no manual intervention needed
 
-## Technical Details (QUIC)
+## QUIC Protocol Details
 | Feature | Detail |
 |---|---|
-| Protocol | QUIC over UDP (RFC 9000) |
-| TLS | 1.3+ only |
-| Connection establishment | 1 round-trip (0-RTT resumption available) |
-| Multiplexing | Multiple app data flows mapped to single QUIC streams |
-| Roaming | Survives client IP/port changes (NAT rebinding, network switches) |
+| Base protocol | UDP |
+| TLS support | TLS 1.3+ only |
+| Standardization | IETF RFC 9000 |
+| Initial connection | 1 round-trip |
+| Connection resumption | 0 round-trips |
 
-## QUIC Advantages Over TCP+TLS
-- No head-of-line blocking (packet loss affects only impacted streams)
-- Faster initial handshake and resumption
-- Better mobile/roaming support
-- Stronger cryptography (TLS 1.3 mandatory)
-- More efficient packet loss recovery
+**QUIC advantages over TCP+TLS:**
+- No head-of-line blocking (packet loss affects only impacted streams, not all)
+- Faster connection establishment
+- Client-side roaming: survives IP/port changes (NAT rebinding, network switches)
+- Multiplexes concurrent data flows from multiple applications over single connection
+- Better packet loss recovery
+
+## Configuration Values
+None required. Feature is automatic and zero-configuration.
 
 ## Gotchas
-- P2P is not guaranteed — symmetric NAT or firewall rules blocking UDP may force relay fallback
-- Relay is always the backup; no configuration needed to enable it
-- QUIC runs over UDP — ensure UDP is not broadly blocked in your network environment
+- Direct P2P is **not always achievable** — incompatible NAT types or firewall rules blocking UDP will force relay fallback
+- QUIC runs over UDP — ensure UDP is not broadly blocked in network environments where Connectors are deployed
+- Relay fallback adds latency; P2P is always preferred when possible
+
+## Prerequisites
+- No special prerequisites; works with existing Client and Connector deployments
+- UDP traffic should not be blocked if P2P performance is desired
 
 ## Related Docs
-- Twingate Relay Infrastructure
 - Twingate Client documentation
 - Twingate Connector documentation
+- Relay Infrastructure documentation

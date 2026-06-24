@@ -1,26 +1,27 @@
 # Location Requirements
 
 ## Summary
-Twingate's geoblocking feature restricts access to protected Resources based on country-level IP geolocation. Admins configure allowlists or denylists on Resource Policies to control which countries can reach assigned Resources. This feature is Enterprise plan only.
+Twingate's Location Requirements feature restricts access to protected Resources based on country-level geolocation using IP address mapping. Admins configure allowlists or denylists on Resource Policies to control which countries can or cannot reach assigned Resources. This is an Enterprise-only feature.
 
 ## Key Information
-- Restriction is configured per **Resource Policy**, not per individual Resource
-- Two modes: **Allowlist** (whitelist specific countries) or **Denylist** (block specific countries)
-- Location determined via IP address geolocation using MaxMind GeoLite2 + Google Cloud load balancer data
-- Coordinates truncated to 2 decimal places, then mapped to country using Natural Earth boundary data
-- Blocked users see an error message indicating location doesn't meet policy requirements
+- Geoblocking operates at the **country level** only (no city/region granularity)
+- Two modes: **Allowlist** (whitelist specific countries) or **Denylist** (blacklist specific countries)
+- Location determined via IP address → geographic coordinates (truncated to 2 decimal places) → country boundary lookup
+- Geolocation data sources: MaxMind GeoLite2 + Google Cloud load balancers
+- Country boundary data from Natural Earth
+- Configured per **Resource Policy**, not per individual Resource
 
 ## Prerequisites
 - Enterprise plan subscription
-- Admin access to configure Resource Policies
-- Resource Policy must exist before enabling location requirements
+- Admin access to Twingate admin console
+- Resource Policy must exist before enabling Location Requirements
 
 ## Step-by-Step Configuration
-1. Navigate to the target **Resource Policy**
+1. Open target Resource Policy in admin console
 2. Click **Enable** next to **Location Requirements**
 3. Choose restriction type:
-   - **Allowlist** – only listed countries can access; all others blocked
-   - **Denylist** – listed countries are blocked; all others allowed
+   - **Allowlist**: only listed countries permitted; all others blocked
+   - **Denylist**: listed countries blocked; all others permitted
 4. Select countries for the chosen restriction type
 5. Save the policy
 
@@ -28,27 +29,23 @@ Twingate's geoblocking feature restricts access to protected Resources based on 
 | Setting | Options |
 |---|---|
 | Restriction Type | `Allowlist` or `Denylist` |
-| Country Selection | All countries except permanently blocked ones |
+| Country Selection | Any country except permanently blocked ones |
 
 ## Permanently Blocked Countries (cannot be overridden)
 - Cuba
 - Iran
 - North Korea
 - Syria
+- Certain non-country regions (unspecified)
 
-These countries do not appear in the selection UI. Certain non-country regions are also always blocked.
+These do not appear in the country selection list.
 
 ## Gotchas
-- **IP geolocation accuracy varies** — VPNs, proxies, or regional ISP routing can cause incorrect country detection
-- Permanently restricted countries cannot be allowlisted under any circumstances
-- Location requirements apply at the **policy level**, affecting all Resources assigned to that policy
-- Feature unavailable on non-Enterprise plans — upgrade required
-
-## Common Use Cases
-- Compliance blocking for high-risk countries
-- Restricting access to countries with physical offices
-- Limiting contractor access to known locations
+- **IP geolocation accuracy varies** — may misclassify VPNs, proxies, satellite connections, or users near borders
+- Permanently restricted countries cannot be allowlisted regardless of configuration
+- Blocked devices see an error message indicating location does not meet policy requirements (no silent fail)
+- Feature is scoped to Resource Policies — changes affect all Resources assigned to that policy
 
 ## Related Docs
-- [Resource Policies](https://www.twingate.com/docs/resource-policies)
-- [Twingate Pricing](https://www.twingate.com/pricing)
+- Resource Policies
+- Twingate pricing page (Enterprise plan required)

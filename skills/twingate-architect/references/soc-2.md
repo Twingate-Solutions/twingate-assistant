@@ -4,23 +4,27 @@
 SOC 2 Report
 
 ## Summary
-Twingate holds a SOC 2 Type 2 certification, audited by an independent third party per AICPA frameworks. The Type 2 designation confirms controls were tested over a period of time, not just a point in time. Existing customers can request the report via a trust portal.
+Twingate maintains a SOC 2 Type 2 report, an independent third-party audit of internal controls covering security and Trust Services Criteria over a period of time. Existing customers can request access to the report via Twingate's trust portal. Access is time-limited to 30 days.
 
 ## Key Information
-- **SOC 2 Type 2** report available (controls tested over time, not a single snapshot)
-- Covers Trust Services Criteria: security (required) plus optional additional dimensions
-- Audited by independent third-party auditor
-- Report access expires **30 days** after granted
+- **SOC 2 Type 2**: Controls tested over a period of time (not a point-in-time snapshot)
+- **Auditor**: Independent third party
+- **Framework**: AICPA Trust Services Criteria
+- **Report access**: Available to existing customers only
+- **Access portal**: [trust.twingate.com](https://trust.twingate.com)
+- **Access duration**: Expires after 30 days
+- **Prospective customers**: Must contact the Twingate customer team directly
 
-## Accessing the Report
-- **Existing customers**: Request at [trust.twingate.com](https://trust.twingate.com) — Twingate team reviews and grants access
-- **Prospective customers**: Contact the Twingate customer team directly
-- Access requests are manually reviewed before approval
+## How to Request Access
+1. Navigate to [trust.twingate.com](https://trust.twingate.com)
+2. Submit an access request
+3. Twingate team reviews and grants access
+4. Download/review report within the 30-day access window
 
 ## Gotchas
-- Access to the SOC 2 report is not immediate — requires manual review/approval
-- Report access automatically expires after 30 days; re-request if needed
-- No self-serve download; must go through trust portal or customer team
+- Access expires after **30 days** — download or review the report promptly after access is granted
+- Non-customers cannot self-serve; must contact the customer team for information
+- Twingate team manually reviews all access requests — not instant
 
 ## Related Docs
 - Twingate Trust Portal: trust.twingate.com

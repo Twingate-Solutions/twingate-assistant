@@ -1,14 +1,13 @@
 # Device Administration
 
 ## Summary
-Twingate tracks devices connecting to the network, displaying attributes like device name, OS, and posture information. Admins can manage device verification status and control access through three device states: active, archived, and blocked.
+Twingate tracks devices that users connect from, displaying attributes like name, OS, and posture information in the Admin Console. Admins can manage device verification status and control access via three device states: active, archived, and blocked.
 
 ## Key Information
 
-- Device data visible in both **User Detail page** and **Devices tab** in Admin Console
-- Devices automatically archived after **90 days** of no sign-in or Resource access
-- Device states configurable via **Admin Console or API**
-- Verified device status can be incorporated into Security Policies
+- Device info visible in both **User Detail page** and the **Devices tab**
+- Displays: name, make/model, Client version, posture info, Trusted Profiles met
+- Verified devices can be integrated into Security Policies
 
 ## Device Attributes by Platform
 
@@ -20,31 +19,35 @@ Twingate tracks devices connecting to the network, displaying attributes like de
 | OS name/version | ✓ | ✓ | ✓ | ✓ |
 | Serial number | ✓ | ✓ | ✓ | — |
 | Local username | ✓ | ✓ | ✓ | — |
+| Client version | ✓ | ✓ | ✓ | ✓ |
 | Internet Security status | ✓ | ✓ | ✓ | — |
 
 ## Device States
 
-| State | Access | Admin Console | Auto-triggered |
-|-------|--------|---------------|----------------|
-| **Active** | Full (per policy) | Visible | Default for new devices |
-| **Archived** | Requires re-auth | Filtered out | 90 days inactive |
+| State | Access | Admin Console | Auto-trigger |
+|-------|--------|---------------|--------------|
+| **Active** | Allowed (per policy) | Visible | Default for new devices |
+| **Archived** | Requires re-auth | Filtered out | No activity for 90 days |
 | **Blocked** | No access | Filtered out | Manual only |
 
-## Device Verification
+- States can be set via **Admin Console** or **API**
+- Re-authenticating on an archived device automatically returns it to **active**
+- Blocking a device signs out the user and **permanently prevents re-login** on that device
 
-- Supports automatic verification via **EDR/MDM integrations**
-- Admins can **manually verify** specific devices
-- Verified status enforceable across all platforms and locations via Security Policies
+## Verified Devices
+
+- Supports EDR/MDM integrations for automatic verification
+- Manual verification available via Admin Console
+- Verification status enforceable in Security Policies across all platforms/locations
 
 ## Gotchas
 
-- **Archived → Active**: Re-authenticating on an archived device automatically restores active state
-- **Blocked devices**: User cannot sign back in; state must be manually changed by admin
-- **Archived devices**: User is automatically signed out but can regain access by re-authenticating
-- **Blocked devices**: User is automatically signed out with no self-service recovery path
-- iOS does not report hostname, serial number, or local username — relevant for posture policies targeting mobile
+- Blocked devices cannot be re-signed into — use for lost/stolen/permanently deprecated devices only
+- Archiving auto-signs out the user; they must re-authenticate to regain access
+- Archived devices are filtered from default Admin Console view (not deleted)
+- `Name` attribute (friendly name) is user-set and differs from `Hostname` (DNS-assigned)
+- Internet Security status not available on iOS
 
 ## Related Docs
 
-- [Device Security Guide](https://www.twingate.com/docs/device-security) — Trusted Profiles, Security Policies, device verification integration
-- Twingate API — for programmatic device state management
+- [Device Security Guide](https://www.twingate.com/docs/device-security-guide) — Trusted Profiles, Security Policies, device verification integration

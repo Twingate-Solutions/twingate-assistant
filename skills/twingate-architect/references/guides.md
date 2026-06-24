@@ -4,64 +4,72 @@
 Twingate Guides Overview
 
 ## Summary
-This is the Twingate documentation guides index page, organizing deployment, configuration, and management documentation across infrastructure types, use cases, and integrations. It serves as the top-level navigation hub for all Twingate implementation guides.
+This is the documentation index for Twingate's guides section, covering deployment, configuration, and management topics. It provides navigation to all major guide categories including infrastructure deployment, client management, policy configuration, and service integrations.
 
 ## Key Information
 
 ### Deployment Targets
 - **Cloud**: AWS EC2, GCP Compute, Azure Compute, Kubernetes, DigitalOcean
 - **On-premises**: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP NAS, TrueNAS SCALE, Proxmox
-- **Homelabs**: Home Assistant, Unraid, ZimaOS, CasaOS
+- **Homelab**: Home Assistant, Unraid, ZimaOS, CasaOS
 - **IaC**: Terraform, Pulumi
 
 ### Client Deployment (MDM)
-- Jamf, Iru, Omnissa Workspace ONE, Microsoft Intune & Endpoint Manager
+- Jamf, Omnissa Workspace ONE, Microsoft Intune & Endpoint Manager, Iru
 
-### Service Integrations
-- Identity: Active Directory, Okta, Microsoft Entra ID, JumpCloud, OneLogin
-- DNS/Security: Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler
-- Databases: MongoDB, AWS RDS, GCP, Azure, Oracle, Snowflake, Redis
+### Database Access Guides
+- MongoDB, AWS, GCP, Azure, Oracle, Snowflake, Redis
 
-### SaaS App Gating
-- IP-based access control for SaaS applications
-- IdP integrations: Google Workspace, JumpCloud, Entra ID, Okta, OneLogin
-- Use cases: AWS CloudFront, Office 365
+### Service Compatibility (non-native integrations)
+- Active Directory, Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler
 
-### Kubernetes
-- Route traffic from K8s, private/public resource exposure, kubectl management
+### SaaS App Gating Integrations
+- Google Workspace, JumpCloud, Microsoft Entra ID, Okta, OneLogin
+- AWS Exit Nodes, AWS CloudFront, Office 365
 
-### Notable Use Cases
-- AI/LLM access, CI/CD pipeline security, site-to-site connections
-- SSH resource management, IoT headless client gateway
-- Replace AWS VPN, vendor/contractor access management
-- Self-hosted VPN with Exit Networks
+### Kubernetes-Specific Guides
+- Route Traffic from Kubernetes
+- Private vs. Publicly Exposed Resources in Kubernetes
+- Manage Kubernetes via kubectl
 
-## Best Practices Docs Available
+## Use Case Guides
+- CI/CD pipeline security
+- SSH resource access management
+- Vendor/contractor access management
+- Site-to-site connections
+- IoT headless client gateway
+- Replace AWS VPN
+- Bastion server cloaking
+- GitHub Codespaces access
+- AI/LLM access (OpenClaw)
+- Remote game streaming
+
+## Best Practices References
 - Connector placement and configuration
 - Private DNS configuration
 - Overlapping IP addresses
 - Security policies
 - Non-production environment access
 - SaaS App Gating
-- Internal network design with peer-to-peer
+- Traffic whitelisting for public resources
+- AWS Reference Network Architecture
+- Local peer-to-peer connections
 
-## Technical Reference Docs Available
-- NAT traversal, encryption, firewall behavior
-- Peer-to-peer troubleshooting
+## Technical Reference Docs
+- NAT traversal mechanics
+- Encryption details
+- Firewall behavior
+- Service accounts
+- Windows Start Before Logon
 - Connector shutdown process
-- Service accounts, Windows Start Before Logon
 - Performance evaluation
-- Release stages
-
-## Gotchas
-- This page is navigation-only; no configuration values are defined here
-- Specific implementation details require navigating to individual guide pages
+- Troubleshooting P2P connections
 
 ## Related Docs
-- `/docs/connector-best-practices`
-- `/docs/remote-network-best-practices`
-- `/docs/security-policies`
-- `/docs/kubernetes`
-- `/docs/saas-app-gating`
-- `/docs/logging`
-- `/docs/client-deployment`
+- Internet Security (DoH, DNS filtering)
+- Security Policies configuration
+- Logging and audit exports
+- Remote Network best practices
+- SIEM log ingestion for Connector logs
+- Twingate Release Stages
+- Monitoring service statuses and maintenance events

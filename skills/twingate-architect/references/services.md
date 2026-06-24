@@ -1,53 +1,50 @@
 # Twingate Services
 
 ## Summary
-Services provide programmatic, centrally-controlled access for automated processes (CI/CD pipelines, custom apps). Access is granted via Service Keys rather than Security Policies. Resources can be assigned to Services, Users, or both.
+Services provide programmatic access controls for automated processes (CI/CD pipelines, custom applications) to Twingate Resources. Access is granted via Service Keys rather than Security Policies. Clients run in headless mode to automate connections.
 
 ## Key Information
-- Services are found under **Team > Services** in the Admin console
-- Service Keys authorize access to **all** Resources assigned to a Service
-- Security Policies do **not** apply to Services — only valid Service Keys control access
-- Clients run in **headless mode** (Linux or Windows) to automate connections
-- Service Keys expire after **365 days** by default; unlimited expiration is configurable at creation time only
-
-## Service Components
-| Component | Description |
-|-----------|-------------|
-| Service | Container object for configuration |
-| Service Key(s) | Auth tokens; one or more per Service |
-| Resource(s) | Any Twingate Resource assigned to the Service |
+- Any Resource can be assigned to a Service, User, or both
+- Security Policies do NOT apply to Services — access controlled solely by valid Service Keys
+- One Service Key authorizes access to ALL Resources assigned to that Service
+- Service Keys expire after 365 days by default; unlimited expiration can be set at creation time only
+- Each Service Key is individually API rate-limited
 
 ## Prerequisites
-- Admin access to Twingate Admin console
+- Admin console access (Team tab)
+- Linux or Windows Twingate client (for headless mode execution)
 - Resources already defined in Twingate
-- Linux or Windows Twingate client for headless mode
 
 ## Step-by-Step: Create a Service
 
-1. Navigate to **Team > Services** → click **Create Service Account**
-2. Click **Generate Key** to create a Service Key
-3. **Copy and save the Service Key immediately** — it cannot be viewed again after this step
-4. Click **Add Resource** to assign Resources to the Service
-5. Configure headless mode on Linux or Windows client
+1. Navigate to **Team > Services** → click **"Create Service Account"**
+2. Click **"Generate Key"** to create a Service Key
+3. **Save the Service Key immediately** — it cannot be retrieved after this step
+4. Click **"Add Resource"** to assign one or more Resources to the Service
+5. Configure headless mode on Linux or Windows client to use the Service Key
 
-## Service Key Lifecycle
+## Configuration Values
+- **Service Key expiry**: Set at creation time only; default = 365 days; unlimited expiration available
+- **Headless mode**: Supported on Linux and Windows clients (see platform-specific guides)
+
+## Service Key Lifecycle States
 
 | State | Valid? | Notes |
 |-------|--------|-------|
-| Active | ✅ Yes | Default state; expiry only settable at creation |
-| Revoked | ❌ No | Must revoke before delete; cannot reactivate |
-| Expired | ❌ No | Auto-expires unless unlimited expiration set |
-| Deleted | ❌ No | Permanent; unrecoverable |
+| Active | Yes | Default state; editable name; expiry set at creation only |
+| Revoked | No | Must revoke before delete; cannot reactivate |
+| Expired | No | Auto-expires unless set to unlimited |
+| Deleted | No | Permanent; unrecoverable |
 
 ## Gotchas
-- **Service Key is only shown once** at creation — store it securely immediately
-- **Expiry cannot be changed after creation** — plan expiration policy upfront
-- **Overprovision warning**: Each Service Key is individually API rate-limited; use a **unique Service Key per high-traffic system** to avoid throttling
-- Revoking a key is required before deletion; revoked keys cannot be reactivated
-- One Service Key grants access to **all** Resources on that Service — scope Resources carefully
+- **Service Key is shown only once** at creation — must be saved immediately
+- **Expiry cannot be modified** after creation
+- **Overprovisioning Service Keys** causes throttling — use one unique Service Key per high-traffic system
+- Revoked keys **cannot be reactivated** — must create a new key
+- Security Policies are bypassed entirely for Services; no MFA or device policy enforcement
 
 ## Related Docs
 - Linux headless mode configuration guide
 - Windows headless mode configuration guide
 - Twingate Resources documentation
-- Security Policies documentation
+- Team administration / Admin console

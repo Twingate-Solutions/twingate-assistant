@@ -4,54 +4,60 @@
 How to Troubleshoot User Issues with the Twingate Service
 
 ## Summary
-Structured methodology for diagnosing Twingate ZTNA connection failures by tracing the connection chain: authentication → Client/ACL → DNS → tunnel establishment → Connector-to-Resource. Troubleshooting requires interrogating components rather than probing perimeters, since inbound ports are closed by design.
+Structured methodology for diagnosing Twingate ZTNA connection failures by tracing the connection chain across five stages: authentication, device/client, DNS, routing/tunnel establishment, and connector-to-resource. Troubleshooting distinguishes between control plane (policy/identity) and data plane (network/connectivity) failures. Traditional tools like `ping`/`tracert` are ineffective externally due to ZTNA's invisible infrastructure design.
 
 ## Key Information
-- **Control plane vs. data plane**: Controller decides *if* access is allowed; Client/Connector/Relays handle *how* — failures can be policy or network issues
-- **Connection chain**: Identity Auth → Client receives ACL → DNS interception → P2P tunnel to Connector → Connector forwards to Resource
-- **Relays**: Used as fallback if P2P/NAT traversal fails; P2P is preferred for performance
-- **Split tunnel by default**: Undefined domains bypass the tunnel — critical for SaaS app failures
+- **Architecture components**: Client (end-user device), Connectors (private network, outbound-only), Relays (NAT traversal/P2P fallback), Controller (control plane)
+- **Control plane vs. data plane**: Controller decides *if* access is granted; Client/Connector/Relays handle *how* connection is made
+- **Connection chain**: Identity Auth → Client/ACL → DNS Resolution → Tunnel Establishment → Connector-to-Resource
+- Connectors make **outbound-only** connections; no inbound firewall ports needed
+- Failed connections may be policy violations, not network failures
 
 ## Prerequisites
 - Access to Twingate Admin Console
-- Access to Identity Provider admin console (Okta, Entra ID, Google Workspace)
-- Ability to retrieve Client logs and Connector logs
+- Access to Identity Provider admin console
+- Ability to retrieve Client logs and Connector logs from affected hosts
 
-## Step-by-Step Methodology
+## Step-by-Step Troubleshooting Methodology
 
-1. **Define scope**: One user vs. all? One resource vs. all? One location vs. all? When did it start?
-2. **Check Twingate status page** for active incidents
-3. **Verify identity/device posture**: Group membership in IdP, trusted device status, Security Policy requirements
-4. **Trace connection via Resource Activity Report** (`Network > Resources > [Resource] > Activity`)
+1. **Define scope**: One vs. all users? One vs. all resources? One vs. all locations? When did it start?
+2. **Check known states**: Verify [Twingate status page](https://www.twingatestatus.com) for active incidents; review recent config changes
+3. **Verify identity/device posture**: Confirm user group membership in Admin Console and IdP; check device trust status against applied Security Policy
+4. **Trace connection attempt**: Check Resource Activity Report (`Network > Resources > [Resource] > Activity`)
 
 ## Configuration Values / Admin Console Paths
-- Resource activity: `Network > Overview` (Activity Events)
-- Connector status: `Network > Connectors`
+- Resource activity events: `Network > Overview`
+- Connector status/details: `Network > Connectors`
 - Audit logs: `Settings > Reports > Audit Logs`
-- Support tickets: `Help > Support`
-- Connector logs (Docker): `docker logs`
-- Connector logs (systemd): `journalctl`
+- Support ticket: `Help > Support`
+- Connector logs (Docker): `docker logs <container>`
+- Connector logs (systemd): `journalctl -u twingate-connector`
 
 ## Diagnostic Quick Reference
 
-| Symptom | First Tool | Key Question |
+| Symptom | Likely Cause | First Tool |
 |---|---|---|
-| Can't log in | IdP Console | User active and assigned to Twingate app? |
-| App won't connect | Client Logs / OS Services | Is Twingate daemon running? |
-| Can't reach internal host | `nslookup` + Activity Report | DNS error at Connector or no events at all? |
-| No one can reach resource | Admin Console Connector Status | Connectors online? Clock in sync? |
-| Slow performance | Admin Console Connector Details | P2P or Relayed? UDP ports blocked? |
-| Local printer broken | `ipconfig` + Resource definitions | Resource CIDR overlapping local subnet? |
-| SaaS app partially loads | Browser DevTools Network tab | All dependency domains defined as Resources? |
+| Can't log in | IdP/Authentication | IdP admin console |
+| App won't connect | Client/daemon not running | `services.msc`, `launchctl`, Client logs |
+| Connected, can't reach resource | DNS resolution | `nslookup`/`dig` + Admin Console Activity |
+| No one can reach resource | Connector down | Admin Console Connector status |
+| Slow performance | Relayed instead of P2P; UDP blocked | Admin Console Connector details |
+| Local printer broken | IP/subnet conflict with Resource definition | `ipconfig`/`ifconfig` |
+| SaaS app partially loads | Missing Resource definitions for dependent domains | Browser DevTools Network tab |
+
+## Activity Report Interpretation
+- **No events logged**: Traffic never reached Connector — check Client, local network, or DNS filtering on device
+- **"DNS lookup error"**: Connector cannot resolve hostname — check DNS config on Connector host
+- **"Unable to connect"**: Connector can't route to destination — check firewall, security groups, app-level blocking
+- **Successful events + user still fails**: Application-layer issue (permissions, app config)
+- **Successful events + web app partially loads**: Missing dependent domains (CDNs, APIs) not defined as Resources
 
 ## Gotchas
-- **No events in Activity Report** = traffic never reached Connector (Client-side issue: local network, DNS, or security software blocking)
-- **"DNS lookup error"** = Connector host can't resolve the Resource hostname (fix: Connector host DNS config)
-- **"Unable to connect"** = Connector reached but can't route to Resource (firewall, security group, or app blocking)
-- **Successful events + user still fails** = application-layer issue, not Twingate
-- **`ping`/`tracert` from external networks won't work** — no inbound ports open by design
-- **Clock drift on Connector** causes connection failures — check via Connector Details page
-- **SaaS apps with CDN/API subdomains** require all dependent domains added as separate Resources
+- `ping`/`tracert` from external network won't work — no open inbound ports by design
+- Split tunnel is default; undefined domains bypass the tunnel entirely and may be blocked by destination services
+- Resource CIDR definitions overlapping with user's local subnet cause local resource access failures (e.g., home printer)
+- P2P connection requires outbound UDP; if blocked, traffic falls back to Relay (higher latency)
+- Clock drift on Connector host can cause connection failures — check Connector Details in Admin Console
 
 ## Related Docs
 - How Twingate Works (architecture overview)
@@ -59,7 +65,4 @@ Structured methodology for diagnosing Twingate ZTNA connection failures by traci
 - Device/Client Failures
 - DNS Resolution Problems
 - Connector Issues
-- Firewall Issues
-- Split Tunneling Issues
-- Engaging Technical Support
-- Self-Serve Troubleshooting Guide
+-

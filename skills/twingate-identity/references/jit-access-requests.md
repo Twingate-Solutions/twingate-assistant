@@ -1,46 +1,51 @@
 # JIT Access Requests
 
+## Page Title
+JIT Access Requests
+
 ## Summary
-JIT Access Requests provide temporary, audited access workflows for Twingate Resources. Access can be auto-approved or require manual approval from an Admin or Access Reviewer. Resources remain locked to users until access is granted through the request workflow.
+JIT Access Requests provide audited, temporary access workflows for Twingate Resources assigned to specific Groups. Users see locked Resources until access is approved (manually or automatically). Supports auto-approval with required reason or manual approval by Admins/Access Reviewers.
 
 ## Key Information
-- Users see locked Resources in the Client and must request access via the Resource address or **Authenticate** submenu option
-- Requests open a browser-based access request page
-- Auto-approval requires users to supply a reason; manual approval requires Admin or Access Reviewer action
-- Users receive email notifications on approval or denial
-- Configuration can be set at Resource level (becomes default for all Group assignments) or overridden per Group assignment
+- Access Requests operate at **Resource level** (default) or **Group assignment level** (overrides Resource-level settings)
+- Users see the Resource in the Client but cannot connect until access is granted
+- Users trigger requests via navigating to the Resource address or **Authenticate** in the Client submenu
+- Auto-approval: user approves immediately but must provide a reason
+- Manual approval: Admin or Access Reviewer approves/denies; user notified by email
+- Access tracking available via downloadable reports from Resource, Group, or User pages
+
+## Prerequisites
+- Resource must be configured with Access Requests enabled
+- Approvers must have Admin or Access Reviewer role (for manual approval)
+- Twingate Client installed on user device
 
 ## Configuration Values
 
-**Access Period Options:**
-- Preset durations (specific values not listed in docs)
-- `Custom Request` — user specifies duration, maximum 7 days
+### Access Period Options
+| Option | Description |
+|--------|-------------|
+| Preset durations | Fixed time periods (e.g., 1 hour, 4 hours, 12 hours) |
+| Custom Request | User specifies duration; max **7 days** |
 
-**Approval Method Options:**
-- `Manual Approval` — Admin or Access Reviewer must approve each request
-- `Auto-Approval` — user self-approves but must provide reason
-
-## Configuration Scope
-| Level | Behavior |
-|-------|----------|
-| Resource level | Default for all Group assignments |
-| Group assignment level | Overrides Resource-level settings |
+### Approval Method Options
+| Option | Behavior |
+|--------|----------|
+| Manual approval | Admin or Access Reviewer must explicitly approve each request |
+| Auto-approval | User self-approves; reason for access required |
 
 ## Step-by-Step: Configure JIT on a Resource
 1. Navigate to the Resource detail page
-2. Configure Access Requests settings (access period + approval method)
-3. Optionally override settings on specific Group assignments
-
-## Tracking Access
-- Download usage summary from Resource, Group, or User page
-- See **usage-based access page** for report contents
+2. Enable Access Requests
+3. Set **Access Period** (preset or Custom Request)
+4. Set **Approval Method** (manual or auto-approval)
+5. Optionally override settings per Group assignment on that Resource
 
 ## Gotchas
-- Users can **see** the Resource in the Client but **cannot connect** until approved — visibility without access is expected behavior
-- Custom Request durations are user-specified but capped at 7 days
-- Resource-level settings are defaults only; per-Group overrides take precedence
-- Auto-approval still requires a reason from the user — it is not frictionless
+- Resource-level settings are **defaults only**; individual Group assignments can override them
+- Custom Request allows users to choose duration up to 7 days — no finer-grained cap control
+- Auto-approval still requires users to submit a reason; it is not silent/transparent access
+- Users must actively trigger a request (navigate to address or use Client submenu) — no automatic prompt on first connection attempt beyond the locked state
 
 ## Related Docs
-- [Reviewing Access Requests](#) — covers delegating and reviewing request details
-- [Usage-Based Access](#) — covers downloadable report contents
+- [Reviewing Access Requests](https://www.twingate.com/docs/reviewing-access-requests) — approval workflow details and delegation
+- [Usage-Based Access Reports](https://www.twingate.com/docs/usage-based-access) — report contents from Resource/Group/User pages

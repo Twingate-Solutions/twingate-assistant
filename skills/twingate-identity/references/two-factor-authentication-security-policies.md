@@ -1,39 +1,39 @@
 # Two-Factor Authentication Security Policies
 
 ## Summary
-Controls whether users are prompted for 2FA when accessing Resources, signing into Networks, or accessing the Admin Console. Uses industry-standard TOTP format, with optional biometric or security key methods as alternatives.
+Controls whether users are prompted for 2FA when accessing Resources, signing into Networks, or signing into the Admin Console. Uses TOTP standard with optional biometric/security key enrollment. Applies as a security policy rule across multiple policy types.
 
 ## Key Information
 - **Applicability**: Resource Policies, Minimum Authentication Requirements, Admin Console Security
-- TOTP-based; compatible with any TOTP authenticator app (Google Authenticator, etc.)
-- After TOTP setup, users can optionally enroll biometric (Touch ID, Windows Hello) or security key (YubiKey) as additional 2FA methods
-- Biometric/security key enrollment is completed via browser flow
+- **Protocol**: Industry-standard TOTP format
+- **Additional methods after TOTP setup**: Biometric (Touch ID, Windows Hello) or security key (YubiKey) — registered via browser
+- All enrolled methods (TOTP, biometric, security key) satisfy the 2FA requirement interchangeably
 
 ## Prerequisites
-- A TOTP-compatible authenticator app installed on Android or iOS
-- Admin must configure 2FA rule on either Resource Policies **or** Minimum Authentication Requirements (not both)
+- TOTP-compatible authenticator app (Google Authenticator, or IdP's own app)
+- Admin must configure the 2FA rule on desired policy type before enforcement begins
 
-## Configuration Steps
-1. Trigger 2FA setup by authenticating — a notification prompts setup if 2FA is required but not configured
-2. Open authenticator app and add a new account
-3. Scan the QR code (or enter alphanumeric ID manually if on mobile)
-4. Confirm setup by entering the generated code
-5. Optionally enroll a biometric method or security key via browser prompt
-
-## Gotchas
-- **Do not set 2FA on both Minimum Authentication Requirements AND Resource Policies** — users will be prompted twice
-- **Do not delete the authenticator app or Twingate entry** — loss of access requires Admin to reset 2FA for the user
-- If TOTP access is lost, only an Admin can reset; self-service recovery is not available
+## Step-by-Step: User 2FA Enrollment
+1. Trigger 2FA prompt by accessing a 2FA-protected Resource or Network
+2. Open authenticator app → add new application
+3. Scan QR code (or manually enter alphanumeric ID if on mobile)
+4. Enter generated TOTP code to confirm setup
+5. (Optional) Enroll biometric method or security key via browser flow
 
 ## Configuration Values
-| Method | Details |
-|--------|---------|
-| TOTP | Industry-standard; any TOTP app supported |
-| Biometric | Touch ID, Windows Hello (browser-enrolled) |
-| Security Key | YubiKey and similar (browser-enrolled) |
+| Setting | Notes |
+|---|---|
+| Apply to Resource Policies | Controls per-resource access |
+| Apply to Minimum Authentication Requirements | Network-wide sign-in enforcement |
+| Apply to Admin Console Security | Admin portal protection |
+
+## Gotchas
+- **Do not apply 2FA rules to both Minimum Authentication Requirements AND Resource Policies** — users will be prompted for 2FA twice
+- **Never delete the authenticator app or Twingate entry** — loss of access requires Admin to reset the user's 2FA
+- Admin reset required if user loses access to their TOTP app; user must re-enroll from scratch
+- Biometric/security key enrollment only becomes available after initial TOTP setup is complete
 
 ## Related Docs
-- [Two-Factor Authentication general documentation](https://www.twingate.com/docs/two-factor-authentication-security-policies)
-- Resource Policies configuration
-- Minimum Authentication Requirements configuration
-- Admin Console Security settings
+- [Two-Factor Authentication general documentation](https://www.twingate.com/docs/two-factor-authentication)
+- [Resource Policies](https://www.twingate.com/docs/resource-policies)
+- [Minimum Authentication Requirements](https://www.twingate.com/docs/minimum-authentication-requirements)

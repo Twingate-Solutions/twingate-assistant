@@ -1,56 +1,52 @@
 # Audit Logs Schema
 
 ## Summary
-Twingate audit logs use a versioned JSON schema capturing actor, action, and target information for all administrative events. Logs can be consumed directly or via S3 sync with a wrapper object. Eight target types are supported covering all major Twingate objects.
+Twingate audit logs use a versioned JSON schema capturing actor, action, and target information for all administrative events. Logs can be consumed directly via API or synced to S3 with a wrapper envelope. Multiple target object types are supported with type-specific fields.
 
 ## Key Information
-- Schema `version` is currently `"1"` at both root and target levels
-- `time` is UTC ISO 8601 format representing start of network communication
-- `targets` is an array — one event can impact multiple objects
-- S3-synced logs wrap each event: `{"event_type": "audit_log", "event": {...}}`
 
-## Event Schema Fields
+- **Schema version**: Currently `"1"` (root-level field)
+- **Time format**: UTC ISO 8601 (represents beginning of network communication)
+- **Actor types**: `"User"`, `"API"`, `"Twingate Support"`
+- **Action types**: `"create"`, `"edit"`, `"delete"`
+- **Target types**: `remoteNetwork`, `connector`, `resource`, `publicAPIKey`, `user`, `group`, `device`, `serviceAccount`, `serviceAccountKey`
+- **S3 sync**: Events wrapped in `{"event_type": "audit_log", "event": {...}}`
 
-| Field | Values |
-|-------|--------|
-| `actor.type` | `"User"`, `"API"`, `"Twingate Support"` |
-| `action` | `"create"`, `"edit"`, `"delete"` |
+## Base Event Schema
 
-**Actor info by type:**
-- `User`: `email`, `name`
-- `API`: `name` (key name)
-- `Twingate Support`: `null`
+```json
+{
+  "version": "1",
+  "time": "2021-08-15T14:30Z",
+  "actor": { "type": "User", "id": "...", "info": { "email": "...", "name": "..." } },
+  "action": "edit",
+  "targets": [{ ... }]
+}
+```
 
-## Target Schemas
+## Target Schemas — Key Fields
 
-| Target Type | Key Fields |
-|-------------|------------|
+| Target | Notable Fields |
+|--------|---------------|
 | `remoteNetwork` | `name`, `location`, `isActive` |
-| `connector` | `name`, `remoteNetwork.{id,name}` |
-| `resource` | `name`, `address.{type,value}`, `protocols`, `isActive` |
-| `publicAPIKey` | `name`, `permission`, `allowedIpRange` |
-| `user` | `name`, `email`, `isAdmin`, `isActive` |
+| `connector` | `name`, `remoteNetwork{id,name}` |
+| `resource` | `address{type,value}`, `protocols{allowIcmp,tcp,udp}`, `isActive` |
+| `publicAPIKey` | `permission` (`read only`/`read write`/`provision`), `allowedIpRange` |
+| `user` | `email`, `isAdmin`, `isActive` |
 | `group` | `name` |
-| `device` | `name`, `displayName`, `platform`, `osName`, `serialNumber`, `user`, `isTrusted`, `clientVersion` |
+| `device` | `platform`, `osName`, `serialNumber`, `isTrusted`, `clientVersion`, `user{}` |
 | `serviceAccount` | `name` |
-| `serviceAccountKey` | `name`, `state`, `serviceAccount` |
-
-## Enumerated Values
-
-- **`publicAPIKey.permission`**: `"read only"`, `"read write"`, `"provision"`
-- **`serviceAccountKey.state`**: `"active"`, `"expired"`, `"revoked"`, `"deleted"`
-- **`resource.address.type`**: `"DNS"` (implied; other types may exist)
-- **`resource.protocols.tcp|udp.policy`**: `"ALLOW_ALL"` (other values likely exist)
+| `serviceAccountKey` | `state` (`active`/`expired`/`revoked`/`deleted`), `serviceAccount{}` |
 
 ## Gotchas
-- S3 sync adds an outer wrapper — parse `event` field, not root object directly
-- `Twingate Support` actor has `null` info — handle null checks in parsers
-- `targets` is always an array even for single-object events
-- Device `name` vs `displayName` are distinct fields — `displayName` is user-friendly label
-- `serviceAccountKey` embeds full `serviceAccount` object, not just an ID reference
+
+- `"Twingate Support"` actor has `null` info — handle null checks when parsing
+- `targets` is an array — events can impact multiple objects simultaneously
+- S3-synced logs have an extra wrapper layer (`event_type` + `event` keys) vs. direct API logs
+- `resource.protocols.tcp/udp.ports` can be an empty array when policy is `ALLOW_ALL`
+- `serviceAccountKey` includes nested `serviceAccount` object — potential for deeply nested parsing
 
 ## Related Docs
-- Audit Logs configuration (setup/export)
-- S3 integration for log syncing
-- API key management
-- Service Accounts documentation
+- Audit Logs setup/export configuration
+- S3 integration for audit log syncing
+- API key permissions reference

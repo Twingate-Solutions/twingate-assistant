@@ -1,49 +1,49 @@
 # How to Cloak strongDM with Twingate
 
 ## Summary
-Hides strongDM gateways behind Twingate so no public TCP/IP ports are required. The strongDM gateway becomes accessible only through Twingate, eliminating inbound firewall rules and public IP/hostname exposure.
+Hides strongDM gateway ports from public internet by routing traffic through Twingate instead of exposing TCP/IP ports publicly. Eliminates inbound firewall rules and makes the network perimeter invisible externally. Mirrors the Bastion host cloaking pattern.
 
 ## Key Information
 - strongDM default proxy port: **5000**
-- No inbound firewall ports need to be opened on the strongDM host
-- strongDM gateway does not need a publicly resolvable IP or hostname after configuration
-- Approach mirrors Twingate's Bastion host cloaking pattern
+- No inbound firewall ports required after configuration
+- strongDM gateway no longer needs a publicly resolvable IP or hostname
+- Works by placing a Twingate Connector on the same subnet as the strongDM gateway
 
 ## Prerequisites
-- Twingate account with Admin console access
-- strongDM account with Admin UI access
-- strongDM gateway deployed on a private subnet
-- Twingate Connector deployable to the same private subnet
+- Twingate Connector deployed and accessible
+- Access to Twingate Admin Console
+- Access to strongDM Admin UI
+- strongDM gateway running on a private subnet
 
 ## Step-by-Step
 
-1. **Deploy Twingate Connector** onto the same private subnet as the strongDM gateway
-2. **Add strongDM gateway as a Twingate Resource** in the Twingate Admin console using the internal hostname or IP address
-3. **Apply port restriction** on the Resource (port 5000 by default)
-4. **Update strongDM gateway advertised host** in the strongDM Admin UI — set it to the internal hostname or IP configured as the Twingate Resource
+1. **Deploy Twingate Connector** on the same private subnet as the strongDM gateway
+2. **Add strongDM as a Twingate Resource** via Twingate Admin Console:
+   - Use the internal hostname or IP of the strongDM gateway
+   - Apply port restriction (default: port **5000**)
+3. **Update strongDM gateway advertised host** in strongDM Admin UI:
+   - Change the advertised host to the internal hostname/IP configured as the Twingate Resource
 
 ## Configuration Values
 
 | Parameter | Value |
 |-----------|-------|
-| strongDM proxy port | `5000` (default) |
-| Twingate Resource address | Internal hostname or IP of strongDM gateway |
-| strongDM setting to change | Advertised host |
+| strongDM default proxy port | `5000` |
+| Resource type | Internal hostname or IP |
 
 ## Testing
 
-1. While **disconnected** from Twingate, attempt to connect to strongDM resources — access should be **blocked**
-2. Connect via Twingate Client application
-3. Retry strongDM resource access — connection should **succeed**
+1. Disconnect from Twingate → attempt strongDM connection → **should fail**
+2. Connect via Twingate Client
+3. Attempt strongDM connection again → **should succeed**
 
 ## Gotchas
-- Connector must be on the **same private subnet** as the strongDM gateway, not just the same network region
-- The strongDM advertised host must match exactly what is registered as the Twingate Resource
-- If strongDM port is changed from 5000, update the Twingate Resource port restriction accordingly
+- The strongDM `advertised host` setting must be changed to the internal address — leaving it as a public hostname defeats the cloaking
+- Connector must be on the **same private subnet** as the gateway to reach the internal address
+- Port restriction in Twingate must match the actual strongDM proxy port (verify if port 5000 has been customized)
 
 ## Related Docs
-- [Twingate Connector deployment](https://www.twingate.com/docs/connectors)
-- [Adding Resources in Twingate Admin console](https://www.twingate.com/docs/resources)
-- [Port restrictions on Resources](https://www.twingate.com/docs/port-restrictions)
-- [Cloaking Bastion host servers](https://www.twingate.com/docs/bastion-cloaking)
-- [Twingate Client applications](https://www.twingate.com/docs/clients)
+- [Cloaking Bastion Hosts](https://www.twingate.com/docs/) — same pattern applies
+- [Deploy a Twingate Connector](https://www.twingate.com/docs/)
+- [Add a Resource with Port Restrictions](https://www.twingate.com/docs/)
+- [Twingate Client Installation](https://www.twingate.com/docs/)

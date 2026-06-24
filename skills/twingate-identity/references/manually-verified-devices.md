@@ -1,41 +1,42 @@
 # Manually Verified Devices
 
 ## Summary
-Admins can manually verify devices to satisfy Trusted Profile requirements using two methods: serial number verification (recommended) or device instance verification. Verification can be done via Admin Console or API.
+Admins can manually verify devices to satisfy Trusted Profile requirements using serial number or device instance verification. Serial number verification matches any device with a specified serial number; device instance verification targets a specific user-device pair.
 
 ## Key Information
-- **Serial number verification**: Any device matching a specified serial number is verified — recommended for most cases
-- **Device instance verification**: Verifies a specific user-device combination — use when device lacks a unique or any serial number
+- Two verification methods: **serial number** (recommended) and **device instance**
 - Serial numbers managed under **Devices > Serial Numbers** tab in Admin Console
 - Serial numbers can be bulk-uploaded before or after devices sign in (supports pre-deployment verification)
 - Device instance verification available on **Devices** tab or individual device detail page
-
-## Configuration Values
-- No env vars or CLI flags documented; management via Admin Console UI or API
-
-## Behavior / Edge Cases (Gotchas)
-- Devices with **no serial number** can only use device instance verification
-- Archived or blocked devices **can** be manually verified; verification is retained through archive/block actions
-- If a serial number is added for a device instance-verified device → device is **reclassified** as serial number verified (instance verification dropped)
-- If that serial number is then **deleted** → device loses verified status entirely and does **not** revert to device instance verified state
-- Deletion of a serial number is a one-way action regarding verification state — previous instance verification is not restored
+- Both methods satisfy Trusted Profile requirements
 
 ## Prerequisites
-- Admin role in Twingate Admin Console
-- Trusted Profile configured to use manual verification as a verification method
+- Admin Console access
+- Trusted Profile configured to use manual verification
 
 ## Step-by-Step
 
-**Serial Number Verification (Bulk Upload):**
+### Serial Number Verification
 1. Navigate to **Devices > Serial Numbers** tab in Admin Console
-2. Upload serial numbers (CSV or similar bulk method)
-3. Devices matching those serial numbers are considered verified
+2. Upload serial numbers (bulk upload supported)
+3. Any device matching an uploaded serial number is considered verified
 
-**Device Instance Verification:**
-1. Navigate to **Devices** tab or a specific device's detail page
-2. Open the device verification modal
-3. Select the option to verify the device instance
+### Device Instance Verification
+1. Navigate to **Devices** tab or specific device detail page
+2. Open device verification modal
+3. Select the option to verify device instance (specific user-device combination)
+
+## Configuration Values
+- Manageable via Admin Console or API
+- Bulk upload available for serial numbers
+
+## Gotchas
+- Devices without serial numbers **cannot** be serial number verified — use device instance verification instead
+- Archived and blocked devices **can** be manually verified; verification status is retained after archiving/blocking
+- If a serial number is added for a device already instance-verified → device reclassifies as **serial number verified**
+- If that serial number is later **deleted** → device loses verified status entirely; it does **not** revert to device instance verified
+- Serial number verification takes precedence over device instance verification; deleting the serial number does not restore prior instance verification state
 
 ## Related Docs
-- Trusted Profiles (verification method configuration)
+- Trusted Profiles
 - Devices tab (Admin Console)

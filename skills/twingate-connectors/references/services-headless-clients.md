@@ -1,39 +1,37 @@
 # Headless Clients
 
 ## Summary
-Twingate clients (Linux and Windows) can operate in headless mode using a Service Key to access Service Resources without a GUI. This enables automated/non-interactive environments to authenticate and connect to protected resources.
+Twingate clients (Windows and Linux) can operate in headless mode using a Service Key to access Service Resources without a GUI or user interaction. This enables automated/non-interactive deployments such as CI/CD pipelines and containerized environments.
 
 ## Key Information
-- Headless mode supports both Windows and Linux Twingate clients
-- Requires a Service Key (not user credentials) for authentication
-- Linux client supports an additional Userspace Networking Mode
-- Designed for automated environments (CI/CD pipelines, containers, etc.)
+- Headless mode uses **Service Keys** (not user credentials) for authentication
+- Both **Windows** and **Linux** clients support headless mode
+- Linux supports an additional **userspace networking mode**
+- Designed for automated, non-interactive workloads
 
 ## Prerequisites
 - A configured Twingate Service with an associated Service Key
-- Windows or Linux Twingate client installed
-- Access to Service Resources defined in Twingate admin
+- Twingate Windows or Linux client installed
+- Service Key credentials available to the deployment environment
 
-## Available Modes
+## Platform-Specific Instructions
+- **Linux headless mode**: See Linux headless mode instructions
+- **Windows headless mode**: See Windows headless mode instructions
+- **Linux userspace networking**: Alternative networking mode for Linux (see linked docs)
 
-| Mode | Platform |
-|------|----------|
-| Standard headless | Linux, Windows |
-| Userspace networking | Linux only |
-
-## Use Cases
-- CI/CD pipeline configurations (automated builds/deployments needing private resource access)
-- AWS ECS container configurations
-- Any non-interactive/automated workload requiring access to Twingate-protected resources
-
-## Related Docs
-- Linux headless mode instructions
-- Windows headless mode instructions
-- Linux userspace networking instructions
-- CI/CD Configurations
-- AWS ECS Configurations
+## Example Use Cases
+- **CI/CD Configurations**: Automated pipeline access to protected Resources
+- **AWS ECS Configurations**: Containerized task access to internal Resources
 
 ## Gotchas
-- Service Keys are distinct from user credentials — ensure the correct key type is provisioned
+- Service Keys are distinct from user credentials — ensure the correct key type is used
 - Userspace networking mode is Linux-only; not available on Windows headless deployments
-- Headless mode is tied to Services, not individual user accounts — permissions are scoped to what the Service is granted access to
+- Service must be pre-configured with appropriate Resource access before deploying headless clients
+
+## Related Docs
+- Linux Headless Mode Instructions
+- Windows Headless Mode Instructions
+- Linux Userspace Networking Instructions
+- CI/CD Configurations
+- AWS ECS Configurations
+- Twingate Services (Service Key generation)

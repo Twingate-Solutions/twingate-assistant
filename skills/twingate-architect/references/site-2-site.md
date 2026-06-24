@@ -1,45 +1,56 @@
-# Secure Site-to-Site Connections with Twingate
+# Twingate Site-to-Site Connections
 
 ## Summary
-Configures bidirectional traffic routing between two cloud sites (Azure and GCP) using Twingate Connectors and headless Twingate Clients acting as routers. Each site runs a Connector for inbound access and a headless Client VM that forwards traffic via iptables/NAT to the remote site's subnet.
+Configure bidirectional traffic routing between two cloud sites (e.g., Azure and GCP) using Twingate Connectors and headless Twingate Clients acting as router VMs. Each site requires a Connector (for inbound access), a headless Client VM (for outbound routing), and iptables NAT rules to forward subnet traffic through the Twingate tunnel.
 
 ## Key Information
-- Architecture: Each site needs two VMs — one running the Connector, one running the headless Client (router VM)
-- Traffic flow: VM in site → router VM (iptables FORWARD) → Twingate Client (`sdwan0`) → remote Connector → destination VM
-- Service Accounts authenticate headless Clients (not user accounts)
-- Resources must be assigned to the **opposing site's** Service Account (site 1 resource → site 2 service account, and vice versa)
+- Each site needs: Remote Network, Connector, Service Account, headless Client VM, and test VM
+- Router VMs require no public IP; use cloud NAT (Azure NAT Gateway / GCP Cloud NAT) for internet access
+- Twingate Client creates a virtual interface `sdwan0` that traffic is masqueraded through
+- Resources must be assigned to the opposing site's Service Account for cross-site access
 - Peer-to-peer connections recommended to reduce bandwidth and stay within Fair Use Policy
 
 ## Prerequisites
-- Two Remote Networks created in Twingate Admin Console (one per site)
-- One Connector deployed per site
-- Two Service Accounts created (one per site)
-- Service Account keys saved securely
-- NAT gateway (Azure) / Cloud NAT (GCP) configured before router VM deployment
-- No public IPs required on any VMs (Connector or router)
+- Twingate Admin Console access
+- Two cloud environments (guide uses Azure + GCP)
+- Linux VMs with internet access via NAT (no public IPs required)
+- IP forwarding capability on router VMs (GCP requires enabling at VM creation time)
 
 ## Step-by-Step
 
-### Router VM Setup (both sites)
-1. Install Twingate Client:
-   ```bash
-   curl https://binaries.twingate.com/client/linux/install.sh | sudo bash
-   ```
-2. Create service key file: `nano /tmp/service_key.json` (paste key contents)
-3. Configure headless mode: `sudo twingate setup --headless /tmp/service_key.json`
-4. Start client: `sudo twingate start` — verify output shows `online`
-5. Enable IP forwarding in `/etc/sysctl.conf` — uncomment `net.ipv4.ip_forward=1`
-6. Apply: `sudo sysctl -p`
-7. Configure iptables (replace interface names as needed):
-   ```bash
-   sudo iptables -A FORWARD -i ens4 -o sdwan0 -j ACCEPT
-   sudo iptables -A FORWARD -i sdwan0 -o ens4 -m state --state RELATED,ESTABLISHED -j ACCEPT
-   sudo iptables -t nat -A POSTROUTING -o sdwan0 -j MASQUERADE
-   ```
-8. Persist rules: `sudo apt install iptables-persistent -y`
+### Twingate Admin Setup
+1. Create two Remote Networks (one per site)
+2. Create a Connector in each Remote Network; generate and save deployment tokens
+3. Create two Service Accounts under **Team → Services**; generate and save keys as JSON
+
+### Per-Site Deployment (repeat for each site)
+1. Deploy Connector VM (no public IP), run generated install command via SSH or Run Command
+2. Deploy router VM (no public IP), install headless Client:
+```bash
+curl https://binaries.twingate.com/client/linux/install.sh | sudo bash
+nano /tmp/service_key.json          # paste service account key
+sudo twingate setup --headless /tmp/service_key.json
+sudo twingate start
+```
+3. Enable IP forwarding:
+```bash
+sudo nano /etc/sysctl.conf          # uncomment net.ipv4.ip_forward=1
+sudo sysctl -p
+```
+4. Configure iptables (replace `ens4`/`eth0` with actual internal interface):
+```bash
+sudo iptables -A FORWARD -i ens4 -o sdwan0 -j ACCEPT
+sudo iptables -A FORWARD -i sdwan0 -o ens4 -m state --state RELATED,ESTABLISHED -j ACCEPT
+sudo iptables -t nat -A POSTROUTING -o sdwan0 -j MASQUERADE
+sudo apt install iptables-persistent -y   # persist rules across reboots
+```
+5. Deploy test VM; add as Twingate Resource; assign to **opposing site's** Service Account
+
+### Routing
+- Azure: Create route table → associate with subnet → add route to remote CIDR via router VM
+- GCP: Add VPC route pointing remote CIDR to router VM
 
 ## Configuration Values
-
 | Parameter | Site 1 (Azure) | Site 2 (GCP) |
 |---|---|---|
 | Internal interface | `ens4` | `eth0` |
@@ -47,13 +58,15 @@ Configures bidirectional traffic routing between two cloud sites (Azure and GCP)
 | Example subnet | `10.0.1.0/24` | `172.16.1.0/24` |
 
 ## Gotchas
-- **Interface names vary** — replace `ens4`/`eth0` and `sdwan0` with actual interface names from your VMs
-- **GCP requires IP forwarding enabled at VM creation time** (not just via sysctl) — Azure does not
-- **Cloud NAT must exist before router VM deployment** in GCP, or the Client install script won't reach the internet
-- **Cross-assign Resources**: site 1 test VM resource → site 2 service account; site 2 test VM resource → site 1 service account
-- Cloud routing tables must be configured in both cloud providers independently (Azure route table + GCP route) for subnet traffic to reach the router VMs
+- GCP requires IP forwarding enabled **at VM creation time**, not just in sysctl
+- Azure Connector deployment via portal uses ACS (separate vnet required); use plain Linux deployment instead
+- Service Account key is only shown once—store securely before closing
+- Cloud NAT must be configured **before** deploying router VM or it cannot install packages
+- Internal interface names (`ens4`, `eth0`) vary by cloud/OS—verify before running iptables commands
+- Without `iptables-persistent`, rules are lost on reboot
 
 ## Related Docs
-- [Peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer)
 - [Headless Client / Service Accounts](https://www.twingate.com/docs/services)
+- [Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
 - [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)
+- [Connector

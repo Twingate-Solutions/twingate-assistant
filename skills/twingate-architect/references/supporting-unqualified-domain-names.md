@@ -1,30 +1,33 @@
 # Supporting Unqualified Domain Names
 
 ## Summary
-Twingate supports accessing private resources via unqualified domain names (e.g., `http://employeeportal` instead of `http://employeeportal.yourcompany.com`). This requires adding the unqualified name as a separate Resource in the Admin Console AND configuring search domains on the Connector host.
+Twingate supports accessing private resources via unqualified domain names (e.g., `http://employeeportal`) instead of FQDNs. This requires defining the unqualified name as a separate Resource in the Admin Console and configuring search domains on the Connector host.
 
 ## Key Information
-- Unqualified resource must be added **in addition to** the FQDN, not as a replacement
-- Twingate uses split-tunneling, so the Client must explicitly know to intercept unqualified name traffic
-- Virtual IPs resolve in the `100.64.0.0–100.127.255.255` range on Client devices
-- Connector inherits search domains from its host OS (no Connector restart required for DNS changes)
+- Unqualified domain resources must be added **in addition to** the FQDN resource, not as a replacement
+- The Connector uses the host machine's configured search domains for DNS resolution
+- Twingate assigns virtual IPs in the `100.64.0.0–100.127.255.255` range for resolved resources
 
 ## Prerequisites
-- Existing FQDN Resource defined in Twingate Admin Console
-- Access to Connector host machine to configure DNS search domains
+- Existing Twingate setup with Connector deployed
+- FQDN resource already defined in Admin Console
+- Access to Connector host OS or container configuration
 
 ## Step-by-Step
 
 ### 1. Define Resources in Admin Console
-- Add the unqualified name (e.g., `employeeportal`) as a separate Resource
-- Keep the FQDN Resource (e.g., `employeeportal.yourcompany.com`) — do not remove it
+- Create a resource for the unqualified name (e.g., `employeeportal`)
+- Keep the existing FQDN resource (e.g., `employeeportal.yourcompany.com`)
+- Both must exist simultaneously
 
 ### 2. Set Search Domain on Connector Host
 
-**Docker (non-ECS):** Add before `--restart=unless-stopped` in the run script:
+**Docker (non-ECS):** Add before `--restart=unless-stopped` in the run command:
 ```
 --dns-search yoursearchdomain.com
 ```
+
+**AWS ECS:** Set via Network Settings in Advanced Container Configuration.
 
 **Ubuntu:**
 ```bash
@@ -36,31 +39,29 @@ sudo systemctl restart systemd-resolved
 **CentOS/Fedora:**
 ```bash
 nmcli dev status
-sudo nmcli con mod "YOUR CONNECTION NAME" ipv4.dns-search "yourcompany.com"
+sudo nmcli con mod "CONNECTION NAME" ipv4.dns-search "yourcompany.com"
 sudo systemctl restart NetworkManager
 ```
 
-**AWS ECS:** Configure under Network Settings → Advanced Container Configuration when adding/editing a container.
-
 ## Configuration Values
-| Platform | Setting | Value |
-|----------|---------|-------|
-| Docker | CLI flag | `--dns-search <domain>` |
-| Ubuntu | File: `/etc/systemd/resolved.conf` | `DOMAINS=yourcompany.com` |
-| CentOS/Fedora | nmcli property | `ipv4.dns-search "yourcompany.com"` |
+| Platform | Config Location | Parameter |
+|----------|----------------|-----------|
+| Docker | Run flags | `--dns-search <domain>` |
+| Ubuntu | `/etc/systemd/resolved.conf` | `DOMAINS=` |
+| CentOS/Fedora | nmcli | `ipv4.dns-search` |
 
 ## Gotchas
-- **Must define both** unqualified and FQDN Resources — omitting FQDN causes connection errors
-- **Browsers may misinterpret** unqualified names as search queries; force URL mode by prepending `http://` (e.g., `http://employeeportal`)
-- `nslookup employeeportal` on the Connector host must resolve before it will work through Twingate
-- On Client devices, unqualified names should resolve to `100.64.x.x–100.127.x.x` range; if not, DNS search domain is not propagating correctly
+- Omitting the unqualified name as a Resource causes silent failures — the Client won't intercept that traffic
+- Connector restart is **not** required after search domain changes on the host
+- Web browsers may interpret unqualified names as search queries; force URL by prepending `http://` (e.g., `http://employeeportal`). Browser history will cache the correct behavior after first use.
+- DNS must resolve the unqualified name on the Connector host before it will work through Twingate
 
 ## Troubleshooting Checklist
-1. SSH into Connector VM → `nslookup employeeportal` must resolve
-2. On Client device → same lookup should return IP in `100.64.0.0–100.127.255.255`
-3. In browser → explicitly type `http://employeeportal` to avoid search engine redirect
+1. Run `nslookup employeeportal` on the Connector VM — must resolve successfully
+2. Run same lookup on a Client device — should return IP in `100.64.0.0–100.127.255.255`
+3. For browsers, explicitly type `http://employeeportal` to force domain interpretation
 
 ## Related Docs
 - Twingate Resources configuration (Admin Console)
 - Split tunneling behavior
-- Connector deployment guides (Docker, ECS, Ubuntu, CentOS)
+- Connector deployment guides

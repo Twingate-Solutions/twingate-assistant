@@ -1,24 +1,24 @@
 # Twingate Security Policy Guides
 
 ## Page Title
-Security Policy Guides (Index/Overview)
+Security Policy Guides (Index)
 
 ## Summary
-This page is a navigation index for Twingate's Security Policy rule documentation. It links to individual guides covering authentication, 2FA, device-only policies, and trusted device requirements.
+This is an index page listing the available Security Policy rule types in Twingate. Each policy type controls a specific aspect of access control, covering authentication frequency, 2FA, device-only rules, and device trust requirements.
 
 ## Key Information
-- Security Policies support four main rule categories:
-  - **Authentication** – controls re-authentication frequency and 2FA requirements
-  - **Two-factor Authentication (2FA)** – settings applied to authentication requirements
-  - **Device-only Resource Policies** – evaluate device requirements independently of user auth
-  - **Trusted Devices** – controls whether devices must be trusted (manually or automatically) to satisfy policy
+- Four distinct Security Policy rule categories are documented separately
+- Policies combine authentication, 2FA, device, and trust controls
+- Each rule type links to its own dedicated guide
 
-## Prerequisites
-- Access to Twingate admin console
-- Security Policies feature enabled on your account
+## Policy Types
 
-## Configuration Values
-None specified on this index page — see individual guides linked below.
+| Policy Type | Purpose |
+|---|---|
+| **Authentication** | Controls re-authentication frequency and 2FA requirements |
+| **Two-factor Authentication** | Configures 2FA enforcement settings |
+| **Device-only Resource Policies** | Evaluates device requirements independent of user auth |
+| **Trusted Devices** | Requires devices to be manually or automatically trusted |
 
 ## Related Docs
 - Authentication settings guide
@@ -27,5 +27,8 @@ None specified on this index page — see individual guides linked below.
 - Trusted Devices guide
 
 ## Gotchas
-- This page is an index only; no implementation details are provided here — consult individual sub-guides for actionable configuration steps
-- "Trusted" status can be granted manually or automatically — behavior differs between the two methods (see Trusted Devices guide)
+- Device-only Resource Policies bypass user authentication checks — evaluate device posture exclusively
+- Trusted devices can be set to manual or automatic trust — these behave differently in enforcement
+
+---
+*This page is a navigation index only; implementation details are in the linked sub-guides.*
