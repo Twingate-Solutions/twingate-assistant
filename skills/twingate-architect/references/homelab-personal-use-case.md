@@ -4,58 +4,55 @@
 Twingate Homelab & Personal Use Cases
 
 ## Summary
-Twingate provides secure remote access to home networks and self-hosted services without port forwarding or VPN server configuration. A free Starter plan is available, with typical setup under 15 minutes via a Connector deployed on a single home network device.
+Twingate provides secure remote access to home networks and self-hosted services without port forwarding or VPN server configuration. A free Starter plan is available, with setup typically completing in under 15 minutes by deploying a single Connector on a home network device.
 
 ## Key Information
-- No open inbound ports or port forwarding required
-- No static IP or dynamic DNS needed
-- Free Starter plan available for personal use
-- Connector runs on Raspberry Pi, NAS devices, Linux/Windows servers
-- Connector deployment options: Docker container or systemd service VM
-- Granular access control: share specific resources (e.g., photos but not cameras) with family/friends
-- Cross-platform client apps: desktop and mobile
+- **Free tier**: Starter plan available for personal use
+- **No open inbound ports required**: eliminates port forwarding security risks
+- **No static IP or dynamic DNS needed**
+- **Connector deployment options**: Docker container or VM systemd service
+- **Supported platforms**: Raspberry Pi, Synology NAS, QNAP NAS, TrueNAS SCALE, Proxmox, Firewalla, Linux servers, Windows
 
 ## Prerequisites
-- A Twingate account (free Starter plan sufficient)
-- One device on the home network to host the Connector (Raspberry Pi, NAS, Linux server, or Windows PC)
-- Docker or systemd-compatible environment on the host device
+- Twingate account (free Starter plan sufficient)
+- One device on home network to run the Connector
+- Twingate client apps installed on accessing devices (desktop/mobile)
 
-## Supported Connector Platforms
-- Raspberry Pi
-- Firewalla
-- Proxmox (container)
-- QNAP NAS
-- Synology NAS (DSM 6.x and DSM 7.x separately documented)
-- TrueNAS SCALE
-- Generic Linux (systemd service)
+## Supported Home Devices (Connector Deployment)
+| Device | Guide Available |
+|--------|----------------|
+| Firewalla | Yes |
+| Proxmox Container | Yes |
+| QNAP NAS | Yes |
+| Synology NAS DSM 6.x | Yes |
+| Synology NAS DSM 7.x | Yes |
+| TrueNAS SCALE | Yes |
+| Raspberry Pi | Yes (via Home Assistant guide) |
 
-## Step-by-Step Guides Available
-- General homelab protection setup
+## Common Use Case Guides
 - Home Assistant on Raspberry Pi
 - Synology NAS remote access
 - Plex Media Server remote access
-- Platform-specific Connector deployment guides (see links in source)
+- General homelab protection
 
 ## Configuration Values
-- No specific env vars documented on this page
-- Connector deployment via Docker image or VM systemd service (details in platform-specific guides)
+- Connector deployment methods: Docker image or systemd service
+- Access control: per-resource granular permissions (e.g., restrict specific resources per user)
 
 ## Developer Features
-| Feature | Description |
-|---|---|
-| Admin API | Programmatic network management |
-| JavaScript CLI | Configuration tooling |
-| Python CLI | Configuration tooling |
-| Terraform provider | Infrastructure-as-code automation |
-| Pulumi provider | Infrastructure-as-code automation |
+- Admin API
+- JavaScript CLI configuration tool
+- Python CLI configuration tool
+- Terraform provider
+- Pulumi provider
 
 ## Gotchas
-- Synology NAS has **separate guides** for DSM 6.x and DSM 7.x — use the correct one
-- Only one Connector needed for basic home use, but placement matters — see deployment recommendations if unsure where to host it
+- Only one Connector needed per home network (deploy on a single device)
+- Connector must remain running for remote access to function — choose a device that stays powered on
+- DSM 6.x and DSM 7.x Synology have separate deployment guides; use the correct one
 
 ## Related Docs
-- Deployment recommendations
+- Connector deployment recommendations
 - Admin API documentation
-- Terraform integration
-- Pulumi integration
-- Platform-specific guides: Firewalla, Proxmox, QNAP, Synology DSM 6/7, TrueNAS SCALE
+- Terraform/Pulumi automation guides
+- Individual platform deployment guides (linked above)

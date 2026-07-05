@@ -1,30 +1,35 @@
-# Automated Deployment - Twingate
+# Automated Deployment Quick Start
+
+## Page Title
+Automated Deployment (Quick Start)
 
 ## Summary
-Twingate supports Infrastructure-as-Code (IaC) automated deployment via Terraform and Pulumi. Guides are available for AWS, Azure, and GCP. Intended to reduce rollout time across multi-cloud environments.
+Twingate supports Infrastructure-as-Code (IaC) automated deployments via Terraform and Pulumi. Guides are available for the three major cloud providers (AWS, Azure, GCP). This is the recommended approach for multi-environment or multi-cloud rollouts.
 
 ## Key Information
 - Supported IaC tools: **Terraform** and **Pulumi**
 - Cloud providers covered: AWS, Azure, GCP
-- Separate guides exist for each tool/provider combination
+- Separate deployment guides exist for each tool/provider combination
+- Webinar resource available: *Best Practices for Secure Infrastructure-as-Code Initiatives*
 
 ## Prerequisites
 - Twingate account
 - Familiarity with Terraform or Pulumi
-- Target cloud provider credentials (AWS, Azure, or GCP)
+- Cloud provider credentials (AWS, Azure, or GCP)
 
 ## Step-by-Step
-1. Choose IaC tool (Terraform or Pulumi)
-2. Select cloud provider guide (AWS, Azure, or GCP)
-3. Follow provider-specific deployment guide
+1. Choose IaC tool: Terraform or Pulumi
+2. Choose target cloud provider (AWS, Azure, or GCP)
+3. Follow the corresponding provider-specific guide (linked from this page)
 
 ## Configuration Values
-- Defined in provider-specific guides (not listed on this page)
+- Specific environment variables, CLI flags, and API parameters are defined in the individual Terraform/Pulumi provider guides (not detailed on this page)
 
 ## Gotchas
-- This page is an index only — actual configuration details are in the linked provider-specific guides
+- This page is an index/entry point only — actual configuration details are in the linked sub-guides
+- No configuration examples are provided directly on this page
 
 ## Related Docs
-- Terraform deployment guides (AWS/Azure/GCP)
-- Pulumi deployment guides (AWS/Azure/GCP)
-- [Best Practices for Secure Infrastructure-as-Code Initiatives](https://www.twingate.com/docs/automated-quick-start) (webinar)
+- Terraform deployment guides (per cloud provider)
+- Pulumi deployment guides (per cloud provider)
+- Twingate IaC Best Practices Webinar

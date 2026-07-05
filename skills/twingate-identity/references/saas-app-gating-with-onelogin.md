@@ -1,47 +1,45 @@
 # SaaS App Gating with OneLogin
 
 ## Summary
-Configures OneLogin to restrict SaaS app access to users connecting through Twingate by allowlisting the Connector's exit IP. Uses OneLogin App Policies combined with Twingate Resources to enforce network-level access control for SaaS applications.
+Restricts SaaS application access by requiring users to route through Twingate before authenticating with OneLogin. OneLogin App Policies enforce that only requests originating from Twingate Connector exit IPs are permitted to access protected applications.
 
 ## Key Information
-- OneLogin validates the source IP of authentication requests; only requests coming from Twingate Connector exit IPs are permitted
-- Twingate acts as a network proxy — authenticated users route through Connectors, presenting the Connector's public IP to OneLogin
-- Protects any OneLogin-integrated SaaS app (e.g., Google Workspace) without modifying the app directly
+- Uses Twingate Connector's public exit IP as an allowlist in OneLogin App Policy
+- Protects any OneLogin-federated SaaS app (e.g., Google Workspace)
+- Requires Device-only Policy on the IdP resource to prevent authentication loops
 
 ## Prerequisites
 - Twingate admin access with ability to create Resources and Policies
-- OneLogin admin access with Security and Applications permissions
-- Know the public exit IP of your Twingate Remote Network's Connector(s)
-- OneLogin tenant URL (e.g., `tenant.onelogin.com`)
+- OneLogin admin access with ability to create App Policies
+- Twingate Connector(s) deployed with known public exit IP address(es)
 
 ## Step-by-Step
 
 ### Twingate Admin Console
-1. Create a Twingate Resource for your OneLogin tenant FQDN (e.g., `tenant.onelogin.com`)
-2. Associate that Resource with the appropriate Twingate Group(s)
-3. Apply a **Device-only Policy** to the OneLogin Resource — prevents auth loops where IdP access requires prior Twingate auth
+1. Create a Resource for your OneLogin tenant URL (e.g., `tenant.onelogin.com`)
+2. Associate the Resource with the appropriate Group(s)
+3. Apply a **Device-only Policy** to the `tenant.onelogin.com` Resource
 
 ### OneLogin Admin Console
-4. Navigate to **Security → Policies → New App Policy**
+4. Navigate to **Security → Policies** → **New App Policy**
 5. Name the policy (e.g., "Twingate SaaS App Gate")
-6. In the **Allowed IP Addresses** field, enter the Connector's public exit IP
-7. Navigate to **Applications → Applications**, select the target app (e.g., Google Workspace)
-8. Go to **Access → Policies**, select your new App Policy, and save
+6. In **Allowed IP Addresses**, enter the public exit IP of the Twingate Remote network/Connector
+7. Save the App Policy
+8. Navigate to **Applications → Applications** → select target app
+9. Go to **Access → Policies**, select the new App Policy, and save
 
 ## Configuration Values
-
-| Parameter | Value |
-|-----------|-------|
-| Twingate Resource | `tenant.onelogin.com` (your specific tenant) |
-| Twingate Resource Policy | Device-only |
-| OneLogin Allowed IP | Connector public exit IP |
+| Value | Description |
+|---|---|
+| `tenant.onelogin.com` | OneLogin tenant FQDN to use as Twingate Resource |
+| Connector exit IP | Public IP of Twingate Remote network; added to OneLogin Allowed IP Addresses |
 
 ## Gotchas
-- **Auth loop risk**: Without a Device-only Policy on the IdP Resource, users can't reach OneLogin to authenticate because Twingate requires authentication first — apply Device-only Policy to the IdP Resource specifically
-- **Multiple Connectors**: If you have multiple Connectors in the Remote Network, all their exit IPs must be added to the OneLogin Allowed IP list
-- **IP changes**: If Connector IPs change (e.g., infrastructure updates), the OneLogin App Policy must be updated manually
+- **Authentication loop risk**: Without a Device-only Policy on the IdP Resource, users can't reach OneLogin to authenticate because Twingate requires authentication first — apply Device-only Policy to break this cycle
+- The exit IP in OneLogin must match the Connector's public IP, not an internal/private IP
+- All users requiring access to the gated app must belong to the Twingate Group associated with the `tenant.onelogin.com` Resource
 
 ## Related Docs
-- [Create a Twingate Resource](https://www.twingate.com/docs/resources)
-- [Device-only Resource Policy](https://www.twingate.com/docs/resource-policies)
-- General SaaS App Gating pattern applies to other IdPs (Okta, Azure AD) with similar IP allowlist capabilities
+- [Create a Twingate Resource](https://www.twingate.com/docs)
+- [Device-only Resource Policy](https://www.twingate.com/docs)
+- SaaS App Gating general configuration

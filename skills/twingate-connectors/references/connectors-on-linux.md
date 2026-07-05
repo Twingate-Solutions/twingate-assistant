@@ -1,72 +1,70 @@
 # Deploy a Connector on Linux
 
 ## Summary
-Twingate Connectors on Linux can run as Docker containers (any distro) or as a systemd service (select distros). Docker offers broader compatibility; systemd is more robust with lower overhead. Both methods require tokens generated from the Admin Console.
+Twingate Connectors on Linux can run as Docker containers or systemd services. Docker works on any Linux distribution; systemd is more robust but limited to specific distros. Both methods require tokens generated from the Twingate Admin Console.
 
 ## Key Information
 - Two deployment methods: Docker container or systemd service
-- Tokens (access + refresh) are connector-specific and non-shareable
+- Tokens are Connector-specific and cannot be shared between Connectors
 - Config file location (systemd): `/etc/twingate/connector.conf`
-- Service name: `twingate-connector`
+- Verify service: `sudo systemctl status twingate-connector`
 
 ## Prerequisites
-- **Docker**: Docker installed and running; use official channel only
-- **systemd**: Supported distros only:
-  - Ubuntu 22.04 LTS, 24.04 LTS
-  - Fedora 39, 40
-  - CentOS Stream 9
-  - Debian 11 LTS, 12 LTS
-- Access to Twingate Admin Console to generate tokens
+- Access to Twingate Admin Console
+- Remote Network already created in Admin Console
+- **Docker method**: Docker installed and running
+- **Systemd method**: Supported Linux distro (see below)
+
+### Supported Distros (systemd)
+| Distro | Versions |
+|--------|----------|
+| Ubuntu | 22.04 LTS, 24.04 LTS only |
+| Fedora | 39, 40 |
+| CentOS | Stream 9 |
+| Debian | 11 LTS, 12 LTS |
 
 ## Step-by-Step
 
 ### Docker Deployment
-1. Install Docker via official method or convenience script
-2. In Admin Console → Remote Networks → select network → Add Connector
-3. Click new connector → select **Docker** option
+1. Install Docker: `curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh`
+2. In Admin Console: Remote Networks → Remote Network → Add Connector
+3. Click new Connector → Select **Docker** option
 4. Generate tokens (requires re-authentication)
 5. Enable optional features
-6. Copy and run generated `docker run` command
+6. Copy and run the generated command in terminal
 
-### systemd Deployment
-1. In Admin Console → Remote Networks → select network → Add Connector
-2. Click new connector → select **Linux** option
+### Systemd Deployment
+1. In Admin Console: Remote Networks → Remote Network → Add Connector
+2. Click new Connector → Select **Linux** option
 3. Generate tokens (requires re-authentication)
-4. Optionally enable real-time logging
-5. Copy and run generated install command
+4. Enable optional real-time logging if needed
+5. Copy and run the generated install command
 6. Verify: `sudo systemctl status twingate-connector`
 
 ## Configuration Values
 
-### `/etc/twingate/connector.conf`
+**File**: `/etc/twingate/connector.conf`
+
 ```
 TWINGATE_NETWORK=https://<account>.twingate.com
 TWINGATE_ACCESS_TOKEN=<access_token>
 TWINGATE_REFRESH_TOKEN=<refresh_token>
 ```
 
-### systemd Management Commands
+**systemd Management Commands:**
 ```bash
 sudo systemctl status twingate-connector
-sudo systemctl start twingate-connector
-sudo systemctl stop twingate-connector
-sudo systemctl restart twingate-connector   # also reloads config
-sudo systemctl enable twingate-connector    # auto-start at boot
-sudo systemctl disable twingate-connector
-```
-
-### Docker Install (convenience script)
-```bash
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
+sudo systemctl start|stop|restart twingate-connector
+sudo systemctl enable|disable twingate-connector  # boot behavior
 ```
 
 ## Gotchas
-- **Do not use unofficial Docker channels** — may install outdated versions incompatible with Connector image
-- **Amazon Linux**: Use pre-built AMI deployment instead of these instructions
-- Tokens cannot be shared between connectors
-- Restarting the service is required after editing `connector.conf`
-- Stagger updates across multiple connectors to avoid downtime
+- Install Docker only via official channel (`get.docker.com`) — other channels may have outdated versions incompatible with Connector image requirements
+- Ubuntu: only LTS versions supported
+- Amazon Linux: use pre-built AMI with systemd instead of standard Linux instructions
+- Stagger updates across multiple Connectors to avoid downtime
+- Tokens are per-Connector; cannot be reused across Connectors
+- Config file changes require service restart to take effect
 
 ## Related Docs
 - Connector Best Practices

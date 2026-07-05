@@ -1,49 +1,49 @@
-# Deploying Twingate Client with Iru (Kandji) MDM
+# Deploying Twingate Clients with Iru (Kandji) MDM
 
 ## Summary
-Covers distributing the Twingate macOS and iOS clients via Iru (formerly Kandji) MDM. macOS deployment is best handled via the Twingate Auto App; iOS requires Apple Business Manager integration.
+Guide for distributing the Twingate macOS and iOS clients via Iru (formerly Kandji) MDM. macOS deployment is recommended via the Twingate Auto App; iOS requires Apple Business Manager integration.
 
 ## Key Information
-- **Iru** is the current name for what was previously Kandji MDM
-- macOS Auto App automatically handles: notifications, VPN profile, and system extension — no custom config needed
-- iOS distribution requires Apple Business Manager to be linked to Iru first
-- PKG installer available from Twingate download page for custom app deployments
+- **Iru** is the current name for what was previously called Kandji
+- macOS Auto App automatically handles: notifications permissions, VPN profile enablement, system extension approval
+- iOS distribution requires Apple Business Manager (ABM) linkage with Iru
+- Custom PKG deployment is supported but not recommended for macOS
 
 ## Prerequisites
 - Access to Iru admin console
-- **iOS only**: Devices enrolled in Apple Business Manager; Iru linked to Apple Business Manager
-- **macOS custom app only**: Twingate PKG installer downloaded
+- **iOS only**: Devices enrolled in Apple Business Manager; Iru linked to ABM
 
 ## Step-by-Step
 
-### macOS (Recommended — Auto App)
+### macOS (Recommended: Auto App)
 1. Sign in to Iru
 2. Select **Library** in the sidebar
-3. Find Twingate Client app for macOS and select it
+3. Find and select the Twingate Client app for macOS
 4. Deploy via Auto App (no additional configuration required)
 
-### macOS (Alternative — Custom App)
-1. Download Twingate PKG from the download page
+### macOS (Alternative: Custom PKG)
+1. Download Twingate PKG from the [Twingate download page](https://www.twingate.com/download)
 2. Upload PKG to Iru as a custom app
 
 ### iOS
 1. Add Twingate iOS app to Apple Business Manager
-2. Enroll devices in Apple Business Manager (follow Iru's official docs)
+2. Enroll devices in ABM (follow Iru's official documentation)
 3. Link Iru with Apple Business Manager
-4. Sign in to Iru → **Library** → find Twingate iOS Client → distribute
+4. Locate Twingate in Iru Library and distribute
 
 ## Configuration Values
-- Pre-configuration of macOS client (VPN config, system extension, network pre-population) done via **configuration profiles** — see separate configuration profiles guide
+- Pre-configuration of macOS client available via **configuration profiles** (separate guide)
+  - Enables VPN configuration automatically
+  - Enables system extension
+  - Pre-populates Network for users
 
 ## Gotchas
-- **Manually installed clients must be removed before MDM rollout** — version mismatches cause issues
+- **Manually installed clients must be removed first** before rolling out MDM distribution — version mismatches cause issues for end users
   - Create a temporary removal policy targeting all devices
-  - Deactivate the removal policy before rolling out via Iru
-- Custom app deployment (PKG) is not recommended; use Auto App when possible
-- Auto App handles VPN profile and system extension automatically — custom app deployments require manual configuration profile setup
+  - Deactivate the removal policy before deploying via Iru
+- Auto App is strongly preferred over custom PKG; custom PKG requires manual handling of VPN profile, system extension, and notifications
 
 ## Related Docs
-- Twingate macOS configuration profiles guide
-- Twingate client download page
-- Iru official documentation (Apple Business Manager enrollment)
-- Apple Business Manager setup
+- [Twingate Configuration Profiles guide](https://www.twingate.com/docs/configuration-profiles) — for pre-configuring macOS client
+- [Twingate Download Page](https://www.twingate.com/download) — PKG installer for custom app deployment
+- Iru official documentation — for Apple Business Manager enrollment steps

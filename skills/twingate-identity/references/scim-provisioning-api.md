@@ -1,78 +1,78 @@
 # Twingate SCIM Provisioning API
 
 ## Summary
-Twingate implements SCIM 2.0 for automated user provisioning via identity provider integrations. The API supports standard CRUD operations on Users and Groups. This API is intended for use with supported IdP integrations, not direct self-serve implementation.
+Twingate supports SCIM 2.0 for automatic user provisioning with identity providers. The API provides standard CRUD operations for Users and Groups. Intended for use with supported IdP integrations, not direct self-serve implementation.
 
 ## Key Information
 - Base URL: `https://{network}.twingate.com/api/scim/v2/`
 - SCIM version: 2.0
 - Rate limit: 25 requests/second per account
+- Only most recently generated bearer token is valid
 - Supports `application/scim+json` and `application/json` content types
-- Errors follow RFC-7644 section 3.12
+- Errors follow RFC-7644 section 3.12 format
 
 ## Prerequisites
 - Twingate network name
-- Bearer token generated from Twingate Admin console (only most recently generated token is valid)
+- Bearer token generated from Twingate Admin console
+- Supported identity provider integration
 
 ## Configuration Values
 
-| Parameter | Value |
-|-----------|-------|
-| Auth header | `Authorization: Bearer <token>` |
-| Content-Type | `application/scim+json` or `application/json` |
-| Base URL pattern | `https://{network}.twingate.com/api/scim/v2/` |
+**Authorization Header:**
+```
+Authorization: Bearer <token>
+```
 
-## User Attributes
+**User SCIM Attributes:**
+| Field | SCIM Attribute | Required | Unique |
+|-------|---------------|----------|--------|
+| Twingate ID | `id` | Yes | Yes |
+| Origin ID | `externalId` | Yes | Yes |
+| Email | `emails[primary eq true]` | No | No |
+| First name | `name.givenName` | No | No |
+| Last name | `name.lastName` | No | No |
+| Active | `active` | No | No |
+| Username | `userName` | Yes | Yes |
 
-| SCIM Attribute | Required | Unique |
-|----------------|----------|--------|
-| `id` | Yes | Yes |
-| `externalId` | Yes | Yes |
-| `userName` | Yes | Yes |
-| `emails[primary eq true]` | No | No |
-| `name.givenName` | No | No |
-| `name.lastName` | No | No |
-| `active` | No | No |
+**Group SCIM Attributes:**
+| Field | SCIM Attribute | Required | Unique |
+|-------|---------------|----------|--------|
+| Group name | `displayName` | Yes | No |
+| Members | `members` | No | No |
+| Twingate ID | `id` | Yes | Yes |
 
-## Group Attributes
-
-| SCIM Attribute | Required | Unique |
-|----------------|----------|--------|
-| `displayName` | Yes | No |
-| `id` | Yes | Yes |
-| `members` | No | No |
-
-## Endpoints
+## API Endpoints
 
 **Users:**
-- `GET /Users` — list/filter (paginated)
+- `GET /Users` — list/filter (pagination supported)
 - `POST /Users` — create
 - `GET /Users/{id}` — retrieve
 - `PUT /Users/{id}` — replace
 - `PATCH /Users/{id}` — modify
-- `DELETE /Users/{id}` — delete permanently
+- `DELETE /Users/{id}` — delete (permanent)
 
 **Groups:**
-- `GET /Groups` — list/filter (paginated)
+- `GET /Groups` — list/filter (pagination supported)
 - `POST /Groups` — create
 - `GET /Groups/{group-id}` — retrieve
 - `PUT /Groups/{group-id}` — replace
 - `PATCH /Groups/{group-id}` — modify
-- `DELETE /Groups/{group-id}` — delete permanently
+- `DELETE /Groups/{group-id}` — delete (permanent)
 
 ## Gotchas
-- Only the **most recently generated** bearer token is valid; generating a new token invalidates the previous one
-- Email: only one email stored; priority is `primary=true`, fallback is `type="work"`
-- `{id}` in path must be the Twingate-assigned ID (returned in SCIM `id` field), not `externalId`
-- `DELETE` on users/groups is **permanent** deletion in Twingate
+- Only **one email** is stored per user — API picks `primary=true` or `type="work"` from multi-value `emails` attribute
+- Token rotation invalidates previous tokens immediately (only latest token valid)
+- `DELETE` on users/groups is **permanent** in Twingate
+- `{id}` path parameter uses **Twingate's internal ID** (from `id` field in response), not `externalId`
 
-## Unsupported Operations
-- `POST /.search` (RFC-7644 §3.4.3)
-- `/Bulk` endpoint (RFC-7644 §3.7)
-- `/Me` endpoint (RFC-7644 §3.11)
-- Sorting in filter queries (RFC-7644 §3.4.2.3)
+## Unsupported Features
+- `/.search` POST endpoint
+- `/Bulk` operations
+- `/Me` endpoint
+- Sort parameters in filter queries
 - `attributes` and `excludedAttributes` query params
 
 ## Related Docs
-- [Supported IdP Integrations](https://www.twingate.com/docs/scim-provisioning-api) (see "here" link in original)
-- RFC-7644 (SCIM Protocol specification)
+- [Supported IdP Integrations](https://www.twingate.com/docs/scim-provisioning-api) (linked in page)
+- [SCIM Configuration](https://www.twingate.com/docs/scim-provisioning-api)
+- RFC-7644 (SCIM protocol specification)

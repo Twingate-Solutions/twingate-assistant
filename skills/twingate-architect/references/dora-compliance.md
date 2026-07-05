@@ -4,27 +4,27 @@
 DORA Compliance
 
 ## Summary
-Twingate supports financial entities regulated by the Digital Operational Resilience Act (DORA). Business and Enterprise subscribers can obtain a DORA Addendum containing required contractual provisions for ICT vendor agreements.
+Twingate supports financial entities regulated by the Digital Operational Resilience Act (DORA) through a DORA Addendum. This addendum provides contractual provisions required for DORA-regulated customers in their agreements with ICT vendors.
 
 ## Key Information
-- DORA Addendum available for **Business** and **Enterprise** subscription tiers only
-- Addendum provides contractual provisions required by DORA-regulated entities for ICT vendor agreements
-- Must contact Twingate's customer team to obtain the addendum
+- Twingate offers a **DORA Addendum** containing required contractual provisions for ICT vendor agreements
+- DORA = Digital Operational Resilience Act (EU financial sector regulation)
+- Twingate is classified as an ICT vendor under DORA
 
 ## Prerequisites
-- Active Business or Enterprise Twingate subscription
+- **Business or Enterprise subscription** required to access the DORA Addendum
 
 ## Configuration Values
-None applicable.
+None — this is a compliance/legal document offering, not a technical configuration.
 
-## Step-by-Step
-1. Verify you have a Business or Enterprise subscription
-2. Contact Twingate's customer team to request the DORA Addendum
+## How to Obtain
+- Contact Twingate's customer team directly to request a copy of the DORA Addendum
+- No self-service option available
 
 ## Gotchas
-- Free/Starter tier customers are **not** eligible for the DORA Addendum
-- Addendum is not self-serve — requires direct contact with customer team
+- Free/Starter tier customers are **not eligible** for the DORA Addendum
+- This is a contractual/legal addendum only — does not describe specific technical controls or configurations
 
 ## Related Docs
-- Twingate subscription/pricing tiers
-- Compliance documentation (SOC 2, etc.)
+- Twingate subscription plans (Business/Enterprise)
+- Other compliance offerings (SOC 2, etc.)

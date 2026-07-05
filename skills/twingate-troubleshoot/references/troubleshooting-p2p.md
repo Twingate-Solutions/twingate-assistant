@@ -1,60 +1,67 @@
 # Troubleshooting Peer-to-Peer Connections
 
 ## Summary
-Twingate uses NAT traversal for peer-to-peer connections between Clients and Connectors. Four main conditions prevent P2P from working: blocked UDP/QUIC, blocked outbound IPs/ports, double NAT, or incompatible NAT types. No inbound firewall ports are required for either P2P or relay transport.
+Twingate uses NAT traversal for peer-to-peer connections between Clients and Connectors. Several network conditions can prevent P2P from working, requiring no open inbound firewall ports but specific outbound UDP/QUIC capabilities. When P2P fails, Twingate falls back to relay transport.
 
 ## Key Information
-- P2P uses UDP/QUIC for NAT traversal; neither side needs open inbound ports
-- Both Client and Connector must be behind **endpoint-independent NAT** for P2P to work
-- Relay transport is the fallback when P2P fails
-- QUIC is more commonly blocked on Connector side than Client side
+- P2P requires no inbound firewall ports, but needs specific outbound UDP/QUIC access
+- Four root causes for P2P failure: UDP/QUIC blocked, IP/port restrictions, double NAT, incompatible NAT type
+- Both Client AND Connector must support endpoint-independent NAT for P2P to work
+- QUIC issues are almost never on the Client side — start troubleshooting at the Connector
 
-## Four Root Causes (in order)
+## Prerequisites
+- Outbound UDP/QUIC unrestricted on both Client and Connector sides
+- Single NAT device in path (no double NAT)
+- Endpoint-independent NAT on both ends
+- Review [network prerequisites doc](https://www.twingate.com/docs) before troubleshooting
 
-### 1. UDP/QUIC Blocked
-- Verify QUIC is not blocked on either side (start with Connector side)
-- Test tool: https://quic.nginx.org/
+## Diagnostic Steps
 
-### 2. Outbound Rules Blocking Traffic
-- Connectors must send UDP to **any IP address and any port** (Client public IPs are unknown in advance, ports are random)
-- Verify prerequisites per [network requirements docs]
+### 1. Verify UDP/QUIC Not Blocked
+- Test QUIC support at `https://quic.nginx.org/`
+- Start with Connector-side analysis (QUIC rarely blocked client-side)
 
-### 3. Double NAT
-- Two NAT devices in front of a single device breaks P2P
-- Common when users add personal routers on top of ISP equipment
-- UDP is stateless—multiple NAT layers create unmaintainable port mappings
+### 2. Verify Outbound Rules
+- Connectors must send UDP to **all IP addresses** (client public IPs are dynamic)
+- UDP must be allowed to **any port** (NAT devices assign random ports)
 
-### 4. Incompatible NAT Type
-- Requires **endpoint-independent NAT** on both sides
-- **Endpoint-dependent NAT** assigns different ports per destination, breaking P2P
+### 3. Check for Double NAT
+- Double NAT: two NAT devices in front of a single device
+- Common when user adds own router on top of ISP-provided equipment
+- UDP's stateless nature makes double NAT incompatible with P2P
 
-## Verification Steps
+### 4. Check NAT Type
 
-**Check Connector NAT type:**
-- Admin Console → Connectors → verify `STUN Discovery` shows `Available`
+**Connector side** — Admin Console → Connectors → verify `STUN Discovery: Available`
 
-**Check Client NAT type:**
-- Search Client logs for:
+**Client side** — search logs for:
 ```
 [INFO] [libsdwan] stun_nat_type: endpoint-independent
 ```
+Required value: `endpoint-independent`
+
+## Configuration Values / Diagnostics
+
+| Check | Location | Expected Value |
+|-------|----------|----------------|
+| Connector NAT type | Admin Console → Connectors | `STUN Discovery: Available` |
+| Client NAT type | Client logs, `stun_nat_type` | `endpoint-independent` |
+
+## Gotchas
+- **AWS NAT Gateways** are incompatible — known to break NAT traversal
+- Endpoint-dependent NAT assigns different ports per destination, making the Connector's port unpredictable to Clients
+- Double NAT creates complex/brittle port mappings that break P2P
 
 ## Known Incompatibilities & Workarounds
 
-| Device | Issue | Fix |
-|--------|-------|-----|
-| AWS NAT Gateway | Incompatible NAT type | Use Cohesive Cloud NAT, fck-nat, alterNAT, or custom NAT gateway |
-| SonicWall | Default NAT type | Enable "Consistent NAT" |
-| PaloAlto | Default NAT type | Configure "Persistent NAT" |
-| OPNSense | Default NAT type | Add Outbound NAT rule |
-
-## Gotchas
-- QUIC (not raw UDP) is what Twingate uses—firewalls blocking QUIC specifically will break P2P even if UDP is allowed
-- AWS NAT Gateways are a **known incompatibility**—cannot be fixed with configuration alone; requires replacement
-- Both sides must have compatible NAT—fixing only the Connector side is insufficient if Client is behind endpoint-dependent NAT
-- Double NAT is common in home setups (ISP modem + personal router)
+| Issue | Workaround |
+|-------|-----------|
+| AWS NAT Gateway | Use Cohesive cloud NAT, fck-nat, alterNAT, or custom NAT gateway |
+| Sonicwall | Enable "Consistent NAT" |
+| PaloAlto | Configure "Persistent NAT" |
+| OPNSense | Add Outbound NAT rule with endpoint-independent config |
 
 ## Related Docs
-- How NAT traversal works (Twingate internal article)
-- Network/firewall prerequisites documentation
-- Twingate relay transport overview
+- [How NAT traversal works](https://www.twingate.com/docs) — deep dive on mechanics
+- [Network prerequisites](https://www.twingate.com/docs) — required outbound rules
+- [Relay transport](https://www.twingate.com/docs) — fallback mechanism

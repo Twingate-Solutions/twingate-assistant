@@ -1,54 +1,46 @@
 # Customer Networks (MSP Portal)
 
 ## Summary
-Customer Networks are Twingate network instances managed through an MSP Portal. MSPs create and manage these networks on behalf of their clients, with each network having its own Admin Console, users, and billing plan.
+Customer Networks are tenant instances managed through the Twingate MSP Portal. Each network has its own Admin Console, URL, and user base. MSP partners create and manage these on behalf of their customers.
 
 ## Key Information
-- Each Customer Network has its own unique URL (subdomain), Admin Console, and user base
-- Networks start with a 14-day free trial (POC status), then auto-convert to Active
-- License count = Users + Service Accounts minus admins
+- Each Customer Network gets its own Admin Console and Client-visible name
+- Network status types: **POC** (14-day trial), **Active** (post-trial subscription), **Non-renewing** (pending deletion at billing cycle end)
+- License count = Users + Service Accounts − Admins
 - Deleted networks remain accessible until end of billing cycle; no refunds issued
-- Deleted networks do not appear in the Customer Networks tab
-- MSP Customer Networks **cannot** be converted to standalone Twingate Networks
+- Deleted networks are hidden from the Customer Networks tab
+- MSP Customer Networks cannot be converted to standalone Twingate Networks
 
 ## Prerequisites
 - Active MSP Portal account
-- Unique subdomain not used by any other Twingate network (MSP Portal, Customer Network, or standalone)
+- Unique subdomain for each network (MSP Portal and Customer Networks cannot share URLs)
 
-## Required Attributes for New Customer Network
+## Required Information for New Customer Network
 
 | Attribute | Description |
-|---|---|
-| Customer Network Name | Displayed in Admin Console and client apps |
+|-----------|-------------|
+| Customer Network Name | Visible in Admin Console and user Clients |
 | Customer Network URL | Unique subdomain |
 | Admin Email | Initial admin user |
 | Business Legal Name | Customer org name |
 | Business Address | Customer address |
 | Business URL | Customer website |
-| Point of Contact | Customer contact person |
+| Point of Contact | Contact at customer company |
 
-## Network Status Values
-- **POC** — 14-day free trial period
-- **Active** — Paid subscription (auto-assigned after trial)
-- **Non-renewing** — Scheduled for deletion at end of billing cycle
-
-## Operations
-
-**Cancel trial:**
-- Click ellipsis (⋯) on network row → "Delete Network"
-- Immediate deletion; no charge incurred
-
-**Delete active network:**
-- Click ellipsis (⋯) on network row → "Delete Network"
-- Access retained until end of billing cycle, then deleted
+## Step-by-Step: Delete a Customer Network
+1. Locate the network row in the MSP Portal Customer Networks tab
+2. Click the ellipses (`...`) at the end of the row
+3. Click **"Delete Network"**
+   - **Trial networks**: Deleted immediately; no charge
+   - **Active networks**: Access retained until billing cycle end, then deleted
 
 ## Gotchas
-- MSP Portal URL and Customer Network URLs must all be unique across the entire Twingate platform
-- Recommended naming: `yourcompanymsp` for MSP Portal, `yourcompany` for the Customer Network
-- End users receive **no notification** when a network is deleted — only a banner in the Admin Console signals pending deletion
-- No refunds for deleted Customer Networks regardless of timing
-- MSP-linked Customer Networks cannot be migrated to standalone networks
+- **No refunds** for deleted Customer Networks
+- End users receive **no deletion notifications** — only a banner appears in the Admin Console
+- MSP Portal URL and Customer Network URL must be **unique**; recommended convention: `yourcompanymsp` (portal) vs. `yourcompany` (network)
+- Cannot convert a Customer Network to a standalone Twingate Network
+- Trial cancellation is immediate and irreversible
 
 ## Related Docs
-- MSP Billing page (for license management details)
+- MSP Billing page (license usage details)
 - MSP Portal documentation

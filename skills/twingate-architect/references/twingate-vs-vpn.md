@@ -1,61 +1,57 @@
 # Twingate vs. VPNs
 
 ## Summary
-Twingate implements Zero Trust Networking (ZTN) as an alternative to corporate VPNs, providing application-level access control rather than network-level access. Unlike VPNs, Twingate requires no public-facing gateway, eliminates traffic backhauling, and deploys as a software-only service with no hardware or infrastructure changes required.
+Twingate implements Zero Trust Networking (ZTN) as an alternative to traditional VPNs, providing application-level access control instead of network-level access. Unlike VPNs, Twingate requires no public-facing gateway, eliminates traffic backhauling, and deploys without infrastructure changes.
 
 ## Key Information
 
-### Security Advantages Over VPNs
-- **Granular access control**: Per-application permissions vs. full network access with VPNs
-- **Hidden network**: No public gateway exposed; Connectors make outbound-only connections from inside private networks
-- **Rich authorization context**: SSO/MFA, location, time-of-day, device posture, risk scores
-- **Lateral movement prevention**: Breach scope limited to specific apps; network remains invisible to attackers
-- **Centralized logging**: Single SIEM-integrated view across all networks
+### Security Advantages
+- **Application-level access control** — grants access per-app, not per-network (least-privilege enforcement)
+- **No public gateway** — Connectors make outbound connections only; network stays hidden from internet
+- **Rich authorization context** — supports SSO, MFA, device posture, location, time-of-day, risk scores
+- **Limits lateral movement** — breach scope limited to specific apps, not entire network
+- **Centralized logging** — single audit view across all networks; integrates with SIEM
 
 ### Performance Advantages
-- **No backhauling**: Traffic routes directly; not forced through a distant VPN server
-- **Split tunneling by default**: Only internal traffic routes through private network
-- **Edge processing (ViPR technology)**: Client handles authorization locally, reducing round-trip latency
-- **Reduced corporate network congestion**
+- **No backhauling** — traffic routes directly, not through a central VPN server
+- **Split tunneling by default** — only private resource traffic routes through internal network
+- **Edge processing** — client (ViPR technology) handles authorization locally, reducing round-trips
 
-### Deployment Differences
-| VPN | Twingate |
-|-----|----------|
-| Hardware appliances required | Software-only, no hardware |
-| Network reconfiguration needed | No infrastructure changes |
-| Complex setup | Deploy in minutes |
-| Manual scaling | Scale with clicks |
-| Per-server client configuration | Always-on, automatic routing |
+### Deployment Advantages
+- No hardware/appliances required
+- Connector is a lightweight container installed on one internal device
+- No IP address or DNS name changes required
+- Protocol agnostic
+- Can coexist with existing VPN infrastructure (no rip-and-replace)
+
+### Operational Advantages
+- Centralized admin console for org-wide access management
+- Scaling via admin UI (no appliance procurement)
+- Twingate manages availability, load balancing, redundancy, patching
 
 ## Prerequisites
-- None for testing — can run alongside existing VPN infrastructure without changes
-- Single lightweight Connector (container) installed inside target network
+- None for evaluation — software-only, no infrastructure changes required
+- Existing VPN can remain in place during migration
 
-## Deployment Notes
-1. Sign up for Twingate (free trial available)
-2. Install Connector container on one device inside the private network
-3. Configure resource access policies in admin console
-4. Users download client and self-enroll with single click
-5. Optionally pilot with one team/resource subset before full rollout
+## Step-by-Step (Migration Approach)
+1. Sign up and deploy a Connector (container) inside target network
+2. Define Resources (specific apps/services) in admin console
+3. Assign user/group access policies to Resources
+4. Pilot with a single team and subset of resources
+5. Gradually expand rollout; decommission VPN segments over time
 
 ## Configuration Values
-- **Connector delivery**: Container (Docker/equivalent)
-- **Tunnel mode**: Split tunnel (default)
-- **Auth factors supported**: SSO, MFA, IP, location, time, device posture, risk score
-- **Protocol support**: Protocol-agnostic (all private applications)
+- **Connector delivery**: Container (Docker-compatible)
+- **Tunneling mode**: Split tunnel (default)
+- **Auth factors**: SSO/IdP, MFA, device posture, IP/location, time-of-day, risk score
+- **SIEM integration**: Supported
 
 ## Gotchas
-- VPN gateways are publicly visible and regularly targeted by exploits (CVEs exist for all major vendors); Twingate Connectors are not publicly exposed
-- VPN full-tunnel mode routes all traffic through corporate network regardless of destination — degrades performance for non-corporate traffic
-- With VPNs, a single breach exposes the entire network; Twingate limits blast radius to specific authorized resources
-- No IP/hostname changes required when migrating — existing resource names work as-is
-
-## Cost Model
-- VPN: Upfront capex (appliances) + ongoing expert staffing for patching/maintenance
-- Twingate: Opex subscription, no hardware, lower admin overhead
+- VPN grants network-wide access on authentication; Twingate grants per-resource access — requires upfront resource definition in admin console
+- Connector makes **outbound** connections only — no inbound firewall rules needed, but network must allow outbound HTTPS/QUIC
+- Split tunneling is default — traffic to public internet does **not** route through corporate network (may conflict with policies requiring full-tunnel)
 
 ## Related Docs
-- Zero Trust Networking concepts
-- Twingate Connector installation
-- Quick, simple, low-risk migration guide
-- Free trial signup
+- [Zero Trust Networking overview](https://www.twingate.com/docs/)
+- [Quick, simple, low-risk migration guide](https://www.twingate.com/docs/)
+- [Free trial signup](https://www.twingate.com/)

@@ -4,45 +4,45 @@
 Advanced Connector Management
 
 ## Summary
-This page serves as a navigation hub for advanced Connector management features in Twingate. It covers monitoring, logging, health checks, metrics, and deployment automation topics. Each section links to dedicated documentation pages.
+This page serves as a navigation hub for advanced Connector management features in Twingate. It covers monitoring, observability, metadata, health checks, and deployment automation capabilities available to Connector operators.
 
 ## Key Information
 - **Real-time connection logs**: Connectors can stream network connection logs to `stdout` for SIEM integration or custom monitoring
-- **Connector details**: State and host machine metadata visible in Admin console → Connector management page
-- **Custom metadata**: Can be attached to Connectors at deploy time, visible in Admin console
-- **Unqualified domain names**: Supported by configuring search domains on the Connector host (no device-level config needed)
-- **Health checks**: Docker deployments report health automatically; direct health checks available for specialized scenarios
+- **Connector details**: State and host machine metadata visible in Admin console Connector management page
+- **Custom metadata**: Deployable at Connector creation time, visible in Admin console
+- **Unqualified domain names**: Supported by configuring search domains on the Connector host (no device-level config required)
+- **Health checks**: Docker deployments report health automatically; specialized scenarios can query health directly
 - **Prometheus metrics**: Connectors can expose Prometheus-compatible metrics endpoint
-- **Deployment automation**: Admin API or custom scripts supported, with documented best practices
+- **Deployment automation**: Admin API or custom scripts supported with documented best practices
 
 ## Prerequisites
-- Connector deployed and registered to a Twingate network
-- Access to Admin console for viewing metadata and details
-- Docker (for automatic health reporting); direct health check method available for non-Docker deployments
+- Deployed Twingate Connector
+- Admin console access
+- For container health checks: Docker deployment
+- For metrics: Prometheus-compatible monitoring stack
 
-## Configuration Areas (links to sub-pages)
+## Feature Subtopics (with linked guidance)
 
-| Feature | Configuration Method |
+| Feature | Notes |
 |---|---|
-| Real-time connection logs | `stdout` configuration on Connector |
-| Custom metadata | Set at deployment time |
-| Search domains | Configured on Connector host machine |
-| Health checks | Direct endpoint (non-Docker) |
-| Metrics | Prometheus endpoint configuration |
-| Automated deployment | Admin API or custom scripts |
+| Real-time connection logs | Enable via Connector config; outputs to `stdout` |
+| Connector details | View in Admin console |
+| Custom metadata | Added at deployment time |
+| Unqualified domain names | Configure search domains on host machine |
+| Health checks | Automatic in Docker; manual check available |
+| Prometheus metrics | Requires configuration to expose endpoint |
+| Automated deployment | See Admin API best practices doc |
 
 ## Gotchas
-- Health checks are **automatic only in Docker** deployments; other deployment types require explicit health check configuration
-- Unqualified domain name support requires search domain config on the **Connector host**, not on client devices
-- Custom metadata must be added **at deployment time** — unclear if it can be modified post-deployment without redeployment
-- Real-time logs go to `stdout` only — no built-in log forwarding; external tooling required for SIEM integration
+- Custom metadata must be added **at deployment time** — not retroactively added after deployment without redeployment
+- Health checks are **automatic only in Docker** — other deployment targets (bare metal, VMs) require manual health check configuration
+- Unqualified domain name support requires search domain config on the **Connector host**, not on end-user devices
 
 ## Related Docs
-- Real-time connection logs (sub-page)
-- Connector details (sub-page)
-- Custom metadata for Connectors (sub-page)
-- Unqualified domain names (sub-page)
-- Connector health checks (sub-page)
-- Connector metrics / Prometheus (sub-page)
-- Deployment automation best practices (sub-page)
-- Twingate Admin API
+- Real-time connection logs configuration
+- Connector details (Admin console)
+- Custom metadata for Connectors
+- Unqualified domain name support
+- Connector health checks
+- Connector Prometheus metrics
+- Deployment automation best practices (Admin API)

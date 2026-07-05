@@ -1,44 +1,50 @@
 # Sign In Policy
 
 ## Summary
-The Sign In Policy defines baseline requirements users must meet before accessing the Twingate Client. It acts as the first authentication gate—users cannot see or access any Resources until it's satisfied. Configured per-network under **Policies > Sign In Policy** in the Admin Console.
+The Sign In Policy defines baseline requirements users must meet before accessing the Twingate Client. It acts as a prerequisite gate—all users must satisfy it before any Resources are accessible, regardless of Resource Policy permissiveness. Configured in Admin Console under **Policies > Sign In Policy**.
 
 ## Key Information
 - Three configurable requirements: Device Security, Authentication Frequency, MFA
-- Evaluated once at sign-in, then again when the session timer expires
-- Sign-in sessions **persist across Client restarts/reboots**
-- Resource Policy re-authentication resets the sign-in session timer (rolling window)
-- Admin Console has a **separate** sign-in policy under **Settings > Admin Console Security**
+- Evaluated once at sign-in and again when session timer expires
+- Sign-in sessions **persist across Client restarts/reboots**; Resource Policy sessions do not
+- Session timer uses a **rolling window**—resets on successful Resource Policy re-authentication
+- Session expiry causes full Client sign-out; user must re-authenticate via IdP
+
+## Prerequisites
+- Device Profiles configured (required for Device Security requirement)
+- IdP integration configured (for authentication frequency/session management)
 
 ## Configuration Values
 
-| Setting | Options/Range | Notes |
-|---|---|---|
-| Device Security | Approved OS or Trusted Profile | Links to Device Profiles config automatically |
-| Authentication Frequency | 7–31 days | Rolling window; resets on Resource Policy re-auth |
-| MFA | Enabled/Disabled | Native Twingate MFA only |
-
-## Prerequisites
-- Device Profiles configured (if using Trusted Profiles for Device Security)
-- IdP integrated (for re-authentication prompts)
+| Setting | Options/Range |
+|---|---|
+| Authentication Frequency | 7 days to 31 days (rolling window) |
+| MFA | Enabled / Disabled |
+| Device Security | Approved OS requirements OR Trusted Device Profile |
 
 ## Step-by-Step
-1. Navigate to **Policies > Sign In Policy** tab in Admin Console
-2. Configure **Device Security**: select Approved OS requirements or a Trusted Device Profile
-3. Set **Authentication Frequency**: choose interval between 7–31 days
-4. Enable/disable **MFA** as needed
-5. Save changes (Device Profile changes apply automatically)
+1. Navigate to Admin Console → **Policies** → **Sign In Policy** tab
+2. Configure **Device Security**: link to existing Device Profiles or Approved OS requirements
+3. Set **Authentication Frequency**: choose interval (7–31 days)
+4. Configure **MFA**: enable only if not already enforced via IdP
 
 ## Gotchas
-- **Double MFA**: If MFA is enforced at both the IdP and Sign In Policy, users authenticate twice per sign-in. Choose one location only.
-- **Device blocked entirely**: Devices failing Device Security requirements cannot sign in at all—not just blocked from specific Resources.
-- **Resource Policy sessions ≠ Sign-in sessions**: Resource Policy sessions do NOT persist across restarts; sign-in sessions do.
-- **Lenient Sign In Policy is valid**: Per-Resource security is handled by Resource Policies, so a 30-day sign-in frequency is a reasonable default.
-- **Session expiry = full sign-out**: When the sign-in timer expires, the user is fully signed out and must re-authenticate via IdP.
+- **Double MFA**: Enabling MFA in both Sign In Policy and IdP forces users to complete MFA twice per sign-in—configure in one place only
+- **Device Security is blocking**: Devices failing Device Security requirements are fully blocked from signing in (no fallback)
+- **Device Profile changes auto-propagate**: Modifying Device Profiles immediately affects Sign In Policy behavior
+- **Admin Console has a separate policy**: Configured under Settings → Admin Console Security; completely independent of Client Sign In Policy
+- **Lenient Sign In Policy is intentional**: Resource Policies handle per-resource strictness; Sign In Policy doesn't need to be restrictive
+
+## Sign In Policy vs Resource Policies
+
+| | Sign In Policy | Resource Policies |
+|---|---|---|
+| Controls | Client access | Per-resource access |
+| Evaluated | At sign-in + session expiry | Each resource access (when timer expired) |
+| Session persists on restart | ✅ Yes | ❌ No |
 
 ## Related Docs
-- [Device Profiles](https://www.twingate.com/docs/device-profiles)
-- [How Sessions Work](https://www.twingate.com/docs/how-sessions-work)
-- [Multi-Factor Authentication](https://www.twingate.com/docs/multi-factor-authentication)
-- [Resource Policies](https://www.twingate.com/docs/resource-policies)
-- [Admin Console Security](https://www.twingate.com/docs/admin-console-security)
+- Device Profiles
+- How Sessions Work
+- Multi-Factor Authentication
+- Admin Console Security

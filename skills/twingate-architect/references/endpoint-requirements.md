@@ -1,46 +1,42 @@
 # Endpoint Requirements
 
-## Page Title
-Endpoint Requirements
-
 ## Summary
-The Twingate Client must be installed and running on devices to access protected Resources. It uses the host OS's native VPN functionality to intercept traffic, so a VPN connection activating on the device is expected behavior.
+The Twingate Client must be installed and running on a device to access protected Resources. It uses the host OS's native VPN functionality to intercept traffic, requiring minimal resources (<10MB). Firewall rules may need adjustment if connectivity issues arise.
 
 ## Key Information
-- Client app size: less than 10MB, minimal resource usage
-- Download available at `get.twingate.com` (auto-detects platform)
-- Compatible with most device management solutions
-- Uses native OS VPN stack — VPN activation is normal, not an error
+- Client size: <10MB, minimal system resource usage
+- Uses native OS VPN functionality — VPN connection activating on device is expected behavior
+- Download at `get.twingate.com` (auto-detects platform)
+- Compatible with most device management solutions (MDM/EMM)
 
 ## Prerequisites
-- Device with supported OS
+- Device running a supported OS platform
 - Outbound internet access on required ports
-- Admin/install permissions on the device
+- Admin rights to install VPN/network extensions (implied by OS VPN usage)
 
-## Configuration Values
-
-### Required Firewall Rules (Outbound Only)
+## Firewall Rules (Outbound Only)
 
 | Protocol | Port(s) | Purpose |
 |----------|---------|---------|
 | TCP | 443 | Communication with Twingate Controller and Relay infrastructure |
 | TCP | 30000–31000 | Relay connections when peer-to-peer is unavailable |
-| UDP + QUIC (HTTP/3) | 1–65535 | Peer-to-peer connectivity (optimal performance) |
+| UDP/QUIC (HTTP/3) | 1–65535 | Peer-to-peer connectivity (optimal performance) |
 
-## Step-by-Step
+**Note:** All connections are **outbound-initiated** — no inbound rules required.
 
-1. Navigate to `get.twingate.com` — client downloads automatically for detected platform
-2. Install the Client application
-3. Ensure outbound firewall rules are not blocking required ports
-4. Connect — a VPN connection activating is expected
+## Installation
+
+1. Navigate to `get.twingate.com`
+2. Platform is auto-detected; download and install the Client
+3. For managed/enterprise deployments, refer to the Managed Devices documentation
 
 ## Gotchas
-- **No inbound rules needed** — all connections are outbound-initiated; default firewall configs typically work without changes
-- **UDP 1–65535 required for P2P** — restricting this port range will degrade performance and fall back to Relay
-- **VPN icon is expected** — users may be confused by the OS VPN indicator; this is by design
-- Firewall rules are primarily needed for troubleshooting, not standard setup
+- UDP ports 1–65535 must be open for peer-to-peer (best performance); if blocked, traffic falls back to Relay via TCP 30000–31000
+- A VPN indicator appearing on the device is **expected** — not an error
+- No special firewall rules are required by default; use the port list only for troubleshooting connectivity issues
+- QUIC/HTTP3 is used for UDP transport — may be blocked by some firewalls that restrict UDP broadly
 
 ## Related Docs
-- Download & Installation (detailed install instructions)
+- Download & Installation (detailed install guide)
 - Managed Devices (MDM/device management compatibility)
-- HTTP/3 / QUIC guide (referenced for UDP/QUIC port usage)
+- QUIC/HTTP3 guide (UDP peer-to-peer connectivity details)

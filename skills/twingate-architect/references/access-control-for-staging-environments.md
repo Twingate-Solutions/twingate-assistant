@@ -1,49 +1,48 @@
 # Best Practices for Non-production Environment Access
 
 ## Summary
-Twingate enables transparent routing between development, staging, and production environments using FQDN-based routing decided before DNS resolution. Users connect to different environments without switching VPN profiles or reconfiguring anything. Resources are coupled to Remote Networks, and the destination address determines routing.
+Twingate routes private traffic based on destination FQDN **before** DNS resolution, enabling transparent routing to separate dev/staging/production environments without user reconfiguration. Resources are coupled to Remote Networks, so the address field determines which private network handles the request and DNS resolution.
 
 ## Key Information
-- Routing decisions are made **before DNS resolution** based on destination FQDN
-- Resources are coupled to Remote Networks (private subnets)
-- DNS resolution happens on the local subnet after routing — requires local/private DNS
-- Environments remain completely invisible to the public internet
-- Users never need to know which backend network they're connecting to
+- Routing decisions happen pre-DNS resolution, using FQDN as the routing key
+- Each environment requires: a Remote Network + deployed Connector pair + a Resource with environment-specific FQDN
+- Local DNS on each subnet resolves the FQDN to the correct private IP
+- Users need zero configuration changes to switch between environments
+- Environments remain invisible to the public internet (no public DNS exposure)
 
 ## Prerequisites
-- Twingate Connectors deployed in each target subnet (deploy in pairs for load balancing)
-- Private/local DNS configured on each subnet (see: Private DNS Best Practices)
-- Twingate Resources defined per environment (e.g., `dev.example.com`, `staging.example.com`)
-- Resources mapped to their corresponding Remote Networks
+- Twingate Connectors deployed (in pairs recommended for load balancing) in each subnet
+- Local DNS configured per subnet for private hostname resolution
+- Separate Remote Networks defined in Twingate admin for each environment
 
 ## Configuration Pattern
 
-| Environment | Resource FQDN | Remote Network | Resolved IP (local DNS) |
-|-------------|--------------|----------------|------------------------|
-| Development | `dev.beamreachinc.com` | Dev subnet | `10.0.2.77` |
-| Staging | `staging.beamreachinc.com` | Staging subnet | internal IP |
-| Production | `prod.beamreachinc.com` | Prod subnet | internal IP |
+| Environment | Resource Address | Remote Network | Resolves To |
+|------------|-----------------|----------------|-------------|
+| Dev | `dev.example.com` | Dev subnet | `10.0.2.77` (via local DNS) |
+| Staging | `staging.example.com` | Staging subnet | staging IP (via local DNS) |
+| Production | `prod.example.com` | Prod subnet | prod IP (via local DNS) |
 
 ## Step-by-Step
-1. Deploy Connector pairs into each environment's subnet
-2. Create a Remote Network in Twingate for each subnet
-3. Define a Resource per environment with its FQDN and associate to the correct Remote Network
-4. Grant user/group access to specific Resources (not entire networks)
-5. Users connect via Twingate — routing is automatic based on FQDN
+1. Deploy Connector pairs into each private subnet (dev, staging, prod)
+2. Create a Remote Network in Twingate admin for each environment
+3. Associate each Connector with its corresponding Remote Network
+4. Create a Resource per environment using the environment-specific FQDN as the address
+5. Assign user/group access policies to each Resource as needed
+6. Configure local DNS on each subnet to resolve the FQDN to the correct private IP
 
-## Access Control
-- Grant narrow Resource access to specific groups (contractors, vendors, marketing) without exposing full environments
-- Use Groups to separate access: e.g., contractors get `staging.example.com` only
-- No whitelist management required for internal private resources
+## Access Control Notes
+- Grant narrow Resource access to external users (contractors, vendors) without exposing entire environments
+- Grant staging-only access to internal non-engineering teams (marketing, executives)
+- No whitelist management required since environments are private by default
 
 ## Gotchas
-- **Requires private/local DNS per subnet** — without it, resolution after routing will fail
-- Routing is FQDN-based pre-DNS, so wildcard or IP-based resources behave differently
-- If an environment is publicly hosted, this pattern doesn't apply — see "Whitelisting Traffic to Public Services" instead
-- Connectors must be deployed inside each target subnet for correct DNS resolution context
+- Requires local/private DNS per subnet — without it, resolution will fail (see *Private DNS Best Practices*)
+- If an environment is **publicly hosted**, this pattern doesn't apply — use the *Whitelisting Traffic to Public Services* approach instead
+- Connector pairs are recommended; single Connectors create a single point of failure
 
 ## Related Docs
-- Private DNS Best Practices
-- Whitelisting Traffic to Public Services
+- [Private DNS Best Practices](https://www.twingate.com/docs/private-dns-best-practices)
+- [Whitelisting Traffic to Public Services](https://www.twingate.com/docs/whitelisting-traffic-to-public-services)
 - Getting Started with Twingate on AWS
 - Getting Started with Twingate on GCP

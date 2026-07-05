@@ -1,12 +1,13 @@
 # SaaS App Gating with JumpCloud
 
 ## Summary
-Configure JumpCloud and Twingate so that IdP authentication to SaaS apps requires an active Twingate connection. Traffic routes through a Twingate Connector, presenting a known exit IP that JumpCloud's Conditional Access Policy validates before allowing SSO.
+Configure JumpCloud and Twingate to gate SaaS application access by requiring users to route IdP authentication traffic through a Twingate Connector. Access approval occurs at the IdP authentication stage via JumpCloud Conditional Access Policies, using the Connector's exit IP as the trusted source.
 
 ## Key Information
-- Replaces IP whitelisting in individual SaaS apps — enforcement happens at the IdP auth stage
-- Connector exit IP(s) are used as the trusted IP list in JumpCloud
-- Multiple Connectors behind NAT = single public IP; without NAT, add each Connector IP individually
+- Traffic routed through Twingate Connector presents the Connector's public exit IP to JumpCloud
+- Multiple Connectors behind NAT share one public IP; without NAT, each Connector IP must be added separately
+- Device-only policy on the IdP resource prevents authentication loop (chicken-and-egg problem)
+- IP lists support individual addresses, CIDR notation, and ranges
 
 ## Prerequisites
 - Twingate Admin Console access
@@ -17,19 +18,19 @@ Configure JumpCloud and Twingate so that IdP authentication to SaaS apps require
 ## Step-by-Step
 
 ### Twingate Admin Console
-1. **Create a Resource** for `console.jumpcloud.com`, assign to relevant Groups
-2. **Apply a Device-only Policy** to the `console.jumpcloud.com` Resource — prevents auth loop where users can't reach IdP without first authenticating via Twingate
+1. **Create a Resource** for `console.jumpcloud.com` and assign it to relevant Groups
+2. **Apply a Device-only Policy** to that Resource (prevents auth loop where IdP access requires prior Twingate auth)
 
-### JumpCloud: Create IP List
-1. Admin Portal → **Security Management > Conditional Lists**
+### JumpCloud — Create IP List
+1. Navigate to **Security Management > Conditional Lists**
 2. Click **+**
-3. Name: `Twingate Connectors` (or similar)
-4. Enter Connector public IP(s) — supports individual IPs, CIDR, and ranges
+3. Set **List Name** (e.g., `Twingate Connectors`)
+4. Enter Connector public IP(s) (individual, CIDR, or range)
 5. Click **Save**
 
-### JumpCloud: Create Conditional Access Policy
-1. Admin Portal → **Security Management > Conditional Policies**
-2. Click **+** → select **SSO Applications**
+### JumpCloud — Create Conditional Access Policy
+1. Navigate to **Security Management > Conditional Policies**
+2. Click **+**, select **SSO Applications**
 3. Enter a unique **Policy Name**
 4. Select target **SSO Applications**
 5. Select target **Users & Groups**
@@ -38,20 +39,19 @@ Configure JumpCloud and Twingate so that IdP authentication to SaaS apps require
 8. Click **Create Policy**
 
 ## Configuration Values
-| Item | Value |
-|------|-------|
-| Resource FQDN | `console.jumpcloud.com` |
-| Resource Policy Type | Device-only |
-| JumpCloud IP list scope | Connector public egress IP(s) |
-| IP formats supported | Individual, CIDR, range |
+| Setting | Value |
+|---|---|
+| JumpCloud Resource FQDN | `console.jumpcloud.com` |
+| Twingate Policy Type | Device-only |
+| IP List source | Connector public exit IP(s) |
 
 ## Gotchas
-- **Auth loop risk**: Without the Device-only policy on the IdP Resource, users can't reach JumpCloud to authenticate, but Twingate requires authentication — apply Device-only policy to break this cycle
-- **NAT**: Most Connectors share one public IP via NAT — verify before assuming multiple IPs are needed
-- **Non-NAT deployments**: Each Connector's individual public IP must be added to the JumpCloud IP list
+- **Auth loop risk**: Without a Device-only policy on the IdP resource, users cannot authenticate because reaching JumpCloud requires Twingate auth first
+- **Multiple Connectors without NAT**: Each Connector's individual IP must be added to the IP list (uncommon scenario)
+- **NAT assumption**: Most deployments share one public IP via NAT gateway — verify before adding IPs
 
 ## Related Docs
-- [Twingate: Create a Resource](https://www.twingate.com/docs)
-- [Twingate: Device-only Resource Policy](https://www.twingate.com/docs)
-- [JumpCloud: Managing IP Lists](https://jumpcloud.com/support)
-- [JumpCloud: Access Policies for SSO Apps](https://jumpcloud.com/support)
+- [Create a Twingate Resource](https://www.twingate.com/docs/creating-resources)
+- [Device-only Resource Policy](https://www.twingate.com/docs/resource-policies)
+- [JumpCloud IP Lists Guide](https://jumpcloud.com/support/manage-ip-lists)
+- [JumpCloud SSO Access Policies](https://jumpcloud.com/support/access-policies-for-sso-apps)

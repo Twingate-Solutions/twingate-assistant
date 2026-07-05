@@ -3,65 +3,74 @@
 # Modded Minecraft Server (Forge) with Twingate
 
 ## Summary
-Deploy a private Forge modded Minecraft server using Docker Compose with a Twingate Connector, keeping it off the public internet. Supports CurseForge modpacks (recommended) or manual mod installation. Players connect via Twingate Client using the server's private IP.
+Hosts a private Forge modded Minecraft server using Docker Compose with a Twingate Connector sidecar. Supports both CurseForge modpack auto-install and manual mod placement. Players connect via Twingate Client to a private IP with no port forwarding required.
 
 ## Key Information
-- Uses `itzg/minecraft-server` Docker image with Forge support
-- Server pinned to `172.30.0.10` on internal bridge network (`172.30.0.0/24`)
-- No host ports published; Connector accesses server directly over Docker bridge network
-- Works on Linux, macOS, and Windows (unlike `network_mode: host`)
-- All players must have identical mods/versions; server rejects mismatched clients
+- Server pinned to `172.30.0.10` on internal bridge network `172.30.0.0/24`
+- No host port published; Connector reaches server directly over Docker bridge
+- Minecraft port: TCP `25565`
+- Both containers share `minecraft-net` bridge network
+- CurseForge API key required for modpack auto-download (free at console.curseforge.com)
+- First startup can take 10+ minutes (downloads Forge + all mods)
 
 ## Prerequisites
-- Machine: 4 GB RAM minimum (6-8 GB for large modpacks), 2 CPU cores, 20 GB disk
+- Machine: 4+ GB RAM (6-8 GB for large packs), 2 CPU cores, 20 GB disk
 - Docker Engine + Docker Compose installed
 - Twingate account with Admin Console access
-- CurseForge API key (free at `console.curseforge.com`) if using modpacks
-- Twingate Connector tokens (from Remote Network setup)
+- Terminal access to host machine
+- CurseForge API key (Option A only)
 
 ## Step-by-Step
 
-1. **Create Remote Network & Connector tokens** — Follow vanilla Minecraft guide Step 1
-2. **Deploy server** — Create `docker-compose.yml`, run `docker compose up -d`
+1. **Create Remote Network + Connector tokens** — Follow Step 1 of vanilla Minecraft guide
+2. **Deploy server** — Create `docker-compose.yml` (see configs below), run `docker compose up -d`
 3. **Add Resource** — Address: `172.30.0.10`, Protocol: TCP port `25565`
 4. **Grant access** — Assign Group to Resource in Admin Console
-5. **Connect players** — Install Twingate Client + matching mods; connect to `172.30.0.10`
+5. **Players install** — Twingate Client + same modpack/mods as server
+6. **Connect** — Multiplayer → Add Server → `172.30.0.10`
 
 ## Configuration Values
 
-### CurseForge Modpack (Option A)
-| Variable | Description |
-|----------|-------------|
+### Option A: CurseForge Modpack
+| Variable | Value/Description |
+|---|---|
 | `TYPE` | `AUTO_CURSEFORGE` |
 | `CF_PAGE_URL` | Full CurseForge modpack URL |
-| `CF_API_KEY` | CurseForge API key (**escape `$` as `$$`**) |
+| `CF_API_KEY` | CurseForge API key (escape `$` as `$$`) |
 | `CF_SLUG` | Alternative to `CF_PAGE_URL` |
 | `CF_FILE_ID` | Pin specific modpack version |
+| `MEMORY` | `6G` recommended |
 
-### Manual Mods (Option B)
-| Variable | Value |
-|----------|-------|
+### Option B: Manual Mods
+| Variable | Value/Description |
+|---|---|
 | `TYPE` | `FORGE` |
-| `VERSION` | e.g., `1.20.1` |
+| `VERSION` | e.g., `1.20.1` (must match mods) |
+| `FORGE_VERSION` | Usually auto-detected |
+| `MEMORY` | `4G` minimum |
 
 ### Common Variables
-| Variable | Default | Notes |
-|----------|---------|-------|
-| `MEMORY` | `1G` | Set `4G`–`8G` for modded |
-| `MAX_PLAYERS` | `20` | — |
+| Variable | Default | Description |
+|---|---|---|
 | `EULA` | — | Must be `"TRUE"` |
-| `OPS` | — | Comma-separated operator usernames |
+| `MAX_PLAYERS` | `20` | Concurrent player limit |
+| `MOTD` | none | Server browser message |
+| `OPS` | none | Comma-separated operator usernames |
+
+### Twingate Connector
+| Variable | Description |
+|---|---|
+| `TWINGATE_NETWORK` | Your network address |
+| `TWINGATE_ACCESS_TOKEN` | From Admin Console |
+| `TWINGATE_REFRESH_TOKEN` | From Admin Console |
 
 ## Gotchas
-- **CurseForge API key dollar signs**: Keys starting with `$2a$10$` must have every `$` escaped as `$$` in `docker-compose.yml`; unescaped keys cause silent corruption with a misleading "forbidden/rate-limit" error
-- **RAM overhead**: JVM + Forge add overhead; a `6G` heap may use 7+ GB total; Connector adds <256 MB
-- **First startup time**: `AUTO_CURSEFORGE` downloads all mods — can take 10+ minutes on slow connections
-- **Mod version matching**: Both mod files AND versions must be identical on client and server; mismatch shows "Mod rejections" screen
-- **Some CurseForge mods** block third-party distribution; must be downloaded manually to `./data/mods/`
-- **Forge startup is slow**: Large modpacks (200+ mods) take 3–5 minutes; wait for `Done! For help, type "help"` in logs
+- **CurseForge API key dollar signs**: Keys start with `$2a$10$`; escape every `$` as `$$` in `docker-compose.yml` or key is silently corrupted → misleading "forbidden or rate-limit" error
+- **Mod version mismatch**: Server rejects clients with missing/wrong mod versions — all players need identical mod files and versions
+- **`network_mode: host`** only works on native Linux; use bridge network for cross-platform compatibility
+- **RAM overhead**: A `6G` heap uses 7+ GB total; JVM + Forge add significant overhead
+- **Some CurseForge mods** are marked "not allowed for third-party distribution" — must be downloaded manually to `./data/mods/`
+- Mods must match both Minecraft `VERSION` and Forge version
 
 ## Related Docs
-- [Vanilla Minecraft guide](https://www.twingate.com/docs/minecraft)
-- [Bedrock Edition guide](https://www.twingate.com/docs/minecraft-bedrock)
-- [itzg/minecraft-server Forge docs](https://docker-minecraft-server.readthedocs.io/)
-- [Twingate Security Policies](https
+- [Vanilla Minecraft Guide](https://www.twingate.com/

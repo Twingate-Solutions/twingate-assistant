@@ -4,45 +4,50 @@
 Network Events Admin Console Export
 
 ## Summary
-Twingate allows administrators to export Network Events from the Admin Console Reports page as GZIP-compressed JSON files. Exports run as background jobs with email notification on completion. The output contains one JSON object per line (JSONL format).
+Twingate allows administrators to export Network Events from the Admin Console Reports page as GZIP-compressed JSON files. Exports run as background jobs and are delivered via email notification when complete. The export covers connection events filtered by date range and Remote Network(s).
 
 ## Key Information
-- Export format: GZIP-compressed JSONL (one JSON event per line)
+- Export format: GZIP-compressed, newline-delimited JSON (one event per line)
 - Timestamps in export are **UTC**, regardless of local timezone used during selection
-- Time range filter uses **connection end time**, not start time
-- Remote Networks default to all if not specified
-- Export duration: seconds to minutes typically; large exports may take hours
-- Detailed schema available via linked documentation (separate page)
+- Time range filter uses **end time** of connection, not start time
+- Remote Networks default to **all** if not specified
+- Export duration: seconds to minutes typically; very large exports may take hours
+- Completed exports are downloaded from the Reports page
 
 ## Prerequisites
-- Admin Console access with permissions to view Reports/Settings
-- Access to the **Reports** page under **Settings**
+- Admin Console access
+- Access to Settings > Reports page
+- Report Type must be set to **Events** (not another report type)
 
-## Step-by-Step
-
+## Step-by-Step: Generating an Export
 1. Navigate to **Settings → Reports**
-2. Click the **Network Events** tab
+2. Click **Network Events** tab
 3. Click **Generate Network Events Report**
 4. Set **Report Type** to `Events`
-5. Select date/time range (local timezone) and target Remote Network(s)
-6. Wait for background processing — refresh page or await email notification
-7. Return to Reports page to download completed export
+5. Select date/time range (uses local timezone for selection)
+6. Select Remote Network(s) (defaults to all)
+7. Wait for background processing; refresh page or await email notification
+8. Return to Reports page to download completed export
+
+## Viewing/Using the Export
+1. Decompress the GZIP file using any standard compression tool
+2. Rename the decompressed file with `.csv` extension for spreadsheet compatibility
+3. Be aware: large time ranges may produce millions of rows, causing spreadsheet editor issues
 
 ## Configuration Values
-| Parameter | Options/Notes |
-|-----------|---------------|
+| Parameter | Notes |
+|-----------|-------|
 | Report Type | Must be set to `Events` |
 | Date/Time Range | Local timezone input; UTC in output |
-| Remote Networks | Defaults to all; can filter to specific networks |
-| Time filter basis | Connection **end time** |
+| Remote Networks | Optional filter; defaults to all |
 
 ## Gotchas
-- **Safari users**: Automatic unpacking may result in an apparently empty file. Disable via *Safari → Preferences → General → uncheck "Open 'Safe' files after downloading"*
-- After decompression, **manually add `.csv` extension** to the file for spreadsheet compatibility
-- Very large exports (millions of lines) may crash or hang spreadsheet editors — consider programmatic processing
-- Local timezone is used for **input selection only**; actual exported timestamps are always UTC
-- Export is asynchronous — the page must be refreshed or email awaited before download is available
+- **Safari users**: File may appear empty due to auto-unpack feature. Disable via Safari → Preferences → General → uncheck "Open 'Safe' files after downloading"
+- **Timezone mismatch**: Selection UI uses local timezone but exported timestamps are in UTC
+- **End time filtering**: Records are included based on when the connection *ended*, not when it started — connections spanning the boundary may be excluded/included unexpectedly
+- **Large exports**: Millions of rows possible; spreadsheet editors may struggle — consider scripted processing
+- **File extension**: Decompressed file has no `.csv` extension by default; must be manually renamed
 
 ## Related Docs
-- Network Events schema (linked inline as "here" on the source page)
-- Reports page documentation (implied)
+- Network Events export schema (linked as "detailed schema" in source — `/docs/network-events-schema` or similar)
+- Twingate Reports page documentation

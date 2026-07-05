@@ -1,61 +1,66 @@
-# Replace AWS VPN with Twingate
+# How to Replace the AWS VPN with Twingate
 
 ## Summary
-Twingate provides Zero Trust network access to AWS resources as an alternative to AWS Client VPN. A single Connector deployed on an EC2 instance grants access to all resources in the same VPC subnet via private IP addresses, without requiring public IPs on target resources.
+Twingate provides a Zero Trust alternative to AWS Client VPN for securing access to AWS resources. A Connector deployed on a single EC2 instance grants access to all resources within the same VPC subnet, including those without public IP addresses. Setup takes approximately 4 minutes using a single shell command.
 
 ## Key Information
-- Connector deployed on one EC2 instance provides access to entire VPC subnet
-- Target resources require **no public IP addresses**
-- Supports hybrid/multi-cloud (AWS, GCP, Azure, on-prem) via multiple Connectors
-- Free Starter plan available for personal use
-- Client apps: Windows, Mac, Linux, iOS, Android
+- No public IP addresses required on resources — access via private IPs only
+- One Connector per VPC subnet covers all resources in that subnet
+- Works across hybrid/multi-cloud (AWS, GCP, Azure, on-prem) from a single control plane
+- Supports Windows, Mac, Linux, iOS, Android clients
+- Free Starter plan available for personal/home use
 
 ## Prerequisites
-- Existing EC2 instance (any major Linux distro) for Connector deployment
-- Twingate account (Starter plan is free)
-- Target AWS resources running in the same VPC subnet as the Connector
+- An EC2 instance (any major Linux distro) to host the Connector
+- Twingate account (sign up at twingate.com)
+- AWS resources deployed in a VPC (public IPs not required)
 
 ## Step-by-Step
 
-1. **Create Remote Network** — In Twingate web UI → Network → Add Remote Network → name it (e.g., "AWS")
+1. **Create a Remote Network**
+   - In Twingate dashboard → Network page → Add Remote Network
+   - Name it (e.g., "AWS")
 
-2. **Deploy Connector**
-   - Select the auto-generated Connector → Linux → Generate Tokens
+2. **Add a Connector**
+   - Select the auto-generated Connector within the Remote Network
+   - Choose Linux as deployment method
+   - Generate tokens (requires re-authentication)
    - Copy the auto-generated shell command
-   - SSH into EC2 instance → paste and run the command
-   - Confirm Connector status turns green in UI
 
-3. **Add Resource**
-   - Remote Network → Add Resource
-   - Enter private IP address (CIDR supported) and label
-   - Resource is now accessible via private IP
+3. **Deploy the Connector on EC2**
+   - SSH into your EC2 instance
+   - Paste and run the copied shell command
+   - Confirm Connector status turns green in dashboard
 
-4. **Install Client**
+4. **Add a Resource**
+   - In Remote Network → Add Resource
+   - Enter a Label and the private IP address (CIDR format supported)
+   - Save — resource is now accessible via Twingate
+
+5. **Install Twingate Client**
    - Download client for your OS
-   - Enter network URL (`[yourname].twingate.com`) → Join Network
-   - Authenticate with Twingate account
-   - Access resource via private IP in browser
+   - Enter your network URL: `[yournetwork].twingate.com`
+   - Authenticate with your Twingate account
+   - Access resources via private IP through the client
 
-5. **Share Access** (optional)
+6. **Share Access (Optional)**
    - Team tab → Invite User → send email invitation
+   - Invitee installs client and joins network
 
 ## Configuration Values
-| Item | Value |
-|------|-------|
-| Network URL format | `[networkname].twingate.com` |
-| Resource type | IP address or CIDR range |
-| Connector install | Auto-generated shell command from UI |
-| Connector tokens | Two tokens generated per Connector |
+- **Network URL format**: `[subdomain].twingate.com`
+- **Resource type**: CIDR Address or specific private IP
+- **Connector tokens**: Two tokens auto-generated per Connector (used in the deploy command)
 
 ## Gotchas
-- Connector must be in the **same VPC subnet** as target resources to reach them via private IP
-- Must re-authenticate in Twingate UI when generating Connector tokens
-- Disconnecting Twingate client makes resources completely inaccessible (no public IP fallback if configured correctly)
-- Each separate network (GCP, on-prem, etc.) requires its own Connector deployment
+- Connector must be in the same VPC subnet as the resources it proxies
+- Disconnecting Twingate client should render resources completely inaccessible (verify this works as a sanity check)
+- Tokens are only shown once after re-authentication — copy them before closing
+- EC2 instance hosting the Connector must remain running for access to work
 
 ## Related Docs
-- GCP Connector deployment
-- Azure Connector deployment
-- Synology NAS deployment
-- Raspberry Pi deployment
-- Twingate API (for programmatic configuration)
+- [GCP Connector deployment](https://www.twingate.com/docs/gcp)
+- [Azure Connector deployment](https://www.twingate.com/docs/azure)
+- [Synology NAS Connector](https://www.twingate.com/docs/synology-nas)
+- [Raspberry Pi Connector](https://www.twingate.com/docs/raspberry-pi)
+- [Twingate API (programmatic config)](https://www.twingate.com/docs/api)

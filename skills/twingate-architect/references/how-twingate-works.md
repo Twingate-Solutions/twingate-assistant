@@ -1,50 +1,61 @@
 # How Twingate Works
 
 ## Summary
-Twingate uses four components (Controller, Client, Connector, Relay) where no single component can independently authorize traffic flow. Authorization requires confirmation across multiple components, with user authentication delegated to a third-party IdP. Users access private Resources via FQDN or IP using local addressing without needing network configuration knowledge.
+Twingate uses four components (Controller, Client, Connector, Relay) to implement zero-trust network access where no single component can independently authorize traffic flow. Authorization is always confirmed with at least two components, with user authentication delegated to a third-party IdP. Users access private Resources via FQDN or IP using network-local addressing without knowledge of underlying network topology.
 
 ## Key Information
-
-- **No single-component authorization**: Access decisions always require cross-component verification
-- **Four components**: Controller (coordination), Client (user device proxy), Connector (remote network agent), Relay (connection broker)
-- **Controller is data-plane isolated**: Only component that never touches actual data flow
-- **Dual ACL intersection check**: Traffic only flows if destination Resource exists in *both* Client ACL and Connector ACL
-- **Peer-to-peer preferred**: Client↔Connector P2P connections attempted first; Relay used as fallback (equivalent to TURN server)
-- **Connector IDs are anonymized**: Only hash-generated IDs shared with Clients; no private network info exposed
+- **No single component** can independently allow traffic — all authorization requires multi-component confirmation
+- User authentication is always delegated to a third-party identity authority (IdP or social identity)
+- Traffic access requires intersection of both Client ACL and Connector ACL — double authorization check
+- DNS resolution for protected Resources happens locally on the Remote network (via Connector)
+- No application configuration required on user devices — Client uses transparent TCP/UDP proxy
+- TLS tunnel is certificate-pinned to a specific Connector using a signed connection token from Controller
+- Peer-to-peer connection is always attempted first; Relay is fallback only
 
 ## Component Responsibilities
 
-| Component | Hosted By | Key Role |
-|-----------|-----------|----------|
-| Controller | Twingate (multi-tenant, clustered) | Config storage, ACL generation, Connector registration, auth delegation |
-| Client | User device (installed software) | Auth proxy, DNS proxying, TCP/UDP proxying, ACL enforcement |
-| Connector | Customer (behind firewall) | Traffic forwarding, local DNS resolution, Client verification |
-| Relay | Twingate | Connector registration point, Client↔Connector matchmaking |
+### Controller (Twingate-hosted, multi-tenant)
+- Stores Admin console configuration
+- Delegates user authentication to IdP
+- Generates signed ACLs for Clients (least-privilege per user)
+- Generates ACLs for Connectors (authorized forwarding destinations)
+- Registers/authenticates Connectors (one-time authorization + hash-based anonymous ID)
+- Does **not** interact with any data flow
 
-## Security Architecture Details
+### Client (installed on user devices)
+- Authenticates users via Controller redirect to identity authority
+- Obtains Controller-signed user ACL
+- Intercepts DNS and TCP/UDP traffic to protected Resources
+- Forwards DNS to Remote network Connector for local resolution
+- Establishes certificate-pinned TLS tunnel to Connector
 
-- **ACL signing**: Client ACLs are signed by Controller; Connector verifies signature on every inbound connection request (prevents tampering)
-- **Certificate-pinned TLS**: Client establishes TLS tunnel to Connector pinned via signed connection token from Controller
-- **Connector deployment**: Requires one-time Controller authorization; authenticates with anonymized hash ID thereafter
-- **DNS resolution**: DNS lookups for protected Resources forwarded to Connector and resolved *locally* on the remote network
-- **No application config needed**: Transparent proxy handles all TCP/UDP—apps behave as if connecting directly to Resources
+### Connector (deployed behind private firewall)
+- Authenticates with Controller; receives and maintains Connector ACL
+- Maintains outbound connections to one or more Relays
+- Verifies TLS tunnel integrity, Client signature, and Client ACL claim on every inbound connection
+- Performs local DNS resolution for FQDN Resources before forwarding
 
-## Connection Verification (Connector-side)
-For every inbound Client connection, Connector verifies:
-1. TLS tunnel integrity
-2. Client signature validity
-3. Client ACL claim validity
+### Relay (Twingate-hosted, equivalent to TURN server)
+- Stores only anonymous hash-based Connector IDs — no network-identifiable data
+- No data-carrying connections terminate at the Relay
+- Connects Clients to Connectors by Connector ID without knowing source/destination network details
 
-## Gotchas
+## Security Design Gotchas
+- Connector ACL acts as a **second check** on Client ACL — traffic only flows if destination is in both ACLs
+- Connector ID shared with Clients is anonymized (hash-based) — no private network info exposed
+- Client ACL signature is verified by Connector on every connection to prevent tampering
+- Connectors cannot be deployed without one-time Controller authorization
 
-- Connector must be deployed *behind* the remote network firewall—it uses outbound connections to Relay(s), not inbound
-- The Relay stores **no** network-identifiable information and terminates **no** data-carrying connections
-- User sync from IdP goes to Controller; authentication is always delegated externally (social identity or configured IdP)
-- Connector ACL intersection with Client ACL acts as a second authorization check—misconfigured Connector ACLs can block authorized users
+## Prerequisites
+- Configured Identity Provider (or social identity)
+- Twingate Admin console access
+- Client installed on user devices
+- Connector deployed inside target private network
 
 ## Related Docs
+- Client installation guide
 - Connector deployment guide
+- Relay documentation
 - Identity Provider configuration
 - Admin console configuration
-- Relay documentation
-- Client installation guide
+- Connection flow detail (referenced as next article in series)

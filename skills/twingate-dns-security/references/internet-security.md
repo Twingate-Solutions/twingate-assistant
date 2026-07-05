@@ -4,30 +4,32 @@
 Internet Security Overview
 
 ## Summary
-Twingate offers DNS-over-HTTPS (DoH) as an internet security feature for desktop users on Windows, macOS, and Linux. It encrypts all DNS traffic system-wide at the network level without requiring per-application configuration. This is the foundational overview page linking to more detailed implementation guides.
+Twingate offers DNS-over-HTTPS (DoH) as an internet security feature for desktop clients (Windows, macOS, Linux). It operates at the network level to encrypt all DNS traffic system-wide without requiring per-application configuration. Additional capabilities are planned but not yet documented.
 
 ## Key Information
-- DNS security feature: DNS-over-HTTPS (DoH) encryption
-- Supported platforms: Windows, macOS, Linux (desktop clients only)
-- Encrypts **all** DNS traffic regardless of originating application
-- No user-side configuration required beyond running the Twingate Client
-- Twingate operates at network level on device to achieve system-wide coverage
-- More internet security capabilities planned for future releases
+- Current feature: DNS encryption via DNS-over-HTTPS (DoH)
+- Supported platforms: Windows, macOS, Linux (desktop only)
+- DoH encrypts **all** DNS traffic regardless of originating application
+- No user-side configuration changes required beyond running the Twingate Client
+- Twingate's network-level operation enables system-wide DNS security
 
 ## Prerequisites
-- Twingate Client installed on a supported desktop OS (Windows, macOS, or Linux)
-- User must be part of a Twingate network
+- Twingate Client installed and running on a supported desktop OS
+- Feature must be enabled by network administrator
 
 ## Exclusions / Gotchas
 - **Headless clients in service account mode never use DoH** — regardless of platform
-- DoH is desktop-only; mobile platforms not mentioned as supported
-- This page is an overview only; actual configuration is in linked guides
+- Mobile platforms not mentioned as supported
+- Feature is desktop-only; no mobile or server-mode support
 
 ## Configuration Values
-- No configuration values on this page; settings handled in DoH configuration guide
+- No direct CLI flags or env vars documented on this page
+- Configuration handled via:
+  - DNS filtering guide (separate doc)
+  - DoH configuration guide (separate doc)
 
 ## Related Docs
-- [DNS Filtering Guide](https://www.twingate.com/docs/dns-filtering) — for filtering configuration
-- [DoH Configuration Guide](https://www.twingate.com/docs/doh-configuration) — for enabling/configuring DoH
-- Twingate DNS behavior overview (linked inline on page)
-- Headless clients / service account documentation
+- [DNS Filtering Guide](https://www.twingate.com/docs/dns-filtering)
+- [DoH Configuration Guide](https://www.twingate.com/docs/doh-configuration)
+- Twingate DNS behavior overview (linked inline)
+- Headless clients / service account mode documentation

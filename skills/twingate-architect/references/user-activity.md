@@ -1,64 +1,67 @@
-# User Activity Reporting
+# User Activity Reports
 
 ## Page Title
-User Activity
+User Activity (Twingate Admin Console Reporting)
 
 ## Summary
-Twingate Admin Console provides user activity reporting including authentication event logs and active/inactive user reports. Admins can export data manually as CSV/JSON or sync to Amazon S3. Reports help troubleshoot connection issues and manage user lifecycle.
+Twingate provides user activity and authentication event reporting via the Admin Console. Admins can export authentication events as JSON (manual or S3 sync) and user activity reports as CSV. Reports help troubleshoot connection issues, audit MFA events, and manage inactive accounts.
 
 ## Key Information
-- **Authentication Events**: Tracks sign-in attempts (success/failure), IDP errors, device posture mismatches, policy blocks, MFA setup/reset
-- **Active Users Report**: Users who accessed Resources in the selected time window
-- **Inactive Users Report**: Automatically flags accounts with no Resource access in **90+ days**
-- Export formats: **JSON** (authentication events), **CSV** (user activity), delivered via **GZIP**
+- **Authentication Events**: Tracks sign-in attempts (success/failure), IDP errors, device posture mismatches, policy blocks, MFA setup/resets
+- **Active Users Report**: Includes connections, bytes transferred, relay vs P2P breakdown, client IPs
+- **Inactive Users Report**: Auto-identifies accounts with no Resource access in last **90 days**
+- Export formats: Authentication events → **JSON (GZIP)**; User activity → **CSV (GZIP)**
 - Timestamps in exports are **UTC**; time range selection uses **local timezone**
-- Large exports may take several hours; completion notification sent via email
-- Authentication events can be synced to **Amazon S3** automatically
+- Large exports may take **a few hours**; completion notification sent via **email**
+- Authentication events can be synced automatically to **Amazon S3**
 
 ## Prerequisites
 - Admin Console access
-- Amazon S3 bucket configured (for automated sync only)
+- Amazon S3 bucket configured (for automatic sync only)
 
 ## Step-by-Step: Generate Export
-1. Settings → **Reports** → **User Activity**
+1. Go to **Settings → Reports → User Activity**
 2. Click **Generate User Activity Report**
 3. Select report type: **Authentication Events** or **User Activity**
 4. For Authentication Events: select time range
 5. For User Activity: select **Active** or **Inactive** users + time range
 6. Wait for email notification (minutes to hours)
 7. Return to Reports page to download
-8. Optionally configure **Amazon S3 sync** for ongoing authentication event delivery
+8. Optionally configure **Amazon S3 sync** for ongoing authentication event export
 
 ## Configuration Values
 
-### Active User Report CSV Columns
+### Active Users Report CSV Columns
 | Column | Description |
 |--------|-------------|
 | `user_email` | User email |
 | `last_access_date` | Last Resource access timestamp |
 | `total_connections` | All connections in period |
 | `success_connections` | Successful connections |
-| `failed_connections` | Total failed connections |
+| `failed_connections` | All failed connections |
 | `failed_connections_dns` | DNS-related failures |
 | `failed_connections_other` | Non-DNS failures |
-| `total_bytes` / `bytes_transferred` / `bytes_received` | Bandwidth metrics |
-| `percent_relay` / `percent_p2p` | Connection type breakdown |
-| `active_devices` | Device count at report generation time |
-| `num_of_client_ip` / `top_10_client_ips` | Client IP metrics |
+| `total_bytes` | Total bytes transferred |
+| `bytes_transferred` | Bytes sent to Resources |
+| `bytes_received` | Bytes received by user |
+| `percent_relay` | % connections via relay |
+| `percent_p2p` | % peer-to-peer connections |
+| `active_devices` | Active devices at report time |
+| `num_of_client_ip` | Unique client IPs used |
+| `top_10_client_ips` | Top 10 client IPs |
 
-### Authentication Event JSON Schema Fields
+### Authentication Event JSON Fields
 - `version`, `time` (UTC), `action.type` (e.g., `admin_login`, `reauth`)
 - `action.user`: `email`, `id`, `policy.id`, `policy.name`
-- Resource auth adds: `device.id`, `device.name`, `resource.id`, `resource.name`
+- Resource auth additionally includes: `device.id`, `device.name`, `resource.id`, `resource.name`
 
 ## Gotchas
-- **Safari users**: Disable "Open safe files after downloading" to prevent auto-unpack issues with GZIP
-- After decompressing GZIP, **manually add `.csv` extension** to open in spreadsheet editors
-- Inactive Users Report threshold is fixed at **90 days** — not configurable
-- Time range input is local timezone but export timestamps are UTC — watch for offset confusion
+- Exports are **GZIP compressed** — rename decompressed file with `.csv` extension for spreadsheet compatibility
+- **Safari users**: Disable "Open safe files after downloading" (Safari → Preferences → General) to prevent empty file issues
+- Inactive users threshold is fixed at **90 days** — not configurable
+- Time range UI uses local timezone but export timestamps are UTC
 
 ## Related Docs
-- Amazon S3 Sync configuration
+- Amazon S3 Sync setup
 - Resource Policies
 - Device Posture
-- Admin Console Settings

@@ -4,35 +4,35 @@
 Connector Details
 
 ## Summary
-Twingate Connectors report metadata back to the Controller including uptime/downtime, time synchronization, STUN discovery status, and network information. This data is used for monitoring Connector health and troubleshooting connectivity issues.
+Twingate Connectors report metadata to the Controller for status monitoring and troubleshooting. Key metrics include uptime/downtime, time synchronization, STUN discovery status, and network information. This data is visible in the Twingate admin console.
 
 ## Key Information
 
-- **Uptime/Downtime**: Reflects Connector state as seen by the Controller — not the host machine status. A running machine can still show Connector downtime.
-- **Time Offset**: Difference between Connector clock and Controller clock. Max tolerance is **±5 seconds**. Values outside this range cause intermittent connection failures.
-- **STUN Discovery**: Required for peer-to-peer connections. Used to determine public IP/port behind NAT layers. If unavailable, P2P connections fail entirely.
-- **Hostname**: Reports the hostname of the machine/container running the Connector (e.g., Docker container hostname, not host machine).
-- **Public IP**: Most recently seen IP from the Controller's perspective — may change in multi-path routing setups.
-- **Private IP**: All private IPs visible to the Connector process. Docker containers report container-network addresses (e.g., `172.0.0.0/16`), not the physical host's IPs.
-
-## Prerequisites
-- A deployed Twingate Connector
-- Network access from Connector to Twingate Controller
-
-## Configuration Values
-- **Time offset limit**: `±5 seconds` (hard tolerance)
-- **Docker private IP subnet**: `172.0.0.0/16` (container networking — does not reflect physical host)
+- **Uptime/Downtime**: Reflects Connector state as seen by the Controller — not the host machine state. Connector downtime ≠ host machine downtime
+- **Time Offset**: Difference between Connector clock and Controller clock; max tolerance is **±5 seconds**
+- **STUN Discovery**: Required for peer-to-peer connections; used to determine public IP/port behind NAT layers
+- **Hostname**: Reports the process's hostname (e.g., Docker container hostname, not physical host)
+- **Public IP**: Most recent IP the Controller observes; may change in multi-path routing setups
+- **Private IP**: All private IPs visible to the Connector process; Docker containers report container subnet (e.g., `172.0.0.0/16`), not host IPs
 
 ## Gotchas
 
-- **Downtime ≠ host offline**: Connector downtime only reflects Controller visibility. A healthy host machine can still register Connector downtime — check best practices if this occurs.
-- **Time sync is critical**: Offsets near ±5s cause *intermittent* issues that may be hard to diagnose. Ensure NTP is configured and running on the Connector host.
-- **STUN unavailability**: Blocks all P2P connections. Clients will fall back to relay if available, but P2P performance is lost.
-- **Docker IP reporting**: Private IPs shown for containerized Connectors reflect container network interfaces only — physical host IPs are not visible from inside the container.
-- **Public IP is not static**: In environments with multiple egress paths, the reported public IP may not be consistent.
+- **Time offset near ±5s** causes intermittent connection issues — ensure NTP is properly configured on Connector hosts
+- **Downtime ≠ host down**: If Connector shows downtime but host is running, review Twingate best practices (misconfiguration, not hardware failure)
+- **STUN unavailable** = no peer-to-peer connections possible; clients fall back to relay or fail
+- **Docker networking**: Private IP will show container network addresses, not physical machine IPs — don't use for host network troubleshooting
+- **Public IP is not static**: In multi-homed or load-balanced setups, the reported IP may rotate
+
+## Configuration Values
+
+| Parameter | Value/Limit |
+|-----------|-------------|
+| Max time offset | ±5 seconds |
+| Docker private subnet (typical) | `172.0.0.0/16` |
 
 ## Related Docs
-- Connector Best Practices (linked in page)
-- Twingate Knowledge Base: Time Synchronization Issues (linked in page)
+
+- Twingate Connector Best Practices
 - STUN protocol documentation
-- NAT traversal overview
+- NAT traversal documentation
+- Twingate Knowledge Base: Time synchronization troubleshooting

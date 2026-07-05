@@ -1,53 +1,45 @@
 # Twingate MSP Portal
 
 ## Summary
-Twingate's MSP portal provides multi-tenant management for Managed Service Providers to handle multiple customer networks and consolidated billing. Each customer network is an isolated account containing all resources, connectors, and team members. A 14-day free POC period applies to each new customer network before billing begins.
+Twingate's MSP portal provides multi-tenant management for Managed Service Providers to handle multiple customer networks and consolidated billing. Each customer network is an isolated account containing all resources, connectors, and team members. MSPs manage billing centrally while customer access is controlled per-network.
 
 ## Key Information
-- Multi-tenant portal separates MSP administration from individual customer networks
-- Credit card required at signup, but no charges during 14-day POC per customer network
-- Consolidated monthly billing across all customer networks
-- MSP portal users ≠ customer network users — access must be granted separately to each
+- MSP portal requires credit card on signup; each Customer Network gets 14-day free POC period
+- URLs are permanent and globally unique — cannot be changed after creation
+- MSP portal users ≠ Customer Network users; access must be granted separately per network
 - Users can be added manually or via Identity Provider sync
-- URLs are **permanent** — cannot be changed after creation
+- Consolidated monthly billing across all Customer Networks
 
 ## Prerequisites
-- Credit card for MSP portal signup
-- Unique URL chosen for MSP portal (distinct from any customer network URLs)
+- Credit card required to create Customer Networks
+- MSP portal account (sign up at twingate.com/docs/msp)
 
-## Step-by-Step
+## URL Naming Strategy
+- MSP Portal URL: use `yourcompanymsp` or `yourcompanyportal`
+- Reserves `yourcompany` for your own internal Twingate network
+- **URLs cannot be changed after creation** — plan carefully
 
-### Initial Setup
-1. Sign up at Twingate MSP portal signup page
-2. Choose MSP portal URL (recommended pattern: `yourcompanymsp` or `yourcompanyportal`)
-3. Add payment method
+## Customer Network Management
+- Create/delete Customer Networks from the portal
+- Assign admins to Customer Networks through the portal
+- Each network is fully isolated (resources, connectors, team members)
 
-### Adding Users
-1. Add users manually via portal UI **or** configure Identity Provider sync
-2. For customer network access, add users separately within each customer network
+## Offboarding Customers (Two Options)
 
-### Offboarding a Customer
-1. Click ellipses (`...`) at end of customer network row
-2. Choose removal option:
-   - **Offboard Network** — access continues until billing cycle ends, then downgraded to Starter tier and removed from MSP
-   - **Delete Network** — access continues until billing cycle ends, then permanently deleted
+| Action | Effect | Billing |
+|---|---|---|
+| **Offboard Network** | Access until end of billing cycle → downgraded to Starter tier, removed from MSP | No longer charged after cycle ends |
+| **Delete Network** | Access until end of billing cycle → network deleted | No longer charged after cycle ends |
 
-## Configuration Values
-| Item | Notes |
-|------|-------|
-| MSP Portal URL | Set at creation; immutable |
-| Customer Network URL | Must be globally unique across all Twingate |
-| POC Period | 14 days per customer network |
-| Post-offboard tier | Starter (Offboard path only) |
+*Access via ellipsis menu (⋯) at end of customer network row.*
 
 ## Gotchas
-- **URLs cannot be changed** after creation — plan naming convention carefully before signup
-- MSP portal URL and customer network URLs must all be globally unique — reserve `yourcompany` separately if needed for your own network
-- Users added to MSP portal do **not** automatically get access to any customer network
-- Both offboard and delete options still allow access until end of billing cycle — neither is immediate termination
-- "Offboard" leaves the network intact at Starter tier; "Delete" destroys it permanently
+- Users added to the MSP portal do **not** automatically get access to any Customer Network — must be added individually to each network
+- 14-day free POC applies per Customer Network, but credit card is required upfront
+- URL uniqueness is global across all Twingate networks (MSP portals, customer networks, standalone networks)
+- Offboarded networks revert to Starter tier (not deleted); deleted networks are permanently removed — choose intentionally
 
 ## Related Docs
-- MSP Billing page (linked in portal docs)
-- Customer Networks page (linked in portal docs)
-- Identity Provider configuration (for automated user sync)
+- [MSP Billing](https://www.twingate.com/docs/msp-billing)
+- [Customer Networks](https://www.twingate.com/docs/customer-networks)
+- Identity Provider sync (for user management)

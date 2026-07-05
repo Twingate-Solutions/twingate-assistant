@@ -1,14 +1,16 @@
 # Twingate Responsible Disclosure Policy
 
+## Page Title
+Responsible Disclosure Policy
+
 ## Summary
-Twingate's responsible disclosure policy outlines how security researchers should report vulnerabilities. Reports are submitted via email, with a commitment to resolve critical issues within 5 business days. Researchers must follow defined rules and scope limitations.
+Twingate accepts vulnerability reports from security researchers via email. Researchers must follow defined rules around scope, data handling, and confidentiality. Critical issues are targeted for resolution within 5 business days.
 
 ## Key Information
-- **Contact**: security@twingate.com
-- **Acknowledgement SLA**: 5 business days
-- **Critical issue resolution target**: 5 business days from disclosure
-- All assessments are considered final
-- Prioritization is at Twingate's sole discretion
+- **Contact**: security [at] twingate.com
+- **Response SLA**: Acknowledgement within 5 business days; critical issue resolution targeted within 5 business days
+- **All assessments are final**
+- Bug prioritization and approach is at Twingate's sole discretion
 
 ## Out of Scope Systems
 - twingate.com (company site)
@@ -18,37 +20,36 @@ Twingate's responsible disclosure policy outlines how security researchers shoul
 - help.twingate.com
 - trust.twingate.com
 - Subdomains: email, packages, sales
-- Third-party hosted sites (unless leading to in-scope weakness)
+- Third-party hosted sites (unless they expose an in-scope endpoint)
 
 ## Out of Scope Vulnerability Types
 - DDoS attacks
 - Spamming
 - Physical property/data center attacks
 
-## Researcher Rules
-- Only test against accounts you own or have explicit permission to test
+## Rules for Researchers
+- Only test accounts you own or have explicit permission to access
 - Do not exploit discovered vulnerabilities
 - Do not access data belonging to others
 - Do not disrupt services or destroy data
-- Stop and report immediately if severe vulnerability permitting system access is found
-- Keep all bug communications confidential
+- Do not target physical security measures
+- Stop immediately and report if severe vulnerability permitting system access is found
+- Keep all bug communications confidential (no third-party disclosure without Twingate consent)
 - Destroy all artifacts (POC code, videos, screenshots) after bug report is closed
 - No threatening behavior toward Twingate personnel
 
-## Reporting Steps
-1. Email security@twingate.com
-2. Describe vulnerability in detail
-3. Include step-by-step reproduction instructions
-4. Allow reasonable time before public disclosure
-5. Await acknowledgement within 5 business days
+## Reporting Requirements
+Email security [at] twingate.com with:
+- Detailed description of the vulnerability
+- Step-by-step reproduction instructions
+- Only in-scope vulnerabilities
 
 ## Gotchas
-- Policy does **not** authorize access to any data that isn't yours
-- Out-of-scope reports will not be considered
-- No bug bounty program is mentioned
-- Researchers must destroy all documentation artifacts post-closure
-- Third-party site vulnerabilities only qualify if they lead to an in-scope weakness
+- Policy explicitly does **not** authorize access to any data that isn't yours
+- Researchers **must destroy all artifacts** after report closure — this is a hard requirement
+- Third-party site vulnerabilities are out of scope **unless** they lead to a weakness on an in-scope endpoint
+- No public or third-party disclosure until Twingate resolves the issue
 
 ## Related Docs
-- Vulnerability Reporting Acknowledgements (linked from policy page)
-- Policy updates tracked at: https://www.twingate.com/docs/responsible-disclosure-policy
+- Vulnerability Reporting Acknowledgements (linked from this page)
+- Policy URL: https://docs.twingate.com/docs/responsible-disclosure-policy
