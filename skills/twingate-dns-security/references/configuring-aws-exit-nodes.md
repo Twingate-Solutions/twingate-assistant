@@ -1,66 +1,65 @@
-# Configuring AWS Exit Nodes for SaaS App Gating
+# Configuring AWS Exit Nodes (SaaS App Gating)
 
 ## Summary
-Configure Twingate Connectors on AWS EC2 instances to act as exit nodes, enabling IP-based access control to public SaaS applications. Traffic from authorized users is routed through EC2 instances with known public IPs, which are then whitelisted in third-party SaaS apps.
+Deploy Twingate Connectors on AWS EC2 instances to route user traffic through known IP addresses, enabling IP-based whitelisting for public SaaS applications. Users access IP-restricted resources through Twingate, which proxies traffic via EC2 instances with predictable public IPs.
 
 ## Key Information
-- Enables user-based access control to public SaaS apps via IP whitelisting
-- Requires at least one Linux EC2 instance (multiple recommended for redundancy)
-- EC2 instances serve as Twingate Connectors and traffic exit points
-- Public IP of EC2 instances is what gets whitelisted in third-party apps
+- Use case: Control access to SaaS apps (e.g., Salesforce) that support IP allowlisting
+- Traffic flows: Client → Twingate → EC2 Connector → SaaS app
+- Recommended EC2 type: `t3a.micro` (general purpose instances acceptable)
+- Recommended OS: Ubuntu 22.04 (any Docker-compatible Linux works)
+- Deploy **multiple EC2 instances** for redundancy
 
 ## Prerequisites
-- AWS account with ability to deploy EC2 instances
-- Linux EC2 instance (Ubuntu 22.04 recommended; any Docker-compatible Linux works)
-- Docker support on the instance
+- AWS account with EC2 provisioning access
 - Twingate admin console access
+- Docker support on target Linux instances
+- Outbound internet access from EC2 instances
 
 ## Step-by-Step
 
-1. **Deploy EC2 instance(s)**
-   - Minimum: `t3a.micro` (general purpose instance acceptable)
-   - OS: Ubuntu 22.04 recommended
-   - Deploy multiple instances for redundancy
+1. **Deploy EC2 instances**
+   - Launch ≥1 Linux EC2 instance (Ubuntu 22.04 recommended)
+   - Instance type: `t3a.micro` minimum
 
 2. **Configure networking**
-   - Allow outbound internet traffic from EC2 instances
-   - Block all inbound internet traffic (SSH access optional for setup only)
-   - Assign Elastic IP to each EC2 instance
+   - Allow all outbound internet traffic
+   - Block all inbound internet traffic (SSH only if needed for setup)
+   - Assign **Elastic IPs** to each instance
 
-3. **Verify public IP address**
-   - Check whether egress routes through NAT gateway or IGW
-   - NAT gateway may mask the instance's own public IP
-   - The IP that external services see is what you whitelist in SaaS apps
+3. **Verify public IP behavior**
+   - Confirm whether egress routes via IGW or NAT Gateway
+   - NAT Gateway masks the instance's Elastic IP — the NAT Gateway's IP is what external services see
+   - Whitelist the **actual egress public IP** with the SaaS provider
 
 4. **Install Twingate Connector**
-   - Follow Linux Connector deployment docs
+   - Follow [deploying Connectors on Linux](https://www.twingate.com/docs/linux) documentation
 
-5. **Create Resource in Twingate**
+5. **Create Twingate Resource**
    - Resource name = FQDN of protected app (e.g., `acme.salesforce.com`)
-   - Twingate uses FQDN/IP from connection request for authorization checks
 
 6. **Authorize users**
-   - Create a Group in Twingate admin console
+   - Create a Group
    - Add the Resource to the Group
    - Assign users to the Group
 
 ## Configuration Values
 | Parameter | Value |
 |-----------|-------|
-| Instance type | `t3a.micro` (minimum) |
-| Recommended OS | Ubuntu 22.04 |
-| Inbound traffic | Block all (SSH optional) |
-| Outbound traffic | Must allow all |
+| EC2 instance type | `t3a.micro` (minimum) |
+| OS | Ubuntu 22.04 |
+| Inbound ports | None required (block all) |
+| Outbound ports | All (unrestricted) |
 | IP assignment | Elastic IP per instance |
 
 ## Gotchas
-- **NAT Gateway masking**: If using a NAT gateway, the EC2 instance's Elastic IP may not be the egress IP seen by external services — verify actual outbound IP before whitelisting
-- **IP redundancy**: Whitelist public IPs from all EC2 instances in the SaaS app, otherwise failover to a secondary instance will break access
-- **Production use**: Guide is illustrative only; apply AWS security best practices for production deployments
-- **Image versions**: Code samples may reference outdated container/software versions — check official docs
+- **NAT Gateway masking**: If EC2 egress routes through a NAT Gateway instead of IGW, the Elastic IP on the instance is **not** the IP seen by external services — whitelist the NAT Gateway's IP instead
+- **IP verification required**: Always confirm the actual public egress IP before whitelisting with SaaS providers
+- This guide is not production-hardened; follow AWS security best practices for production deployments
+- Image/version references in docs may be outdated — check official sources
 
 ## Related Docs
-- [Whitelisting Traffic to Public Resources](https://www.twingate.com/docs)
-- [Deploying Connectors on Linux](https://www.twingate.com/docs)
-- [Connector Best Practices](https://www.twingate.com/docs)
-- [Creating Resources and Groups](https://www.twingate.com/docs)
+- [Whitelisting Traffic to Public Resources](https://www.twingate.com/docs/saas-app-gating)
+- [Deploying Connectors on Linux](https://www.twingate.com/docs/linux)
+- [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
+- [Creating Resources and Groups](https://www.twingate.com/docs/resources-and-groups)

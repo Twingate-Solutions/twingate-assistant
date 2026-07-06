@@ -1,42 +1,37 @@
 # Kandji (Iru) Configuration
 
 ## Page Title
-Iru (Kandji) Configuration — Twingate Device Integration
+Iru (previously Kandji) Configuration for Twingate Device Integration
 
 ## Summary
-Twingate integrates with Iru (formerly Kandji) to verify macOS devices against an MDM-managed device list. Verified devices can satisfy Trusted Profile requirements within Security Policies. Available on Business and Enterprise plans only.
+Twingate integrates with Iru/Kandji to verify macOS devices via MDM enrollment status. The integration uses the Kandji API to match device serial numbers and enforce managed device requirements within Security Policies. Only macOS devices passing all verification checks satisfy the Trusted Profile condition.
 
 ## Key Information
-- Verification uses Iru API to pull managed device serial numbers; Twingate Client matches device serial number against this list
-- **macOS only**
-- Sync runs periodically; initial status shows "Waiting to sync" for a few minutes before device states populate
-- Recoverable errors (API unresponsive): integration pauses, auto-resumes when API is reachable
-- Unrecoverable errors (invalid/deleted credentials, changed permissions): integration stops, admin notified by email; requires manual reconfiguration
+- **macOS only** — no support for other platforms
+- Device sync has an initial delay ("Waiting to sync"); allow a few minutes before verification states appear
+- Verification checks device serial number, last check-in (≤7 days), agent presence, MDM profile, and active enrollment
+- Integration pulls device list via Kandji API; Twingate Client reports serial number for matching
 
 ## Prerequisites
-- Business or Enterprise Twingate plan
-- Access to Iru web app with permission to create API tokens
-- Required API token permissions: **Device details** and **Device list** (under Devices)
+- **Business or Enterprise** Twingate plan required
+- Iru/Kandji tenant with admin access to generate API tokens
+- API token with specific permissions: **Device details** and **Device list** (under Devices scope)
 
 ## Step-by-Step
 
-### Generate Iru API Key
-1. Iru web app → **Settings** (left panel) → **Access** (top bar)
-2. Scroll to **API Token** → **Add Token**
-3. Enter Name and Description → save the token
-4. In **Manage API Permissions** modal → **Configure**
-5. Under Devices, enable **Device details** and **Device list**
+### Generate Kandji API Key
+1. Open Iru web app → **Settings** (left panel)
+2. Click **Access** (top bar)
+3. Scroll to **API Token** → **Add Token**
+4. Enter Name and Description → save token value
+5. In **Manage API Permissions** modal → **Configure**
+6. Under Devices, enable: **Device details** + **Device list**
 
 ### Configure in Twingate
-1. Twingate Admin → **Settings** → **Device Integration**
-2. Select **Connect** next to Iru
+1. Navigate to **Settings** → **Device Integration**
+2. Click **Connect** next to Iru
 3. Enter Iru URL and API token
-4. Verify status on Device Settings page
-
-### Incorporate into Security Policies
-1. Create a Trusted Profile for macOS
-2. Set Iru as a required Trust Method
-3. Add Trusted Profile to Security Policies
+4. Verify status on Device Settings page after sync completes
 
 ## Configuration Values
 
@@ -44,21 +39,22 @@ Twingate integrates with Iru (formerly Kandji) to verify macOS devices against a
 |-------|--------|
 | Iru URL (US) | `<subdomain>.api.kandji.io` |
 | Iru URL (EU) | `<subdomain>.api.eu.kandji.io` |
+| Required API Permissions | Device details, Device list |
 
-## Device Verification Requirements (all must be met)
-- Serial number present in Iru tenant
+## Device Verification Criteria (ALL must be true)
+- Serial number present in Iru
 - Reported to Iru within past **7 days**
 - Iru agent installed
 - MDM profile installed
 - Not removed from Iru
 
 ## Gotchas
-- Initial sync delay: devices may show incorrect verification state for a few minutes after setup
-- Changing API token permissions after setup causes an unrecoverable error requiring full reconfiguration
-- Integration only verifies macOS devices; no other OS supported
-- "Iru not verified" is expected if device hasn't checked in within 7 days, even if otherwise healthy
+- Initial sync shows "Waiting to sync" — devices won't show correct state until first sync completes (few minutes)
+- **Recoverable errors** (API unresponsive): integration shows last successful sync time; auto-recovers when API is reachable
+- **Unrecoverable errors** (invalid/deleted credentials or changed permissions): integration stops retrying; admin email notification sent; requires manual reconfiguration with new API credentials
+- Altering API token permissions after setup causes unrecoverable error
 
 ## Related Docs
-- Device Security / Trusted Profiles configuration
-- Security Policies configuration
-- Twingate pricing page (plan eligibility)
+- Twingate Device Security / Trusted Profiles documentation
+- Twingate Security Policies configuration
+- [Twingate Pricing](https://www.twingate.com/pricing)

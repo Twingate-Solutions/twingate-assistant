@@ -1,43 +1,43 @@
 # Twingate iOS Client
 
+## Page Title
+iOS Client Setup
+
 ## Summary
-Instructions for installing and configuring the Twingate iOS client app. The client authenticates via your organization's identity provider and runs in the background, only intercepting traffic for configured private Resources.
+Instructions for installing and configuring the Twingate iOS client. The app connects users to private resources via their organization's identity provider without affecting regular internet traffic.
 
 ## Key Information
-- App available on Apple App Store
+- App available on the App Store (also accessible via get.twingate.com)
 - Network name format: `<orgname>.twingate.com`
-- Network name found in welcome email
-- Client runs persistently in background after setup
-- Only intercepts traffic for private Resources, not general internet traffic
-- Authentication handled by existing identity provider (SSO)
+- Network name is provided in the welcome email
+- App runs in background after initial setup; does not intercept general internet traffic
+- Only intercepts traffic destined for configured private Resources
 
 ## Prerequisites
-- iOS device
-- App Store access
+- iOS device with App Store access
 - Organization network name (from welcome email)
-- Valid identity provider credentials
+- Valid credentials for the organization's identity provider (IdP)
 
 ## Step-by-Step
 
-1. **Install** — Search "Twingate" in App Store or navigate to `get.twingate.com`
-2. **Set Network** — Enter network name (e.g., `autoco.twingate.com`) when prompted on first launch
-3. **Join** — Tap "Join Network"
-4. **Authenticate** — Tap "Sign in to Connect"; complete IdP login in browser window that opens
-5. **Confirm Connected** — Client displays "online" status; browser window closes automatically
-6. **Minimize** — App can be closed; connection persists in background
+1. **Install** — Search "Twingate" in the App Store or visit `get.twingate.com`
+2. **Set Network** — Open app, enter network name (e.g., `autoco.twingate.com`), tap **Join Network**
+3. **Authenticate** — Tap **Sign in to Connect**; browser window opens for IdP login
+4. **Connect** — Browser closes automatically; app shows "online" status
+5. **Background** — Close the app; it remains connected and only routes private Resource traffic
 
 ## Configuration Values
 | Field | Format | Example |
 |-------|--------|---------|
-| Network name | `<org>.twingate.com` | `autoco.twingate.com` |
+| Network Name | `<org>.twingate.com` | `autoco.twingate.com` |
 
 ## Gotchas
-- If already authenticated with IdP, re-login may not be required
-- App must remain running in background to maintain connectivity to Resources
-- Normal internet traffic is **not** routed through Twingate — only traffic to defined private Resources
+- If already authenticated with the IdP, login prompt may be skipped automatically
+- App must remain running (backgrounded) to maintain Resource access
+- Regular internet browsing is unaffected — only private Resource traffic is intercepted
 
 ## Related Docs
 - Android client setup
 - Desktop client setup (macOS, Windows, Linux)
-- Admin: configuring Resources
-- Identity provider integration
+- Identity provider configuration
+- Resource access configuration

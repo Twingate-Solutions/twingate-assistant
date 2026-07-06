@@ -1,86 +1,68 @@
-# Route Traffic from Kubernetes (GKE) via Twingate Headless Client
+# Route Traffic from Kubernetes (GKE) via Twingate
 
 ## Summary
-This guide configures a GCP VM as a Twingate headless client router, enabling pods within a GKE cluster to access Twingate-protected remote resources. Traffic from the cluster is routed through the VM, which runs the Twingate client in headless (service account) mode and performs IP masquerading via iptables.
+Uses a Twingate headless client on a GCP VM as a network router, enabling GKE cluster pods to access Twingate-protected remote resources. Traffic flows: GKE Pod → VPC static route → Router VM (iptables NAT) → Twingate → Remote Resource.
 
 ## Key Information
-- Architecture: GKE pods → static VPC route → Router VM (Twingate headless client) → remote Twingate resource
-- Router VM must be in the same VPC network/subnet as the GKE cluster
-- IP forwarding must be enabled on the VM at both OS and GCP levels
-- Twingate interface on the VM is `sdwan0`; VM network interface is typically `ens4` (verify yours)
+- Router VM must be in the same VPC/subnet as the GKE cluster
+- Twingate runs in headless mode using a Service Account key
+- VM interface `sdwan0` is created by Twingate; `ens4` is the VM's network interface (may differ)
+- Static VPC route must point resource IP/range to the router VM instance
+- Two firewall rules needed: one for GKE node IPs, one for pod IP range
 
 ## Prerequisites
-- GCP project with a custom VPC network and subnet
-- Twingate account with admin access
-- Remote network and resource already configured in Twingate
-- `gcloud` CLI and `kubectl` installed locally
-- GKE cluster in same region/zone as router VM
+- GCP project with VPC network and subnet created
+- Twingate admin access to create Service Accounts
+- Remote network and resource configured in Twingate
+- `gcloud` CLI and `kubectl` configured locally
+- Ubuntu VM with IP forwarding enabled at GCP level (checkbox in NIC settings)
 
 ## Step-by-Step
 
-### 1. Create Service Account
-- Admin console → Team → Services → Create Service Account
-- Generate a service key; copy the full **Key Object** JSON
-
-### 2. Create Router VM
-- OS: Ubuntu x86/64
-- Same region/subnet as GKE cluster
-- Enable **IP Forwarding** checkbox in Networking section
-- Remove default NIC; add NIC on your custom VPC subnet
-
-### 3. Configure Firewall Rules
-- SSH access: TCP port 22, source `0.0.0.0/0`, all instances in network
-- Inbound from GKE node IPs (find on VM instances page)
-- Inbound from pod IP CIDR range (find on GKE cluster info page)
-
-### 4. Install & Configure Twingate on Router VM
-```bash
-curl https://binaries.twingate.com/client/linux/install.sh | sudo bash
-nano /tmp/service_key.json          # paste Key Object JSON
-sudo twingate setup --headless /tmp/service_key.json
-sudo twingate start
-```
-
-### 5. Configure IP Routing on VM
-```bash
-# Enable IP forwarding
-sudo nano /etc/sysctl.conf          # uncomment net.ipv4.ip_forward=1
-sudo sysctl -p
-
-# iptables rules (replace ens4 if your interface differs)
-sudo iptables --append FORWARD --in-interface ens4 --out-interface sdwan0 --jump ACCEPT
-sudo iptables --append FORWARD --in-interface sdwan0 --out-interface ens4 --match state --state RELATED,ESTABLISHED --jump ACCEPT
-sudo iptables -t nat --append POSTROUTING --out-interface sdwan0 --jump MASQUERADE
-
-sudo apt install iptables-persistent -y   # persist rules across reboots
-```
-
-### 6. Add Static VPC Route
-- VPC Network → Routes → Create Route
-- Destination IP: remote resource IP/range
-- Next hop: Router VM instance
-
-### 7. Grant Service Account Resource Access
-- Twingate Admin → Resource → Add Access → select the service account
-
-### 8. Deploy Test Pod to GKE
-```bash
-kubectl apply -f ubuntu.yaml        # see pod spec in docs
-kubectl exec -it ubuntu /bin/bash
-curl <resource-ip>
-```
+1. **Create Service Account** → Twingate Admin > Team > Services > Create Service Account → Generate service key → Copy Key Object JSON
+2. **Create Router VM** (GCP): Ubuntu x86/64, same region as subnet, enable IP Forwarding checkbox, attach to custom VPC subnet, remove default NIC
+3. **Add SSH firewall rule**: TCP port 22, source `0.0.0.0/0`, target all instances in network
+4. **Install Twingate on VM**:
+   ```bash
+   curl https://binaries.twingate.com/client/linux/install.sh | sudo bash
+   nano /tmp/service_key.json        # paste Key Object JSON
+   sudo twingate setup --headless /tmp/service_key.json
+   sudo twingate start
+   ```
+5. **Enable IP forwarding on VM**:
+   ```bash
+   sudo nano /etc/sysctl.conf        # uncomment net.ipv4.ip_forward=1
+   sudo sysctl -p
+   ```
+6. **Configure iptables** (replace `ens4` with actual interface name):
+   ```bash
+   sudo iptables --append FORWARD --in-interface ens4 --out-interface sdwan0 --jump ACCEPT
+   sudo iptables --append FORWARD --in-interface sdwan0 --out-interface ens4 --match state --state RELATED,ESTABLISHED --jump ACCEPT
+   sudo iptables -t nat --append POSTROUTING --out-interface sdwan0 --jump MASQUERADE
+   sudo apt install iptables-persistent -y
+   ```
+7. **Grant Service Account access** to the Twingate resource via Add Access
+8. **Add static VPC route**: Destination = resource IP/range, Next hop = router VM instance
+9. **Add firewall rules**: Allow inbound from GKE node IPs AND pod IP CIDR to router VM
+10. **Deploy test pod** with `NET_ADMIN` capability, exec in, test with `curl <resource-ip>`
 
 ## Configuration Values
-| Parameter | Value |
-|-----------|-------|
-| Twingate install script | `https://binaries.twingate.com/client/linux/install.sh` |
-| Service key path | `/tmp/service_key.json` |
-| Twingate network interface | `sdwan0` |
-| VM network interface | `ens4` (verify) |
-| sysctl key | `net.ipv4.ip_forward=1` |
+| Item | Value |
+|------|-------|
+| Service key file path | `/tmp/service_key.json` |
+| Twingate setup command | `sudo twingate setup --headless <key-file>` |
+| sysctl parameter | `net.ipv4.ip_forward=1` |
+| Twingate VPN interface | `sdwan0` |
+| VM network interface | `ens4` (verify with `ip link`) |
 
 ## Gotchas
-- Interface name `ens4` may differ on your VM — verify before running iptables commands
-- Resource access permissions can take **a few minutes** to propagate after granting
-- Static route must be added for **each** resource IP/range you want reachable from the cluster
-- Pod spec requires `NET_ADMIN
+- `ens4` interface name varies by VM — verify before running iptables commands
+- Service Account access to resources can take several minutes to propagate
+- GKE nodes and pod CIDR require **separate** firewall rules to reach router VM
+- Service key JSON must be stored securely; loss = re-generate key
+- iptables rules are lost on reboot without `iptables-persistent`
+
+## Related Docs
+- [Twingate Headless Client setup](https://www.twingate.com/docs/)
+- [Remote Network configuration](https://www.twingate.com/docs/)
+- [

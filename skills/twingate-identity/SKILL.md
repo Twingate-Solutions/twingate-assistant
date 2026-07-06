@@ -73,7 +73,7 @@ memory — IdP UIs and SCIM connectors evolve frequently.
 | If the user asks about… | Read first |
 |---|---|
 | General IdP overview, choosing an IdP | `identity-providers.md`, `identity-provider-setup.md` |
-| Okta SAML / SCIM | `okta-configuration.md`, `okta-app-configuration.md`, `okta-scim-configuration.md` |
+| Okta SAML / SCIM | `okta-configuration.md`, `okta-app-configuration.md`, `okta-scim-configuration.md`, `saas-app-gating-with-okta.md` |
 | Entra ID SAML / SCIM, Office 365 gating | `entra-id-configuration.md`, `entra-id-app-gating-office-365.md`, `saas-app-gating-with-entra-id.md` |
 | Google Workspace SAML / SCIM | `google-workspace-configuration.md`, `saas-app-gating-with-google-workspace.md` |
 | JumpCloud SAML / SCIM | `jumpcloud-configuration.md`, `saas-app-gating-with-jumpcloud.md` |

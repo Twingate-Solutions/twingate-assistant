@@ -1,32 +1,39 @@
 # Twingate Trust Center
 
 ## Page Title
-Trust Center
+Twingate Trust Center
 
 ## Summary
-Twingate's Trust Center aggregates security, privacy, legal, and compliance documentation in one location. It provides transparency into Twingate's security posture, certifications, and legal agreements for customer evaluation and due diligence purposes.
+The Trust Center aggregates Twingate's security, privacy, legal, and compliance documentation in one location. It provides links to certifications, legal agreements, and policies for customer evaluation and due diligence purposes.
 
 ## Key Information
-- **Security docs**: Security information overview, service reliability details, service status page, responsible disclosure policy
-- **Privacy docs**: Privacy Policy, California Supplemental Privacy Notice
-- **Legal docs**: Customer Agreement, User Terms of Service
-- **Compliance certifications**: DORA, GDPR, HIPAA, PCI DSS, SOC 2 Report
-- **Additional resources**: W-9 form, Twingate & Customer Data document
-- Contact Twingate directly for compliance certifications/standards not listed
+- **Security**: Security information and responsible disclosure policy available
+- **Service Status**: Live service reliability/status page linked
+- **Compliance certifications**: SOC 2, HIPAA, PCI DSS, GDPR, DORA
+- **Privacy**: Privacy Policy and California Supplemental Privacy Notice (CCPA)
+- **Legal**: Customer Agreement and User Terms of Service
+- **Additional**: W-9 form and Twingate & Customer Data documentation available
+
+## Available Resources
+
+| Category | Documents |
+|----------|-----------|
+| Security | Security Information, Responsible Disclosure Policy |
+| Privacy | Privacy Policy, California Supplemental Privacy Notice |
+| Legal | Customer Agreement, User Terms of Service |
+| Compliance | DORA, GDPR, HIPAA, PCI DSS, SOC 2 Report |
+| Other | W-9 Form, Twingate & Customer Data |
 
 ## Prerequisites
-None — publicly accessible reference page.
-
-## Configuration Values
-None applicable.
+- None — publicly accessible reference page
+- SOC 2 Report may require a request/NDA to access full report
 
 ## Gotchas
-- Compliance certifications not listed require direct contact with Twingate
-- SOC 2 Report availability may require NDA or request process (not specified on page)
+- Compliance certifications not listed (e.g., ISO 27001, FedRAMP) are not confirmed — contact Twingate directly for unlisted standards
+- Page is informational only; actual compliance documents/reports are behind separate links
+- California privacy notice is separate from the main Privacy Policy (relevant for CCPA compliance reviews)
 
 ## Related Docs
-- [Service Status](https://status.twingate.com)
-- [Responsible Disclosure Policy](https://www.twingate.com/docs/responsible-disclosure)
-- [GDPR Compliance](https://www.twingate.com/docs/gdpr)
-- [HIPAA Compliance](https://www.twingate.com/docs/hipaa)
-- [SOC 2 Report](https://www.twingate.com/docs/soc2)
+- Twingate Security Information (linked from Trust Center)
+- Twingate & Customer Data (data handling specifics)
+- Individual compliance pages: `/docs/dora-compliance`, `/docs/gdpr-compliance`, `/docs/hipaa-compliance`, `/docs/pci-dss-compliance`

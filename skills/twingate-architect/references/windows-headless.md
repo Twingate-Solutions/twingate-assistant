@@ -1,22 +1,22 @@
 # Windows Headless Mode
 
 ## Summary
-Twingate's Windows client can run in headless mode using a Service Key, enabling automated/unattended deployments. It is installed via command-line switches and controlled through Windows Services.
+Twingate's Windows client can run in headless mode using a Service Key, enabling automated/non-interactive deployments. The client is installed via command line with a `service_secret` parameter and controlled through Windows Services.
 
 ## Key Information
-- Requires a Service Account and Service Key from the Twingate Admin console
+- Requires a Service Account and Service Key from Twingate Admin Console
 - Client controlled via Windows Services (`Twingate Service`)
-- Does **not** start automatically by default (modify service settings to change)
-- Service Key is securely stored after installation; original file can be removed, but is needed for updates/reinstalls
-- Logs output to `C:\ProgramData\Twingate\logs`
-- Additional config available at `C:\Program Files\Twingate\headless.conf`
+- Does **not** auto-start by default; modify Windows service settings to change startup behavior
+- Service Key is securely stored after installation; original file can be moved/deleted
+- A valid Service Key is still required for updates/reinstalls
 
 ## Prerequisites
-- Service account and Service Key created in Twingate Admin console
+- Service Account created in Twingate Admin Console
+- Valid Service Key (`.json` file) downloaded
+- Administrator permissions for installation and service management
 - Windows Client EXE installer (from [public changelog](https://www.twingate.com/docs/windows-headless))
-- Administrator permissions for service management
 
-## Step-by-Step: Installation
+## Step-by-Step Installation
 
 ```bash
 # Silent install with service key
@@ -31,20 +31,21 @@ TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json log_leve
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
 | `service_secret` | Yes | — | Path to Service Key JSON file |
-| `log_level` | No | `info` | Log verbosity; see `headless.conf` for levels |
+| `log_level` | No | `info` | Log verbosity level |
 | `/qn` | No | — | Silent install flag |
 
-**Config file path:** `C:\Program Files\Twingate\headless.conf`
+**Config file path:** `C:\Program Files\Twingate\headless.conf`  
+**Log output path:** `C:\ProgramData\Twingate\logs`
 
-## Key Rotation / Upgrades
+## Key Rotation & Upgrades
 
-**Update Service Key via `sc`:**
+**Update Service Key (option 1 — sc command):**
 ```bash
 sc stop twingate.service
 sc start twingate.service --config --service_secret C:\path\to\service\secret.json
 ```
 
-**Update Service Key via reinstall:**
+**Update Service Key (option 2 — reinstall):**
 ```bash
 TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json
 ```
@@ -54,14 +55,14 @@ TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json
 sc start twingate.service --config --reset
 ```
 
-**Upgrade client:** Re-run installer with `service_secret` switch.
+**Upgrade client:** Re-run installer with `service_secret` switch pointing to valid key.
 
 ## Gotchas
-- Service must be **restarted** for any config changes to take effect
-- If client was previously installed **without** a Service Key, you must do a **fresh install** with `service_secret`; `sc` command alone won't work
-- Deleting the Service Key disconnects the client immediately; a new key is required to reconnect
-- Client does not auto-start after installation by default
+- Service must be **restarted** for any key or config changes to take effect
+- If originally installed **without** a Service Key, you cannot use `sc` to add one — must do a fresh install with `service_secret`
+- Deleting the Service Key disconnects the client immediately; requires new key to reconnect
+- Client will **not auto-start** after installation by default
 
 ## Related Docs
-- [Services (Service Accounts & Keys)](https://www.twingate.com/docs/services)
-- [Twingate Public Changelog](https://www.twingate.com/docs/windows-headless) (for installer download)
+- [Services documentation](https://www.twingate.com/docs/services) — creating Service accounts and keys
+- [Public changelog](https://www.twingate.com/changelog) — download latest Windows installer

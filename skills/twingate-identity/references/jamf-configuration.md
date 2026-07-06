@@ -1,46 +1,41 @@
 # Jamf Configuration
 
-## Page Title
-Jamf Configuration (Business & Enterprise only)
-
 ## Summary
-Twingate integrates with Jamf to verify macOS device management status as a trust requirement for accessing private resources. The integration uses the Jamf API to match device serial numbers against managed devices. Devices must be Jamf-managed and have reported to Jamf within the last 7 days to be considered verified.
+Twingate integrates with Jamf to enforce device trust in Security Policies. The integration uses the Jamf API to verify Mac devices by matching serial numbers against managed devices in a Jamf tenant. Devices must be Jamf-managed and have reported to Jamf within the last 7 days to be considered verified.
 
 ## Key Information
-- **Platform support**: macOS only
-- **Plan requirement**: Business & Enterprise plans only
+- **Plan requirement**: Business & Enterprise only
+- **Supported platform**: macOS only
 - **Verification criteria**: Device must be Jamf-managed AND reported to Jamf within last 7 days
-- **Sync mechanism**: Twingate client returns device serial number; matched against Jamf-managed device list
-- **Initial sync delay**: Up to 10 minutes after configuration
+- **Sync mechanism**: Twingate client returns device serial number; matched against Jamf API pull
+- **Integration surfaces**: Device Security → Trusted Profiles → Security Policies
 
 ## Prerequisites
 - Business or Enterprise Twingate plan
-- Jamf admin user credentials with API access
-- macOS devices enrolled in Jamf
+- Jamf admin user credentials with API access permissions
+- Jamf tenant/instance accessible via API
 
-## Step-by-Step Configuration
+## Step-by-Step
 
-1. In Jamf, identify/create a user with admin capabilities and API access
-2. In Twingate Admin Console → **Settings** → **Device Integration**
-3. Select **Connect** next to Jamf; enter Jamf credentials
-4. Verify integration status on Device Settings page
-5. Create a Trusted Profile (macOS) with Jamf as the required Trust Method
-6. Incorporate the Trusted Profile into Security Policies
+1. **In Jamf**: Identify or create a user with admin capabilities and API access
+2. **In Twingate**: Navigate to **Settings → Device Integration**
+3. Select **Connect** next to Jamf; input Jamf credentials
+4. Verify integration status on the Device Settings page
+5. **Create Trusted Profile**: Settings → Device Security → create macOS Trusted Profile with Jamf as Trust Method
+6. Incorporate Trusted Profile into Security Policies
 
 ## Configuration Values
-| Parameter | Details |
-|-----------|---------|
-| Jamf credentials | Admin user with API access |
-| Trust Method | Jamf (selectable in Device Security Trusted Profiles) |
-| Sync frequency | Periodic; device must report to Jamf within 7 days |
+- **Credentials required**: Jamf admin username/password with API access
+- **Sync interval**: Initial sync takes up to 10 minutes; subsequent syncs show timestamp on Device Integration page
+- **Verification window**: Device must have reported to Jamf within last **7 days**
 
 ## Gotchas
-- **10-minute initial sync delay**: Devices show incorrect state during this window; Device Settings shows "Waiting to sync"
-- **Recoverable errors** (e.g., Jamf API unresponsive): Integration shows last successful sync time + failure time; auto-resolves when API is reachable again
-- **Unrecoverable errors** (e.g., invalid/deleted credentials or altered permissions): Integration stops attempting to connect; admin email notification sent; requires manual reconfiguration with new API credentials
-- Jamf verification state is per-device; check individual device details page after sync completes
+- **Initial sync delay**: Up to 10 minutes before devices show correct Jamf verification state; status shows "Waiting to sync" during this period
+- **Recoverable errors** (e.g., Jamf API unresponsive): Integration shows last successful sync time + failure time; auto-resolves when API is reachable
+- **Unrecoverable errors** (e.g., invalid/deleted credentials, altered permissions): Integration stops attempting to connect; admin email notification sent — requires manual reconfiguration with new API credentials
+- Only Macs verified through Jamf satisfy the Trusted Profile; non-Jamf devices will fail the trust check
 
 ## Related Docs
 - Device Security / Trusted Profiles documentation
 - Security Policies documentation
-- Twingate pricing page (for plan eligibility)
+- Twingate pricing page (plan eligibility)

@@ -1,17 +1,16 @@
 # Cancel Your Subscription
 
 ## Summary
-Instructions for canceling automatic renewal of a Twingate subscription. Cancellation stops auto-renewal; service continues until the end of the current billing period. Downgrade is achieved by switching to the Starter plan.
+Instructions for canceling automatic renewal of a Twingate subscription. Cancellation does not immediately terminate service — access continues until the end of the current billing term. Downgrading to Starter plan effectively cancels paid subscription renewal.
 
 ## Key Information
-- Canceling does **not** immediately terminate service
-- Subscription remains active until end of current term
-- "Cancellation" is implemented as a downgrade to the free **Twingate Starter** plan
-- Applies only to automatically renewing subscriptions
+- Cancellation stops **automatic renewal only**; service continues until current term expires
+- Cancellation is accomplished by downgrading to the **Twingate Starter** (free) plan
+- Must be performed by an account admin with access to Admin Console
 
 ## Prerequisites
-- Active Twingate subscription (paid tier)
-- Admin Console access with billing permissions
+- Admin Console access
+- Active paid Twingate subscription with automatic renewal enabled
 
 ## Step-by-Step
 
@@ -25,11 +24,11 @@ Instructions for canceling automatic renewal of a Twingate subscription. Cancell
 8. Click **Update Subscription**
 
 ## Gotchas
-- There is no direct "cancel" button — cancellation requires explicitly selecting the Starter plan
-- Data/configuration retention after downgrade is not documented on this page; verify resource limits before downgrading
-- Timing matters: cancellation must be completed before the renewal date to avoid being charged for the next term
+- No immediate termination — subscription remains active through end of current paid term
+- Cancellation is done via plan downgrade, not a dedicated "cancel" button
+- No mention of refund eligibility for unused subscription time
 
 ## Related Docs
 - Billing settings
-- Plan comparison (Starter vs. paid tiers)
-- Account Settings
+- Plan management
+- Twingate Starter plan details

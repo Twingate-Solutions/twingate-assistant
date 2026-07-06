@@ -1,28 +1,25 @@
 # Configuring AnyConnect with Umbrella
 
-## Page Title
-How to Configure AnyConnect with Umbrella
-
 ## Summary
-AnyConnect with Umbrella Module is compatible with Twingate (unlike the legacy Roaming Client), but requires configuring Internal Domains in the Umbrella console to prevent AnyConnect from intercepting Twingate traffic. The key configuration step is adding your Twingate resource domains to the Internal Domains list so AnyConnect passes DNS resolution back to the OS/Twingate.
+AnyConnect with Umbrella Module is compatible with Twingate, unlike the legacy Umbrella Roaming Client which conflicts with Twingate. Configuration requires adding Twingate resource domains to AnyConnect's Internal Domains list to prevent traffic interception.
 
 ## Key Information
-- **Roaming Client is incompatible** with Twingate; AnyConnect with Umbrella Module is fully compatible
-- Roaming Client works via DNS resolver replacement (`127.0.0.1` loopback); does not detect OS resolver changes after startup
-- AnyConnect uses a **kernel module** intercepting port 53 traffic — no OS resolver list modification required
-- AnyConnect marks Internal Domain destinations as "do not intercept" in memory until client restart
+- **Roaming Client** (legacy): Incompatible with Twingate — replaces OS DNS resolver with `127.0.0.1` loopback and uses a static, non-updating resolver list
+- **AnyConnect with Umbrella Module** (current): Compatible with Twingate — uses kernel module to intercept port 53 traffic without modifying OS resolver list
+- AnyConnect intercepts all DNS on port 53; Internal Domains are tagged "do not intercept" and passed back to the OS network stack
+- Non-internal domains are forwarded to Umbrella backend for allow/block decisions
 - Customers can upgrade from Roaming Client to AnyConnect at no charge
 
 ## Prerequisites
-- AnyConnect with Umbrella Module (not legacy Roaming Client)
+- AnyConnect with Umbrella Module installed (not legacy Roaming Client)
 - Access to Cisco Umbrella Management Console
-- Knowledge of your Twingate resource domain(s)
+- Knowledge of domains used by Twingate Resources (e.g., `*.example.com`)
 
 ## Step-by-Step Configuration
 
 1. Open **Cisco Umbrella Management Console**
 2. Navigate to **Deployments → Configuration → Domain Management**
-3. Under **Internal Domains**, add each domain used by your Twingate Resources
+3. Under **Internal Domains**, add the domains corresponding to your Twingate Resources
    - Example: add `example.com` to cover `*.example.com`
 
 ## Configuration Values
@@ -32,11 +29,11 @@ AnyConnect with Umbrella Module is compatible with Twingate (unlike the legacy R
 | Internal Domains | Umbrella Console → Deployments → Configuration → Domain Management | Your Twingate resource domains (e.g., `example.com`) |
 
 ## Gotchas
-- **Wildcard support**: Left-hand wildcards only — `example.com` implicitly covers `*.example.com`. Midfield wildcards (`bla.*.example.com`) are **not supported**
-- **Publicly resolvable domains**: Even if resources are publicly resolvable, they **must** be added to Internal Domains for Twingate to resolve them correctly
-- AnyConnect's "do not intercept" tag is in-memory only and resets on client restart
-- Roaming Client's resolver list is static after startup — incompatible with Twingate's DNS behavior
+- **Publicly resolvable domains** must still be added to Internal Domains — AnyConnect will otherwise intercept and forward them to Umbrella instead of letting Twingate resolve them
+- **Wildcard syntax**: Left-hand wildcards only — `example.com` implicitly covers `*.example.com`; mid-field wildcards like `bla.*.example.com` are **not supported**
+- Roaming Client stores resolver list at startup and never polls for OS-level changes — this is why it conflicts with Twingate (Twingate's resolver additions are ignored)
+- Internal Domain tags are stored in memory and reset when AnyConnect restarts
 
 ## Related Docs
 - [Umbrella Domain Management](https://docs.umbrella.com/deployment-umbrella/docs/domain-management)
-- Cisco AnyConnect upgrade from Roaming Client (contact Cisco — free of charge)
+- Twingate: Split DNS / DNS configuration docs

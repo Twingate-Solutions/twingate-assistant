@@ -11,7 +11,7 @@
 # Auto-assign patterns apply to new sitemap URLs not yet in this file.
 # First matching pattern wins; unmatched docs go to _triage/ for review.
 #
-# Last updated: 2026-06-08 (293 entries; docsTemplate, unlisted, WIP excluded)
+# Last updated: 2026-07-06 (302 entries; docsTemplate, unlisted, WIP excluded)
 
 docs:
 
@@ -312,6 +312,34 @@ docs:
   - url: https://www.twingate.com/docs/whitelisting-traffic-to-public-services
     skill: twingate-architect
     keywords: [IP whitelisting, public resources, exit nodes, SaaS app gating, access control, dynamic IP, best practices, security]
+
+  - url: https://www.twingate.com/docs/minecraft-guides
+    skill: twingate-architect
+    keywords: [Minecraft, homelab, game server, Java, Bedrock, Forge, Docker Compose, no port forwarding]
+
+  - url: https://www.twingate.com/docs/minecraft-server
+    skill: twingate-architect
+    keywords: [Minecraft, Java Edition, Docker Compose, homelab, game server, "itzg/minecraft-server", TCP 25565, no port forwarding]
+
+  - url: https://www.twingate.com/docs/minecraft-server-linux
+    skill: twingate-architect
+    keywords: [Minecraft, Java Edition, Linux, systemd, bare metal, homelab, game server, TCP 25565]
+
+  - url: https://www.twingate.com/docs/minecraft-bedrock-server
+    skill: twingate-architect
+    keywords: [Minecraft, Bedrock, Docker Compose, homelab, game server, UDP 19132, "itzg/minecraft-bedrock-server"]
+
+  - url: https://www.twingate.com/docs/minecraft-bedrock-server-linux
+    skill: twingate-architect
+    keywords: [Minecraft, Bedrock, Linux, systemd, bare metal, homelab, game server, UDP 19132, x86_64]
+
+  - url: https://www.twingate.com/docs/minecraft-forge-server
+    skill: twingate-architect
+    keywords: [Minecraft, Forge, modded, Docker Compose, CurseForge, homelab, game server, TCP 25565]
+
+  - url: https://www.twingate.com/docs/minecraft-forge-server-linux
+    skill: twingate-architect
+    keywords: [Minecraft, Forge, modded, Linux, systemd, bare metal, homelab, game server, TCP 25565]
 
   - url: https://www.twingate.com/docs/windows-sbl
     skill: twingate-architect
@@ -739,6 +767,14 @@ docs:
   - url: https://www.twingate.com/docs/deploy-connector-on-ubiquiti
     skill: twingate-connectors
     keywords: [Ubiquiti, UniFi, UDM Pro, UXG, "systemd-nspawn", Connector deployment, gateway, router]
+
+  - url: https://www.twingate.com/docs/cloud-providers-guide
+    skill: twingate-connectors
+    keywords: [cloud providers, AWS, GCP, Azure, DigitalOcean, Connector deployment, Remote Network, outbound only, high availability]
+
+  - url: https://www.twingate.com/docs/homelabs-guide
+    skill: twingate-connectors
+    keywords: [homelab, Connector deployment, Home Assistant, Proxmox, Unraid, Synology, QNAP, TrueNAS, "self-hosted", NAS]
 
 
   # ── twingate-terraform ──────────────────────────────────────────────────────
@@ -1326,4 +1362,6 @@ auto_assign_patterns:
   - pattern: "/docs/resource"
     skill: twingate-architect
   - pattern: "/docs/database-access"
+    skill: twingate-architect
+  - pattern: "/docs/minecraft"
     skill: twingate-architect

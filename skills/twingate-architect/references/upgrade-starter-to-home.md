@@ -1,17 +1,18 @@
-# Upgrade to Twingate Home
+# Upgrade Starter to Twingate Home
 
 ## Summary
-Guide for redeeming a Twingate Home promo code to upgrade from a Starter plan. The upgrade takes effect immediately upon successful code redemption via the Admin Console.
+Redeems a promo/access code to upgrade a Twingate Starter plan account to Twingate Home. The upgrade takes effect immediately upon successful code redemption via the Admin Console.
 
 ## Key Information
-- Upgrades Starter plan accounts to Twingate Home tier
-- Upgrade is immediate — no delay after code redemption
-- Confirmation shown via green banner: "Promo code applied successfully!"
+- Upgrade is immediate upon code redemption
+- Requires a Twingate Home access code (promo code)
+- Success confirmed by green banner: "Promo code applied successfully!"
+- Access codes obtained from the Twingate Access Pass page if not already held
 
 ## Prerequisites
 - Active Twingate Starter plan account
 - Admin Console access
-- Twingate Home access code (obtain from [Twingate Access Pass](https://www.twingate.com/access-pass) if not already held)
+- Valid Twingate Home access/promo code
 
 ## Step-by-Step
 
@@ -22,12 +23,15 @@ Guide for redeeming a Twingate Home promo code to upgrade from a Starter plan. T
 5. Click the **Redeem Twingate Home Promo Code** section to expand
 6. Enter access code in the promo code field
 7. Click **Apply Code**
-8. Verify green success banner appears
+8. Confirm success via green banner at top of page
+
+## Configuration Values
+- None (UI-only flow, no CLI flags or API parameters)
 
 ## Gotchas
-- No access code = cannot upgrade; must visit Access Pass page first
-- Process is only applicable to Starter plan accounts (not other tiers)
+- No access code? Must visit Twingate Access Pass page first — codes are not auto-issued
+- Upgrade path is Starter → Home only; other plan transitions are not covered here
 
 ## Related Docs
-- [Twingate Access Pass](https://www.twingate.com/access-pass) — obtain Home access code
-- [Twingate Pricing Page](https://www.twingate.com/pricing) — Home plan feature details
+- Twingate Access Pass page (code acquisition)
+- Twingate Pricing page (Home plan feature details)

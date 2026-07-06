@@ -4,64 +4,59 @@
 Infrastructure Access Use Case
 
 ## Summary
-Twingate provides secure access to on-premises and cloud infrastructure without public internet exposure, replacing jump servers and Bastion hosts. It supports programmatic configuration via Terraform, Pulumi, and Admin API, and integrates with Kubernetes and CI/CD workflows.
+Twingate provides secure access to on-premises and cloud infrastructure without exposing resources publicly. It supports programmatic configuration via Terraform, Pulumi, and Admin API, and integrates with CI/CD pipelines and Kubernetes environments.
 
 ## Key Information
-- No public internet exposure required — eliminates need for jump servers or Bastion hosts
+- No public exposure required — eliminates jump servers, Bastion hosts, and VPN servers
 - Deployment time: under 15 minutes with a single lightweight Connector host
-- No network reconfiguration or VPN server setup needed
+- No network reconfiguration needed
 - Supports simultaneous access to multiple clouds or environments (dev, staging, prod)
 - Kubernetes support: GKE, Amazon EKS, microK8s, Kubernetes Operator available
-- Service accounts enable machine-to-machine (M2M) access for automated pipelines
 
 ## Prerequisites
-- Twingate account with Admin access
-- Connector deployed within target network
+- A Twingate account with Admin access
+- A host within the target network for Connector deployment
+- For IaC: Terraform or Pulumi installed; Twingate provider configured
 - For Kubernetes: GKE, EKS, or compatible cluster
-- For CI/CD: Service account configured in Twingate
 
-## Configuration Approaches
-| Method | Use Case |
-|--------|----------|
-| Terraform provider | IaC automation of resources/groups |
-| Pulumi provider | IaC automation (alternative to Terraform) |
+## Configuration Options
+| Method | Reference |
+|--------|-----------|
+| Terraform | Twingate Terraform provider |
+| Pulumi | Twingate Pulumi integration |
 | Admin API | Programmatic management |
-| Kubernetes Operator | Cluster-native Twingate integration |
+| Kubernetes Operator | Cluster-native resource management |
 
-## Use Case Guides (Linked)
+## Use Case Guides
 
-**Automation:**
-- Pulumi + Twingate
-- Terraform + Twingate
-- Admin API
+**IaC / Automation**
+- Getting Started with Pulumi and Twingate
+- Getting Started with Terraform and Twingate
 
-**CI/CD:**
-- CircleCI & GitHub Actions pipeline security
-- GitHub Codespaces private resource access
-- Machine-to-machine via Service Accounts
+**CI/CD**
+- Secure CI/CD Pipelines (CircleCI & GitHub Actions)
+- Secure Access from GitHub Codespaces
+- Machine-to-machine communication via Service Accounts
 
-**Kubernetes:**
+**Kubernetes**
 - Route traffic from a Kubernetes cluster using Twingate Client
-- Access private resources in a Kubernetes cluster
-- Access publicly exposed resources in a Kubernetes cluster
-- Manage Kubernetes via `kubectl` securely
+- Securely access private resources in a Kubernetes cluster
+- Securely access publicly exposed resources in a Kubernetes cluster
+- Manage Kubernetes using `kubectl` securely
 
-**Dev Environments:**
-- Non-production environment best practices
-- MFA for all protocols (SSH, RDP, SQL, zOS)
+**Development Environments**
+- Best practices for non-production environment access
+- MFA for all protocols (SSH, RDP, SQL, zOS, etc.)
 - Private DNS with Twingate
 
 ## Gotchas
-- Connector must be deployed inside the target network segment — it is not a VPN server
-- Kubernetes Operator is a separate integration from standard Connector deployment
-- Service accounts are required for automated/headless CI/CD access (no user login flow)
-- Private DNS configuration is separate and must be explicitly set up for hostname-based resource access
+- Service Accounts must be configured for automated/machine-to-machine workflows — user credentials should not be used in CI/CD contexts
+- Kubernetes Operator is a separate integration path from deploying a Connector inside a cluster
+- "Unified access" to multiple environments requires separate Connectors per network/environment
 
 ## Related Docs
-- [Terraform Integration](https://www.twingate.com/docs/terraform)
-- [Pulumi Integration](https://www.twingate.com/docs/pulumi)
-- [Admin API](https://www.twingate.com/docs/api)
-- [Kubernetes Operator](https://www.twingate.com/docs/kubernetes-operator)
-- [CircleCI & GitHub Actions](https://www.twingate.com/docs/ci-cd)
-- [Service Accounts](https://www.twingate.com/docs/service-accounts)
-- [Private DNS](https://www.twingate.com/docs/private-dns)
+- Twingate Kubernetes Operator
+- Service Accounts (machine-to-machine)
+- Admin API reference
+- Private DNS configuration
+- Terraform and Pulumi provider docs

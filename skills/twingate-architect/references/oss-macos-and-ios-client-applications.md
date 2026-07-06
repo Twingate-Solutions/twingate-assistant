@@ -1,46 +1,51 @@
-# macOS and iOS Client Applications – OSS Third-Party Notices
-
-## Page Title
-Twingate macOS and iOS Client Applications – Open Source Component Licenses
+# macOS and iOS Client Applications - OSS Third Party Notices
 
 ## Summary
-This page lists all third-party open source components bundled in Twingate's macOS and iOS client applications, along with their full license texts. It serves as the required third-party notice disclosure for legal compliance purposes. No implementation guidance is provided.
+This page lists all open-source third-party components bundled in Twingate's macOS and iOS client applications, along with their full license texts. It serves as the legal attribution/notice document required by the respective open-source licenses.
 
 ## Key Information
 
-### Components and Their Licenses
+- **Purpose**: Legal compliance document listing OSS components and their licenses
+- **Platform**: Twingate macOS and iOS client applications
 
-| Component | License | Copyright Holder |
-|-----------|---------|-----------------|
-| libssl | Apache 2.0 | OpenSSL Project |
-| libevent | BSD 3-Clause | Niels Provos, Nick Mathewson |
-| lwip | BSD 3-Clause | Swedish Institute of Computer Science |
-| siphash | CC0 1.0 Universal | — |
-| libjansson | MIT | Petri Lehtinen |
-| jwt-cpp | MIT | Dominik Thalhammer |
-| args | MIT | Taylor C. Richberger, Pavel Belikov |
-| Sentry-cocoa | MIT | Sentry |
-| pubnub | MIT | PubNub |
-| quicly | MIT | Fastly, Kazuho Oku |
-| catch2 | Boost Software License 1.0 | Catch2 Authors |
-| zlib | zlib License | Jean-loup Gailly, Mark Adler |
-| nanopb | zlib License | Petteri Aimonen |
-| fmt | MIT-like (with optional exception) | Victor Zverovich |
+### Components by License
 
-## Prerequisites
-- N/A – This is a legal disclosure page only.
+| License | Components |
+|---------|-----------|
+| Apache 2.0 | `libssl` (OpenSSL Project) |
+| BSD 3-Clause | `libevent`, `lwip` |
+| CC0 1.0 Universal | `siphash` |
+| MIT | `libjansson`, `jwt-cpp`, `args`, `Sentry-cocoa`, `pubnub`, `quicly` |
+| Boost Software License 1.0 | `catch2` |
+| zlib | `zlib`, `nanopb` |
+| Other (MIT-like) | `fmt` |
 
-## Step-by-Step
-- N/A – No implementation steps; reference only.
+## Component Details
 
-## Configuration Values
-- N/A
+- **args** – CLI argument parsing (Taylor C. Richberger, 2016–2017)
+- **catch2** – C++ testing framework (Catch2 Authors)
+- **fmt** – String formatting library (Victor Zverovich, 2012–present)
+- **jwt-cpp** – JWT handling (Dominik Thalhammer, 2018)
+- **libevent** – Event notification library (Niels Provos / Nick Mathewson, 2000–2012)
+- **libjansson** – JSON library (Petri Lehtinen, 2009–2020)
+- **libssl** – TLS/SSL (OpenSSL Project, 1998–2020)
+- **lwip** – Lightweight TCP/IP stack (Swedish Institute of Computer Science, 2001–2002)
+- **nanopb** – Protocol Buffers for embedded systems (Petteri Aimonen, 2011)
+- **pubnub** – Real-time messaging (PubNub, 2015)
+- **quicly** – QUIC protocol library (Fastly/Kazuho Oku, 2017)
+- **Sentry-cocoa** – Error tracking SDK (Sentry, 2015)
+- **siphash** – Hash function (CC0 public domain)
+- **zlib** – Compression library (Jean-loup Gailly / Mark Adler, 1995–2017)
 
 ## Gotchas
-- `fmt` uses a non-standard license variant: includes an optional exception allowing embedded portions in compiled object form to be redistributed **without** copyright notices.
-- `siphash` uses CC0 (public domain dedication), not a traditional license.
-- BSD 3-Clause components (`libevent`, `lwip`) prohibit use of contributor names for endorsement without permission.
+
+- `fmt` includes an **optional exception**: embedded portions in machine-executable object code may be redistributed without the copyright/permission notices
+- `siphash` is CC0 (public domain dedication), not a traditional license—no attribution legally required but included for completeness
+- BSD 3-Clause components (`libevent`, `lwip`) prohibit using contributor names for endorsement without permission
+
+## Prerequisites
+N/A – Reference/legal document only
 
 ## Related Docs
-- [Twingate OSS Notices – other platforms](#) (check Twingate docs for Windows/Linux equivalents)
-- [Twingate Client Documentation](https://www.twingate.com/docs/)
+- [Twingate OSS Notices (other platforms)](https://www.twingate.com/docs/) – check for Windows/Linux equivalents
+- Apache License 2.0: https://www.apache.org/licenses/

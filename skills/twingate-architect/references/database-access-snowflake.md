@@ -1,35 +1,35 @@
 # Snowflake Access with Twingate
 
 ## Summary
-Route Snowflake traffic (Snowsight UI and database queries) through Twingate Connectors and restrict access via Snowflake network policies scoped to Connector public IPs. Covers both JDBC/ODBC/API query access and Snowsight web UI access. PrivateLink/Private Service Connect eliminates need for IP allowlisting entirely.
+Secures Snowflake access (both Snowsight UI and database/warehouse queries) by routing traffic through Twingate Connectors and restricting Snowflake network policies to Connector public IPs. Works for JDBC, ODBC, SnowSQL, APIs, and the Snowsight web console.
 
 ## Key Information
-- Snowflake uses network policies (containing network rules) to allowlist IP addresses or private endpoint identifiers
-- Two separate access surfaces: Snowsight UI (`*.snowflake.com`) and database queries (`*.snowflakecomputing.com`)
-- Both use port 443 (HTTPS)
-- PrivateLink (AWS/Azure) or Private Service Connect (GCP) keeps traffic off public internet; no IP allowlisting needed
+- Snowflake uses **network policies** (containing network rules) to allowlist IP addresses or private endpoint identifiers
+- Two separate access surfaces to secure: **Snowsight UI** (`*.snowflake.com`) and **database/warehouse** (`*.snowflakecomputing.com`)
+- Both use the same network policy framework; port 443 (HTTPS) for both
+- PrivateLink (AWS/Azure) or Private Service Connect (GCP) eliminates need to allowlist public IPs entirely
 
 ## Prerequisites
-- Twingate Remote Network with at least one deployed Connector
-- Connector public IP addresses (Admin Console → Remote Network → Connectors → Public IP)
+- Twingate Remote Network with at least one Connector deployed
+- Connector's public IP noted (Admin Console → Remote Network → Connectors → Public IP)
 - Snowflake account with `ACCOUNTADMIN` or `SECURITYADMIN` role
 
 ## Step-by-Step
 
-### Database/Query Access
-1. Create Snowflake Network Rule scoped to Connector IPs (Admin → Security → Network Rules or SQL)
-2. Create Twingate Resource for `myorg-myaccount.snowflakecomputing.com`, port 443
+### Database/Warehouse Access
+1. Create Snowflake **Network Rule** scoped to Connector public IPs (Snowsight: Admin → Security → Network Rules)
+2. Create Twingate Resource for `*.snowflakecomputing.com` or `myorg-myaccount.snowflakecomputing.com`, port `443`
 3. Connect Twingate Client before running queries
 
 ### Snowsight UI Access
-1. Create Snowflake Network Policy scoped to Connector IPs (Admin → Security → Network Policies) and activate it
-2. Create Twingate Resource for `*.snowflake.com` or regional URL (e.g., `apps-api.c1.us-west-2.aws.app.snowflake.com`), port 443
-3. Connect Twingate Client before accessing `https://app.snowflake.com`
+1. Create Snowflake **Network Policy** scoped to Connector IPs (Admin → Security → Network Policies) and activate it
+2. Create Twingate Resource for `*.snowflake.com` or regional Snowsight URL, port `443`
+3. Use same Remote Network as warehouse resources
 
 ## Configuration Values
 
 ```toml
-# ~/.snowflake/config.toml
+# Snowflake CLI config.toml
 [connections.myconn]
 account = "myaccount"
 user = "jondoe"
@@ -42,19 +42,16 @@ snow connection set-default myconn
 snow sql -q "select current_user();"
 ```
 
-**Twingate Resource settings:**
-- Address: `*.snowflakecomputing.com` (queries) or `*.snowflake.com` (Snowsight)
-- Port: `443`
-
 ## Gotchas
-- Snowflake evaluates the **most restrictive** applicable policy — if user-level policy exists alongside account-level, Connector IPs must appear in **both**
-- Use full account identifier (`myorg-myaccount`), not partial — missing segments cause connection failures
-- "No Activity" in Twingate logs means Client didn't route traffic to Connector (check Client is running, no conflicting VPN)
-- "DNS Failed" means Connector can't resolve hostname — verify DNS is reachable from Connector subnet
-- Multiple network policies can conflict; audit all applied policies
+- **Multiple network policies**: Snowflake applies the most restrictive policy. User-level policies override account-level — ensure Connector IPs are in **both**
+- **Account URL format**: Must use full identifier `myorg-myaccount` — missing segments cause connection failures
+- **No Activity in Twingate logs**: Client not running, no resource access, or another VPN intercepting traffic
+- **DNS Failed**: Connector can't resolve hostname — check DNS routing from Connector's network
+- **Snowsight vs. warehouse**: Separate Twingate Resources needed for each domain
 
 ## Related Docs
-- [Snowflake Private Connectivity](https://docs.snowflake.com/en/user-guide/private-connectivity)
 - [Twingate Troubleshooting Guide](https://www.twingate.com/docs/troubleshooting)
-- [SaaS App Gating](https://www.twingate.com/docs/saas-app-gating)
+- [SaaS App Gating Guide](https://www.twingate.com/docs/saas-app-gating)
 - [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
+- [Snowflake Configuring Private Connectivity](https://docs.snowflake.com/en/user-guide/private-link-overview)
+- MongoDB/Redis Access Guides (parallel database patterns)

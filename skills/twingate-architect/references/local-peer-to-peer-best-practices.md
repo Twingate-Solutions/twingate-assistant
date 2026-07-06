@@ -1,48 +1,43 @@
 # Best Practices for Local Peer-to-Peer Connections
 
 ## Summary
-Twingate supports local peer-to-peer (P2P) connections where users communicate directly with Connectors on the same network, bypassing central gateways. This guide covers network topology design using VLAN segregation to optimize performance while enforcing Zero Trust access controls.
+Twingate supports local peer-to-peer (P2P) connections that allow users to communicate directly with Connectors without routing through a central gateway. This guide covers recommended network topology using dual VLANs with strict traffic segregation to optimize performance and security. All user access to resources is mediated through Twingate Connectors.
 
 ## Key Information
 - Local P2P keeps traffic within the local network, reducing latency and external bandwidth usage
-- Only authenticated/authorized users can initiate P2P connections
-- Recommended topology: single physical network with two VLANs (Resources vs. Users)
-- Two Connectors should be deployed in the Resource VLAN for redundancy
+- Recommended topology: two VLANs on a single physical network
+  - **VLAN 1**: Resources (servers, systems) + two Twingate Connectors
+  - **VLAN 2**: Users, DHCP, DNS, end-user devices
+- Only Connector private IPs in VLAN 1 are reachable from VLAN 2
+- Two Connectors recommended for redundancy in VLAN 1
 
-## Recommended Network Topology
+## Firewall Rules (Apply Top-to-Bottom)
 
-**VLAN 1 (Resources):** Servers, systems, and Twingate Connectors  
-**VLAN 2 (Users):** End-user devices, DHCP, DNS
+| Source | Destination | IP/Port | Action |
+|--------|------------|---------|--------|
+| VLAN 2 | VLAN 1 | `<ConnectorIP>:*` | Allow |
+| VLAN 2 | VLAN 1 | `*:*` | Block |
+| VLAN 1 | VLAN 2 | `*:*` | Block |
 
-## Firewall Rules
+> Note: VLAN 1 → VLAN 2 blocking is implied; adjust if return traffic needs to flow.
 
-```
-Source | Destination | IP/Port     | Action
-VLAN 2 | VLAN 1      | 10.0.0.2:* | Allow   ← Connector IP only
-VLAN 2 | VLAN 1      | *:*         | Block
-VLAN 1 | VLAN 2      | *:*         | Block
-```
-Rules are evaluated top-to-bottom; only Connector IPs in VLAN 1 are reachable from VLAN 2.
+## Supported Firewall Platforms
+Configuration guidance provided for:
+- **Palo Alto NGFW** – Security zones, security policies, PBF rules; reference Strata Cloud Manager
+- **Fortinet FortiGate** – VLAN creation via GUI → Network → VLAN; policies via Policy & Objects
+- **Sophos XG** – Network → Interfaces → Add VLAN; Rules and Policies for inter-VLAN control
+- **Barracuda CloudGen** – VLAN interfaces on physical/virtual ports; access rules via Firewall Admin → Configuration
 
-## Firewall-Specific Configuration Notes
-
-| Firewall | Key Steps |
-|----------|-----------|
-| **Palo Alto NGFW** | Create security zones per VLAN → define security policies allowing VLAN2→Connector IPs → optionally use PBF rules |
-| **FortiGate** | Network > VLAN config → Policy & Objects > new policy with explicit destination IP (Connector) → block all other inter-VLAN traffic |
-| **Sophos XG** | Network > Interfaces > Add VLAN → Rules and Policies permitting VLAN2→Connector IP only |
-| **Barracuda CloudGen** | Configure VLAN interfaces → Firewall Admin > Configuration > access rules (VLAN2 source, Connector IP destination) → default deny rule |
-
-## Connector Placement
-- Deploy **two Connectors** in VLAN 1 (Resource VLAN)
-- Connectors mediate all requests from VLAN 2 users to VLAN 1 resources
-- Only Connector private IPs should be reachable from VLAN 2
+## Prerequisites
+- Two Twingate Connectors deployed in VLAN 1
+- Managed switch supporting 802.1Q VLANs
+- Firewall capable of inter-VLAN policy enforcement
 
 ## Gotchas
-- All inter-VLAN traffic must be blocked **except** to Connector IP addresses — misconfigured rules allowing broader access defeat Zero Trust enforcement
-- Firewall rules are order-dependent; place allow rules for Connector IPs **before** the blanket block rule
-- VLAN 1→VLAN 2 traffic is blocked in the example config — verify this matches your operational requirements
-- Replace `10.0.0.2` in examples with actual Connector IP(s); adjust if deploying two Connectors (add a second allow rule)
+- Firewall rules are order-dependent; allow Connector IPs **before** the broad block rule
+- Users cannot reach any VLAN 1 resource directly—only through Connectors; plan DNS accordingly
+- The example allows traffic from VLAN 2 to a single Connector IP (`10.0.0.2`)—update rules for both Connectors
+- VLAN 1 → VLAN 2 block in the example table conflicts with return traffic; verify stateful firewall behavior on your platform
 
 ## Related Docs
 - [Twingate Architecture](https://www.twingate.com/docs/architecture)

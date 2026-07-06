@@ -1,49 +1,40 @@
 # Twingate Users
 
 ## Summary
-Twingate users are managed either via social logins (Google, Microsoft, GitHub, LinkedIn) or automatically synchronized from a third-party IdP via SCIM. New users only have access to the "Everyone" group by default and cannot access Resources until explicitly assigned. Billing applies to all synchronized users and service accounts.
+Twingate manages users either through built-in social logins (Google, Microsoft, GitHub, LinkedIn) or via a third-party IdP with SCIM sync. All new users default to the "Everyone" group with no Resource access until explicitly assigned. Billing applies to all synchronized users and service accounts.
 
 ## Key Information
-- Default auth: social logins (Google, Microsoft, GitHub, LinkedIn)
-- IdP-connected accounts: users auto-synced via SCIM; cannot be modified in Admin Console
-- New users default to "Everyone" group only — no Resource access unless explicitly granted
-- Billing covers all synchronized users + service accounts
-- User access viewable via detail page (list view or Access Graph)
-- Access Graph shows groups, Resources, paths, and policies with filtering by Group, Remote Network, or Resource
+- **Default auth**: Social logins managed via Admin Console Teams page
+- **IdP sync**: When IdP is configured, users sync automatically via SCIM; cannot be manually modified in Admin Console
+- **Default access**: New users only get "Everyone" group membership — no Resources accessible unless explicitly added
+- **Access visibility**: User detail page shows accessible Resources in list view or Access Graph (filterable by Groups, Remote Networks, Resources)
+- **Billing**: Applies to all synchronized users + service accounts
+- **Offboarding**: Users can be disabled or deleted when access is no longer needed
 
 ## Admin Roles
 
 | Role | Permissions |
 |------|-------------|
-| **Admin** | Full read/write across entire Admin Console |
-| **DevOps** | Read/write on Network tab; read-only elsewhere |
-| **Support** | Read-only across entire Admin Console |
+| Admin | Full read/write across entire Admin Console |
+| DevOps | Read/write on Network tab; read-only elsewhere |
+| Support | Read-only across entire Admin Console |
+| Access Reviewer | Access Requests page only |
+| Billing | Billing page only (plan & payment management) |
 
 ## Prerequisites
-- Admin Console access
-- For IdP sync: configured Identity Provider with SCIM enabled
-
-## User Management
-
-### Social Login (Default)
-- Invite users via **Teams page** in Admin Console
-- Deactivate users directly in Admin Console
-
-### IdP-Connected
-- Users created/deactivated via IdP only
-- Changes propagate to Twingate immediately via SCIM
-- No user modification available in Admin Console
+- Admin Console access to invite/manage users
+- IdP + SCIM configured if using automated user sync (optional)
 
 ## Gotchas
-- New users have **zero Resource access** by default — must add Resources to Everyone group or assign users to specific Groups
-- With IdP integration, user management is locked in Admin Console; all changes must be made at the IdP level
-- All synchronized users count toward billing, not just active/licensed ones
-- Deleting vs. disabling users are separate actions — see Offboarding Users docs
+- Users with IdP/SCIM sync **cannot** be modified in the Admin Console — all changes must originate from the IdP
+- New users have **zero Resource access** by default; requires explicit Group/Resource assignment
+- Forgetting to assign users beyond "Everyone" group is a common misconfiguration causing access issues
+- All synced users count toward billing regardless of active use
 
 ## Related Docs
-- [Social Logins](#) — managing social login configuration
-- [Identity Providers](#) — configuring third-party IdP + SCIM
-- [Groups](#) — assigning Resources to groups
-- [Admins](#) — detailed admin role descriptions and assignment
-- [Offboarding Users](#) — disabling/deleting users
-- [Billing](#) — user billing details
+- [Social Logins](/docs/social-logins)
+- [Identity Providers](/docs/identity-providers)
+- [Groups](/docs/groups)
+- [Offboarding Users](/docs/offboarding-users)
+- [Admins](/docs/admins)
+- [Billing](/docs/billing)

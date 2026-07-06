@@ -96,7 +96,7 @@ training data is often months out of date.
 
 | If the user asks about… | Read first |
 |---|---|
-| Provider config, version pinning, env var name, getting started | `terraform-provider-overview.md`, `terraform-getting-started.md` |
+| Provider config, version pinning, env var name, getting started | `terraform-provider-overview.md`, `terraform-provider-twingate.md`, `terraform-getting-started.md` |
 | AWS-specific Terraform patterns (ECS/EC2 + Twingate) | `terraform-aws.md` (and `skills/twingate-connectors/references/aws-connector-patterns.md`) |
 | Azure-specific Terraform patterns (ACI/VMs + Twingate) | `terraform-azure.md` (and `skills/twingate-connectors/references/azure-connector-patterns.md`) |
 | GCP-specific Terraform patterns (GCE/MIG + Twingate) | `terraform-gcp.md` (and `skills/twingate-connectors/references/gcp-connector-patterns.md`) |

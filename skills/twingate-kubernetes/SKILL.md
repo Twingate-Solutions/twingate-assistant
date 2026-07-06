@@ -103,10 +103,11 @@ fields drift between releases.
 |---|---|
 | Helm chart deployment, values keys, install commands | `k8s-helm-chart.md` |
 | Helm chart upgrades and chart version handling | `k8s-helm-chart-upgrades.md` |
-| Operator CRDs, GitOps with `TwingateResource` / `TwingateRemoteNetwork` | `kubernetes-operator.md` |
+| Operator CRDs, GitOps with `TwingateResource` / `TwingateRemoteNetwork` | `kubernetes-operator.md`, `Getting-Started.md` |
 | Cluster service exposure (private services to Twingate users) | `k8s-private-services.md`, `k8s.md` |
 | Public service exposure patterns | `k8s-public-services.md` |
 | kubectl access via Twingate (non-IDFW) | `k8s-cluster-access.md`, `k8s-kubectl.md` |
+| Kubeconfig sync automation | `kubernetes-kubeconfig-sync.md` |
 | Helm values schema (exact field names) | Helm chart repo: `charts/connector/values.yaml` |
 | CRD schemas (exact field names) | Operator repo: `config/crd/` |
 

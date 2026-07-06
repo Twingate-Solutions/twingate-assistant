@@ -1,51 +1,56 @@
 # How Twingate Forwards DNS
 
 ## Summary
-Twingate Client resolves DNS `A` records locally using CGNAT IPs (`100.64.0.0/10`) and routes traffic through its local network interface. Non-`A` record types (TXT, MX, etc.) are forwarded to the Remote Network via the Connector using the private DNS server. DNS forwarding can be blocked by Resource port restrictions on 53/UDP.
+Twingate Client resolves DNS `A` records locally using CGNAT IPs (100.64.0.0/10) and routes traffic through its network interface to the Connector. Non-`A` record queries are forwarded to the Remote Network's private DNS server via the Connector. DNS forwarding can be blocked by Resource port restrictions on port 53/UDP.
 
 ## Key Information
-- Client resolves `A` records locally → assigns CGNAT IP from `100.64.0.0/10`
-- Traffic routed through Twingate interface from `100.96.0.0/12`
-- Non-`A` queries (TXT, MX, etc.) forwarded to Connector → resolved by private DNS server
-- DNS traffic treated as standard UDP traffic on port 53/UDP — no special-casing
-- Querying DNS server explicitly via private Resource IP bypasses CGNAT resolution (returns real IP, not CGNAT)
+- Client resolves `A` records locally → assigns CGNAT IP → routes via Twingate interface → proxied to Connector
+- CGNAT range used: `100.64.0.0/10`; routing range: `100.96.0.0/12`
+- Non-`A` queries (TXT, MX, etc.) are forwarded to Remote Network and resolved by Connector using private DNS
+- DNS traffic is treated as standard UDP traffic on port 53/UDP — no special-casing
 
-## Prerequisites for Explicit DNS Forwarding
-| Component | Minimum Version |
-|-----------|----------------|
-| Connector | 1.46.0+ |
-| macOS Client | 1.0.26+ |
-| Linux Client | 1.0.74+ |
-| iOS Client | 1.0.26+ |
-| Android Client | 1.0.23+ |
-| Windows Client | Not yet released |
+## Prerequisites
+For explicit DNS forwarding:
+- Connector version **≥ 1.46.0**
+- Client versions:
+  - macOS ≥ 1.0.26
+  - Linux ≥ 1.0.74
+  - iOS ≥ 1.0.26
+  - Android ≥ 1.0.23
+  - Windows: not yet supported
 
 ## When DNS Forwarding Fails
-- Resource has port **53/UDP blocked** → non-`A` queries return empty response (`ANSWER: 0`)
-- This is expected behavior; Twingate applies Resource port restrictions to DNS traffic like any other UDP traffic
+- If a Resource has **port 53/UDP blocked**, non-`A` queries return empty responses (`ANSWER: 0`)
+- This is expected behavior — Twingate applies port restrictions uniformly to all UDP traffic including DNS
 
-## Explicit DNS Forwarding (Workaround)
-
-**Method:** Query a private Resource configured as a DNS server directly using `@<ip>` syntax.
+## Explicit DNS Forwarding Workaround
+To bypass automatic DNS handling, specify a **private Resource** as the DNS resolver directly:
 
 ```bash
 dig @10.0.0.2 TXT nas.home.int
 ```
 
 **Requirements:**
-- The DNS server IP (`10.0.0.2`) must be a configured Twingate Resource
-- Port 53/UDP must be **allowed** on the DNS server Resource (not necessarily on the target Resource)
+1. The DNS server (e.g., `10.0.0.2`) must be a configured Twingate Resource
+2. Port 53/UDP must be **allowed** on that DNS server Resource
+3. The target domain's Resource port restrictions don't matter — only the DNS server Resource's port config matters
 
 **Use cases:**
-- `dig @dns-server A nas.home.int` → returns real IP (not CGNAT)
-- `dig @dns-server TXT nas.home.int` → returns TXT record even if target Resource blocks 53/UDP
+- `dig @dns-server A nas.home.int` → returns real IP (not CGNAT address)
+- `dig @dns-server TXT nas.home.int` → returns TXT record even if the target Resource blocks port 53/UDP
+
+## Configuration Values
+| Parameter | Value |
+|-----------|-------|
+| DNS port | 53/UDP |
+| CGNAT local resolution range | `100.64.0.0/10` |
+| Twingate routing range | `100.96.0.0/12` |
 
 ## Gotchas
-- Port 53/UDP blocked on a Resource silently returns empty DNS responses for non-`A` queries — not an error, no warning
-- The DNS server Resource and the queried Resource port restrictions are **independent** — DNS server needs 53/UDP open; target Resource does not
-- Explicit `@dns-server` queries bypass CGNAT — returns actual private IP addresses
-- Most applications behave normally when non-`A` requests are blocked; explicit forwarding is only needed in edge cases
+- Port 53/UDP blocked on a Resource → all non-`A` DNS queries for that Resource return empty (no error, just no answer)
+- Explicit `@server` DNS queries bypass Twingate's automatic handling only when the server is a private Resource
+- `dig @dns-server A domain` returns the real IP, not the CGNAT IP assigned by Twingate
 
 ## Related Docs
-- [How DNS works with Twingate](#)
-- [Port restrictions](#)
+- How DNS works with Twingate (prerequisite reading)
+- Twingate port restrictions

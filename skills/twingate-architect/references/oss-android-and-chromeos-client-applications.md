@@ -1,35 +1,24 @@
 # Android and ChromeOS Client Applications - OSS Notices
 
 ## Page Title
-Twingate Android and ChromeOS Client Applications — Open Source Software (OSS) Third-Party Notices
+Twingate Android and ChromeOS Client Applications — Open Source Software Notices
 
 ## Summary
-This page lists all third-party open source components used in Twingate's Android and ChromeOS client applications, along with their respective licenses. It serves as the legal attribution document required by the included OSS licenses. No implementation guidance is provided.
+This page lists all third-party open source components used in the Twingate Android and ChromeOS client applications, along with their respective licenses. It serves as the legal attribution document required by the included open source licenses. No implementation guidance is provided.
 
 ## Key Information
 
 ### Components by License
 
-**Apache License 2.0:**
-- AndroidX, Dagger 2, Kotlin, Logback Android, Moshi, OkHttp, Retrofit, Retrofit Rx adapter, RxAndroid, RxJava, Timber, libssl
-
-**BSD 3-Clause:**
-- libevent, lwip, Sentry
-
-**MIT License:**
-- libjansson, jwt-cpp, args, Sentry SDK for Java and Android, SLF4J, pubnub, quicly
-
-**zlib License:**
-- zlib, nanopb
-
-**Boost Software License 1.0:**
-- catch2
-
-**CC0 1.0 Universal (Public Domain):**
-- siphash
-
-**Other (MIT-like):**
-- fmt (with optional embedded object code exception)
+| License | Components |
+|---------|------------|
+| **Apache 2.0** | AndroidX, Dagger 2, Kotlin, libssl (OpenSSL), Logback Android, Moshi, OkHttp, Retrofit, Retrofit Rx adapter, RxAndroid, RxJava, Timber |
+| **BSD 3-Clause** | libevent, lwip, Sentry |
+| **MIT** | args, jwt-cpp, libjansson, pubnub, quicly, Sentry SDK for Java/Android, SLF4J |
+| **CC0 1.0 Universal** | siphash |
+| **Boost Software License 1.0** | catch2 |
+| **zlib** | nanopb, zlib |
+| **Custom (MIT-like)** | fmt |
 
 ## Prerequisites
 - N/A — reference/legal document only
@@ -41,10 +30,10 @@ This page lists all third-party open source components used in Twingate's Androi
 - N/A
 
 ## Gotchas
-- **Redistribution requires license inclusion**: Apache 2.0, MIT, BSD 3-Clause, and Boost components all require copyright/license notices in redistributed copies
-- **BSD 3-Clause** components (libevent, lwip, Sentry) prohibit using contributor names for endorsement without permission
-- **fmt** includes an optional exception allowing embedded object code redistribution without copyright notices
-- **siphash** is CC0 (effectively public domain), but CC0 does not waive patent or trademark rights
+- `libssl` is listed under Apache 2.0 but is part of the OpenSSL project; actual OpenSSL license terms may differ from what is listed here
+- `siphash` uses CC0 (public domain dedication), not a traditional license
+- `fmt` uses a custom license with an **optional exception** allowing redistribution of embedded portions in compiled object form without copyright notices
 
 ## Related Docs
-- [Twingate OSS Notices (other platforms)](https://www.twingate.com/docs/oss-notices) — likely contains similar notices for iOS, Windows, macOS clients
+- [Twingate OSS Notices (other platforms)](https://www.twingate.com/docs/) — check for iOS, macOS, Windows, Linux equivalents
+- Apache License 2.0: https://www.apache.org/licenses/

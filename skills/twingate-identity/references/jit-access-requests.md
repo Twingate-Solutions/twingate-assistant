@@ -1,51 +1,46 @@
 # JIT Access Requests
 
-## Page Title
-JIT Access Requests
-
 ## Summary
-JIT Access Requests provide audited, temporary access workflows for Twingate Resources assigned to specific Groups. Users see locked Resources until access is approved (manually or automatically). Supports auto-approval with required reason or manual approval by Admins/Access Reviewers.
+JIT Access Requests provide temporary, audited access workflows for Twingate Resources. Access can be auto-approved or require manual approval from an Admin or Access Reviewer. Users see locked Resources until access is granted.
 
 ## Key Information
-- Access Requests operate at **Resource level** (default) or **Group assignment level** (overrides Resource-level settings)
-- Users see the Resource in the Client but cannot connect until access is granted
-- Users trigger requests via navigating to the Resource address or **Authenticate** in the Client submenu
-- Auto-approval: user approves immediately but must provide a reason
-- Manual approval: Admin or Access Reviewer approves/denies; user notified by email
-- Access tracking available via downloadable reports from Resource, Group, or User pages
-
-## Prerequisites
-- Resource must be configured with Access Requests enabled
-- Approvers must have Admin or Access Reviewer role (for manual approval)
-- Twingate Client installed on user device
+- Configured at the Resource level (becomes default for all Group assignments) or overridden at individual Group assignment level
+- Two approval methods: **manual** (Admin/Access Reviewer approves) or **auto-approval** (user self-approves but must provide reason)
+- Access periods: preset durations or **Custom Request** (user-specified, max 7 days)
+- Users see the Resource in the Client but cannot connect until approved
+- Users trigger requests via navigating to Resource address or selecting **Authenticate** from the Resource submenu in the Client
+- If auto-approved: immediate access after submission
+- If manual: user receives email notification on approval/denial
 
 ## Configuration Values
 
-### Access Period Options
-| Option | Description |
-|--------|-------------|
-| Preset durations | Fixed time periods (e.g., 1 hour, 4 hours, 12 hours) |
-| Custom Request | User specifies duration; max **7 days** |
+| Setting | Options |
+|---|---|
+| Access Period | Preset durations or Custom Request (up to 7 days) |
+| Approval Method | Manual approval or Auto-approval |
 
-### Approval Method Options
-| Option | Behavior |
-|--------|----------|
-| Manual approval | Admin or Access Reviewer must explicitly approve each request |
-| Auto-approval | User self-approves; reason for access required |
+## Prerequisites
+- Resource must have Access Requests enabled for the relevant Group assignment
+- Approvers must have Admin or Access Reviewer role (for manual approval)
 
-## Step-by-Step: Configure JIT on a Resource
+## Step-by-Step: Configuring JIT Access
+
 1. Navigate to the Resource detail page
-2. Enable Access Requests
-3. Set **Access Period** (preset or Custom Request)
-4. Set **Approval Method** (manual or auto-approval)
-5. Optionally override settings per Group assignment on that Resource
+2. Configure Access Requests at the Resource level (sets default for all Group assignments)
+3. Optionally override settings on individual Group assignments
+4. Select **Access Period** (preset or Custom Request)
+5. Select **Approval Method** (manual or auto-approval)
+
+## Tracking Access
+- Download usage summary from the Resource, Group, or User page
+- See usage-based access page for full report details
 
 ## Gotchas
-- Resource-level settings are **defaults only**; individual Group assignments can override them
-- Custom Request allows users to choose duration up to 7 days — no finer-grained cap control
-- Auto-approval still requires users to submit a reason; it is not silent/transparent access
-- Users must actively trigger a request (navigate to address or use Client submenu) — no automatic prompt on first connection attempt beyond the locked state
+- Custom Request duration is capped at **7 days** maximum
+- Resource-level settings are defaults only — Group-level assignments can override them
+- Auto-approval still requires users to supply a reason for access
+- Users can see locked Resources in the Client but cannot connect without approval
 
 ## Related Docs
-- [Reviewing Access Requests](https://www.twingate.com/docs/reviewing-access-requests) — approval workflow details and delegation
-- [Usage-Based Access Reports](https://www.twingate.com/docs/usage-based-access) — report contents from Resource/Group/User pages
+- [Reviewing Access Requests](https://www.twingate.com/docs/reviewing-access-requests)
+- [Usage-Based Access Reports](https://www.twingate.com/docs/usage-based-access)

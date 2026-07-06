@@ -1,13 +1,15 @@
-# Getting Started with Twingate on Unraid
+# Getting Started with Unraid and Twingate
+
+## Page Title
+Getting Started with Unraid and Twingate
 
 ## Summary
-Installs Twingate Connector on Unraid via the Community Applications plugin to enable secure remote access. Requires generating connector tokens from the Twingate Admin Console and configuring them in the Unraid app form.
+Deploys a Twingate Connector on an Unraid server via the Community Applications plugin to enable secure remote access to private resources. Requires generating connector tokens in the Twingate Admin Console and configuring them in the Unraid app form.
 
 ## Key Information
-- Uses Unraid Community Apps store for installation
-- Connector runs as a container managed by Unraid
-- Each Connector must have its own unique token pair (never reuse tokens)
-- Verify success by checking Controller and Relay statuses show "connected" in Admin Console
+- Uses Unraid's Community Applications plugin to install the Twingate Connector
+- Connector authenticates to Twingate using an Access Token + Refresh Token pair
+- Successful deployment shows `Controller` and `Relay` statuses as **connected** in Admin Console
 
 ## Prerequisites
 - Running Unraid instance with web UI access
@@ -28,29 +30,29 @@ Installs Twingate Connector on Unraid via the Community Applications plugin to e
 2. Search for **Twingate Connector** → select official entry → click **Install**
 3. Fill configuration form:
    - **Network**: `<network-name>.twingate.com`
-   - **Access Token**: paste from Admin Console
-   - **Refresh Token**: paste from Admin Console
+   - **Access Token**: paste generated token
+   - **Refresh Token**: paste generated token
 4. Click **Apply**
 
 ### 3. Verify
-- Admin Console → Remote Networks → select network → select Connector
-- Confirm **Controller** and **Relay** statuses are **connected**
+1. Admin Console → Remote Networks → select network → select connector
+2. Confirm **Controller** and **Relay** statuses show **connected**
 
 ## Configuration Values
 
 | Field | Value |
 |-------|-------|
-| Network | `<yournetwork>.twingate.com` |
-| Access Token | Generated from Admin Console |
-| Refresh Token | Generated from Admin Console |
+| Network | `<your-network-name>.twingate.com` |
+| Access Token | Generated from Admin Console Step 2 |
+| Refresh Token | Generated from Admin Console Step 2 |
 
 ## Gotchas
-- **Do not reuse token sets** — each Connector requires its own unique Access/Refresh token pair
-- Token entry errors are the most common issue; double-check copy/paste accuracy
-- Ensure Unraid web interface is locally accessible before troubleshooting connectivity issues
+- **Never reuse token sets** — each Connector must have its own unique Access/Refresh token pair
+- Tokens are only displayed once at generation time; copy immediately
+- Use the **official** Twingate Connector entry in Community Apps store (verify it's not a third-party clone)
 
 ## Related Docs
-- [Twingate Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)
-- [Setting Up Resources](https://www.twingate.com/docs/resources)
-- [Home Assistant Setup Guide](https://www.twingate.com/docs/home-assistant)
-- [Proxmox Helper Script Guide](https://www.twingate.com/docs/proxmox)
+- [Setting Up Resources](https://www.twingate.com/docs) — configure access to private apps/services after connector is running
+- [Home Assistant Setup Guide](https://www.twingate.com/docs) — integrate Twingate with Home Assistant
+- [Proxmox Helper Script Guide](https://www.twingate.com/docs) — Proxmox integration
+- [Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)
