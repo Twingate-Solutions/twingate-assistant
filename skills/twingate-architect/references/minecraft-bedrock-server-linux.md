@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/minecraft-bedrock-server-linux -->
-
 # Minecraft Bedrock Server with Twingate (Linux)
 
 ## Summary

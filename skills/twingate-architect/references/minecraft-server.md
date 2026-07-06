@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/minecraft-server -->
-
 # Minecraft Server with Twingate
 
 ## Summary

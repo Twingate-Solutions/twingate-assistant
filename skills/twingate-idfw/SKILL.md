@@ -100,7 +100,7 @@ training-data memory.
 | IDFW feature overview, protocol support matrix, roadmap | `identity-firewall.md`, `identity-firewall-overview.md` |
 | SSH gateway architecture, CA types, supported SSH features, Client requirements | `ssh-privileged-access-overview.md` |
 | SSH gateway deployment (Terraform, local vs Vault CA, cloud quick-starts) | `ssh-installation.md` |
-| Kubectl proxy mode, K8s RBAC integration, K8s session recording | `kubernetes-access.md` |
+| Kubectl proxy mode, K8s RBAC integration, K8s session recording | `kubernetes-access.md`, `wiki.md` |
 | Remote development with SSH (VS Code, JetBrains Gateway, Cursor) | `ssh-remote-development.md` |
 | Smallstep CA integration | `ssh-smallstep.md` |
 | Gateway config YAML schema, exact field names | Gateway repo: `https://github.com/Twingate/gateway` (`deploy/` directory) |

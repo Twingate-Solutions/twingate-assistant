@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/minecraft-guides -->
-
 # Minecraft Server Guides
 
 ## Summary

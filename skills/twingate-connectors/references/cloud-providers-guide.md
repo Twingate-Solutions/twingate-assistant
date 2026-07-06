@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/cloud-providers-guide -->
-
 # Cloud Providers Guide
 
 ## Page Title

@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/homelabs-guide -->
-
 # Twingate Home Labs Guide
 
 ## Page Title

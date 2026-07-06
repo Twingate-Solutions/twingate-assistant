@@ -70,23 +70,32 @@ memory — both Twingate's implementation details and compliance scope evolve.
 
 | If the user asks about… | Read first |
 |---|---|
-| Core architecture, components, connection flow | `architecture.md`, `how-twingate-works.md`, `client-connection-flow.md`, `detailed-client-connection-flow.md` |
-| Network model overview, customer networks | `network-overview.md`, `customer-networks.md`, `remote-network-best-practices.md` |
-| DNS model, split DNS, DNS forwarding | `how-dns-works-with-twingate.md`, `how-twingate-forwards-dns.md`, `introduction-to-dns.md`, `private-dns-best-practices.md` |
+| Core architecture, components, connection flow, Relays | `architecture.md`, `how-twingate-works.md`, `client-connection-flow.md`, `detailed-client-connection-flow.md`, `understanding-relays.md` |
+| Network model, Remote Networks, Resources, aliases, tags | `network-overview.md`, `remote-networks.md`, `remote-network-best-practices.md`, `resources.md`, `resource-aliases.md`, `resource-policies.md`, `policy-on-resource-migration.md`, `tags.md`, `location-requirements.md`, `ip-overlap.md`, `customer-networks.md` |
+| DNS model, split DNS, DNS forwarding | `how-dns-works-with-twingate.md`, `how-twingate-forwards-dns.md`, `introduction-to-dns.md`, `private-dns-best-practices.md`, `supporting-unqualified-domain-names.md` |
 | P2P / NAT traversal | `peer-to-peer-communication-in-twingate.md`, `how-nat-traversal-works.md`, `local-peer-to-peer-best-practices.md` |
 | Encryption, cryptography | `how-encryption-works-in-twingate.md` |
-| VPN comparison, VPN replacement | `aws-vpn-replacement.md`, `diy-vpn-setup-guide.md` |
-| Bastion replacement | `bastion-replacement.md`, `cloak-your-bastion-server.md` |
+| VPN comparison, VPN replacement, performance | `twingate-vs-vpn.md`, `twingate-vs-mesh-vpns.md`, `twingate-performance.md`, `aws-vpn-replacement.md`, `vpn-replacement-use-case.md`, `diy-vpn-setup-guide.md` |
+| Bastion replacement, cloaking | `bastion-replacement.md`, `cloak-your-bastion-server.md`, `strongdm-cloaking.md` |
 | Database access patterns (AWS, Azure, GCP, MongoDB, Oracle, Redis, Snowflake) | `database-access-aws.md`, `database-access-azure.md`, `database-access-gcp.md`, `database-access-guide.md`, `database-access-mongodb.md`, `database-access-oracle.md`, `database-access-redis.md`, `database-access-snowflake.md` |
-| Compliance use cases | `compliance-use-case.md`, `hipaa-compliance.md`, `pci-compliance.md`, `gdpr-compliance.md`, `dora-compliance.md`, `dora-locations.md` |
-| AWS-specific access patterns | `accessing-private-resources-in-azure.md`, `aws-cloudfront.md`, `aws-how-to-setup-subnets-for-secure-access.md`, `aws-workspaces.md` |
-| Audit logs, network events, analytics, reporting | `audit-logs.md`, `audit-logs-schema.md`, `network-events-ac-export.md`, `detailed-network-event-schema.md`, `network-summary-export.md`, `analytics.md`, `generating-insights-reports.md`, `exporting-network-traffic.md` |
-| Client platform details (macOS, Windows, Linux, mobile, ChromeOS) | `clients.md`, `macos.md`, `macos-and-ios.md`, `macos-standalone-client.md`, `linux.md`, `linux-headless.md`, `linux-userspace-networking.md`, `ios.md`, `android.md`, `chromeos.md`, `endpoint-requirements.md` |
-| Use-case overviews (infra access, internet security, device controls, IP-based) | `infra-access-use-case.md`, `internet-security-use-case.md`, `device-controls-use-case.md`, `ip-based-access-use-case.md`, `compliance-use-case.md` |
+| AWS / cloud access patterns | `accessing-private-resources-in-azure.md`, `aws-cloudfront.md`, `aws-how-to-setup-subnets-for-secure-access.md`, `aws-workspaces.md` |
+| App / SaaS protection & specialized access (Elasticsearch, legacy MFA, IP allowlisting, Windows SBL, site-to-site, staging, CI/CD) | `protect-access-to-elasticsearch-and-kibana.md`, `protect-legacy-apps-with-multi-factor-authentication.md`, `whitelisting-traffic-to-public-services.md`, `windows-sbl.md`, `site-2-site.md`, `access-control-for-staging-environments.md`, `cicd-pipelines-with-twingate.md` |
+| Homelab & personal access | `homelab-personal-use-case.md`, `homelab-step-by-step.md`, `remotely-access-a-nas-device.md`, `remotely-access-a-coworkers-development-server.md`, `github-codespaces.md` |
+| Game streaming | `game-streaming-remote.md`, `game-streaming-apollo.md`, `game-streaming-sunshine.md`, `game-streaming-duo.md` |
+| Minecraft servers (homelab use case) | `minecraft-guides.md`, `minecraft-server.md`, `minecraft-server-linux.md`, `minecraft-bedrock-server.md`, `minecraft-bedrock-server-linux.md`, `minecraft-forge-server.md`, `minecraft-forge-server-linux.md` |
+| AI / LLM / MCP access | `llms.md`, `remote-llm-access.md`, `remote-mcp-access.md` |
+| Use-case overviews (infra access, internet security, device controls, IP-based) | `use-cases.md`, `guides.md`, `infra-access-use-case.md`, `internet-security-use-case.md`, `device-controls-use-case.md`, `ip-based-access-use-case.md`, `compliance-use-case.md` |
+| Service accounts / headless services | `services.md` |
+| Audit logs, network events, analytics, reporting | `audit-logs.md`, `audit-logs-schema.md`, `admin-console-export.md`, `network-events-ac-export.md`, `detailed-network-event-schema.md`, `network-summary-export.md`, `analytics.md`, `generating-insights-reports.md`, `exporting-network-traffic.md`, `user-activity.md`, `device-report.md`, `syncing-data-to-s3.md` |
+| Client platform details (macOS, Windows, Linux, mobile, ChromeOS, MDM) | `clients.md`, `using-twingate.md`, `endpoint-requirements.md`, `macos.md`, `macos-and-ios.md`, `macos-standalone-client.md`, `linux.md`, `linux-headless.md`, `linux-userspace-networking.md`, `linux-device-id-migration.md`, `ios.md`, `android.md`, `chromeos.md`, `windows.md`, `windows-client-dotnet-8.md`, `windows-headless.md`, `deploy-twingate-client-with-microsoft-endpoint-manager.md` |
+| Compliance frameworks & attestations (HIPAA, PCI, SOC 2, GDPR, DORA, FIPS) | `compliance-use-case.md`, `hipaa-compliance.md`, `twingate-hipaa.md`, `pci-compliance.md`, `twingate-pci.md`, `gdpr-compliance.md`, `soc-2.md`, `dora-compliance.md`, `dora-locations.md`, `twingate-fips140.md` |
+| Security posture, trust center, disclosure, advisories | `twingate-security.md`, `trust-center.md`, `twingate-customer-data.md`, `service-reliability.md`, `responsible-disclosure-policy.md`, `vulnerability-reporting-acknowledgements.md`, `log4j-vulnerabilities-log4shell-cve-2021-44228-and-cve-2021-45046.md` |
+| Open-source attributions & source | `open-source-software.md`, `open-source-attributions.md`, `oss-windows-client-application.md`, `oss-macos-and-ios-client-applications.md`, `oss-linux-client-application.md`, `oss-android-and-chromeos-client-applications.md` |
+| Billing, subscription, admin console, team, notifications | `administration.md`, `admin-console-security.md`, `subscription-management.md`, `subscription-cancellation.md`, `upgrade-starter-to-home.md`, `notifications.md`, `team.md` |
+| Product lifecycle, service status, support, FAQ | `release-stages.md`, `maintenance-events-service-status-outages.md`, `ubuntu-18-04-eol.md`, `support.md`, `faq.md` |
 | MSP, multi-tenant, partner deployments | `msp.md`, `msp-billing.md` |
 | Quick start / onboarding | `quick-start.md`, `automated-quick-start.md`, `digitalocean-getting-started.md` |
 
-For comprehensive coverage, see [`references/`](./references/) for the full
-set of doc summaries (~150 architecture-related files). **Default to
-checking** — architectural details, compliance scope, and use-case
-patterns evolve.
+This table indexes every file in `references/` (~150 architecture-related
+summaries). **Default to checking** — architectural details, compliance
+scope, and use-case patterns evolve.

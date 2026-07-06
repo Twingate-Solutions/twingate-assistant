@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/minecraft-forge-server -->
-
 # Modded Minecraft Server (Forge) with Twingate
 
 ## Summary

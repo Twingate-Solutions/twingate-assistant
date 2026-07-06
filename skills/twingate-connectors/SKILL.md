@@ -82,18 +82,23 @@ may be incomplete or stale.
 
 | If the user asks about… | Read first |
 |---|---|
+| What a Connector is, how it registers, connection concepts | `connectors.md`, `understanding-connectors.md`, `connector-client-registration.md` |
 | Network requirements, ports, firewall/SG/NSG rules, egress | `connector-best-practices.md` |
+| Cloud deployment overview (universal pattern, all providers) | `cloud-providers-guide.md` |
 | AWS-specific deployment (ECS, EC2, EKS) | `aws-connector-patterns.md`, `aws.md`, `aws-ecs-headless-configurations.md` |
 | Azure-specific deployment (ACI, VMs, AKS) | `azure-connector-patterns.md`, `azure.md` |
 | GCP-specific deployment (GCE, GKE, Cloud Run, MIG) | `gcp-connector-patterns.md`, `gcp.md` |
 | Docker / Docker Compose deployment | `docker.md`, `deploy-connector-with-docker-compose.md` |
 | Linux / systemd deployment | `connectors-on-linux.md`, `systemd-service.md` |
-| NAS, homelab, on-prem (Synology, QNAP, TrueNAS, Proxmox, Unraid, Firewalla, CasaOS, ZimaOS, Ubiquiti) | `how-to-set-up-twingate-on-a-synology-nas-dsm-7.md`, `nas-qnap-install.md`, `truenas-container-deployment.md`, `proxmox-container-deployment.md`, `unraid-getting-started.md`, `deploy-connector-on-firewalla.md`, `casaos-getting-started.md`, `zimaos-getting-started.md`, `deploy-connector-on-ubiquiti.md` |
-| Connector image tag, container env vars, deployment commands | `connector-deployment.md`, `connector-metadata.md` |
+| PaaS / managed container platforms (Aptible) | `aptible.md` |
+| Homelab / NAS overview, getting started | `homelabs-guide.md`, `home-assistant-getting-started.md`, `headless-iot-gateway.md` |
+| NAS, homelab, on-prem (Synology, QNAP, TrueNAS, Proxmox, Unraid, Firewalla, CasaOS, ZimaOS, Ubiquiti) | `how-to-set-up-twingate-on-a-synology-nas-dsm-7.md`, `how-to-set-up-twingate-on-a-synology-nas-dsm-6.md`, `nas-qnap-install.md`, `truenas-container-deployment.md`, `proxmox-container-deployment.md`, `proxmox-getting-started.md`, `unraid-getting-started.md`, `deploy-connector-on-firewalla.md`, `casaos-getting-started.md`, `zimaos-getting-started.md`, `deploy-connector-on-ubiquiti.md` |
+| Connector image tag, container env vars, deployment commands | `connector-deployment.md`, `connector-metadata.md`, `connector-details.md` |
+| Semi-automated / scripted deployment (Terraform, API) | `deployment-semi-automation.md` |
 | Connector upgrades | `upgrading-connectors.md` |
 | `DEAD_NO_RELAYS`, `DEAD_NO_HEARTBEAT`, health diagnosis | `connector-real-time-logs.md`, `connector-monitoring.md`, `connector-health-checks.md` |
 | Logs, metrics, monitoring, SIEM integration | `connector-metrics.md`, `connector-monitoring.md`, `connector-real-time-logs.md`, `siem-guide.md` |
-| Hardware sizing, HA topology | `connector-best-practices.md` |
+| Hardware sizing, HA topology, placement | `connector-best-practices.md`, `connector-placement-best-practices.md` |
 | Headless / service account clients | `services-headless-clients.md`, `aws-ecs-headless-configurations.md` |
 | Connector shutdown, restart, lifecycle | `connector-shutdown-process.md`, `advanced-connector-management.md` |
 

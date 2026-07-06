@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/minecraft-bedrock-server -->
-
 # Minecraft Bedrock Server with Twingate
 
 ## Summary
