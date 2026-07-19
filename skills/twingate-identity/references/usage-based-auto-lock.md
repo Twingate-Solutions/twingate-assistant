@@ -1,67 +1,65 @@
-# Usage-based Auto-lock
+# Usage-Based Auto-Lock
 
 ## Summary
-Automatically locks Resource access for users who haven't accessed it within a configured duration. Enforces least-privilege by removing stale access. Locking is evaluated per-user even when configured at the Group level.
+Auto-lock automatically revokes Resource access for users who haven't accessed it within a configured duration, enforcing least-privilege. Access can be restored via manual admin approval or automatic approval (user provides reason). Configuration is available per-Resource or per-Group.
 
 ## Key Information
-- Auto-lock durations via Admin Console: **1, 7, 30, 60, or 90 days**; additional durations available via API
-- Configurable at **Resource level** (applies to all users) or **Group level** (per Resource on Group detail page)
-- Group-level config overrides Resource-level default; locking still evaluated per individual user
-- Changes logged in **Access category** of audit logs
+- Auto-lock evaluated **per user**, even when configured at the Group level
+- Durations via Admin Console: **1, 7, 30, 60, or 90 days**; additional durations available via API
+- Two approval modes: **Manual** (admin unlocks) or **Automatic** (user provides reason, immediately restored)
+- Audit log changes appear in the **Access** category
 - Access summary reports downloadable from Resource, Group, or User pages
 
 ## Prerequisites
 - Admin Console access
-- Resources and Groups already configured
-- Approval method chosen: **Manual** or **Automatic**
+- Resources and Groups already configured in Twingate
 
-## Configuration Locations
+## Configuration
 
-### Resource Page
-1. Open Resource → set auto-lock duration (applies to all users with access)
-2. When adding a Group to a Resource → optionally specify Group-specific duration + approval method
-3. For existing Group access → click options button on the Group → set duration and approval method
+### Resource-Level (applies to all users with access)
+1. Navigate to the Resource page in Admin Console
+2. Set auto-lock duration directly on the Resource
+3. When adding a Group, optionally specify a Group-level override duration
+4. To modify existing Group access: click options button → set duration and approval method
 
-### Group Page
-1. Open Group detail page → set auto-lock duration and approval method per Resource
-
-## Approval Methods
-| Method | Locked User Experience | Admin Action Required |
-|--------|----------------------|----------------------|
-| Manual | Submits request + reason via block page | Admin must approve |
-| Automatic | Provides reason → access restored immediately | None (logged only) |
+### Group-Level
+1. Navigate to the Group detail page
+2. Set auto-lock duration and approval method per Resource
 
 ## Unlocking Access
-- Admin unlocks via **user's detail page** in Admin Console
-- Report fields include: lock status, last admin unlock date, expiration dates, auto-lock duration, Groups/policies
+- Admins unlock via the **user's detail page** in Admin Console
+- Manual approval: admin must approve locked user's request
+- Automatic approval: user submits reason on block page → access restored immediately
+
+## Tracking Access (Access Summary Report)
+Download from Resource, Group, or User page. Report includes:
+- Groups with access and policy used
+- Expiration dates (if configured)
+- Auto-lock duration
+- Per-user lock status and last admin unlock timestamp
 
 ## Notifications
-- Configure at **Settings > Notifications**
-- Email notifications toggleable per admin user (roles: Admin, DevOps, Support, Access Reviewer)
-- Webhook supported for workflow integration
+- Configure at **Settings → Notifications**
+- Email notifications toggleable per user for roles: Admin, DevOps, Support, Access Reviewer
+- Webhook support for workflow integration
 
-## Webhook Payload Fields
-```json
-{
-  "type": "ACCESS_REQUEST",
-  "request_type": "AutoLock",
-  "approval_mode": "MANUAL" | "AUTOMATIC",
-  "request_duration_seconds": 2592000,
-  "reason": "...",
-  "user_name": "...",
-  "resource_name": "...",
-  "requested_at": "ISO8601",
-  "request_url": "...",
-  "tenant": "tenant.twingate.com"
-}
-```
+### Webhook Payload Fields (`type: ACCESS_REQUEST`)
+| Field | Description |
+|---|---|
+| `request_type` | `"AutoLock"` for auto-lock events |
+| `approval_mode` | `"MANUAL"` or `"AUTOMATIC"` |
+| `request_duration_seconds` | Requested access duration |
+| `reason` | User-provided reason |
+| `resource_name` / `resource_url` | Affected resource |
+| `user_name` / `user_url` | Requesting user |
 
 ## Gotchas
-- Group inherits Resource-level config by **default**; must explicitly override at Group level if needed
-- Manual approval requires admin action even for automatic-approval policies when auto-lock triggers — check approval method is set correctly per use case
-- Approved/denied requests trigger **email notifications to users**; ensure notification settings are configured before enabling
+- Group-level duration **inherits** Resource-level config by default; must explicitly override
+- Automatic approval still logs reason and records in analytics/resolved requests page
+- API supports durations beyond the 5 Admin Console options — use API for custom intervals
+- Users see a **block page** when locked; manual approval requires admin action before access resumes
 
 ## Related Docs
-- Reviewing Access Requests
-- Settings > Notifications
-- Twingate API (for custom auto-lock durations beyond Admin Console options)
+- [Reviewing Access Requests](https://www.twingate.com/docs/reviewing-access-requests)
+- Settings → Notifications (webhook configuration)
+- Audit Logs → Access category

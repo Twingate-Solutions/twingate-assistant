@@ -1,61 +1,55 @@
 # How Sessions Work
 
 ## Summary
-Twingate controls authentication frequency via two independent timers: the Sign In Policy session and per-Resource Policy sessions. Re-authentication checks a stored IdP session copy before redirecting users to the IdP. The Sign In Policy uses a rolling window that resets on successful Resource Policy re-authentication.
+Twingate controls authentication frequency via two independent timers: Sign In Policy (global) and Resource Policy (per-resource). Re-authentication leverages a stored IdP session copy to minimize user interruption. Understanding timer interactions and IdP session alignment is key to balancing security and UX.
 
 ## Key Information
-- **Sign In Policy**: Global timer; when expired, user is signed out of Twingate Client entirely
-- **Resource Policy**: Per-resource timer; expiry requires re-auth before continuing resource access
-- **Stored IdP session**: Captured at last sign-in; used to silently re-authenticate if still valid (no user action required unless MFA mandated)
-- **Rolling window**: Successful Resource Policy re-auth resets the Sign In Policy timer to full duration
+- **Sign In Policy timer**: Global session gate; expiry signs user out of Twingate Client entirely
+- **Resource Policy timer**: Per-resource; expiry requires re-auth before accessing that resource
+- **Rolling window**: Successful Resource Policy re-auth resets the Sign In Policy timer
 - **Device-only policies do NOT reset the Sign In Policy timer**
-
-## Prerequisites
-- Enterprise IdP (Okta, Entra ID, Google Workspace, JumpCloud, OneLogin) for configurable IdP session lifetimes
-- Social IdPs (Google, Microsoft, LinkedIn, GitHub): session lifetimes fixed by provider
+- Stored IdP session is internal—admins cannot configure it in Twingate; lifetime set by IdP
+- Social IdPs (Google, Microsoft, LinkedIn, GitHub): session lifetimes not configurable by org
 
 ## Re-authentication Flow
 1. Timer expires → Twingate checks stored IdP session
-2. **IdP session valid**: Browser briefly opens Twingate-hosted page, confirms session silently, timers reset
-3. **IdP session expired**: User redirected to IdP login; all Twingate timers reset after success
+2. **IdP session valid** → Silent browser redirect, auto re-authenticated, no user action needed (unless MFA required)
+3. **IdP session expired** → User redirected to IdP to sign in; all Twingate timers reset after success
 
 ## Configuration Values
-| Setting | Recommended Value | Notes |
+
+| Control | Recommended Value | Notes |
 |---|---|---|
-| Sign In Policy frequency | Up to 30 days | Acts as baseline gate only |
-| Resource Policy (RDP/SSH) | 12–16 hours | Avoids mid-session disconnects |
-| Resource Policy (web apps) | 12–16 hours | Adjust down for high sensitivity |
-| Business-critical resources | Shorter (org-defined) | Risk-tolerance dependent |
+| Sign In Policy | Up to 30 days | Acts as baseline, not primary control |
+| Resource Policy (RDP/SSH) | 12–16 hours | Prevents mid-session disconnects |
+| Resource Policy (web apps) | 12–16 hours | Adjust down for high-sensitivity resources |
+| Resource Policy (device-only) | N/A | No auth check; stays accessible while Sign In Policy valid |
 
-## User Offboarding (Revocation)
+## Offboarding / Access Revocation
 
-**Enterprise IdP users** (revoke within ~5 min):
-1. Block user's devices in Admin Console or API (effective within 5 min)
-2. Suspend user in IdP + revoke active sessions (SCIM sync; up to 1 hour)
+**Target: revoke within 5 minutes**
 
-**Social IdP users** (no SCIM):
-1. Block devices in Twingate
-2. Disable user in Admin Console or API (~5 min average)
+| User Type | Steps |
+|---|---|
+| Enterprise IdP | (1) Block devices in Twingate (≤5 min) + (2) Suspend in IdP and revoke sessions (up to 1 hour) |
+| Social IdP | (1) Block devices in Twingate + (2) Disable user in Twingate (≤5 min avg) |
 
-**Note**: Deactivate/suspend in IdP rather than delete—preserves audit logs, same access revocation effect.
+- **Deactivate, don't delete** in enterprise IdPs—preserves audit logs, same access revocation effect
+- Do both steps for enterprise IdPs: covers SCIM sync delays
 
 ## Gotchas
-- Twingate does **not** influence session state of other SSO-linked apps accessed through Twingate
-- Device-only Resource Policies skip authentication—they do **not** satisfy Sign In Policy auth requirements and won't extend its timer
-- IdP session lifetime is an implicit variable admins may overlook; a short IdP session causes more frequent full IdP redirects even with long Twingate timers
-- For social IdPs, SCIM is unavailable—device blocking and manual Twingate user disable are the only fast revocation paths
+- Resource Policy re-auth only resets Sign In Policy if authentication is enabled (device-only policies don't count)
+- Other SSO applications accessed through Twingate manage their own sessions independently—Twingate does not influence their session state
+- SCIM sync delays (up to 1 hour) mean device block is the reliable fast-revocation mechanism
+- Social IdP session lifetimes are provider-controlled; no org-level configuration possible
 
-## Policy Design Quick Reference
-| Resource Type | Recommended Frequency |
-|---|---|
-| Sign In Policy | 30 days |
-| RDP/SSH servers | 12–16 hours |
-| Internal web apps | 12–16 hours |
-| High-sensitivity resources | Shorter (risk-based) |
-| System services/monitoring | Device-only policy |
+## Prerequisites
+- Admin access to Twingate Admin Console
+- Enterprise IdP configured if session lifetime alignment is needed
+- SCIM provisioning configured for enterprise IdP sync (for offboarding)
 
 ## Related Docs
-- Session Evaluation Walkthrough
+- Session Evaluation Walkthrough (linked inline)
 - How to Offboard Users
 - Device-only Resource Policies
 - Sign In Policy configuration

@@ -1,48 +1,46 @@
 # How to Cloak strongDM with Twingate
 
 ## Summary
-Hides strongDM gateways behind Twingate to eliminate publicly exposed TCP/IP ports. The strongDM gateway's advertised host is changed to an internal hostname/IP registered as a Twingate Resource, making the network perimeter invisible externally.
+Hides strongDM gateways behind Twingate so they require no publicly exposed TCP/IP ports. The strongDM gateway becomes accessible only through Twingate, making the network perimeter invisible externally.
 
 ## Key Information
+- Eliminates need for public IP or publicly resolvable hostname on strongDM gateway
+- No inbound firewall ports required on the host
 - strongDM default proxy port: **5000**
-- No inbound firewall ports need to be opened on the host
-- strongDM gateway does not need a publicly resolvable IP or hostname after configuration
-- Pattern mirrors Twingate's Bastion host cloaking approach
+- Analogous approach to cloaking Bastion hosts
 
 ## Prerequisites
-- Existing strongDM gateway deployed on a private subnet
-- Twingate account with Admin console access
-- Twingate Client application installed on end-user devices
+- Twingate Connector deployed on same private subnet as strongDM gateway
+- Access to Twingate Admin Console
+- Access to strongDM Admin UI
+- Twingate Client installed on end-user devices
 
 ## Step-by-Step
 
 1. **Deploy Twingate Connector** on the same private subnet as the strongDM gateway
-2. **Add strongDM gateway as a Twingate Resource** via the Twingate Admin console using its internal hostname or IP address
-3. **Apply port restriction** to the Resource (default: port 5000)
-4. **Update strongDM advertised host** in the strongDM Admin UI — change it to the internal hostname/IP configured as the Twingate Resource
+2. **Add strongDM gateway as a Twingate Resource** via Twingate Admin Console using its internal hostname or IP address
+3. **Apply port restriction** to the Resource (default strongDM proxy port: `5000`)
+4. **Update strongDM gateway advertised host** in strongDM Admin UI — set it to the internal hostname/IP configured as the Twingate Resource
+
+## Testing Procedure
+1. While **disconnected** from Twingate, attempt to access strongDM resources — access should be **blocked**
+2. Connect to Twingate via Client app
+3. Attempt strongDM resource access again — connection should **succeed**
 
 ## Configuration Values
-
 | Parameter | Value |
 |-----------|-------|
 | strongDM default proxy port | `5000` |
-| strongDM setting to change | Advertised host (in strongDM Admin UI) |
-| Twingate Resource address | Internal hostname or IP of strongDM gateway |
-
-## Testing
-
-1. Attempt strongDM resource access **without** Twingate connected → should be **blocked**
-2. Connect via Twingate Client
-3. Attempt strongDM resource access again → should **succeed**
+| Connector placement | Same private subnet as strongDM gateway |
+| Resource address | Internal hostname or IP of strongDM gateway |
 
 ## Gotchas
-- The strongDM **advertised host** must be updated to the internal address; leaving it as a public hostname defeats the cloaking
-- Port restriction must match the actual strongDM proxy port (verify if changed from default 5000)
-- Connector must be on the **same private subnet** as the gateway to reach it internally
+- The strongDM gateway's **advertised host must be updated** to the internal address — leaving it as a public address defeats the cloaking
+- Port restriction must match the actual strongDM proxy port in use (verify if non-default)
 
 ## Related Docs
-- [Twingate Connector deployment](https://www.twingate.com/docs/connector)
-- [Adding Resources in Twingate Admin console](https://www.twingate.com/docs/resources)
-- [Port restrictions](https://www.twingate.com/docs/port-restrictions)
-- [Cloaking Bastion hosts](https://www.twingate.com/docs/bastion-cloaking)
-- [Twingate Client applications](https://www.twingate.com/docs/clients)
+- Twingate Connector deployment
+- Adding Resources in Twingate Admin Console
+- Port restrictions on Resources
+- Cloaking Bastion host servers
+- Twingate Client installation (platform-specific)

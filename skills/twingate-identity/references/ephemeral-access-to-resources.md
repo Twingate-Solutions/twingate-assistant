@@ -1,52 +1,56 @@
 # Ephemeral Access to Resources
 
 ## Summary
-Ephemeral Access grants time-bounded access to Resources for specific Groups, with automatic revocation at expiration. Configured via the Admin Console, it removes the Group from the Resource when the expiration time is reached, revoking access for all users in that Group.
+Ephemeral Access grants time-bounded access to Resources for specific Groups, with automatic revocation at expiration. Configured via the Admin Console, it sets an expiration on a Group's access to a Resource without requiring manual cleanup.
 
 ## Key Information
-- Access expiration range: **1 hour to 1 year** from current date
-- Expiration is set at the **Group-Resource relationship level**, not per-user
-- Expired Groups are **automatically removed** from the Resource (no manual action needed)
-- Active expirations display an **"Expires [date]" pill** on the Group row
-- All expiration changes are logged in **audit logs** under the Access category
-- Expiration can be **removed without revoking access** using the "Remove Expiration" link in the date picker
+- Access expiration range: 1 hour to 1 year from current date
+- Expired Groups are **automatically removed** from the Resource
+- Active expirations show an `Expires [date]` pill on the Group row
+- All expiration changes are logged in **Access category** of audit logs
+- Expiration can be removed without revoking access entirely
 
 ## Prerequisites
 - Admin Console access
-- Existing Groups and Resources configured in Twingate
+- Existing Resource and Group configured in Twingate
 
-## Step-by-Step
+## Configuration Steps
 
-### Grant New Access with Expiration (from Resource Page)
-1. Navigate to the Resource page
-2. Add a new Group to the Resource
-3. Click **Set Expiration** in the access configuration
-4. Select date and time via the date picker
-5. Click **Set Expiration Time**
-6. Click **Grant Access** to finalize
+### From a Resource Page
+**New Group:**
+1. Navigate to Resource → access configuration
+2. Click **Set Expiration** → select date/time → click **Set Expiration Time**
+3. Click **Grant Access** to finalize
 
-### Modify Expiration on Existing Group Access (from Resource Page)
-1. Navigate to the Resource page
-2. Find the Group row with existing access
-3. Click the **options menu** on the Group row
-4. Select **Set Expiration**
-5. Modify date/time, or click **Remove Expiration** to clear without revoking access
+**Existing Group:**
+1. Click options menu on Group row → **Set Expiration**
+2. Select date/time → **Set Expiration Time**
+3. To clear: use **Remove Expiration** link inside the date picker
 
-### From Group Page
-- Same patterns apply—use **Set Expiration** when adding new Resources, or **options menu → Set Expiration** for existing Resource access
+### From a Group Page
+**New Resource:**
+1. Navigate to Group → add Resource → click **Set Expiration** → set date/time
+
+**Existing Resource:**
+1. Click options menu on Resource row → **Set Expiration** → set date/time
+
+## Configuration Values
+| Parameter | Range |
+|-----------|-------|
+| Expiration window | 1 hour – 1 year from current date |
 
 ## Gotchas
-- Expiration applies to the **entire Group's access**, not individual users—removing ephemeral access affects all Group members
-- **Removing expiration** ≠ revoking access; use "Remove Expiration" to make access permanent again
-- No built-in notification/warning before expiration occurs (access is silently revoked at the set time)
-- Cannot set expiration shorter than 1 hour or longer than 1 year
+- Expiration removes the **Group from the Resource** entirely — all users in that Group lose access simultaneously
+- "Remove Expiration" clears the timer but does **not** remove the Group's access
+- No API/CLI configuration documented — Admin Console only
+- No warning notifications mentioned before expiration occurs
 
 ## Common Use Cases
-- Projects with defined end dates
-- Contractor engagements with fixed durations
-- "Break glass" emergency access to sensitive Resources
+- Fixed-duration contractor access
+- Project-scoped access with defined end dates
+- Break-glass scenarios for sensitive Resources
 
 ## Related Docs
-- Twingate Groups documentation
-- Twingate Resources documentation
 - Audit Logs (Access category)
+- Resource access configuration
+- Group management

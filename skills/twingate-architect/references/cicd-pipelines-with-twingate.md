@@ -1,40 +1,43 @@
 # Securing CI/CD Pipelines with Twingate
 
 ## Summary
-Twingate Service Accounts enable Zero Trust access control for automated processes like CI/CD pipelines, replacing legacy VPN or direct network deployment approaches. Clients run in headless mode using service account credentials via command line, integrating with pipeline tools like GitHub Actions and CircleCI.
+Twingate Service Accounts enable Zero Trust access control for automated processes like CI/CD pipelines, replacing legacy VPN and static firewall rules. The Linux and Windows clients support headless mode, allowing service account credentials to be used via command line in automated workflows.
 
 ## Key Information
 - Service Accounts are first-class citizens in Twingate's Zero Trust architecture
-- Linux and Windows clients support headless mode for unattended/automated use
-- Access rules, key rotation, and revocation managed centrally—no firewall/IP allowlist changes needed
-- Pre-built example configs available for CircleCI and GitHub Actions
-- Examples serve as templates for any CI/CD or custom automation tool
+- Assign service accounts to existing Resources or define new ones via admin console
+- Headless mode allows single command-line connection using service account credentials
+- No firewall rule changes needed when modifying access — manage via admin console only
+- Keys can be rotated and revoked without network disruption
+- Pre-built example configs available for **CircleCI** and **GitHub Actions**
+- Examples serve as templates for any CI/CD or custom automation platform
 
 ## Prerequisites
-- **Twingate Enterprise plan** (Service Accounts are Enterprise-only)
-- Latest Twingate Linux or Windows client (headless mode support required)
+- **Enterprise plan** required for Service Accounts
+- Latest Linux or Windows Twingate client (headless mode support)
 - Service Account created and configured in Twingate admin console
-- Resources defined and access granted to the Service Account
+- Service Account assigned to relevant Resources
 
-## Step-by-Step
+## Implementation Steps
 1. Create a Service Account in the Twingate admin console
-2. Assign access to required Resources (existing or new)
-3. Generate Service Account key/credentials
-4. Install latest Twingate Linux/Windows client in your pipeline environment
-5. Invoke Twingate client in headless mode via single command using service account credentials
-6. Pipeline jobs now have Zero Trust access to protected resources
+2. Assign the Service Account access to required Resources
+3. Configure the Twingate client in headless mode using service account credentials (single CLI command)
+4. Integrate the headless startup command into your CI/CD pipeline step
+5. Use CircleCI or GitHub Actions example configs as templates if applicable
 
 ## Configuration Values
-- **Headless mode**: Single CLI command invocation (see CircleCI/GitHub Actions example configs for exact flags)
-- **Credential injection**: Pass service account keys as environment variables/secrets in your pipeline tool
+- **Headless mode**: Initiated via CLI flag on Linux/Windows client (see platform-specific client docs)
+- **Service Account credentials**: Generated in admin console; used as CLI arguments or environment secrets in pipeline config
 
 ## Gotchas
-- Service Accounts are **Enterprise plan only**—not available on lower tiers
-- Must use the **latest** Linux or Windows client; older versions do not support headless mode
-- macOS client headless support is not mentioned—assume Linux/Windows only
-- Key rotation/revocation must be managed actively; no automatic expiry behavior described
+- Service Accounts are **Enterprise plan only** — not available on lower tiers
+- Only **Linux and Windows** clients support headless mode; macOS is not mentioned
+- Third-party SaaS CI/CD tools (e.g., GitHub Actions) require the Twingate client to be installed as a step within the runner environment
+- Access rules and key rotation are managed centrally — ensure pipeline secrets stay synchronized when keys are rotated
 
 ## Related Docs
-- [Service Accounts](https://www.twingate.com/docs/service-accounts) (referenced but separate page)
-- [CircleCI example configuration](https://www.twingate.com/docs/circleci) (referenced)
-- [GitHub Actions example configuration](https://www.twingate.com/docs/github-actions) (referenced)
+- [Service Accounts](https://www.twingate.com/docs/service-accounts) — setup and management
+- [CircleCI Integration Example](https://www.twingate.com/docs/circleci)
+- [GitHub Actions Integration Example](https://www.twingate.com/docs/github-actions)
+- Twingate Linux Client (headless mode documentation)
+- Twingate Windows Client (headless mode documentation)

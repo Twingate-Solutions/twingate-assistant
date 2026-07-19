@@ -1,24 +1,18 @@
 # Linux Headless Mode
 
 ## Summary
-Twingate's Linux Client can run in headless mode for GUI-less server environments using a Service Key for authentication. It supports deployment as a systemd service, Docker container, or Kubernetes sidecar. Requires `systemd` and `glibc` on the host.
+Twingate's Linux Client can run in headless mode for GUI-less server environments using a Service Key for authentication. It supports systemd service, Docker container, and Kubernetes sidecar deployment patterns. Headless mode is triggered by passing `--headless` to the `twingate setup` command.
 
 ## Key Information
-- Headless mode uses Service Keys (not user credentials) from the Twingate Admin console
+- Requires a **Service Key** (JSON file) from a Service account in the Twingate Admin console
+- Relies on `systemd` and `glibc`; distributions including these are most compatible
 - Docker image: `twingate/client:latest`
-- Service key must be mounted to `/etc/twingate/service_key.json` in Docker
-- Logs accessible via `journalctl`
-- Requires `NET_ADMIN` capability and `/dev/net/tun` device in containerized environments
+- AWS Fargate and other compute engines that don't support kernel capabilities are **not supported**
 
 ## Prerequisites
-- Twingate account with permission to create Services
-- Service Key JSON file created in Admin console
-- Supported Linux distro with `systemd` and `glibc`
-- For containers: kernel capability support (AWS Fargate **not supported**)
-
-## Supported Distributions
-- **x86/AMD64 + ARM64:** Ubuntu 22.04/24.04 LTS, Debian 9+, Fedora 40+, CentOS Stream 9+, Oracle Linux 8+
-- **x86/AMD64 only:** Arch Linux, ThinPro, NixOS, Gentoo
+- Twingate account with permissions to create Services
+- Service Key JSON file downloaded from Admin console
+- Supported Linux distribution (Ubuntu 22.04/24.04, Debian 9+, Fedora 40+, CentOS Stream 9+, Oracle Linux 8+, and others for x86/AMD64 only)
 
 ## Step-by-Step
 
@@ -40,32 +34,31 @@ docker run -d \
   twingate/client:latest
 ```
 
-### Kubernetes Secret Setup
+### Kubernetes Secret
 ```bash
 kubectl create secret generic twingate-service-key --from-file=key.json=/path/to/service_key.json
 ```
 
 ## Configuration Values
 
-| Parameter | Value |
-|-----------|-------|
-| Setup flag | `--headless` |
-| Service key path (container) | `/etc/twingate/service_key.json` |
-| Docker capability | `NET_ADMIN` |
-| Docker device | `/dev/net/tun` |
+| Parameter | Value/Description |
+|-----------|-------------------|
+| Service key mount path (Docker/K8s) | `/etc/twingate/service_key.json` |
+| Required device | `/dev/net/tun` |
+| Required capability | `NET_ADMIN` |
 | Twingate DNS resolvers | `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254` |
-| Docker Compose host network | `network_mode: host` |
+| Docker Compose host network option | `network_mode: host` |
 | Share container network | `network_mode: "service:twingate-client"` |
 
 ## Gotchas
-- **AWS Fargate unsupported** — no kernel capability support
-- Containers sharing a network must use `network_mode: "service:twingate-client"` to route through Twingate
-- When Docker containers can't share network namespace, update `/etc/docker/daemon.json` with Twingate DNS resolvers and restart Docker
-- Kubernetes sidecar requires `privileged: true`, `runAsUser: 0`, and `NET_ADMIN` capability with `ALL` dropped
-- `--network host` needed if Client must capture all host interface traffic
+- Docker containers **must** have `--device /dev/net/tun` and `--cap-add NET_ADMIN` or the client cannot connect
+- Services sharing the Twingate Client's network stack must set `network_mode: "service:twingate-client"` in Docker Compose
+- Containerized CI/CD jobs that can't share network namespaces need Docker's `/etc/docker/daemon.json` updated with Twingate DNS resolvers (requires Docker restart)
+- K8s sidecar requires `privileged: true` and `runAsUser: 0`
+- Logs accessible via `journalctl`
 
 ## Related Docs
 - [Linux Client (interactive mode)](https://www.twingate.com/docs/linux-client)
 - [Services & Service Keys](https://www.twingate.com/docs/services)
-- [Docker prebuilt image](https://www.twingate.com/docs/docker)
-- [GitHub Actions integration](https://www.twingate.com/docs/github-actions)
+- [Docker headless image](https://www.twingate.com/docs/docker)
+- [GitHub Action](https://github.com/twingate/github-action)

@@ -1,72 +1,56 @@
 # Security Policies
 
 ## Summary
-Twingate uses layered policies to control network access, configured under the **Policies** tab in the Admin Console. Three components work together: Resource Policies (per-resource requirements), Sign In Policy (baseline sign-in requirements), and Device Profiles (device trust definitions).
+Twingate uses layered policies to control network access, configured under the **Policies** tab in the Admin Console. Three components work together: Resource Policies (per-resource access requirements), Sign In Policy (baseline client sign-in requirements), and Device Profiles (device trust/posture definitions).
 
 ## Key Information
 
-- **Three policy types**: Resource Policies, Sign In Policy, Device Profiles
-- **Evaluation order**: Device Profiles → Sign In Policy → Resource Policy (all must pass)
-- Device posture checked at sign-in and ~every 5 minutes thereafter
-- Admin Console session: fixed 1-hour static timeout (cannot be changed)
-- When Resource Policy re-auth succeeds and is a superset of Sign In Policy, the Sign In Policy session timer resets (rolling window)
+- **Three policy layers** evaluated in order: Device Profiles → Sign In Policy → Resource Policy
+- Device posture checked at sign-in and approximately every **5 minutes** thereafter
+- **Default Policy** automatically assigned to new Resources
+- Resource Policies support up to 3 requirement types: Authentication, Device Security, Location (geoblocking is Enterprise-only)
+- Admin Console session = **1 hour static** (non-configurable, non-rolling)
 
-## Resource Policies
+## Policy Components
 
-- Define per-resource requirements: Authentication frequency, MFA, Device Security, Location (geoblocking = Enterprise only)
-- Assigned at Resource level; applies to all Groups accessing that Resource
-- **Group-level overrides**: Twingate applies the **more permissive** of Resource policy vs. Group override
-- Recommended: Set strictest policy at Resource level, use Group overrides to relax
-- Group overrides persist if Resource-level policy changes
-- Authentication requirement can be disabled → device-only policy (Sign In Policy session still required)
+### Resource Policies
+- Assigned at Resource level; applies to all Groups with access
+- **Group-level overrides** available; Twingate applies the **more permissive** of the two policies
+- Can disable authentication requirement to create **device-only policies** (Sign In Policy session still required)
+- Group overrides persist even if Resource-level policy changes
 
-## Sign In Policy
+### Sign In Policy
+- Three requirements: Device Security, Authentication frequency, MFA
+- Authentication frequency uses a **rolling window** — resets when a Resource Policy re-auth succeeds (if Resource Policy is a superset of Sign In Policy requirements)
+- Recommended: set lenient (e.g., 30-day frequency); use Resource Policies for sensitive resources
 
-- Baseline for all users before accessing any Resource
-- Three settings: Device Security, Authentication frequency, MFA
-- Authentication frequency uses a **rolling window** (resets on successful Resource Policy re-auth)
-- **Recommended**: Set lenient (e.g., 30-day frequency); use Resource Policies for sensitive resources
+### Device Profiles
+Two sections:
+- **Trusted Profiles**: Verification via manual, CrowdStrike, Intune, Jamf, Kandji, SentinelOne, or 1Password; per-platform; supports additional posture checks
+- **Approved Operating Systems**: Enable/disable platforms; per-platform posture checks (disk encryption, screen lock, firewall, min OS version); blocking a platform prevents sign-in entirely
 
-## Device Profiles
+## Configuration Values
 
-### Trusted Profiles
-- Single platform per profile
-- Verification methods: Manual, CrowdStrike, Intune, Jamf, Kandji, SentinelOne, 1Password
-- Can include additional posture checks on top of verification method
-- Referenced in Sign In Policy and/or Resource Policies
-
-### Approved Operating Systems
-- Enable/disable platforms globally (blocking a platform prevents all sign-ins from it)
-- Per-platform posture checks: disk encryption, screen lock, firewall, minimum OS version
-
-## How Sessions Work
-
-- Twingate stores IdP session expiry at sign-in
-- On policy re-auth check: compares current time to stored expiry; if valid, no redirect
-- After expiry: redirects to IdP, captures new expiry
-- **IdP session lifetime directly affects re-authentication behavior**
+| Setting | Notes |
+|---|---|
+| Authentication frequency (Sign In Policy) | Recommended: 30 days |
+| Admin Console session | 1 hour, static, non-configurable |
+| Device posture check interval | ~5 minutes |
+| Geoblocking (Location Requirements) | Enterprise plan only |
 
 ## Gotchas
 
-- Group-level policy overrides apply the **more permissive** policy — set strict defaults at Resource level
-- Group overrides are **not reset** when Resource-level policy changes; must be manually cleared
-- Disabling authentication on a Resource Policy still requires a valid Sign In Policy session
-- Admin Console has a **separate, fixed 1-hour session** that cannot be modified
-- Geoblocking (Location Requirements) is **Enterprise plan only**
-- Device posture is re-evaluated ~every 5 minutes, not just at access time
-
-## Prerequisites
-
-- Admin Console access
-- Identity provider (IdP) configured for authentication
-- MDM/EDR integration configured if using Trusted Profiles (optional)
+- Group-level policy overrides apply the **more permissive** policy — set the strictest policy at Resource level, use overrides to relax
+- Group overrides are **not reset** when Resource-level policy changes; must be explicitly cleared
+- IdP session expiry is captured and stored at sign-in; Twingate checks stored expiry on re-auth, not a fresh IdP call
+- Disabling authentication on a Resource Policy skips re-auth checks but still requires a valid Sign In Policy session
+- Blocking an OS in Approved Operating Systems prevents users on that platform from signing in at all
 
 ## Related Docs
-
-- Resource Policies
+- Resource Policies (detailed)
 - Device-only Resource Policies
+- How Sessions Work
 - Device Profiles
 - Device Posture Checks
 - Approved Operating Systems
-- How Sessions Work
 - Admin Console Security

@@ -4,29 +4,30 @@
 Network Summary Export
 
 ## Summary
-Twingate allows admins to export aggregated summaries of Remote Network activity via the Admin Console Reports page. Reports are generated asynchronously in gzip-compressed JSON format and contain per-resource connection statistics for a selected date range and network scope.
+Twingate allows admins to export aggregated summaries of Remote Network activity via the Admin Console Reports page. Reports are generated asynchronously in gzip-compressed JSON/CSV format and delivered via email notification when ready.
 
 ## Key Information
-- Export type: **Summary** (aggregated stats per resource, not raw events)
-- Output format: gzip-compressed JSON (one event per line / JSONL)
+- Export type: **Summary** (aggregated per-resource stats, not raw event logs)
+- Output format: gzip-compressed JSON (one event per line); rename to `.csv` after decompression
 - Timestamps in export are **UTC**; time range selection uses **local timezone**
-- Time range filtering uses connection **end time**, not start time
-- Reports generated in background; notification sent via email when ready
-- File must be renamed with `.csv` extension after decompression to open in spreadsheet editors
+- Time range filtering is based on **connection end time**, not start time
+- Remote Networks default to "all" if not specified
+- Large exports may contain millions of lines — avoid opening directly in spreadsheet editors
 
 ## Prerequisites
 - Admin Console access
-- Navigate to: **Settings → Reports → Network Events tab**
+- Access to Settings → Reports → Network Events tab
 
 ## Step-by-Step
 
-1. Go to **Settings → Reports → Network Events**
-2. Click **Generate Network Events Report**
-3. Set **Report Type** to `Summary`
-4. Select date/time range and Remote Network(s) (defaults to all networks)
-5. Wait for background generation; refresh page or await email notification
-6. Return to Reports page to download completed report
-7. Decompress the `.gz` file and rename with `.csv` extension
+1. Navigate to **Settings → Reports**
+2. Click **Network Events** tab
+3. Click **Generate Network Events Report**
+4. Set **Report Type** to `Summary`
+5. Select date/time range and Remote Network(s)
+6. Wait for background generation; refresh page or await email notification
+7. Return to Reports page to download when ready
+8. Decompress gzip file; rename with `.csv` extension to open in spreadsheet editor
 
 ## Export Fields
 
@@ -35,7 +36,7 @@ Twingate allows admins to export aggregated summaries of Remote Network activity
 | `resource_id` | Resource identifier |
 | `resource_address` | Resource address |
 | `remote_network` | Associated Remote Network name |
-| `remote_network_id` | Remote Network identifier |
+| `remote_network_id` | Associated Remote Network ID |
 | `total_connections` | Total connection count |
 | `success_connections` | Successful connections |
 | `failed_connections` | Total failed connections |
@@ -45,16 +46,16 @@ Twingate allows admins to export aggregated summaries of Remote Network activity
 | `bytes_transferred` | Bytes sent |
 | `bytes_received` | Bytes received |
 | `protocol` | Protocols used |
-| `percent_relay` | % connections via Twingate Relay |
-| `percent_p2p` | % peer-to-peer connections |
-| `top_10_address_accessed` | Top 10 addresses within the resource |
+| `percent_relay` | % of connections via Twingate Relay |
+| `percent_p2p` | % of peer-to-peer connections |
+| `top_10_address_accessed` | Top 10 addresses accessed within resource |
 
 ## Gotchas
-- **Safari users**: If file appears empty, **disable** "Open 'Safe' files after downloading" (Safari → Preferences → General) before downloading
-- Large time ranges or high-activity environments may produce millions of rows — avoid opening directly in spreadsheet editors
-- Time zone mismatch: selection UI is local time, but exported timestamps are UTC
-- Remote Network filter defaults to "all" if not specified
+- **Safari users**: If downloaded file appears empty, **disable** "Open 'safe' files after downloading" (Safari → Preferences → General) — Safari auto-unpacks gzip but may corrupt the file display
+- Time range is local timezone on input but **UTC in output** — account for offset when cross-referencing
+- Very large exports can crash spreadsheet editors; use CLI tools (`jq`, `awk`) for large datasets
+- File has no `.csv` extension by default — must rename manually after decompression
 
 ## Related Docs
-- Network Events (raw/detailed export — separate report type)
-- Twingate Reports page (Admin Console)
+- Network Events (raw event export — distinct from Summary)
+- Twingate Reports / Admin Console Settings

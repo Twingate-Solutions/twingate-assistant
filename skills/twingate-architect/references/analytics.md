@@ -1,44 +1,39 @@
 # Twingate Analytics
 
-## Page Title
-Analytics
-
 ## Summary
-Twingate provides reporting tools for monitoring network traffic, admin actions, and user activity. Data is accessible via the Admin Console and exportable in CSV format. Three main analytics categories exist: network traffic logs, audit logs, and usage reports.
+Twingate provides analytics covering network traffic, admin audit logs, and user activity reports. Data is accessible via the Admin Console and exportable in CSV format. Network connection logs are also available in real-time via advanced Connector configuration.
 
 ## Key Information
-- **Network Traffic Logs**: Logged for all Client-to-Connector connections
-- **Audit Logs**: Tracks most Admin Console actions; retained for account lifetime
-- **Usage Reports**: Shows last access time per user
+- **Three report types**: Network traffic logs, audit logs, and usage/activity reports
+- Network logs are viewable per User and per Resource in the Admin Console
+- Audit logs cover most Admin Console actions and are retained for the lifetime of the account
+- User activity report shows last access time for every user
+- All reports are exportable in CSV format
 
-## Data Access Methods
+## Report Types
 
-### Network Traffic
-- View per-user and per-Resource in Admin Console detail pages
-- Stream in real-time via advanced Connector configuration
-- Export as CSV from Admin Console
-
-### Audit Logs
-- Exportable from Admin Console
-- Covers most admin actions taken in the Admin Console
-
-### Usage Reports
-- Export from Admin Console
-- Contains last-access timestamp per user
+| Report | Location | Export | Real-time |
+|--------|----------|--------|-----------|
+| Network Traffic | User/Resource detail pages | CSV | Via Connector config |
+| Audit Logs | Admin Console | CSV | No |
+| User Activity | Admin Console | CSV | No |
 
 ## Prerequisites
-- Admin role required to access Admin Console
-- Connector must be deployed and active for network traffic logging
-- Advanced Connector configuration needed for real-time log streaming
+- Admin role required to access Admin Console reports
+- Advanced Connector configuration needed for real-time network log streaming
+
+## Access Points
+- **Network traffic**: Admin Console → individual User or Resource detail pages
+- **Audit logs**: Admin Console → export option
+- **User activity**: Admin Console → export option
 
 ## Gotchas
-- Not all admin actions may be logged ("most actions" implies some exceptions)
-- Real-time log streaming requires additional Connector configuration beyond defaults
-- Network traffic logs are tied to individual User/Resource pages — no single unified traffic view mentioned on this page
+- Audit logs only cover *most* admin actions, not necessarily all actions
+- Real-time network log output requires additional Connector configuration (advanced option), not enabled by default
+- Network logs record connections between Clients and Connectors only
 
 ## Related Docs
-- Analyzing Network Traffic (detailed guide)
-- Advanced Connector Configuration (for real-time log output)
-- Audit Logs export guide
-- User Activity Reports export guide
-- Admin role documentation
+- Analyzing network traffic (detailed guide)
+- Advanced Connector configuration (for real-time log output)
+- Audit log export guide
+- User activity report export guide

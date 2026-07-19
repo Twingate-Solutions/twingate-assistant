@@ -1,62 +1,64 @@
 # Device Failures - Twingate Troubleshooting
 
 ## Summary
-Covers diagnosis and resolution of Twingate Client application failures at the OS networking stack level. Addresses stuck/disconnected state, missing adapter errors, and empty resource lists. Conflicts with other network software are the most common root cause.
+Covers diagnosis and resolution of Twingate Client failures caused by service/daemon state, missing virtual network adapters, and software conflicts. Applies when the Client UI is unresponsive, won't start, or shows an empty resource list.
 
 ## Key Information
 - Client UI is a front-end only; background service does the actual work
-- Twingate creates a virtual network adapter per platform (TAP on Windows, network extension on macOS, `sdwan0` on Linux)
-- If connected but cannot access a specific Resource by name → DNS issue (not covered here)
-- Simply "disabling" conflicting software is insufficient; their drivers may remain active in the network stack
+- Virtual network adapter is required for traffic handling (per-OS interface name varies)
+- Software conflicts are a very common root cause
+- DNS issues (not covered here) are the likely cause when Client is healthy but a specific Resource is unreachable by name
 
 ## Common Symptoms
-- Client UI stuck on "Disconnected," connect button unresponsive
-- Windows log errors: `TapAdapterExistence` or "Twingate adapter is missing"
-- Connected but Resource list is empty
+- Client stuck on "Disconnected" with unresponsive connect button
+- Windows logs show `TapAdapterExistence` errors or "Twingate adapter is missing"
+- Client connected but Resource list is empty
 
 ## Diagnostic Steps
 
 ### 1. Check Background Service
-| Platform | Command |
-|----------|---------|
-| Windows | `services.msc` → find "Twingate Service" → verify Running + Automatic startup |
+| OS | Command/Action |
+|----|----------------|
+| Windows | `services.msc` → find "Twingate Service" → verify Running + Automatic startup; check Event Viewer (Application Log) on failure |
 | macOS | `log show --process Twingate --last 1h` |
 | Linux | `sudo journalctl -u twingate --since "1 hour ago"` |
 
 ### 2. Verify Virtual Network Adapter
-| Platform | Command | Expected |
-|----------|---------|---------|
-| Windows | `ipconfig \| findstr "Twingate"` | TAP-Windows Adapter present |
+| OS | Command | Expected |
+|----|---------|----------|
+| Windows | `ipconfig \| findstr "Twingate"` | "Twingate TAP-Windows Adapter" present |
 | macOS | `scutil --nc list` | Twingate network extension listed |
-| Linux | `ip a` | Interface `sdwan0` present |
+| Linux | `ip a` | Interface named `sdwan0` present |
 
-**Fix:** Missing adapter → reinstall Twingate Client
+**Fix:** Reinstall the Twingate Client if adapter is missing or disabled.
 
-### 3. Check for Software Conflicts
+### 3. Identify Software Conflicts
 Conflicting software categories:
-- Other VPNs / ZTNA clients (routing table conflicts)
-- Antivirus / EDR / Firewall with deep packet inspection
-- OEM network optimization / traffic shaping tools
+- Other VPN/ZTNA clients (routing table conflicts)
+- Antivirus/EDR/Firewall with deep packet inspection
+- OEM network optimizer/traffic shaping tools
 
-**Resolution process:**
-1. Fully **uninstall** (not just disable) suspected software
-2. Restart machine
-3. Test Twingate
-4. If resolved, reinstall other software with explicit exceptions for Twingate processes and `*.twingate.com`
+**Conflict test:** Fully **uninstall** (not just disable) suspected software, restart machine, retest. Driver-level components remain active even when the app is "disabled."
+
+**Resolution if confirmed:** Reinstall other software and whitelist:
+- Twingate processes
+- Domain: `*.twingate.com`
 
 ### 4. Collect Client Logs
-**Access via UI:** `More > Troubleshoot > View Logs`
+Access via Client UI: **More → Troubleshoot → View Logs**
 
-| Platform | Log Location |
-|----------|-------------|
-| Windows | `%LOCALAPPDATA%\Twingate\logs\` — key files: `Twingate.log` (UI), `Twingate.Service.log` (service) |
+| OS | Log Location |
+|----|-------------|
+| Windows | `%LOCALAPPDATA%\Twingate\logs\` → `Twingate.log` (UI), `Twingate.Service.log` (service) |
 | macOS | `~/Library/Group Containers/6GX8KVTR9H.com.twingate.com/Logs/private/var/log/twingate/` |
 
 ## Gotchas
-- Windows Event Viewer (Application Log) needed if service fails to start entirely
-- Security software drivers persist in network stack even when the application is "disabled"
-- Empty resource list ≠ connectivity failure; check DNS separately
+- Disabling security software is insufficient for conflict testing—kernel/network drivers remain loaded until uninstall + reboot
+- Empty Resource list ≠ connectivity failure; check service health separately
+- Resource unreachable by name when Client is healthy → DNS issue, not covered by this doc
+- Linux uses `systemd`-based service management; non-systemd distros not addressed
 
 ## Related Docs
-- DNS troubleshooting (for resource-name-specific access failures)
-- Client Logs reference
+- DNS troubleshooting (for name resolution failures on specific Resources)
+- Client logs documentation
+- Software conflict exceptions configuration

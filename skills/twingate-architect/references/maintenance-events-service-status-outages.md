@@ -1,55 +1,55 @@
 # Monitoring Twingate Service Status & Maintenance Events
 
 ## Summary
-Twingate exposes public read-only REST APIs (via Statuspage) to query real-time service health, incidents, and maintenance windows. All endpoints are unauthenticated GET requests returning JSON. Full API index available at `https://status.twingate.com/api/`.
+Twingate exposes public REST APIs (via Statuspage) to retrieve real-time service status, incidents, and maintenance events. All endpoints are unauthenticated GET requests returning JSON. The same data is available at https://status.twingate.com/api/.
 
 ## Key Information
-- All APIs are under `https://status.twingate.com/api/v2/`
+- Base URL: `https://status.twingate.com/api/v2/`
 - No authentication required
-- Returns standard Statuspage.io JSON format
+- All responses include a `page` metadata object plus the relevant data array
+- Postman collection available for all endpoints
 - Page ID: `d3m2m1y4ghc6`
-- Postman collection available in official docs
 
 ## API Endpoints
 
-| Purpose | Method | URL |
+| Purpose | Method | Endpoint |
 |---|---|---|
-| Full summary (status + components + incidents + maintenance) | GET | `https://status.twingate.com/api/v2/summary.json` |
-| Unresolved incidents | GET | `https://status.twingate.com/api/v2/incidents/unresolved.json` |
-| Past incidents | GET | `https://status.twingate.com/api/v2/incidents.json` |
-| Upcoming maintenance | GET | `https://status.twingate.com/api/v2/scheduled-maintenances/upcoming.json` |
-| Active maintenance | GET | `https://status.twingate.com/api/v2/scheduled-maintenances/active.json` |
-| Past maintenance | GET | `https://status.twingate.com/api/v2/scheduled-maintenances.json` |
+| Full summary (status + components + incidents + maintenance) | GET | `/summary.json` |
+| Overall status only | GET | `/status.json` |
+| Unresolved incidents | GET | `/incidents/unresolved.json` |
+| Past incidents | GET | `/incidents.json` |
+| Upcoming maintenance | GET | `/scheduled-maintenances/upcoming.json` |
+| Active maintenance | GET | `/scheduled-maintenances/active.json` |
+| Past maintenance | GET | `/scheduled-maintenances.json` |
 
-## Response Structure (summary.json)
-- `status.indicator` — overall status (`none`, `minor`, `major`, `critical`)
-- `status.description` — human-readable overall status
-- `components[]` — per-component status; `group: true` indicates a component group with child IDs in `components[]`
-- `incidents[]` — active incidents
-- `scheduled_maintenances[]` — active/upcoming maintenance
+## Component Groups
+- **Controller** (`qjtcw45cbnzc`): Controller, User Authentication, Connection Authorization, IdP Synchronization
+- **Admin Console** (`ybbtjt0tpv20`): Admin Web Interface, Billing, Reports Export
+- **Relay Infrastructure** (`nh6xcxh41s05`): Data Relays, Peer-to-Peer Infrastructure
+- **Homepage** (`3h4fm0kpyqtw`): www.twingate.com, docs.twingate.com
+- **Standalone**: Admin API, Analytics
 
-## Monitored Components
-| Component | Group |
-|---|---|
-| Controller, User Authentication, Connection Authorization, IdP Synchronization | Controller |
-| Data Relays, Peer-to-Peer Infrastructure | Relay Infrastructure |
-| Admin Web Interface, Billing, Reports Export | Admin Console |
-| Admin API, Analytics | (standalone) |
-| www.twingate.com, docs.twingate.com | Homepage |
+## Response Fields
 
-## Component Status Values
-- `operational`
-- `under_maintenance`
-- `degraded_performance`
-- `partial_outage`
-- `major_outage`
+**Status indicator values:** `none`, `minor`, `major`, `critical`
+
+**Component status values:** `operational`, `degraded_performance`, `partial_outage`, `major_outage`, `under_maintenance`
+
+**Maintenance status values:** `scheduled`, `in_progress`, `verifying`, `completed`
+
+**Summary response top-level keys:**
+- `page` — metadata
+- `components` — array of all components with individual status
+- `incidents` — unresolved incidents
+- `scheduled_maintenances` — active/upcoming maintenance
+- `status` — overall indicator + description string
 
 ## Gotchas
-- Admin Console availability is **independent** from Controller; Admin Console downtime does not affect end-user connectivity
-- Component entries with `"group": true` contain child component IDs in their `components[]` array, not status details—look up children separately
-- `scheduled-maintenances.json` returns **all** (past + active + upcoming); use specific `/active` or `/upcoming` endpoints to filter
-- `incident_updates[].affected_components[].code` maps to `components[].id` in the summary response
+- Admin Console outages do **not** impact end-user connectivity — it is independent from Controller infrastructure
+- Components with `"group": true` are parent containers; their `components` array contains child component IDs
+- `only_show_if_degraded: true` components are hidden in UI when operational but still appear in API responses
+- The `/summary.json` endpoint combines all other endpoints into a single call — use it to minimize requests
 
 ## Related Docs
-- Statuspage API reference: `https://status.twingate.com/api/`
-- Twingate status page: `https://status.twingate.com`
+- Twingate Status page UI: https://status.twingate.com
+- Statuspage API reference: https://status.twingate.com/api/

@@ -4,66 +4,67 @@
 Twingate uses split tunneling by default, routing only explicitly defined Resource traffic through the tunnel. Two failure categories exist: local subnet collisions (Twingate captures traffic it shouldn't) and missing Resource definitions (Twingate doesn't capture traffic it should).
 
 ## Key Information
-- Split tunnel = only defined Resources are routed through Twingate
-- Local network traffic bypasses Twingate unless a Resource definition overlaps with it
-- Missing domain definitions cause partial app failures for web/SaaS gating use cases
-- Exit Networks = intentional full-tunnel mode (not default); user-selectable
+- Split tunnel = only defined Resources are tunneled; all other traffic follows normal network path
+- Two failure modes: **local subnet collisions** and **missing Resource definitions**
+- Exit Networks enable full-tunnel mode (intentional, user-selectable)
+- `.local` domains conflict with mDNS/Bonjour — requires special handling
 
-## Local Subnet Collision
+## Local Subnet Collision Troubleshooting
 
-### Symptoms
-- Local printer/NAS unreachable when Twingate is active
-- Other VPN clients fail when Twingate is running
+**Symptoms:** Can't reach home printer, local NAS, or another VPN client while Twingate is active
 
-### Diagnosis Steps
-1. Get user's local IP/subnet (`ipconfig` / `ifconfig` / `ip addr`)
-2. Check Admin Console Resource definitions for overlapping CIDRs or IPs
-3. If overlap found, that Resource is intercepting local traffic
+**Steps:**
+1. Get user's local IP/subnet via `ipconfig` (Windows) or `ifconfig`/`ip addr` (macOS/Linux)
+2. Compare against Resource definitions in Admin Console for overlapping CIDR ranges
+3. Refine Resource definitions to be more specific (e.g., `10.0.5.23` instead of `10.0.0.0/16`)
 
-### Fix
-- Use specific IPs (`10.0.5.23`) or small CIDRs (`10.0.5.0/24`) instead of broad ranges (`10.0.0.0/16`)
-- `.local` domains conflict with mDNS/Bonjour — see dedicated KB article
+**Best Practice:** Use specific IPs or small CIDR blocks rather than broad ranges
 
-## Missing Resource Definitions
+## Missing Resource Definitions (Web App Gating)
 
-### Symptoms
-- App partially loads; features broken
-- HTTP 401/403 errors on gated web apps
-- Styles/scripts fail to load; intermittent failures
+**Symptoms:** App partially loads, broken features, HTTP 401/403 errors, intermittent failures
 
-### Fix: Browser DevTools
-1. Open app in browser with Twingate active → F12 → Network tab
-2. Reload page; filter for 401/403/blocked requests
-3. Note failing domains → add as wildcard DNS Resources (e.g., `*.partnersite.com`)
-4. Assign same Groups/Security Policies as primary Resource
+### Method 1: Browser Developer Tools
+1. Open app in browser with Twingate active
+2. Press `F12` → Network tab → reload page
+3. Filter for failed requests (401, 403, blocked/cancelled)
+4. Note domains of failed requests
+5. Add wildcard DNS Resources (e.g., `*.partnersite.com`) in Admin Console
+6. Assign same Groups/Security Policies as primary Resource
+7. Wait for Client sync, reload, repeat
 
-### Fix: Test Resources (when DevTools insufficient)
-1. Create two temporary Resources on same Remote Network:
+**Best Practice:** Use `*.domain.com` wildcards to cover all current and future subdomains
+
+### Method 2: Test Resources (Temporary Full-Tunnel Diagnostic)
+1. Create two Resources on same Remote Network as problem app:
    - DNS Resource: `*.*` (name: "Test DNS")
    - IP Resource: `0.0.0.0/0` (name: "Test IP")
-2. Assign **no Groups** initially
-3. Create "Test Group" → add both test Resources
-4. Add affected user to Test Group; wait for Resources to appear in Client
-5. User reproduces failing workflow (should now work)
-6. **Remove user from Test Group immediately after test**
-7. Review activity logs on user profile or test Resource pages → identify uncovered domains/IPs
-8. Add missing entries as permanent Resources with proper Groups/Policies
-9. **Delete or disable test Group and test Resources**
+   - No port/protocol restrictions; **assign to no Groups initially**
+2. Create new Group (e.g., "Test Group"), add both test Resources
+3. Add affected user to Test Group; wait for Resources to appear in Client
+4. User loads app — should work fully with all traffic tunneled
+5. **Remove user from Test Group immediately after test**
+6. Review activity logs on user profile or Resource activity page for uncovered domains/IPs
+7. Add missing entries as permanent Resources with proper Groups/Policies
+8. Retest without test Resources
+9. Delete/disable Test Group and test Resources
 
 ## Configuration Values
 | Resource Type | Test Value | Purpose |
 |---|---|---|
-| DNS Resource | `*.*` | Catch all DNS traffic |
-| IP Resource | `0.0.0.0/0` | Catch all IP traffic |
-| Wildcard DNS | `*.example.com` | Cover all subdomains |
+| DNS Resource | `*.*` | Capture all DNS traffic |
+| IP Resource | `0.0.0.0/0` | Capture all IP traffic |
+| Wildcard DNS | `*.domain.com` | Cover all subdomains |
 
 ## Gotchas
-- Test Resources (`0.0.0.0/0`, `*.*`) must be removed after diagnosis — leaving them active causes unexpected behavior
-- `.local` TLD conflicts with mDNS — requires special handling
-- Modern web apps use many domains; always prefer wildcard (`*.domain.com`) over individual subdomains
-- Broad CIDR Resources are the primary cause of local network collisions
+- **Test Resources must be removed after testing** — leaving them active causes unexpected behavior
+- `.local` domains conflict with mDNS; see separate KB article
+- Full-tunnel mode requires Exit Networks, not broad Resource definitions
+- Web apps commonly depend on CDN, auth, and third-party domains not obvious from the main URL
+- Subnet collision applies to both CIDR ranges AND specific IPs within a range
 
 ## Related Docs
-- Twingate Exit Networks documentation
-- `.local` domain KB article (linked in page)
-- Activity/logging documentation for diagnosing test Resource traffic
+- Exit Networks documentation
+- `.local` domain KB article
+- Activity/log review (user profile page or Resource activity page)
+- Twingate log collection for unresolved issues

@@ -1,21 +1,26 @@
 <!-- triage: unassigned URL: https://www.twingate.com/docs/unlisted -->
 
-# Twingate: Unlisted Page
+# Unlisted Page
 
 ## Summary
-This page exists at the Twingate documentation URL but contains no accessible content. It appears to be an unlisted or placeholder documentation page with no substantive information.
+This page does not contain substantive documentation content. It appears to be a placeholder or unlisted/private page within the Twingate documentation site.
 
 ## Key Information
-- Page is marked as "unlisted" in the Twingate documentation system
-- No content is available at this URL
-- Last updated approximately 2 months ago
+- Page is marked as "unlisted" within the Twingate docs structure
+- No technical content, configuration details, or implementation guidance is present
+- Last updated 3 months ago
+
+## Prerequisites
+N/A
+
+## Step-by-Step
+N/A
 
 ## Configuration Values
-None available.
+N/A
 
 ## Gotchas
-- This URL does not contain usable documentation
-- Any references to this page in other docs may be broken or pointing to removed content
+- This page contains no actionable content and should not be referenced for implementation guidance
 
 ## Related Docs
 - [Twingate Documentation Home](https://www.twingate.com/docs)

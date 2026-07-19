@@ -4,48 +4,49 @@
 Firewall, NAT, and Routing Issues
 
 ## Summary
-Twingate requires no inbound firewall rules but has specific outbound connectivity requirements. Performance issues typically stem from falling back to Relay connections instead of direct Peer-to-Peer (P2P) connections, usually caused by blocked UDP or incompatible NAT configurations.
+Twingate requires no inbound firewall rules but has specific outbound connectivity requirements. Performance issues typically stem from connections being forced through Twingate's Relay infrastructure instead of direct Peer-to-Peer (P2P) tunnels. Diagnosing slowness means diagnosing why P2P establishment is failing.
 
 ## Key Information
-- **P2P connections**: Direct encrypted tunnel between Client and Connector — preferred, lower latency
-- **Relay connections**: Traffic routed through Twingate's public infrastructure — secure but higher latency
-- Relayed connections indicate P2P negotiation failed
+- **P2P connection**: Direct encrypted tunnel between Client and Connector — preferred, lower latency
+- **Relay connection**: Traffic routed through Twingate's public relay infrastructure — secure but potentially higher latency
+- **#1 cause of relayed connections**: Firewalls blocking outbound UDP
 - STUN Discovery must show "Available" in Admin Console for P2P to work
 
 ## Common Symptoms
-- Users report slow/laggy resource access
-- Admin Console Connector details show most/all connections as "Relayed"
+- Users report slow/laggy Resource access
+- Admin Console shows most/all connections as "Relayed"
 - Client or Connector fails to connect entirely
 
-## Configuration Values / Required Outbound Rules
+## Prerequisites
+- Access to firewall/NAT configuration on both client-side and connector-side networks
+- Admin Console access to check Connector connection details
+
+## Required Outbound Connectivity
 
 | Destination | Protocol/Port | Purpose |
 |-------------|--------------|---------|
 | `*.twingate.com` | TCP 443 | Controller & Relay communication |
-| Twingate Relay infrastructure | TCP 30000–31000 | Relayed connection fallback |
-| All destinations | UDP (all ports) | P2P / NAT traversal — **critical** |
+| Twingate Relay infrastructure | TCP 30000-31000 | Relay fallback |
+| All destinations | UDP (any port) | P2P / NAT traversal |
 | STUN servers | UDP 3478 | STUN Discovery for P2P |
 
-## Troubleshooting Steps
+## Step-by-Step Troubleshooting
 
-1. **Verify outbound firewall rules** — confirm all ports in table above are permitted on both client-side and connector-side networks
-2. **Check for blocked UDP/QUIC** — use `nmap` from Connector host to test outbound UDP reachability
-3. **Check NAT type** — P2P requires **endpoint-independent NAT**; symmetric NAT breaks traversal
-4. **Check for double NAT** — two NAT layers will break P2P connections
-5. **Confirm STUN Discovery status** — in Admin Console → Connector details page; must show "Available"
+1. **Verify outbound firewall rules** — confirm TCP 443, TCP 30000-31000, and all outbound UDP are permitted on both client and connector networks
+2. **Check Admin Console** — navigate to Connector details page; verify "STUN Discovery" shows "Available"
+3. **Test UDP availability** — use `nmap` from the Connector host to test outbound UDP to a public endpoint
+4. **Check NAT type** — confirm NAT is endpoint-independent (not symmetric); symmetric NAT breaks P2P
+5. **Identify double-NAT** — devices behind two router layers can prevent P2P establishment
+6. **AWS-specific**: Replace AWS NAT Gateway with a self-hosted EC2 NAT instance or AWS Marketplace NAT product if P2P is required
 
-## Gotchas
-- **Blocked outbound UDP is the #1 cause** of relayed connections and performance issues
-- **AWS NAT Gateway** is known to be incompatible with robust NAT traversal — use a self-hosted EC2 NAT instance or AWS Marketplace NAT product instead
-- Enterprise firewalls often use symmetric NAT, which is incompatible with P2P traversal
-- Double NAT scenarios (common in home/office setups with multiple routers) break P2P
-
-## Prerequisites
-- Access to Admin Console to check Connector connection details
-- Ability to modify firewall/NAT rules on both client and connector networks
-- `nmap` or equivalent tool for UDP connectivity testing
+## Configuration Gotchas
+- **AWS NAT Gateway** is known incompatible with robust NAT traversal — do not use for P2P-critical deployments
+- **Symmetric NAT** (common in enterprise firewalls) blocks P2P traversal even if UDP is permitted
+- **Double NAT** scenarios break P2P regardless of firewall rules
+- Blocking UDP port 3478 prevents STUN Discovery, disabling P2P entirely
+- Enterprise firewalls that block QUIC/UDP by default require explicit UDP allowlisting
 
 ## Related Docs
-- How to troubleshoot peer-to-peer connections
-- Outbound connectivity requirements
-- Split tunneling (for local device conflicts when network path is clear)
+- [Outbound Connectivity Requirements](https://www.twingate.com/docs/outbound-connectivity)
+- [How to Troubleshoot Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
+- Split Tunneling (for local device conflicts after network path is confirmed clear)

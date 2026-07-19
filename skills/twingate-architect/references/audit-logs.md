@@ -1,21 +1,20 @@
 # Audit Logs
 
 ## Summary
-Twingate provides audit log activity tracking for account events including create, delete, edit, and connect operations. Logs can be manually exported via Admin Console or automatically synced to AWS S3 in JSON format.
+Twingate provides audit log export functionality for account activity tracking. Logs capture create, delete, edit, and connect events across major platform categories. Export is available via Admin Console (manual) or automated sync to AWS S3.
 
 ## Key Information
-- **Event types tracked:** create, delete, edit, connect
-- **Export format:** JSON
-- **Export methods:** Manual (Admin Console) or automated (AWS S3 sync)
-- **Schema reference:** Separate audit logs schema page available
+- **Format:** JSON
+- **Export methods:** Manual via Admin Console, or automated sync to AWS S3
+- **Schema documentation:** Available on separate audit logs schema page
 
-## Covered Categories
+## Covered Event Categories
 - Access
 - API Keys
 - Devices
 - Device Integrations
 - Device Security
-- Secure DNS (DNS-over-HTTPS + DNS filtering)
+- Secure DNS (DNS-over-HTTPS and DNS filtering)
 - Network (Remote Networks, Connectors, Resources)
 - Policies
 - Service Accounts
@@ -24,22 +23,28 @@ Twingate provides audit log activity tracking for account events including creat
 - Data Exports
 - MFA Configurations
 
+## Event Types Captured
+- `create`
+- `delete`
+- `edit`
+- `connect`
+
 ## Export Methods
 
 ### Manual Export
-- Access via Admin Console
-- Downloads JSON report on demand
+- Accessed via Admin Console
+- One-time JSON download
 
-### Automated Export (AWS S3)
-- Syncs JSON files to an AWS S3 bucket
-- Requires separate S3 integration configuration
+### Automated Export
+- Sync to AWS S3 bucket
+- Output format: JSON file
 
 ## Gotchas
-- Export is JSON only — no native CSV or syslog format mentioned
-- Two distinct export paths (Admin Console vs S3) require separate configuration
-- S3 sync setup documented separately
+- No mention of retention period or log volume limits
+- S3 sync requires separate configuration (see S3 integration docs)
+- Schema details are on a separate page — reference before building integrations
 
 ## Related Docs
-- Audit Logs Schema page (JSON field definitions)
+- Audit Logs Schema page (for JSON field definitions)
 - AWS S3 bucket sync configuration
 - Admin Console documentation

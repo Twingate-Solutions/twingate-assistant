@@ -1,45 +1,39 @@
 # Twingate MSP Portal
 
 ## Summary
-Twingate's MSP portal provides multi-tenant management for Managed Service Providers to handle multiple customer networks and consolidated billing. Each customer network is an isolated account containing all resources, connectors, and team members. MSPs manage billing centrally while customer access is controlled per-network.
+Twingate's MSP portal provides a multi-tenant management interface for managed service providers to create and manage Customer Networks and consolidated billing. Each Customer Network represents a complete customer account with its own Resources, Connectors, and team members.
 
 ## Key Information
-- MSP portal requires credit card on signup; each Customer Network gets 14-day free POC period
-- URLs are permanent and globally unique — cannot be changed after creation
-- MSP portal users ≠ Customer Network users; access must be granted separately per network
-- Users can be added manually or via Identity Provider sync
+- MSP portal has separate user access from Customer Networks — users added to MSP portal must be explicitly added to each Customer Network for access
+- Each new Customer Network includes a 14-day free POC period before billing begins
+- Credit card required at signup but not charged during POC period
 - Consolidated monthly billing across all Customer Networks
+- Users can be added manually or synced via Identity Provider
 
 ## Prerequisites
-- Credit card required to create Customer Networks
-- MSP portal account (sign up at twingate.com/docs/msp)
+- Credit card on file to create Customer Networks
+- Unique URL selected at signup (cannot be changed after creation)
 
-## URL Naming Strategy
-- MSP Portal URL: use `yourcompanymsp` or `yourcompanyportal`
-- Reserves `yourcompany` for your own internal Twingate network
-- **URLs cannot be changed after creation** — plan carefully
+## URL Naming Convention
+- MSP Portal URL and all Customer Network URLs must be globally unique and **permanent**
+- Recommended pattern: use `yourcompanymsp` or `yourcompanyportal` for the MSP portal URL
+- Reserve `yourcompany` for your own internal Twingate network
 
-## Customer Network Management
-- Create/delete Customer Networks from the portal
-- Assign admins to Customer Networks through the portal
-- Each network is fully isolated (resources, connectors, team members)
+## Customer Network Removal Options
 
-## Offboarding Customers (Two Options)
-
-| Action | Effect | Billing |
+| Option | Access Until | End State |
 |---|---|---|
-| **Offboard Network** | Access until end of billing cycle → downgraded to Starter tier, removed from MSP | No longer charged after cycle ends |
-| **Delete Network** | Access until end of billing cycle → network deleted | No longer charged after cycle ends |
+| **Offboard Network** | End of billing cycle | Downgraded to Starter tier, removed from MSP, no further charges |
+| **Delete Network** | End of billing cycle | Permanently deleted, no further charges |
 
-*Access via ellipsis menu (⋯) at end of customer network row.*
+Both options: click ellipses (⋯) at end of network row to access.
 
 ## Gotchas
-- Users added to the MSP portal do **not** automatically get access to any Customer Network — must be added individually to each network
-- 14-day free POC applies per Customer Network, but credit card is required upfront
-- URL uniqueness is global across all Twingate networks (MSP portals, customer networks, standalone networks)
-- Offboarded networks revert to Starter tier (not deleted); deleted networks are permanently removed — choose intentionally
+- URLs **cannot be changed** after creation — plan naming convention carefully before signup
+- MSP portal users ≠ Customer Network users; separate addition required for each network
+- "Offboard" vs "Delete" distinction matters — offboard preserves customer access at Starter tier, delete removes the network entirely
 
 ## Related Docs
-- [MSP Billing](https://www.twingate.com/docs/msp-billing)
-- [Customer Networks](https://www.twingate.com/docs/customer-networks)
-- Identity Provider sync (for user management)
+- [MSP Billing page](https://www.twingate.com/docs/msp-billing)
+- [Customer Networks page](https://www.twingate.com/docs/customer-networks)
+- [MSP Portal signup](https://www.twingate.com/msp-signup)

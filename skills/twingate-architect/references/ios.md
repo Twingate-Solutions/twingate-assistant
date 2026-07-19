@@ -1,30 +1,31 @@
-# Twingate iOS Client
+# iOS – Twingate Client Setup
 
 ## Page Title
-iOS Client Setup
+iOS Client Installation and Configuration
 
 ## Summary
-Instructions for installing and configuring the Twingate iOS client. The app connects users to private resources via their organization's identity provider without affecting regular internet traffic.
+Instructions for installing and configuring the Twingate client on iOS devices. The client runs in the background after setup, only intercepting traffic destined for private Resources without affecting general internet browsing.
 
 ## Key Information
-- App available on the App Store (also accessible via get.twingate.com)
-- Network name format: `<orgname>.twingate.com`
+- App available via App Store (search "Twingate") or direct link: `get.twingate.com`
+- Network name format: `<your-org>.twingate.com`
 - Network name is provided in the welcome email
-- App runs in background after initial setup; does not intercept general internet traffic
-- Only intercepts traffic destined for configured private Resources
+- Authentication delegated to configured Identity Provider (IdP)
+- Client can remain running in background; does not proxy general internet traffic
+- Only intercepts traffic for explicitly defined private Resources
 
 ## Prerequisites
 - iOS device with App Store access
-- Organization network name (from welcome email)
-- Valid credentials for the organization's identity provider (IdP)
+- Twingate network name (from welcome email)
+- Valid credentials for the organization's Identity Provider
 
 ## Step-by-Step
 
-1. **Install** — Search "Twingate" in the App Store or visit `get.twingate.com`
-2. **Set Network** — Open app, enter network name (e.g., `autoco.twingate.com`), tap **Join Network**
-3. **Authenticate** — Tap **Sign in to Connect**; browser window opens for IdP login
-4. **Connect** — Browser closes automatically; app shows "online" status
-5. **Background** — Close the app; it remains connected and only routes private Resource traffic
+1. **Install** – Download "Twingate" from the App Store or visit `get.twingate.com`
+2. **Set Network** – On first launch, enter network name (e.g., `autoco.twingate.com`) and tap **Join Network**
+3. **Authenticate** – Tap **Sign in to Connect**; a browser window opens for IdP authentication
+4. **Complete Auth** – Log in with IdP credentials (skipped if already authenticated); browser closes automatically
+5. **Confirm Online** – Client displays online status; app can be minimized
 
 ## Configuration Values
 | Field | Format | Example |
@@ -32,12 +33,12 @@ Instructions for installing and configuring the Twingate iOS client. The app con
 | Network Name | `<org>.twingate.com` | `autoco.twingate.com` |
 
 ## Gotchas
-- If already authenticated with the IdP, login prompt may be skipped automatically
-- App must remain running (backgrounded) to maintain Resource access
-- Regular internet browsing is unaffected — only private Resource traffic is intercepted
+- Network name must be entered exactly as provided; incorrect names will fail to connect
+- If already authenticated with the IdP, the browser step may complete without requiring credentials
+- App must remain running (background) to maintain Resource access; fully closing it disconnects the VPN tunnel
 
 ## Related Docs
 - Android client setup
 - Desktop client setup (macOS, Windows, Linux)
-- Identity provider configuration
-- Resource access configuration
+- Resource access configuration (Admin Console)
+- Identity Provider configuration

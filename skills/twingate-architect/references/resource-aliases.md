@@ -1,49 +1,52 @@
 # Resource Aliases
 
 ## Summary
-Aliases add extra addresses to Twingate Resources, accessible to anyone with Resource access without replacing the original address. They function as pseudo-A records that only work via Twingate and require no DNS setup. Aliases are protocol agnostic but have caveats for HTTPS and certain domain formats.
+Aliases add extra addresses to Twingate Resources, accessible only through Twingate without requiring DNS record setup. They are protocol-agnostic and work alongside the original Resource address rather than replacing it.
 
 ## Key Information
-- Aliases are additional addresses on top of existing Resource addresses (both work simultaneously)
-- Only accessible via Twingate — no external DNS records needed
-- Protocol agnostic: works with any protocol
-- All users with Resource access can use the alias
+- Aliases act as pseudo-A records resolvable only via Twingate
+- Multiple addresses work simultaneously (original + alias)
+- No DNS record configuration required
+- Protocol-agnostic (works with any protocol)
+- Anyone with access to the Resource can use the alias
 
-## Prerequisites
-Minimum versions required:
-- **Connector**: 1.50.0+
-- **macOS Client**: 1.0.27+
-- **Windows Client**: 1.0.29+
-- **Linux Client**: 1.0.79+
-- **iOS**: 1.0.27+
-- **Android**: 1.0.24+
+## Prerequisites / Version Requirements
+| Component | Minimum Version |
+|-----------|----------------|
+| Connector | 1.50.0 |
+| macOS Client | 1.0.27 |
+| Windows Client | 1.0.29 |
+| Linux Client | 1.0.79 |
+| iOS Client | 1.0.27 |
+| Android Client | 1.0.24 |
 
 ## Configuration Values
-- Aliases must be multi-label domains (must contain a `.`)
-- Avoid `.local` TLD (conflicts with mDNS/Bonjour/zeroconf)
-- Recommended formats: `alias.internal`, `alias.corp`, `alias.yourcompany.com`
+- Set via Twingate Admin Console on a per-Resource basis
+- No CLI flags or API params documented on this page
 
 ## Gotchas
 
-**HTTPS Certificate Errors**
-- Aliases have no built-in HTTPS support → browser certificate errors will occur
-- Fix: Create and register a TLS certificate for the alias domain
-  - Option A: Use a subdomain of a domain you control
-  - Option B: Create and distribute a private/internal certificate
+**HTTPS / TLS**
+- Aliases cause certificate errors with HTTPS Resources by default
+- Fix: Create and register a TLS certificate for the alias domain (use a controlled domain or distribute a private cert)
 
-**Host Header Behavior**
-- HTTP connections set `Host:` header to the alias value (not original address)
-- May affect virtual host routing on servers
+**HTTP Host Headers**
+- HTTP requests via alias set `Host:` to the alias value (e.g., `Host: router.internal`)
+- May affect virtual host routing on the server side
 
 **`.local` TLD**
-- Reserved for mDNS (Bonjour, zeroconf) — alias may not resolve correctly on many devices
-- Avoid `.local`; use `.internal`, `.corp`, or a controlled subdomain instead
+- Conflicts with mDNS (Bonjour, zeroconf) — avoid `.local` aliases
+- Use alternatives: `alias.internal`, `alias.corp`, or a subdomain of a domain you control
 
 **Single Label Domains**
-- Aliases cannot be single-label (no `.` in name, e.g., `router`)
-- Must use format like `router.internal` or `router.corp`
+- Aliases must contain at least one `.` (e.g., `twingate` is invalid; `twingate.internal` is valid)
+
+## Recommended Alias Patterns
+- `resource.internal`
+- `resource.corp`
+- `resource.yourdomain.com` (if you control the domain)
 
 ## Related Docs
-- Twingate Resources configuration
+- Resources (general configuration)
 - Connector setup and versioning
-- TLS certificate management (external)
+- DNS and split tunnel configuration

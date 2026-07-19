@@ -1,68 +1,63 @@
 # Device Report
 
 ## Summary
-Twingate Admin Console allows exporting device inventory as a CSV file. The report includes device metadata, Client version, and owner information. Reports are generated asynchronously and downloaded from the Reports page.
+Twingate Admin Console allows exporting device inventory data as a CSV file. Reports can be filtered by device state and include hardware, software, and ownership details. Generation happens asynchronously with email notification on completion.
 
 ## Key Information
 - Export format: CSV file
 - Two entry points: Devices page or Settings → Reports page
 - Filter options: Active, Archived, Blocked, or All Devices
-- Generation is async; notification sent via email when ready
-- Most exports complete in seconds; large datasets may take minutes
+- Generation is asynchronous; email sent when ready
+- Download completed reports from the Reports page
 
 ## Prerequisites
-- Admin Console access
-- Sufficient permissions to view Devices/Reports sections
+- Access to Twingate Admin Console
+- Appropriate admin permissions
 
 ## Step-by-Step
 
-**Option 1 – From Devices page:**
+### Option 1: From Devices Page
 1. Navigate to **Devices** tab in Admin Console
 2. Click **Download** button above device table
+3. Select device filter (Active/Archived/Blocked/All Devices)
+4. Click **Generate Report**
+5. Wait for email notification or refresh page
+6. Download from **Settings → Reports**
 
-**Option 2 – From Reports page:**
+### Option 2: From Reports Page
 1. Navigate to **Settings → Reports → Device List**
 2. Click **Generate Device Report**
-
-**Complete report generation:**
-1. Select device filter: `Active`, `Archived`, `Blocked`, or `All Devices`
-2. Click **Generate Report**
-3. Wait for email notification or refresh the Reports page
-4. Download completed report from the **Reports** page
-
-## Configuration Values
-| Filter Option | Description |
-|---|---|
-| `Active` | Currently active devices only |
-| `Archived` | Archived devices only |
-| `Blocked` | Blocked devices only |
-| `All Devices` | All devices regardless of state |
+3. Select device filter (Active/Archived/Blocked/All Devices)
+4. Click **Generate Report**
+5. Wait for email notification or refresh page
+6. Download from the same Reports page
 
 ## Report Schema (CSV Columns)
+
 | Column | Description |
-|---|---|
+|--------|-------------|
 | Device ID | Twingate device ID |
 | Owner user ID | Twingate user ID of owner |
-| Owner name | Owner's display name |
-| Device name | Twingate device name |
+| Owner name | Device owner's name |
+| Device name | Twingate-assigned device name |
 | Device type | `mobile`, `desktop`, or `laptop` |
 | Active state | `active`, `archived`, or `blocked` |
-| Is manually trusted | Boolean: manual trust status |
-| Client version | Installed Client version |
+| Is manually trusted | Boolean: manually trusted status |
+| Client version | Twingate Client version |
 | Hostname | Device hostname |
-| Local username | Owner's local OS username |
+| Local username | Owner's local system username |
 | Serial number | Device serial number |
 | Device manufacturer | Hardware manufacturer |
 | Device model | Hardware model |
 | OS platform | `macOS`, `Windows`, `Linux`, `iOS`, or `Android` |
-| OS version | OS version string |
+| OS version | Operating system version |
 | Last resource access time | Timestamp of last Resource access |
 
 ## Gotchas
-- Report is **not** generated in real-time; must be downloaded from Reports page after generation completes
-- No API or CLI method documented for report generation—Admin Console UI only
-- Download link appears on Reports page, not at the original generation entry point
+- Large device inventories may take **several minutes** to generate (not just seconds)
+- Report is not instantly available — must be downloaded from Reports page after generation, not immediately after clicking Generate
+- No direct download from Devices page; final download always from **Settings → Reports**
 
 ## Related Docs
 - Devices documentation
-- Reports page (Settings → Reports)
+- Twingate Admin Console Settings

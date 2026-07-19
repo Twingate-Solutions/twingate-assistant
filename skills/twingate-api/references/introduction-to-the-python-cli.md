@@ -1,13 +1,17 @@
-# Twingate Python CLI
+# Twingate Python CLI - Introduction
+
+## Page Title
+Introduction to the Twingate Python CLI
 
 ## Summary
-Open-source CLI tool wrapping Twingate GraphQL APIs to automate administrative tasks. Maintained outside core engineering—support via GitHub Issues. Requires Python 3 and pandas library.
+An open-source CLI tool wrapping Twingate's GraphQL APIs to automate admin tasks available in the Admin Panel. Maintained outside core product engineering; support via GitHub Issues. Requires Python 3 and the `pandas` library.
 
 ## Key Information
-- **Repo**: Clone from [GitHub](https://github.com/Twingate-Labs/tg-cli) (open source)
-- **Authentication**: Session-based; create once, reuse session name across commands
-- **Output formats**: JSON (default), CSV, DF (dataframe/table)
-- **Supported objects**: `auth`, `device`, `connector`, `user`, `group`, `resource`, `network`, `account`, `service`
+- **GitHub**: Clone from the official Twingate Python CLI repository
+- **Supported object types**: `auth`, `device`, `connector`, `user`, `group`, `resource`, `network`, `account`
+- **Operations vary by object** (e.g., resource: `list`, `show`, `create`, `delete`)
+- **Sessions**: Authentication is stored as named sessions; session name required for all non-auth commands
+- **Output formats**: `JSON` (default), `CSV`, `DF` (dataframe/table)
 
 ## Prerequisites
 - Python 3
@@ -17,65 +21,43 @@ Open-source CLI tool wrapping Twingate GraphQL APIs to automate administrative t
 
 ## Step-by-Step
 
-### Setup & Auth
+### Initial Setup
 ```bash
-# Clone repo, then verify install
-python3 ./tgcli.py auth list  # returns [''] if OK
-
-# Login (creates named session)
-python3 ./tgcli.py auth login -t <tenant> -a <apikey>
-# Returns auto-generated session name (e.g., OrangeElk)
-
-# Login with custom session name
-python3 ./tgcli.py auth login -t <tenant> -a <apikey> -s mysession
+git clone <repo>
+cd <cli-folder>
+python3 ./tgcli.py auth list   # Verify install; empty list = success
 ```
 
-### Basic Usage Pattern
+### Authenticate
 ```bash
-python3 ./tgcli.py -s <sessionname> [-f FORMAT] <object> <operation> [params]
+python3 ./tgcli.py auth login -t <tenant> -a <apikey> [-s <session_name>]
+# Returns auto-generated session name (e.g., "OrangeElk") if -s not specified
+```
 
-# Examples
-python3 ./tgcli.py -s OrangeElk resource list
+### Run Commands
+```bash
+python3 ./tgcli.py -s <session_name> [-f FORMAT] <object> <operation>
+# Example:
 python3 ./tgcli.py -s OrangeElk -f CSV resource list
-python3 ./tgcli.py -s OrangeElk -f DF resource list
 ```
 
-### Discovery with `-h`
-```bash
-python3 ./tgcli.py -h                    # top-level help
-python3 ./tgcli.py resource -h           # operations for object
-python3 ./tgcli.py resource list -h      # params for operation
-```
+## Configuration Values
 
-## Configuration Values / CLI Flags
-
-| Flag | Description |
-|------|-------------|
-| `-s SESSIONNAME` | Session name (reuse across calls) |
-| `-f OUTPUTFORMAT` | `JSON`, `CSV`, or `DF` |
-| `-a APIKEY` | API key (login only) |
-| `-t TENANT` | Tenant name (login only) |
-| `-v` | Version |
-| `-h` | Contextual help (works at any level) |
-
-## Supported Operations by Object
-
-| Object | Operations |
-|--------|-----------|
-| `auth` | login, logout, list |
-| `resource` | list, show, create, delete |
-| `device` | list, show, update trust |
-| `group` | list, show, add/remove users, add/remove resources, create, delete, assign policy |
-| `connector` | list, show, rename, generate tokens |
-| `user` | list, show |
-| `service` (account) | list, show, create, delete, add/remove resources |
+| Flag | Description | Required |
+|------|-------------|----------|
+| `-s SESSIONNAME` | Session name | Yes (for most commands) |
+| `-f OUTPUTFORMAT` | `JSON`, `CSV`, or `DF` | No (default: JSON) |
+| `-a APIKEY` | API key for login | Yes (auth login) |
+| `-t TENANT` | Tenant name for login | Yes (auth login) |
+| `-v` | Show version | No |
+| `-h` | Contextual help at any level | No |
 
 ## Gotchas
-- Commands fail with `no session name passed` if `-s` is omitted after login
-- Missing `pandas` causes errors on first run—install before use
-- Session name is auto-generated (random words) unless `-s` is specified at login
-- Pull updates periodically (`git pull`); CLI is actively developed
+- All commands except `auth` require `-s <session_name>`; omitting it returns `error: no session name passed`
+- Missing `pandas` is the most common install error — install and retry
+- Open-source project: **not supported by Twingate product engineering**; file issues on GitHub
+- Pull latest version periodically — features added incrementally
 
 ## Related Docs
-- [Twingate GraphQL APIs](https://www.twingate.com/docs/api)
-- GitHub Issues page (for support—not Twingate official support)
+- [Twingate GraphQL APIs](https://www.twingate.com/docs/)
+- GitHub Issues page (for support)

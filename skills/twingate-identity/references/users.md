@@ -1,40 +1,41 @@
 # Twingate Users
 
 ## Summary
-Twingate manages users either through built-in social logins (Google, Microsoft, GitHub, LinkedIn) or via a third-party IdP with SCIM sync. All new users default to the "Everyone" group with no Resource access until explicitly assigned. Billing applies to all synchronized users and service accounts.
+Twingate users can be managed via social logins or synced automatically from a third-party IdP via SCIM. New users only have access to the "Everyone" group by default and must be explicitly granted access to Resources. Billing applies to all synchronized users and service accounts.
 
 ## Key Information
-- **Default auth**: Social logins managed via Admin Console Teams page
-- **IdP sync**: When IdP is configured, users sync automatically via SCIM; cannot be manually modified in Admin Console
-- **Default access**: New users only get "Everyone" group membership — no Resources accessible unless explicitly added
-- **Access visibility**: User detail page shows accessible Resources in list view or Access Graph (filterable by Groups, Remote Networks, Resources)
-- **Billing**: Applies to all synchronized users + service accounts
-- **Offboarding**: Users can be disabled or deleted when access is no longer needed
+- Default auth methods: Google, Microsoft, GitHub, LinkedIn (social logins)
+- IdP-connected accounts: users sync automatically via SCIM; cannot be modified in Admin Console
+- New users start with **only** "Everyone" group membership — no Resource access unless explicitly assigned
+- View user Resource access via user detail page (list view or Access Graph)
+- Access Graph shows groups, Resources, paths, and policies; filterable by Group, Remote Network, or Resource
+- Billing applies to all synchronized users + service accounts
 
 ## Admin Roles
 
-| Role | Permissions |
+| Role | Access Level |
 |------|-------------|
 | Admin | Full read/write across entire Admin Console |
 | DevOps | Read/write on Network tab; read-only elsewhere |
 | Support | Read-only across entire Admin Console |
 | Access Reviewer | Access Requests page only |
-| Billing | Billing page only (plan & payment management) |
+| Billing | Billing page only (plan and payment management) |
 
 ## Prerequisites
 - Admin Console access to invite/manage users
-- IdP + SCIM configured if using automated user sync (optional)
+- IdP configured (optional) for SCIM sync
+- Resources must be added to groups for users to gain access
 
 ## Gotchas
-- Users with IdP/SCIM sync **cannot** be modified in the Admin Console — all changes must originate from the IdP
-- New users have **zero Resource access** by default; requires explicit Group/Resource assignment
-- Forgetting to assign users beyond "Everyone" group is a common misconfiguration causing access issues
-- All synced users count toward billing regardless of active use
+- **No automatic Resource access**: New users have zero Resource access until added to a Group with Resources or Resources are added to the Everyone group
+- **IdP sync is one-way**: With an IdP connected, user changes must be made in the IdP — the Admin Console becomes read-only for user management
+- **Billing impact**: All synchronized users count toward billing, not just active ones
+- Deactivation/deletion must go through IdP if SCIM is configured
 
 ## Related Docs
-- [Social Logins](/docs/social-logins)
-- [Identity Providers](/docs/identity-providers)
-- [Groups](/docs/groups)
-- [Offboarding Users](/docs/offboarding-users)
-- [Admins](/docs/admins)
-- [Billing](/docs/billing)
+- [Social Logins](#) — managing social login providers
+- [Identity Providers](#) — configuring IdP/SCIM sync
+- [Groups](#) — assigning users to groups and Resources
+- [Admins](#) — detailed admin role management
+- [Offboarding Users](#) — disabling/deleting users
+- [Billing](#) — understanding user billing

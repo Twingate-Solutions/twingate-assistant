@@ -1,35 +1,35 @@
 # Keycloak Configuration
 
 ## Page Title
-Keycloak Configuration (Twingate + Keycloak OIDC Integration)
+Keycloak Configuration (Twingate Identity Provider Integration)
 
 ## Summary
 Twingate integrates with Keycloak to delegate user authentication via OIDC. Only users associated with the Twingate app in Keycloak can authenticate and access private resources. This feature is restricted to Business and Enterprise plans.
 
 ## Key Information
-- Authentication protocol: **OIDC** (OpenID Connect)
-- Twingate delegates **user authentication only** to Keycloak
-- User access scoped to those associated with the Twingate app in Keycloak
-- Integration is **not self-serve** — requires contacting Twingate support
+- Authentication delegation uses **OIDC** (OpenID Connect)
+- Keycloak acts as the identity provider (IdP) for Twingate
+- Only Keycloak users assigned to the Twingate application can access Twingate resources
+- No self-service configuration steps are documented — setup requires contacting Twingate support
 
 ## Prerequisites
-- Twingate **Business or Enterprise** plan (not available on lower tiers)
-- Existing Keycloak instance
+- **Twingate Business or Enterprise plan** (not available on lower tiers)
+- An existing Keycloak instance
 - Contact with Twingate support to initiate configuration
 
 ## Step-by-Step
-1. Confirm you are on a Business or Enterprise plan
-2. Contact Twingate via the "Contact Us" link to request Keycloak integration setup
-3. Configuration is completed with Twingate support assistance
+No public step-by-step configuration documented. To configure:
+1. Contact Twingate directly via the "Contact Us" link on the docs page
 
 ## Configuration Values
-- None documented publicly — configuration details provided through Twingate support engagement
+None publicly documented.
 
 ## Gotchas
-- **No self-service setup**: Unlike some other IdP integrations, Keycloak requires direct engagement with Twingate support
-- Users **not** associated with the Twingate app in Keycloak will be blocked from accessing any resources
-- Only authentication is delegated; authorization/resource access control remains in Twingate
+- **Plan restriction**: Keycloak integration is explicitly limited to Business and Enterprise plans — attempting to configure on lower plans will not work
+- Configuration is **not self-service** — requires Twingate involvement, unlike some other IdP integrations
+- Only user **authentication** is delegated (OIDC); no mention of SCIM/provisioning support
 
 ## Related Docs
-- [Twingate Pricing](https://www.twingate.com/pricing) — to verify plan eligibility
-- Other IdP integration docs (e.g., Okta, Azure AD) for comparison reference
+- Twingate pricing page (for plan comparison)
+- Other IdP integration docs (e.g., Okta, Azure AD, Google) for self-service alternatives
+- Twingate OIDC/SSO general documentation

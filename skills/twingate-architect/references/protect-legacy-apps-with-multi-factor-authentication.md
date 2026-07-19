@@ -1,45 +1,44 @@
 # Protect Legacy Apps with Multi-Factor Authentication
 
-## Page Title
-How to Protect Legacy Technologies with MFA
-
 ## Summary
-Twingate enables MFA enforcement on legacy systems (SSH, RDP, databases, file servers) that were never designed to support it by intercepting requests at the network level and applying Security Policies before allowing access. No changes to the legacy application or infrastructure are required.
+Twingate enables MFA enforcement on legacy technologies (SSH, RDP, databases, file servers) that lack native MFA support by intercepting requests at the network level. Security Policies are applied to resources, requiring IdP authentication before access is granted. No changes to legacy applications are required.
 
 ## Key Information
-- MFA enforcement works at the **network level** — no reconfiguration of target apps needed
-- Twingate integrates with your existing **Identity Provider (IdP)** for authentication
-- Supported legacy technology types:
-  - SSH
-  - RDP, Citrix, Windows Remote Desktop Services
-  - Database servers (MSSQL, MySQL, Oracle, PostgreSQL)
-  - File sharing servers
-  - Custom web apps
-- Access revocation is simplified: disable SSO account → access removed automatically, no per-app manual cleanup
+- Works with: SSH, RDP, Citrix, Windows RDS, SQL Server, MySQL, Oracle, PostgreSQL, file sharing servers, custom web apps
+- MFA enforcement happens at the **network level** — legacy app requires zero reconfiguration
+- Twingate intercepts resource-bound requests on the client device before they leave
+- Unauthorized requests never leave the device (resource is invisible to unauthorized users)
+- User offboarding simplified: disabling SSO account revokes access to all protected resources automatically
 
 ## Prerequisites
-- Twingate account with an Identity Provider configured
+- Twingate deployed with at least one Resource configured
+- Identity Provider (IdP) integrated with Twingate
 - Security Policy with MFA requirement created
-- Twingate deployed and resources defined
+- Twingate Client installed on user devices
 
 ## How It Works (Step-by-Step)
-1. User device sends a request to a resource
-2. Twingate intercepts the request at the network level
-3. Twingate checks the applicable **Security Policy** for that resource
-4. If MFA is required and not yet satisfied, Twingate prompts the user for MFA
-5. On successful MFA, Twingate forwards the request to the resource
-6. If user lacks authorization, the request never leaves the device (resource is invisible)
+1. User device makes a network request to a protected resource
+2. Twingate client intercepts the request
+3. Twingate checks the applicable Security Policy for that resource
+4. If MFA is required and not yet satisfied, user is prompted for MFA via IdP
+5. On successful MFA: request is forwarded to resource
+6. On failure or no authorization: request is dropped; resource remains inaccessible
 
 ## Configuration Values
-- **Security Policy**: Must be configured with MFA requirement and assigned to the target resource
-- **Identity Provider**: Must be connected to Twingate for SSO-based authentication
+| Component | Setting |
+|-----------|---------|
+| Security Policy | Enable MFA requirement |
+| Resource | Assign the Security Policy |
+| Identity Provider | Must be configured in Twingate admin |
 
 ## Gotchas
-- MFA prompt is triggered by Twingate, not the legacy app — users may be confused by the unexpected auth step
-- Unauthorized resources are completely hidden from users (not just blocked) — useful for security posture but worth documenting for helpdesk
-- Relies on IdP being available; if IdP is down, MFA enforcement behavior should be tested in advance
+- MFA prompt is triggered by Twingate, not the legacy app — user experience differs from app-native MFA flows
+- Relies on IdP integration being correctly configured; broken IdP = blocked access
+- Users must have the Twingate client running for protection to apply
+- Does not protect resources from lateral movement if accessed from a machine already on the network without Twingate
 
 ## Related Docs
 - Security Policies
-- Identity Provider integration
-- Resources configuration
+- Identity Provider configuration
+- Resource configuration
+- Twingate Client setup

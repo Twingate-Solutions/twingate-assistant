@@ -1,28 +1,29 @@
 # Upgrading Twingate Connectors on Linux (systemd)
 
 ## Summary
-Covers upgrading Twingate Connector packages running as native Linux systemd services on Ubuntu/Fedora/CentOS. Includes manual upgrade commands, simple cron automation, and an advanced script to stay one version behind latest.
+Covers upgrading Twingate Connectors running as native Linux systemd services using package managers (apt/dnf). Includes manual upgrade steps and automation options via cron jobs to minimize user downtime.
 
 ## Key Information
 - Check current version: `twingate-connector -V`
-- Always deploy 2+ Connectors per Remote Network to avoid downtime during upgrades
-- Stagger update schedules so multiple Connectors in the same Remote Network don't update simultaneously
+- Restart required after package upgrade via `systemctl restart twingate-connector`
+- Two distro families supported: Debian/Ubuntu (apt) and Fedora/CentOS (dnf)
 
 ## Prerequisites
-- Twingate Connector installed as a systemd service
-- Root/sudo access
-- `apt` (Ubuntu/Debian) or `dnf` (Fedora/CentOS)
+- Connector deployed as Linux systemd service
+- `sudo` access
+- Package manager configured with Twingate repository (see Linux systemd deployment docs)
+- Deploy **2+ Connectors per Remote Network** to enable zero-downtime upgrades
 
 ## Step-by-Step
 
-### Manual Upgrade — Ubuntu (apt)
+### Ubuntu/Debian (apt)
 ```bash
 sudo apt update
 sudo apt install -yq twingate-connector
 sudo systemctl restart twingate-connector
 ```
 
-### Manual Upgrade — Fedora/CentOS (dnf)
+### Fedora/CentOS (dnf)
 ```bash
 sudo dnf update
 sudo dnf --best install twingate-connector
@@ -38,7 +39,7 @@ EOF
 sudo chmod +x /etc/cron.weekly/update-twingate-connector
 ```
 
-### Advanced: Stay One Version Behind (Ubuntu/Debian)
+### Advanced: Stay One Version Behind (apt)
 ```bash
 sudo sh -c '
 curl -fsSL "https://raw.githubusercontent.com/Twingate-Solutions/general-scripts/refs/heads/main/bash-scripts/keep-one-behind.sh" \
@@ -48,25 +49,26 @@ echo "0 2 * * 0 root /usr/local/sbin/keep-one-behind.sh twingate-connector --app
   > /etc/cron.d/twingate-connector-one-behind
 '
 ```
+- Runs every Sunday at 2 AM
+- Logs to `/var/log/keep-one-behind.log`
+- Script flags: `--apply` (execute changes), `--allow-downgrades` (permit version rollback)
 
 ## Configuration Values
 | Item | Value |
 |------|-------|
 | Script install path | `/usr/local/sbin/keep-one-behind.sh` |
-| Cron job file | `/etc/cron.d/twingate-connector-one-behind` |
+| Cron file path | `/etc/cron.d/twingate-connector-one-behind` |
 | Log file | `/var/log/keep-one-behind.log` |
-| Cron schedule | Every Sunday at 2 AM (`0 2 * * 0`) |
-| Script flags | `--apply`, `--allow-downgrades` |
+| Cron schedule (advanced) | `0 2 * * 0` (Sunday 2 AM) |
 
 ## Gotchas
-- The advanced `keep-one-behind.sh` script is Ubuntu/Debian only (uses APT)
-- Restarting the Connector service causes brief disconnection — always maintain 2+ Connectors per Remote Network
-- Multiple Connectors in the same Remote Network updated simultaneously = user downtime
-- Monitor `/var/log/keep-one-behind.log` to confirm updates are applying correctly
-- Adjust cron schedule to match actual maintenance windows
+- **Never update multiple Connectors in the same Remote Network simultaneously** — stagger schedules to prevent downtime
+- Simple cron example is Ubuntu-only; adapt `apt` commands for other distros
+- `keep-one-behind.sh` is designed for Ubuntu/Debian only
+- Monitor `/var/log/keep-one-behind.log` and adjust maintenance windows as needed
+- `--allow-downgrades` flag enables version rollback if latest is skipped
 
 ## Related Docs
-- [Upgrading Connectors (best practices)](https://www.twingate.com/docs/upgrading-connectors)
-- [Linux systemd deployment](https://www.twingate.com/docs/systemd-service)
-- [Connector Release Notes](https://www.twingate.com/docs/connector-release-notes)
-- [keep-one-behind.sh script](https://github.com/Twingate-Solutions/general-scripts/blob/main/bash-scripts/keep-one-behind.sh)
+- Linux systemd deployment guide
+- Upgrading Connectors (best practices)
+- Connector Release Notes

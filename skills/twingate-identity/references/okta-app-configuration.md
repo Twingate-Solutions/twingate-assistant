@@ -1,49 +1,49 @@
 # Twingate Okta Application Configuration
 
 ## Summary
-Covers the steps to activate the Twingate app in the Okta App Catalog and connect it to the Twingate Admin Console. Requires assigning users/groups in Okta and entering Okta credentials into Twingate to complete the integration.
+Step-by-step guide to activate the Twingate app in Okta's catalog and link it to the Twingate Admin console. Covers app assignment, visibility settings, and credential retrieval for completing the integration.
 
 ## Key Information
-- Twingate is available directly in the Okta App Catalog (no manual SAML setup)
-- Users authenticate via the Twingate Client app, not through the Okta dashboard tile
-- After setup, Twingate prompts you to sign in with Okta to validate credentials
+- Twingate is available in the Okta App Catalog (pre-built integration)
+- Hide the app from users' Okta dashboard — authentication only works from the Twingate Client app, not via Okta dashboard tile
+- Admin must assign themselves to the app before completing integration
+- Integration requires three values from Okta: Domain, Client ID, Client Secret
 
 ## Prerequisites
-- Access to Okta Admin dashboard
-- Access to Twingate Admin Console
-- Your Twingate subdomain available
-- At least one user (yourself) assigned to the Okta app before completing integration
+- Okta admin access
+- Twingate Admin console access
+- Twingate subdomain available
+- Twingate Client app installed (for final authentication verification step)
 
 ## Step-by-Step
 
 ### In Okta
-1. Go to **Applications → Browse App Catalog**
-2. Search for and select **Twingate**
-3. Click **Add**
-4. Enter your **Twingate subdomain**
-5. Check both **Application Visibility** boxes to hide the tile from the Okta user dashboard
-6. Assign the app to users or groups (must include yourself)
+1. **Applications → Browse App Catalog** → search "Twingate" → select → click **Add**
+2. Enter your **Twingate subdomain** in the Subdomain field
+3. Check both **Application Visibility** boxes (hides app from user dashboard)
+4. Assign app to users/groups — must include yourself
 
 ### In Twingate Admin Console
 1. Navigate to the Okta integration setup screen
-2. Enter **Okta Domain** (found in the upper-right global header of Okta dashboard)
-3. Enter **Client ID** and **Client Secret** (found in the **Sign On** tab of the Twingate Okta app)
-4. Follow the wizard and sign in with Okta to validate credentials
+2. Enter **Okta Domain** (found in upper-right global header of Okta dashboard)
+3. Enter **Client ID** and **Client Secret** (found in **Sign On** tab of the Twingate Okta app)
+4. Follow the wizard and sign in with Okta to verify credentials
 
 ## Configuration Values
 
-| Field | Source |
-|-------|--------|
-| `Subdomain` | Your Twingate subdomain |
-| `Okta Domain` | Upper-right corner of Okta dashboard |
-| `Client ID` | Sign On tab of Twingate app in Okta |
-| `Client Secret` | Sign On tab of Twingate app in Okta |
+| Field | Source in Okta |
+|-------|---------------|
+| Okta Domain | Global header, upper-right corner of Okta dashboard |
+| Client ID | Twingate app → Sign On tab |
+| Client Secret | Twingate app → Sign On tab |
+| Subdomain | Your Twingate subdomain |
 
 ## Gotchas
-- **Hide app tile**: Users cannot authenticate from the Okta dashboard tile — only from the Twingate Client app. Enable both Application Visibility checkboxes to prevent confusion.
-- **Admin group management**: Create a dedicated Okta group (e.g., "Admins") for Twingate admins. If you use a general group and later remove it from the Twingate app, your own account will lose access.
-- **Must assign yourself**: Okta integration wizard requires signing in with Okta to verify credentials — you must be assigned to the app before completing setup.
+- **Do not skip assigning yourself** — you cannot complete the integration without being assigned to the app
+- **Admin group isolation**: Create a dedicated Okta group (e.g., "Admins") for Twingate admin users. If you use a shared group and later remove it from the Twingate app, your own account will lose access
+- **Application Visibility**: Must hide the tile — users cannot initiate sessions from Okta dashboard, only from the Twingate Client
+- A live Okta sign-in is required during setup to validate credentials before integration activates
 
 ## Related Docs
-- [Okta configuration overview](https://www.twingate.com/docs/okta) (referenced as "this article")
-- [Okta guide for finding your Okta Domain](https://help.okta.com/en-us/content/topics/common/find-your-domain.htm) (referenced as "this Okta guide")
+- Okta configuration overview (referenced as "this article")
+- [Okta guide for finding your Okta Domain](https://help.okta.com/en/prod/Content/Topics/Settings/settings-customization-general.htm)

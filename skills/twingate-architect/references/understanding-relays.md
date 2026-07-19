@@ -4,33 +4,49 @@
 Understanding Relays
 
 ## Summary
-Relays facilitate secure connections between Twingate Clients and Connectors for Resource-bound traffic. They act as intermediaries in the end-to-end encrypted TLS tunnel but never terminate connections or store traffic data. Twingate operates a global Relay network across Google Cloud and DigitalOcean infrastructure.
+Relays facilitate secure connection establishment between Twingate Clients and Connectors for resource access. They serve as routing hops within end-to-end encrypted TLS tunnels but do not terminate connections or store traffic data. Twingate operates a global network of Relay clusters across Google Cloud and DigitalOcean infrastructure.
 
 ## Key Information
-- Relays are used **only when necessary** to route the encrypted tunnel between Client and Connector
-- Connections are end-to-end encrypted via certificate-pinned TLS tunnels
-- Relays do **not** terminate connections — they are a transit hop only
-- Relays do **not** store traffic or network-identifiable information
-- Each Connector connects to the **geographically nearest** available Relay
-- Multiple Relays per cluster location provide redundancy; if a cluster fails, next-nearest cluster is used automatically
+- Relays facilitate (not terminate) connections between Clients and Connectors
+- Connection tunnel is end-to-end encrypted, certificate-pinned TLS
+- Relay involvement: connection establishment always; data routing when necessary
+- Each Connector connects to the geographically nearest available Relay
+- Relay clusters provide redundancy: failover within location first, then next nearest cluster
+- Relays are Twingate-managed infrastructure (not self-hosted)
+- No traffic data or network-identifiable information is stored at Relays
+- Traffic passing through Relays is already encrypted end-to-end
+
+## Prerequisites
+- None (Relays are fully managed by Twingate — no user configuration required)
+
+## Configuration Values
+- None — Relay selection and failover are automatic; no user-configurable parameters
 
 ## Relay Cluster Locations
 
-**Google Cloud:** Iowa, Los Angeles, Ohio, Oregon, South Carolina, Toronto, Virginia, São Paulo, Eemshaven, Finland, Frankfurt, London, Zurich, Tel Aviv, Johannesburg, Hong Kong, Mumbai, Singapore, Taiwan, Tokyo, Sydney
+**Google Cloud**
+- North America: Iowa, Los Angeles, Ohio, Oregon, South Carolina, Toronto, Virginia
+- South America: São Paulo
+- Europe: Eemshaven, Finland, Frankfurt, London, Zurich
+- Middle East: Tel Aviv
+- Africa: Johannesburg
+- Asia: Hong Kong, Mumbai, Singapore, Taiwan, Tokyo
+- Australia: Sydney
 
-**DigitalOcean:** Atlanta, New York City, San Francisco, Toronto, Amsterdam, Frankfurt, London, Bengaluru, Singapore, Sydney
-
-## Data Privacy
-- Traffic passing through Relays is already encrypted before it arrives
-- No connection termination at Relay layer
-- No persistent storage of traffic or network metadata
+**DigitalOcean**
+- North America: Atlanta, Richmond (VA), New York City, San Francisco, Toronto
+- Europe: Amsterdam, Frankfurt, London
+- Asia: Bengaluru, Singapore
+- Australia: Sydney
 
 ## Gotchas
-- Relays are Twingate-managed infrastructure — no self-hosting option mentioned
-- Relay routing is automatic; no manual selection of Relay cluster by operators
-- Firewall rules must allow Connector outbound access to Relay endpoints (see network requirements docs)
+- Relays are on the data path only "when necessary" — direct Client-to-Connector connections are preferred when possible
+- Relay routing adds potential latency; geographic proximity is used to minimize this
+- Encrypted data does traverse Twingate-controlled Relay infrastructure transiently (relevant for compliance considerations)
+- No self-hosted Relay option documented here
 
 ## Related Docs
-- Connector setup and configuration
-- Controller documentation
-- Network/firewall requirements for Connector-to-Relay communication
+- Twingate Controllers (authorization component referenced)
+- Twingate Connectors (paired component that connects to Relays)
+- Twingate Clients (endpoint component)
+- Network architecture / security model documentation

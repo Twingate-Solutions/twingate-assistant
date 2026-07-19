@@ -1,38 +1,43 @@
 # Headless Clients
 
 ## Page Title
-Headless Clients (Twingate Services)
+Services Headless Clients
 
 ## Summary
-Headless clients allow Twingate Service Keys to access Service Resources without a GUI, using either Windows or Linux clients in headless mode. This enables automated/non-interactive workloads to authenticate via Service Accounts rather than user credentials.
+Twingate clients (Linux and Windows) can operate in headless mode using a Service Key to access Service Resources without a GUI or user interaction. This enables automated and infrastructure-based access patterns.
 
 ## Key Information
-- Supported platforms: Windows and Linux
-- Authentication method: Service Key (not user credentials)
-- Linux supports an additional **Userspace Networking Mode**
-- Intended for automated workloads, not interactive users
+- Headless mode supports **Linux** and **Windows** clients
+- Requires a **Service Key** (not user credentials) for authentication
+- **Userspace Networking Mode** available for Linux (no root/kernel module required)
+- Intended for automated/non-interactive workloads
 
 ## Prerequisites
-- A configured Twingate Service Account with a Service Key
-- Access to Windows or Linux client binaries
-- Resources assigned to the Service in Twingate Admin Console
+- A Twingate Service with at least one Resource assigned
+- A valid Service Key generated for the Service
+- Linux or Windows Twingate client installed
+
+## Supported Configurations
+| Mode | Platform |
+|------|----------|
+| Headless | Linux |
+| Headless | Windows |
+| Userspace Networking | Linux only |
 
 ## Step-by-Step
-This page is an index/overview — see linked pages for detailed instructions:
-1. **Linux headless mode** → Follow Linux headless mode instructions
-2. **Windows headless mode** → Follow Windows headless mode instructions
-3. **Linux userspace networking** → Alternative networking mode for Linux (no kernel module required)
-
-## Configuration Values
-Not specified on this page — see platform-specific pages for flags/env vars.
+Detailed instructions are platform-specific — follow linked guides:
+1. **Linux headless mode** → see Linux headless mode instructions
+2. **Windows headless mode** → see Windows headless mode instructions
+3. **Linux userspace networking** → see Linux userspace networking instructions
 
 ## Example Use Cases
-- **CI/CD Configurations** — Running Twingate client in pipelines (e.g., GitHub Actions, GitLab CI)
-- **AWS ECS Configurations** — Running headless client as a sidecar or task in ECS
+- **CI/CD pipelines** — authenticate automated build/deploy agents to private Resources
+- **AWS ECS** — run Twingate client as a sidecar or task in ECS configurations
 
 ## Gotchas
-- Headless mode requires a **Service Key**, not a user token — ensure correct credential type is used
-- Linux userspace networking mode is a distinct configuration from standard headless mode (useful in environments where kernel-level networking is restricted, e.g., containers)
+- Service Keys are distinct from user auth tokens — cannot be used interchangeably with interactive client sessions
+- Userspace networking mode is Linux-only; Windows headless uses standard networking stack
+- No GUI is present in headless mode — all configuration is CLI/file-based
 
 ## Related Docs
 - Linux Headless Mode Instructions
@@ -40,4 +45,4 @@ Not specified on this page — see platform-specific pages for flags/env vars.
 - Linux Userspace Networking Instructions
 - CI/CD Configurations
 - AWS ECS Configurations
-- Twingate Services / Service Accounts (parent concept)
+- Services & Service Keys (concept docs)

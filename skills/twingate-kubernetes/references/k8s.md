@@ -1,51 +1,62 @@
 # Kubernetes Overview - Twingate
 
 ## Summary
-Twingate provides Kubernetes integration for securing cluster access and managing authorization within K8s workflows. The recommended approach uses the Twingate Kubernetes Operator to define and manage Twingate components directly from Kubernetes deployments. Privileged Access for Kubernetes adds identity propagation and session recording.
+Twingate provides Kubernetes integration for securing cluster access and managing resource permissions within K8s workflows. The primary deployment method is the Twingate Kubernetes Operator, which co-locates access configuration with cluster configuration. Privileged Access features add identity propagation and session recording for sensitive infrastructure.
 
 ## Key Information
-- Kubernetes Operator is the **recommended** deployment method for Twingate on K8s
-- Operator allows managing Twingate config and access authorization in the same K8s deployment
+- Twingate Kubernetes Operator is the recommended deployment method
+- Operator manages Twingate components and access authorizations directly from K8s manifests
 - Privileged Access for Kubernetes enables identity propagation and session recording
-- Users can sync kubeconfig via CLI to use `kubectl` without cloud provider CLIs
+- `twingate kube config sync` syncs kubeconfig for direct `kubectl` access without cloud provider CLIs
 - Helm Chart available for deployment
 
 ## Prerequisites
 - Kubernetes cluster
-- Twingate account with appropriate permissions
+- Twingate account with appropriate plan for desired features
 - Kubernetes Operator installed (via GitHub repo or Helm Chart)
 
 ## Core Components
 
-| Component | Purpose |
-|---|---|
-| Kubernetes Operator | Manage/deploy Twingate resources as K8s objects |
-| Kubernetes Access Gateway | Open-source; enables Privileged Access |
-| Kubeconfig Sync | Syncs kubeconfig for direct `kubectl` access |
+### Kubernetes Operator
+- Manages Twingate deployment and access rules declaratively
+- Configuration lives alongside K8s manifests
+- Source: [GitHub repo](https://github.com/Twingate/kubernetes-operator)
 
-## CLI Commands
-```bash
-# Sync kubeconfig for direct kubectl access
-twingate kube config sync
-```
+### Privileged Access for Kubernetes
+- Requires Kubernetes Operator setup
+- Uses open-source [Kubernetes Access Gateway](https://github.com/Twingate/kubernetes-access-gateway)
+- Enables session recording and identity propagation
 
-## Available Guides
-- [Kubernetes Operator GitHub Repo](https://github.com/Twingate) — Operator setup instructions
-- Quick Start Guide
-- Securely manage Kubernetes using `kubectl`
-- Route traffic from a K8s cluster using Twingate Client
-- Securely access private resources in a K8s cluster
-- Securely access publicly exposed resources in a K8s cluster
-- Helm Chart deployment
+### Kubeconfig Sync
+- CLI command: `twingate kube config sync`
+- Enables direct `kubectl` access after Privileged Access setup
+- Supports CI/CD workflows
+
+## Configuration Values
+
+| Item | Value |
+|------|-------|
+| CLI command | `twingate kube config sync` |
+| Deployment method | Kubernetes Operator or Helm Chart |
+
+## Step-by-Step (High Level)
+1. Deploy Twingate Kubernetes Operator via GitHub repo or Helm Chart
+2. Define Twingate resources and access policies in K8s manifests
+3. (Optional) Configure Privileged Access using Kubernetes Access Gateway
+4. Run `twingate kube config sync` to enable `kubectl` access
 
 ## Gotchas
-- Operator configuration lives in the GitHub repo — primary docs are external to this page
-- Privileged Access (session recording + identity propagation) requires the Kubernetes Access Gateway in addition to the Operator
-- `twingate kube config sync` eliminates need for cloud provider CLIs (e.g., `aws eks update-kubeconfig`) — useful for CI/CD pipelines
+- Privileged Access must be fully configured before `twingate kube config sync` is useful
+- Cloud provider CLIs (e.g., `aws`, `gcloud`) are not required after kubeconfig sync, but Privileged Access setup is a prerequisite
 
 ## Related Docs
-- Twingate Kubernetes Operator (GitHub)
+- [Twingate Kubernetes Operator (GitHub)](https://github.com/Twingate/kubernetes-operator)
+- [Kubernetes Access Gateway (GitHub)](https://github.com/Twingate/kubernetes-access-gateway)
 - Kubernetes Access Guide
-- Kubernetes Access Gateway (GitHub, open source)
 - Kubernetes Kubeconfig Sync
+- Quick Start Guide
+- How to Securely Manage Kubernetes using kubectl
+- How to Route Traffic from a Kubernetes Cluster Using the Twingate Client
+- How to Securely Access Private Resources in a Kubernetes Cluster
+- How to Securely Access Publicly Exposed Resources in a Kubernetes Cluster
 - Helm Chart

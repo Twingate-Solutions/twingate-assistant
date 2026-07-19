@@ -1,20 +1,21 @@
 # Cancel Your Subscription
 
 ## Summary
-Instructions for canceling automatic renewal of a Twingate subscription. Cancellation does not immediately terminate service — access continues until the end of the current billing term. Downgrading to Starter plan effectively cancels paid subscription renewal.
+Instructions for canceling automatic renewal of a Twingate subscription via the Admin Console. Cancellation stops auto-renewal; access continues until the current subscription term ends. Downgrading to Starter plan is the cancellation mechanism.
 
 ## Key Information
-- Cancellation stops **automatic renewal only**; service continues until current term expires
-- Cancellation is accomplished by downgrading to the **Twingate Starter** (free) plan
-- Must be performed by an account admin with access to Admin Console
+- Cancellation = disabling automatic renewal, not immediate termination
+- Access remains active until end of current billing period
+- Cancellation is performed by downgrading to the **Twingate Starter** plan
+- Must be completed through the Admin Console UI (no API/CLI method documented)
 
 ## Prerequisites
-- Admin Console access
-- Active paid Twingate subscription with automatic renewal enabled
+- Active automatically renewing Twingate subscription (paid plan)
+- Admin Console access with billing permissions
 
 ## Step-by-Step
 
-1. Sign into the **Admin Console**
+1. Sign into the Admin Console
 2. Click **Settings**
 3. Click **Billing**
 4. Click **Manage Plan**
@@ -23,12 +24,15 @@ Instructions for canceling automatic renewal of a Twingate subscription. Cancell
 7. Select the **Twingate Starter** plan
 8. Click **Update Subscription**
 
+## Configuration Values
+- None (UI-only workflow, no env vars, CLI flags, or API parameters)
+
 ## Gotchas
-- No immediate termination — subscription remains active through end of current paid term
-- Cancellation is done via plan downgrade, not a dedicated "cancel" button
-- No mention of refund eligibility for unused subscription time
+- Subscription is not immediately terminated — it runs to the end of the current term
+- "Cancellation" is effectively a plan downgrade to Starter, not a true account deletion
+- No confirmation of cancellation method other than UI (no email trigger or API endpoint documented)
 
 ## Related Docs
-- Billing settings
-- Plan management
-- Twingate Starter plan details
+- Billing settings documentation
+- Twingate Starter plan feature comparison
+- Account deletion (separate from subscription cancellation)

@@ -1,14 +1,14 @@
 # Internet Security Client Configuration
 
 ## Summary
-Configures Twingate Clients to run Internet Security features (DNS filtering) even when users are signed out. Requires deploying a Machine Key via MDM and optionally configuring auto-restart to ensure continuous operation.
+Configures Twingate Clients to run Internet Security features (DNS filtering) even when users are signed out. Requires deploying a Machine Key via MDM and optionally configuring auto-restart. When configured, users cannot quit, sign out, or switch Networks on the Client.
 
 ## Key Information
-- Without this config, DNS filtering only works when a user is signed in
-- When configured, users cannot quit, sign out, or switch Networks in the Client
-- Machine Keys are shared across devices; up to 10 keys can be active simultaneously
+- Machine Keys are shared across devices; one key can deploy to all devices
+- Up to 10 keys can be generated simultaneously
 - Devices don't appear in Admin Console until a user signs in at least once
-- macOS App Store client does **not** support this configuration
+- DNS filtering is configured separately from this feature
+- macOS App Store client does NOT support this configuration
 
 ## Prerequisites
 - Minimum Client versions:
@@ -22,9 +22,9 @@ Configures Twingate Clients to run Internet Security features (DNS filtering) ev
 
 1. Navigate to Admin Console → **Internet Security** → **Client Configuration**
 2. Click **Generate Key** to create a Machine Key
-3. Rename the file to `machinekey.conf`
+3. Rename downloaded file to `machinekey.conf`
 4. Deploy via MDM to platform-specific path
-5. (Recommended) Deploy KeepAlive/auto-restart configuration via MDM
+5. (Recommended) Deploy KeepAlive configuration via MDM
 
 ## Configuration Values
 
@@ -37,22 +37,21 @@ Configures Twingate Clients to run Internet Security features (DNS filtering) ev
 
 **macOS KeepAlive Launch Agent:**
 - File: `com.twingate.macos.plist`
-- Deploy to: `/Library/LaunchAgents/com.twingate.macos.plist`
-- Key settings: `KeepAlive=true`, `RunAtLoad=true`
+- Location: `/Library/LaunchAgents/com.twingate.macos.plist`
+- Key fields: `KeepAlive: true`, `RunAtLoad: true`
 - Program path: `/Applications/Twingate.app/Contents/MacOS/Twingate`
 - Optional immutable flag: `sudo chflags schg /Library/LaunchAgents/com.twingate.macos.plist`
 
-**Windows:** Use Intune Proactive Remediation
-- Detection: checks if `twingate` process exists
-- Remediation: starts `C:\Program Files\Twingate\Twingate.exe`
+**Windows KeepAlive:** Use Intune Proactive Remediation
+- Detection: checks `Get-Process twingate`
+- Remediation: `Start-Process -FilePath "C:\Program Files\Twingate\Twingate.exe"`
 
 ## Gotchas
-- File **must** be named `machinekey.conf` exactly — incorrect filename breaks DNS filtering for signed-out clients
-- Machine Key alone doesn't prevent users from manually killing the process (Task Manager, Activity Monitor, CLI) — deploy KeepAlive config too
-- DNS filtering setup is **separate** from this configuration; this does not enable DNS filtering by itself
-- Signed-out devices show differently in DNS filtering logs than signed-in devices
+- File **must** be named exactly `machinekey.conf` — incorrect filename breaks DNS filtering for signed-out clients
+- Without KeepAlive config, users can manually terminate the Client via Task Manager/Activity Monitor/CLI
+- DNS filtering must be configured separately; this config only ensures the Client runs persistently
+- Signed-out devices won't appear in Admin Console (no device name in DNS logs)
 
 ## Related Docs
-- Internet Security documentation
-- DNS Filtering documentation
-- Intune Proactive Remediation (Microsoft docs)
+- [DNS Filtering documentation](https://www.twingate.com/docs/internet-security)
+- Internet Security overview

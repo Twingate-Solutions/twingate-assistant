@@ -1,32 +1,30 @@
-# Twingate DORA Locations
+# Twingate DORA Compliance - Location List
 
 ## Page Title
 Location List (DORA)
 
 ## Summary
-This page documents Twingate's service and data processing locations for DORA (Digital Operational Resilience Act) compliance. Only Twingate's Private Access service is classified as a Regulated Service. It identifies where customer data is processed and stored.
+Lists geographic locations where Twingate's Regulated Services are provided and Customer Data is processed/stored, published for DORA (Digital Operational Resilience Act) compliance. Only Twingate's Private Access service is currently classified as a Regulated Service.
 
 ## Key Information
-- **Regulated Service**: Only Private Access qualifies as a Regulated Service under DORA
+- **Regulated Service**: Only Private Access service qualifies as a Regulated Service under DORA
 - **Primary location**: USA (data processing, data storage, and service provision)
-- Additional subprocessor countries listed (specific countries not enumerated in source)
-- Relay locations listed separately (specific countries not enumerated in source)
-- Page is maintained and updated periodically (last updated ~2 months prior to retrieval)
-
-## Configuration Values
-- None applicable — informational/compliance reference page only
+- **Additional scope**: Subprocessor countries and Relay locations are included in the full list (detail not published in scraped content)
+- **Purpose**: DORA compliance disclosure for regulated financial entities using Twingate
 
 ## Prerequisites
-- Relevant for customers subject to DORA regulation (primarily EU financial entities and ICT third-party service providers)
+- Relevant primarily to customers in EU financial sector subject to DORA regulation
+- Full subprocessor and Relay location lists referenced but require direct page access for complete detail
+
+## Configuration Values
+None — this is a compliance disclosure page, not a configuration reference.
 
 ## Gotchas
-- The page references subprocessor countries and relay countries but does not enumerate them explicitly in the retrievable content — the full lists may require viewing the live page directly
-- Only Private Access is a Regulated Service; other Twingate services are not covered under this DORA compliance disclosure
+- The scraped content does not enumerate all subprocessor countries or Relay locations; check the live page directly for the complete list
+- DORA applicability is scoped only to Private Access — other Twingate services are not classified as Regulated Services
+- Page content may update; "last updated 3 months ago" at time of scrape
 
 ## Related Docs
-- Twingate Privacy/Compliance documentation
-- Subprocessor list (likely separate page)
-- DORA compliance overview
-
----
-*Note: This page is a compliance disclosure document with minimal technical implementation detail. For full subprocessor and relay country lists, consult the live page at https://www.twingate.com/docs/dora-locations*
+- Twingate Subprocessor list
+- Twingate Privacy/Data Processing documentation
+- DORA regulation (EU 2022/2554) for compliance context

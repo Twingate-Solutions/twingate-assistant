@@ -1,46 +1,50 @@
 # JIT Access Requests
 
 ## Summary
-JIT Access Requests provide temporary, audited access workflows for Twingate Resources. Access can be auto-approved or require manual approval from an Admin or Access Reviewer. Users see locked Resources until access is granted.
+JIT Access Requests provide temporary, audited access workflows for Twingate Resources. Users in configured Groups can see but not access locked Resources until approval is granted. Requests can be auto-approved or require manual Admin/Access Reviewer approval.
 
 ## Key Information
-- Configured at the Resource level (becomes default for all Group assignments) or overridden at individual Group assignment level
-- Two approval methods: **manual** (Admin/Access Reviewer approves) or **auto-approval** (user self-approves but must provide reason)
-- Access periods: preset durations or **Custom Request** (user-specified, max 7 days)
-- Users see the Resource in the Client but cannot connect until approved
-- Users trigger requests via navigating to Resource address or selecting **Authenticate** from the Resource submenu in the Client
-- If auto-approved: immediate access after submission
-- If manual: user receives email notification on approval/denial
+- Access Requests are configured at the **Resource level** (becomes default for all Group assignments) or overridden at individual **Group assignment level**
+- Locked Resources are visible in the Client but inaccessible until approved
+- Users trigger requests via navigating to the Resource address or selecting **Authenticate** from the Resource submenu
+- Auto-approval requires users to supply a reason; manual approval requires Admin or Access Reviewer action
+- Approved users receive email notification on approval or denial
+
+## Prerequisites
+- Admin or Access Reviewer role required to approve/manage requests
+- Resource must have Access Requests enabled
+- Users must be members of the configured Group assigned to the Resource
 
 ## Configuration Values
 
 | Setting | Options |
 |---|---|
-| Access Period | Preset durations or Custom Request (up to 7 days) |
+| Access Period | Preset durations (unspecified in docs) or **Custom Request** |
+| Custom Request max duration | 7 days |
 | Approval Method | Manual approval or Auto-approval |
 
-## Prerequisites
-- Resource must have Access Requests enabled for the relevant Group assignment
-- Approvers must have Admin or Access Reviewer role (for manual approval)
+### Access Period Options
+- Preset durations (e.g., 12 hours shown in example)
+- `Custom Request` — user specifies duration up to 7 days
 
-## Step-by-Step: Configuring JIT Access
+### Approval Method Options
+- **Manual** — Admin or Access Reviewer must approve each request
+- **Auto-approval** — user self-approves but must provide a reason
 
-1. Navigate to the Resource detail page
-2. Configure Access Requests at the Resource level (sets default for all Group assignments)
-3. Optionally override settings on individual Group assignments
-4. Select **Access Period** (preset or Custom Request)
-5. Select **Approval Method** (manual or auto-approval)
+## Configuration Hierarchy
+1. Set defaults at **Resource level**
+2. Override per **Group assignment** as needed
 
 ## Tracking Access
-- Download usage summary from the Resource, Group, or User page
-- See usage-based access page for full report details
+- Download summary reports from the **Resource**, **Group**, or **User** page
+- Report contents detailed in the usage-based access page
 
 ## Gotchas
-- Custom Request duration is capped at **7 days** maximum
-- Resource-level settings are defaults only — Group-level assignments can override them
-- Auto-approval still requires users to supply a reason for access
-- Users can see locked Resources in the Client but cannot connect without approval
+- Custom Request allows **any duration up to 7 days** — no minimum enforced
+- Auto-approval still requires a **stated reason** from the user (not fully frictionless)
+- Resource-level settings are defaults only; Group assignments can override them independently
+- Users see the Resource in Client regardless of lock status — visibility ≠ access
 
 ## Related Docs
-- [Reviewing Access Requests](https://www.twingate.com/docs/reviewing-access-requests)
-- [Usage-Based Access Reports](https://www.twingate.com/docs/usage-based-access)
+- [Reviewing Access Requests](https://www.twingate.com/docs/reviewing-access-requests) — approval workflow and delegation details
+- [Usage-Based Access](https://www.twingate.com/docs/usage-based-access) — report contents and access tracking

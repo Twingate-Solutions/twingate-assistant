@@ -5,47 +5,41 @@ Deploys Twingate's SSH Gateway using Terraform provider with cloud-specific guid
 
 ## Key Information
 - Recommended installation method: Twingate Terraform provider
-- Two CA modes: local SSH CA (testing/simple) or HashiCorp Vault SSH CA (production)
+- Two CA modes: local SSH CA (testing) or HashiCorp Vault SSH secrets engine (production)
 - Local CA: Gateway holds private key and signs certificates directly
-- Vault CA: Uses Vault's SSH secrets engine for certificate signing
-- Cloud guides include full Terraform config, startup scripts, and deployment steps
+- Cloud guides include full Terraform config, startup scripts, and deployment instructions
 
 ## Prerequisites
 - Twingate account with administrator privileges
-- A configured Remote Network in Twingate
-- Twingate Client at minimum required version
+- A configured Remote Network
+- Twingate Client (minimum version requirements apply)
 - Terraform installed
 
 ## Deployment Options
 
 ### Local SSH CA (Quick Start)
-Available for three clouds via Terraform provider examples:
-- **AWS** – Local SSH CA on AWS
-- **DigitalOcean** – Local SSH CA on DigitalOcean
-- **GCE** – Local SSH CA on Google Compute Engine
+| Cloud | Guide |
+|-------|-------|
+| AWS | Local SSH CA on AWS |
+| DigitalOcean | Local SSH CA on DigitalOcean |
+| Google Compute Engine | Local SSH CA on GCE |
 
-Each guide provides complete, runnable Terraform configuration.
-
-### Vault as SSH CA (Production)
-- Use HashiCorp Vault's SSH secrets engine instead of local CA
-- Requires separate Vault integration guide setup
-- Recommended for production deployments
-
-## Step-by-Step
-1. Choose deployment target (AWS, DigitalOcean, or GCE)
-2. Follow cloud-specific Terraform guide from Twingate Terraform provider examples
-3. Apply Terraform configuration (includes Gateway + startup scripts)
-4. Verify SSH Resources are accessible through Twingate
-5. (Optional) Configure IDE integration for remote development
+### Vault SSH CA (Production)
+- Use HashiCorp Vault's SSH secrets engine to sign certificates
+- Gateway delegates signing to Vault instead of holding CA key locally
+- See Vault integration guide for setup
 
 ## Gotchas
 - Local SSH CA stores private key on the Gateway — not suitable for production
-- Must use Vault integration for production-grade key management
-- Client version must meet minimum requirements (check docs before deploying)
-- Remote Network must exist before deployment
+- Must use Terraform provider examples as the authoritative source; configs include startup scripts that are not documented inline
+- Client version must meet minimum requirements (check compatibility before deploying)
+
+## Next Steps
+- After Gateway deployment, configure SSH Resources as accessible Twingate Resources
+- For IDE integration (VS Code, JetBrains Gateway, Cursor): see "Remote development with Twingate SSH" guide
 
 ## Related Docs
-- Twingate Terraform Provider (published examples)
-- Vault Integration Guide (SSH secrets engine setup)
-- Remote Development with Twingate SSH (VS Code, JetBrains Gateway, Cursor IDE setup)
-- Twingate Client version requirements
+- Twingate Terraform provider (example configurations)
+- Vault integration guide (production CA setup)
+- Remote development with Twingate SSH (IDE setup)
+- Twingate Client minimum version requirements

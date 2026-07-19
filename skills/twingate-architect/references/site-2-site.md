@@ -1,48 +1,49 @@
 # Secure Site-to-Site Connections with Twingate
 
 ## Summary
-Configures bidirectional traffic routing between two cloud sites (Azure and GCP) using Twingate Connectors and headless Twingate Clients acting as router VMs. Each site deploys a Connector for inbound access and a headless Client VM with iptables NAT rules to forward outbound traffic to the remote site.
+Configures bidirectional traffic routing between two cloud sites (Azure and GCP) using Twingate Connectors and headless Twingate Clients acting as router VMs. Each site runs a Connector for inbound access and a headless Client with iptables NAT rules to forward outbound traffic to the remote site.
 
 ## Key Information
-- Architecture: Each site needs both a **Connector** (receives traffic) and a **headless Client VM** (routes traffic out)
-- Service Accounts authenticate the headless Clients — not user accounts
-- Router VMs require no public IP; use NAT gateway (Azure) or Cloud NAT (GCP) for internet access
-- Twingate Resources are cross-assigned: site 1's test VM assigned to site 2's Service Account, and vice versa
-- Enable peer-to-peer connections to stay within Fair Use Policy bandwidth limits
+- Each site requires two VMs: one running the Twingate Connector, one running the headless Twingate Client (router VM)
+- Headless Client uses Service Account keys (not user auth) for authentication
+- `sdwan0` is the virtual network interface created by the Twingate Client
+- Resources in each site are assigned to the Service Account of the **opposite** site
+- Peer-to-peer connections recommended to reduce bandwidth and comply with Fair Use Policy
 
 ## Prerequisites
 - Twingate Admin Console access
-- Azure: Resource group, VNet, NAT gateway, subnet
-- GCP: VPC, subnet, Cloud NAT configured before VM deployment
-- Two Remote Networks created in Admin Console (one per site)
-- Two Service Accounts created in Admin Console (one per site)
+- Two Remote Networks configured (one per site)
+- Two Connectors deployed (one per site)
+- Two Service Accounts created with keys saved
+- NAT gateway (Azure) / Cloud NAT (GCP) configured before router VM deployment
+- IP forwarding enabled on router VMs
 
 ## Step-by-Step
 
-### Per Site (repeat for both):
-1. Create Remote Network in Admin Console → deploy Connector token
-2. Deploy Connector on Linux VM (no public IP), paste generated install command
-3. Create Service Account → generate and save key as `/tmp/service_key.json`
-4. Deploy router Linux VM (no public IP), install headless Client:
+### Per Site (repeat for each)
+1. Create Remote Network in Admin Console
+2. Deploy Connector VM (no public IP, use NAT for internet access); run generated token command
+3. Deploy router VM (no public IP); install headless Client:
 ```bash
 curl https://binaries.twingate.com/client/linux/install.sh | sudo bash
+nano /tmp/service_key.json   # paste Service Account key
 sudo twingate setup --headless /tmp/service_key.json
 sudo twingate start
 ```
-5. Enable IP forwarding:
+4. Enable IP forwarding:
 ```bash
-sudo nano /etc/sysctl.conf  # uncomment net.ipv4.ip_forward=1
+sudo nano /etc/sysctl.conf   # uncomment net.ipv4.ip_forward=1
 sudo sysctl -p
 ```
-6. Configure iptables (replace interface names as needed):
+5. Configure iptables (replace interface names):
 ```bash
 sudo iptables -A FORWARD -i ens4 -o sdwan0 -j ACCEPT
 sudo iptables -A FORWARD -i sdwan0 -o ens4 -m state --state RELATED,ESTABLISHED -j ACCEPT
 sudo iptables -t nat -A POSTROUTING -o sdwan0 -j MASQUERADE
-sudo apt install iptables-persistent -y
+sudo apt install iptables-persistent -y   # optional: persist rules
 ```
-7. Deploy test VM → add as Twingate Resource → assign to **opposite site's** Service Account
-8. Configure cloud routing tables to direct subnet traffic to router VM's private IP
+6. Deploy test VM; add as Twingate Resource assigned to the **other site's** Service Account
+7. Configure cloud routing tables to route remote subnet traffic through router VM
 
 ## Configuration Values
 | Parameter | Site 1 (Azure) | Site 2 (GCP) |
@@ -52,13 +53,14 @@ sudo apt install iptables-persistent -y
 | Example subnet | `10.0.1.0/24` | `172.16.1.0/24` |
 
 ## Gotchas
-- **GCP only**: Enable IP forwarding at VM creation time (not just in sysctl)
-- Cloud NAT must be configured **before** deploying the router VM in GCP, or it can't install packages
-- Interface names (`ens4`, `eth0`, `sdwan0`) vary — verify with `ip link` before running iptables commands
-- Without `iptables-persistent`, NAT rules reset on reboot
-- If no SSH access to a VM, add its private IP as a Twingate Resource first to gain access
+- Interface names (`ens4`, `eth0`) vary by VM/OS — verify before running iptables commands
+- GCP requires IP forwarding enabled at VM creation time (not just in OS)
+- Cloud NAT must be configured **before** deploying router VM or it can't download packages
+- Service Account key is shown once — copy immediately during generation
+- Assign each site's Resource to the **opposite** site's Service Account (cross-assignment)
+- iptables rules are lost on reboot unless `iptables-persistent` is installed
 
 ## Related Docs
-- [Headless Client / Service Accounts](https://www.twingate.com/docs/services)
-- [Peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer)
-- [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)
+- Peer-to-peer connections support
+- Headless Client / Service Accounts documentation
+- Twingate Fair Use Policy

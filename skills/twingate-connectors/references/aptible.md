@@ -1,64 +1,78 @@
-# Deploy Twingate Connector on Aptible
+# Deploy a Twingate Connector on Aptible
 
 ## Summary
-Guide for deploying Twingate Connectors on Aptible's serverless platform using either the Twingate CLI (automated) or Aptible CLI (manual). Supports High Availability via multiple Connector instances on the same Remote Network.
+Aptible is a serverless platform with automatic security/compliance management. Twingate Connectors can be deployed on Aptible via two methods: automated (Twingate CLI) or manual (Aptible CLI). Peer-to-peer connections are recommended for better performance and Fair Use Policy compliance.
 
 ## Key Information
-- Two deployment methods: automated (Twingate CLI) or manual (Aptible CLI)
-- HA setup requires running the automated command twice against the same Remote Network
-- Successful deployment shows two green status indicators in Admin Console
-- Peer-to-peer connections recommended for better performance and Fair Use Policy compliance
+- Two deployment methods: Twingate CLI (automated) or Aptible CLI (manual)
+- HA setup requires running the deploy command twice, selecting the same Remote Network
+- Success indicated by green status lights in the Admin Console Connector detail page
 
 ## Prerequisites
-**Automated method:**
+**Automated:**
 - Twingate CLI installed and configured
-- API token with Read, Write & Provision permissions
+- API token with **Read, Write & Provision** permissions
 - Aptible CLI installed and configured
 
-**Manual method:**
+**Manual:**
 - Aptible CLI installed and configured
-- Remote Network created in Twingate Admin Console
-- Connector tokens generated (Manual deployment method)
+- Twingate Admin Console access to generate Connector tokens
+
+---
 
 ## Step-by-Step
 
 ### Automated (Twingate CLI)
 1. Run `./tg deploy aptible app` (add `--environment NAME` for multiple Aptible environments)
 2. Enter Twingate account name and API token when prompted
-3. Select existing or create new Remote Network
-4. Verify deployment via green indicators in Admin Console
+3. Select existing Remote Network or create new one
+4. Verify green status indicators in Admin Console
+
+**HA Setup:** Re-run step 1, select the same Remote Network — second Connector auto-provisions with load balancing/failover.
 
 ### Manual (Aptible CLI)
-1. Create Remote Network in Admin Console → select Connector
-2. Choose Manual deployment → click **Generate Tokens** → copy both tokens
-3. Create Aptible app: `aptible apps:create [APP]`
+1. Create Remote Network in Admin Console → **Network** page, select a Connector
+2. Choose **Manual** deployment → **Generate Tokens** → copy both tokens (requires re-auth)
+3. Create Aptible app:
+   ```
+   aptible apps:create [APP]
+   ```
 4. Set app configuration:
-```bash
-aptible config:set --app [APP] \
-  TWINGATE_NETWORK="[ACCOUNT]" \
-  TWINGATE_ACCESS_TOKEN="[ACCESS_TOKEN]" \
-  TWINGATE_REFRESH_TOKEN="[REFRESH_TOKEN]"
-```
-5. Deploy: `aptible deploy --app [APP] --docker-image twingate/connector:1`
-6. Verify two green indicators in Admin Console
+   ```bash
+   aptible config:set --app [APP] \
+     TWINGATE_NETWORK="[ACCOUNT]" \
+     TWINGATE_ACCESS_TOKEN="[ACCESS_TOKEN]" \
+     TWINGATE_REFRESH_TOKEN="[REFRESH_TOKEN]"
+   ```
+5. Deploy:
+   ```bash
+   aptible deploy --app [APP] --docker-image twingate/connector:1
+   ```
+6. Verify two green lights in Admin Console
+
+---
 
 ## Configuration Values
 
 | Parameter | Description |
 |-----------|-------------|
 | `TWINGATE_NETWORK` | Twingate account name |
-| `TWINGATE_ACCESS_TOKEN` | Connector access token |
-| `TWINGATE_REFRESH_TOKEN` | Connector refresh token |
-| `--environment NAME` | Aptible environment (CLI flag, optional) |
+| `TWINGATE_ACCESS_TOKEN` | Generated Connector access token |
+| `TWINGATE_REFRESH_TOKEN` | Generated Connector refresh token |
+| `--environment NAME` | (CLI flag) Target Aptible environment |
 | `--docker-image` | `twingate/connector:1` |
 
+---
+
 ## Gotchas
-- Token generation requires re-authentication in Admin Console — copy tokens immediately, they won't be shown again
-- HA setup: must select the **same** Remote Network for both Connector instances
-- Token generation step during manual setup triggers a re-auth request before tokens are displayed
+- Token generation requires **re-authentication** in the Admin Console — copy tokens immediately as they won't be shown again
+- Tokens are per-Connector; each HA instance needs its own token set (automated method handles this)
+- Replace `[APP]`, `[ACCOUNT]`, `[ACCESS_TOKEN]`, `[REFRESH_TOKEN]` in all commands — brackets are placeholders
+
+---
 
 ## Related Docs
-- Twingate CLI setup
-- Connector Best Practices
-- Remote Network configuration
-- Peer-to-peer connections / Fair Use Policy
+- [Twingate CLI](https://www.twingate.com/docs/cli)
+- [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
+- [Peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer)
+- [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)

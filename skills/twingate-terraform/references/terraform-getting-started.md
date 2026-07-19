@@ -1,43 +1,47 @@
 # Getting Started with Terraform and Twingate
 
 ## Summary
-Overview page for deploying Twingate infrastructure using Terraform (IaC) across major cloud providers. Links to provider-specific guides for GCP, AWS, and Azure. Covers automated deployment of both Twingate configuration and cloud infrastructure components.
+Overview page for deploying Twingate infrastructure using Terraform (IaC) across GCP, AWS, and Azure. Guides cover full stack deployment including Twingate components and cloud provider networking. Serves as an index/prerequisites page pointing to provider-specific guides.
 
 ## Key Information
-- Terraform provider available for full Twingate environment automation
-- Three cloud provider guides available: GCP, AWS, Azure
-- Each guide deploys a complete end-to-end setup including connector VMs and test resources
-- Peer-to-peer connections are recommended to improve user experience and comply with Fair Use Policy bandwidth limits
+- Twingate provides a Terraform Provider for automating Twingate environments
+- Three cloud providers supported: GCP, AWS, Azure (separate guides for each)
+- Each guide deploys both Twingate components and cloud infrastructure together
 
 ## Prerequisites
-- VSCode or any text editor installed
+- VS Code or any text editor installed
 - Terraform CLI installed
-- Twingate client installed
-- Twingate API access (API key required for Terraform provider)
+- Twingate Client installed
+- Twingate account with API access
 
 ## What Each Guide Deploys
 
-**Twingate Resources:**
-- Remote Network (new)
-- Connector (attached to Remote Network)
+**Twingate Components:**
+- New Remote Network
+- New Connector (attached to Remote Network)
 - Access and refresh tokens for the connector
-- Resource (pointing to Nginx VM)
-- Group (with access to network and resource)
+- New Resource (pointing to Nginx VM)
+- New Group with access to network and resource
 
-**Cloud Provider Resources (GCP/AWS/Azure):**
-- VPC
-- Subnet within VPC
+**Cloud Provider Components (GCP/AWS/Azure):**
+- New VPC
+- New subnet
 - Firewall rules
-- VM with Twingate connector installed and configured
+- VM with Twingate Connector installed and configured
 - VM with Nginx installed and running
 
-## Related Docs
-- [GCP Guide](https://www.twingate.com/docs/) — GCP-specific Terraform deployment
-- [AWS Guide](https://www.twingate.com/docs/) — AWS-specific Terraform deployment
-- [Azure Guide](https://www.twingate.com/docs/) — Azure-specific Terraform deployment
-- Peer-to-peer connections support documentation
-- Fair Use Policy (bandwidth)
+## Step-by-Step
+1. Install prerequisites (VS Code, Terraform, Twingate Client)
+2. Select cloud provider guide (GCP, AWS, or Azure)
+3. Follow provider-specific deployment steps
 
 ## Gotchas
-- Page is an index/overview only — actual step-by-step instructions are in the provider-specific sub-guides
-- Connector tokens (access + refresh) are managed as Terraform resources, meaning they will be stored in Terraform state — use secure state backends (e.g., Terraform Cloud, encrypted S3)
+- Peer-to-peer connections are recommended to improve user experience and stay within Fair Use Policy for bandwidth consumption — configure these when deploying connectors
+- This page is an index only; actual configuration values and Terraform code are in the provider-specific linked guides
+
+## Related Docs
+- [GCP Guide](https://www.twingate.com/docs/gcp)
+- [AWS Guide](https://www.twingate.com/docs/aws)
+- [Azure Guide](https://www.twingate.com/docs/azure)
+- [Peer-to-peer connections support](https://www.twingate.com/docs/peer-to-peer)
+- [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)

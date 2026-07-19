@@ -1,45 +1,48 @@
-# Twingate Windows Client
+# Windows Client Installation
 
 ## Summary
-Installation guide for the Twingate Windows desktop client. Covers supported OS versions, tunnel driver selection, first-time configuration, and common troubleshooting issues. Windows Server is supported only in headless mode.
+Twingate Windows client supports Windows 10, Windows 11, Windows Server 2022, and Windows Server 2025. Installation requires local admin rights and offers two tunnel driver options. Windows Server is only supported in headless mode due to missing posture check dependencies.
 
 ## Key Information
 - Download from `get.twingate.com`
-- Supported OS: Windows 10, Windows 11, Windows Server 2022, Windows Server 2025
-- Windows Server **must** use headless mode (no posture checks supported)
-- Runs from system tray (Notification Area) after installation
-- Only intercepts traffic for configured private Resources; does not affect general internet browsing
+- Requires local admin rights to install
+- Two tunnel drivers available: **TunTap** (default, recommended) and **Wintun** (experimental, potentially higher throughput)
+- Runs from Windows Taskbar Notification Area after installation
+- Only intercepts traffic for configured private Resources; does not affect regular internet browsing
+- Windows Server: headless mode only (no posture checks supported)
 
 ## Prerequisites
-- Local admin rights on the machine
-- .NET Desktop Runtime (x64):
-  - Client versions **before** November 2024: .NET Desktop Runtime 6.0+
-  - Client versions **from** November 2024 onward: .NET Desktop Runtime 8.0+
-- EXE/update installer installs .NET automatically; **MSI installer requires manual .NET installation**
+- Windows 10, 11, Server 2022, or Server 2025
+- Local administrator rights
+- **.NET Desktop Runtime (x64)**:
+  - Client versions before November 2024: .NET Desktop Runtime 6.0+
+  - Client versions from November 2024 onward: .NET Desktop Runtime 8.0+
+  - EXE installer auto-installs .NET; **MSI installer requires manual .NET installation**
 
 ## Step-by-Step Installation
 1. Download installer from `get.twingate.com`
-2. Run installer (requires local admin)
-3. Select tunnel driver: **TunTap** (default, recommended) or **Wintun** (alternative, potentially higher throughput)
-4. Launch via desktop shortcut or Start menu
+2. Run installer with local admin rights
+3. Select tunnel driver (TunTap recommended; Wintun optional)
+4. Launch Twingate via desktop shortcut or Start menu
 5. Enter your Twingate network name (e.g., `Beamreach`)
-6. Click **Join Network** → redirected to configured identity provider
+6. Click **Join Network** → redirected to identity provider
 7. Authenticate with organizational credentials
 
 ## Configuration Values
-| Setting | Options | Notes |
-|---|---|---|
-| Tunnel Driver | `TunTap` (default), `Wintun` | Switch by reinstalling and selecting at install dialog |
-| Network Name | Your org's Twingate subdomain | Required on first run |
+| Setting | Value |
+|---|---|
+| Default tunnel driver | TunTap |
+| Alternative tunnel driver | Wintun |
+| .NET requirement (pre-Nov 2024) | Desktop Runtime 6.0 x64 |
+| .NET requirement (Nov 2024+) | Desktop Runtime 8.0 x64 |
 
 ## Gotchas
-- **Switching tunnel drivers requires a full reinstall** — no in-app toggle
-- **MSI installs require manual .NET installation** — not handled automatically unlike EXE installs
-- **Windows Server posture checks are unsupported** — headless mode only
-- **Intel Ethernet adapters on Windows 10** may cause slow speeds; Windows 10 won't auto-update the driver — manually update from Intel's website
-- .NET requirement jumped from 6.0 to 8.0 in November 2024 — old installs may need runtime upgrade
+- **MSI installs**: Must manually install .NET Desktop Runtime — it is NOT auto-installed (unlike EXE installer)
+- **Driver switching**: Requires full reinstall; cannot switch drivers in-place
+- **Windows Server**: Posture checks are unsupported; headless mode is the only option
+- **Intel Ethernet on Windows 10**: May cause slow speeds; Windows 10 does not auto-update Intel adapter drivers — manually update from Intel's website if experiencing slow network throughput
 
 ## Related Docs
-- Headless mode (Windows Server usage)
-- Twingate Client posture checks
-- Network Resource configuration
+- Headless mode (for Windows Server deployments)
+- Posture checks
+- Client troubleshooting

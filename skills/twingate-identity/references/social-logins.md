@@ -1,42 +1,40 @@
 # Social Logins
 
 ## Summary
-Twingate supports social identity providers as an alternative to third-party IdPs. Users authenticate via social accounts where the email must match their Twingate account email. Admins manage all user lifecycle operations through the Admin Console Team page.
+Twingate supports social identity providers as an alternative when no third-party IdP is available. Users authenticate via social accounts where the email must match their Twingate account email. Admins manage users through the Team page in the Admin Console.
 
 ## Key Information
-- **Supported providers:** Google, Microsoft, LinkedIn, GitHub
-- Email address on social account **must match** the email address registered in Twingate
-- No third-party IdP configuration required
-- Disabled users **still count toward billing**
+- Four supported social login providers: **Google, Microsoft, LinkedIn, GitHub**
+- Email address from social provider must match the email address in Twingate
+- Users must accept invite email before first sign-in
+- Disabled users still count toward billing
 
 ## Prerequisites
 - Admin access to Twingate Admin Console
-- User's email address for invitation
+- User's email address to send invite
 
 ## Step-by-Step: Inviting Users
-1. Navigate to Admin Console → Team → Users tab
-2. Click **Add User**
+1. Navigate to **Team page → Users tab** in Admin Console
+2. Click **"Add User"**
 3. Enter the user's email address
-4. Click **Send Invite Email**
-5. User must accept the invite via email before first sign-in
+4. Click **"Send Invite Email"**
+5. User accepts invite via email, then downloads Client and logs in
 
-## Step-by-Step: Managing Users
-1. Navigate to Admin Console → Team page
-2. Click the **three-dot menu** on the right side of a user record
-3. Select action:
-   - **Edit** — update display name
-   - **Manage Role** — change user role
-   - **Disable** — temporarily block login (user remains billable)
-   - **Remove** — permanently delete user
+## User Management Options
+Access via three-dot menu on user record:
 
-## Configuration Values
-None (UI-only configuration, no env vars or API params documented on this page)
+| Option | Action |
+|--------|--------|
+| Edit | Update display name |
+| Manage Role | Change user role |
+| Disable | Temporarily block login (user retained) |
+| Remove | Permanently delete user |
 
 ## Gotchas
-- Disabled users are still billed — use **Remove** to stop billing for a user
-- Users must accept the invite email before they can log in for the first time
-- Social account email must exactly match the Twingate-registered email; mismatches will block login
+- **Disabled users are still billed** — removal is required to stop billing
+- Users cannot sign in for the first time until invite email is accepted
+- Social account email must exactly match the Twingate account email; mismatches will block login
 
 ## Related Docs
-- [Admins Guide](https://www.twingate.com/docs/) — role management details
-- [Offboarding Users](https://www.twingate.com/docs/) — full offboarding process for social users
+- Admins guide (role management)
+- Offboarding Users page

@@ -4,27 +4,24 @@
 DORA Compliance
 
 ## Summary
-Twingate supports financial entities regulated by the Digital Operational Resilience Act (DORA) through a DORA Addendum. This addendum provides contractual provisions required for DORA-regulated customers in their agreements with ICT vendors.
+Twingate supports financial entities regulated by the Digital Operational Resilience Act (DORA). Business and Enterprise subscribers can obtain a DORA Addendum containing required contractual provisions for ICT vendor agreements.
 
 ## Key Information
-- Twingate offers a **DORA Addendum** containing required contractual provisions for ICT vendor agreements
-- DORA = Digital Operational Resilience Act (EU financial sector regulation)
-- Twingate is classified as an ICT vendor under DORA
+- DORA Addendum available for **Business** and **Enterprise** subscription tiers only
+- Addendum provides contractual provisions required by DORA-regulated entities for ICT vendor agreements
+- Twingate qualifies as an ICT vendor under DORA
 
 ## Prerequisites
-- **Business or Enterprise subscription** required to access the DORA Addendum
+- Active Business or Enterprise Twingate subscription
+- Contact Twingate customer team to obtain the addendum
 
 ## Configuration Values
-None — this is a compliance/legal document offering, not a technical configuration.
-
-## How to Obtain
-- Contact Twingate's customer team directly to request a copy of the DORA Addendum
-- No self-service option available
+None applicable — this is a compliance/contractual matter, not a technical configuration.
 
 ## Gotchas
-- Free/Starter tier customers are **not eligible** for the DORA Addendum
-- This is a contractual/legal addendum only — does not describe specific technical controls or configurations
+- Free/Starter tier customers are **not** eligible for the DORA Addendum
+- Must proactively contact Twingate to obtain the addendum; it is not self-serve
 
 ## Related Docs
-- Twingate subscription plans (Business/Enterprise)
-- Other compliance offerings (SOC 2, etc.)
+- Twingate subscription/pricing tiers
+- Other compliance documentation (SOC 2, GDPR, etc.)

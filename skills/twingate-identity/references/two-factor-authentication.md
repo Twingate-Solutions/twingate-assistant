@@ -1,43 +1,38 @@
 # Native MFA
 
 ## Summary
-Twingate provides native MFA independent of your identity provider, configurable at sign-in, resource access, or Admin Console levels. Supports TOTP, biometrics (WebAuthn), and hardware security keys. MFA frequency is tied to the authentication frequency of the policy where it's enabled.
+Twingate provides native MFA configurable independently of an identity provider. MFA can be required at sign-in, for specific Resources via policies, or for Admin Console access. Avoid enabling MFA in both Twingate and your IdP simultaneously to prevent double authentication prompts.
 
 ## Key Information
-- MFA is policy-level configuration, not account-level
-- Three enforcement scopes: Sign In Policy, Resource Policies, Admin Console Security (Settings)
-- Resource Policy MFA useful for protecting only sensitive resources
-- TOTP always configured as backup even when biometrics/security key is primary method
-- Admin MFA reset available from user detail page in Admin Console
-
-## Prerequisites
-- Admin Console access
-- Users need a TOTP app (Google Authenticator, Authy, 1Password) and/or WebAuthn-capable device/key
-
-## Configuration Locations
-
-| Scope | Location | Effect |
-|-------|----------|--------|
-| Sign-in | Sign In Policy | MFA required every client login |
-| Resource access | Resource Policies | MFA required per resource access |
-| Admin Console | Settings → Security | MFA required for admin login |
+- MFA is configured at the **policy level**, not per-user
+- Three scopes: Sign In Policy, Resource Policies, Admin Console Security (Settings)
+- Authentication frequency is inherited from the policy's configured frequency
+- Even when using biometrics/security keys, TOTP is always required as a backup method
 
 ## Supported MFA Methods
-- **TOTP**: Time-based codes via authenticator app
-- **Biometrics (WebAuthn)**: Touch ID, Windows Hello
-- **Security Keys (WebAuthn)**: YubiKey — FIDO2/CTAP2 only
+| Method | Details |
+|--------|---------|
+| TOTP | Google Authenticator, Authy, 1Password, etc. |
+| Biometrics (WebAuthn) | Touch ID, Windows Hello |
+| Security Keys (WebAuthn) | FIDO2/CTAP2 keys only (e.g., YubiKey) |
+
+## Configuration Locations
+- **Sign In Policy** → MFA on every client sign-in
+- **Resource Policy** → MFA on access to specific Resources (useful for sensitive Resources)
+- **Settings → Admin Console Security** → MFA for admin sign-ins
+
+## Step-by-Step: Reset User MFA
+1. Navigate to user's detail page in Admin Console
+2. Select the authentication method to reset or delete
+3. User is guided through setup flow on next MFA prompt
 
 ## Gotchas
-- **Do not enable MFA in both Twingate and your IdP** — users will be prompted twice per authentication
-- Authentication frequency (how often MFA is re-prompted) is inherited from the policy's auth frequency setting, not separately configurable
-- WebAuthn support varies by platform/browser — check [webauthn.me/browser-support](https://webauthn.me/browser-support)
-- TOTP backup is always required when biometrics or security key is configured — cannot be skipped
-
-## Admin Operations
-- **Reset user MFA**: User detail page → select method → reset or delete
-- User is re-prompted through setup flow on next MFA challenge after reset
+- **Do not enable MFA in both Twingate and your IdP** — users will be prompted twice
+- TOTP backup is always configured even when biometrics/security keys are primary method
+- WebAuthn (biometrics/security keys) support varies by platform and browser — check [webauthn.me/browser-support](https://webauthn.me/browser-support)
+- Only **FIDO2/CTAP2** security keys are supported; older FIDO U2F-only keys will not work
 
 ## Related Docs
-- Security Policies (linked in source)
+- Security Policies
 - Sign In Policy configuration
 - Resource Policy configuration
