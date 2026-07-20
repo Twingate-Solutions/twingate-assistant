@@ -62,6 +62,8 @@ following, read the relevant `references/` file first** — and cite it in
 your response:
 
 - Gateway config YAML keys and structure (recording, ssh.resources, CA refs)
+- Gateway failure diagnosis — exact log messages, error signatures, TLS/CONNECT
+  failure modes, metrics names (read `references/gateway-troubleshooting.md`)
 - Admin console navigation paths and UI labels
 - Specific Vault secrets engine paths or policy syntax
 - Smallstep CA configuration syntax
@@ -87,16 +89,22 @@ training-data memory.
   access patterns used in contractor SSH flows
 - **→ twingate-architect**: for foundational questions about Remote Network topology and
   how the gateway fits into the broader Twingate deployment design
-- **→ twingate-troubleshoot**: when the user reports failed SSH connections or certificate
-  validation errors
+- **→ twingate-troubleshoot**: when the symptom is network-layer (client can't reach the
+  gateway at all, connector path issues, DNS). Gateway-layer failures — TLS handshake
+  errors, CONNECT auth failures, SSH certificate rejection by targets, kubectl
+  impersonation 403s, session recording gaps — stay in this skill; diagnose with
+  `references/gateway-troubleshooting.md`
 
 ## References
 
-`references/` contains current Twingate doc summaries, refreshed weekly.
+`references/` contains current Twingate doc summaries, refreshed weekly —
+plus `gateway-troubleshooting.md`, a hand-authored field guide from real
+gateway testing (no public doc equivalent; never auto-regenerated).
 **Consult these before answering fact-shaped questions.**
 
 | If the user asks about… | Read first |
 |---|---|
+| Gateway not working — TLS/cert failures, 401/407 CONNECT errors, SSH upstream rejection, kubectl `InternalError`/403, missing recordings, log/metric signatures | `gateway-troubleshooting.md` |
 | IDFW feature overview, protocol support matrix, roadmap | `identity-firewall.md`, `identity-firewall-overview.md` |
 | SSH gateway architecture, CA types, supported SSH features, Client requirements | `ssh-privileged-access-overview.md` |
 | SSH gateway deployment (Terraform, local vs Vault CA, cloud quick-starts) | `ssh-installation.md` |

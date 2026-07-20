@@ -100,7 +100,9 @@ Do not answer these from training-data memory or this skill body alone.
 - **→ twingate-architect**: when the failure suggests an architectural problem (wrong Remote
   Network topology, Resource defined incorrectly)
 - **→ twingate-idfw**: for SSH certificate validation failures, PAM module errors, or
-  gateway connectivity issues
+  any Twingate Gateway failure (TLS handshake errors, CONNECT 401/407, kubectl through
+  the gateway, session recording) — that skill has a hand-authored field guide at
+  `skills/twingate-idfw/references/gateway-troubleshooting.md`
 
 ## References
 

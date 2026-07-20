@@ -11,6 +11,7 @@ CLAUDE.md
 # Internal planning docs — kept local, not shipped with the plugin
 docs/TECHNICAL_PLAN.md
 docs/SESSIONS.md
+docs/troubleshooting-gateway.md
 docs/sessions/
 
 # Pipeline test artifacts — generated during local development, not for release

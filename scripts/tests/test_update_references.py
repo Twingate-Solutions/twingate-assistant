@@ -9,7 +9,9 @@ import pytest
 
 import update_references
 from update_references import (
+    MANUAL_REFERENCE_MARKER,
     check_api_health,
+    is_manual_reference,
     load_hash_cache,
     main,
     process_doc,
@@ -496,6 +498,83 @@ def test_write_reference_file_rejects_traversal_in_skill(tmp_path):
         pytest.raises(ValueError, match="escapes skills directory"),
     ):
         write_reference_file("../../evil", "some-doc", "content")
+
+
+# ---------------------------------------------------------------------------
+# is_manual_reference — hand-authored reference protection
+# ---------------------------------------------------------------------------
+
+
+def _manual_content() -> str:
+    return f"<!-- {MANUAL_REFERENCE_MARKER} -->\n\n# Hand-authored guide\n"
+
+
+def test_is_manual_reference_missing_file(tmp_path):
+    assert is_manual_reference(tmp_path / "nope.md") is False
+
+
+def test_is_manual_reference_generated_file(tmp_path):
+    path = tmp_path / "generated.md"
+    path.write_text("## Summary\nAuto-generated content", encoding="utf-8")
+    assert is_manual_reference(path) is False
+
+
+def test_is_manual_reference_marked_file(tmp_path):
+    path = tmp_path / "manual.md"
+    path.write_text(_manual_content(), encoding="utf-8")
+    assert is_manual_reference(path) is True
+
+
+def test_is_manual_reference_marker_beyond_header_ignored(tmp_path):
+    """Only the first 1024 chars are inspected — a marker buried deep doesn't count."""
+    path = tmp_path / "deep.md"
+    path.write_text("x" * 2000 + MANUAL_REFERENCE_MARKER, encoding="utf-8")
+    assert is_manual_reference(path) is False
+
+
+def test_process_doc_skips_manual_reference(tmp_path):
+    """A mapped/auto-assigned URL whose slug collides with a hand-authored
+    reference is skipped before any fetch or API call, and the file is untouched."""
+    skills_dir = tmp_path / "skills"
+    triage_dir = skills_dir / "_triage"
+    url = "https://www.twingate.com/docs/gateway-troubleshooting"
+
+    manual_file = skills_dir / "twingate-idfw" / "references" / "gateway-troubleshooting.md"
+    manual_file.parent.mkdir(parents=True)
+    manual_file.write_text(_manual_content(), encoding="utf-8")
+
+    hash_cache: dict[str, str] = {}
+    stats = {"updated": 0, "skipped": 0, "failed": 0}
+
+    with (
+        patch("update_references.SKILLS_DIR", skills_dir),
+        patch("update_references.TRIAGE_DIR", triage_dir),
+        patch("update_references.fetch_doc_html") as mock_fetch,
+        patch("update_references.summarize_with_backoff") as mock_summarize,
+    ):
+        process_doc(url, "twingate-idfw", hash_cache, stats)
+
+    assert stats == {"updated": 0, "skipped": 1, "failed": 0}
+    mock_fetch.assert_not_called()
+    mock_summarize.assert_not_called()
+    assert manual_file.read_text(encoding="utf-8") == _manual_content()
+    assert hash_cache == {}
+
+
+def test_write_reference_file_rejects_manual_overwrite(tmp_path):
+    """write_reference_file refuses to clobber a hand-authored reference."""
+    skills_dir = tmp_path / "skills"
+    manual_file = skills_dir / "twingate-idfw" / "references" / "gateway-troubleshooting.md"
+    manual_file.parent.mkdir(parents=True)
+    manual_file.write_text(_manual_content(), encoding="utf-8")
+
+    with (
+        patch("update_references.SKILLS_DIR", skills_dir),
+        pytest.raises(ValueError, match="hand-authored"),
+    ):
+        write_reference_file("twingate-idfw", "gateway-troubleshooting", "## Generated")
+
+    assert manual_file.read_text(encoding="utf-8") == _manual_content()
 
 
 # ---------------------------------------------------------------------------

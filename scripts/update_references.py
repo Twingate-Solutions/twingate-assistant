@@ -9,6 +9,12 @@ This is the main entry point for the auto-update pipeline. It:
 4. Routes newly discovered docs to their auto-assigned skill, or to a
    ``_triage/`` directory if no pattern matches
 5. Reports updated / skipped / failed counts and exits non-zero on failures
+
+Hand-authored reference files — those whose header contains
+``manual-reference: do-not-overwrite`` (e.g.
+``skills/twingate-idfw/references/gateway-troubleshooting.md``) — are never
+overwritten or deleted by this pipeline. Any future cleanup/pruning logic
+must preserve them.
 """
 
 import json
@@ -42,6 +48,35 @@ HASH_CACHE_PATH = SCRIPTS_DIR / ".doc_hashes.json"
 BACKOFF_BASE_SECONDS = 1.0
 BACKOFF_MAX_SECONDS = 60.0
 BACKOFF_MAX_RETRIES = 4
+
+# Files carrying this marker are hand-authored references (not generated from
+# a public doc page). The pipeline must never overwrite or delete them.
+MANUAL_REFERENCE_MARKER = "manual-reference: do-not-overwrite"
+
+
+def is_manual_reference(path: Path) -> bool:
+    """Return True if ``path`` is a hand-authored reference file.
+
+    Hand-authored references carry ``MANUAL_REFERENCE_MARKER`` in a comment
+    near the top of the file. Only the first 1024 characters are inspected,
+    so the marker must appear in the file's header block.
+
+    Args:
+        path: Candidate output path in a skill's ``references/`` directory.
+
+    Returns:
+        True if the file exists and contains the marker; False otherwise
+        (including on read errors, which are logged and treated as manual
+        to fail safe against overwriting).
+    """
+    if not path.exists():
+        return False
+    try:
+        head = path.read_text(encoding="utf-8", errors="replace")[:1024]
+    except OSError as exc:
+        logger.warning("Could not read %s to check manual marker (%s); treating as manual", path, exc)
+        return True
+    return MANUAL_REFERENCE_MARKER in head
 
 
 def check_api_health() -> bool:
@@ -211,7 +246,8 @@ def write_reference_file(skill: str, slug: str, content: str) -> Path:
         The absolute path of the file that was written.
 
     Raises:
-        ValueError: If the resolved output path escapes ``SKILLS_DIR``.
+        ValueError: If the resolved output path escapes ``SKILLS_DIR``, or
+            if it would overwrite a hand-authored (manual) reference file.
     """
     refs_dir = references_dir_for_skill(skill)
     refs_dir.mkdir(parents=True, exist_ok=True)
@@ -221,6 +257,12 @@ def write_reference_file(skill: str, slug: str, content: str) -> Path:
     resolved = output_path.resolve()
     if not resolved.is_relative_to(SKILLS_DIR.resolve()):
         raise ValueError(f"Output path escapes skills directory: {resolved}")
+
+    # Never overwrite hand-authored reference files (e.g. a doc URL whose
+    # slug collides with one). process_doc skips these earlier; this is the
+    # last line of defense at the single write chokepoint.
+    if is_manual_reference(output_path):
+        raise ValueError(f"Refusing to overwrite hand-authored reference: {resolved}")
 
     output_path.write_text(content, encoding="utf-8")
     logger.info("Wrote reference file: %s", output_path)
@@ -256,6 +298,17 @@ def process_doc(
         output_path = TRIAGE_DIR / f"{slug}.md"
     else:
         output_path = references_dir_for_skill(skill) / f"{slug}.md"
+
+    # Hand-authored references are never regenerated — skip before fetching
+    # so a slug collision costs nothing and touches nothing.
+    if is_manual_reference(output_path):
+        logger.warning(
+            "Skipping %s: output %s is a hand-authored reference (slug collision?)",
+            url,
+            output_path,
+        )
+        stats["skipped"] += 1
+        return
 
     # Fetch HTML.
     html = fetch_doc_html(url)
