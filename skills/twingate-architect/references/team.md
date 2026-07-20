@@ -1,39 +1,47 @@
 # Twingate Team Management
 
+## Page Title
+Team — Users, Groups, and Identity Providers
+
 ## Summary
-The Team section covers management of Users, Groups, and Identity Provider (IdP) integrations in Twingate. Access to Resources is controlled through Group membership, with Users either added manually or synced via IdP.
+The Team section covers how to manage Users, Groups, and Identity Provider (IdP) integrations in Twingate. Access to Resources is controlled through Group membership, with Users either added manually or synced automatically via an IdP.
 
 ## Key Information
-- **Users**: The fundamental unit for Resource access in Twingate
-- **Groups**: Determine Resource entitlements — all Users in a Group inherit access to that Group's assigned Resources
-- **Identity Providers**: Enable both authentication management and automatic Group/User synchronization from external IdPs
+- **Users**: The fundamental entity for Resource access; can be manually added or auto-synced from an IdP
+- **Groups**: Determine Resource access entitlements; all Users in a Group inherit access to that Group's assigned Resources
+- **Identity Providers**: Used for both authentication and automatic Group/User synchronization from the source IdP
 
 ## Core Concepts
 
-### Users
-- Can be added **manually** or **automatically synchronized** via Identity Provider
-- Resource access is ultimately granted at the User level
-
-### Groups
-- Membership-based access control model
-- Resources are assigned to Groups, not individual Users
-- All Users in a Group get access to all Resources assigned to that Group
-
-### Identity Providers
-- Dual function: manage **user authentication** + **sync group membership**
-- Syncs existing group structure from the source IdP into Twingate
-
-## Access Control Model
+### Access Model
 ```
 User → Group membership → Resource access
 ```
-Users gain access to Resources by being members of Groups that have those Resources assigned.
+- Users must belong to a Group to access Resources
+- Group assignment drives all Resource entitlement
+- No direct User-to-Resource assignment (must go through Groups)
+
+### User Management Options
+| Method | Use Case |
+|--------|----------|
+| Manual | Small teams, no IdP |
+| IdP Sync | Automated provisioning from existing directory |
+
+### Identity Provider Capabilities
+- Handles **user authentication**
+- Syncs **group membership** from source IdP to Twingate
+- Eliminates manual User/Group management when configured
+
+## Prerequisites
+- Admin access to Twingate Admin Console
+- For IdP integration: existing IdP with SCIM/SSO support (refer to specific IdP guides)
+
+## Gotchas
+- Users without Group membership cannot access any Resources — Group assignment is required
+- IdP sync mirrors source IdP groups; changes must be made in the IdP, not Twingate, when sync is active
+- Both authentication and provisioning are handled by IdP integration (not independently configurable per this page)
 
 ## Related Docs
 - [Users documentation](https://www.twingate.com/docs/users)
 - [Groups documentation](https://www.twingate.com/docs/groups)
-- [Identity Provider configuration guides](https://www.twingate.com/docs/identity-providers)
-
-## Gotchas
-- Access is Group-centric, not User-centric — Resources must be assigned to Groups, not directly to Users
-- IdP sync affects both authentication and group membership; changes in the IdP propagate to Twingate
+- [Identity Provider configuration guides](https://www.twingate.com/docs/identity-provider-guides)

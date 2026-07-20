@@ -1,51 +1,51 @@
 # macOS Standalone Client
 
 ## Summary
-Twingate offers a PKG-based macOS client installable without the App Store or Apple ID. It uses a system extension for VPN functionality that must be explicitly enabled on first connection. Supports MDM distribution and pre-configuration via mobile config profiles.
+Twingate offers a PKG-based macOS client installable without the App Store or Apple ID. It uses a system extension for its VPN adapter, which must be explicitly enabled on first connection. Supports MDM distribution and pre-configuration via mobile config profiles.
 
 ## Key Information
-- PKG installer available at Twingate download page; specific versions in Client changelog
-- Requires system extension enabled — without it, Twingate cannot connect
-- Auto-updates supported if user has local administrator permissions
-- Clients older than 12 months cannot connect to Twingate service
-- Pre-configuration (network, disabling auto-updates) works with standalone app
+- Download from [Twingate download page](https://www.twingate.com/docs/macos-standalone-client) or specific versions from Client changelog
+- Requires system extension approval to connect
+- Supports automatic updates if user has local administrator permissions
+- **Clients older than 12 months cannot connect to Twingate service**
+- App must be located at `/Applications/Twingate.app` — system extensions fail from other directories
 
 ## Prerequisites
 - macOS device
-- Local admin permissions (for auto-updates)
-- App must reside at `/Applications/Twingate.app` (system extension requirement)
+- Local admin permissions (for automatic updates)
+- MDM solution (for enterprise distribution)
 
 ## Step-by-Step: Enable System Extension
-1. Attempt first connection — prompted to enable system extension
-2. Click **Open System Settings**
+1. Attempt to connect to network — prompt appears to enable system extension
+2. Click **"Open System Settings"**
 3. Navigate to **Privacy & Security** → **Security** section
 4. Find panel: *"System software from application 'Twingate.app' was blocked from loading"*
 5. Click **Allow**
-6. Verify status: bottom of Privacy & Security page under **Extensions**
+6. Verify status: Privacy & Security → **Extensions** (bottom of page)
 
 ## MDM Distribution
-| MDM Platform | Method |
-|---|---|
-| Intune | Distribute as Custom App |
-| Jamf | Distribute as a package |
-| Omnissa Workspace ONE | Distribute as non-App Store app |
-| Hexnode UEM | Distribute as enterprise app |
+| MDM | Method |
+|-----|--------|
+| Intune | Custom App |
+| Jamf | Distribute as package |
+| Omnissa Workspace ONE | Non-App Store app |
+| Hexnode UEM | Enterprise app |
 
-**Pre-enabling system extension via MDM:** Deploy provided `.mobileconfig` profile to automatically enable the system extension for end users before first launch.
+- Pre-existing network pre-configuration (including disabling auto-updates) works with standalone app
+- Use provided `.mobileconfig` example to **pre-enable system extension** via MDM profile before user first launch
 
 ## Configuration Values
 - **Install path (required):** `/Applications/Twingate.app`
-- **Pre-config profile:** `.mobileconfig` (example provided by Twingate)
+- **Profile type for pre-enabling extension:** `.mobileconfig` (macOS mobile configuration profile)
 
 ## Gotchas
-- System extension **will not work** if app is run outside `/Applications/Twingate.app`
-- Must actively manage update cadence if fully managing devices — no auto-update without local admin rights
-- Clients >12 months old are blocked from connecting; establish regular update process for managed fleets
-- If no security prompt appears, check **Privacy & Security → Extensions → Others → Networking** for Twingate toggle
+- System extension will not load if `Twingate.app` is run from any directory other than `/Applications/`
+- No system extension prompt visible? Check **Privacy & Security → Extensions → Others → Networking** section for Twingate entry
+- Managed devices need a defined update process — Twingate does not force-update clients; stale clients (12+ months) lose service access
+- Automatic updates require local admin rights; managed environments may need to handle updates via MDM
 
 ## Related Docs
-- Twingate download page
-- Client changelog (version-specific PKG downloads)
 - General macOS onboarding guide
-- Example `.mobileconfig` for system extension pre-enablement
+- Client changelog (version-specific PKG downloads)
+- Example `.mobileconfig` for system extension pre-approval
 - MDM-specific distribution guides (Intune, Jamf, Workspace ONE, Hexnode)

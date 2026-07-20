@@ -1,42 +1,50 @@
 # Endpoint Requirements
 
+## Page Title
+Endpoint Requirements
+
 ## Summary
-The Twingate Client must be installed and running on a device to access protected Resources. It uses the host OS's native VPN functionality to intercept traffic, requiring minimal resources (<10MB). Firewall rules may need adjustment if connectivity issues arise.
+The Twingate Client must be installed and running on a device to access Twingate-protected Resources. It uses the host OS's native VPN functionality to intercept traffic, requiring less than 10MB and minimal system resources.
 
 ## Key Information
-- Client size: <10MB, minimal system resource usage
-- Uses native OS VPN functionality — VPN connection activating on device is expected behavior
-- Download at `get.twingate.com` (auto-detects platform)
-- Compatible with most device management solutions (MDM/EMM)
+- Client size: <10MB, minimal resource usage
+- Download URL: `get.twingate.com` (auto-detects platform)
+- Uses native OS VPN stack — VPN connection activation is expected/normal
+- Compatible with most device management (MDM/EMM) solutions
 
 ## Prerequisites
-- Device running a supported OS platform
-- Outbound internet access on required ports
-- Admin rights to install VPN/network extensions (implied by OS VPN usage)
+- Device running a supported OS
+- Outbound internet access on required ports (see below)
+- Twingate network/account to connect to
 
-## Firewall Rules (Outbound Only)
+## Configuration Values
+
+### Required Firewall Rules (Outbound Only)
 
 | Protocol | Port(s) | Purpose |
 |----------|---------|---------|
-| TCP | 443 | Communication with Twingate Controller and Relay infrastructure |
-| TCP | 30000–31000 | Relay connections when peer-to-peer is unavailable |
+| TCP | 443 | Controller and Relay infrastructure communication |
+| TCP | 30000–31000 | Relay fallback when peer-to-peer is unavailable |
 | UDP/QUIC (HTTP/3) | 1–65535 | Peer-to-peer connectivity (optimal performance) |
 
-**Note:** All connections are **outbound-initiated** — no inbound rules required.
+- All connections are **outbound-initiated** — no inbound rules required
+- UDP/QUIC ports enable best performance; blocking them forces Relay fallback
 
-## Installation
-
+## Step-by-Step: Client Installation
 1. Navigate to `get.twingate.com`
-2. Platform is auto-detected; download and install the Client
-3. For managed/enterprise deployments, refer to the Managed Devices documentation
+2. Client auto-downloads for the detected platform
+3. Install and launch the Client
+4. Connect using your Twingate network address
+
+For advanced/managed deployments, refer to the Managed Devices section.
 
 ## Gotchas
-- UDP ports 1–65535 must be open for peer-to-peer (best performance); if blocked, traffic falls back to Relay via TCP 30000–31000
-- A VPN indicator appearing on the device is **expected** — not an error
-- No special firewall rules are required by default; use the port list only for troubleshooting connectivity issues
-- QUIC/HTTP3 is used for UDP transport — may be blocked by some firewalls that restrict UDP broadly
+- A VPN connection appearing in the OS is **expected behavior**, not an error
+- Firewall rules are generally not needed in standard environments — only troubleshoot if connectivity issues arise
+- UDP ports 1–65535 must be open for peer-to-peer; if blocked, traffic falls back to Relay via TCP 30000–31000 with degraded performance
+- QUIC/HTTP/3 UDP traffic uses the full port range — overly restrictive UDP egress policies will impact performance
 
 ## Related Docs
 - Download & Installation (detailed install guide)
-- Managed Devices (MDM/device management compatibility)
-- QUIC/HTTP3 guide (UDP peer-to-peer connectivity details)
+- Managed Devices (MDM/EMM deployment)
+- QUIC/HTTP/3 guide (UDP peer-to-peer connectivity details)

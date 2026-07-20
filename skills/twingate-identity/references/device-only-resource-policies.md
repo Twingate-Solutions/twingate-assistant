@@ -1,45 +1,53 @@
 # Device-only Resource Policies
 
-## Page Title
-Device-only Policies
-
 ## Summary
-Device-only Resource Policies enforce device security requirements without requiring user re-authentication. Access is granted as long as the device meets the required security profile and the user's Sign In Policy session remains valid. Useful for system services, monitoring endpoints, or pre-login network access.
+Device-only Resource Policies enforce device security requirements without requiring user re-authentication. Access remains available as long as the Sign In Policy session is valid and the device meets the configured security profile. Useful for system services, monitoring endpoints, or pre-login network access.
 
 ## Key Information
-- Disables authentication requirement on a Resource Policy, leaving only device security checks active
-- Sign In Policy is **always** enforced regardless — user must have a valid sign-in session
-- Session persists across Client restarts and device reboots (unlike standard Resource Policies)
-- Device posture re-evaluated approximately every **5 minutes**; access revoked at next check if device falls out of compliance
+- Disables authentication requirement on a Resource Policy, leaving only device posture checks
+- Sign In Policy is **always enforced** regardless — user must have a valid sign-in session
+- Device posture re-evaluated approximately every **5 minutes**; non-compliant devices lose access at next check
+- Sessions **persist across Client restarts and device reboots** (unlike standard Resource Policy sessions)
 - Sign In Policy timer does **not** extend when accessing device-only resources
-- Compatible with Windows **Start Before Logon** for pre-interactive-login network access
+- Compatible with Windows **Start Before Logon** for pre-login system access
 
 ## Prerequisites
-- Existing Resource Policy configured in Admin Console
-- User must have valid Sign In Policy session before accessing device-only resources
-- Device must meet the configured security profile
+- Existing Resource Policy to modify
+- Valid Sign In Policy configured
+- User must have authenticated within Sign In Policy's configured timeframe
 
-## Step-by-Step: Create a Device-only Policy
+## Step-by-Step Configuration
 1. Open Admin Console
 2. Navigate to the target Resource Policy
-3. Locate **Authentication Requirements**
+3. Locate **Authentication Requirements** section
 4. Select **Disable** next to Authentication Requirements
+5. Save the policy — device-only mode is now active
 
 ## Configuration Values
-| Setting | Value/Notes |
+| Setting | Value |
 |---|---|
-| Authentication Requirements | Set to `Disabled` |
+| Authentication Requirements | Disabled |
 | Device posture check interval | ~5 minutes |
-| Session persistence | Survives restarts/reboots |
-| Sign In Policy timer behavior | Continues countdown; not reset by device-only access |
+| Session persistence across restart | Yes (device-only) |
+| Session persistence across restart | No (standard policies) |
+
+## Session Behavior Comparison
+
+| Behavior | Device-only Policy | Standard Resource Policy |
+|---|---|---|
+| Extends Sign In Policy timer | No | Yes |
+| Persists across restarts | Yes | No |
+| Requires active auth | No | Yes |
+| Device posture enforced | Yes | Yes |
 
 ## Gotchas
-- **Sign In Policy still enforced**: Disabling auth on Resource Policy does not bypass Sign In Policy — users still need a valid session
-- **Timer not extended**: Accessing device-only resources does not refresh the Sign In Policy timer; users may be prompted to re-authenticate when timer expires
-- **Posture drift**: If device falls out of compliance, access is revoked at the next ~5-minute posture check, not immediately
-- **Standard Resource Policy sessions don't persist across restarts** — device-only policies behave differently in this regard
+- **Sign In Policy still required**: Disabling auth on the Resource Policy does not bypass the Sign In Policy — users without a valid session cannot access device-only resources
+- **Timer does not reset**: Accessing device-only resources will not prevent Sign In Policy session expiration; users may be forced to re-authenticate even if actively using device-only resources
+- **5-minute posture lag**: Device falling out of compliance is not immediately revoked — up to 5-minute window before access is cut
+- **Not a bypass mechanism**: Device-only ≠ unauthenticated access; it reduces friction for already-authenticated sessions only
 
 ## Related Docs
 - [Resource Policies](https://www.twingate.com/docs/resource-policies)
 - [How Sessions Work](https://www.twingate.com/docs/how-sessions-work)
-- [Start Before Logon](https://www.twingate.com/docs/start-before-logon) (Windows only)
+- [Start Before Logon (Windows)](https://www.twingate.com/docs/start-before-logon)
+- [Sign In Policy](https://www.twingate.com/docs/sign-in-policy)

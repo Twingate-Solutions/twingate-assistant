@@ -1,18 +1,18 @@
 # Configuring Zscaler to Work with Twingate
 
 ## Summary
-Zscaler intercepts Twingate TLS sessions, causing certificate validation failures that prevent the Twingate Client from establishing secure channels. The fix requires either disabling Zscaler or configuring SSL inspection bypass for Twingate domains.
+Zscaler SSL inspection intercepts Twingate TLS sessions, causing certificate validation failures on the Twingate Client. Two resolution options exist: disable Zscaler entirely or configure SSL inspection bypass for Twingate domains.
 
 ## Key Information
-- Zscaler performs SSL inspection that breaks Twingate's certificate pinning
-- Issue manifests as "SSL Certificate is not pinned!" warnings in `twingate.log`
-- Affects Windows devices (log-based symptoms documented for Windows)
-- Two resolution paths: full Zscaler disable or targeted SSL bypass
+- Zscaler intercepts Twingate TLS sessions, breaking secure channel establishment
+- Issue manifests as "SSL Certificate is not pinned!" warnings and trust relationship errors
+- Primarily affects Windows devices (error found in `twingate.log`)
+- Both tools can run simultaneously with proper Zscaler bypass configuration
 
 ## Prerequisites
 - Access to Zscaler admin console
-- Admin rights on affected Windows devices
-- Knowledge of your Twingate tenant name (`<tenant>.twingate.com`)
+- Twingate tenant name/network name
+- Admin rights on affected Windows device
 
 ## Symptoms
 Error in `twingate.log` on Windows:
@@ -22,26 +22,32 @@ Error in `twingate.log` on Windows:
 System.Net.Http.HttpRequestException: Could not establish trust relationship for SSL/TLS channel.
 ```
 
-## Step-by-Step: SSL Bypass Configuration (Option 2)
+## Resolution Options
 
-1. In Zscaler admin console, navigate to **Administration → IP & FQDN Groups → Destination IPv4 Groups**
+### Option 1: Disable Zscaler
+- Uninstall Zscaler **or** stop/disable the Zscaler service
+- **Note:** Simply exiting Zscaler is insufficient — the service must be fully stopped/disabled
+
+### Option 2: Bypass SSL Inspection (Preferred — allows both tools simultaneously)
+
+1. In Zscaler admin console, go to **Administration → IP & FQDN Groups → Destination IPv4 Groups**
 2. Create a new group for SSL inspection bypass
-3. Add `.twingate.com` (wildcard) to the group
+3. Add `.twingate.com` to the group
 4. Navigate to **Policy → Client Connector Portal → Windows**
 5. Add `<tenant>.twingate.com` as an exception under **VPN Gateway Bypass**
-6. Push/update policy on the Zscaler local agent
+6. Update policy on the Zscaler local agent
 
 ## Configuration Values
 | Field | Value |
-|-------|-------|
-| FQDN bypass (wildcard) | `.twingate.com` |
+|---|---|
+| FQDN bypass (group) | `.twingate.com` |
 | VPN Gateway Bypass exception | `<tenant>.twingate.com` |
 
 ## Gotchas
-- Simply exiting Zscaler is insufficient for Option 1 — the service must be fully stopped or uninstalled
-- Two separate Zscaler configurations are needed for Option 2: the IP/FQDN group AND the VPN Gateway Bypass exception
-- Policy must be explicitly updated on the local Zscaler agent after changes
+- Exiting Zscaler UI does **not** stop the service — must disable/uninstall for Option 1 to work
+- Both the FQDN group bypass and VPN Gateway Bypass exception are required for Option 2
+- Policy must be pushed/updated on the local Zscaler agent after changes
 
 ## Related Docs
-- [Zscaler documentation](https://help.zscaler.com) (for detailed Zscaler-side configuration)
-- Twingate log location: `twingate.log` on Windows devices
+- [Zscaler documentation](https://help.zscaler.com) (for additional Zscaler configuration details)
+- Twingate Windows Client logs: `twingate.log`

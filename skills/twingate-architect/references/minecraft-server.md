@@ -1,60 +1,62 @@
 # Minecraft Server with Twingate
 
 ## Summary
-Host a private Minecraft Java Edition server using Docker Compose with a Twingate Connector, eliminating the need for port forwarding. Players connect via Twingate Client, routing traffic through an encrypted tunnel to the server's private Docker network IP. No public ports are exposed.
+Host a private Minecraft Java Edition server via Docker Compose with zero port forwarding. Twingate Connector creates an outbound-only encrypted tunnel; players use the Twingate Client to reach the server's private IP. Port 25565 is never exposed to the public internet.
 
 ## Key Information
-- Uses `itzg/minecraft-server` Docker image with Twingate Connector in same Docker Compose stack
-- Server fixed at `172.30.0.10` on private bridge network `172.30.0.0/24`
-- Java Edition uses TCP port `25565` only (no UDP needed)
-- Connector adds <256 MB RAM overhead; vanilla server needs 2 GB minimum
-- Players must keep Twingate Client connected for entire session
+- Uses `itzg/minecraft-server` Docker image (supports Vanilla, Paper, Forge, Fabric)
+- Server fixed at `172.30.0.10` on private Docker bridge network `172.30.0.0/24`
+- Minecraft Java Edition: TCP port `25565` only (no UDP needed)
+- Connector overhead: <256 MB RAM, negligible CPU
+- Vanilla server for ≤10 players: 2 GB RAM minimum; modded: 4–8+ GB
 
 ## Prerequisites
-- Machine: 2 GB RAM, 2 CPU cores, 10 GB disk (4+ GB RAM for mods)
+- Machine: 2 GB RAM, 2 CPU cores, 10 GB disk (Linux/macOS/Windows)
 - Docker Engine + Docker Compose installed
 - Twingate account with Admin Console access
-- Terminal access to host machine
+- Terminal access
 
 ## Step-by-Step
 
-1. **Create Remote Network** in Admin Console → Remote Networks → Add Remote Network
-2. **Generate Connector tokens**: Click Connector → Docker → Generate Tokens → copy Access Token + Refresh Token
-3. **Create `docker-compose.yml`** with minecraft + twingate-connector services (see config below)
-4. **Start containers**: `docker compose up -d`
-5. **Verify Connector** shows Controller + Relay as "Connected" in Admin Console
-6. **Add Resource**: Address `172.30.0.10`, TCP port `25565`, assign to a Group
-7. **Players install** Twingate Client, sign in, add `172.30.0.10` as Minecraft server address
+1. **Admin Console → Remote Networks → Add Remote Network** (e.g., "Home Lab")
+2. **Add Connector → Select Docker → Generate Tokens** → copy Access Token + Refresh Token
+3. Create `~/minecraft-server/docker-compose.yml` (see config below)
+4. Replace placeholders → `docker compose up -d`
+5. Verify: `docker compose logs minecraft -f` → wait for `Done (...s)! For help, type "help"`
+6. Confirm Connector shows `Controller` and `Relay` both **Connected** in Admin Console
+7. **Admin Console → Resources → Add Resource**: Address `172.30.0.10`, TCP port `25565`
+8. Assign Resource to a Group (e.g., `Everyone` or custom `Minecraft Players`)
+9. Players install Twingate Client, sign in, then add `172.30.0.10` in Minecraft → Multiplayer
 
 ## Configuration Values
 
 **Docker Compose environment variables:**
 
-| Variable | Value | Description |
-|----------|-------|-------------|
-| `EULA` | `"TRUE"` | Accept Minecraft EULA |
-| `MEMORY` | `"2G"` | Java heap size |
-| `TYPE` | `"VANILLA"` | Server type: `VANILLA`, `PAPER`, `FORGE`, `FABRIC` |
-| `VERSION` | `"LATEST"` | Minecraft version |
-| `DIFFICULTY` | `"normal"` | `peaceful/easy/normal/hard` |
-| `MAX_PLAYERS` | `"10"` | Max concurrent players |
-| `TWINGATE_NETWORK` | `<network-name>` | Your Twingate network name |
+| Variable | Value | Notes |
+|---|---|---|
+| `TWINGATE_NETWORK` | `<your-network-name>` | e.g., `mynetwork` (no `.twingate.com`) |
 | `TWINGATE_ACCESS_TOKEN` | `<token>` | From Admin Console |
 | `TWINGATE_REFRESH_TOKEN` | `<token>` | From Admin Console |
+| `EULA` | `"TRUE"` | Required; implies EULA acceptance |
+| `MEMORY` | `"2G"` | Java heap size |
+| `TYPE` | `"VANILLA"` | `VANILLA`, `PAPER`, `FORGE`, `FABRIC` |
+| `VERSION` | `"LATEST"` | Or pin e.g. `"1.21.1"` |
+| `DIFFICULTY` | `"normal"` | `peaceful`/`easy`/`normal`/`hard` |
+| `MAX_PLAYERS` | `"10"` | |
+| `OPS` | *(none)* | Comma-separated operator usernames |
+| `SEED` | *(random)* | World generation seed |
 
-**Network:** `subnet: 172.30.0.0/24`, server at `172.30.0.10`
+**Fixed network:** `172.30.0.10` (minecraft container), subnet `172.30.0.0/24`
 
 ## Gotchas
-- **Do not reuse tokens** across Connectors — each requires unique Access/Refresh token pair
-- **`network_mode: host` not used** — incompatible with Docker Desktop on macOS/Windows
-- World data stored in `./data:/data` volume — deleting this directory loses all world data
-- Heavy modpacks may need 6–8 GB RAM; set `MEMORY` accordingly
-- After any `docker-compose.yml` changes: `docker compose down && docker compose up -d`
+- **Do not reuse tokens** across Connectors — each needs unique Access/Refresh Token pair
+- `network_mode: host` is intentionally avoided (breaks Docker Desktop on macOS/Windows)
+- Twingate Client must remain connected for entire play session
+- World data lives in `./data` volume — deleting it loses the world; back up regularly
+- Modded servers (Forge/Fabric) may need 6–8+ GB RAM; raise `MEMORY` accordingly
+- Bedrock Edition uses UDP/19132 — this guide is Java Edition only
 
-## Related Docs
-- [Bedrock Edition guide](https://www.twingate.com/docs) — uses UDP port 19132
-- [Forge (modded) guide](https://www.twingate.com/docs)
-- [Linux native install guide](https://www.twingate.com/docs)
-- [itzg/minecraft-server documentation](https://github.com/itzg/docker-minecraft-server)
-- [Twingate Security Policies](https://www.twingate.com/docs/security-policies)
-- [Protect Your Home Lab](https://www.twingate.com/docs)
+## Troubleshooting
+- **Can't connect**: Check Client toggle is green; verify player is in correct Group; confirm `172.30.0.10` matches Resource address
+- **Server crashes**: Check `docker compose logs minecraft` — likely insufficient `MEMORY`
+- **Connector offline**: Verify all three `TWINGATE_*` env vars;

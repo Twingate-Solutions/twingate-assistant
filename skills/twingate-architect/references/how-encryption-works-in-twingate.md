@@ -4,43 +4,51 @@
 How Encryption Works in Twingate
 
 ## Summary
-Twingate secures communications between Clients, Connectors, Relays, and Controller using TLS/HTTPS for public component authentication and a custom certificate-pinning scheme for Client-Connector trust. No inbound ports are required. Traffic between Clients and Connectors cannot be decrypted by Twingate or any intermediary, including Relays.
+Twingate secures communications between Clients, Connectors, Relays, and Controller using TLS for public-facing components and a custom mutual authentication scheme for Client-Connector traffic. No inbound ports are required because all connections are outbound. Twingate (including Relay operators) cannot decrypt Client-Connector traffic.
 
 ## Key Information
+- **Two security goals**: Confidentiality (no third-party decryption, including Twingate) and Authentication (components verify legitimacy of peers)
+- **Four components**: Client and Connector (customer-hosted); Relay and Controller (Twingate-hosted)
+- **Client/Connector → Relay/Controller**: Standard TLS/HTTPS with CA-signed certificates (same as browser-to-bank)
+- **Client ↔ Connector**: Custom scheme using Controller as root of trust; encrypted with session key that Relays cannot decrypt
+- **Transport agnostic**: Client-Connector encryption applies whether traffic is peer-to-peer or routed through Relays
 
-- **Four components**: Client (user device), Connector (customer infrastructure), Relay (Twingate-hosted), Controller (Twingate-hosted)
-- **Two security goals**: Confidentiality (end-to-end encryption) and Authentication (verify legitimacy of components)
-- **Client/Connector → Relay/Controller**: Standard TLS/HTTPS using CA-signed certificates (same as browser-to-bank)
-- **Client ↔ Connector**: Custom trust chain using Controller as "root of trust" and Connector's self-signed certificate
-- **Session encryption**: Asymmetric encryption used for key exchange only; symmetric session keys used for actual data transfer
-- **Twingate CA**: Uses Let's Encrypt to sign certificates for `twingate.com` and hosted infrastructure
+## Client-Connector Authentication Flow (Step-by-Step)
 
-## Client-Connector Trust Flow (Step-by-Step)
-
-1. **Connector startup**: Generates a public/private key pair and creates a self-signed certificate
-2. **Connector heartbeat**: Sends SHA-256 digest/fingerprint of its self-signed certificate to Controller periodically
+1. **Connector startup**: Generates RSA public/private key pair; creates self-signed certificate
+2. **Connector heartbeat**: Sends SHA-256 digest/fingerprint of its self-signed cert to Controller periodically
 3. **Client connects**: Requests self-signed certificate directly from Connector
-4. **Client requests Connection Token (CT)**: Asks Controller for a JWT signed by the Controller
-5. **Controller issues CT**: JWT contains the SHA-256 digest of Connector's self-signed certificate (sourced from heartbeat)
-6. **Client validates**: Verifies CT authenticity AND checks that the SHA-256 digest in CT matches the certificate received directly from Connector
-7. **Trust established**: Client encrypts a session key using Connector's public key and shares it
-8. **Data transfer**: All subsequent traffic encrypted with the symmetric session key
+4. **Client requests Connection Token (CT)**: JWT signed by Controller, containing SHA-256 digest of Connector's certificate
+5. **Client validates**: Compares SHA-256 digest in CT (from Controller) against digest received directly from Connector
+6. **Trust established**: Client encrypts session key using Connector's public key; sends to Connector
+7. **Encrypted session**: All subsequent data encrypted with session key (symmetric)
 
 ## Configuration Values
+- None exposed to end users; internal to Twingate components
+- Certificate digest algorithm: **SHA-256**
+- Connection Token format: **JWT** signed by Controller
 
-- **Connection Token format**: JWT signed by Controller
-- **Certificate digest algorithm**: SHA-256
-- **Applies to**: Both peer-to-peer and Relay-mediated Client-Connector connections
+## Key Cryptographic Details
+| Component | Method |
+|-----------|--------|
+| Relay/Controller auth | TLS with CA-signed certs (standard PKI) |
+| Connector identity | Self-signed cert + SHA-256 fingerprint |
+| Session establishment | Asymmetric (RSA) key exchange |
+| Data transfer | Symmetric session key |
+| CT signing | JWT signed by Controller private key |
 
 ## Gotchas
+- Relays **cannot decrypt** Client-Connector traffic — session key is shared only between Client and Connector
+- Connector generates a **new** key pair at each startup — fingerprint in Controller updates via heartbeat
+- Controller is the **root of trust**; if Controller is compromised, the authentication chain breaks
+- Clients come prepackaged with CA root certificates to validate Relay/Controller TLS certs (standard browser behavior)
 
-- Relays **cannot decrypt** Client-Connector traffic — session key is only shared between Client and Connector
-- Connector self-signed certificates are **not CA-signed**; trust is established via Controller's JWT (Controller is the root of trust, not a CA)
-- The Controller must be reachable and trusted for any Client-Connector session to be established
-- Compromising a Relay does not expose traffic content — it only carries encrypted packets
+## Prerequisites
+- No special configuration needed by end users; encryption is automatic
+- Connector must have outbound connectivity to Controller to maintain heartbeat/fingerprint registration
 
 ## Related Docs
-
-- Twingate architecture overview (Clients, Connectors, Relays, Controller roles)
+- Twingate architecture overview
 - Connector deployment documentation
-- Network requirements / firewall configuration (no inbound ports needed)
+- Relay documentation
+- Zero Trust network access concepts

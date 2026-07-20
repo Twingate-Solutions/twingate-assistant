@@ -1,33 +1,39 @@
 # GDPR Compliance
 
-## Page Title
-GDPR Compliance
-
 ## Summary
-Twingate complies with GDPR in both data controller and data processor capacities. For customers subject to GDPR, Twingate provides a data processing addendum (DPA) and uses Standard Contractual Clauses (SCCs) for EU-to-US data transfers.
+Twingate complies with GDPR as both a data controller (for its own processing activities) and a data processor (for customer data). Customers requiring GDPR compliance are supported through a data processing addendum (DPA) and Standard Contractual Clauses (SCCs) for EU-to-US data transfers.
 
 ## Key Information
-- Twingate acts as both a **data controller** (its own processing activities) and **data processor** (on behalf of customers)
-- As controller: maintains privacy notices, data subject rights procedures, security measures, and third-party processor oversight
-- As processor: provides a **data processing addendum (DPA)** included in customer agreements
-- Uses **Standard Contractual Clauses (SCCs)** for EU → US personal data transfers
-- Uses **UK International Data Transfer Addendum** for UK GDPR compliance (UK → US transfers)
-- Twingate collects limited personal data from customers by design
 
-## Prerequisites
-- Review Twingate's [Privacy Policy](https://www.twingate.com/privacy) for controller-side processing details
-- Review Twingate's [Customer Agreement](https://www.twingate.com/customer-agreement) for processor commitments
-- Access the [Data Processing Addendum](https://www.twingate.com/dpa) if GDPR compliance is required
+- Twingate acts as **data controller** for data described in its Privacy Policy
+- Twingate acts as **data processor** for customer data per the Customer Agreement
+- Only **limited personal data** is collected from customers
+- Twingate maintains an ongoing GDPR compliance program (not a one-time certification)
+- Cross-border transfer mechanisms in place:
+  - **EU → US**: Standard Contractual Clauses (SCCs)
+  - **UK → US**: UK's International Data Transfer Addendum (UK GDPR compliance)
 
-## Configuration Values
-None — GDPR compliance is handled via contractual/legal mechanisms, not technical configuration.
+## As Data Controller, Twingate Implements
+
+- Privacy notices where required
+- Procedures for data subject rights requests
+- Appropriate security measures for personal data
+- Third-party processor due diligence and contractual controls
+
+## As Data Processor (Customer Obligations)
+
+- **Data Processing Addendum (DPA)** included in customer agreements for GDPR-required customers
+- SCCs cover EU data transfers; UK ITDA covers UK data transfers
+- Details of what customer data Twingate processes: see [Twingate & Customer Data](https://www.twingate.com/docs/twingate-and-customer-data)
 
 ## Gotchas
-- DPA is included in customer agreements but may need to be explicitly requested or reviewed for enterprise compliance purposes
-- UK GDPR requires a separate addendum (UK IDTA) — not covered solely by EU SCCs
-- Twingate is a **US-based company**; cross-border transfer mechanisms are required for EU/UK data
+
+- Twingate is a **US company** — cross-border transfer mechanisms (SCCs/UK ITDA) are required for EU/UK compliance; verify your DPA is executed if operating under GDPR jurisdiction
+- GDPR compliance is described as **continuous** — Twingate's program evolves; check for DPA/agreement updates periodically
 
 ## Related Docs
-- [Twingate & Customer Data](https://www.twingate.com/docs/twingate-and-customer-data) — types of data processed and processing methods
-- Privacy Policy — controller-side processing details
-- Customer Agreement — processor commitments and DPA
+
+- [Privacy Policy](https://www.twingate.com/privacy-policy)
+- [Customer Agreement](https://www.twingate.com/customer-agreement)
+- [Data Processing Addendum](https://www.twingate.com/dpa)
+- [Twingate & Customer Data](https://www.twingate.com/docs/twingate-and-customer-data)

@@ -1,23 +1,25 @@
 # Audit Logs Schema
 
 ## Summary
-Defines the JSON schema for Twingate audit log events, including the root event structure and all possible target object schemas. Events track create/edit/delete actions by users, API keys, or Twingate Support on network objects.
+Twingate audit logs are structured JSON events capturing who made a change, what action was taken, and what objects were affected. Logs can be consumed directly or synced to S3 with a wrapper envelope. Each event contains actor, action, and targets fields.
 
 ## Key Information
-- Schema version is currently `"1"`
-- `time` field is UTC ISO 8601 format representing start of network communication
-- `actor.type` values: `"User"`, `"API"`, `"Twingate Support"`
-- `action` values: `"create"`, `"edit"`, `"delete"`
-- S3-synced logs wrap events in an outer object with `event_type: "audit_log"`
+
+- **Schema version**: Current version is `"1"`
+- **Time format**: UTC ISO 8601 datetime string (e.g., `"2021-08-15T14:30Z"`)
+- **Actor types**: `"User"`, `"API"`, `"Twingate Support"`
+- **Action values**: `"create"`, `"edit"`, `"delete"`
+- **Target types**: `remoteNetwork`, `connector`, `resource`, `publicAPIKey`, `user`, `group`, `device`, `serviceAccount`, `serviceAccountKey`
 
 ## Root Event Schema
+
 ```json
 {
   "version": "1",
-  "time": "2021-08-15T14:30Z",
+  "time": "<UTC ISO datetime>",
   "actor": {
     "type": "User|API|Twingate Support",
-    "id": "unique-id",
+    "id": "<unique-id>",
     "info": { "email": "...", "name": "..." }
   },
   "action": "create|edit|delete",
@@ -25,10 +27,19 @@ Defines the JSON schema for Twingate audit log events, including the root event 
 }
 ```
 
-## Target Object Types
+## S3 Wrapper Schema
 
-| Type | Key Fields |
-|------|-----------|
+```json
+{
+  "event_type": "audit_log",
+  "event": { /* standard event schema */ }
+}
+```
+
+## Target Schemas Reference
+
+| Target Type | Key Fields |
+|---|---|
 | `remoteNetwork` | `name`, `location`, `isActive` |
 | `connector` | `name`, `remoteNetwork{id,name}` |
 | `resource` | `name`, `address{type,value}`, `protocols`, `isActive` |
@@ -39,27 +50,23 @@ Defines the JSON schema for Twingate audit log events, including the root event 
 | `serviceAccount` | `name` |
 | `serviceAccountKey` | `name`, `state`, `serviceAccount` |
 
-## Configuration Values
+## Enum Values
 
-- **`publicAPIKey.permission`** values: `"read only"`, `"read write"`, `"provision"`
-- **`serviceAccountKey.state`** values: `"active"`, `"expired"`, `"revoked"`, `"deleted"`
-- **`resource.address.type`**: `"DNS"` (shown in example)
-- **`resource.protocols.tcp/udp.policy`**: `"ALLOW_ALL"` (shown in example)
-
-## S3 Wrapper Schema
-```json
-{
-  "event_type": "audit_log",
-  "event": { /* standard event schema */ }
-}
-```
+- **`publicAPIKey.permission`**: `"read only"`, `"read write"`, `"provision"`
+- **`serviceAccountKey.state`**: `"active"`, `"expired"`, `"revoked"`, `"deleted"`
+- **`resource.address.type`**: `"DNS"` (implied from example)
+- **`resource.protocols.tcp/udp.policy`**: `"ALLOW_ALL"` (implied from example)
 
 ## Gotchas
-- S3-synced logs have an extra wrapper layer — parsers must unwrap `event` field before processing standard schema
-- `actor.info` is `null` for `"Twingate Support"` actor type
-- `targets` is an array — a single action can impact multiple objects
-- Each target has its own `version` field independent of the root event version
+
+- `"Twingate Support"` actor has `null` info field — handle null checks when parsing
+- S3-synced logs have an extra wrapper object; direct API logs do not — parsers need to handle both formats
+- `targets` is an array; a single event can affect multiple objects
+- `time` represents **beginning** of network communication, not event processing time
+- `serviceAccountKey` includes nested `serviceAccount` object (not just an ID reference)
 
 ## Related Docs
-- Audit Logs setup/configuration (see Twingate audit logs docs)
-- S3 integration for log export
+
+- Audit Logs setup/configuration (Twingate admin docs)
+- S3 integration for log syncing
+- Twingate API reference

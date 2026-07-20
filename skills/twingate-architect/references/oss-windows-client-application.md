@@ -4,47 +4,48 @@
 Twingate Windows Client Application — Third Party OSS Notices
 
 ## Summary
-This page lists all open-source software components bundled in the Twingate Windows client application, along with their full license texts. It serves as the required legal attribution notice for third-party dependencies. No installation or configuration guidance is provided.
+This page lists all open-source software components bundled in the Twingate Windows client application, along with their full license texts. It serves as the legal third-party notice disclosure required by the respective open-source licenses.
 
 ## Key Information
 
-### Components Included
-| Component | License |
-|-----------|---------|
-| libssl (OpenSSL) | Apache 2.0 |
-| libevent, lwip, nlog | BSD 3-Clause |
-| siphash | CC0 1.0 Universal |
-| libjansson, jwt-cpp, args, ModernWpf, MVVMLight, Newtonsoft JSON.NET, Sentry, pubnub, quicly | MIT |
-| catch2 | Boost Software License 1.0 |
-| zlib, nanopb | zlib License |
-| wpf-notifyicon | Code Project Open License (CPOL) |
-| CommonServiceLocator | Microsoft Public License (Ms-PL) |
-| fmt | MIT (with optional embedding exception) |
+### Components by License
 
-### Component Purposes (inferred)
-- **Networking**: libevent, lwip, quicly, libssl
-- **Serialization**: libjansson, nanopb, Newtonsoft JSON.NET, protobuf (nanopb)
-- **UI**: ModernWpf, MVVMLight, wpf-notifyicon
+| License | Components |
+|---------|------------|
+| Apache 2.0 | libssl |
+| BSD 3-Clause | libevent, lwip, nlog |
+| CC0 1.0 Universal | siphash |
+| MIT | libjansson, jwt-cpp, args, ModernWpf, MVVMLight, Newtonsoft JSON.NET, Sentry, pubnub, quicly |
+| Boost Software License 1.0 | catch2 |
+| zlib License | zlib, nanopb |
+| Code Project Open License | wpf-notifyicon |
+| Microsoft Public License | CommonServiceLocator |
+| MIT-variant | fmt |
+
+### Full Component List
+- **Networking/Protocol**: libevent, lwip, quicly, libssl
+- **Serialization**: libjansson, nanopb, Newtonsoft JSON.NET, protobuf-adjacent (nanopb)
+- **UI/WPF**: ModernWpf, MVVMLight, wpf-notifyicon
 - **Auth**: jwt-cpp
 - **Logging**: nlog, Sentry
 - **Messaging**: pubnub
-- **Utilities**: fmt, args, zlib, siphash, catch2
+- **Utilities**: fmt, zlib, args, siphash, catch2 (testing), CommonServiceLocator
 
 ## Prerequisites
-- N/A — this is a legal/attribution reference page only
+- N/A — this is a legal disclosure page, not a configuration guide.
 
 ## Step-by-Step
-- N/A — no configuration or installation steps
+- N/A
 
 ## Configuration Values
 - N/A
 
 ## Gotchas
-- **CPOL (wpf-notifyicon)**: More restrictive than typical OSS licenses — prohibits selling the component standalone; accompanying articles cannot be redistributed without author consent
-- **fmt**: Includes an optional exception allowing embedded object-form redistribution without copyright notices — relevant if statically linking
-- **CC0 (siphash)**: Does **not** waive trademark or patent rights held by the affirmer
-- **Ms-PL (CommonServiceLocator)**: Patent license terminates automatically if you bring patent claims against any contributor
+- **wpf-notifyicon (CPOL)**: Cannot sell the component standalone; cannot remove copyright notices; accompanying articles cannot be redistributed without author consent.
+- **CC0 (siphash)**: Trademark and patent rights are explicitly **not** waived under CC0.
+- **fmt**: Includes an optional exception allowing embedded object-form redistribution without copyright notices.
+- **nlog/libevent/lwip (BSD 3-Clause)**: Cannot use contributor names for endorsement without permission.
 
 ## Related Docs
-- Twingate OSS notices for other platforms (Linux, macOS clients likely have separate pages)
-- Twingate Windows client installation/deployment documentation
+- [Twingate Windows Client Setup](https://www.twingate.com/docs/windows-client)
+- OSS notices for other platforms (macOS, Linux, iOS, Android clients likely have separate pages)

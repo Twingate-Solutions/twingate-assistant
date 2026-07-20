@@ -1,23 +1,29 @@
 # Exploring the Twingate APIs
 
 ## Summary
-Twingate uses GraphQL APIs as its primary interface. This page provides video walkthroughs for getting started with the GraphQL API using a provided Postman collection, covering queries, nesting, mutations, and introspection.
+Twingate's primary API is GraphQL-based. This page provides video walkthroughs for getting started with the GraphQL API using Postman, covering queries, mutations, nesting, and introspection.
 
 ## Key Information
-- Twingate's official API is GraphQL-based
-- A pre-built Postman collection is provided with example requests
-- Videos cover: basic queries, nested queries, mutations, and introspection
-- API token generation is required before use
+- Twingate uses **GraphQL APIs** (not REST)
+- Official **Postman collection** available with pre-built request examples
+- Videos cover: token generation, basic queries, nested queries, mutations, and introspection
+- GraphQL allows precise data retrieval without over-fetching
 
 ## Prerequisites
-- Postman installed (free)
-- Twingate Postman collection imported (download JSON from docs page, import into Postman)
-- API token generated from Twingate admin console
+- **Postman** installed (free): [postman.com](https://postman.com)
+- Twingate **API Token** (generated via Twingate Admin Console)
+- Twingate **Postman Collection** JSON file imported into Postman
+
+## Step-by-Step Setup
+1. Download and install Postman
+2. Right-click the Postman collection link on the docs page → "Save Link As" → save JSON
+3. Import JSON collection into Postman
+4. Generate an API Token from Twingate Admin Console
+5. Configure token in Postman collection environment/headers
 
 ## Learning Path (Video Series)
-
-| Part | Topic |
-|------|-------|
+| Part | Topics |
+|------|--------|
 | Part 1 | Generate API token, navigate Postman collection, basic queries |
 | Part 2 | Advanced queries, nested queries |
 | Part 3 | Mutations, variables in queries/mutations |
@@ -25,15 +31,15 @@ Twingate uses GraphQL APIs as its primary interface. This page provides video wa
 | Bonus 2 | Discovering mutations via introspection |
 
 ## Configuration Values
-- **API Token**: Generated via Twingate admin UI; used to authenticate all API requests
-- **Endpoint**: Standard Twingate GraphQL endpoint (configured in Postman collection)
+- API authentication requires an **API Token** passed in request headers
+- GraphQL endpoint: not explicitly listed on this page — check Twingate API reference docs
 
 ## Gotchas
-- GraphQL is less intuitive than REST; use the Postman collection as a starting reference rather than building requests from scratch
-- Introspection is the primary method for discovering available queries/mutations not explicitly documented
-- Variables in mutations (Part 3) are a separate concept from query parameters—review before building automation
+- GraphQL is less intuitive than REST; use the Postman collection as a starting point
+- Introspection is available for self-discovery of schema (queries and mutations)
+- All examples in videos use the provided Postman collection — import it before following along
 
 ## Related Docs
-- Twingate GraphQL API reference
-- API token management
-- Postman collection (linked on the docs page)
+- Twingate GraphQL API Reference (introspection-based schema exploration)
+- API Token generation (Twingate Admin Console)
+- Postman collection JSON (linked from the docs page)

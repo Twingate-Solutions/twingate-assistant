@@ -1,39 +1,39 @@
-# Configuring AnyConnect with Umbrella
+# Configuring AnyConnect with Umbrella for Twingate
 
 ## Summary
-AnyConnect with Umbrella Module is compatible with Twingate, unlike the legacy Umbrella Roaming Client which conflicts with Twingate. Configuration requires adding Twingate resource domains to AnyConnect's Internal Domains list to prevent traffic interception.
+AnyConnect with Umbrella Module is compatible with Twingate, unlike the legacy Umbrella Roaming Client. Configuration requires adding Twingate resource domains to AnyConnect's Internal Domains list to prevent DNS interception interference.
 
 ## Key Information
-- **Roaming Client** (legacy): Incompatible with Twingate — replaces OS DNS resolver with `127.0.0.1` loopback and uses a static, non-updating resolver list
-- **AnyConnect with Umbrella Module** (current): Compatible with Twingate — uses kernel module to intercept port 53 traffic without modifying OS resolver list
-- AnyConnect intercepts all DNS on port 53; Internal Domains are tagged "do not intercept" and passed back to the OS network stack
-- Non-internal domains are forwarded to Umbrella backend for allow/block decisions
-- Customers can upgrade from Roaming Client to AnyConnect at no charge
+- **Roaming Client ≠ AnyConnect**: Legacy Roaming Client is incompatible with Twingate; AnyConnect with Umbrella Module is fully compatible
+- AnyConnect operates at kernel level, intercepting port 53 traffic via kernel module (no OS resolver list modification)
+- Internal Domains tagged "do not intercept" are passed back to the OS network stack unchanged
+- Publicly resolvable domains protected by Twingate **must** be added to Internal Domains list
 
 ## Prerequisites
-- AnyConnect with Umbrella Module installed (not legacy Roaming Client)
-- Access to Cisco Umbrella Management Console
-- Knowledge of domains used by Twingate Resources (e.g., `*.example.com`)
+- Cisco Umbrella Management Console admin access
+- AnyConnect with Umbrella Module deployed (not legacy Roaming Client)
+- Known list of domains for Twingate Resources
 
 ## Step-by-Step Configuration
 
 1. Open **Cisco Umbrella Management Console**
 2. Navigate to **Deployments → Configuration → Domain Management**
-3. Under **Internal Domains**, add the domains corresponding to your Twingate Resources
-   - Example: add `example.com` to cover `*.example.com`
+3. Under **Internal Domains**, add each Twingate resource domain (e.g., `example.com`)
+4. Save configuration
 
 ## Configuration Values
 
 | Setting | Location | Value |
 |---|---|---|
-| Internal Domains | Umbrella Console → Deployments → Configuration → Domain Management | Your Twingate resource domains (e.g., `example.com`) |
+| Internal Domain entry | Umbrella Domain Management | `example.com` (covers `*.example.com`) |
 
 ## Gotchas
-- **Publicly resolvable domains** must still be added to Internal Domains — AnyConnect will otherwise intercept and forward them to Umbrella instead of letting Twingate resolve them
-- **Wildcard syntax**: Left-hand wildcards only — `example.com` implicitly covers `*.example.com`; mid-field wildcards like `bla.*.example.com` are **not supported**
-- Roaming Client stores resolver list at startup and never polls for OS-level changes — this is why it conflicts with Twingate (Twingate's resolver additions are ignored)
-- Internal Domain tags are stored in memory and reset when AnyConnect restarts
+- **Roaming Client is incompatible** with Twingate—must migrate to AnyConnect with Umbrella Module
+- AnyConnect does **not** support midfield wildcards (`bla.*.example.com` is invalid)
+- Left-hand wildcards are implied: adding `example.com` is equivalent to `*.example.com`
+- Roaming Client captures resolver list at startup and never refreshes it—dynamic resolver changes (like Twingate's) break it
+- Internal Domain "do not intercept" tags are **in-memory only**; cleared on AnyConnect restart
 
 ## Related Docs
-- [Umbrella Domain Management](https://docs.umbrella.com/deployment-umbrella/docs/domain-management)
-- Twingate: Split DNS / DNS configuration docs
+- Cisco Umbrella Domain Management: https://docs.umbrella.com/deployment-umbrella/docs/domain-management
+- Twingate: Upgrading from Roaming Client to AnyConnect is free of charge via Cisco

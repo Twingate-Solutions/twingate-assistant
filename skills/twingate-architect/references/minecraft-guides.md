@@ -1,47 +1,51 @@
 # Minecraft Server Guides
 
+## Page Title
+Minecraft Server Guides - Private Minecraft Server Hosting with Twingate
+
 ## Summary
-Index page for hosting private Minecraft servers using Twingate to avoid port forwarding. Covers Java (Vanilla), Java (Forge/modded), and Bedrock editions with both Docker Compose and Linux bare metal deployment options. All setups use a Twingate Connector that creates outbound-only connections, keeping servers off the public internet.
+Index page for hosting private Minecraft servers using Twingate without port forwarding. Covers three server editions (Java Vanilla, Java Forge, Bedrock) with two deployment options each (Docker Compose or bare metal Linux). The Twingate Connector handles outbound-only connections, keeping the server off the public internet.
 
 ## Key Information
-- Six total guides: 3 editions × 2 deployment methods (Docker Compose, Linux bare metal)
-- No ports exposed to internet; players connect via private IP through Twingate Client
-- Connector opens outbound connection to Twingate Cloud (no inbound firewall rules needed)
-- Docker guides use `itzg/minecraft-server` (Java) and `itzg/minecraft-bedrock-server` (Bedrock) images
-- Forge Docker guide supports automated CurseForge modpack installation
+- 6 total guides: 3 editions × 2 deployment methods
+- No ports exposed to internet; Connector makes outbound connections to Twingate Cloud
+- Players connect via private IP using Twingate Client
 
-## Comparison Table
+## Edition Comparison
 
 | | Java Vanilla | Java Forge | Bedrock |
 |---|---|---|---|
 | Protocol | TCP 25565 | TCP 25565 | UDP 19132 |
 | Min RAM | 2 GB | 4–8 GB | 1 GB |
 | Platforms | Win/Mac/Linux | Win/Mac/Linux | Win/iOS/Android/ChromeOS |
-| Mod support | No | Yes | No |
+| Mod Support | No | Yes | No |
 
 ## Prerequisites
 - Twingate account (free tier available)
 - Twingate Client installed on each player's device
-- **Docker guides:** Docker + Docker Compose on host (Linux, macOS, or Windows)
-- **Linux guides:** Ubuntu 22.04/24.04 or Debian 12; Java installed (Java editions); x86_64 arch (Bedrock); systemd
+- **Docker guides**: Docker + Docker Compose (Linux/macOS/Windows host)
+- **Linux guides**: Ubuntu 22.04/24.04 or Debian 12; Java (Vanilla/Forge) or Bedrock binary (x86_64 only); systemd
 
 ## Architecture
 ```
-[Player Device + Twingate Client] → [Twingate Cloud] → [Twingate Connector] → [Minecraft Server]
+[Player Device] → Twingate Client → [Twingate Cloud] ↔ [Twingate Connector] → [Minecraft Server]
 ```
-- Connector and server run as either Docker containers (Compose) or systemd services (bare metal)
-- Players connect using server's **private IP address**, not public IP or hostname
+
+## Deployment Options by Edition
+- **Java Vanilla Docker**: `itzg/minecraft-server` image
+- **Java Vanilla Linux**: Native install + systemd
+- **Forge Docker**: Auto-downloads CurseForge modpacks or manual mods
+- **Forge Linux**: Manual Forge install + systemd
+- **Bedrock Docker**: `itzg/minecraft-bedrock-server` image
+- **Bedrock Linux**: Native install + systemd
 
 ## Gotchas
-- Bedrock edition is **UDP 19132**, not TCP — relevant for Connector/Resource configuration
-- Bedrock Linux guide requires **x86_64** architecture only (no ARM support noted)
-- Forge requires significantly more RAM (4–8 GB) vs vanilla (2 GB); check specific guide before provisioning
-- RAM/disk requirements vary by edition — index page doesn't specify disk; check individual guides
+- Bedrock uses **UDP** 19132, not TCP — relevant for firewall/connector config
+- Bedrock Linux bare metal is **x86_64 only**
+- Forge RAM requirement (4–8 GB) is significantly higher than Vanilla
+- RAM/disk specifics vary per guide — check individual guides before provisioning
 
 ## Related Docs
-- Vanilla Java Docker guide
-- Vanilla Java Linux guide
-- Forge Docker guide
-- Forge Linux guide
-- Bedrock Docker guide
-- Bedrock Linux guide
+- Individual guides linked from this index (not URLs provided)
+- Twingate Connector setup (implied prerequisite)
+- Twingate Client installation

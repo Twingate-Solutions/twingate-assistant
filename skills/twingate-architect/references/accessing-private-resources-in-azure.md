@@ -1,58 +1,55 @@
-# Securing Private Resources in Azure with Twingate
+# Accessing Private Resources in Azure with Twingate
 
 ## Summary
-Step-by-step guide to deploying Twingate Connectors and accessing private Azure resources (VMs without public IPs) via SSH, HTTP, or DNS. Covers subnet preparation, Connector deployment, and Resource creation for Azure virtual networks.
+Step-by-step guide to deploy Twingate Connectors in Azure and expose private VM resources (no public IPs) to authorized users. Covers subnet creation, Connector deployment, Resource definition, and client access.
 
 ## Key Information
-- Azure Container Instances **cannot share a subnet** with VMs — a dedicated subnet is required for the Connector
-- Resources can be defined by IP address, DNS name, or both — users can only access via the defined address type(s)
-- Internal DNS names resolve automatically if the zone is defined for the Connector — no additional zone configuration in Twingate needed
-- Connector status visible in Twingate Admin Console (green = healthy)
+- Azure Container Instances **cannot share a subnet with VMs** — a dedicated subnet is required for the Connector
+- Resources can be defined by internal DNS name or private IP address
+- Users can only access Resources via the address type defined (IP, DNS, or both)
+- DNS resolution works automatically if the zone is configured on the Connector's network — no explicit Twingate zone config needed
 
 ## Prerequisites
-- Azure tenant with an existing Virtual Network
-- Permissions to create subnets and deploy Container Instances in Azure
-- Twingate Admin Console access (to create Remote Network, generate Connector tokens)
+- Azure Virtual Network with available address space
+- Permissions to create subnets, resource groups, and container instances in Azure
+- Twingate account with Admin Console access
 - Twingate Client installed on end-user devices
 
 ## Step-by-Step
 
-### Prepare Network
+### Prepare the Network
 1. Navigate to **Virtual Networks** in Azure Portal
-2. Add address space to the virtual network
+2. Add address space to the VNet (to accommodate new subnet)
 3. Navigate to **Subnets**
-4. Create a new subnet using the new address space (dedicated for Containers only)
+4. Create a new subnet using the new address space (dedicated for Container Instances)
 
-### Deploy Connector
-5. Follow the [Azure Connector Deployment Guide](https://www.twingate.com/docs/deploy-azure) with:
-   - Resource Group name
-   - VNet name
-   - Subnet name (the dedicated container subnet)
-6. Verify Container Instance is running in Azure Portal
-7. Confirm Connector status shows green in Twingate Admin Console
+### Deploy the Connector
+5. Follow the [Azure Connector Deployment Guide](https://www.twingate.com/docs/azure-connector) using the Resource Group, VNet, and new subnet details
+6. Verify: container service running in Azure + Connector status shows **green** in Twingate Admin Console
 
 ### Create Resources
-8. In Admin Console, create Resources using internal IP addresses or internal DNS names
-9. Assign Resources to the Remote Network associated with the deployed Connector
+7. In Admin Console, create Resources using either:
+   - Internal DNS name (e.g., `vm.internal.corp`)
+   - Private IP address
+8. Assign Resources to a Twingate Group
 
 ### Access Resources
-10. Connect via Twingate Client (tray menu on Windows/macOS, app on Android/iOS/ChromeOS, CLI on Linux)
-11. Access resources using the defined address (IP or DNS)
+9. Connect via Twingate Client (Windows/macOS tray, mobile app, or Linux CLI)
+10. Resources appear in client; access via SSH, HTTP, etc. using defined addresses
 
 ## Configuration Values
-| Parameter | Notes |
-|-----------|-------|
-| Resource Group | Existing Azure RG for Connector deployment |
-| VNet | Target virtual network |
-| Subnet | Must be dedicated to Containers (no VMs) |
-| Resource address | IP, FQDN, or both — determines how users connect |
+| Item | Notes |
+|------|-------|
+| Subnet delegation | Must be dedicated to Container Instances |
+| Resource address | IP, DNS hostname, or both — users limited to defined type |
+| Connector visibility | Admin Console shows green status on successful deploy |
 
 ## Gotchas
-- **Subnet isolation required**: Azure enforces that Container Instances cannot coexist with VMs in the same subnet — always create a separate subnet
-- **Address type lock-in**: If a Resource is defined by DNS name only, IP access won't work (and vice versa) — define both if needed
-- **DNS resolution**: Works automatically for internal zones without explicit Twingate zone config, as long as the Connector can reach the DNS server
+- **Subnet isolation required**: VMs and Container Instances cannot coexist in the same Azure subnet — failure to separate will block Connector deployment
+- **Address type lock-in**: If a Resource is defined only by IP, DNS access won't work (and vice versa) — define both if needed
+- **DNS zones**: No Twingate-side zone configuration needed; relies on DNS being resolvable from the Connector's subnet
 
 ## Related Docs
-- [Azure Connector Deployment Guide](https://www.twingate.com/docs/deploy-azure)
-- [Twingate Client Installation](https://www.twingate.com/docs/client)
-- Twingate Admin Console — Remote Networks and Resources configuration
+- [Azure Connector Deployment Guide](https://www.twingate.com/docs/azure-connector)
+- [Twingate Client Setup](https://www.twingate.com/docs/client)
+- Azure Connector troubleshooting (within deployment workflow screen in Admin Console)

@@ -1,60 +1,60 @@
 # Introduction to DNS
 
-## Page Summary
-Conceptual reference covering DNS fundamentals including resolution hierarchy, record types, zonefiles, resolvers, caching, TTLs, reverse DNS, and private DNS. Provides context for understanding how Twingate integrates with DNS. No configuration steps — pure reference material.
+## Page Title
+Introduction to DNS
+
+## Summary
+Conceptual overview of DNS mechanics for Twingate users. Covers how DNS translates human-readable names to IP addresses through a hierarchical resolution system. Provides foundational knowledge needed to understand how Twingate intercepts and handles DNS queries.
 
 ## Key Information
 
-### DNS Resolution Hierarchy
-1. **Root Servers** → handle TLD queries (`.com`, `.net`, `.org`)
-2. **TLD Servers** → resolve second-level domain (`google` in `google.com`)
-3. **Domain-Level Nameservers** → return actual IP for full address (`www.google.com`)
+**DNS Resolution Hierarchy:**
+- Root Servers → TLD Servers → Domain Level Nameservers
+- Resolution always flows top-level down
+- Each level returns a pointer to the next, not the final IP
 
-### DNS Record Types
-| Record | Purpose |
-|--------|---------|
-| `A` | Hostname → IPv4 |
-| `AAAA` | Hostname → IPv6 |
-| `CNAME` | Alias one record to another |
-| `MX` | Mail server with priority |
-| `PTR` | IP → hostname (reverse DNS) |
-| `SOA` | Zone authority + expiry metadata |
-| `SRV` | Generic service location |
-| `TXT` | Arbitrary data (SPF, verification) |
+**DNS Record Types:**
+| Type | Purpose |
+|------|---------|
+| A | Hostname → IPv4 |
+| AAAA | Hostname → IPv6 |
+| CNAME | Alias one record to another |
+| MX | Mail server mapping |
+| PTR | IP → hostname (Reverse DNS) |
+| SOA | Zone authority/metadata |
+| SRV | Service location (generic) |
+| TXT | Arbitrary key/value data |
 
-### Key Files (Unix)
-- `/etc/hosts` — local DNS override, always takes precedence over DNS; supports only A-record equivalents
-- `/etc/resolv.conf` — defines resolver list
-- Windows hosts file: `C:\Windows\System32\drivers\etc\hosts`
-- Windows DNS cache: `ipconfig /displaydns`
+**Twingate DNS Behavior:**
+- With Twingate Client active, inserts its own resolver first: `100.95.0.25[1-4]` (on `utun7`)
+- Original resolver (e.g., router at `192.168.1.1`) becomes fallback
+- See full behavior: [How DNS Works with Twingate](https://www.twingate.com/docs/dns)
 
-### Twingate Resolver Behavior
-- With Twingate Client **off**: resolver points to router (e.g., `192.168.1.1`)
-- With Twingate Client **on**: Twingate DNS resolvers (`100.95.0.251–254`) inserted as **first** in resolver list
-- Mac diagnostic command: `scutil --dns`
+## Configuration Values
 
-## Caching & TTL
-- **SOA record** sets default zone expiry (e.g., `$TTL 3600` = 1 hour)
-- Individual records can override with per-record TTL values
-- Unix: caching typically at **application level** (per-browser)
-- Windows: OS-level centralized DNS cache
-- DNS propagation delay = maximum TTL value on cached records
+- **Twingate DNS resolver IPs:** `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254`
+- **Default TTL field in zonefile:** `$TTL <seconds>` (e.g., `3600`)
+- **Reverse DNS suffix:** `<reversed-octets>.in-addr.arpa`
 
-## Reverse DNS
-- Resolves IP → hostname using `PTR` records
-- Syntax: reverse IP octets + append `in-addr.arpa`
-  - `22.33.44.55` → query `55.44.33.22.in-addr.arpa`
+## Host-Side DNS Configuration
 
-## Private DNS
-- Internal DNS servers only accessible within private network
-- Allows name resolution of private resources (e.g., `nas.home.int`) without public exposure
-- Standard practice for corporate environments
+**Linux/Mac:**
+- `/etc/hosts` — local overrides, takes precedence over DNS, A-record equivalent only
+- `/etc/resolv.conf` — defines resolver order
+- Check resolvers (Mac): `scutil --dns`
+
+**Windows:**
+- Hosts file: `C:\Windows\System32\drivers\etc\hosts`
+- View DNS cache: `ipconfig /displaydns`
 
 ## Gotchas
-- `/etc/hosts` takes precedence over DNS — unintended entries cause resolution failures
-- Don't modify the first 4 auto-generated lines in `/etc/hosts`
-- High SOA TTLs cause slow propagation when records change — reduce TTL **before** making changes
-- DNS caching layer varies by OS; flushing browser cache ≠ flushing OS DNS cache
+
+- `/etc/hosts` always overrides DNS — useful for testing but easy to forget
+- DNS caching means record updates can take up to the SOA expiry time to propagate network-wide
+- Unix systems cache DNS at the application level (per-browser); Windows caches centrally
+- Reduce TTL *before* a planned DNS change to speed propagation
+- Private DNS records (e.g., `nas.home.int`) must be served by internal-only DNS servers — not publicly resolvable by design
+- `www.example.com` resolving the same as `example.com` is due to a CNAME record, not automatic behavior
 
 ## Related Docs
-- [How DNS Works with Twingate](https://www.twingate.com/docs/how-dns-works-with-twingate)
+- [How DNS Works with Twingate](https://www.twingate.com/docs/dns)

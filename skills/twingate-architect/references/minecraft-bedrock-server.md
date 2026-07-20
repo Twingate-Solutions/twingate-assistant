@@ -1,63 +1,68 @@
 # Minecraft Bedrock Server with Twingate
 
 ## Summary
-Hosts a private Minecraft Bedrock Edition server using Docker Compose with a Twingate Connector, eliminating the need for port forwarding. Players connect via Twingate Client using the server's private Docker bridge IP. Console players (Xbox, PlayStation, Switch) are not supported.
+Host a private Minecraft Bedrock Edition server using Docker Compose with a Twingate Connector, eliminating the need for port forwarding. Traffic routes through an encrypted Twingate tunnel using a fixed Docker bridge network IP. Supports Windows, iOS, Android, and ChromeOS players only (no console support).
 
 ## Key Information
-- Bedrock server pinned to `172.30.0.10` on Docker bridge network `minecraft-net` (subnet `172.30.0.0/24`)
-- Bedrock uses **UDP port 19132** — must be configured as UDP in Twingate Resource (not TCP)
-- No ports published to host; Connector reaches server directly over private bridge
-- `itzg/minecraft-bedrock-server` image is multi-arch (includes box64 emulation for ARM)
-- Twingate Connector adds <256 MB RAM overhead
+- Uses `itzg/minecraft-bedrock-server` Docker image with Twingate Connector in Docker Compose
+- Server pinned to `172.30.0.10` on a user-defined bridge network (`minecraft-net`)
+- **No ports published to host** — Connector reaches server directly over Docker bridge
+- Bedrock uses **UDP port 19132** (not TCP)
+- Multi-arch image supports ARM (Apple Silicon, Raspberry Pi) via `box64` emulation layer
+- Hardware minimum: 1 GB RAM, 2 CPU cores, 10 GB disk
 
 ## Prerequisites
-- Machine: 1 GB RAM, 2 CPU cores, 10 GB disk
 - Docker Engine + Docker Compose installed
 - Twingate account with Admin Console access
 - Terminal access to host machine
 
 ## Step-by-Step
 
-1. **Create Remote Network** in Twingate Admin Console → Add Connector → Select Docker → Generate Tokens → copy Access Token and Refresh Token
-2. **Create project directory** and `docker-compose.yml` (see config below)
-3. **Start containers**: `docker compose up -d`
-4. **Verify Connector** in Admin Console shows Controller and Relay as `Connected`
-5. **Add Resource**: Address `172.30.0.10`, Protocol UDP port `19132`
-6. **Grant access** to a Group (e.g., `Everyone` or custom `Minecraft Players`)
-7. **Players install Twingate Client**, sign in, then add server `172.30.0.10:19132` in Minecraft
+1. **Admin Console** → Remote Networks → Add Remote Network
+2. Add Connector → Select Docker → Generate Tokens → copy Access Token + Refresh Token
+3. Create project directory and `docker-compose.yml` (see config below)
+4. Replace placeholders → `docker compose up -d`
+5. **Admin Console** → Resources → Add Resource → set address `172.30.0.10`, **UDP port 19132**
+6. Assign Group access to Resource
+7. Players install Twingate Client, sign in, then add server at `172.30.0.10:19132` in Minecraft
 
 ## Configuration Values
 
-**docker-compose.yml environment variables:**
+### Docker Compose Environment Variables
+| Variable | Value | Notes |
+|---|---|---|
+| `TWINGATE_NETWORK` | `<network_name>` | Without `.twingate.com` |
+| `TWINGATE_ACCESS_TOKEN` | `<token>` | Unique per Connector |
+| `TWINGATE_REFRESH_TOKEN` | `<token>` | Unique per Connector |
+| `EULA` | `TRUE` | Required to start server |
+| `SERVER_NAME` | `"Private Bedrock Server"` | Shown in server list |
+| `GAMEMODE` | `survival` | `survival`/`creative`/`adventure` |
+| `DIFFICULTY` | `normal` | `peaceful`/`easy`/`normal`/`hard` |
+| `MAX_PLAYERS` | `10` | |
+| `VERSION` | `LATEST` | Pin with e.g. `1.21.30.03` |
+| `LEVEL_SEED` | *(random)* | |
 
-| Variable | Value |
-|---|---|
-| `TWINGATE_NETWORK` | `<your-network-name>` |
-| `TWINGATE_ACCESS_TOKEN` | `<access-token>` |
-| `TWINGATE_REFRESH_TOKEN` | `<refresh-token>` |
-| `EULA` | `"TRUE"` |
-| `SERVER_NAME` | `"Private Bedrock Server"` |
-| `GAMEMODE` | `survival` / `creative` / `adventure` |
-| `DIFFICULTY` | `peaceful` / `easy` / `normal` / `hard` |
-| `MAX_PLAYERS` | `10` |
-| `VERSION` | `LATEST` or specific (e.g., `1.21.30.03`) |
-| `LEVEL_SEED` | *(random)* |
-| `SERVER_PORT` | `19132` |
-
-**Docker images:**
+### Docker Images
 - `itzg/minecraft-bedrock-server:latest`
 - `twingate/connector:1`
 
+### Network
+- Subnet: `172.30.0.0/24`
+- Server fixed IP: `172.30.0.10`
+
 ## Gotchas
-- **UDP required**: Configuring Resource as TCP causes "Unable to connect to world" error
-- **Twingate Client must stay connected** throughout the entire Minecraft session
-- **Console platforms unsupported**: Xbox, PlayStation, Switch have no Twingate Client
-- **ARM overhead**: box64 emulation works but reduces performance on low-powered ARM hardware (e.g., Raspberry Pi)
-- **Token reuse**: Each Connector requires unique Access/Refresh token pair
-- **`network_mode: host`** does not work on Docker Desktop for macOS/Windows
+- **UDP not TCP**: Configuring the Twingate Resource with TCP causes "Unable to connect to world" error
+- **Console players unsupported**: Xbox, PlayStation, Switch have no Twingate Client
+- **Twingate must stay connected** during entire Minecraft session
+- `network_mode: host` does not work on Docker Desktop for macOS/Windows
+- Each Connector requires its own unique token pair — never reuse tokens
+- ARM emulation adds CPU overhead; keep player counts low on Raspberry Pi
+
+## Troubleshooting
+- "Unable to connect": Check Twingate Client connected, Resource in client list, UDP protocol set, server running (`docker compose ps`), correct IP/port in Minecraft
+- Connector offline: Verify all three `TWINGATE_*` env vars, outbound internet access, check `docker compose logs twingate-connector`
 
 ## Related Docs
-- [Minecraft Java Edition guide](https://www.twingate.com/docs/minecraft-java-server)
-- [Linux native install version](https://www.twingate.com/docs/minecraft-bedrock-server-linux)
-- [itzg/minecraft-bedrock-server docs](https://github.com/itzg/docker-minecraft-bedrock-server)
-- Twingate Security Policies, Resources configuration, Protect Your Home Lab
+- [Minecraft Java Edition Guide](https://www.twingate.com/docs/minecraft-java-server)
+- [Linux native install version](https://www.twingate.com/docs/minecraft-bedrock-server) (linked as "Linux version")
+- [itzg/minecraft-bedrock-server documentation](https://github.com/itzg/docker-minecraft-bed

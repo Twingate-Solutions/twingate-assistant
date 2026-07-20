@@ -4,58 +4,55 @@
 Twingate Cloud Providers Guide
 
 ## Summary
-Covers deploying and configuring Twingate Connectors across AWS, GCP, Azure, and DigitalOcean. The setup pattern is identical across all providers: create a Remote Network, deploy a Connector, then define Resources. Connectors use outbound-only connections, eliminating inbound firewall requirements.
+Covers deploying and configuring Twingate Connectors across AWS, GCP, Azure, and DigitalOcean. The setup pattern is identical across all providers: create a Remote Network, deploy a Connector, then define Resources using private IPs or internal DNS names.
 
 ## Key Information
-- Supported providers: AWS, Google Cloud (GCP), Azure, DigitalOcean
-- Universal pattern: Remote Network → Connector → Resources
-- Connectors require **no inbound firewall rules** — outbound only
-- High availability: deploy **minimum 2 Connectors** per Remote Network in production
-- Resources addressed by private IP (e.g., `10.0.1.15`) or internal DNS (e.g., `app.internal.example.com`)
+- Connectors make **outbound-only connections** — no inbound firewall rules or public ports required
+- Deploy **minimum 2 Connectors per Remote Network** for production high availability
+- Resources are defined by private IP addresses or internal DNS names
 
 ## Prerequisites
 - Twingate Admin Console access
-- VM/instance in target cloud VPC/VNet
-- Outbound internet access from Connector VM
-- Valid Connector tokens (generated in Admin Console)
+- Cloud VM/instance with outbound internet access
+- Twingate Client installed on end-user devices
 
-## Step-by-Step (Universal Pattern)
-1. Create a **Remote Network** in Admin Console representing your VPC/VNet/project
-2. Deploy a **Connector** into that network (cloud-specific guides below)
-3. Create **Resources** using private IPs or internal DNS names
+## Setup Pattern (All Providers)
+1. Create a **Remote Network** in Admin Console (represents VPC/VNet/project)
+2. Deploy a **Connector** into that network
+3. Create **Resources** with private IPs or internal DNS names
 4. Assign user permissions to Resources
 
 ## Provider-Specific Guides
+
 | Provider | Topics Covered |
 |----------|---------------|
-| AWS EC2 | Instance sizing, security groups, IAM |
-| AWS | Replace Client VPN / Site-to-Site VPN migration |
-| AWS | WorkSpaces client install, RDS/Aurora database access |
-| GCP Compute Engine | Machine type, VPC firewall, service accounts, Cloud SQL |
-| Azure VM | VM sizing, NSG rules, resource groups, SQL Database/Managed Instance |
-| DigitalOcean | Droplet deployment, VPC private resource access |
+| **AWS** | EC2 deployment, VPN migration, Workspaces, reference architecture, RDS/Aurora access |
+| **GCP** | Compute Engine VM, Cloud SQL + Auth Proxy |
+| **Azure** | Azure VM deployment, private VNet resources, Azure SQL/Managed Instance |
+| **DigitalOcean** | Droplet deployment, VPC access |
 
-## Configuration Values
-| Requirement | Value |
-|-------------|-------|
-| Outbound port (HTTPS) | `443` |
-| Outbound port (Relay) | `30000–31000` TCP |
-| Inbound ports required | None |
+## Configuration Values / Network Requirements
+
+| Protocol | Port | Direction | Purpose |
+|----------|------|-----------|---------|
+| HTTPS | 443 | Outbound | Connector control plane |
+| TCP | 30000–31000 | Outbound | Relay infrastructure |
+
+No inbound ports required.
 
 ## Troubleshooting
 
-| Issue | Check |
-|-------|-------|
-| Connector won't connect | Outbound access on 443 + 30000-31000; valid/unexpired tokens |
-| Resources unreachable | Security group allows outbound from Connector to Resource IP/port |
-| DNS resolution failures | Connector VM can resolve internal DNS; VPC DNS settings; hosted zone association |
-| Slow connections | Connector health in Admin Console; deploy Connector closer to Resource; enable peer-to-peer |
+| Issue | Fix |
+|-------|-----|
+| Connector won't connect | Verify outbound 443 + TCP 30000–31000; check Connector tokens not expired |
+| Resources unreachable | Security group must allow outbound from Connector to Resource's private IP/port |
+| DNS resolution failures | Confirm Connector VM can resolve internal DNS; check VPC DNS settings and hosted zone associations |
+| Slow connections | Check Connector health in Admin Console; deploy Connector closer to Resource or enable peer-to-peer |
 
 ## Gotchas
-- Connector must have **network path to Resource** — treat it like any other host in the VPC needing access
-- DNS failures often caused by hosted zone not associated with correct VPC
-- Tokens must not be expired; regenerate in Admin Console if needed
-- Single Connector = single point of failure; always use 2+ for production
+- Connector must have a **network path to the Resource** (treated like any host in the VPC)
+- Internal DNS names require the Connector's VM DNS to resolve them — check VPC DNS and hosted zone config
+- Connector tokens must be valid and not expired
 
 ## Related Docs
 - Connector Best Practices

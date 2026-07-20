@@ -1,59 +1,67 @@
 # Twingate Notifications
 
 ## Summary
-Twingate provides granular notification controls for admins, supporting both email and webhook delivery channels. Some notifications (subscription updates, end-user notifications) are always emailed to all admins; others can be routed to specific recipients or webhooks.
+Twingate provides configurable notification channels (email and webhooks) for admin alerts. Some notifications are mandatory email-only; others can be routed to specific recipients or webhook endpoints. Webhooks accept POST requests with JSON payloads.
 
 ## Key Information
-- Notifications managed in **Admin Console → Settings**
-- Two delivery methods: email (specific addresses) or webhook (URL-based)
-- Can configure by channel (which notifications go to a recipient) or by notification (which recipients get a specific notification)
-- Webhook testing available via "Test Payload" button in Admin Console
-- All webhooks receive **POST requests** with **JSON payloads**
-- Use **Slack Workflow Builder** (not Incoming Webhooks) for Slack integration
+- **Fixed notifications** (always email to all admins): subscription updates, end-user notifications
+- **Configurable notifications**: can target specific email addresses or webhooks
+- Manage via Admin Console → Settings
+- Use **Slack Workflow Builder** (not Incoming Webhooks) for Slack integration — Incoming Webhooks only support plain text JSON
+- Test payloads available directly in Admin Console per notification type
 
 ## Prerequisites
 - Admin access to Twingate Admin Console
-- Webhook endpoint must accept HTTP POST with standard JSON
+- Webhook endpoint that accepts HTTP **POST** requests with standard JSON
 
 ## Webhook Configuration
-Required fields:
+Required inputs:
 - Webhook name
 - Webhook URL
 - Selected notification types
 
-## Webhook Payload Types & Key Fields
+## Webhook Payload Fields (Common)
+| Field | Description |
+|-------|-------------|
+| `timestamp` | ISO 8601 datetime |
+| `tenant` | Twingate tenant domain |
+| `version` | Payload version (`"1"`) |
+| `type` | Notification type constant (see below) |
 
-| Type | `type` value | Notable fields |
-|------|-------------|----------------|
-| Usage-based Access Request | `ACCESS_REQUEST` | `request_type: "AutoLock"`, `approval_mode`, `request_duration_seconds` |
-| JIT Access Request | `ACCESS_REQUEST` | `request_type: "AccessRequest"`, `reason`, `user_url`, `resource_url` |
-| Client update recommended | `CLIENT_UPDATE_RECOMMENDED` | `platform`, `devices_list` |
-| Client update required | `CLIENT_UPDATE_REQUIRED` | `table` |
-| Connector upgrade available | `CONNECTOR_UPGRADE_AVAILABLE` | `table` |
-| Connectors offline | `CONNECTOR_STATUS_OFFLINE` | `table` |
-| Connectors online | `CONNECTOR_STATUS_ONLINE` | `table` |
-| Device integration API token expiry | `DEVICE_INTEGRATION_API_TOKEN_EXPIRATION` | `integration`, `days_remaining`, `manage_integration` |
-| Events sync errors | `EVENTS_SYNC_ERRORS` | `message`, `manage_sync` |
-| Events sync resolved | `EVENTS_SYNC_ERROR_RESOLVED` | `sync_type`, `manage_sync` |
-| Events sync needs attention | `EVENTS_SYNC_REQUIRES_ATTENTION` | `sync_type`, `manage_sync` |
-| Google Workspace sync error | `GOOGLE_WORKSPACE_SYNC_ERROR` | `message_integration` |
-| IdP integration error | `IDENTITY_PROVIDER_INTEGRATION_ERROR` | `integration`, `manage_integration` |
-| Integration error resolved | `INTEGRATION_ERROR_RESOLVED` | `integration`, `manage_integration` |
-| Integration errors | `INTEGRATION_ERRORS` | `integration`, `manage_integration` |
-| Service account key expiry | `SERVICE_ACCOUNT_KEYS_EXPIRATION` | `table[].service_account_name`, `table[].service_key`, `table[].link` |
+## Notification Types & `type` Values
+| Notification | `type` constant |
+|---|---|
+| Usage-based Access Request | `ACCESS_REQUEST` (request_type: `AutoLock`) |
+| JIT Access Request | `ACCESS_REQUEST` (request_type: `AccessRequest`) |
+| Client update recommended | `CLIENT_UPDATE_RECOMMENDED` |
+| Client update required | `CLIENT_UPDATE_REQUIRED` |
+| Connector upgrade available | `CONNECTOR_UPGRADE_AVAILABLE` |
+| Connector offline | `CONNECTOR_STATUS_OFFLINE` |
+| Connector online | `CONNECTOR_STATUS_ONLINE` |
+| Device integration API token expiring | `DEVICE_INTEGRATION_API_TOKEN_EXPIRATION` |
+| Events sync errors | `EVENTS_SYNC_ERRORS` |
+| Events sync errors resolved | `EVENTS_SYNC_ERROR_RESOLVED` |
+| Events sync requires attention | `EVENTS_SYNC_REQUIRES_ATTENTION` |
+| Google Workspace sync error | `GOOGLE_WORKSPACE_SYNC_ERROR` |
+| Identity provider integration error | `IDENTITY_PROVIDER_INTEGRATION_ERROR` |
+| Integration error resolved | `INTEGRATION_ERROR_RESOLVED` |
+| Integration errors | `INTEGRATION_ERRORS` |
+| Service account keys expiring | `SERVICE_ACCOUNT_KEYS_EXPIRATION` |
 
-## Common Payload Fields
-All payloads include: `timestamp` (ISO 8601), `tenant`, `version: "1"`, `type`
+## Access Request Payload Notable Fields
+- `request_id`, `request_url` — link to approve/deny in console
+- `approval_mode` — `MANUAL` or automatic
+- `request_type` — `AutoLock` (usage-based) vs `AccessRequest` (JIT)
+- `request_duration_seconds` — requested access duration
 
 ## Gotchas
-- Webhook endpoint **must accept POST** — GET-only endpoints will error
-- Slack Incoming Webhooks reject standard JSON; use Slack Workflow Builder instead
-- Fixed notifications (subscription/end-user) cannot be customized — always go to all admins
-- `table` field appears as empty array `[]` in test payloads for some notification types
+- Webhook endpoints **must accept POST**; GET-only endpoints will error
+- Slack Incoming Webhooks reject standard JSON — use Workflow Builder instead
+- `CLIENT_UPDATE_REQUIRED` and connector/status payloads include a `table` array (may be empty in test payloads)
+- `SERVICE_ACCOUNT_KEYS_EXPIRATION` includes a `table` array with `service_account_name`, `service_key`, `link`
 
 ## Related Docs
 - Access Requests (JIT/Usage-based)
+- Device Integrations settings
 - Connector management
-- Device integrations
-- Service accounts
 - Events sync configuration

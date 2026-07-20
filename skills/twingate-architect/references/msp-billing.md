@@ -4,42 +4,49 @@
 MSP Billing
 
 ## Summary
-MSP partners receive consolidated monthly billing on the first of each calendar month, with separate line items per Customer Network. License count is calculated as total Users and Service Accounts minus Admins across all subtenants. Billing management is handled exclusively through the MSP portal, not individual Customer Network consoles.
+MSP billing is consolidated and charged on the first of each calendar month, with separate line items per Customer Network. License count is calculated as total Users and Service Accounts minus Admins across all subtenants at end of billing period.
 
 ## Key Information
-- Billing date: 1st of every calendar month
+- Billing cycle: Monthly, charged on the 1st of each calendar month
 - Each Customer Network has a minimum charge of **1 license** regardless of user count
-- Invoices are sent only to the MSP, not to end customers
-- Billing page exists **only** in the MSP portal (not in Customer Network Admin Consoles)
+- License formula: `(Total Users + Service Accounts) - Admins = Licenses charged`
+- Admins are excluded from license count
+- Billing is snapshot-based at end of month (e.g., March 31 count → April 1 charge)
+- Invoices sent only to MSP portal signup email, not to Customer Networks
 
-## License Calculation
-```
-Licenses charged = (Total Users + Service Accounts across all subtenants) - Total Admins
-```
-- Count is taken from the **last day of the prior month**
-- Admins are excluded from license counts
-- Example: 150 Users/SAs - 5 Admins = 145 licenses billed
+## Prerequisites
+- Must be operating through the Twingate MSP portal
+- Billing page is only accessible from the MSP portal, not Customer Network Admin Consoles
 
-## Step-by-Step: Access Billing Settings
-1. Navigate to MSP portal → **Settings > Billing**
-2. Click **"Manage Plan"** to open the Manage Subscriptions modal
-3. From the modal, access:
-   - **Child subscriptions** — view all Customer Networks and monthly prices
-   - **Payment Methods** — update credit card information
-   - **Billing History** — view or download past invoices
+## Navigation
+**Settings → Billing → "Manage Plan" button → Manage Subscriptions modal**
 
-## Configuration Values
-| Setting | Location |
-|---|---|
-| Invoice email address | MSP portal Billing page → "Manage" → Account Information |
-| Customer Network plan changes | Contact `partnersupport@twingate.com` |
+Modal options:
+| Button | Function |
+|--------|----------|
+| Child subscriptions | View all Customer Networks and monthly prices |
+| Payment Methods | Update credit card information |
+| Billing History | View or download past invoices |
+
+## Configuration Values / Parameters
+None (UI-only management)
+
+## Licensing Example
+| Event | Value |
+|-------|-------|
+| Users + Service Accounts on Feb 28 | 100 |
+| Admins on Feb 28 | 5 |
+| **Charged March 1** | **95** |
+| Add 50 users March 25 → total March 31 | 150 |
+| Admins March 31 | 5 |
+| **Charged April 1** | **145** |
 
 ## Gotchas
-- **Billing page not visible in Customer Network Admin Console** — must use MSP portal
-- Minimum 1 license charged per Customer Network even with zero non-admin users
-- Invoices go to the **signup email** for the MSP portal — update via Account Information if needed
-- Plan changes for individual Customer Networks require contacting partner support directly; cannot be self-served
+- Billing page does **not** appear in Customer Network Admin Consoles — only in the MSP portal
+- Plan changes for individual Customer Networks require emailing `partnersupport@twingate.com` (cannot self-serve)
+- Invoice email is tied to MSP portal signup email; update via Billing → Manage → Account Information
+- Each Customer Network is billed a minimum of 1 license even with zero non-admin users
 
 ## Related Docs
 - MSP Portal documentation
-- Twingate licensing/plans documentation
+- Contact: `partnersupport@twingate.com` for Customer Network plan changes

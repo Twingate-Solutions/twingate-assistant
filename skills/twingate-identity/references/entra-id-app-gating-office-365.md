@@ -1,64 +1,62 @@
 # SaaS App Gate Office 365 with Microsoft Entra ID
 
 ## Summary
-Configures Microsoft Entra ID Conditional Access to restrict Office 365 access exclusively through a Twingate Connector's public IP address. Users must be connected to Twingate to access Office 365; all other access paths are blocked.
+Configures Microsoft Entra ID Conditional Access to restrict Office 365 access exclusively through Twingate by whitelisting the Connector's public IP address. All Office 365 requests from non-Connector IPs are blocked. This is a practical implementation of the general Entra ID SaaS App Gating pattern.
 
 ## Key Information
-- Twingate Resource is created for Office 365 URLs in a Remote Network
-- Entra ID Conditional Access uses a Named Location (Connector's public IP) as the trusted location
-- Policy logic: block access from **any location EXCEPT** the trusted location (Connector IP)
-- Multiple Office 365 URLs may need separate Resources depending on apps protected
+- Traffic routed through Twingate Connector exits via the Connector's public IP, which Entra ID treats as a trusted location
+- Policy logic: Block access from "any location" EXCEPT the trusted location (Connector IP) — net effect is allow-only-via-Connector
+- Multiple Resources may be needed for full O365 coverage
+- Conditional Access logs will show Twingate-routed access activity
 
 ## Prerequisites
 - Office 365 Business Subscription
 - Entra ID Conditional Access license
-- At least one deployed Twingate Connector with a known public IP address
+- At least one deployed Twingate Connector with a known static public IP address
+- Note the public IP of each Connector before starting
 
 ## Step-by-Step
 
-**1. Add Twingate Resource**
-- In Admin Console, create a Resource in the Remote Network containing the Connector
-- Map to relevant Office 365 URLs as needed
+**1. Add Twingate Resource(s)**
+- In Admin Console, create Resource(s) in the Remote Network containing your Connector(s)
+- Common O365 URLs to add as Resources:
+  - `portal.office.com`
+  - `*.sharepoint.com`
+  - `*-my.sharepoint.com`
+  - `admin.microsoft.com`
+  - `*-admin.sharepoint.com`
+  - `admin.teams.microsoft.com`
 
 **2. Add Named Location in Entra ID**
-- Navigate to Entra ID → Conditional Access → Named Locations
-- Create location using Connector's public IP in CIDR format
+- Navigate to Entra ID → Conditional Access → Named locations
+- Create new location with Connector's public IP in CIDR format
 
 **3. Create Conditional Access Policy**
-- Assign policy to target users (test on single account first)
-- Target app: Office 365
-- Condition: Include **Any location**, Exclude the **trusted Named Location**
+- Target: specific user(s) or group (test on single account first)
+- App: Office 365
+- Condition → Locations:
+  - **Include**: Any location
+  - **Exclude**: Your named Connector location
 - Grant: **Block access**
-
-**4. Enable Policy**
-- Start with **Report-only** mode for testing
-- Switch to **On** when validated
+- Enable as **Report-only** first for testing, then toggle **On**
 
 ## Configuration Values
-
-| Item | Value/Notes |
-|------|-------------|
-| Trusted location | Connector public IP in CIDR notation |
-| Target application | Office 365 (Entra app selector) |
-| Condition – Include | Any location |
-| Condition – Exclude | Named location (Connector IP) |
-| Grant action | Block access |
-
-**Office 365 URLs to consider for Resources:**
-- `portal.office.com`
-- `*.sharepoint.com`
-- `*-my.sharepoint.com`
-- `admin.microsoft.com`
-- `*-admin.sharepoint.com`
-- `admin.teams.microsoft.com`
+| Setting | Value |
+|---|---|
+| Named Location | Connector public IP in CIDR notation |
+| Policy scope (apps) | Office 365 |
+| Location include | Any location |
+| Location exclude | Connector named location |
+| Grant control | Block access |
 
 ## Gotchas
-- **Lockout risk**: Misconfigured Conditional Access can lock out all accounts including global admins — verify policy carefully before enabling
-- Always test on a **single user account** before applying to groups
-- Use **Report-only mode** before setting policy to **On**
-- Each Connector used for access must have its public IP included in the Named Location
+- **Account lockout risk**: Misconfigured Conditional Access can lock out global admin accounts from the Entra portal — review policy carefully before enabling
+- Policy logic is inverted: "Block from any location except trusted" = "allow only from trusted" — not "allow from any location except trusted"
+- Always start with **Report-only** mode before activating
+- Each Connector's public IP must be added as a separate named location if using multiple Connectors
+- Incomplete Resource list may leave some O365 apps accessible without Twingate
 
 ## Related Docs
-- [SaaS App Gating with Microsoft Entra ID](https://www.twingate.com/docs/entra-id-app-gating) (parent guide)
-- [Entra ID Conditional Access licensing](https://www.microsoft.com/en-us/security/business/identity-access/azure-active-directory-pricing)
-- Twingate Connector deployment documentation
+- [SaaS App Gating with Microsoft Entra ID](https://www.twingate.com/docs/entra-id-saas-app-gating) (general guide)
+- [Microsoft Entra ID Conditional Access documentation](https://learn.microsoft.com/en-us/entra/identity/conditional-access/)
+- Entra ID Conditional Access licensing information

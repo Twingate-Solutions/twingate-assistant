@@ -1,42 +1,43 @@
-# Twingate ChromeOS Client
+# ChromeOS Twingate Client
 
 ## Summary
-Twingate on ChromeOS uses the Android app installed via Google Play Store, running in ChromeOS's Android compatibility layer. Device posture checks have significant limitations due to this architecture.
+Twingate on ChromeOS uses the Android app via the Google Play Store, running in ChromeOS's Android compatibility layer. Installation and connection follow standard Android procedures, but device posture check support is limited due to the Android compatibility layer architecture.
 
 ## Key Information
-- App source: Google Play Store or `get.twingate.com`
-- ChromeOS client is an Android app running in Android compatibility layer — not a native ChromeOS app
-- App only intercepts traffic for defined private Resources; regular internet browsing is unaffected
-- Can be minimized/closed while staying connected
+- ChromeOS client is an Android app running in ChromeOS's Android compatibility layer
+- Available via Google Play Store or `get.twingate.com`
+- App only intercepts traffic for private Resources; regular internet browsing is unaffected
+- Can be minimized/closed after connecting—connection persists
 
 ## Prerequisites
 - ChromeOS device with Google Play Store access
-- Twingate Network name (your organization's subdomain)
-- Valid credentials for your organization's Identity Provider (IdP)
+- Twingate Network name
+- Valid identity provider credentials
 
-## Step-by-Step: Installation & Connection
-1. Install "Twingate" from Google Play Store or navigate to `get.twingate.com`
+## Step-by-Step Installation
+
+1. Install from Google Play Store (search "Twingate") or visit `get.twingate.com`
 2. Open the Twingate app
 3. Enter your Twingate Network name
 4. Tap **Connect**
-5. Complete IdP authentication in the browser window that opens (skipped if already authenticated)
+5. Authenticate via identity provider in the browser window that opens
 6. Browser window closes automatically; client shows "online" status
-7. App can be closed — connection remains active
+7. Close the app—connection remains active
 
-## Device Posture Check Limitations
+## Device Posture Checks — Unsupported on ChromeOS
 
-| Posture Check | ChromeOS Support | Reason |
+| Check | Status | Reason |
 |---|---|---|
 | Screen lock | ❌ Not supported | ChromeOS does not expose this to Android layer |
 | Biometric configuration | ❌ Not supported | ChromeOS does not expose biometric status to Android apps |
-| Hard drive encryption | ❌ Not supported | Managed at OS level, inaccessible to Android layer |
+| Hard drive encryption | ❌ Not supported | ChromeOS manages encryption at OS level, separate from Android layer |
 
 ## Gotchas
-- **Posture checks silently unsupported**: Even if posture checks are configured for Android, they will not function on ChromeOS — plan access policies accordingly
-- Device posture-gated Resources may behave unexpectedly for ChromeOS users if policies rely on these checks
-- Standard Android posture checks that *do* work on physical Android devices will **not** work on ChromeOS
+- **Posture checks silently unsupported**: If your Twingate policies require posture checks (screen lock, biometrics, encryption), ChromeOS clients cannot satisfy them—plan access policies accordingly
+- Standard Android posture checks may appear available in configuration but will not function on ChromeOS
+- Re-authentication typically not required if already authenticated with your IdP
 
 ## Related Docs
 - Android client documentation
-- Device Posture Checks configuration
-- Identity Provider setup
+- Device posture checks configuration
+- Identity provider setup

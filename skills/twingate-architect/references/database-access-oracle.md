@@ -1,70 +1,71 @@
 # Oracle Cloud Database Access with Twingate
 
 ## Summary
-Twingate secures access to Oracle Database (self-managed or OCI-managed) by routing traffic through Connectors, enabling private endpoints and firewall restrictions without public internet exposure. Supports Oracle DB, Autonomous Database, MySQL HeatWave, and NoSQL Database. Private endpoints are strongly recommended over public endpoints.
+Twingate secures access to Oracle Database (on-prem, OCI VMs, or managed services like Autonomous Database) by routing traffic through Connectors, enabling private endpoints without public internet exposure. Supports Oracle DB, Autonomous Database, MySQL HeatWave, and NoSQL Database on OCI.
 
 ## Key Information
-- Default Oracle DB port: **1521**
-- Two deployment paths: OCI-managed databases (Autonomous DB, MySQL HeatWave, NoSQL) and self-managed Oracle DB
-- Private endpoint approach eliminates need to allowlist Connector public IPs
-- Connectors must be placed inside the same VCN/LAN as the database for private connectivity
-- OCI Console access can be gated via Twingate SSO integration
+- Default Oracle Database port: **1521**
+- Connector placement: inside same VCN/LAN as database for private endpoint access
+- Private endpoints eliminate need to manage Connector public IP allowlists
+- OCI Console access can be gated via SSO/SaaS App Gating (no native IP allowlist in OCI)
 
 ## Prerequisites
-- Twingate Remote Network created with one or more Connectors deployed
-- Connectors placed inside same VCN (private) or Connector public IPs captured (public fallback)
-- Oracle Database instance accessible on port 1521 (or custom port from `listener.ora`)
+- Twingate Remote Network created with Connector(s) deployed in target VCN/LAN
+- Oracle Database instance (self-managed or OCI-managed)
+- For private endpoints: Connector on same private network as database
+- For public endpoints: Connector public IPs collected for allowlisting
 
 ## Step-by-Step
 
 ### OCI-Managed Databases (Autonomous DB / MySQL HeatWave / NoSQL)
-1. **Create Twingate Resource** — Use database private IP or FQDN; assign to user groups
-2. **Configure network restrictions** — Allow Connector private IPs/VCN CIDR in OCI Network Security Groups or Security Lists
-3. **Connect** — Download wallet, configure `sqlnet.ora` `DIRECTORY` to wallet path, set `TNS_ADMIN`, connect via `sqlplus username/password@TNS_NAME`
+1. **Create Twingate Resource** — use database private IP or FQDN; assign to user groups
+2. **Configure network restrictions** — allow Connector private IPs via OCI Network Security Groups or Security Lists; set ACL to VCN/private subnet CIDR
+3. **Connect** — download wallet, configure `sqlnet.ora` with wallet path, set `TNS_ADMIN`, connect via `sqlplus`
 
 ### Self-Managed Oracle Database
-1. **Create Twingate Resource** — Use private IP/FQDN, port 1521; assign to user groups
-2. **Configure firewall** — Allow DB port from Connector private IPs only
-3. **Configure listener restrictions** (optional) — Add Valid Node Checking to `sqlnet.ora`, reload listener
-4. **Connect** — `sqlplus username/password@"//hostname:1521/orclpdb"`
+1. **Create Twingate Resource** — use private IP/FQDN, port 1521 (or custom per `listener.ora`)
+2. **Configure firewall** — allow DB port only from Connector private IPs
+3. **Configure listener restrictions** (optional) — edit `sqlnet.ora`, reload listener
+4. **Connect** — `sqlplus username/password@"//host:1521/orclpdb"`
 
 ## Configuration Values
 
 ### sqlnet.ora (Valid Node Checking)
 ```
 tcp.validnode_checking = YES
-tcp.invited_nodes = (CONNECTOR_IP_1, CONNECTOR_IP_2)
+tcp.invited_nodes = (1.2.3.4, 1.2.3.5)  # Connector IPs
 ```
 
-### Environment Variables (Autonomous DB wallet)
+### Wallet Setup (Autonomous DB)
 ```bash
-export TNS_ADMIN=/path/to/wallet
+export TNS_ADMIN=/Users/<User>/Downloads/Wallet
 export TNS_NAME=nw0xyz123_high
+sqlplus username/password@TNS_NAME
 ```
 
-### Listener reload
+### Listener Reload
 ```bash
 lsnrctl reload
 ```
 
 ## Gotchas
 - `sqlnet.ora` changes require `lsnrctl reload` to take effect
-- Wallet `DIRECTORY` in `sqlnet.ora` must be absolute path
-- OCI has no native console IP allowlist — use Twingate SSO for console access gating
-- If using public endpoints, allowlist Connector **public** IPs; private endpoints use VCN CIDR instead
-- Port mismatches between Resource config and `listener.ora` will silently fail
+- Changes to `tcp.invited_nodes` without reload will silently fail to update
+- Public endpoints require Connector public IPs in both firewall rules AND `sqlnet.ora`
+- OCI has no native console IP allowlist — use SSO/SaaS App Gating instead
+- Twingate Client must be running; other VPNs may hijack connections (check Recent Activity if "No Activity" shown)
+- DNS failures: ensure DNS hosted zone is tied to VPC and reachable from Connector
 
-## Troubleshooting
-| Symptom | Check |
-|---|---|
-| Connection refused | Connector IP in firewall/`tcp.invited_nodes` |
-| DNS Failed (Recent Activity) | DNS zone tied to VPC, DNS server reachable from Connector |
-| Connection Failed | Route exists Connector→DB, IP allowlists correct, port open both ends |
-| No Activity | Client running, has Resource access, no conflicting VPN |
+## Troubleshooting Reference
+| Symptom | Cause | Fix |
+|---|---|---|
+| Connection refused | IP not in `tcp.invited_nodes` or firewall | Update allowlist, reload listener |
+| DNS Failed | Connector can't resolve hostname | Check DNS zone, routes |
+| Connection Failed | Connector can't reach DB | Check routes, firewall, security groups |
+| No Activity | Client not sending traffic | Check Client running, Resource access, VPN conflicts |
 
 ## Related Docs
-- [AWS Database Access Guide](https://www.twingate.com/docs/database-access-aws)
-- [Azure Database Access Guide](https://www.twingate.com/docs/database-access-azure)
-- [GCP Database Access Guide](https://www.twingate.com/docs/database-access-gcp)
-- [SaaS App Gating Guide](https://www.twingate.com/docs/saas-app-gating)
 - [Twingate Troubleshooting Guide](https://www.twingate.com/docs/troubleshooting)
+- AWS/Azure/GCP Database Access Guides
+- SaaS App Gating Guide
+- Connector Best Practices

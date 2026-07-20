@@ -1,19 +1,36 @@
-# Exporting Network Traffic
+# Network Traffic Export - Twingate
 
 ## Page Title
-Twingate Network Traffic Viewing and Exporting
+Exporting Network Traffic
 
 ## Summary
-Twingate captures and exposes network activity flowing through deployed Connectors. Traffic not routed through Connectors (direct internet traffic) is not captured. Four export/viewing methods are available depending on use case.
+Twingate captures and exports network activity that flows through deployed Connectors (not all user traffic). Multiple export methods are available ranging from Admin Console viewing to real-time Connector logging. Traffic visibility is scoped only to Connector-proxied traffic.
 
 ## Key Information
-- Only traffic through Connectors is captured — not general internet traffic
-- Network events viewable per User or per Resource in Admin Console
-- Event details include: Resource IP, protocol, connection type, duration
-- Client IP address is **not currently available** (planned for future)
-- Access denied events are **not captured** — zero trust model makes denied access indistinguishable from resource non-existence
+- Only traffic routed through Connectors is captured — direct internet traffic is invisible to Twingate
+- Four export methods available (see Step-by-Step)
+- Events viewable per User or per Resource in Admin Console
+- Client IP addresses are **not** currently shown
+- Access denied events are **not** logged (by design — zero trust model hides non-permitted resources entirely)
 
-## Log Retention by Plan
+## Prerequisites
+- Deployed Connectors on your network
+- Admin Console access
+- Appropriate plan tier for required retention period
+
+## Export Methods (Step-by-Step)
+
+1. **View in Admin Console** — Navigate to individual User or Resource page to see recent traffic; click events for details (Resource IP, protocol, connection type, duration)
+2. **Manual CSV Export** — Export via Admin Console UI
+3. **AWS S3 Sync** — Sync network events in JSON format to an S3 bucket
+4. **Real-time Connection Logging** — Output directly from the Connector process
+
+## Configuration Values
+- Event schema reference: [Network Events Schema page](https://www.twingate.com/docs/network-events-schema)
+- Export formats: CSV (manual), JSON (S3 sync)
+
+## Retention Periods by Plan
+
 | Plan | Retention |
 |------|-----------|
 | Starter | 24 hours |
@@ -21,27 +38,18 @@ Twingate captures and exposes network activity flowing through deployed Connecto
 | Business | 30 days |
 | Enterprise | 12 months |
 
-## Export Methods
-1. **Admin Console** — View traffic inline on User or Resource pages; supports filtering
-2. **CSV Export** — Manual export via Admin Console
-3. **AWS S3 Sync** — JSON format, event streaming to S3 bucket
-4. **Real-time Connection Logging** — Output directly from Connector process
-
-## Filtering Options
-Filters available in Admin Console:
-- Resource
-- User
-- Date
-- Other activity criteria
-
 ## Gotchas
-- No access denied events logged — zero trust architecture prevents distinguishing denied access from non-existent resources
-- Client IP not exposed in event data
-- Short retention on lower tiers (Starter: 24h) limits forensic use
-- Must have Connectors deployed — no Connectors = no traffic data
+- **No access denied events**: Zero trust design means clients only know about permitted Resources; denied access is indistinguishable from resource non-existence
+- **No client IP**: Currently not captured in event data (planned for future update)
+- **Connector scope**: Events only reflect traffic through your deployed Connectors — split-tunnel traffic to internet bypasses this entirely
+- Retention limits mean historical investigations are plan-dependent
+
+## Filtering
+Admin Console supports filtering by: Resource, User, Date, Activity criteria
 
 ## Related Docs
-- Network Events Schema (for JSON/CSV field definitions)
-- AWS S3 Sync configuration
-- Real-time connection logging (Connector process output)
-- Twingate Pricing Page (plan comparison)
+- Network Events Schema
+- AWS S3 Sync setup
+- Real-time Connection Logging
+- Connector deployment
+- Twingate Pricing (plan comparison)

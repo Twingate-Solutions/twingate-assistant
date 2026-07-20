@@ -1,76 +1,83 @@
 # Linux Userspace Networking (HTTP Proxy Mode)
 
 ## Summary
-Twingate's Linux client supports a non-root HTTP Proxy Mode that routes HTTP/HTTPS traffic through a local proxy instead of creating a kernel-level TUN interface. Applications must explicitly send traffic through the proxy—interception is not automatic. Designed for containers, CI/CD pipelines, and restricted environments.
+Twingate's Linux client supports a userspace networking mode via HTTP/HTTPS proxy, eliminating the need for root privileges. Instead of creating a kernel-level TUN interface, the client runs as a local HTTP/HTTPS proxy. Applications must explicitly route traffic through the proxy.
 
 ## Key Information
-- Default mode is TUN (root required); HTTP Proxy Mode must be explicitly enabled
-- Proxy runs locally (e.g., `0.0.0.0:9999`) using HTTP CONNECT semantics
-- Only HTTP/HTTPS traffic supported (not arbitrary protocols)
-- Service Accounts require Business or Enterprise plan
-
-## Network Modes
-| Mode | Root Required | Command |
-|------|--------------|---------|
-| TUN (default) | Yes | `twingated` |
-| HTTP Proxy Only | No | `--tun off --http-proxy 0.0.0.0:9999` |
-| Hybrid (TUN + Proxy) | Yes | `--tun on --http-proxy 0.0.0.0:9999` |
+- Three modes: TUN (default, root required), HTTP Proxy only (no root), Hybrid TUN+HTTP Proxy (root required)
+- Default proxy port: `9999`
+- Traffic is **not** automatically intercepted — apps must explicitly use the proxy
+- Uses standard HTTP `CONNECT` semantics
+- Service Accounts require Business/Enterprise plan
 
 ## Prerequisites
-- Twingate Linux client installed
-- Auth: interactive (`twingate setup`) OR headless service key at `/etc/twingate/service_key.json`
+- Authentication via one of:
+  - Interactive: `twingate setup`
+  - Headless: service key at `/etc/twingate/service_key.json`
 
 ## Configuration Values
 
-**CLI flags:**
+| Method | Config |
+|--------|--------|
+| CLI flag | `--http-proxy 0.0.0.0:9999` |
+| CLI flag | `--tun off` or `--tun on` |
+| Env var | `TWINGATE_HTTP_PROXY=0.0.0.0:9999` |
+| Env var | `TWINGATE_TUN=off` |
+| Config file | `/etc/twingate/network-config.json` |
+
+## Step-by-Step
+
+**HTTP Proxy Only (no root):**
 ```bash
-twingated --http-proxy 0.0.0.0:9999 --tun off   # userspace, no root
-sudo twingated --http-proxy 0.0.0.0:9999 --tun on  # hybrid, root required
+twingated --http-proxy 0.0.0.0:9999 --tun off
 ```
 
-**Environment variables:**
+**Hybrid Mode (root required):**
 ```bash
-export TWINGATE_HTTP_PROXY=0.0.0.0:9999
-export TWINGATE_TUN=off
+sudo twingated --http-proxy 0.0.0.0:9999 --tun on
 ```
 
-**Config file** (`/etc/twingate/network-config.json`):
-```json
-{"http-proxy": "0.0.0.0:9999", "tun": "off"}
+**Persistent config:**
+```bash
+echo '{"http-proxy": "0.0.0.0:9999", "tun": "off"}' | sudo tee /etc/twingate/network-config.json
 ```
 
-**CLI helpers:**
+**Interactive CLI:**
 ```bash
-twingate config networking                              # show current config
 twingate config networking http-proxy=0.0.0.0:9999 tun=off
+twingate config networking  # show current config
+```
+
+**Test proxy:**
+```bash
+curl -v --proxy http://127.0.0.1:9999 https://<twingate-resource>
 ```
 
 ## Container Deployments
 
-**Kubernetes:** Mount service key as volume at `/etc/twingate/service_key.json`, run `twingated --http-proxy 0.0.0.0:9999 --tun off`, expose `containerPort: 9999`.
+**Kubernetes:** Mount service key at `/etc/twingate/service_key.json`, run `twingated --http-proxy 0.0.0.0:9999 --tun off`, expose port `9999`.
 
-**Docker Compose (internal only):** Do NOT publish port—containers reach proxy via `http://twingate-client:9999`.
+**Docker Compose (internal only):** Do not publish port; other containers access via `http://twingate-client:9999`.
 
-**Docker Compose (host/LAN access):** Publish port `"9999:9999"`, configure clients to use `http://<host-ip>:9999`.
+**Docker Compose (host/LAN access):** Publish port `"9999:9999"`, access via `http://<host-ip>:9999`.
 
 ## Gotchas
-- Traffic is **not** intercepted automatically—apps must explicitly use the proxy
-- Publishing proxy port exposes it to LAN; use firewall rules appropriately
-- `127.0.0.1:9999` vs `twingate-client:9999`—use service name when accessing from other containers in same network
-- `NO_PROXY` environment variable can silently bypass the proxy
-- Peer-to-peer connections recommended to stay within Fair Use Policy bandwidth limits
+- Applications must explicitly configure proxy — no automatic traffic interception
+- Publishing proxy port exposes it to LAN — add firewall rules as needed
+- `NO_PROXY` environment variables can silently bypass the proxy
+- Internal Docker network containers use service name (`twingate-client:9999`), not `127.0.0.1`
+- Hybrid mode still requires root despite proxy component not needing it
 
-## Troubleshooting
-```bash
-# Test proxy from host
-curl -v --proxy http://127.0.0.1:9999 https://<twingate-resource-address>
-```
-- Verify client is authenticated and running
-- Confirm service key exists if headless
-- Check Resource address matches domain/IP in Admin Console → Recent Activity
+## Troubleshooting Checklist
+1. Client running and authenticated
+2. Service key exists at correct path (headless mode)
+3. App explicitly using proxy
+4. Resource address/alias matches requested domain/IP
+5. Check Recent Activity in Admin Console
+6. Verify shared Docker network for unpublished proxy
 
 ## Related Docs
-- [Twingate Headless & AWS ECS](https://www.twingate.com/docs)
-- [Service Accounts](https://www.twingate.com/docs)
-- [Auto Lock / Just-in-Time Access](https://www.twingate.com/docs)
-- [Twingate Troubleshooting Guide](https://www.twingate.com/docs)
+- Twingate Headless & AWS ECS
+- Service Accounts documentation
+- Auto Lock / Just-in-Time Access features
+- Twingate Troubleshooting Guide

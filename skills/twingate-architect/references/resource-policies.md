@@ -1,68 +1,62 @@
 # Resource Policies
 
 ## Summary
-Resource Policies define security requirements (authentication, device security, location) applied at the Resource level in Twingate. Policies can be assigned per-Resource and overridden per-Group. A Default Policy is auto-assigned to all new Resources.
+Resource Policies define security requirements (authentication, device, location) applied at the Resource level in Twingate. Each policy can combine up to three requirement types and is assigned to Resources via the Admin Console. Group-level overrides allow per-team policy variation on the same Resource.
 
 ## Key Information
 - Managed under **Policies → Resource Policies** tab in Admin Console
-- Each policy combines up to 3 optional requirement types: Authentication, Device Security, Location
-- Default Policy is auto-assigned to new Resources; editable but not deletable
-- When user is in multiple Groups with different policies on same Resource, **least permissive policy wins**
-- Successful authentication resets timer across **all** Resources (rolling window), not just the accessed one
+- A **Default Policy** is auto-assigned to all new Resources; editable but not deletable
+- Three requirement types: Authentication, Device Security, Location (all optional)
+- Least permissive policy applies when a user belongs to multiple Groups with different Group-level policies
+- Session prompt appears ~10 minutes before expiry if user is actively accessing the Resource
 
 ## Prerequisites
-- Admin Console access
 - Enterprise plan required for Location Requirements (geoblocking)
-- Device Profiles/Trusted Profiles configured if using device security requirements
+- Trusted Profiles and Approved OS configurations must be defined before using Custom/Only Trusted Devices modes
 
-## Configuration Values
+## Policy Requirements
 
-### Authentication Requirements
+### Authentication
 | Setting | Range/Options |
 |---|---|
-| Authentication frequency | 1 hour – 31 days |
-| MFA | Enabled / Disabled |
+| Authentication frequency | 1 hour to 31 days |
+| MFA | Enabled/Disabled (uses Twingate native MFA) |
+
+- Timer is **rolling**: any successful auth resets timer across **all** Resources, not just one
+- Can disable entirely for device-only policies
 
 ### Device Security Modes
-| Mode | Description |
-|---|---|
-| `Any Device` | Any device meeting Approved OS requirements or Trusted Profile (default) |
-| `Only Trusted Devices` | Must match a Trusted Profile; Approved OS alone insufficient |
-| `Custom` | Select specific Trusted Profiles and/or Approved OS configurations |
+- **Any Device** (default): Any device meeting Approved OS requirements or Trusted Profile
+- **Only Trusted Devices**: Must meet a Trusted Profile; Approved OS alone is insufficient
+- **Custom**: Select specific Trusted Profiles and Approved OS configurations
 
 ### Location Requirements
-- **Allowlist**: Only specified countries permitted
-- **Denylist**: Specified countries blocked
-- **Always blocked (non-overridable)**: Cuba, Iran, North Korea, Syria
+- Configure allowlist (only specified countries) or denylist (block specified countries)
+- **Always blocked (cannot override):** Cuba, Iran, North Korea, Syria
 
-## Step-by-Step
+## Configuration Steps
 
-### Create a Policy
-1. Navigate to **Policies → Resource Policies**
-2. Click **Create**
-3. Name the policy
-4. Configure Authentication, Device Security, and/or Location requirements (all optional)
-5. Save
+1. Navigate to **Admin Console → Policies → Resource Policies**
+2. Click **Create** → name the policy
+3. Configure Authentication, Device, and/or Location requirements as needed
+4. Assign to a Resource via the Resource's detail page
+5. Optionally set Group-level overrides on the Resource detail page
 
-### Assign to a Resource
-1. Open the Resource in Admin Console
-2. Select desired policy from available options on Resource detail page
+## Assigning and Overrides
 
-### Override Policy for a Specific Group
-1. Open Resource detail page
-2. Change the policy assignment for an individual Group
-3. To revert, explicitly reset the override for that Group
+- Policy assigned on Resource detail page; applies to all Groups by default
+- **Group-level override:** Change policy per-Group on the Resource detail page
+- Overrides persist even if Resource-level policy changes; must be manually reset to inherit Resource policy again
 
 ## Gotchas
-- Group-level overrides **persist** even if the Resource-level policy changes later; must be manually reset to re-inherit
-- Authentication timer expiry triggers IdP session check first — user may not see a prompt if IdP session is still valid
-- Session expiry prompt appears ~10 minutes before timer expires **only if user is actively accessing the Resource**; ignored/dismissed prompt = access cut off immediately at expiry
-- Disabling authentication requirements creates a device-only policy (authentication section can be fully disabled)
-- Device-only policies have different session behavior — see sessions guide
+- Group-level overrides **stick** after being set — changing the Resource-level policy won't affect overridden Groups
+- Ignoring/dismissing the session expiry prompt cuts off access immediately at expiry; user must re-authenticate to restore access
+- If IdP session is still valid at re-auth check, user is not redirected; if expired, redirect occurs and all timers reset after
+- Embargoed countries (Cuba, Iran, North Korea, Syria) cannot be unblocked via allowlist
 
 ## Related Docs
 - [Device Profiles](https://www.twingate.com/docs/device-profiles)
 - [Location Requirements](https://www.twingate.com/docs/location-requirements)
-- [Device-only Resource Policies](https://www.twingate.com/docs/device-only-resource-policies)
-- [How Sessions Work](https://www.twingate.com/docs/how-sessions-work)
 - [Multi-Factor Authentication](https://www.twingate.com/docs/mfa)
+- [Device-only Resource Policies](https://www.twingate.com/docs/device-only-resource-policies)
+- [How Sessions Work](https://www.twingate.com/docs/sessions)

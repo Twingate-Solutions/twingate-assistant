@@ -1,38 +1,39 @@
 # Twingate & HIPAA
 
 ## Summary
-Twingate takes the position that it is not a HIPAA "business associate" and therefore a BAA is generally unnecessary. This position is based on the HIPAA "conduit exception," as Twingate only routes encrypted traffic without accessing or storing PHI content. Twingate will review customer BAAs under specific conditions for larger accounts.
+Twingate's position is that it does not qualify as a HIPAA "business associate" due to the conduit exception, meaning a BAA is generally unnecessary. Twingate relays only transiently pass end-to-end encrypted traffic without decrypting or storing it. BAA review is available under specific conditions for larger enterprise contracts.
 
 ## Key Information
-- Twingate classifies itself as a **conduit**, not a business associate, under HIPAA
-- Traffic through Twingate relays is **end-to-end encrypted** — Twingate does not decrypt or inspect content
+- Twingate's admin console manages access control — no PHI involved in auth/authorization processes
+- Traffic through Twingate relays is **end-to-end encrypted**; Twingate does not decrypt or inspect content
 - Relays **do not store traffic** — data is transient (contact duration measured in fractions of a second)
-- Twingate **prefers not to sign BAAs** as it may incorrectly imply business associate status
-- The conduit exception applies to **subcontractors of business associates** as well (per DHHS clarification)
-- Many connections use **peer-to-peer** routing, meaning traffic never touches Twingate relays at all; relays are fallback only
+- Twingate supports **peer-to-peer connections** where traffic never touches Twingate relay infrastructure at all; relays are fallback only
+- The conduit exception applies equally to subcontractors of business associates per DHHS guidance
 
-## Legal Basis
-- **Conduit exception**: Derived from DHHS commentary on the HIPAA Omnibus Rule
-- Applies to entities transporting data without processing or storing it (e.g., ISPs, postal services)
-- DHHS confirmed conduit exception extends to subcontractors of business associates
+## Conduit Exception Basis
+- Twingate does not require "access on a routine basis" to any PHI
+- Functionally equivalent to a postal service or ISP — transports data without processing or storing it
+- DHHS Omnibus Rule commentary explicitly covers this scenario
+- Applies to both covered entities and their business associates (and subcontractors thereof)
 
-## BAA Review Conditions
-If a BAA is required by your compliance team, Twingate will review (not originate) it with these requirements:
-1. BAA scope limited to services where HIPAA **actually applies** to Twingate
-2. BAA liability tied to **limitation of liability** provisions in the main services agreement
-3. Only available for **annual plans above $75,000**
+## BAA Policy
+| Condition | Detail |
+|-----------|--------|
+| Twingate preference | Not to sign BAAs (avoids incorrect implication of business associate status) |
+| BAA available | Yes, for customer-form BAAs only |
+| Minimum contract threshold | Annual plans **above $75,000** |
+| Required BAA terms | (1) Applies only where HIPAA actually applies to Twingate services; (2) Liability tied to limitation of liability provisions in main services agreement |
 
 ## Gotchas
-- Twingate will not sign a BAA without the two conditions above being met
-- Signing a BAA could create incorrect legal impressions about Twingate's role — Twingate actively discourages it
-- The conduit position does **not** reduce Twingate's security commitments — security practices apply regardless of HIPAA applicability
-- PHI contact only theoretically occurs when a user sends/receives PHI to a protected resource via a relay (not peer-to-peer)
+- Signing a BAA could create incorrect legal implications that HIPAA governs Twingate's services — Twingate considers this undesirable for both parties
+- BAA review is resource-constrained; only available for high-value annual contracts
+- Peer-to-peer connections mean PHI may never touch Twingate infrastructure at all — relay contact is not guaranteed
 
 ## Prerequisites
-- Annual contract above $75,000 required for BAA review
-- Contact your **account manager** for BAA or HIPAA-related questions
+- For BAA review: annual contract exceeding $75,000
+- Contact assigned account manager for BAA requests or compliance questions
 
 ## Related Docs
-- [Twingate Security](https://www.twingate.com/docs/security) — details on security measures
-- [DHHS Omnibus Rule Commentary](https://www.hhs.gov) — conduit exception legal basis
-- [DHHS subcontractor clarification](https://www.hhs.gov) — conduit exception for business associate subcontractors
+- [Twingate Security](https://www.twingate.com/docs/security) — security measures in place regardless of HIPAA applicability
+- DHHS Omnibus Rule commentary (external) — conduit exception guidance
+- DHHS subcontractor clarification (external) — conduit exception for business associate subcontractors

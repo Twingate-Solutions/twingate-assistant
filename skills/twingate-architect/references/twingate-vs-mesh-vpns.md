@@ -1,52 +1,50 @@
 # Twingate vs. Mesh VPNs
 
 ## Summary
-Comparison of Twingate and mesh VPN products (e.g., Tailscale, WireGuard-based solutions) across deployment complexity, administration, and enterprise security features. Twingate is architected specifically for enterprise environments, avoiding the infrastructure disruption typical of mesh VPN deployments.
+Comparison of Twingate's zero-trust network access architecture against mesh VPN products (e.g., Tailscale, WireGuard-based solutions). Key differentiators are infrastructure compatibility, enterprise administration, and security feature depth. Twingate targets enterprises; mesh VPNs often require significant infrastructure changes to deploy.
 
 ## Key Differences
 
-### Deployment & Infrastructure
-- **Mesh VPNs**: Require new IP addresses assigned to all network resources; require agent installed on every device (including servers); cannot coexist easily with existing VPN solutions
-- **Twingate**: No network infrastructure changes required; supports overlapping IP address ranges; only requires agent on client devices + one Controller per Remote Network; can run alongside existing VPN for evaluation
+### Deployment
+| Factor | Twingate | Mesh VPN |
+|---|---|---|
+| IP re-addressing required | No | Yes (unique IPs across entire network) |
+| Overlapping IP support | ✅ | ❌ |
+| Agent on servers | No (Connector only) | Yes (every device) |
+| Co-exists with existing VPN | Yes | Typically requires replacement |
 
 ### Administration
-- **Mesh VPNs**: Basic admin UIs; some require JSON for policy configuration; limited automation
-- **Twingate**: Point-and-click admin console; extensive REST API for automation (user provisioning, server access provisioning); no technical expertise required for day-to-day admin tasks
+- Twingate: Point-and-click admin console, consumer-grade UX
+- Mesh VPN: Often requires JSON-based policy configuration
+- Both offer APIs; Twingate API supports user provisioning automation and VPC server access provisioning
 
-### End Users
-- **Mesh VPNs**: Variable client quality and setup complexity
-- **Twingate**: Clients for all major desktop/mobile platforms; zero-configuration self-install; runs in background with minimal interaction
-
-## Enterprise Security Features (Twingate-specific)
-- **Universal 2FA**: Applies MFA to any private resource including SSH—no application changes required
+### Security Features (Twingate-specific)
+- **Universal 2FA**: Applies 2FA to any resource type including SSH, no app changes needed
 - **Device posture checks**: Access policies based on device attributes
-- **Identity-indexed network logs**: All activity tied to user + device identity; centralized analytics
+- **Identity-indexed logs**: Network flow logs tied to user + device identity, centralized analytics
 
-## Identity Provider Integrations
-- Okta, OneLogin, Google Workspace, Entra ID (Azure AD), social SSO
+### Integrations
+- IdP: Okta, OneLogin, Google Workspace, Entra ID (Azure AD), social SSO
+- DNS filtering: Compatible with DNSFilter and similar tools
+- Designed to coexist with existing security stack
 
-## Compatibility
-- Works alongside DNS filtering tools (e.g., DNSFilter) for public internet protection
-- Designed to interoperate with existing security stack components
+## Prerequisites
+- None for evaluation — Twingate deploys alongside existing infrastructure without changes
+
+## Architecture Notes
+- Twingate requires: Client agent (per end-user device) + Connector (lightweight, one per Remote Network)
+- Mesh VPN requires: Agent on every device including servers
 
 ## Gotchas
-- Mesh VPNs require full IP address re-inventory and re-addressing before deployment—significant operational impact in large networks
-- Mesh VPN server-side agents on every server creates scaling/maintenance burden in dynamic environments
-- JSON-based policy management in some mesh VPNs increases error risk and requires technical expertise
-- Evaluate mesh VPN client UX carefully—quality varies significantly between products
-
-## Use Case Fit
-| Scenario | Twingate | Mesh VPN |
-|---|---|---|
-| Overlapping IP ranges | ✅ Supported | ❌ Requires re-addressing |
-| No infrastructure changes | ✅ | ❌ |
-| Parallel eval with existing VPN | ✅ | ❌ Difficult |
-| Universal 2FA on SSH | ✅ | ❌ |
-| Agent on servers required | ❌ No | ✅ Yes |
+- Mesh VPNs force IP uniqueness across all network segments — problematic for multi-segment networks with overlapping ranges
+- Re-addressing in mesh VPN deployments requires full inventory + downstream updates (bookmarks, configs, user retraining)
+- Mesh VPN agent-on-every-server model doesn't scale in dynamic cloud environments (VPCs with ephemeral instances)
+- Mesh VPN admin UX varies widely — evaluate end-user client experience separately from admin experience
 
 ## Related Docs
-- Twingate Connectors (Controller/Remote Network setup)
-- Identity Provider integration guides (Okta, Entra ID, etc.)
+- Twingate Connectors (Remote Networks)
 - Universal 2FA configuration
-- API documentation for automation workflows
-- DNSFilter integration
+- Device posture policies
+- Identity provider integrations
+- DNSFilter compatibility
+- Administrative API reference

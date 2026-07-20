@@ -1,38 +1,35 @@
-# Security Policy Guides
+# Policy Guides
 
 ## Page Title
 Security Policy Guides
 
 ## Summary
-Twingate supports multiple Security Policy rule types that control access to resources. These policies govern authentication frequency, 2FA requirements, device trust, and device-only evaluations.
+Twingate Security Policies support multiple rule types that control access to resources. This page serves as an index linking to detailed guides for each policy rule category.
 
 ## Key Information
-- Four distinct policy categories available:
-  - **Authentication** – controls re-authentication frequency and 2FA requirements
-  - **Two-factor Authentication** – specific settings applied to authentication requirements
-  - **Device-only Resource Policies** – evaluates only device requirements (not user auth)
-  - **Trusted Devices** – requires devices to be trusted (manually or automatically) before meeting policy requirements
+- Four distinct Security Policy rule types are available
+- Each rule type has its own dedicated documentation guide
+- Policies can be combined to enforce layered access controls
 
-## Prerequisites
-- Active Twingate deployment
-- Admin access to configure Security Policies
+## Policy Rule Types
 
-## Configuration Areas
-
-| Policy Type | Controls |
+| Policy Type | Purpose |
 |---|---|
-| Authentication | Re-auth frequency, 2FA enforcement |
-| Two-factor Authentication | 2FA-specific settings within auth requirements |
-| Device-only Resource Policies | Device posture checks without user auth evaluation |
-| Trusted Devices | Manual or automatic device trust enforcement |
-
-## Gotchas
-- Device-only policies bypass user authentication checks — use carefully for resources where device posture alone is the access criterion
-- Trusted Devices can be set to manual or automatic trust; automatic trust may reduce security posture if not paired with other controls
-- 2FA settings are a sub-component of Authentication settings — both must be configured appropriately together
+| **Authentication** | Controls re-authentication frequency and 2FA requirements |
+| **Two-factor Authentication** | Configures specific 2FA enforcement settings |
+| **Device-only Resource Policies** | Restricts policy evaluation to device requirements only (bypasses user auth checks) |
+| **Trusted Devices** | Requires devices to be trusted (manually or automatically) before meeting policy requirements |
 
 ## Related Docs
 - Authentication settings guide
-- Two-factor Authentication guide
+- Two-factor Authentication settings guide
 - Device-only Resource Policies guide
 - Trusted Devices guide
+
+## Gotchas
+- Device-only Resource Policies explicitly skip user authentication evaluation — use only when device posture alone is sufficient for access control
+- Trusted Devices can be approved manually or automatically; automatic trust may reduce security posture if misconfigured
+- 2FA settings are configured separately from general Authentication settings — both must be reviewed when setting up auth policies
+
+---
+*This page is an index only; implementation details are in the linked sub-guides.*

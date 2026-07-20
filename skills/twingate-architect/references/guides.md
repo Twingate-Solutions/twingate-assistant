@@ -1,57 +1,56 @@
 # Twingate Guides Index
 
 ## Page Title
-Twingate Guides — Documentation Hub
+Twingate Guides Overview
 
 ## Summary
-This is the top-level index page for Twingate's documentation guides, organizing deployment, configuration, and management topics. It serves as a navigation hub linking to specific implementation guides across infrastructure platforms, use cases, and integrations. No direct technical content is present; all actionable detail is in linked child pages.
+This is the top-level guides index for Twingate documentation, covering deployment, configuration, and management across cloud, on-premises, homelab, and enterprise environments. It serves as a navigation hub linking to specific implementation guides organized by category and use case.
 
 ## Key Information
 
-**Deployment Targets:**
-- Cloud: AWS EC2, GCP Compute, Azure Compute, Kubernetes, DigitalOcean
-- On-premises: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP, TrueNAS, Synology
-- Homelab: Home Assistant, Proxmox, Unraid, ZimaOS, CasaOS
+### Deployment Targets
+- **Cloud**: AWS EC2, GCP Compute, Azure Compute, Kubernetes, DigitalOcean
+- **On-premises**: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP, TrueNAS SCALE
+- **Homelab**: Home Assistant, Proxmox, Unraid, ZimaOS, CasaOS
+- **IaC**: Terraform, Pulumi
 
-**Client Deployment (MDM):**
+### Client Deployment (MDM)
 - Jamf, Iru, Omnissa Workspace ONE, Microsoft Intune & Endpoint Manager
 
-**IaC Automation:**
-- Terraform, Pulumi
+### Service Integrations
+- Identity/SSO: Active Directory, Okta, Microsoft Entra ID, JumpCloud, OneLogin
+- Security tools: Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler
+- Databases: MongoDB, AWS, GCP, Azure, Oracle, Snowflake, Redis
 
-**Service Integrations:**
-- Identity/IdP: Active Directory, Okta, JumpCloud, Microsoft Entra ID, OneLogin
-- Security: Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler
-- Database: MongoDB, AWS RDS, GCP, Azure, Oracle, Snowflake, Redis
+### Core Feature Areas
+- **Internet Security**: DNS-over-HTTPS (DoH), DNS filtering
+- **SaaS App Gating**: IP-based access control for SaaS applications
+- **Security Policies**: Per-network and per-resource policy configuration
+- **Logging**: Audit log viewing and export
 
-**SaaS App Gating:**
-- IP-based access control for SaaS apps
-- IdP integrations: Google Workspace, JumpCloud, Entra ID, Okta, OneLogin
-- AWS CloudFront, Office 365, AWS Exit Nodes
+### Notable Use Cases
+- AI/LLM access gating
+- CI/CD pipeline security
+- Site-to-site connections
+- SSH resource access management
+- IoT headless client gateway
+- Replace AWS VPN
+- Vendor/contractor access management
+- GitHub Codespaces access
 
-**Kubernetes Topics:**
-- Route traffic, private/public resources, kubectl management
-
-**Use Case Guides:**
-- CI/CD pipeline security, SSH access, site-to-site connections, IoT headless client, vendor/contractor access, bastion cloaking, AWS VPN replacement, GitHub Codespaces, AI/LLM access
-
-## Prerequisites
-None — this is an index page. Individual linked guides have their own prerequisites.
-
-## Configuration Values
-None on this page — see child guide pages for env vars, CLI flags, and API parameters.
+## Related Docs (Key Subcategories)
+- Best Practices for Connector Placement
+- Best Practices for Private DNS Configuration
+- Best Practices for Overlapping IP Addresses
+- Best Practices for Security Policies
+- AWS Reference Network Architecture
+- How NAT Traversal Works
+- How Encryption Works in Twingate
+- How Firewalls Work with Twingate
+- Troubleshooting Peer-to-peer Connections
+- How Service Accounts Work
+- Twingate Release Stages
 
 ## Gotchas
-- This page is a navigation index only; no implementation details are present here
-- Content is updated frequently ("Last updated 2 days ago") — check child pages for current procedures
-- Some guides cover complementary service compatibility (Zscaler, Netskope) for environments where Twingate coexists with other security tools
-
-## Related Docs
-- [Remote Network Best Practices](https://www.twingate.com/docs/remote-network-best-practices)
-- [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
-- [Security Policies](https://www.twingate.com/docs/security-policies)
-- [SaaS App Gating](https://www.twingate.com/docs/saas-app-gating)
-- [Kubernetes Guides](https://www.twingate.com/docs/kubernetes)
-- [Logging](https://www.twingate.com/docs/logging)
-- [How Encryption Works](https://www.twingate.com/docs/how-encryption-works)
-- [Terraform Integration](https://www.twingate.com/docs/terraform)
+- No implementation details on this page — it is navigation only; follow specific guide links for configuration values, prerequisites, and step-by-step instructions
+- SaaS App Gating requires IdP integration (Okta, Entra ID, etc.) for most configurations

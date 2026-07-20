@@ -1,61 +1,51 @@
 # How Twingate Works
 
 ## Summary
-Twingate uses four components (Controller, Client, Connector, Relay) to implement zero-trust network access where no single component can independently authorize traffic flow. Authorization is always confirmed with at least two components, with user authentication delegated to a third-party IdP. Users access private Resources via FQDN or IP using network-local addressing without knowledge of underlying network topology.
+Twingate uses four components (Controller, Client, Connector, Relay) where no single component can independently authorize traffic flow. Authorization requires confirmation across multiple components, with user authentication delegated to a third-party IdP. Users access private Resources via FQDN or IP using addresses local to the remote network.
 
 ## Key Information
-- **No single component** can independently allow traffic — all authorization requires multi-component confirmation
-- User authentication is always delegated to a third-party identity authority (IdP or social identity)
-- Traffic access requires intersection of both Client ACL and Connector ACL — double authorization check
-- DNS resolution for protected Resources happens locally on the Remote network (via Connector)
-- No application configuration required on user devices — Client uses transparent TCP/UDP proxy
-- TLS tunnel is certificate-pinned to a specific Connector using a signed connection token from Controller
-- Peer-to-peer connection is always attempted first; Relay is fallback only
+
+- **No single point of authorization** — access decisions require intersection of Client ACL and Connector ACL
+- **Controller** is the only component that never touches data flow
+- **Client** handles all network routing and authorization decisions at the edge
+- **Connector** deploys behind the firewall; maintains outbound connections to Relays (never requires inbound firewall rules)
+- **Relay** is equivalent to a TURN server — no data terminated or stored there
+- Twingate always attempts peer-to-peer (Client↔Connector); Relay is fallback
+- DNS for protected Resources is resolved locally on the Remote network via the Connector
+- No application configuration required on user devices — transparent proxy handles TCP/UDP
 
 ## Component Responsibilities
 
-### Controller (Twingate-hosted, multi-tenant)
-- Stores Admin console configuration
-- Delegates user authentication to IdP
-- Generates signed ACLs for Clients (least-privilege per user)
-- Generates ACLs for Connectors (authorized forwarding destinations)
-- Registers/authenticates Connectors (one-time authorization + hash-based anonymous ID)
-- Does **not** interact with any data flow
+| Component | Hosted By | Key Role |
+|-----------|-----------|----------|
+| Controller | Twingate (multi-tenant) | Config, auth delegation, ACL generation, Connector registration |
+| Client | User device | Auth proxy, ACL enforcement, DNS/traffic proxying |
+| Connector | Customer network (behind firewall) | ACL verification, DNS resolution, traffic forwarding |
+| Relay | Twingate | Connector registration point, Client↔Connector matchmaking |
 
-### Client (installed on user devices)
-- Authenticates users via Controller redirect to identity authority
-- Obtains Controller-signed user ACL
-- Intercepts DNS and TCP/UDP traffic to protected Resources
-- Forwards DNS to Remote network Connector for local resolution
-- Establishes certificate-pinned TLS tunnel to Connector
+## Authorization Flow (Dual ACL Check)
+1. Controller generates **Client ACL** (Resources user can access)
+2. Controller generates **Connector ACL** (Resources Connector can forward to)
+3. Traffic only flows if destination is in **intersection** of both ACLs
 
-### Connector (deployed behind private firewall)
-- Authenticates with Controller; receives and maintains Connector ACL
-- Maintains outbound connections to one or more Relays
-- Verifies TLS tunnel integrity, Client signature, and Client ACL claim on every inbound connection
-- Performs local DNS resolution for FQDN Resources before forwarding
+## Security Architecture
 
-### Relay (Twingate-hosted, equivalent to TURN server)
-- Stores only anonymous hash-based Connector IDs — no network-identifiable data
-- No data-carrying connections terminate at the Relay
-- Connects Clients to Connectors by Connector ID without knowing source/destination network details
+- Connector registers with anonymized hash-generated unique ID — only identifier shared with Clients
+- Client establishes **certificate-pinned TLS tunnel** to Connector
+- Connector verifies: TLS tunnel integrity + Client signature + Client ACL claim validity on every connection
+- Controller always delegates authentication to external identity authority (social or IdP)
+- Connector cannot be deployed without one-time Controller authorization
 
-## Security Design Gotchas
-- Connector ACL acts as a **second check** on Client ACL — traffic only flows if destination is in both ACLs
-- Connector ID shared with Clients is anonymized (hash-based) — no private network info exposed
-- Client ACL signature is verified by Connector on every connection to prevent tampering
-- Connectors cannot be deployed without one-time Controller authorization
+## Gotchas
 
-## Prerequisites
-- Configured Identity Provider (or social identity)
-- Twingate Admin console access
-- Client installed on user devices
-- Connector deployed inside target private network
+- Connectors make **outbound** connections to Relays — no inbound firewall rules needed on the remote network
+- The Relay stores **no** identifying information about source/destination networks, Clients, or Connectors
+- Connector ID is the **only** information about Connectors ever shared with Clients
+- DNS resolution for FQDN Resources happens on the **remote network** side (via Connector), not the client side
 
 ## Related Docs
-- Client installation guide
-- Connector deployment guide
-- Relay documentation
-- Identity Provider configuration
+- Twingate Client installation
+- Connector deployment
+- Relay configuration
+- Identity Provider integration
 - Admin console configuration
-- Connection flow detail (referenced as next article in series)

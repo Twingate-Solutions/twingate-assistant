@@ -1,21 +1,27 @@
 # Twingate Open Source Software
 
 ## Summary
-Twingate publishes source code for components used in its software under open source licenses. Currently, one component is available for download. This page serves as the compliance/distribution point for GPL and similar license obligations.
+Twingate publishes source code for open source components used in their software. Currently, one open source component is listed: a fork/distribution of tap-windows6 under GPLv2 license.
 
 ## Key Information
-- **Twingate tap-windows6**: Licensed under GPLv2
-- Source code download available directly from the page
-- tap-windows6 is a TAP virtual network driver (Windows), used for VPN-style tunneling on Windows clients
+- Twingate provides source code downloads to comply with open source license requirements
+- **tap-windows6**: Windows TAP driver component, licensed under GPLv2
+- Source code is available for direct download from the documentation page
 
 ## Configuration Values
-- License: GPLv2
-- Component: `tap-windows6`
+None applicable — this is a source code distribution page only.
+
+## Components Listed
+
+| Component | License | Notes |
+|-----------|---------|-------|
+| tap-windows6 | GPLv2 | Windows virtual network adapter driver |
 
 ## Gotchas
-- Only one OSS component is currently listed; other Twingate components are proprietary
-- GPLv2 requires that modifications to tap-windows6 also be released under GPLv2 if distributed
+- Only one component is currently listed; other Twingate components are proprietary
+- tap-windows6 is a Windows-specific driver — only relevant if building/auditing Windows Client components
+- GPLv2 requires that any modifications to tap-windows6 also be distributed under GPLv2
 
 ## Related Docs
-- Twingate Client installation docs (Windows)
-- [OpenVPN tap-windows6 upstream](https://github.com/OpenVPN/tap-windows6) (community reference)
+- Twingate Client installation (Windows)
+- Twingate network architecture documentation

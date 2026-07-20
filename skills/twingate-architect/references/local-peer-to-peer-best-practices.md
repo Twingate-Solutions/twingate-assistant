@@ -1,32 +1,37 @@
 # Best Practices for Local Peer-to-Peer Connections
 
 ## Summary
-Twingate supports local peer-to-peer (P2P) connections that allow users to communicate directly with Connectors without routing through a central gateway. This guide covers recommended network topology using dual VLANs with strict traffic segregation to optimize performance and security. All user access to resources is mediated through Twingate Connectors.
+Guide for designing internal networks to leverage Twingate's local peer-to-peer (P2P) connections. Recommends a two-VLAN architecture with Connectors mediating all inter-VLAN traffic. Covers firewall configuration for Palo Alto, FortiGate, Sophos XG, and Barracuda CloudGen.
 
 ## Key Information
-- Local P2P keeps traffic within the local network, reducing latency and external bandwidth usage
-- Recommended topology: two VLANs on a single physical network
-  - **VLAN 1**: Resources (servers, systems) + two Twingate Connectors
-  - **VLAN 2**: Users, DHCP, DNS, end-user devices
-- Only Connector private IPs in VLAN 1 are reachable from VLAN 2
-- Two Connectors recommended for redundancy in VLAN 1
+- Local P2P: direct communication between users and Resources on the same physical network, routed through Connectors
+- Benefits: reduced latency, bandwidth optimization, Zero Trust enforcement
+- Recommended topology: single physical network, two VLANs, two Connectors in resource VLAN
+- All user-to-resource traffic must pass through Connector IPs — no direct inter-VLAN access
 
-## Firewall Rules (Apply Top-to-Bottom)
+## Recommended Network Topology
+
+| VLAN | Contents |
+|------|----------|
+| VLAN 1 (Resources) | Servers, systems, 2x Twingate Connectors |
+| VLAN 2 (Users) | End-user devices, DHCP, DNS |
+
+## Firewall Rules (Applied Top-to-Bottom)
 
 | Source | Destination | IP/Port | Action |
-|--------|------------|---------|--------|
+|--------|-------------|---------|--------|
 | VLAN 2 | VLAN 1 | `<ConnectorIP>:*` | Allow |
 | VLAN 2 | VLAN 1 | `*:*` | Block |
 | VLAN 1 | VLAN 2 | `*:*` | Block |
 
-> Note: VLAN 1 → VLAN 2 blocking is implied; adjust if return traffic needs to flow.
+> Only Connector private IP addresses are whitelisted. All other VLAN 2 → VLAN 1 traffic is denied.
 
-## Supported Firewall Platforms
-Configuration guidance provided for:
-- **Palo Alto NGFW** – Security zones, security policies, PBF rules; reference Strata Cloud Manager
-- **Fortinet FortiGate** – VLAN creation via GUI → Network → VLAN; policies via Policy & Objects
-- **Sophos XG** – Network → Interfaces → Add VLAN; Rules and Policies for inter-VLAN control
-- **Barracuda CloudGen** – VLAN interfaces on physical/virtual ports; access rules via Firewall Admin → Configuration
+## Firewall-Specific Configuration Notes
+
+- **Palo Alto NGFW**: Create security zones per VLAN → define security policies allowing VLAN 2 → Connector IPs → use PBF rules for routing; use Strata Cloud Manager for policy validation
+- **FortiGate**: Network > VLAN setup → Policy & Objects > create policy with source VLAN and destination = Connector IP(s) only
+- **Sophos XG**: Network > Interfaces > Add VLAN → Rules and Policies > permit VLAN 2 to Connector IPs in VLAN 1; block all other inter-VLAN traffic
+- **Barracuda CloudGen**: Configure VLAN interfaces → Firewall Admin > Configuration > Firewall rules → set source = VLAN 2 range, destination = Connector IP only → add default deny rule
 
 ## Prerequisites
 - Two Twingate Connectors deployed in VLAN 1
@@ -34,10 +39,9 @@ Configuration guidance provided for:
 - Firewall capable of inter-VLAN policy enforcement
 
 ## Gotchas
-- Firewall rules are order-dependent; allow Connector IPs **before** the broad block rule
-- Users cannot reach any VLAN 1 resource directly—only through Connectors; plan DNS accordingly
-- The example allows traffic from VLAN 2 to a single Connector IP (`10.0.0.2`)—update rules for both Connectors
-- VLAN 1 → VLAN 2 block in the example table conflicts with return traffic; verify stateful firewall behavior on your platform
+- Firewall rules are order-dependent (top-to-bottom); allow rules for Connector IPs must precede the block-all rule
+- VLAN 1 → VLAN 2 traffic is also blocked by default in this design — verify Connector-initiated return traffic is handled correctly
+- Two Connectors recommended for redundancy; only specific Connector IPs should be whitelisted, not entire VLAN 1 subnet
 
 ## Related Docs
 - [Twingate Architecture](https://www.twingate.com/docs/architecture)
