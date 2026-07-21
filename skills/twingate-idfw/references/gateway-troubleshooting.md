@@ -99,6 +99,7 @@ journalctl -u twingate-gateway -o cat | grep '"levelname":"error"'        # erro
 | `failed to verify signature` (401) | Proof-of-possession failure — usually TLS interception between client and gateway | [§6](#6-connect-authentication-failures) |
 | `Failed to connect to upstream SSH server` | TCP dial failure **or** target sshd rejected the gateway's certificate (untrusted CA / unknown principal) | [§7](#7-ssh-resource-issues) |
 | `host key does not match known host key` | Target host rebuilt/re-keyed since first connection (TOFU pin) | [§7](#7-ssh-resource-issues) |
+| SSH shows the Twingate ASCII-art banner, then hangs or drops | Gateway→target leg failed after a successful downstream handshake — dial failure, cert signing (Vault), or the target rejected the cert | [§7](#7-ssh-resource-issues) |
 | kubectl: `InternalError ("")`; gateway audit shows the request but upstream fails | Gateway dialing the API server on 443 when it listens elsewhere (e.g. k3s on 6443) | [§8](#8-kubernetes-resource-issues) |
 | kubectl: `403 Forbidden` mentioning impersonation | Gateway service account lacks impersonate RBAC for a forwarded group | [§8](#8-kubernetes-resource-issues) |
 | Every web app request returns 500, `API request failed` | Bad `webApp.headers` template | [§9](#9-web-app-resource-issues) |
@@ -303,6 +304,15 @@ GAT) and opens its *own* SSH connection to the target, authenticating with a
 short-lived (default 5 min) user certificate signed by the gateway's SSH CA, with
 the configured `ssh.gateway.username` as the principal.
 
+**The welcome banner tells you where the failure is.** The Twingate ASCII-art
+banner is delivered during the *downstream* handshake — before the gateway mints
+its upstream certificate and dials the target. A user who sees the banner and then
+hangs or gets disconnected (`upstream connection failed` when their client opens a
+channel) has already passed TLS, CONNECT authentication, and the downstream
+handshake: the failure is in the gateway→target leg, and the reason is only in the
+**gateway logs**. Every cause in this section produces exactly this
+banner-then-drop symptom on the client side.
+
 ### 7.1 `Failed to connect to upstream SSH server`
 
 One log message, two very different causes — distinguish by the wrapped `error`:
@@ -346,6 +356,11 @@ first use. If a target is rebuilt or re-keyed, subsequent connections fail with
 restart the gateway to re-pin after a legitimate host rebuild, and treat an
 *unexplained* mismatch as a potential machine-in-the-middle before resetting it.
 
+TOFU applies only to the auto-generated and manual CA modes. **A Vault-backed CA
+replaces TOFU entirely**: the gateway verifies the target's *host certificate*
+against Vault's host CA instead (§7.4), so a rebuilt target needs its host cert
+re-signed by Vault, not a gateway restart.
+
 ### 7.3 Channel and feature restrictions
 
 The gateway deliberately rejects certain SSH features; these appear as
@@ -356,12 +371,66 @@ gateway" are hitting design, not failure.
 
 ### 7.4 Vault-backed SSH CA
 
-If the SSH CA is Vault-backed, the gateway logs its token lifecycle. Watch for
+A Vault-backed CA changes two things at once: every new session makes a live Vault
+signing call (the user certificate), and upstream host verification switches from
+TOFU to validating the target's host certificate against Vault's host CA (§7.2).
+Both add failure modes the embedded CA doesn't have — all with the same client
+symptom: banner, then drop.
+
+**Token lifecycle.** The gateway logs it. Watch for
 `Failed to renew Vault token, re-attempting login` and
-`Failed to login to Vault, will retry later` — while the Vault login is broken,
-certificate signing fails and all new SSH sessions fail. `failed to sign
-certificate with Vault` on a session means the signing role/mount is wrong or the
-token lacks permissions.
+`Failed to login to Vault, will retry later` — while the login is broken,
+certificate signing fails and all new SSH sessions fail (retry interval: 1 min).
+
+**Per-session signing failures.** A signing failure aborts the connection *before*
+the upstream dial, so it is logged as `Failed to serve SSH connection` wrapping
+`failed to sign user certificate: …` — **not** as
+`Failed to connect to upstream SSH server`. The wrapped error is Vault's own:
+`permission denied` means an expired/invalid token or a missing policy; a 404
+means a wrong mount or role. The message `failed to sign certificate with Vault`
+appears only in the narrower case where Vault responds but returns no signed key.
+
+**Target rejects the gateway's certificate** — the target's `TrustedUserCAKeys`
+holds a key that is not Vault's *current* user CA (see the trap below). Logged as
+`Failed to connect to upstream SSH server` with `ssh: handshake failed: …
+unable to authenticate`; diagnose on the target per §7.1.
+
+**Gateway rejects the target's host certificate** — expired, or signed by a CA
+other than the one at Vault's upstream-host-CA mount. Logged as
+`Failed to connect to upstream SSH server` with `ssh: handshake failed: host key
+…`.
+
+#### The ephemeral-Vault trap (test/dev deployments)
+
+A Vault instance **without persistent storage** — dev mode, or a Kubernetes pod
+with no volume — loses everything when it restarts or is rescheduled (a node
+drain is all it takes) and comes back with **freshly generated SSH CA key pairs**.
+Everything then *looks* healthy: the gateway logs in and Vault signs certificates
+without complaint — but they are signed by the *new* CA, while every target still
+trusts the *old* CA public key. Every SSH session fails with the banner-then-drop
+symptom until the trust anchors are redistributed.
+
+```bash
+# 1. Confirm the CA changed: Vault's current user CA…
+vault read -field=public_key <user-ca-mount>/config/ca
+# …vs what a target trusts (the file named by sshd's TrustedUserCAKeys)
+cat /etc/ssh/gateway_ca.pub
+
+# 2. If they differ, on every target:
+#    a. install the new user CA public key into TrustedUserCAKeys
+#    b. re-sign the target's host key with Vault's host CA so the gateway
+#       trusts the target again
+vault write <host-ca-mount>/sign/<role> cert_type=host \
+  public_key=@/etc/ssh/ssh_host_ed25519_key.pub
+```
+
+(The mount names come from the gateway config's `ssh.ca.vault` section —
+`gatewayUserCA` / `upstreamHostCA` blocks, defaulting to the top-level `mount`,
+which itself defaults to `ssh`.)
+
+Prevention: give Vault durable storage **before** routing SSH through it. An
+in-memory Vault makes the entire SSH trust fabric restart-fragile, and the
+failure looks nothing like a storage problem when it hits.
 
 ## 8. Kubernetes resource issues
 
@@ -460,6 +529,31 @@ Common failure modes:
 4. **Kubernetes exec** — WebSocket-based `kubectl exec`/`attach` sessions are
    recorded; `kubectl cp` and `kubectl proxy` traffic is deliberately skipped.
 
+### 10.1 Eyeballing a recording straight from the logs
+
+The recording payload is just a JSON field (`asciicast`) on the log line, so you
+can watch sessions being captured with nothing but `jq`. Filter before extracting
+— a bare `jq -r '.asciicast'` prints `null` for every non-recording line:
+
+```bash
+# All sessions, live (any platform's log command works the same way)
+kubectl logs -f -n <ns> <gateway-pod> | jq -r 'select(.asciicast) | .asciicast'
+
+# One session only — recording lines carry the connection's conn_id
+journalctl -u twingate-gateway -o cat \
+  | jq -r 'select(.asciicast and .conn_id == "<conn_id>") | .asciicast'
+```
+
+Two caveats before treating the output as a playable file:
+
+- **Each flush re-prepends the asciicast header** and carries only the events
+  since the previous flush. A single-flush session is directly playable
+  (`asciinema play <file>`); a multi-flush session has duplicate header lines
+  mid-stream — keep the first header, drop the repeats, keep all event lines in
+  `asciicast_sequence_num` order.
+- Concurrent sessions interleave in the combined stream — filter by `conn_id`
+  when reconstructing one.
+
 ## 11. Controller-side management gotchas
 
 Some gateway problems can only be fixed on the controller, and (as of this
@@ -524,6 +618,7 @@ kubectl logs -n <ns> deploy/<release>-gateway --since=1h   # kubernetes
 ... | grep '"levelname":"error"'                           # errors
 ... | grep '"logger":"gateway.audit"'                      # audit + recordings
 ... | grep '<conn_id>'                                     # trace one session
+... | jq -r 'select(.asciicast) | .asciicast'              # extract session recordings (see §10.1)
 
 ## TLS: what the gateway serves vs what's on disk
 openssl s_client -connect <gw>:8443 </dev/null 2>/dev/null | openssl x509 -noout -issuer -dates -ext subjectAltName
