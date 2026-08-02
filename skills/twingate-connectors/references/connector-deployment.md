@@ -1,50 +1,49 @@
 # Connector Deployment
 
-## Page Title
-Deploying Connectors
-
 ## Summary
-Twingate Connectors are deployed via Linux systemd packages or OCI (Docker) containers. A single Connector can serve an entire network segment; multiple Connectors enable load-balancing and failover. Deployment method depends on target environment (cloud VM, on-prem, serverless, IaC, or home network).
+Twingate Connectors run as either a Linux systemd package or OCI (Docker) container. A single Connector provides access to all reachable resources in its network; additional Connectors enable load-balancing and failover. No inbound firewall rules are required—only outbound internet access.
 
 ## Key Information
-- Connectors do **not** need to be on every host — one Connector covers all reachable resources in its network
+- Connectors do **not** need to be on every host; one Connector can serve an entire network segment
 - Multiple Connectors on separate hosts = automatic load-balancing + failover
-- No inbound firewall rules required — only outbound internet access needed
 - Use separate Remote Networks per location for multi-site deployments
-- Peer-to-peer connections recommended for better UX and Fair Use Policy compliance
+- Peer-to-peer connections improve user experience and reduce bandwidth under Fair Use Policy
+- Cloud VMs are the recommended deployment method when available
 
 ## Supported Platforms
 
-**x86/AMD64 and ARM64:**
+### Linux (x86/AMD64 and ARM64)
 - Ubuntu 22.04 LTS, 24.04 LTS, 26.04 LTS
 - Debian 11+, Fedora 41+, CentOS Stream 9+, Oracle Linux 8+
 
-**x86/AMD64 only:**
+### Linux (x86/AMD64 only)
 - Arch Linux, HP ThinPro, NixOS, Gentoo
 
 ## Deployment Methods by Environment
 
 | Environment | Options |
 |---|---|
-| Cloud VMs | AWS EC2, GCP Compute, Azure Compute, Kubernetes |
-| On-Prem/Office | Docker Compose, Firewalla, Synology, QNAP, Proxmox, TrueNAS SCALE |
+| Cloud VMs | AWS EC2, GCP Compute, Azure Compute |
+| Kubernetes | K8s |
+| Office/Data Center | Docker Compose, Firewalla, Synology, QNAP, Proxmox, TrueNAS SCALE |
 | Serverless/PaaS | AWS ECS (Fargate), Azure ACS, Aptible |
 | IaC | Terraform, Pulumi |
-| Home Network | Mac VM, Synology NAS, Raspberry Pi, Linux, Home Assistant, Proxmox, Unraid, CasaOS |
-
-## Prerequisites
-- Outbound internet access from the Connector host
-- Linux-based host (systemd or Docker/OCI runtime)
+| Home Network | Raspberry Pi, Synology NAS, Linux, Home Assistant, Proxmox, Unraid, CasaOS, Mac VM |
 
 ## Gotchas
-- **Cloud VMs are recommended** over serverless when available — better resource control and sizing
-- Serverless/PaaS deployments offer less control over CPU/memory/network allocated to Connectors
-- Home networks with dynamic IPs, CGNATs (e.g., Starlink), or no inbound access require Connector deployment (cannot rely on port forwarding)
-- Deploy second Connector on a **separate physical machine** for on-prem redundancy — same host defeats the purpose
+- Serverless/PaaS deployments offer less control over CPU, memory, and network resources allocated to Connectors
+- Home networks with dynamic IPs or CGNATs (e.g., Starlink) cannot accept inbound connections—Connector deployment resolves this without opening firewall ports
+- For office/data center deployments, a **second Connector on a separate physical machine** is explicitly recommended for redundancy
+
+## Prerequisites
+- Outbound internet access from the host running the Connector
+- No inbound firewall rules needed
+- Target environment must support Linux systemd or Docker/OCI containers
 
 ## Related Docs
-- Peer-to-peer connection support
-- Fair Use Policy
-- Remote Networks configuration
-- Best Practices for Secure Infrastructure-as-Code (webinar)
-- Platform-specific guides: Terraform, Pulumi, AWS EC2, Kubernetes, Docker Compose, Raspberry Pi, Home Assistant
+- Peer-to-peer connections support guide
+- Fair Use Policy (bandwidth)
+- AWS EC2, GCP Compute, Azure Compute deployment guides
+- Terraform, Pulumi integration guides
+- Specific home network guides (Plex, Home Assistant, Windows File Shares)
+- Best Practices for Secure Infrastructure-as-Code webinar

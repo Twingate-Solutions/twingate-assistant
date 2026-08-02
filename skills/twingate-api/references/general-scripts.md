@@ -1,57 +1,45 @@
 # Twingate General Scripts Repository
 
 ## Summary
-Community repository maintained by Twingate Solutions Engineering containing utility scripts for deployment, log parsing, and administration tasks. Each subdirectory contains its own README with usage instructions. Licensed under Apache-2.0.
+Community repository of operational reference scripts from Twingate Solutions Engineering covering client deployment, log parsing, gateway setup, and diagnostics. Scripts are provided as-is under Apache 2.0 with no official support or warranty. Each subfolder is a self-contained mini-project with its own README.
 
 ## Key Information
-- **Repository**: `Twingate-Solutions/general-scripts`
-- **Languages**: PowerShell (78.3%), Shell (16.6%), Python (5.1%)
-- **126 commits**, 6 forks, 4 stars
+- All scripts are reference/starting points — not production-ready drop-in tools
+- Developed with LLM coding assistance; review and test before use
+- Secrets must be passed at runtime (args, env vars, local files) — never hardcoded
+- Each folder contains its own README with specific usage instructions
 
-## Script Categories / Directories
+## Folder Index
 
-| Directory | Purpose |
-|-----------|---------|
-| `bash-scripts/` | General bash utilities |
-| `filter-network-events-report/` | Parse/filter network event logs |
-| `internet-security-include-only-group/` | Internet security group filtering |
-| `powershell-scripts/` | Windows PowerShell utilities |
-| `remove-users/` | User removal automation |
-| `twingate-headless-client-gateway/` | Headless client/gateway deployment |
-| `unique_ports/` | Port enumeration utilities |
+| Folder | Purpose | Platform | Language |
+|--------|---------|----------|----------|
+| `bash-scripts/` | macOS/Linux client diagnostics & admin helpers | macOS/Linux | Bash |
+| `powershell-scripts/` | Windows client deployment & lifecycle (Intune/MDM) | Windows | PowerShell |
+| `powershell-scripts/autopilot-scripting/` | Headless Windows machines → user-mode client on first logon | Windows | PowerShell |
+| `twingate-headless-client-gateway/` | Linux box as whole-network gateway + DNS for IoT/unmanaged devices | Linux | Bash |
+| `filter-network-events-report/` | Filter Network Events CSV to single user | Cross-platform | Python |
+| `unique_ports/` | Extract unique host:port combinations from Network Events report | Cross-platform | Python |
+| `remove-users/` | Bulk-remove all users from a Twingate group via CLI | Linux/macOS | Bash |
+| `internet-security-include-only-group/` | Populate exclude group from include group for Internet Security rollout | Linux/macOS | Bash |
 
 ## Prerequisites
-- Each script has its own dependencies — check the README in each subdirectory
-- PowerShell scripts require Windows or PowerShell Core
-- Shell scripts require bash-compatible environment
-- Twingate API credentials likely required for admin scripts (user removal, group management)
+- Twingate CLI required for `remove-users/` and `internet-security-include-only-group/`
+- Python required for `filter-network-events-report/` and `unique_ports/`
+- Twingate API token (passed at runtime, never committed)
+- Each subfolder README specifies additional dependencies
 
-## Usage Pattern
-```bash
-# Navigate to specific script directory
-cd <script-folder>/
-
-# Read per-script documentation
-cat README.md
-
-# Execute per script-specific instructions
-```
-
-## Notable Scripts
-
-- **`twingate-headless-client-gateway/`** — Deployment automation for headless Twingate clients/gateways; includes Ubuntu Hyper-V image release (Sep 2024)
-- **`remove-users/`** — Automates user removal, likely via Twingate API
-- **`filter-network-events-report/`** — Post-processing of Twingate network event exports
-- **`internet-security-include-only-group/`** — Restricts internet security policies to specific groups
+## Configuration Values
+- **API tokens**: Pass via CLI arguments, environment variables, or local files excluded from `.gitignore`
+- **No hardcoded secrets** — enforce via `.gitignore` for any local config files
 
 ## Gotchas
-- No centralized configuration — each script is independently configured
-- Repository is community/solutions-team maintained, not official product support
-- Must read per-directory READMEs; top-level README provides no implementation details
-- Scripts may require Twingate API tokens with appropriate scopes (admin-level for user/group management)
+- No official Twingate support attached to any script
+- `powershell-scripts/hyperv-connector-deployment/` has been moved to separate repo: `Twingate-Solutions/twingate-connector-hyperv`
+- Scripts were LLM-assisted — validate logic independently before production use
+- Apache 2.0 "AS IS" terms apply (no warranty, limited liability)
 
 ## Related Docs
-- [Twingate API Documentation](https://docs.twingate.com/docs/api-overview)
-- [Twingate Headless Client](https://docs.twingate.com/docs/linux-headless-client)
-- [Network Events / Logs](https://docs.twingate.com/docs/network-events)
-- Individual script READMEs within each subdirectory
+- Individual folder READMEs (primary usage reference)
+- [CONTRIBUTING.md](https://github.com/Twingate-Solutions/general-scripts/blob/main/CONTRIBUTING.md) — pattern for adding new scripts
+- [Twingate-Solutions/twingate-connector-hyperv](https://github.com/Twingate-Solutions/twingate-connector-hyperv) — relocated Hyper-V connector scripts
+- Twingate CLI documentation (required for bash group management scripts)
