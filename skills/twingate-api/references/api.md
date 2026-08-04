@@ -4,68 +4,62 @@
 Twingate GraphQL API Reference
 
 ## Summary
-Twingate exposes a GraphQL API for programmatic management of all network resources, users, devices, connectors, and access controls. All requests require an API key header and target a tenant-specific endpoint. The API supports full CRUD operations via queries and mutations with cursor-based pagination.
+Complete GraphQL schema reference for the Twingate API, covering queries and mutations for managing all Twingate resources. The API uses per-tenant endpoints with API key authentication. Supports CRUD operations for connectors, remote networks, resources, groups, users, devices, service accounts, and more.
 
 ## Key Information
 - **API Type**: GraphQL (queries + mutations)
-- **Pagination**: Cursor-based using `before`, `after`, `first`, `last` on all list queries
-- **Response pattern**: Mutations return `{ ok: Boolean, error: String, entity: <Type> }`
-- **IDs**: Base64-encoded (e.g., `"YWJjMTIzeHl6Nzg5"`)
+- **Endpoint pattern**: `https://<network-name>.twingate.com/api/graphql/`
+- **Auth**: Header-based API key (`X-API-KEY`)
+- **Pagination**: Cursor-based (`before`, `after`, `first`, `last`) on all list queries
+- **List responses**: Return `pageInfo`, `edges`, and `totalCount`
+- **Mutation responses**: Always return `ok` (Boolean) and `error` (String)
 
 ## Prerequisites
-- API token generated from the Twingate admin console
-- Network name (tenant subdomain) for constructing the endpoint URL
+- Twingate account with admin access
+- API token generated from the admin console
+- Network name (subdomain) for your tenant
 
 ## Configuration Values
 
 | Parameter | Value |
 |-----------|-------|
-| Endpoint | `https://<network-name>.twingate.com/api/graphql/` |
-| Auth Header | `X-API-KEY: <YOUR_TOKEN_HERE>` |
+| Header | `X-API-KEY: <YOUR_TOKEN_HERE>` |
+| Endpoint | `https://<network name>.twingate.com/api/graphql/` |
 
 ## Available Queries
-| Query | Description |
-|-------|-------------|
-| `accessRequest(id)` | Single access request |
-| `accessRequests` | List with filter support |
-| `connector(id)` / `connectors` | Connector(s) |
-| `device(id)` / `devices` | Device(s) |
-| `devicePosture(id)` | Device security posture |
-| `group(id)` / `groups` | Group(s) |
-| `remoteNetwork(id\|name)` / `remoteNetworks` | Remote network(s) |
-| `resource(id)` / `resources` | Resource(s) |
-| `securityPolicy(id\|name)` / `securityPolicies` | Security policies |
-| `serviceAccount(id)` / `serviceAccounts` | Service accounts |
-| `user(id)` / `users` | User(s) |
-| `gateway(id)` / `gateways` | Gateways |
-| `dnsFilteringProfile(id)` / `dnsFilteringProfiles` | DNS filtering |
-| `certificateAuthority(id)` / `certificateAuthorities` | CAs |
+- `accessRequest(id)` / `accessRequests(filter)`
+- `certificateAuthority(id)` / `certificateAuthorities()`
+- `connector(id)` / `connectors(filter)`
+- `device(id)` / `devices(filter)` / `devicePosture(id)`
+- `dnsFilteringProfile(id)` / `dnsFilteringProfiles()`
+- `gateway(id)` / `gateways()`
+- `group(id)` / `groups(filter)`
+- `remoteNetwork(id|name)` / `remoteNetworks(filter)`
+- `resource(id)` / `resources(filter)`
+- `securityPolicy(id|name)` / `securityPolicies(filter)`
+- `serialNumbers(filter)`
+- `serviceAccount(id)` / `serviceAccounts(filter)` / `serviceAccountKey(id|name)`
+- `user(id)` / `users(filter)`
 
 ## Available Mutations
-| Mutation | Description |
-|----------|-------------|
-| `connectorCreate/Update/Delete/GenerateTokens` | Connector management |
-| `resourceCreate/Update/Delete` | Resource management |
-| `resourceAccessAdd/Remove/Set` | Access control |
-| `groupCreate/Update/Delete` | Group management |
-| `remoteNetworkCreate/Update/Delete` | Network management |
-| `userCreate/Update/Delete` | User management |
-| `serviceAccountCreate/Delete` + `serviceAccountKeyCreate/Delete` | Service accounts |
-| `deviceUpdate/Archive/Unarchive/Block/Unblock` | Device management |
-| `accessRequestApprove/Reject` | Access request handling |
-| `gatewayCreate/Update/Delete` | Gateway management |
-| `dnsFilteringProfileCreate/Update/Delete` | DNS filtering |
-| `serialNumbersCreate/Delete` | Serial number management |
-| `kubernetesResourceCreate/Update` | K8s resources |
+- **Access Requests**: `accessRequestApprove`, `accessRequestReject`
+- **Connectors**: `connectorCreate`, `connectorUpdate`, `connectorDelete`, `connectorGenerateTokens`
+- **Devices**: `deviceArchive`, `deviceUnarchive`, `deviceBlock`, `deviceUnblock`, `deviceUpdate`
+- **DNS Filtering**: `dnsFilteringProfileCreate`, `dnsFilteringProfileUpdate`, `dnsFilteringProfileDelete`
+- **Gateways**: `gatewayCreate`, `gatewayUpdate`, `gatewayDelete`
+- **Groups**: `groupCreate`, `groupUpdate`, `groupDelete`
+- **Kubernetes Resources**: `kubernetesResourceCreate`, `kubernetesResourceUpdate`
+- **Remote Networks**: `remoteNetworkCreate`, `remoteNetworkUpdate`, `remoteNetworkDelete`
+- **Resources**: `resourceCreate`, `resourceUpdate`, `resourceDelete`, `resourceAccessAdd`, `resourceAccessRemove`, `resourceAccessSet`
+- **Security Policies**: `securityPolicyUpdate`
+- **Serial Numbers**: `serialNumbersCreate`, `serialNumbersDelete`
+- **Service Accounts**: `serviceAccountCreate`, `serviceAccountDelete`, `serviceAccountKeyCreate`
 
 ## Gotchas
-- `resourceAccessSet` **replaces all existing access** — use `resourceAccessAdd/Remove` for incremental changes
-- `securityPolicyId: null` in updates resets to the default policy (not unchanged); omit the field to preserve existing
-- `alias: null` explicitly clears the alias; omit to leave unchanged
-- `serviceAccountKeyCreate` returns the `token` only at creation time — not retrievable afterward
-- `expirationTime` for service account keys is 0–365 days (integer)
-- DNS filtering queries return `None` when DNS filtering is not enabled on the tenant
-
-## Related Docs
-- Getting Started with the API guide (linked from page intro)
-- Twingate Support: https://www.twingate.com/support
+- `remoteNetwork` query accepts **either** `id` or `name` (both optional, use one)
+- `groupUpdate` has both full-replace (`resourceIds`, `userIds`) and incremental (`addedResourceIds`, `removedResourceIds`) patterns — using both simultaneously may conflict
+- `resourceUpdate`: passing `securityPolicyId: null` resets to Default Policy; omitting it leaves it unchanged
+- `resourceUpdate`: passing `alias: null` clears the alias; omitting it leaves it unchanged
+- `serviceAccountKeyCreate`: `expirationTime` is in days, range 0–365 inclusive
+- `gatewayUpdate`: setting `sshCAId: null` **unassigns** the SSH CA
+- DNS filtering

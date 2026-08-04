@@ -3,48 +3,58 @@
 # Resource Exclusion (Bypass Twingate)
 
 ## Summary
-Resources can be set to "Bypass Twingate" routing mode, sending traffic directly to the OS routing table instead of through Connectors/Relays. This allows carving exceptions from broader Resources (e.g., excluding a public status page from a wildcard domain Resource) without topology restructuring.
+Resource exclusions allow specific addresses to bypass Twingate's proxy infrastructure entirely, routing traffic directly via the local OS routing table. Designed for carving exceptions out of broader Resources (e.g., a public subdomain within a wildcard Resource). Excluded Resources generate no network events and are Connector-independent.
 
 ## Key Information
-- Default routing mode is `Through Twingate`; alternative is `Bypass Twingate`
-- Bypassed Resources: no Connector/Relay involved, no Security Policy evaluation, no network events generated
-- Bypassed Resources remain reachable even if all Connectors in a Remote Network are offline
-- DNS filtering and OS-level internet security still apply
-- Audit log captures all Routing Mode changes (who, before/after values)
-- Bypassed Resources are invisible to end users — don't appear in Client Resource list, no auth prompt triggered
+- **Routing Mode** setting per Resource: `Through Twingate` (default) or `Bypass Twingate`
+- Bypassed traffic skips: Connectors, Relay, Security Policies, network event generation
+- Bypassed traffic still subject to: DNS filtering, OS-level internet security
+- Excluded Resources remain reachable even if all Connectors in a Remote Network are offline
+- Changes to Routing Mode are captured in the audit log (who changed it, before/after values)
+- Excluded Resources are **invisible** to Clients — don't appear in Resource list, no auth prompt
 
 ## Prerequisites
-Minimum Client versions required:
-- macOS: 2026.182
-- iOS: 2026.182
-- Android: 2026.181
-- Linux: 2026.188 (in `latest` channel)
+Minimum Client versions:
+- macOS: `2026.182`
+- iOS: `2026.182`
+- Android: `2026.181`
+- Linux: `2026.188` (in latest channel)
 - Windows: not yet supported
 
-## Step-by-Step (Admin Console)
+## Configuration
+
+### Admin Console
 1. Open Resource creation modal or edit existing Resource
 2. Under **Routing Mode**, select **Bypass Twingate**
-3. Enter specific FQDN or IP address (wildcards/CIDR blocked)
-4. Save — active immediately on qualifying Clients
+3. Enter specific FQDN or IP address
+4. Save
+
+### API (GraphQL)
+```graphql
+routingMode: BYPASS_TWINGATE  # in createResource or updateResource mutation
+# Default: THROUGH_TWINGATE
+```
+
+### REST API
+```json
+"routing_mode": "bypass_twingate"
+// Default: "through_twingate"
+```
 
 ## Configuration Values
-
-| Context | Field | Value |
-|---|---|---|
-| GraphQL API | `routingMode` | `BYPASS_TWINGATE` / `THROUGH_TWINGATE` (default) |
-| REST API | `routing_mode` | `"bypass_twingate"` / `"through_twingate"` (default) |
-
-Apply to `createResource` or `updateResource` mutations/payloads.
+| Context | Field | Values | Default |
+|---------|-------|--------|---------|
+| GraphQL | `routingMode` | `BYPASS_TWINGATE`, `THROUGH_TWINGATE` | `THROUGH_TWINGATE` |
+| REST | `routing_mode` | `bypass_twingate`, `through_twingate` | `through_twingate` |
 
 ## Gotchas
-- **Wildcards and CIDR ranges are blocked** — must use specific FQDN or IP; enforced at both UI and API level
-- **Port restrictions unavailable** — port section hidden when Bypass is selected
-- **Identity Firewall (ID-FW) Resources cannot be bypassed** — blocked at UI and API level
-- **No network events generated** — bypassed traffic never reaches Twingate infrastructure; Security Policies and JIT/usage-based access options hidden in UI
-- **Ephemeral Access** can still be configured for bypassed Resources
-- **Remote Network association persists** — bypassed Resources still belong to a Remote Network (organizational only)
-- **Aliases inherit bypass** — an alias on a bypassed Resource also bypasses Twingate
-- Older Clients (below minimum versions) will not apply exclusions silently
+- **No wildcards or CIDR ranges** — only specific FQDNs or IP addresses accepted; blocked at UI and API level (prevents routing loops)
+- **No port restrictions** — port section hidden when Bypass selected; cannot be combined
+- **Identity Firewall Resources cannot be bypassed** — blocked at UI and API level
+- **Aliases inherit bypass** — an alias on an excluded Resource also bypasses Twingate
+- **No Security Policies or JIT/usage-based access** — hidden in UI for excluded Resources (Ephemeral Access still configurable)
+- **Older Clients silently ignore exclusions** — Clients below minimum version will route excluded Resources normally (through Twingate)
+- Remote Network association is retained for organizational purposes only
 
 ## Identifying Excluded Resources
 - Add **Routing Mode** column via "add column" menu in Resources data grid (hidden by default)

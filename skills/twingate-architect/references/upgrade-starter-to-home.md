@@ -1,41 +1,39 @@
 # Upgrade Starter to Twingate Home
 
-## Page Title
-Upgrade to Twingate Home
-
 ## Summary
-Guide for redeeming a Twingate Home promo code to upgrade from a Starter plan. The upgrade takes effect immediately upon successful code redemption via the Admin Console.
+Guides existing Starter plan users through redeeming a promo code to upgrade to Twingate Home. The upgrade takes effect immediately upon successful code redemption.
 
 ## Key Information
-- Requires an existing Starter plan account
-- Promo codes obtained from the Twingate Access Pass page
-- Upgrade is instantaneous upon code application
-- Success confirmed via green banner: "Promo code applied successfully!"
+- Requires a valid Twingate Home promo/access code obtained separately
+- Upgrade is immediate — no waiting period
+- Success confirmed by green banner: "Promo code applied successfully!"
+- Home plan features become available instantly after upgrade
 
 ## Prerequisites
 - Active Twingate Starter plan account
-- Twingate Home access/promo code (obtain from [Twingate Access Pass](https://www.twingate.com/access-pass) if not already acquired)
 - Admin Console access
+- Valid Twingate Home promo code
 
 ## Step-by-Step
 
-1. Sign into the Admin Console
+1. Sign into the **Admin Console**
 2. Click **Settings**
 3. Click **Manage Plan** (navigates to billing tab)
 4. Locate **Redeem Twingate Home Promo Code** section under current plan
-5. Click the **Redeem Twingate Home Promo Code** section to expand
-6. Enter the access code in the promo code field
+5. Click the **Redeem Twingate Home Promo Code** section to expand it
+6. Enter your access code in the promo code field
 7. Click **Apply Code**
-8. Confirm green success banner appears
+8. Verify green success banner appears at top of page
 
 ## Configuration Values
-- None (UI-only process, no env vars, CLI flags, or API params)
+- No environment variables or API parameters
+- Input: promo/access code (alphanumeric string, format not documented)
 
 ## Gotchas
-- Must be on a Starter plan — no indication this works from other plan tiers
-- Access code must be obtained before starting; no in-console way to request one
-- No mention of code expiry or single-use limitations — verify code validity before attempting redemption
+- Code must be entered exactly as provided — no documented retry behavior if code fails
+- Only applicable to Starter plan accounts (not other plan tiers)
+- Promo code acquisition process is not covered in this guide — code must be obtained beforehand
 
 ## Related Docs
-- [Twingate Access Pass](https://www.twingate.com/access-pass) — obtain promo code
-- [Twingate Pricing Page](https://www.twingate.com/pricing) — Home plan feature comparison
+- Twingate Pricing Page (for Home plan feature comparison)
+- Admin Console Settings / Billing documentation

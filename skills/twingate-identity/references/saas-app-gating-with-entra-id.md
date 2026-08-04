@@ -1,47 +1,50 @@
 # SaaS App Gating with Microsoft Entra ID
 
+## Page Title
+How to Configure SaaS App Gating with Microsoft Entra ID
+
 ## Summary
-Configure Twingate and Microsoft Entra ID so that SaaS application access requires an active Twingate connection. Authentication traffic routes through a Twingate Connector's egress IP, which Entra ID Conditional Access validates via a Named Location policy.
+SaaS app gating uses Twingate Connectors as a network prerequisite for Entra ID authentication, replacing IP whitelisting in SaaS apps. Users must connect through an authorized Twingate Connector (with a known egress IP) before IdP authentication succeeds. The IP check occurs at the Entra ID Conditional Access layer, not within the SaaS application itself.
 
 ## Key Information
-- Replaces IP whitelisting in SaaS apps — IP enforcement happens at IdP auth stage instead
-- Connector's egress IP (typically a NAT gateway IP) is the enforcement point
-- Applies to any SaaS apps protected by Entra ID Conditional Access
+- Twingate Connector's egress IP becomes the trusted IP in Entra ID Named Locations
+- Conditional Access Policy enforces that only traffic from the Connector IP can authenticate to target SaaS apps
+- Twingate Group membership controls which users can reach the Connector/Resource
 
 ## Prerequisites
-- Twingate Admin Console access with ability to create Resources and Policies
-- Microsoft Entra ID admin access with Conditional Access licensing
-- Known egress IP of the Twingate Connector(s) / NAT gateway for the Remote Network
+- Twingate Admin Console access
+- Microsoft Entra ID admin access with Conditional Access permissions
+- Known egress IP of Twingate Connector(s) (typically a NAT gateway IP)
 
 ## Step-by-Step
 
-### Twingate Admin Console
-1. **Create a Resource** for the Entra ID authentication FQDN (e.g., `tenant.office.com` or `login.microsoftonline.com`) and assign it to the appropriate Group(s)
-2. **Apply a Device-only Policy** to that IdP Resource — prevents authentication loop where users can't reach the IdP to authenticate because Twingate requires prior auth
+### Twingate Configuration
+1. **Create a Resource** for your Entra ID authentication FQDN (e.g., `tenant.office.com` or `login.microsoftonline.com`); assign it to appropriate Groups
+2. **Apply a Device-only Policy** to the IdP Resource — prevents authentication loops where Twingate auth requires IdP access but IdP access requires Twingate auth
 
-### Microsoft Entra ID
-3. **Create a Named Location** (Conditional Access → Named Locations) using the Connector's egress IP address
+### Entra ID Configuration
+3. **Create a Named Location** in Entra ID Portal → Conditional Access using the Connector's egress IP address (NAT gateway IP)
 4. **Create a Conditional Access Policy** with:
-   - Target: the SaaS app(s) to restrict
-   - Location condition: `Selected locations` → choose the Named Location created above
+   - Target app(s) to restrict
+   - Location condition: **Selected locations** → choose the trusted Named Location created above
 
 ## Configuration Values
 
-| Field | Value |
-|-------|-------|
-| Twingate Resource FQDN | `tenant.office.com` or `login.microsoftonline.com` |
-| Twingate Resource Policy | Device-only |
-| Named Location IP | Connector NAT gateway egress IP |
-| Conditional Access location type | Selected locations (trusted) |
+| Item | Value/Notes |
+|------|-------------|
+| Resource FQDN | `tenant.office.com` or `login.microsoftonline.com` |
+| Resource Policy | Device-only |
+| Named Location IP | Connector egress/NAT gateway IP |
+| Location condition type | Selected locations (trusted Named Location) |
 
 ## Gotchas
-- **Auth loop risk**: Without a Device-only Policy on the IdP Resource, users cannot authenticate to reach Twingate, creating a deadlock. Device-only Policy breaks this dependency.
-- **Egress IP accuracy**: Use the NAT gateway IP, not the Connector host IP, if Connectors share a NAT gateway for egress.
-- **Group scoping**: Only users in the correct Twingate Group will route through the approved IP — others will fail Conditional Access.
+- **Authentication loop risk**: Without a Device-only policy on the IdP Resource, users cannot authenticate with Entra ID because Twingate requires prior auth — apply Device-only policy to break this circular dependency
+- **NAT gateway IP**: Use the NAT gateway IP (not the Connector's private IP) as the Named Location address — this is the actual egress IP Entra ID sees
+- Connector IP changes will break the Conditional Access Policy; update Named Location if Connector egress IP changes
 
 ## Related Docs
-- [Create a Twingate Resource](https://www.twingate.com/docs)
-- [Device-only Resource Policy](https://www.twingate.com/docs)
-- [SaaS App Gating Office 365 with Entra ID](https://www.twingate.com/docs) — step-by-step walkthrough
-- [Microsoft Entra ID Named Locations documentation](https://learn.microsoft.com/en-us/entra/identity/conditional-access/location-condition)
-- [Entra ID Conditional Access location conditions](https://learn.microsoft.com/en-us/entra/identity/conditional-access/location-condition)
+- [SaaS App Gating Office 365 with Entra ID](https://www.twingate.com/docs/saas-app-gating-office-365-with-entra-id) — step-by-step example
+- Twingate: Create a Resource
+- Twingate: Device-only Resource Policy
+- Microsoft: Named Locations (Conditional Access)
+- Microsoft: Location condition configuration

@@ -1,41 +1,39 @@
-# Protect Access to Elasticsearch and Kibana
+# Protect Access to Elasticsearch and Kibana with Twingate
 
 ## Summary
-Twingate secures Elasticsearch and Kibana by adding SSO and MFA via your identity provider without modifying the applications or requiring paid Elastic security tiers. It hides Elastic servers within a private network, making them invisible to the public internet.
+Twingate adds SSO and MFA to Elasticsearch and Kibana without modifying the applications or requiring paid Elastic security tiers. Access is controlled through your identity provider, and servers can be hidden from the public internet entirely.
 
 ## Key Information
 - Elasticsearch and Kibana have no built-in authentication/authorization on free/lower tiers
-- Twingate adds SSO and MFA enforcement without any changes to Elastic applications
-- Works regardless of Elastic subscription tier
-- Centralized user provisioning/deprovisioning through your identity provider
-- No separate user accounts needed in Elasticsearch or Kibana
-- Servers are hidden from public internet — not just access-controlled
+- Elastic SSO/auth features require higher-cost paid plans
+- Twingate enforces identity provider SSO and MFA at the network layer, not the application layer
+- No changes required to Elasticsearch or Kibana configurations
+- Users provisioned/deprovisioned centrally via identity provider — no separate Elastic user accounts needed
+- Servers can be fully hidden from public internet (not just access-restricted)
 
 ## Prerequisites
-- Twingate account with admin console access
-- Identity provider configured with Twingate (for SSO/MFA enforcement)
-- Elasticsearch/Kibana deployed on-premise or in private network
-- Twingate Connector deployed in the same network as Elastic servers
+- Twingate account with admin access
+- Existing identity provider (IdP) configured in Twingate
+- Elasticsearch/Kibana deployed on-premise or in a private network
+- Twingate Connector deployed in the same network as Elastic instances
 
 ## Step-by-Step
-1. Add Elasticsearch and Kibana servers as **Resources** in the Twingate admin console
-2. Configure access policies on those resources to enforce MFA via your identity provider
-3. Assign user groups to the resources
-4. Users access Elastic only through the Twingate client — direct internet access is blocked
-
-> See [Add Resources](https://www.twingate.com/docs) for detailed instructions.
+1. Deploy a Twingate Connector in the network hosting Elasticsearch/Kibana
+2. In the Twingate admin console, add the Elasticsearch and Kibana servers as Resources
+3. Assign appropriate Groups/access policies to those Resources
+4. Configure MFA enforcement via your identity provider's policy if required
+5. Users access Elasticsearch/Kibana only through the Twingate client — no direct internet exposure
 
 ## Configuration Values
-- No application-level config changes required in Elasticsearch or Kibana
-- Access control configured entirely in Twingate admin console via Resource and Policy settings
+- No specific env vars, CLI flags, or API parameters documented on this page
+- Resource configuration: use server hostname/IP and relevant ports (Elasticsearch default: `9200`, Kibana default: `5601`)
 
 ## Gotchas
-- Elastic security features (SSO, user management) on paid plans can conflict or overlap — Twingate approach bypasses Elastic's own security layer entirely at the network level
-- Misconfiguring Elasticsearch security (even with paid plans) has historically caused massive data exposure — Twingate mitigates this by blocking network-level access
-- Deprovisioning must happen at the identity provider level; no separate Elastic account cleanup needed, but only if users never had direct Elastic credentials
+- Authentication is enforced at the Twingate/IdP layer only — Elasticsearch itself remains unauthenticated internally; ensure network segmentation prevents bypass
+- Misconfiguration of Elasticsearch security (even with Twingate) can still expose data if the server is reachable via other network paths
+- MFA enforcement depends on IdP configuration, not Twingate alone
 
 ## Related Docs
-- [Adding Resources to Twingate](https://www.twingate.com/docs/resources)
-- [Identity Provider / SSO Configuration](https://www.twingate.com/docs/identity-providers)
-- [Deploying Connectors](https://www.twingate.com/docs/connectors)
-- [Access Policies and MFA](https://www.twingate.com/docs/access-policies)
+- [Add Resources in Twingate Admin Console](https://www.twingate.com/docs/resources) (referenced as "add the relevant servers as resources")
+- Step-by-step resource setup instructions (linked inline on source page)
+- Twingate Connector deployment documentation

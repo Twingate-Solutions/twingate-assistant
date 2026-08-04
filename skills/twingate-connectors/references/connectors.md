@@ -5,16 +5,16 @@ Connectors are Twingate components deployed behind your firewall to enable acces
 
 ## Key Information
 - Connectors run as either a **container** or **Linux systemd service**
-- Admin console provides ready-made deployment scripts for supported environments
-- Connector names are randomly generated at creation but can be edited (must be unique across account)
-- Admins receive email notifications when Connectors go offline/come back online
-- Name changes in Admin console do **not** propagate to the deployment environment
+- Admin console provides ready-made deployment scripts for all supported environments
+- Connector names are randomly generated on creation but are editable
+- Names must be **unique across all Connectors** in your account
+- Admins receive email notifications when a Connector goes offline/comes back online
 
 ## Supported Deployment Environments
 - Docker
 - Kubernetes (via Helm Chart)
 - Azure (via ContainerInstance)
-- Linux (generic systemd script)
+- Linux (generic systemd)
 - AWS ECS Fargate
 - AWS AMI
 
@@ -23,17 +23,18 @@ Connectors are Twingate components deployed behind your firewall to enable acces
 - Target deployment environment provisioned
 - For Windows: Linux VM via Hyper-V (Docker on Windows not supported)
 
-## Configuration Notes
-- Rename Connectors in Admin console **before** deployment if custom naming is needed
-- Status availability email notifications can be disabled per-Connector in Admin console
-
 ## Gotchas
-- **Docker on Windows is explicitly unsupported** due to a known Docker issue — use a Linux VM via Hyper-V instead
-- Renaming a Connector in the Admin console does not update the name in the deployment environment; set names before deploying to avoid mismatch
-- Connector names must be globally unique across your entire Twingate account
+- **Do not deploy via Docker on Microsoft Windows** — known Docker issue makes this unsupported
+- Windows recommended path: deploy inside a Linux VM using Hyper-V
+- Renaming a Connector in the Admin console **does NOT rename it in your deployment environment** — rename before deployment if custom naming is needed
+- Connector names must be globally unique within your account
+
+## Configuration Notes
+- Status availability emails are enabled by default; can be disabled per-Connector in settings
+- Rename Connectors **before** deployment if you want the deployment environment name to match
 
 ## Related Docs
 - First-time configuration guide (Admin console deployment)
 - Connector Management section (detailed deployment and management)
-- How Twingate Works (architecture overview)
+- How Twingate Works (architecture deep-dive)
 - Twingate Architecture section

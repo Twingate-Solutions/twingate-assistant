@@ -1,62 +1,59 @@
 # Kubernetes Kubeconfig Sync
 
 ## Summary
-Twingate Client can automatically sync kubeconfig entries for Kubernetes Cluster Resources using `twingate kube config sync`, eliminating the need for cloud provider CLIs (gcloud, doctl, aws eks). Works for both interactive developer use and headless CI/CD pipelines with Service Keys.
+Twingate Client's `twingate kube config sync` command automatically writes kubeconfig contexts for all Kubernetes Cluster Resources a user can access. Eliminates need for cloud provider CLIs (gcloud, doctl, aws eks) to obtain cluster credentials. Works for both interactive workstation use and headless CI/CD pipelines.
 
 ## Key Information
-- Writes standard kubeconfig contexts to `~/.kube/config` (or `$KUBECONFIG` path)
-- Context name matches the cluster/resource name
-- Compatible with any kubeconfig-aware tool (Helm, Skaffold, k9s, Lens)
-- Works in headless mode for CI/CD with Service Accounts
+- Writes standard kubeconfig contexts to `~/.kube/config` (or `KUBECONFIG` path)
+- Each cluster gets a context named after the cluster resource
+- Compatible with any kubeconfig-aware tool (Helm, Skaffold, k9s, Lens, etc.)
+- Works in headless mode with Service Keys for CI/CD
 
 ## Prerequisites
 - Twingate Client **v2025.175+** (macOS, Windows, Linux)
-- Kubernetes Cluster Resource configured with **Privileged Access for Kubernetes**
-- User/Service Account assigned to a Twingate Group with access to the Kubernetes Resource
+- At least one Kubernetes Cluster Resource configured with Privileged Access for Kubernetes
+- User/Service Account must have access via a Twingate Group
 - Connector version **1.82.0+**
-
-## Step-by-Step (Interactive)
-1. Ensure Twingate Client is running and authenticated
-2. `twingate kube config sync`
-3. `kubectl config get-contexts` — verify contexts
-4. `kubectl --context=my-cluster get pods`
-5. `twingate kube config autosync on` — optional, keeps kubeconfig current
 
 ## CLI Commands
 
 | Command | Description |
 |---|---|
-| `twingate kube config sync` | Sync all accessible Kubernetes resources |
-| `twingate kube config sync <resource-name>` | Sync single resource |
-| `twingate kube config autosync on` | Enable automatic sync |
-| `twingate kube config autosync off` | Disable automatic sync |
-| `twingate status` | Verify client is running |
-
-## CI/CD Setup Pattern
-```bash
-# Install
-echo "deb [trusted=yes] https://packages.twingate.com/apt/ /" | sudo tee /etc/apt/sources.list.d/twingate.list
-sudo apt update -yq && sudo apt install -yq twingate
-
-# Start headless
-echo "$SERVICE_KEY" | sudo twingate setup --headless=-
-sudo twingate start
-
-# Sync and use
-twingate kube config sync
-kubectl --context=my-cluster get pods
-```
+| `twingate kube config sync` | Sync all accessible K8s Cluster Resources |
+| `twingate kube config sync <resource-name>` | Sync single resource by name |
+| `twingate kube config autosync on` | Enable automatic kubeconfig updates |
+| `twingate kube config autosync off` | Disable automatic updates |
 
 ## Configuration Values
-- `SERVICE_KEY` — Service Key from Admin Console (CircleCI env var)
-- `secrets.SERVICE_KEY` — GitHub Actions secret name
-- `KUBECONFIG` — env var to override default kubeconfig path (`~/.kube/config`)
+- `KUBECONFIG` env var — override default kubeconfig path (`~/.kube/config`)
+- `SERVICE_KEY` / `TWINGATE_SERVICE_KEY` — Service Key for headless/CI mode
+- `--headless=-` flag — reads Service Key from stdin: `echo "$KEY" | sudo twingate setup --headless=-`
+
+## Step-by-Step (Interactive)
+1. Ensure Twingate Client is running and authenticated
+2. `twingate kube config sync`
+3. `kubectl config get-contexts` — verify contexts written
+4. `kubectl --context=my-cluster get pods`
+5. Optionally: `twingate kube config autosync on`
+
+## Step-by-Step (CI/CD Headless)
+1. Install Twingate via apt package
+2. `echo "$SERVICE_KEY" | sudo twingate setup --headless=-`
+3. `sudo twingate start`
+4. `twingate kube config sync`
+5. `kubectl --context=my-cluster <command>`
 
 ## Gotchas
-- Resources must be type **Kubernetes Cluster** (created via Kubernetes Operator with Privileged Access) — standard Resources won't appear
-- If `sync` returns no resources: check `twingate status`, verify Group assignments, verify Resource type
-- If `kubectl` fails after sync: Connector may be offline — check Admin Console
-- Autosync recommended for interactive use; in CI/CD, run `sync` explicitly after starting the client
+- Resources must be type **Kubernetes Cluster** (set via Kubernetes Operator with Privileged Access) — regular TCP resources won't appear
+- `sync` returns nothing if Client is unauthenticated or user has no K8s resources assigned
+- Connector must be online for `kubectl` to work after sync
+- Autosync recommended for interactive use; manual sync sufficient for CI/CD
+
+## Troubleshooting
+| Symptom | Fix |
+|---|---|
+| No resources returned | Run `twingate status`; verify Group assignments in Admin Console |
+| kubectl connection errors | Check `twingate status`; verify Connector is online and v1.82.0+ |
 
 ## Related Docs
 - Privileged Access for Kubernetes
