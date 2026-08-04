@@ -377,6 +377,10 @@ docs:
     skill: twingate-architect
     keywords: [aliases, resource address, DNS, HTTPS, "pseudo-A record"]
 
+  - url: https://www.twingate.com/docs/exclusion
+    skill: twingate-architect
+    keywords: [resource exclusion, bypass Twingate, routing mode, BYPASS_TWINGATE, split tunnel exception]
+
   - url: https://www.twingate.com/docs/location-requirements
     skill: twingate-architect
     keywords: [geoblocking, location requirements, country restrictions, Enterprise, compliance]

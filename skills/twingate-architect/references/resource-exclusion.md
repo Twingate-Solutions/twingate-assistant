@@ -1,5 +1,3 @@
-<!-- triage: unassigned URL: https://www.twingate.com/docs/exclusion -->
-
 # Resource Exclusion (Bypass Twingate)
 
 ## Summary
@@ -13,13 +11,16 @@ Resource exclusions allow specific addresses to bypass Twingate's proxy infrastr
 - Changes to Routing Mode are captured in the audit log (who changed it, before/after values)
 - Excluded Resources are **invisible** to Clients — don't appear in Resource list, no auth prompt
 
-## Prerequisites
+## Prerequisites / Version Requirements
 Minimum Client versions:
-- macOS: `2026.182`
-- iOS: `2026.182`
-- Android: `2026.181`
-- Linux: `2026.188` (in latest channel)
-- Windows: not yet supported
+
+| Component | Minimum Version |
+|-----------|----------------|
+| macOS | `2026.182` |
+| iOS | `2026.182` |
+| Android | `2026.181` |
+| Linux | `2026.188` (latest channel) |
+| Windows | not yet supported |
 
 ## Configuration
 

@@ -24,6 +24,12 @@ evaluating, or asking architecture-level questions, this skill answers them.
   Avoid mega Remote Networks and per-server Remote Networks.
 - **Prefer FQDNs over CIDRs** — FQDNs survive backend IP changes. Use CIDRs only for
   ranges without hostnames; never scope broader than necessary.
+- **Reach for Resource exclusion (Bypass Twingate) only to carve exceptions** — e.g. a
+  public subdomain caught inside a broader wildcard Resource. Bypassed traffic skips
+  Connectors, Relay, and Security Policies and generates no network events, so it is not
+  access-controlled or audited for traffic — never use it to "allowlist" a sensitive
+  destination. FQDN/IP only (no wildcards or CIDR), and it cannot cover Identity Firewall
+  Resources. See `references/resource-exclusion.md`.
 - **Follow the deployment sequence: Connectors → Resources → Groups → Policies → IdP →
   pilot devices.** Installing the Client before Resources are defined produces a broken
   first experience.
@@ -71,7 +77,7 @@ memory — both Twingate's implementation details and compliance scope evolve.
 | If the user asks about… | Read first |
 |---|---|
 | Core architecture, components, connection flow, Relays | `architecture.md`, `how-twingate-works.md`, `client-connection-flow.md`, `detailed-client-connection-flow.md`, `understanding-relays.md` |
-| Network model, Remote Networks, Resources, aliases, tags | `network-overview.md`, `remote-networks.md`, `remote-network-best-practices.md`, `resources.md`, `resource-aliases.md`, `resource-policies.md`, `policy-on-resource-migration.md`, `tags.md`, `location-requirements.md`, `ip-overlap.md`, `customer-networks.md` |
+| Network model, Remote Networks, Resources, aliases, exclusions, tags | `network-overview.md`, `remote-networks.md`, `remote-network-best-practices.md`, `resources.md`, `resource-aliases.md`, `resource-exclusion.md`, `resource-policies.md`, `policy-on-resource-migration.md`, `tags.md`, `location-requirements.md`, `ip-overlap.md`, `customer-networks.md` |
 | DNS model, split DNS, DNS forwarding | `how-dns-works-with-twingate.md`, `how-twingate-forwards-dns.md`, `introduction-to-dns.md`, `private-dns-best-practices.md`, `supporting-unqualified-domain-names.md` |
 | P2P / NAT traversal | `peer-to-peer-communication-in-twingate.md`, `how-nat-traversal-works.md`, `local-peer-to-peer-best-practices.md` |
 | Encryption, cryptography | `how-encryption-works-in-twingate.md` |
