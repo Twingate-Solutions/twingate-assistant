@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/iru-mdm
+type: docs
+fetched: 2026-08-05
+source_version: b5bf113b719e132b0923112b7c1ed94cd565ad35257b2c4096458cf655ae63d1
+---
+
 # Deploying Twingate macOS and iOS Clients with Iru (Kandji)
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/android
+type: docs
+fetched: 2026-08-05
+source_version: a4c65a7003ae739032570c11db0119aaa0c067c2fc3c1c85c20b3edc8326d893
+---
+
 # Android Client Setup
 
 ## Page Title

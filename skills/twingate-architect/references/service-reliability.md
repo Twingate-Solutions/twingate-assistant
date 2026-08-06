@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/service-reliability
+type: docs
+fetched: 2026-08-05
+source_version: 1edd55fd3b5427bfbe0cc6e6e7964d66cb73c89b843a0f213fe99e73c888062f
+---
+
 # Service Reliability
 
 ## Page Title

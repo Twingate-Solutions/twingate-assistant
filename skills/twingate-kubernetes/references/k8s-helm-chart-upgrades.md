@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/k8s-helm-chart-upgrades
+type: docs
+fetched: 2026-08-05
+source_version: c105dfd487c942ab0365cbe19140956d8f3179b9b071b092e71e5c8bf16f0769
+---
+
 # Upgrading Twingate Connectors in Kubernetes with Helm
 
 ## Summary

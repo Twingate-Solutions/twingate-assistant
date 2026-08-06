@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/k8s-private-services
+type: docs
+fetched: 2026-08-05
+source_version: 37e38092062e1826194bdf386946a4dccfeebff8cc4ebbaa9590324fb80508b3
+---
+
 # Private Resources in Kubernetes
 
 ## Page Title

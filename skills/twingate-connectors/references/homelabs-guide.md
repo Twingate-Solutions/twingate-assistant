@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/homelabs-guide
+type: docs
+fetched: 2026-08-05
+source_version: 6e96c424159bd9fb3e6649afe98e5fa940b1034776af4d8da927a57938e44336
+---
+
 # Twingate Home Labs Guide
 
 ## Page Title

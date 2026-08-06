@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/notifications
+type: docs
+fetched: 2026-08-05
+source_version: 77a4ede80193713ad68089f353f3419f550e119e8dfb90ca251eff0029ef16ac
+---
+
 # Twingate Notifications
 
 ## Summary

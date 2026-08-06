@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/twingate-vs-mesh-vpns
+type: docs
+fetched: 2026-08-05
+source_version: 4b59bb7cdda312e2115197685b87b435be2db2887b533e5f566d22a9d9b9f3f9
+---
+
 # Twingate vs. Mesh VPNs
 
 ## Summary

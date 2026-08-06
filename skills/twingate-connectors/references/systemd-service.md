@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/systemd-service
+type: docs
+fetched: 2026-08-05
+source_version: a49dfb1f17a548d24a813e7b065815e11187d58f9b6c5ccb5069c92f57a11307
+---
+
 # Upgrading Twingate Connectors on Linux (systemd)
 
 ## Summary

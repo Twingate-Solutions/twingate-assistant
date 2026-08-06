@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/access-control-for-staging-environments
+type: docs
+fetched: 2026-08-05
+source_version: 514110d4aef28048ae02a8ffa7c9abf3e5c482ec889888cf3df371813656ee0e
+---
+
 # Best Practices for Non-production Environment Access
 
 ## Summary

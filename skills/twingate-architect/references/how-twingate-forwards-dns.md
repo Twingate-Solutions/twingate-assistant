@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/how-twingate-forwards-dns
+type: docs
+fetched: 2026-08-05
+source_version: 50609c3077c2bf124c762695ab9b8f66fb50b71b134cf6d99e8f02a7ed8b0ffa
+---
+
 # How Twingate Forwards DNS
 
 ## Summary

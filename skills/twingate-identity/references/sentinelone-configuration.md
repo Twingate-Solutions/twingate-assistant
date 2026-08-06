@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/sentinelone-configuration
+type: docs
+fetched: 2026-08-05
+source_version: 2b267f62e8642d94525654dbba432c9c1c3c720fca2dd72bff946415067cfdde
+---
+
 # SentinelOne Configuration
 
 ## Page Title

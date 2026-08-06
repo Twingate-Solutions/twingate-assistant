@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/minecraft-server
+type: docs
+fetched: 2026-08-05
+source_version: f8eae94bbfac4a63444238ae0cdf1db5473913844d74ee3976bf2e29d46b8342
+---
+
 # Minecraft Server with Twingate
 
 ## Summary

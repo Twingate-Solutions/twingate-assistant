@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/cloak-your-bastion-server
+type: docs
+fetched: 2026-08-05
+source_version: 671b1dd82f1c15e091aac255a5e586f762752982b14e7064158d306ba3e99794
+---
+
 # How to Cloak a Bastion Server
 
 ## Summary

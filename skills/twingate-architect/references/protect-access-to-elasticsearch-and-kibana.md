@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/protect-access-to-elasticsearch-and-kibana
+type: docs
+fetched: 2026-08-05
+source_version: 50f0ed83a77a3924cc2008b0a1a6cdb44984f34ed696b195fe597a72f54af8cc
+---
+
 # Protect Access to Elasticsearch and Kibana with Twingate
 
 ## Summary

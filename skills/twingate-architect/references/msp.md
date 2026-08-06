@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/msp
+type: docs
+fetched: 2026-08-05
+source_version: e420b419fa2f780cc0114f6ccf069171bc8f9d224f076336d03d255380ad6980
+---
+
 # Twingate MSP Portal
 
 ## Summary

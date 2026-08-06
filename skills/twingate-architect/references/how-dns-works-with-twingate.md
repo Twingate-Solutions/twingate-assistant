@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/how-dns-works-with-twingate
+type: docs
+fetched: 2026-08-05
+source_version: 50518c3ee8e193c328e106bfd18e0d5f1e7b1cc4d23ad5e11af8021659df8efb
+---
+
 # How DNS Works with Twingate
 
 ## Summary

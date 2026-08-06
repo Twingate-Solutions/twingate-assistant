@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/identity-providers
+type: docs
+fetched: 2026-08-05
+source_version: 15081ad0be4825c079ca78c63ad347b3a27178a2eca8c482b87e94188923df55
+---
+
 # Identity Providers
 
 ## Summary

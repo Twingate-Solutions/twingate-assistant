@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/usage-based-auto-lock
+type: docs
+fetched: 2026-08-05
+source_version: 6e81f6278d323e0886b536f5bba51e3f82bb5b824dab90e5e0405a0b02cdf7a0
+---
+
 # Usage-Based Auto-Lock
 
 ## Summary

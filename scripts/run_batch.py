@@ -20,22 +20,22 @@ file contains the extracted page text and a ``summary`` field initially set to
 Uses the same hash cache (``scripts/.doc_hashes.json``) as
 ``update_references.py``. GitHub repository entries in ``doc_mapping.yaml``
 are automatically excluded (pipeline cannot fetch non-twingate.com URLs).
-
-Progress is tracked in ``docs/sessions/18-reference-pipeline-run.md``.
 """
 
 import argparse
 import json
 import logging
 import sys
+from datetime import date
 from pathlib import Path
 
-# Ensure scripts/ is on the path for sibling module imports.
+# Ensure scripts/ is importable for sibling module imports.
 sys.path.insert(0, str(Path(__file__).parent))
 
 from diff_docs import load_mapping
 from summarize_docs import (
     SYSTEM_PROMPT,
+    build_frontmatter,
     content_hash,
     extract_text_from_html,
     fetch_doc_html,
@@ -43,7 +43,6 @@ from summarize_docs import (
 from update_references import (
     HASH_CACHE_PATH,
     SCRIPTS_DIR,
-    SKILLS_DIR,
     TRIAGE_DIR,
     load_hash_cache,
     references_dir_for_skill,
@@ -89,7 +88,7 @@ def prepare_batch(skip: int, limit: int) -> int:
     """Fetch docs, extract text, write JSON work files for AI summarization.
 
     Skips docs whose content hash matches the cache and whose reference file
-    already exists (no change since last run).
+    already exists.
 
     Args:
         skip: Number of docs to skip from the start of the list.
@@ -131,29 +130,24 @@ def prepare_batch(skip: int, limit: int) -> int:
             logger.warning("Skipping entry with missing url or skill: %s", entry)
             continue
 
-        # Fetch HTML.
         html = fetch_doc_html(url)
         if html is None:
-            print(f"  FAILED: could not fetch page")
+            print("  FAILED: could not fetch page")
             failed += 1
             continue
 
-        # Extract text and compute hash.
         text = extract_text_from_html(html)
         current_hash = content_hash(text)
 
-        # Skip if content unchanged and file already exists.
         if hash_cache.get(url) == current_hash and out_path.exists():
-            print(f"  SKIPPED: content unchanged")
+            print("  SKIPPED: content unchanged")
             skipped += 1
             continue
 
-        # Truncate text to match pipeline behaviour.
         prompt_text = text
         if len(text) > MAX_TEXT_LENGTH:
             prompt_text = text[:MAX_TEXT_LENGTH] + "\n\n[Content truncated for length]"
 
-        # Write work file.
         work = {
             "index": pos,
             "url": url,
@@ -192,9 +186,8 @@ def prepare_batch(skip: int, limit: int) -> int:
 def finalize_batch() -> int:
     """Read completed work files, write reference docs, update hash cache.
 
-    Reads all JSON files in ``.batch_work/`` where ``summary`` is not null.
-    Writes reference markdown files to the appropriate skill directory and
-    updates the hash cache. Cleans up processed work files.
+    Processes ``.batch_work/*.json`` files where ``summary`` is filled in and
+    removes each once written.
 
     Returns:
         Exit code 0 on success, 1 if any writes failed.
@@ -206,6 +199,7 @@ def finalize_batch() -> int:
         return 0
 
     hash_cache = load_hash_cache(HASH_CACHE_PATH)
+    fetched = date.today().isoformat()
     written = 0
     pending = 0
     failed = 0
@@ -233,12 +227,21 @@ def finalize_batch() -> int:
 
         try:
             if skill:
-                write_reference_file(skill, slug, summary)
+                write_reference_file(
+                    skill,
+                    slug,
+                    summary,
+                    source=url,
+                    type_="docs",
+                    fetched=fetched,
+                    source_version=text_hash,
+                )
             else:
-                # Triage
+                # Triage: frontmatter, unassigned marker, then summary.
                 TRIAGE_DIR.mkdir(parents=True, exist_ok=True)
                 triage_path = TRIAGE_DIR / f"{slug}.md"
-                triage_content = f"<!-- triage: unassigned URL: {url} -->\n\n{summary}"
+                frontmatter = build_frontmatter(url, "docs", fetched, text_hash)
+                triage_content = f"{frontmatter}\n<!-- triage: unassigned -->\n\n{summary}"
                 triage_path.write_text(triage_content, encoding="utf-8")
         except Exception as exc:
             logger.error("Failed to write reference file for %s: %s", url, exc)
@@ -277,7 +280,6 @@ def run_api_batch(skip: int, limit: int) -> int:
     Returns:
         Exit code 0 on success, 1 if any docs failed.
     """
-    # Import here so missing API key is only an error in this mode.
     from update_references import process_doc, summarize_with_backoff  # noqa: F401
 
     mapping = load_mapping()
@@ -315,8 +317,8 @@ def run_api_batch(skip: int, limit: int) -> int:
     print("-" * 60)
 
     if end_idx < total:
-        print(f"\nNext batch:")
-        print(f"  python scripts/run_batch.py --skip {end_idx} --limit {skip}")
+        print("\nNext batch:")
+        print(f"  python scripts/run_batch.py --skip {end_idx} --limit {limit}")
     else:
         print("\nAll docs processed!")
 

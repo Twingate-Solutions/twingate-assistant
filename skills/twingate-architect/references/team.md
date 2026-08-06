@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/team
+type: docs
+fetched: 2026-08-05
+source_version: 21a13f3ada30a403e5e96f2add15747e1ab289c028bc3ffb5dc34d381d206bef
+---
+
 # Team Management
 
 ## Summary

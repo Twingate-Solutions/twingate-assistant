@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/jamf-configuration
+type: docs
+fetched: 2026-08-05
+source_version: e1fbd291f10c0204c51cdffe79677c41e942dcb4c6224cf214426d939de09cc4
+---
+
 # Jamf Configuration
 
 ## Page Title

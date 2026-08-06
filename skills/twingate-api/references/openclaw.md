@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/openclaw
+type: docs
+fetched: 2026-08-05
+source_version: 866e4b174047e1330f9320678c8fb90d5f18efeda37812c344b5f5a11f624f62
+---
+
 # Secure OpenClaw Deployments with Twingate
 
 ## Summary

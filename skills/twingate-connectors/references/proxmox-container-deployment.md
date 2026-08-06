@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/proxmox-container-deployment
+type: docs
+fetched: 2026-08-05
+source_version: 6e40a7de91986847d06e7de0957ea2fd8bde8deb761b71d136cfdd6e38f266d7
+---
+
 # Deploy Twingate Connector in Proxmox LXC Container
 
 ## Summary

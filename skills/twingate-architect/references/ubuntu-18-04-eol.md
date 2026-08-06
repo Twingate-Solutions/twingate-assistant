@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/ubuntu-18-04-eol
+type: docs
+fetched: 2026-08-05
+source_version: 55eda5eb0ae0716ce347eed6dbaba899bdc8019cfe8fc7f758af11e657a9e172
+---
+
 # Ubuntu 18.04 End of Life
 
 ## Summary

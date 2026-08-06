@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/okta-configuration
+type: docs
+fetched: 2026-08-05
+source_version: b9601e736322b145a0717b7721a1eb8facbfb15a7b6256c00810a5cd5e8d2f2f
+---
+
 # Okta Configuration
 
 ## Page Title

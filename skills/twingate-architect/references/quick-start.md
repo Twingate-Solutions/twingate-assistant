@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/quick-start
+type: docs
+fetched: 2026-08-05
+source_version: 1e841a0d49d1d8f30dffb4c21c43ffdac38f061832545861dffa34c3a6d87419
+---
+
 # Twingate Quick Start
 
 ## Summary

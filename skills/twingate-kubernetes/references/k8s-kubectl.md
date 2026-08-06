@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/k8s-kubectl
+type: docs
+fetched: 2026-08-05
+source_version: bb1cb058396a362f2e87002c713fb447f120d53676d4068f01ec85c947185d6a
+---
+
 # Manage Kubernetes Using kubectl via Twingate
 
 ## Summary

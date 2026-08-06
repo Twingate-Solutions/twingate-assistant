@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connector-placement-best-practices
+type: docs
+fetched: 2026-08-05
+source_version: 39daabff2332f2efbde36d822f96270b82b0f3be2d88d9755c057a6349732c35
+---
+
 # Best Practices for Connector Placement
 
 ## Summary

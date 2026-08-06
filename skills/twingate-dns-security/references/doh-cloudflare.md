@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/doh-cloudflare
+type: docs
+fetched: 2026-08-05
+source_version: 723fc4640a8c048423d766f2c4b039e11d45952fa202bff41db96e7dbac0fedc
+---
+
 # How to Configure Cloudflare DoH and DNS Filtering with Twingate
 
 ## Page Title

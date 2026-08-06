@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/groups
+type: docs
+fetched: 2026-08-05
+source_version: 8e5d7ee40052e365a633865cb48f26897ce112e2f2edb164b618de7e76d0db1d
+---
+
 # Twingate Groups
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/open-source-software
+type: docs
+fetched: 2026-08-05
+source_version: 911ef4d17619716841993796da45d6fd953747d628e26afd957e95ed35cf280c
+---
+
 # Twingate Open Source Software
 
 ## Summary

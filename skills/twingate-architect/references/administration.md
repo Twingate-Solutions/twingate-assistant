@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/administration
+type: docs
+fetched: 2026-08-05
+source_version: 3f96c5d05182a326fed0b32e3fb4b815fe76cce7a3e5659e015066abc2757b01
+---
+
 # Twingate Administration
 
 ## Page Title

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/windows-managed-devices
+type: docs
+fetched: 2026-08-05
+source_version: 2e6cfccde18efe38433c864dcae90598f561bc3d894ae91ea486b08256976699
+---
+
 # Windows Managed Devices - Twingate
 
 ## Summary

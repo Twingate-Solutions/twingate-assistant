@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/supporting-unqualified-domain-names
+type: docs
+fetched: 2026-08-05
+source_version: b37863c704c79818ca98197e458114663f8bd33859c26845b312db68262a8824
+---
+
 # Supporting Unqualified Domain Names
 
 ## Summary

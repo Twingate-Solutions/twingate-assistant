@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/jamf-mdm
+type: docs
+fetched: 2026-08-05
+source_version: cf385a5d3c2630ba7c4d2b9c51db412027b65bb61e3fcf66976e6d1ad5d069b2
+---
+
 # Deploying Twingate Client with Jamf MDM
 
 ## Summary

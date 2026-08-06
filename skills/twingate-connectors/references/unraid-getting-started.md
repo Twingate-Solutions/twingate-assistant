@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/unraid-getting-started
+type: docs
+fetched: 2026-08-05
+source_version: 483fc6031376a039052fbb09d39fb1c2264d057b4376f45a26be9feb551d25ce
+---
+
 # Getting Started with Unraid and Twingate
 
 ## Summary

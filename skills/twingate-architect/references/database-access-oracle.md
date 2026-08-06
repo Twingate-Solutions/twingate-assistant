@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/database-access-oracle
+type: docs
+fetched: 2026-08-05
+source_version: 4f23db9a7da939b7d17292abc27b14772e342eab439e734e12431ce32d8eb7f3
+---
+
 # Oracle Cloud Database Access with Twingate
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/infra-access-use-case
+type: docs
+fetched: 2026-08-05
+source_version: fb7a1cf397ed4a6d2f23bccb8d6e9a886655c833637508e29547ecd706cded32
+---
+
 # Infrastructure Access Use Case
 
 ## Page Title

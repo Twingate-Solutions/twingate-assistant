@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/ios
+type: docs
+fetched: 2026-08-05
+source_version: 0660b2a84527f4b5dda486553511464989a73d989184890e21a5f02812f5131e
+---
+
 # iOS – Twingate Client Setup
 
 ## Page Title

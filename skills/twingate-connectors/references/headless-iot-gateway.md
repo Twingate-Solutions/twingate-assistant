@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/headless-iot-gateway
+type: docs
+fetched: 2026-08-05
+source_version: 853e1d994835093f7cef5bc291e727f3b642c713256b7d4ee7dc0c487bb47947
+---
+
 # Twingate Headless IoT Gateway
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/openclaw-docker-compose
+type: docs
+fetched: 2026-08-05
+source_version: 53dc1146bbb7329fcd31224acb8796f73e79350ffee716264c96ff8d70070328
+---
+
 # How to Set Up and Secure OpenClaw with Docker Compose
 
 ## Summary

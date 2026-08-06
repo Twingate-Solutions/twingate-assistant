@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/okta-scim-configuration
+type: docs
+fetched: 2026-08-05
+source_version: 150cae403fb5286115c3ef9779626e31c1d601c7cf0ccb8fefa3fb1ad6ec63b2
+---
+
 # Okta SCIM User & Group Sync Configuration
 
 ## Summary

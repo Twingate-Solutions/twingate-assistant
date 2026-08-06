@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/compliance-use-case
+type: docs
+fetched: 2026-08-05
+source_version: 0d417018346a490bdb7a53accd87467925b000a4f31c08820bb25b5c5ec32bde
+---
+
 # Twingate Compliance Use Cases
 
 ## Page Title

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/database-access-snowflake
+type: docs
+fetched: 2026-08-05
+source_version: 6fab4505d93bd5520d8b11fbbdbb1debef2e365822bac06e70954f3634570d60
+---
+
 # Snowflake Access with Twingate
 
 ## Summary

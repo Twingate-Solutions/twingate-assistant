@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/security-policy-guides
+type: docs
+fetched: 2026-08-05
+source_version: 33c435f351cb1211fc388f499380080e891ddb7819469e025758844672abe2d5
+---
+
 # Policy Guides
 
 ## Page Title

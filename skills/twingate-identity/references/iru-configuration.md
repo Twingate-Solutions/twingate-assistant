@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/iru-configuration
+type: docs
+fetched: 2026-08-05
+source_version: a7dfcf0269b8b9049cb12313502191fb338dc81b4fe47a4b1f75513d5893a32a
+---
+
 # Iru (Kandji) Configuration
 
 ## Summary

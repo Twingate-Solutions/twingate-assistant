@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/gcp
+type: docs
+fetched: 2026-08-05
+source_version: aa9d02f37bb1cc032780d10f28e6939d993391ab52740883c7087009ed4ec1bc
+---
+
 # Deploy a Connector on GCP
 
 ## Summary

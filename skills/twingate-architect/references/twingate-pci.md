@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/twingate-pci
+type: docs
+fetched: 2026-08-05
+source_version: c3bd1d319d35b9fc55883bdc9a1ecc507dfc05c5fe539ca68f6e65609a3788e9
+---
+
 # Twingate & PCI DSS Compliance
 
 ## Summary

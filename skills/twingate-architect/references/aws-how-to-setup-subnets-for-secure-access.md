@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/aws-how-to-setup-subnets-for-secure-access
+type: docs
+fetched: 2026-08-05
+source_version: 2b4171d33e6695c942131b262bfc60a2a15db3bbabd506569bb79bc5cdc3d716
+---
+
 # AWS Reference Network Architecture for Twingate
 
 ## Page Title

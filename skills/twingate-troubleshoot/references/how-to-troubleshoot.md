@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/how-to-troubleshoot
+type: docs
+fetched: 2026-08-05
+source_version: 45f992f4e8d37e0d1878c05f789f7ff62a6f98964320d7beffacd2babcfe15e8
+---
+
 # Twingate Troubleshooting Guide
 
 ## Page Title

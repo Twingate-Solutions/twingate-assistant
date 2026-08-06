@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/azure
+type: docs
+fetched: 2026-08-05
+source_version: 745a7acf666974f76ae4d33377f64a97e10727e7aa2615308b131718fba3c71e
+---
+
 # Deploy a Connector on Azure
 
 ## Summary

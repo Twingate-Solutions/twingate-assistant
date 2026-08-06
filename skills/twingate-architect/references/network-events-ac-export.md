@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/network-events-ac-export
+type: docs
+fetched: 2026-08-05
+source_version: 4e9d4353c8843ada5dfd376df338da6b976f63467974388ac4a4ee8fffc06fb9
+---
+
 # Network Events Admin Console Export
 
 ## Page Title

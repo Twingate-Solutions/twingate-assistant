@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/support
+type: docs
+fetched: 2026-08-05
+source_version: 8154ace33adf0c4662f999c08f5f7be602c3d807148f5514483f3aeccd3aa5a7
+---
+
 # Twingate Support Options
 
 ## Summary

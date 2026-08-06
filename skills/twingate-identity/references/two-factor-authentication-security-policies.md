@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/two-factor-authentication-security-policies
+type: docs
+fetched: 2026-08-05
+source_version: 0fba92ea759373492abdf9c2e7bd5a15d7bc55ac45380abf30bedb035978b9a6
+---
+
 # Two-Factor Authentication Security Policies
 
 ## Summary

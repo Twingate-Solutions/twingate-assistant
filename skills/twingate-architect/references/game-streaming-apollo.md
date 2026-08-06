@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/game-streaming-apollo
+type: docs
+fetched: 2026-08-05
+source_version: 442f7d11da7f07bf561656eeaaf6e2bb99a4268852008b1e84b2d1451cc99f76
+---
+
 # Apollo Remote Game Streaming with Twingate
 
 ## Summary

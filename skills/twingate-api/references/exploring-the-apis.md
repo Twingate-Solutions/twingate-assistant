@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/exploring-the-apis
+type: docs
+fetched: 2026-08-05
+source_version: 867cff067bafe898ec4bcd3c6b6b03518bc8071b1b22873e3f4fe6d8b042a9d8
+---
+
 # Exploring the Twingate APIs
 
 ## Summary

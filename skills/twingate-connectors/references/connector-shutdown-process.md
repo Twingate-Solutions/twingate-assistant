@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connector-shutdown-process
+type: docs
+fetched: 2026-08-05
+source_version: cce8f21acbb71b36c1d458dc5f070425e0547f3ebeb29b24be6dc8100fb03a2d
+---
+
 # Connector Shutdown Process
 
 ## Summary

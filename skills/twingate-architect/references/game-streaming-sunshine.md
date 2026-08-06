@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/game-streaming-sunshine
+type: docs
+fetched: 2026-08-05
+source_version: 1d066f13babee5ab3bd60f528842544951ee77f555a7dbe519b91308d032d7f0
+---
+
 # Sunshine Remote Game Streaming with Twingate
 
 ## Summary

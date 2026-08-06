@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/release-stages
+type: docs
+fetched: 2026-08-05
+source_version: 3f4ecfdce59764cd670a5cf4428ca6119ccffed1685de7d5caa92601cb019262
+---
+
 # Twingate Release Stages
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connector-real-time-logs
+type: docs
+fetched: 2026-08-05
+source_version: e7270f196ae43bcc1e38a83b4668d2a24a008ee5786d678663a0844bf022deff
+---
+
 # Connector Real-Time Logs
 
 ## Summary

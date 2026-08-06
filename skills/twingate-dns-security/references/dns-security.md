@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/dns-security
+type: docs
+fetched: 2026-08-05
+source_version: 10c9734f0e5613a0e5c39235949b11e7aa264b23d7e79f364ce3d0b2bcede754
+---
+
 # DNS-over-HTTPS (DoH) - Twingate
 
 ## Summary

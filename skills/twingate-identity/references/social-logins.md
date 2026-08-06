@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/social-logins
+type: docs
+fetched: 2026-08-05
+source_version: 39e4b3e059b2998ae7f846ce632f5e477bea10e16a69213788b739e5195290f7
+---
+
 # Social Logins
 
 ## Summary

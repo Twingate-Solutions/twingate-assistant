@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/device-report
+type: docs
+fetched: 2026-08-05
+source_version: 29c0411a8d377ef7dbf76db3c796fa846dcf811d5755997f575b391ff324eac8
+---
+
 # Device Report
 
 ## Summary

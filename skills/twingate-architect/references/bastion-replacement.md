@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/bastion-replacement
+type: docs
+fetched: 2026-08-05
+source_version: eb3a232dfdc2b2f1de2e1434e2700155824461a2ae94519bc8e8b2f4eac3ac11
+---
+
 # Bastion Server Cloaking with Twingate
 
 ## Summary

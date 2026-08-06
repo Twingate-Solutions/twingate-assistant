@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/using-twingate
+type: docs
+fetched: 2026-08-05
+source_version: 9557fcd2ee11a174da034ac348a05aa9b69b45ccd5af53b9a8f2fab68a981057
+---
+
 # Using Twingate (Client Usage Guide)
 
 ## Summary

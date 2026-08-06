@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/oss-linux-client-application
+type: docs
+fetched: 2026-08-05
+source_version: 95839b0ad38add6ae7e170456479d2d4fa42778a39d3b5ed90fc116dbecb7976
+---
+
 # Linux Client Application - OSS Third Party Notices
 
 ## Page Title

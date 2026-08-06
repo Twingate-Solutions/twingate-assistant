@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connector-health-checks
+type: docs
+fetched: 2026-08-05
+source_version: 9fa0330423ef665ea1e95d952a29397c2fba8f87fd6c8f9f4c82c03285b9bd59
+---
+
 # Connector Health Checks
 
 ## Summary

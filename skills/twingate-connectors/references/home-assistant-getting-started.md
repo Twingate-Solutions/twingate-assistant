@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/home-assistant-getting-started
+type: docs
+fetched: 2026-08-05
+source_version: dda99254d2e6ce356e0cde0846967a9c1464d88c36071386393d8ee131205ece
+---
+
 # Getting Started with Home Assistant and Twingate
 
 ## Page Title

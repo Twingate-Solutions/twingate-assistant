@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/device-controls-use-case
+type: docs
+fetched: 2026-08-05
+source_version: fc70b3cc156c426cde1db22557f2232c23ade79f6ee75e8e9d8f2ec8b719d896
+---
+
 # Device Security Controls Use Case
 
 ## Page Title

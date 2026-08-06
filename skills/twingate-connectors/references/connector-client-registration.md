@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connector-client-registration
+type: docs
+fetched: 2026-08-05
+source_version: 4a8609d00720b150944d40dc8658ff4799d425251ad535d898ad73b97e546e9e
+---
+
 # Connector & Client Registration
 
 ## Page Title

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/managing-devices
+type: docs
+fetched: 2026-08-05
+source_version: 39fa08f19cd5b83e5da1cd34c64a1bebd7542c7e1080f41dbc94c0d7160565ae
+---
+
 # Device Administration
 
 ## Summary

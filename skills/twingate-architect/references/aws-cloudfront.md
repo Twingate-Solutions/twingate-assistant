@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/aws-cloudfront
+type: docs
+fetched: 2026-08-05
+source_version: b40a08285949dd1d313148547845de56fe9bf7c4fdf477ef304be7296257aa22
+---
+
 # How to SaaS App Gate AWS CloudFront
 
 ## Summary

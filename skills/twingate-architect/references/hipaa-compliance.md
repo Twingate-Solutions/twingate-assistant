@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/hipaa-compliance
+type: docs
+fetched: 2026-08-05
+source_version: 3115bbae7f69b4cc2bf97e2c2174982f8545b57738b0d7fb50d382716d0ec292
+---
+
 # HIPAA Compliance
 
 ## Page Title

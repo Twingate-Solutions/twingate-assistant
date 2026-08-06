@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/users
+type: docs
+fetched: 2026-08-05
+source_version: 953b64718ef0757aaed77773901d8b49779ddcc6d3c39fadc79874b4a32df3e5
+---
+
 # Twingate Users
 
 ## Summary

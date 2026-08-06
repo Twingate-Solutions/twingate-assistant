@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/homelab-personal-use-case
+type: docs
+fetched: 2026-08-05
+source_version: ea9fe68a6c96c46b2be4217fac852e1a0804ac0590d89f51816a3516577fa43d
+---
+
 # Homelab & Personal Use Cases
 
 ## Page Title

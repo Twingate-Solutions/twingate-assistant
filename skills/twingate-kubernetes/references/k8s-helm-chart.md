@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/k8s-helm-chart
+type: docs
+fetched: 2026-08-05
+source_version: 927f96b3d095325739a62ad5f60c85c3f08f1c1a007e0a8f5bf144557ea774ba
+---
+
 # Deploy Twingate Connector with K8s Helm Chart
 
 ## Summary

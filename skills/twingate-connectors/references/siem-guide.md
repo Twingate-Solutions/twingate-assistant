@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/siem-guide
+type: docs
+fetched: 2026-08-05
+source_version: 85386790a3dc5e83e3540759f8f4427c65c6a97c11f7c48b10881634d63e8094
+---
+
 # How to Ingest Connector Logs into a SIEM
 
 ## Summary

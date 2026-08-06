@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/offboarding-users
+type: docs
+fetched: 2026-08-05
+source_version: aaf7acf55bdef295317d99cf1e46160fa69f67fd7ac205bdae17823eb36904ca
+---
+
 # How to Offboard Users from Twingate
 
 ## Summary

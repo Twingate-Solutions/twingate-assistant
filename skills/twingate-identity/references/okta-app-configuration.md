@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/okta-app-configuration
+type: docs
+fetched: 2026-08-05
+source_version: cd0664a41dcc5d27cd124bb6d1863cfb29b0fdf0f8ed87ebd2276fc00a6ef926
+---
+
 # Twingate Okta Application Configuration
 
 ## Summary

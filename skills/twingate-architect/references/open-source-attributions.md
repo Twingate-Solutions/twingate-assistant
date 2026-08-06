@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/open-source-attributions
+type: docs
+fetched: 2026-08-05
+source_version: 9ff80cd2cbfcf0069a1a834ee07217ade382500e113ae338ad8e77e5b40fa8b4
+---
+
 # Open Source Attributions
 
 ## Page Title

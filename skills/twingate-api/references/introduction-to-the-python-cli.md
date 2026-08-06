@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/introduction-to-the-python-cli
+type: docs
+fetched: 2026-08-05
+source_version: a7979cc7591016219d29471797af6884626dae883d3cab6e9ed309888add91c8
+---
+
 # Twingate Python CLI - Introduction
 
 ## Page Title

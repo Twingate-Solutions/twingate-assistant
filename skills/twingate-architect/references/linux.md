@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/linux
+type: docs
+fetched: 2026-08-05
+source_version: 326250320a0cd0f213df3aabc7a76af538e17c9a4eabb0d4c59c329b63a3cf00
+---
+
 # Twingate Linux Client
 
 ## Summary

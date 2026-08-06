@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/openclaw-digitalocean
+type: docs
+fetched: 2026-08-05
+source_version: ceebf9d0ee9029cbbeb6d0efbf9ce40cc20ca4032b9b6cf64f888a0905451603
+---
+
 # Setup and Secure OpenClaw on DigitalOcean
 
 ## Summary

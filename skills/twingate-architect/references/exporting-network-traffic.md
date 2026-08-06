@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/exporting-network-traffic
+type: docs
+fetched: 2026-08-05
+source_version: 51d6b67b3853c2eeec7b7ee3754fec369295e05cddeb64bced91280ee7129d38
+---
+
 # Network Traffic Export - Twingate
 
 ## Page Title

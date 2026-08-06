@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/how-nat-traversal-works
+type: docs
+fetched: 2026-08-05
+source_version: 3db5befadf6ab79ca6e336c491883905662c7d1121d25659856f9237d7201e51
+---
+
 # How NAT Traversal Works
 
 ## Page Title

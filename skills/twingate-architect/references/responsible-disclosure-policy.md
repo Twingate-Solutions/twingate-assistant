@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/responsible-disclosure-policy
+type: docs
+fetched: 2026-08-05
+source_version: a1bb7bd6686aa329985f0b7572fb3126001a99052759c1e1dd233831cc448adc
+---
+
 # Twingate Responsible Disclosure Policy
 
 ## Summary

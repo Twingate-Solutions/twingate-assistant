@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/identity-firewall
+type: docs
+fetched: 2026-08-05
+source_version: f4571610043a9428ff327b1644d15bc4c1afcc3fa28eed66f391c57d45d866f5
+---
+
 # Twingate Identity Firewall
 
 ## Summary

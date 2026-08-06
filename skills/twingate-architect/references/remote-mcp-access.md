@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/remote-mcp-access
+type: docs
+fetched: 2026-08-05
+source_version: f2569b1a1288015537e40bff1eb46ab1fedf89400f071ea6c5118c6323bfeba0
+---
+
 # Remote MCP Access with Twingate
 
 ## Summary

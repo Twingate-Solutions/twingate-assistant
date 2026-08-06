@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/user-activity
+type: docs
+fetched: 2026-08-05
+source_version: 5cdbccea41b772ad867ac2859c92052b85a176e8ffea431123e2c0fe322b9f38
+---
+
 # User Activity Reports
 
 ## Summary

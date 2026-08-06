@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/kandji-configuration
+type: docs
+fetched: 2026-08-05
+source_version: eedf499227e7bfba97c4b4b596e100e3b9f029b6cec3bf6ae6024ada092e2279
+---
+
 # Kandji (Iru) Configuration
 
 ## Page Title

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/service-accounts-guide
+type: docs
+fetched: 2026-08-05
+source_version: f22206cd5bb38549e69b4c55b6fef082fe6b769a4ee2f0f17835db0b5edf54e6
+---
+
 # Service Accounts Guide
 
 ## Page Title

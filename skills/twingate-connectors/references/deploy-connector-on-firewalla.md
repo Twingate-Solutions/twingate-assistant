@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/deploy-connector-on-firewalla
+type: docs
+fetched: 2026-08-05
+source_version: 007f6f2eb30a4d93d8ccbd035a81ca321d3a84a4a62ab411b6345ccbc531e066
+---
+
 # Deploy Connector on Firewalla Box
 
 ## Summary

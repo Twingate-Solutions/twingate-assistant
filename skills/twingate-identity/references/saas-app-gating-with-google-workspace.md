@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/saas-app-gating-with-google-workspace
+type: docs
+fetched: 2026-08-05
+source_version: a9266d63f879c7d6c5ececeb88b763b18634504cc54f395eec53cb24c7a7b20b
+---
+
 # SaaS App Gating with Google Workspace
 
 ## Summary

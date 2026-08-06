@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/network-overview
+type: docs
+fetched: 2026-08-05
+source_version: 9e7d6424460dfbac681098e5721d92a7ba81585722d1da34bd25885ad60b4499
+---
+
 # Network Overview
 
 ## Page Title

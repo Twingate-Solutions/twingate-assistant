@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/windows
+type: docs
+fetched: 2026-08-05
+source_version: a9e6c9f1da90c66317621eb35e8b3fabe7b85c1771019cc8096bec163b27571d
+---
+
 # Windows Client Installation
 
 ## Summary

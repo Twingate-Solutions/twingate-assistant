@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connector-deployment
+type: docs
+fetched: 2026-08-05
+source_version: ad8bb9eef29a9dc617ddbfdf5034f9f3194b81ccf5811468c2dd69a168c04e8c
+---
+
 # Connector Deployment
 
 ## Summary

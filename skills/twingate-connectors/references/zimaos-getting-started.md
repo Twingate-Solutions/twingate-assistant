@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/zimaos-getting-started
+type: docs
+fetched: 2026-08-05
+source_version: 8ad00df48ec883d2925e29b0d54f0a193ed0c7f4ec1a1af170f295323e9336b2
+---
+
 # Getting Started with ZimaOS and Twingate
 
 ## Summary

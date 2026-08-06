@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/oss-macos-and-ios-client-applications
+type: docs
+fetched: 2026-08-05
+source_version: 54f2d3a588e3ecef40d14d861771040f0257d555859a0c4ef7f46fd8d9ed6b0f
+---
+
 # Twingate macOS and iOS Client Applications - OSS Third Party Notices
 
 ## Page Title

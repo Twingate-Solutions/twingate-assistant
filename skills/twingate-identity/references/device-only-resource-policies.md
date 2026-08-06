@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/device-only-resource-policies
+type: docs
+fetched: 2026-08-05
+source_version: c0dc2ba5d14401571a91efeb9ab03851f2f1406f9c700bb5726d91d8abdf1f38
+---
+
 # Device-Only Resource Policies
 
 ## Page Title

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connector-details
+type: docs
+fetched: 2026-08-05
+source_version: 07c8dbfd3476d240412e07dc6c6cba500431a5dd5ffc1122c93efd4f155a95ca
+---
+
 # Connector Details
 
 ## Page Title

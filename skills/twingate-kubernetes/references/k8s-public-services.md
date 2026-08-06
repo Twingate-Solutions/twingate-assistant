@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/k8s-public-services
+type: docs
+fetched: 2026-08-05
+source_version: 682c81bea3b0f6dab5fbf68c4177a2fb94f37d3a4816cf43be619292b34734a1
+---
+
 # Publicly Exposed Resources in Kubernetes
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/terraform-aws
+type: docs
+fetched: 2026-08-05
+source_version: 84c9e77cc4252dd5e70964555576282d24410e749412dbf5810f173b974cb928
+---
+
 # Terraform with AWS and Twingate
 
 ## Summary

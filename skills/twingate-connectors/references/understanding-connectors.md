@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/understanding-connectors
+type: docs
+fetched: 2026-08-05
+source_version: 8db824e92f4e20af45d2685097d3be2afb0054cfd399bf45ce16d3e5a90e7f6c
+---
+
 # Understanding Connectors
 
 ## Summary

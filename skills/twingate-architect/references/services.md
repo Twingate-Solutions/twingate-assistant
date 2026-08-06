@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/services
+type: docs
+fetched: 2026-08-05
+source_version: 5abc6535f21cad94880fdaa918d8e8403edfdd43b84f442a19ba0373a6f35401
+---
+
 # Twingate Services
 
 ## Summary

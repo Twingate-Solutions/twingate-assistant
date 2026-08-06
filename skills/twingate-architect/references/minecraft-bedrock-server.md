@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/minecraft-bedrock-server
+type: docs
+fetched: 2026-08-05
+source_version: 8a3d8c1ef64330fcab35a357eeb076db14e2e6e82ea8161d744063468dda505f
+---
+
 # Minecraft Bedrock Server with Twingate
 
 ## Summary

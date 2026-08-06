@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/msp-billing
+type: docs
+fetched: 2026-08-05
+source_version: 587e011526a2ab53c6b5218f87e86c0171efb5f99549cae3e7e2286e711ea422
+---
+
 # MSP Billing
 
 ## Page Title

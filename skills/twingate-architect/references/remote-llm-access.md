@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/remote-llm-access
+type: docs
+fetched: 2026-08-05
+source_version: fb2cb554e5a476c978c4bb045943e6d591776e6b471289a1f4de05f864e1d778
+---
+
 # Remote LLM Access with Twingate
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/keycloak-configuration
+type: docs
+fetched: 2026-08-05
+source_version: ba6b6b0932b227272dff974f8d6d70099dfb0ca35cc666e3eb07ae4b6c875d09
+---
+
 # Keycloak Configuration
 
 ## Page Title

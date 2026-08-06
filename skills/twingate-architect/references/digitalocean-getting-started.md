@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/digitalocean-getting-started
+type: docs
+fetched: 2026-08-05
+source_version: 479bdf983dffd92d274ec6ff7b73240d366d152f1c8022598f75697958f3462d
+---
+
 # Getting Started with DigitalOcean and Twingate
 
 ## Summary

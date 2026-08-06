@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/game-streaming-remote
+type: docs
+fetched: 2026-08-05
+source_version: 7ad726f7d4730eb8c59fd0562cf481571e8fe8977e51c832769ec2908a1c4096
+---
+
 # Remote Game Streaming with Twingate
 
 ## Page Title

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/deployment-semi-automation
+type: docs
+fetched: 2026-08-05
+source_version: 601bd166d54e33372f07144a2b1072d964f7f2a08f44369cf1f21d9c46132494
+---
+
 # Deployment Automation (Semi-Automation)
 
 ## Summary

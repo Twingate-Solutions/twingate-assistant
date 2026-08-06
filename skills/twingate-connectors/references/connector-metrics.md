@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connector-metrics
+type: docs
+fetched: 2026-08-05
+source_version: b4c7d940291b2b9a9201d69832fb93a6fb0b52f1f7dc5a499dc7e4a595a29655
+---
+
 # Connector Metrics Overview
 
 ## Page Title

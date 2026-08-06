@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/split-tunnel-failures
+type: docs
+fetched: 2026-08-05
+source_version: 718d075684972b6e2120fc7730ad42954a3c091690fb54f41944d0b96482a3ab
+---
+
 # Split Tunnel Failures
 
 ## Summary

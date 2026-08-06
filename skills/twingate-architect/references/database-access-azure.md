@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/database-access-azure
+type: docs
+fetched: 2026-08-05
+source_version: a82f2a6b81282b8fb28f363f9e92778961b6aa9f8ed1c9d57559c4fa56eb4e99
+---
+
 # Azure SQL Database Access with Twingate
 
 ## Summary

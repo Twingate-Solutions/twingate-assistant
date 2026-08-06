@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/browser-security
+type: docs
+fetched: 2026-08-05
+source_version: ca2ff29926368658142ea969bde9b8b2a6fb701147480ac2ff9e5bd415e30568
+---
+
 ## Browser Security (Twingate Browser Extension)
 
 The **Twingate Browser Extension** restricts which browsers can access sensitive Resources, applies enterprise application controls (block copy/paste/download/etc.), and shows DNS Filtering block pages on HTTPS sites.

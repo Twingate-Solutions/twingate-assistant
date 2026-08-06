@@ -13,12 +13,18 @@ docs/TECHNICAL_PLAN.md
 docs/SESSIONS.md
 docs/troubleshooting-gateway.md
 docs/sessions/
+docs/BACKLOG.md
 
 # Pipeline test artifacts — generated during local development, not for release
 scripts/test_output/
 
 # Batch runner work files — temporary, created by run_batch.py --prepare
 scripts/.batch_work/
+
+# Manual/seed pipeline run logs — local audit trail only. Contain absolute
+# local filesystem paths from the tee; never publish. The cron emits the
+# .jsonl metrics (committed), not these .log files.
+docs/metrics/*.log
 
 # Python
 __pycache__/

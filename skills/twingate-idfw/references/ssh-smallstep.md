@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/ssh-smallstep
+type: docs
+fetched: 2026-08-05
+source_version: f4f38f53df32d5d77cff9caabd984a81f6ccac5a7f9f50de435b3af4ca8313ad
+---
+
 # SSH Access Management with Twingate + Smallstep CA
 
 ## Page Title

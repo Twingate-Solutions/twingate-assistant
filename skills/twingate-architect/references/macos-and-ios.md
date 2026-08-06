@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/macos-and-ios
+type: docs
+fetched: 2026-08-05
+source_version: 73360edbf74f2a61012ad873d69c5ec9c88e9c2fa6a7bc7669ec15ab43db1905
+---
+
 # macOS & iOS Client Distribution via MDM
 
 ## Summary

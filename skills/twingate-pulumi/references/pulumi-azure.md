@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/pulumi-azure
+type: docs
+fetched: 2026-08-05
+source_version: 5c69b18453cc2a6f0ba58c5ae24eabd2e41a9fa238677692913b266463cc468f
+---
+
 # Pulumi with Azure and Twingate
 
 ## Page Title

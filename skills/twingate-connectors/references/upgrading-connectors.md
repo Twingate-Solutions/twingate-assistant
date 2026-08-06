@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/upgrading-connectors
+type: docs
+fetched: 2026-08-05
+source_version: b2dd8ffeebb6cde837a5d58b8382cde25fc315fc2149dc43fe7cec6e49596933
+---
+
 # Updating Twingate Connectors
 
 ## Summary

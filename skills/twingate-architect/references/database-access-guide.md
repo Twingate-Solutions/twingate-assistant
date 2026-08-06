@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/database-access-guide
+type: docs
+fetched: 2026-08-05
+source_version: c8ecb27e55804704b1c191740ced861e8c1fff3734f39f4bdff34cf3b6eb374d
+---
+
 # Database Access Guide
 
 ## Page Title

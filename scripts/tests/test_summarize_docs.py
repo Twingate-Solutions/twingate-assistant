@@ -1,12 +1,8 @@
-"""Unit tests for summarize_docs module.
-
-All HTTP requests and Claude API calls are mocked so tests run
-without network access or an API key. The conftest.py at
-scripts/tests/ adds scripts/ to sys.path.
-"""
+"""Unit tests for summarize_docs module."""
 
 from unittest.mock import MagicMock, patch
 
+import pytest
 import requests
 
 from summarize_docs import (
@@ -15,6 +11,7 @@ from summarize_docs import (
     content_hash,
     extract_text_from_html,
     fetch_doc_html,
+    normalize_for_hash,
     summarize_doc,
 )
 
@@ -152,7 +149,6 @@ def test_extract_finds_main_content() -> None:
 
     assert "Connector Deployment" in text
     assert "Deploy connectors" in text
-    # Header/footer should be stripped by tag removal.
     assert "Navigation links" not in text
     assert "Footer content" not in text
 
@@ -214,7 +210,6 @@ def test_summarize_doc_calls_api_with_correct_params(
 
     assert result == "# Summary\nTest summary."
 
-    # Verify the API was called with the expected parameters.
     call_kwargs = mock_client.messages.create.call_args.kwargs
     assert call_kwargs["model"] == "claude-sonnet-4-6"
     assert call_kwargs["max_tokens"] == 1024
@@ -236,7 +231,6 @@ def test_summarize_doc_truncates_long_text(
         "# Truncated Summary"
     )
 
-    # Build HTML with a body exceeding 60000 chars of text.
     long_text = "word " * 15000  # ~75000 chars
     long_html = f"<html><body><p>{long_text}</p></body></html>"
 
@@ -269,12 +263,76 @@ def test_summarize_doc_long_html_still_calls_api(
     assert result == "# Long Page Summary"
     mock_client.messages.create.assert_called_once()
 
-    # Verify the text was extracted from <main> and truncated.
     user_content = mock_client.messages.create.call_args.kwargs["messages"][0][
         "content"
     ]
     assert "Big Doc" in user_content
     assert "[Content truncated for length]" in user_content
+
+
+# ── normalize_for_hash tests (shadow-hash footer stripping) ─────────────────
+
+
+@pytest.mark.parametrize(
+    "age_line",
+    ["2 months ago", "3 months ago", "yesterday", "just now", "an hour ago", "5 days ago"],
+)
+def test_normalize_for_hash_strips_relative_age_variants(age_line: str) -> None:
+    """Texts differing only in the relative-age footer line normalize identically."""
+    body = "Connector Deployment\nDeploy connectors on Docker or Kubernetes."
+    text_a = f"{body}\nLast updated\n2 months ago\nOpen with AI"
+    text_b = f"{body}\nLast updated\n{age_line}\nOpen with AI"
+
+    normalized_a = normalize_for_hash(text_a)
+    normalized_b = normalize_for_hash(text_b)
+
+    assert normalized_a == normalized_b
+    assert content_hash(normalized_a) == content_hash(normalized_b)
+
+
+def test_normalize_for_hash_real_body_change_produces_different_hash() -> None:
+    """A genuine body-line change still produces a different normalized hash."""
+    text_a = "Connector Deployment\nDeploy connectors on Docker.\nLast updated\n2 months ago"
+    text_b = "Connector Deployment\nDeploy connectors on Kubernetes.\nLast updated\n3 months ago"
+
+    normalized_a = normalize_for_hash(text_a)
+    normalized_b = normalize_for_hash(text_b)
+
+    assert normalized_a != normalized_b
+    assert content_hash(normalized_a) != content_hash(normalized_b)
+
+
+def test_normalize_for_hash_last_updated_without_age_line_drops_only_label() -> None:
+    """'Last updated' with no following age line loses only the label line."""
+    text = "Connector Deployment\nLast updated\nSome unrelated next line"
+
+    normalized = normalize_for_hash(text)
+
+    assert normalized == "Connector Deployment\nSome unrelated next line"
+
+
+def test_normalize_for_hash_preserves_non_footer_lines_byte_for_byte() -> None:
+    """Ordinary content lines pass through unchanged, in order."""
+    text = "Line one.\nLine two.\nLine three."
+
+    assert normalize_for_hash(text) == text
+
+
+def test_normalize_for_hash_removes_open_with_ai_line() -> None:
+    """The standalone 'Open with AI' footer line is removed."""
+    text = "Connector Deployment\nDeploy connectors.\nOpen with AI"
+
+    normalized = normalize_for_hash(text)
+
+    assert normalized == "Connector Deployment\nDeploy connectors."
+    assert "Open with AI" not in normalized
+
+
+def test_normalize_for_hash_labels_are_case_insensitive() -> None:
+    """The 'Last updated' / 'Open with AI' line matches are case-insensitive."""
+    text = "Body text.\nLAST UPDATED\nyesterday\nOPEN WITH AI"
+
+    assert normalize_for_hash(text) == "Body text."
 
 
 # ── _is_safe_url tests ──────────────────────────────────────────────────────

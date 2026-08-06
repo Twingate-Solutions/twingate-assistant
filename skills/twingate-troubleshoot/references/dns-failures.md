@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/dns-failures
+type: docs
+fetched: 2026-08-05
+source_version: 7a66ffc0b7fc1ec45d1c02247dbd448a2efdf4c395732336c300552e8149c19f
+---
+
 # DNS Failures - Twingate Troubleshooting
 
 ## Page Title

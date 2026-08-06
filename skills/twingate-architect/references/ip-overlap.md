@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/ip-overlap
+type: docs
+fetched: 2026-08-05
+source_version: 9a85399172d79da11c90bc0a878bf50c7fb82b73adb9d82d95599fb6e95996f1
+---
+
 # Best Practices for Overlapping IP Addresses
 
 ## Summary

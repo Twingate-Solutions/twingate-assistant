@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/dns-filtering
+type: docs
+fetched: 2026-08-05
+source_version: 629c8c939aaa9abd89cee453f3fda8ae77ec3f471d8577f4ee947443ee667836
+---
+
 # DNS Filtering
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/exit-networks
+type: docs
+fetched: 2026-08-05
+source_version: 02f16afc51cff537fbfd1bbca344fda37d6b94bb553209d8bed87af5180b063a
+---
+
 # Exit Networks
 
 ## Summary

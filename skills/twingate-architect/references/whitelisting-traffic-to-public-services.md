@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/whitelisting-traffic-to-public-services
+type: docs
+fetched: 2026-08-05
+source_version: 2b48ba91f5afbbdc15d5cc11697cc260cb4c521eba0fe9d61a571b9af13db2f8
+---
+
 # Best Practices for Whitelisting Traffic to Public Resources
 
 ## Summary

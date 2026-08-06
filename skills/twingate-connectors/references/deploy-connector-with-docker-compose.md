@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/deploy-connector-with-docker-compose
+type: docs
+fetched: 2026-08-05
+source_version: 843aa9171c07d86dd88a01d9d1a11754e97767e794ab35c6ee083e0ef296b438
+---
+
 # Deploy Connector with Docker Compose
 
 ## Summary

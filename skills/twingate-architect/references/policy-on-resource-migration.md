@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/policy-on-resource-migration
+type: docs
+fetched: 2026-08-05
+source_version: b79fb5830019219d1b71fa8df177b84ae40bdb799bce6f41cab70988239ec30c
+---
+
 # Policy on Resource Migration
 
 ## Summary

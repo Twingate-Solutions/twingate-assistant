@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connectors-on-linux
+type: docs
+fetched: 2026-08-05
+source_version: e161a1df07ea98b685a6a035553546a9615165d2f3d3ce7398c860f4d68c058b
+---
+
 # Deploy a Connector on Linux
 
 ## Summary

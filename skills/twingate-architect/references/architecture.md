@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/architecture
+type: docs
+fetched: 2026-08-05
+source_version: 1b78ae20f180d4d6d122f608728753d6716c357a2e63dbbb5d9f561cbfafb79a
+---
+
 # Twingate Architecture Overview
 
 ## Page Title

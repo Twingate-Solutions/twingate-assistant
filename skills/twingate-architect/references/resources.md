@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/resources
+type: docs
+fetched: 2026-08-05
+source_version: 32b54f49ea6920d02aae4b3dcd00962660f8372c86adf0e8168ba29ef8a0efea
+---
+
 # Twingate Resources
 
 ## Summary

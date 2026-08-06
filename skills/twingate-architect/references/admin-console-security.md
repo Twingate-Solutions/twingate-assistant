@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/admin-console-security
+type: docs
+fetched: 2026-08-05
+source_version: 45596f09a9e534fe2f740db2971ccfef872149df0480a0dfc7c68ba887208b26
+---
+
 # Admin Console Security
 
 ## Summary

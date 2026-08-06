@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/nextdns-configuration
+type: docs
+fetched: 2026-08-05
+source_version: cf97365beb8c2312a645110eaa3a73a7ad3386e47f560edb4835fc979e81719a
+---
+
 # NextDNS Integration with Twingate
 
 ## Page Title

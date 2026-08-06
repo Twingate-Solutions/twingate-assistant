@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/trust-center
+type: docs
+fetched: 2026-08-05
+source_version: 5b124a49b9c09c7372cb7257c82af7f35705e794f8f706d29ec4882d26b29eda
+---
+
 # Twingate Trust Center
 
 ## Page Title

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/faq
+type: docs
+fetched: 2026-08-05
+source_version: b67fc3c866cd8d1e860a68aa2b2c8bf6b6b6ea4656470c991475fb8c1861b7c9
+---
+
 # Twingate FAQ
 
 ## Page Title

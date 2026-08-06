@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/security-policies-best-practices
+type: docs
+fetched: 2026-08-05
+source_version: 5af23ccf7d5dafdf1760f2b3e208b09ce8a77daf543008297db2cd30c9b7395f
+---
+
 # Security Policies Best Practices
 
 ## Summary

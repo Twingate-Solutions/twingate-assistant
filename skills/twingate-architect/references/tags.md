@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/tags
+type: docs
+fetched: 2026-08-05
+source_version: 9cfdec0b1c91761455a8de2a4c3e177e7a1a948a0c9145c45aa13cba8d688914
+---
+
 # Resource Tags
 
 ## Summary

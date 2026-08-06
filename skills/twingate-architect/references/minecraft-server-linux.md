@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/minecraft-server-linux
+type: docs
+fetched: 2026-08-05
+source_version: 9daeb1f04eaaa27143058f309c97946d7f116f01aaa5b962d9beed19f4a5188c
+---
+
 # Minecraft Server with Twingate (Linux)
 
 ## Page Title

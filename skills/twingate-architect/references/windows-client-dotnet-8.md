@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/windows-client-dotnet-8
+type: docs
+fetched: 2026-08-05
+source_version: ca0a2eb2ec493a7c897fc4ec0c3bb7b718ebd0dcfa89028ac5a0e4fa97b864bb
+---
+
 # Windows Client Migration to .NET 8
 
 ## Summary

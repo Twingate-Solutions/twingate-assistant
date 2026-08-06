@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/linux-device-id-migration
+type: docs
+fetched: 2026-08-05
+source_version: 2ad2fa7fe6ca47b3bb300d1609fbb0d1f2712cac675eced58426822b57bccd49
+---
+
 ## Linux Device ID Migration (v1.0.79)
 
 One-time migration guide for Linux Client v1.0.79, which changed internal device ID generation. All Linux devices appear as new after upgrading; users with Trusted Profiles must re-verify their devices to maintain access.

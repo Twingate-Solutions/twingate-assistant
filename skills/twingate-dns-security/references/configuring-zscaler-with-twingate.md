@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/configuring-zscaler-with-twingate
+type: docs
+fetched: 2026-08-05
+source_version: 718abe4f053659a8e6ed1fd63b6f3dd60f2eef303ece4da8f507bdd031a4f40c
+---
+
 # Configuring Zscaler to Work with Twingate
 
 ## Summary

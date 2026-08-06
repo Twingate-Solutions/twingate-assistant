@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/gdpr-compliance
+type: docs
+fetched: 2026-08-05
+source_version: e7af1cac8628a2f09ead059876630fffcc5b603748a3ad613b986908469291ad
+---
+
 # GDPR Compliance
 
 ## Summary

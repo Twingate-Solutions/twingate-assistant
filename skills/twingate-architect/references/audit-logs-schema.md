@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/audit-logs-schema
+type: docs
+fetched: 2026-08-05
+source_version: 1ccbac3627e4149088651631950c147e80673960340c63b61e028c419efe77f0
+---
+
 # Audit Logs Schema
 
 ## Summary

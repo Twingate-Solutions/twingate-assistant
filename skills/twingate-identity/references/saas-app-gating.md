@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/saas-app-gating
+type: docs
+fetched: 2026-08-05
+source_version: 0ee4af7b25f30423c57aaafec4fea3e5c92497a500bb6535ef498955825c0d4e
+---
+
 # SaaS App Gating with Twingate
 
 ## Page Title

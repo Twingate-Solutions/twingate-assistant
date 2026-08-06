@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/understanding-relays
+type: docs
+fetched: 2026-08-05
+source_version: 69e77ac39097deee75d722573b8152850b8fd7a4e0860b1bf3a35759748e969a
+---
+
 # Understanding Relays
 
 ## Page Title

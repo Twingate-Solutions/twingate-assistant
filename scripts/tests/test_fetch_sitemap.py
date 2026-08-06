@@ -1,8 +1,4 @@
-"""Unit tests for fetch_sitemap module.
-
-All HTTP requests are mocked so tests run without network access.
-The conftest.py at scripts/tests/ adds scripts/ to sys.path.
-"""
+"""Unit tests for fetch_sitemap module."""
 
 from unittest.mock import MagicMock, patch
 import xml.etree.ElementTree as ET
@@ -51,6 +47,26 @@ SITEMAP_XML_DUPLICATES = """\
   <url><loc>https://www.twingate.com/docs/architecture</loc></url>
   <url><loc>https://www.twingate.com/docs/architecture</loc></url>
   <url><loc>https://www.twingate.com/docs/connectors</loc></url>
+</urlset>
+"""
+
+# help.twingate.com's flat urlset: no xmlns, mixes /articles/ with other paths.
+SITEMAP_XML_HELP_ARTICLES = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset>
+  <url><loc>https://help.twingate.com/articles/1422554451-connector-offline</loc></url>
+  <url><loc>https://help.twingate.com/articles/8458642629-twingate-client-logs</loc></url>
+  <url><loc>https://help.twingate.com/</loc></url>
+  <url><loc>https://help.twingate.com/categories/general</loc></url>
+</urlset>
+"""
+
+# A mixed sitemap containing both /docs/ and /articles/ URLs on the same host.
+SITEMAP_XML_MIXED_DOCS_AND_ARTICLES = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset>
+  <url><loc>https://www.twingate.com/docs/architecture</loc></url>
+  <url><loc>https://www.twingate.com/articles/not-a-real-docs-path</loc></url>
 </urlset>
 """
 
@@ -136,7 +152,6 @@ def test_non_namespaced_loc_tags_are_parsed(mock_get: MagicMock) -> None:
         "https://www.twingate.com/docs/connectors",
         "https://www.twingate.com/docs/terraform",
     ]
-    # /pricing should be filtered out
     assert "https://www.twingate.com/pricing" not in result
 
 
@@ -186,3 +201,45 @@ def test_result_is_sorted(mock_get: MagicMock) -> None:
         "https://www.twingate.com/docs/mmm-middle",
         "https://www.twingate.com/docs/zzz-last",
     ]
+
+
+# ── Multi-source: path_filter="/articles/" (help.twingate.com) ────────────────
+
+
+@patch("fetch_sitemap.requests.get")
+def test_fetch_sitemap_articles_filter_keeps_only_articles_urls(mock_get: MagicMock) -> None:
+    """path_filter='/articles/' keeps only /articles/ URLs, dropping others."""
+    mock_get.return_value = _mock_response(SITEMAP_XML_HELP_ARTICLES)
+
+    result = fetch_sitemap("https://help.twingate.com/sitemap.xml", path_filter="/articles/")
+
+    assert result == [
+        "https://help.twingate.com/articles/1422554451-connector-offline",
+        "https://help.twingate.com/articles/8458642629-twingate-client-logs",
+    ]
+    assert "https://help.twingate.com/" not in result
+    assert "https://help.twingate.com/categories/general" not in result
+
+
+@patch("fetch_sitemap.requests.get")
+def test_fetch_sitemap_articles_filter_ignores_docs_urls(mock_get: MagicMock) -> None:
+    """path_filter='/articles/' does not accidentally match /docs/ URLs."""
+    mock_get.return_value = _mock_response(SITEMAP_XML_MIXED_DOCS_AND_ARTICLES)
+
+    result = fetch_sitemap("https://www.twingate.com/sitemap.xml", path_filter="/articles/")
+
+    assert result == ["https://www.twingate.com/articles/not-a-real-docs-path"]
+    assert "https://www.twingate.com/docs/architecture" not in result
+
+
+@patch("fetch_sitemap.requests.get")
+def test_fetch_sitemap_default_path_filter_still_keeps_docs_and_drops_articles(
+    mock_get: MagicMock,
+) -> None:
+    """With no path_filter override, fetch_sitemap selects /docs/ and drops /articles/."""
+    mock_get.return_value = _mock_response(SITEMAP_XML_MIXED_DOCS_AND_ARTICLES)
+
+    result = fetch_sitemap("https://www.twingate.com/sitemap.xml")
+
+    assert result == ["https://www.twingate.com/docs/architecture"]
+    assert "https://www.twingate.com/articles/not-a-real-docs-path" not in result

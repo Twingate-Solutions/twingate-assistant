@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/managed-devices
+type: docs
+fetched: 2026-08-05
+source_version: 979e15d93285fb0d1c4a87ded7f24935f53794549dbb0385c1ec917ae69210e3
+---
+
 # Managed Devices
 
 ## Summary

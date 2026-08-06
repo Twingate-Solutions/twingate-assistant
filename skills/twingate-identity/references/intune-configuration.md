@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/intune-configuration
+type: docs
+fetched: 2026-08-05
+source_version: b9f47e19ad4e4e5f61e0099fffea083148aff193aa0aa71653e54b4746c2251c
+---
+
 # Intune Configuration
 
 ## Page Title

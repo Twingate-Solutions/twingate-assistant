@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/detailed-client-connection-flow
+type: docs
+fetched: 2026-08-05
+source_version: 78746d2bca089de0dd010d4402c926eccd0fd80244cf5bd29a4691582f6cbed2
+---
+
 # Detailed Client Connection Flow
 
 ## Page Title

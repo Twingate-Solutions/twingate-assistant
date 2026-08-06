@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/database-access-aws
+type: docs
+fetched: 2026-08-05
+source_version: ac76d34bca85c67d011ef4b940565768ba8dfcd8aa7fd9d815442701d657b1e8
+---
+
 # AWS Database Access with Twingate
 
 ## Summary

@@ -1,10 +1,4 @@
-"""Compare sitemap URLs against doc_mapping.yaml to detect changes.
-
-This module identifies new and removed documentation pages by diffing
-the live sitemap URL list against the URLs already tracked in
-``doc_mapping.yaml``. New URLs can be auto-assigned to a skill based
-on URL path patterns defined in the mapping file.
-"""
+"""Compare sitemap URLs against doc_mapping.yaml to detect new and removed docs."""
 
 import logging
 from pathlib import Path
@@ -21,8 +15,6 @@ def load_mapping(mapping_path: str | Path = DEFAULT_MAPPING_PATH) -> dict:
 
     Args:
         mapping_path: Filesystem path to the YAML mapping file.
-            Defaults to ``doc_mapping.yaml`` in the same directory
-            as this script.
 
     Returns:
         The parsed YAML document as a dictionary.
@@ -49,20 +41,14 @@ def diff_docs(
     sitemap_urls: list[str],
     mapping_path: str | Path = DEFAULT_MAPPING_PATH,
 ) -> tuple[list[str], list[str]]:
-    """Compare sitemap URLs against doc_mapping.yaml.
-
-    Computes which URLs are new (present in the sitemap but not in the
-    mapping) and which are removed (present in the mapping but no longer
-    in the sitemap).
+    """Compute new and removed URLs between the sitemap and doc_mapping.yaml.
 
     Args:
-        sitemap_urls: List of documentation URLs discovered from the
-            live sitemap.
+        sitemap_urls: Documentation URLs discovered from the live sitemap.
         mapping_path: Filesystem path to the YAML mapping file.
 
     Returns:
-        A tuple of ``(new_urls, removed_urls)`` where each element is
-        a sorted list of URL strings.
+        A tuple of ``(new_urls, removed_urls)``, each a sorted list of URLs.
     """
     mapping = load_mapping(mapping_path)
     mapped_urls: set[str] = {
@@ -87,21 +73,15 @@ def diff_docs(
 
 
 def auto_assign(url: str, patterns: list[dict]) -> str | None:
-    """Try to assign a new URL to a skill based on URL path patterns.
-
-    Iterates through the pattern list in order and returns the skill
-    for the first pattern whose ``pattern`` value is a substring of the
-    URL. Returns ``None`` if no pattern matches.
+    """Assign a URL to the skill of the first matching path pattern.
 
     Args:
         url: The documentation URL to classify.
-        patterns: A list of pattern dictionaries, each with ``pattern``
-            (a substring to match) and ``skill`` (the target skill name).
-            First matching pattern wins.
+        patterns: Pattern dicts, each with ``pattern`` (substring to match)
+            and ``skill``. First match wins.
 
     Returns:
-        The skill name string if a pattern matches, or ``None`` if no
-        pattern matches the URL.
+        The skill name if a pattern matches, else ``None``.
     """
     for entry in patterns:
         pattern = entry.get("pattern", "")
@@ -119,13 +99,11 @@ if __name__ == "__main__":
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
 
-    # Quick self-test: load mapping and show stats
     mapping = load_mapping()
     docs = mapping.get("docs", [])
     patterns = mapping.get("auto_assign_patterns", [])
     print(f"Loaded {len(docs)} mapped docs, {len(patterns)} auto-assign patterns")
 
-    # Example: diff against the mapped URLs themselves (should produce no diff)
     mapped_urls = [entry["url"] for entry in docs if "url" in entry]
     new, removed = diff_docs(mapped_urls)
     print(f"Self-diff: {len(new)} new, {len(removed)} removed (expected 0, 0)")

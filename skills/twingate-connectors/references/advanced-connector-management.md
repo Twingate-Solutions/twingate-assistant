@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/advanced-connector-management
+type: docs
+fetched: 2026-08-05
+source_version: e209ad13100a0587ad505b4a8736b72502f312ff49e027249bcb492035d62997
+---
+
 # Advanced Connector Management
 
 ## Page Title

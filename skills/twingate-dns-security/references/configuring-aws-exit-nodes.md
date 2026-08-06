@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/configuring-aws-exit-nodes
+type: docs
+fetched: 2026-08-05
+source_version: f9aee35da28c7ed418d3adf391e841f5d7f410238de3ee1ff0200f74a9923d6a
+---
+
 # Configuring AWS Exit Nodes (SaaS App Gating)
 
 ## Summary

@@ -1,10 +1,4 @@
-"""Fetch and parse the Twingate sitemap to extract /docs/ URLs.
-
-This module downloads the Twingate sitemap XML, parses it with
-xml.etree.ElementTree, and returns all URLs that contain /docs/
-in their path. Used by the auto-update pipeline to discover which
-documentation pages exist.
-"""
+"""Fetch and parse a Twingate sitemap to extract documentation URLs."""
 
 import logging
 import xml.etree.ElementTree as ET
@@ -18,33 +12,30 @@ logger = logging.getLogger(__name__)
 SITEMAP_NAMESPACE = "http://www.sitemaps.org/schemas/sitemap/0.9"
 DEFAULT_SITEMAP_URL = "https://www.twingate.com/sitemap/sitemap-0.xml"
 REQUEST_TIMEOUT_SECONDS = 30
-MAX_SITEMAP_BYTES = 10 * 1024 * 1024  # 10 MB guard against XML bombs
+MAX_SITEMAP_BYTES = 10 * 1024 * 1024  # 10 MB size cap
 
 
-def fetch_sitemap(url: str = DEFAULT_SITEMAP_URL) -> list[str]:
-    """Fetch sitemap XML and return all /docs/ URLs.
+def fetch_sitemap(
+    url: str = DEFAULT_SITEMAP_URL,
+    path_filter: str = "/docs/",
+) -> list[str]:
+    """Fetch sitemap XML and return URLs matching a path filter.
 
-    Downloads the sitemap from the given URL, parses the XML to extract
-    all ``<loc>`` elements, and filters to URLs containing ``/docs/``
-    that originate from ``www.twingate.com`` over HTTPS.
-
-    Handles both namespaced (standard sitemap xmlns) and non-namespaced
-    ``<loc>`` tags.
+    Extracts all ``<loc>`` elements (namespaced or not) and keeps URLs whose
+    path contains ``path_filter`` and that pass the ``_is_safe_url`` allowlist.
 
     Args:
-        url: The sitemap URL to fetch. Defaults to the Twingate
-            production sitemap.
+        url: The sitemap URL to fetch. Defaults to the Twingate docs sitemap.
+        path_filter: Substring a URL's path must contain to be kept. Defaults
+            to ``/docs/``; pass ``/articles/`` for the help source.
 
     Returns:
-        A sorted, deduplicated list of documentation URLs found in
-        the sitemap.
+        A sorted, deduplicated list of URLs matching ``path_filter``.
 
     Raises:
-        requests.RequestException: If the HTTP request fails (timeout,
-            connection error, non-2xx status).
+        requests.RequestException: If the HTTP request fails.
         ValueError: If the sitemap response exceeds MAX_SITEMAP_BYTES.
-        xml.etree.ElementTree.ParseError: If the response body is not
-            valid XML.
+        xml.etree.ElementTree.ParseError: If the response body is not valid XML.
     """
     logger.info("Fetching sitemap from %s", url)
     response = requests.get(url, timeout=REQUEST_TIMEOUT_SECONDS, headers=REQUEST_HEADERS)
@@ -65,28 +56,27 @@ def fetch_sitemap(url: str = DEFAULT_SITEMAP_URL) -> list[str]:
 
     urls: set[str] = set()
 
-    # Try namespaced <loc> elements (standard sitemap format)
     namespaced_locs = root.findall(f".//{{{SITEMAP_NAMESPACE}}}loc")
     for loc in namespaced_locs:
         if loc.text:
             urls.add(loc.text.strip())
 
-    # Also try non-namespaced <loc> elements (fallback for atypical sitemaps)
     plain_locs = root.findall(".//loc")
     for loc in plain_locs:
         if loc.text:
             urls.add(loc.text.strip())
 
     all_urls = sorted(urls)
-    docs_urls = [u for u in all_urls if "/docs/" in u and _is_safe_url(u)]
+    matched_urls = [u for u in all_urls if path_filter in u and _is_safe_url(u)]
 
     logger.info(
-        "Parsed %d total URLs, %d are /docs/ URLs",
+        "Parsed %d total URLs, %d match path filter %r",
         len(all_urls),
-        len(docs_urls),
+        len(matched_urls),
+        path_filter,
     )
 
-    return docs_urls
+    return matched_urls
 
 
 if __name__ == "__main__":

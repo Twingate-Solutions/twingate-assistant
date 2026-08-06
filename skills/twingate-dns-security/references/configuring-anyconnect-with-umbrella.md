@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/configuring-anyconnect-with-umbrella
+type: docs
+fetched: 2026-08-05
+source_version: d0b1626a4360283fcab6b80fe0839b7206dc0d001683b4a624c542d0782b9042
+---
+
 # Configuring AnyConnect with Umbrella for Twingate
 
 ## Summary

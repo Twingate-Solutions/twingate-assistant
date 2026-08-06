@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connector-monitoring
+type: docs
+fetched: 2026-08-05
+source_version: 85afcad7ff3c7c088aa8b8a871b105c95c27d779d5e902985b0229d9f6af920c
+---
+
 # Twingate Connector Monitoring with Prometheus & Grafana
 
 ## Summary

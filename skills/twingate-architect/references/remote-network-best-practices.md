@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/remote-network-best-practices
+type: docs
+fetched: 2026-08-05
+source_version: 60457adfffeac36bb8072100e79863ed59d53ad3064e76f3d7b88215b90e1fc8
+---
+
 # Remote Network Best Practices
 
 ## Page Title

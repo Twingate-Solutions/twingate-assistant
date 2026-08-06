@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/terraform-getting-started
+type: docs
+fetched: 2026-08-05
+source_version: 15a14a4153a4ce243f65a20b50378b1b5b42eafbcf34f62f4d7aab2ae165acb3
+---
+
 # Getting Started with Terraform and Twingate
 
 ## Summary

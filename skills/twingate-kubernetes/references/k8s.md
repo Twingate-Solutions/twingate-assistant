@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/k8s
+type: docs
+fetched: 2026-08-05
+source_version: 3b220db1fadb21a1ca2ca0ba3e6bd2243dd578303d468c125a2f937bdd5149e1
+---
+
 # Kubernetes Overview - Twingate
 
 ## Summary

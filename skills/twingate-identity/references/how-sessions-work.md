@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/how-sessions-work
+type: docs
+fetched: 2026-08-05
+source_version: 337accfb6faf3b5ed0e81f6abcf724396edbfcd9336d0353f812f4ed1220f487
+---
+
 # How Sessions Work
 
 ## Summary

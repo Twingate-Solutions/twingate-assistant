@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/deploy-twingate-client-with-microsoft-endpoint-manager
+type: docs
+fetched: 2026-08-05
+source_version: 7c463cb173226c83fc1c5939daf3b27e9bfd67a507234100a8d559bea7953318
+---
+
 # Deploy Twingate Client with Microsoft Intune
 
 ## Summary

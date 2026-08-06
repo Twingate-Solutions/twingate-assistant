@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/twingate-security
+type: docs
+fetched: 2026-08-05
+source_version: 638672e96a393e2cabd983ccf03fa0ebbe33ec610e1de860cc602719540316f6
+---
+
 # Twingate Security Posture
 
 ## Page Title

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/jit-access-requests
+type: docs
+fetched: 2026-08-05
+source_version: e3e91ae4d62ad55bfb3240dc321c02bda3110b388cd962392350d62dc2db2125
+---
+
 # JIT Access Requests
 
 ## Summary

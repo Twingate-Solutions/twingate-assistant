@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/internet-security
+type: docs
+fetched: 2026-08-05
+source_version: ca91296dafe324a6de49c892b5dbb75399039517e71f0245ca9900d45c68b545
+---
+
 # Internet Security Overview
 
 ## Page Title

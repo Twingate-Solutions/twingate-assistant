@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/device-security-guide
+type: docs
+fetched: 2026-08-05
+source_version: 2f94cf256faae9a7805bde89e68db69bc090e8853fefa96c8c718c28fb69e598
+---
+
 # Device Profiles (Twingate Device Security)
 
 ## Summary

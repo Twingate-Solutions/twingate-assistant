@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/kubernetes-access
+type: docs
+fetched: 2026-08-05
+source_version: e16838d0a5c4bfe367e004ec9d461ad6d1f53f37a60174c61993fe44f0d087d4
+---
+
 # Privileged Access for Kubernetes Overview
 
 ## Summary

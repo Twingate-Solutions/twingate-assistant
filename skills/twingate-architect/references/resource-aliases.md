@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/resource-aliases
+type: docs
+fetched: 2026-08-05
+source_version: a559b1e20a55414853953280315633e0e19144929ead579aa52d35a059274fdb
+---
+
 # Resource Aliases
 
 ## Summary

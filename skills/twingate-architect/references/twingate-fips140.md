@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/twingate-fips140
+type: docs
+fetched: 2026-08-05
+source_version: 5e17f25e68f1d03a7d3df94f33ce24301f460f5ae0ec3ef71e28c6d51b09db38
+---
+
 # Twingate & FIPS 140 Compliance
 
 ## Summary

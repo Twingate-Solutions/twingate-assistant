@@ -92,14 +92,12 @@ def phase1(target_url: str | None, quiet: bool = False) -> None:
     patterns = mapping.get("auto_assign_patterns", [])
 
     if target_url:
-        # Find the requested URL in the mapping.
         entry = next((d for d in docs if d.get("url") == target_url), None)
         if entry:
             url = entry["url"]
             skill = entry["skill"]
             print(f"  Using requested URL: {url} -> {skill}")
         else:
-            # Not in mapping — try auto-assign.
             assigned = auto_assign(target_url, patterns)
             if assigned:
                 url = target_url
@@ -110,7 +108,6 @@ def phase1(target_url: str | None, quiet: bool = False) -> None:
                 skill = "_triage"
                 print("  URL not in mapping and no auto-assign match: routing to _triage")
     else:
-        # Default: pick first mapped entry.
         if not docs:
             print("  ERROR: No docs in mapping.")
             sys.exit(1)
@@ -150,9 +147,7 @@ def phase1(target_url: str | None, quiet: bool = False) -> None:
         "page_hash": page_hash,
         "extracted_text": text,
     }
-    # Always write the shared state file (used by --write).
     STATE_FILE.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
-    # Also write a slug-named file so parallel runs don't clobber each other.
     slug_state_file = TEST_OUTPUT_DIR / f"{slug}.state.json"
     slug_state_file.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"\nState saved to: {slug_state_file}")
@@ -209,7 +204,6 @@ def phase2(summary_file: str | None) -> None:
 
     print(f"\nReceived {len(summary)} chars of summary")
 
-    # Write reference file.
     if skill == "_triage":
         out_dir = SKILLS_DIR / "_triage"
         content = f"<!-- triage: unassigned URL: {url} -->\n\n{summary}"
@@ -226,16 +220,11 @@ def phase2(summary_file: str | None) -> None:
 
 
 def claude_code_mode(target_url: str | None, count: int) -> None:
-    """End-to-end mode: fetch, extract, summarize via claude -p subprocess, write reference file.
-
-    Uses the Claude Code CLI (``claude --print``) as the summarization engine.
-    No ANTHROPIC_API_KEY required — uses the active Claude Code session auth.
-    """
+    """Fetch, extract, summarize via the ``claude`` CLI, and write reference files."""
     mapping = load_mapping()
     docs = mapping.get("docs", [])
     patterns = mapping.get("auto_assign_patterns", [])
 
-    # Build list of (url, skill) pairs to process.
     targets: list[tuple[str, str]] = []
     if target_url:
         entry = next((d for d in docs if d.get("url") == target_url), None)
@@ -255,14 +244,12 @@ def claude_code_mode(target_url: str | None, count: int) -> None:
     for idx, (url, skill) in enumerate(targets, 1):
         print(f"\n[{idx}/{total}] {url} -> {skill}")
 
-        # Fetch HTML.
         html = fetch_doc_html(url)
         if html is None:
             print("  ERROR: Failed to fetch page.")
             failed += 1
             continue
 
-        # Extract and optionally truncate text.
         text = extract_text_from_html(html)
         truncated = len(text) > MAX_TEXT_LENGTH
         if truncated:
@@ -271,8 +258,6 @@ def claude_code_mode(target_url: str | None, count: int) -> None:
         slug = url_to_slug(url)
         user_message = f"URL: {url}\n\n{text}"
 
-        # Call the Claude Code CLI as a subprocess.
-        # Flag confirmed from `claude --help`: -p / --print for non-interactive output.
         try:
             combined = f"{SYSTEM_PROMPT}\n\nUser:\n{user_message}"
             result = subprocess.run(
@@ -304,7 +289,6 @@ def claude_code_mode(target_url: str | None, count: int) -> None:
             failed += 1
             continue
 
-        # Write reference file.
         if skill == "_triage":
             out_dir = SKILLS_DIR / "_triage"
             content = f"<!-- triage: unassigned URL: {url} -->\n\n{summary}"

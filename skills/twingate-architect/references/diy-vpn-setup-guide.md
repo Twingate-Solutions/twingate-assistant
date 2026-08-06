@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/diy-vpn-setup-guide
+type: docs
+fetched: 2026-08-05
+source_version: ca9c01586476c9f2a82a5bc47d35a4703d277847b58ea1b7ff6692a42a7f1eb5
+---
+
 # DIY VPN Setup Guide with Twingate and DigitalOcean
 
 ## Summary

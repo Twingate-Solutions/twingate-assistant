@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/twingate-hipaa
+type: docs
+fetched: 2026-08-05
+source_version: 6926b92254dd5026cb569881ab5dafcbf9fb2f5ba46241ae8cefc69b4e449705
+---
+
 # Twingate & HIPAA
 
 ## Summary

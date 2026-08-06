@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/security-policies
+type: docs
+fetched: 2026-08-05
+source_version: b01b72f9ecb3d0b3d3a1943450a92fe7685a4c3d47ed7f5b76fe80d5852f0172
+---
+
 # Security Policies
 
 ## Summary

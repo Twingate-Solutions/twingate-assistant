@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/kandji-mdm
+type: docs
+fetched: 2026-08-05
+source_version: fc04469b6d15bb2fb20b076e72725c22785ce32b953868b74307204d4bb9d692
+---
+
 # Deploying Twingate Client with Iru (Kandji) MDM
 
 ## Summary

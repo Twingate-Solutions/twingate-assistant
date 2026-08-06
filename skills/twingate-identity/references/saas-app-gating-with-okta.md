@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/saas-app-gating-with-okta
+type: docs
+fetched: 2026-08-05
+source_version: 1aa51b667eb36dd76c23e75b7109ac35cb92731f3f945697443e0ce784103218
+---
+
 # SaaS App Gating with Okta
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/saas-app-gating-with-jumpcloud
+type: docs
+fetched: 2026-08-05
+source_version: a3be6a244ec6852075e4a6cca43039e4b4e25461080f710d85834f9294b0b458
+---
+
 # SaaS App Gating with JumpCloud
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/saas-app-gating-with-onelogin
+type: docs
+fetched: 2026-08-05
+source_version: 58265894f8b298e56e8e298a9cd5ed3897ac03e2f0077001a436054c3398f877
+---
+
 # SaaS App Gating with OneLogin
 
 ## Summary

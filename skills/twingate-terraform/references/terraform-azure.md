@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/terraform-azure
+type: docs
+fetched: 2026-08-05
+source_version: 7367a1a0f90725d71cc03df5f61ac5815d247e7aeac8195649aa7b56192783e9
+---
+
 # Terraform with Azure and Twingate
 
 ## Summary

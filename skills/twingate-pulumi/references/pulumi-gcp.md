@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/pulumi-gcp
+type: docs
+fetched: 2026-08-05
+source_version: d845524db220bdbc110a680e245de92111baa278b2af237b894f36597e23b494
+---
+
 # Pulumi with GCP and Twingate
 
 ## Page Title

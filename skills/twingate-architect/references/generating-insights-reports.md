@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/generating-insights-reports
+type: docs
+fetched: 2026-08-05
+source_version: 0e9e672b75ff17e92c95a5dd525fab7d9461fc4404572e07ee9303c140bcf645
+---
+
 # Insights Reports from Network Events
 
 ## Page Title

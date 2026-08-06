@@ -1,13 +1,8 @@
-"""Fetch doc pages and generate structured summaries via Claude API.
-
-This module fetches a Twingate documentation page's HTML, strips it
-down to plain text, and calls the Claude API (Sonnet) to produce a
-structured markdown summary suitable for inclusion as a reference file
-in the Claude Code plugin. Used by the auto-update pipeline.
-"""
+"""Fetch a Twingate doc page and generate a structured summary via the Claude API."""
 
 import hashlib
 import logging
+import re
 
 import anthropic
 import requests
@@ -32,28 +27,32 @@ SYSTEM_PROMPT = (
     "marketing language."
 )
 
-# Tags that should be removed entirely before extracting text.
+# Tags removed entirely before extracting text.
 REMOVE_TAGS = ("script", "style", "nav", "footer", "header", "aside")
 
 # CSS selectors tried in order to find the main content area.
-MAIN_CONTENT_SELECTORS = ("main", "article", "#content", ".content")
+MAIN_CONTENT_SELECTORS = ("main", "article", "#content", ".content", ".kb-article-main")
+
+# Footer label lines stripped by ``normalize_for_hash``.
+_LAST_UPDATED_LABEL = "last updated"
+_OPEN_WITH_AI_LABEL = "open with ai"
+# Matches a "N units ago" relative-age line.
+_RELATIVE_AGE_RE = re.compile(
+    r"^(?:just now|yesterday|"
+    r"(?:a|an|\d+)\s+(?:second|minute|hour|day|week|month|year)s?\s+ago)$",
+    re.IGNORECASE,
+)
 
 
 def fetch_doc_html(url: str) -> str | None:
     """Fetch a documentation page and return its HTML.
 
-    Validates that the URL points to www.twingate.com over HTTPS before
-    fetching. Makes an HTTP GET request and returns the response body as
-    a string. Returns ``None`` on any request failure (network error,
-    timeout, non-2xx status, or disallowed URL) and logs a warning
-    instead of raising.
-
     Args:
         url: The full URL of the documentation page to fetch.
 
     Returns:
-        The HTML content as a string, or ``None`` if the request failed
-        or the URL did not pass domain/scheme validation.
+        The HTML content as a string, or ``None`` if the request failed or
+        the URL did not pass the allowlist check.
     """
     if not _is_safe_url(url):
         logger.warning("Refusing to fetch non-twingate URL: %s", url)
@@ -77,10 +76,8 @@ def fetch_doc_html(url: str) -> str | None:
 def extract_text_from_html(html_content: str) -> str:
     """Extract readable text from HTML, stripping boilerplate elements.
 
-    Parses the HTML with BeautifulSoup (lxml parser), removes script,
-    style, navigation, and other non-content tags, then attempts to
-    locate the main content area. Falls back to the full ``<body>`` or
-    the entire document if no main content container is found.
+    Falls back to the full ``<body>`` or the entire document if no main
+    content container is found.
 
     Args:
         html_content: Raw HTML string to process.
@@ -90,19 +87,16 @@ def extract_text_from_html(html_content: str) -> str:
     """
     soup = BeautifulSoup(html_content, "lxml")
 
-    # Remove non-content tags entirely.
     for tag_name in REMOVE_TAGS:
         for tag in soup.find_all(tag_name):
             tag.decompose()
 
-    # Try to narrow to the main content area.
     content_element = None
     for selector in MAIN_CONTENT_SELECTORS:
         content_element = soup.select_one(selector)
         if content_element is not None:
             break
 
-    # Fall back to <body>, then the whole document.
     if content_element is None:
         content_element = soup.body if soup.body else soup
 
@@ -113,9 +107,6 @@ def extract_text_from_html(html_content: str) -> str:
 def content_hash(text: str) -> str:
     """Compute a SHA-256 hex digest of the given text.
 
-    Used for change detection so the pipeline can skip re-summarizing
-    pages whose content has not changed since the last run.
-
     Args:
         text: The text string to hash.
 
@@ -125,24 +116,79 @@ def content_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def summarize_doc(url: str, html_content: str) -> str:
-    """Call Claude API (Sonnet) to summarize a doc page.
+def normalize_for_hash(text: str) -> str:
+    """Strip the time-varying "Last updated … ago" footer lines from the text.
 
-    Extracts plain text from the HTML, truncates to the maximum allowed
-    length, and sends it to the Claude API with a structured summary
-    prompt. The ``ANTHROPIC_API_KEY`` environment variable must be set.
+    Removes a ``"Last updated"`` line together with an immediately following
+    relative-age line, and any standalone ``"Open with AI"`` line. All other
+    lines are preserved byte-for-byte.
 
     Args:
-        url: The source URL of the doc page (included in the prompt
-            for context).
+        text: Extracted page text, as returned by ``extract_text_from_html``.
+
+    Returns:
+        The text with the footer lines removed, rejoined with ``"\\n"``.
+    """
+    lines = text.split("\n")
+    kept: list[str] = []
+    i = 0
+    total = len(lines)
+    while i < total:
+        line = lines[i]
+        lowered = line.strip().lower()
+        if lowered == _LAST_UPDATED_LABEL:
+            # Drop the label, plus the next line if it is a relative-age timestamp.
+            if i + 1 < total and _RELATIVE_AGE_RE.match(lines[i + 1].strip()):
+                i += 2
+            else:
+                i += 1
+            continue
+        if lowered == _OPEN_WITH_AI_LABEL:
+            i += 1
+            continue
+        kept.append(line)
+        i += 1
+    return "\n".join(kept)
+
+
+def build_frontmatter(source: str, type_: str, fetched: str, source_version: str) -> str:
+    """Build a YAML frontmatter block for a generated reference file.
+
+    Args:
+        source: Provenance URL of the page the reference was generated from.
+        type_: Source category — ``"docs"``, ``"help"``, or ``"github"``.
+        fetched: Date the source was fetched, as an ISO ``YYYY-MM-DD`` string.
+        source_version: Version identifier of the source content — a content
+            hash for ``docs``/``help`` or a git commit SHA for ``github``.
+
+    Returns:
+        A YAML frontmatter block as a string, fenced by ``---`` and ending
+        with a newline.
+    """
+    return (
+        "---\n"
+        f"source: {source}\n"
+        f"type: {type_}\n"
+        f"fetched: {fetched}\n"
+        f"source_version: {source_version}\n"
+        "---\n"
+    )
+
+
+def summarize_doc(url: str, html_content: str) -> str:
+    """Call the Claude API to summarize a doc page.
+
+    Requires the ``ANTHROPIC_API_KEY`` environment variable.
+
+    Args:
+        url: The source URL of the doc page (included in the prompt).
         html_content: Raw HTML content of the page.
 
     Returns:
         A structured markdown summary produced by Claude.
 
     Raises:
-        anthropic.APIError: If the Claude API call fails. The caller
-            is responsible for retry logic.
+        anthropic.APIError: If the Claude API call fails.
         ValueError: If the API response does not contain a text block.
     """
     page_text = extract_text_from_html(html_content)

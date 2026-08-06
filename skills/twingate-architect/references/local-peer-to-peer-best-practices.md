@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/local-peer-to-peer-best-practices
+type: docs
+fetched: 2026-08-05
+source_version: 93b1552a365222d157965dc3b31bee208964faf229339e9b8e210bd4af9990f1
+---
+
 # Best Practices for Local Peer-to-Peer Connections
 
 ## Summary

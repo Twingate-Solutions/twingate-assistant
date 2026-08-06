@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/database-access-redis
+type: docs
+fetched: 2026-08-05
+source_version: 47ff2f59d851c526206e60a907a28cf5b28d180cd80935c608f0702d1f5fd3d1
+---
+
 # Redis Access with Twingate
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/services-headless-clients
+type: docs
+fetched: 2026-08-05
+source_version: 1264b9a119fa2b5ad11b7cf261f32ed8ead943a83567b7a6b0db3e96b912181c
+---
+
 # Headless Clients
 
 ## Page Title

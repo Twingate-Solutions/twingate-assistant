@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/ssh-installation
+type: docs
+fetched: 2026-08-05
+source_version: ec946c6a09c3647522600e456abe4f5c6d4da26001788ae7d002d7e69371f710
+---
+
 # Installing Privileged Access for SSH
 
 ## Summary

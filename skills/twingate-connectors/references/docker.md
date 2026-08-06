@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/docker
+type: docs
+fetched: 2026-08-05
+source_version: 2bd2a755839348b5cf762f94fb5a7a62b57f795ce56b450f342cfb2be20a5f79
+---
+
 # How to Upgrade Containerized Connectors (AWS/Azure/Docker)
 
 ## Summary

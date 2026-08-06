@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/network-summary-export
+type: docs
+fetched: 2026-08-05
+source_version: 1088ce850353e5227cd3855ad98bf274001d4364495e885e2e6fdccac3baaf0d
+---
+
 # Network Summary Export
 
 ## Page Title

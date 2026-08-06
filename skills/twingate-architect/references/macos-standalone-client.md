@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/macos-standalone-client
+type: docs
+fetched: 2026-08-05
+source_version: 67b588aaa80d22ac96b80553b837ee0811abfe842158887b3271584e2730be14
+---
+
 # macOS Standalone Client
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/linux-headless
+type: docs
+fetched: 2026-08-05
+source_version: 32a58f31fd645b83812af70b87674d14ecf15bb6fab981cb74098430c9a60c32
+---
+
 # Linux Headless Mode
 
 ## Summary

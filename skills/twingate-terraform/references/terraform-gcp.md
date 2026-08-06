@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/terraform-gcp
+type: docs
+fetched: 2026-08-05
+source_version: 2281ae79447602672bbb56eedc32d8faabbbf4f4b504435e3321ed375618421d
+---
+
 # Terraform with GCP and Twingate
 
 ## Page Title

@@ -108,7 +108,7 @@ Use the network-designer agent to plan our resource structure for three environm
 
 ## How it stays current
 
-Each skill has a `references/` directory of summarized Twingate documentation. A weekly GitHub Action refreshes those summaries from the live docs site, so the plugin always reflects current Twingate behavior. No action needed on your end — just re-run `/plugin install` occasionally to pull updates.
+Each skill has a `references/` directory of summarized Twingate documentation. A weekly GitHub Action refreshes those summaries from the Twingate docs site, the Twingate help center, and the public `Twingate`, `Twingate-Solutions`, `Twingate-Labs`, and `Twingate-Community` GitHub orgs (repos and wikis), so the plugin always reflects current Twingate behavior. No action needed on your end — just re-run `/plugin install` occasionally to pull updates.
 
 ---
 

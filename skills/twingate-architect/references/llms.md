@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/llms
+type: docs
+fetched: 2026-08-05
+source_version: 6d5f66bd11a2c7bb2d47f27058e472d43083694cdebb4105c1baf9e13983368a
+---
+
 # AI and LLM Access with Twingate
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/vendor-and-contractor-access-management
+type: docs
+fetched: 2026-08-05
+source_version: e5c837306f89f73c169ad594017f286fada3eb06cc09e2dde9171b57b1b780cd
+---
+
 # Vendor and Contractor Access Management
 
 ## Page Title

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/syncing-data-to-s3
+type: docs
+fetched: 2026-08-05
+source_version: 770be174a1a2f504e65fc57b7f72edec1e7d124350e3e61e5dc70d765d7c3814
+---
+
 # Syncing Data to AWS S3
 
 ## Page Title

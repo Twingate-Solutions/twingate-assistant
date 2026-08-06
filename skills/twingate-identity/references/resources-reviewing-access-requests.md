@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/resources-reviewing-access-requests
+type: docs
+fetched: 2026-08-05
+source_version: dcb4a45f4e9eb8ff42018601e6aad5122935e1ae4324846f8bec5d3b0102ff83
+---
+
 # Reviewing Access Requests
 
 ## Summary

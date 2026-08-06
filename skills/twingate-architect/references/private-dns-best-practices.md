@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/private-dns-best-practices
+type: docs
+fetched: 2026-08-05
+source_version: 2e34aa0d004b839aa8a1016c30abaa3201cf952e3cb2116b6915869631ae4574
+---
+
 # Best Practices for Configuring Private DNS with Twingate
 
 ## Summary

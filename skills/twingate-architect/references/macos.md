@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/macos
+type: docs
+fetched: 2026-08-05
+source_version: 8ac71ac4c437b7b018afcf3ad7c8e50ad53fe2277a62d06354436476029d9fce
+---
+
 # macOS Twingate Client
 
 ## Page Title

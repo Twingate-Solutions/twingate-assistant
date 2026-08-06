@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/minecraft-forge-server-linux
+type: docs
+fetched: 2026-08-05
+source_version: f3fb899c83a8f1d07ec8257ae551b13926250d2cbe581a603dda4f3d874c428c
+---
+
 # Modded Minecraft Server (Forge) with Twingate (Linux)
 
 ## Summary

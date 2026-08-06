@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/remotely-access-a-nas-device
+type: docs
+fetched: 2026-08-05
+source_version: b79d574398a66aceaebfd13cfe92d806e446d3474e7da35885b58ada78e129d5
+---
+
 # Remotely Access a NAS Device
 
 ## Summary

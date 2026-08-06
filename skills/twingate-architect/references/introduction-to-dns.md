@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/introduction-to-dns
+type: docs
+fetched: 2026-08-05
+source_version: 1f5f10807e60b156233211c369d0970e8c107953eaaa6c6d7f166b57ea61cd9d
+---
+
 # Introduction to DNS
 
 ## Page Title

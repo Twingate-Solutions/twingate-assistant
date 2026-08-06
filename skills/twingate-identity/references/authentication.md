@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/authentication
+type: docs
+fetched: 2026-08-05
+source_version: 2c17217ca5b63a69386f41637b190d9dd01402c61bf0d31a3130764ea726c902
+---
+
 # Authentication Rule – Twingate
 
 ## Summary

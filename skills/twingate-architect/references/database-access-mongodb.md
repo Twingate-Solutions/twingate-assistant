@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/database-access-mongodb
+type: docs
+fetched: 2026-08-05
+source_version: b93d692b44f90b99fe49a75dc02f007017928b9c1035b7ed4e7da930be181d8d
+---
+
 # MongoDB Access with Twingate
 
 ## Summary

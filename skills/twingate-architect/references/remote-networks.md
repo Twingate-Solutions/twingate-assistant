@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/remote-networks
+type: docs
+fetched: 2026-08-05
+source_version: fc9c6b9f155119c711b8274b0a76296e3bca3362615553b44b58c71d4affa967
+---
+
 # Remote Networks
 
 ## Page Title

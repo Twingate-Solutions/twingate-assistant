@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/jumpcloud-configuration
+type: docs
+fetched: 2026-08-05
+source_version: ec60d71c3985715ce2dd0d0e2193b388c4e476f1a0cd3d1c55b8f10ec16c8270
+---
+
 # JumpCloud Configuration
 
 ## Page Title

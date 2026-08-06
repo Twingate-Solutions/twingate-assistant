@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/saas-app-gating-with-entra-id
+type: docs
+fetched: 2026-08-05
+source_version: b80991fc078965e670d950a3c88517bf3449beba78b49c33fc411a7c92b92c29
+---
+
 # SaaS App Gating with Microsoft Entra ID
 
 ## Page Title

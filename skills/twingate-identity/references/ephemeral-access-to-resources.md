@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/ephemeral-access-to-resources
+type: docs
+fetched: 2026-08-05
+source_version: d2906c9d61fc785e7ca1d46ae39be730106cb2ac628a8d832eab850c6f579e4b
+---
+
 # Ephemeral Access to Resources
 
 ## Summary

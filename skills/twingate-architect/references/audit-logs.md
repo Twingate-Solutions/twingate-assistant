@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/audit-logs
+type: docs
+fetched: 2026-08-05
+source_version: d4c400ce9872948578d88edd1e7265204035a8b74c1b723a337ea4a2a0ea4912
+---
+
 # Audit Logs
 
 ## Summary

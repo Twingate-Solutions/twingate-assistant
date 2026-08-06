@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/minecraft-forge-server
+type: docs
+fetched: 2026-08-05
+source_version: ad484d120f340411296c78927685b211097f17d8da1d33ca91678158c9999449
+---
+
 # Modded Minecraft Server (Forge) with Twingate
 
 ## Summary

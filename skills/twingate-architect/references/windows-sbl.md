@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/windows-sbl
+type: docs
+fetched: 2026-08-05
+source_version: 5017cf427b3f9934c1c213a7c79bc80f8b7386f05b84e280608668695f3b0962
+---
+
 # Windows Start Before Logon (SBL)
 
 ## Summary

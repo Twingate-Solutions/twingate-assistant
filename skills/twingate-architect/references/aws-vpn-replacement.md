@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/aws-vpn-replacement
+type: docs
+fetched: 2026-08-05
+source_version: acb0698936b8f91a3593765a596ce156c143232c07eed2e27d3cea9d0a23dff8
+---
+
 # Replace AWS VPN with Twingate
 
 ## Page Title

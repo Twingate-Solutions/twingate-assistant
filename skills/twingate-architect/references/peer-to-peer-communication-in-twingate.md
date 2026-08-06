@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/peer-to-peer-communication-in-twingate
+type: docs
+fetched: 2026-08-05
+source_version: daafbcbebf9f1996cfc0ba6a16c295d90e0ed226b1510513f187beb03fde76b6
+---
+
 # Peer-to-Peer Communication in Twingate
 
 ## Summary

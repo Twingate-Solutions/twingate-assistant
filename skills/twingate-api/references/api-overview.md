@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/api-overview
+type: docs
+fetched: 2026-08-05
+source_version: eee6375cbb5d1d0d5094f2d5eaff78dad3c119483b85e2c8f96e4172c618da6f
+---
+
 # Twingate Admin API Overview
 
 ## Summary

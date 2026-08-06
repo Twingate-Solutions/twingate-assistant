@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/strongdm-cloaking
+type: docs
+fetched: 2026-08-05
+source_version: 30883a6a9a157c3d77fe697718a59df866fba700bf93579bc29efc600aeb4a58
+---
+
 # How to Cloak strongDM with Twingate
 
 ## Summary

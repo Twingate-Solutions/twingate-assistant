@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/twingate-vs-vpn
+type: docs
+fetched: 2026-08-05
+source_version: 9cf7ddf5b0f326ac0ab3b3f6256b5c1c6cbf134f510989cd4902c4a394bfa4b1
+---
+
 # Twingate vs. VPNs
 
 ## Page Title

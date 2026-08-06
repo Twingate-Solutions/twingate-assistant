@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connector-metadata
+type: docs
+fetched: 2026-08-05
+source_version: 19b86df6c0011178ce06392302b3e0f12a60ea530f0fb8cabd6dd2b814ab6187
+---
+
 # Connector Metadata
 
 ## Summary

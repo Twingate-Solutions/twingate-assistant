@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/accessing-private-resources-in-azure
+type: docs
+fetched: 2026-08-05
+source_version: 893d5c64fdf5258f551a00e78b6bce894af76f8ffe0f45c4d9b7acc03b13c40b
+---
+
 # Accessing Private Resources in Azure with Twingate
 
 ## Summary

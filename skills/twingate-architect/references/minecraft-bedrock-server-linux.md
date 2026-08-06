@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/minecraft-bedrock-server-linux
+type: docs
+fetched: 2026-08-05
+source_version: 7949a7587adac9f7aff3f1e44b991c3ea4b1cb8f7a40c230b0c8b0815229b545
+---
+
 # Minecraft Bedrock Server with Twingate (Linux)
 
 ## Summary

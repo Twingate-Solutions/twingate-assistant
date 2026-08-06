@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/using-active-directory-with-twingate
+type: docs
+fetched: 2026-08-05
+source_version: 0b26d01a6ddf517009188f4386fc041f24df44a24f9e7aa7776974b24abf50ca
+---
+
 # Active Directory Configuration with Twingate
 
 ## Summary

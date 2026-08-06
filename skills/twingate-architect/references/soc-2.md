@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/soc-2
+type: docs
+fetched: 2026-08-05
+source_version: ba05d355e00471bc31331565b10a6c360c9f4ce2d509c91d8a9711ddb5a8a914
+---
+
 # SOC 2 Report
 
 ## Page Title

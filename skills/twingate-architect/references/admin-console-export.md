@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/admin-console-export
+type: docs
+fetched: 2026-08-05
+source_version: cb794c9bc7c0046eeaf003d3c6407df6ff818eba5d32bf335cee9ab9c9fb431e
+---
+
 # Admin Console Export
 
 ## Page Title

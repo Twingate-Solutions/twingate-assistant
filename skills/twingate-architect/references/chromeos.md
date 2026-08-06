@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/chromeos
+type: docs
+fetched: 2026-08-05
+source_version: c26d097e93a4c78c1c6e32efe88cd17e90fd909f1e804efb765fe5d694ee282f
+---
+
 # ChromeOS Twingate Client
 
 ## Summary

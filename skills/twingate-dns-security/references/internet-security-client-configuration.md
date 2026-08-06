@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/internet-security-client-configuration
+type: docs
+fetched: 2026-08-05
+source_version: c5eaacf46d3b509773f1990022c4e2d4d63253c5725d18319601795ed5d2c6a8
+---
+
 # Internet Security Client Configuration
 
 ## Summary

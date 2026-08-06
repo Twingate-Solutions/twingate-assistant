@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/location-requirements
+type: docs
+fetched: 2026-08-05
+source_version: 26e02da492797bf4d13b26053ab7927a959cf7512e2d3da36b479e7a2ae72658
+---
+
 # Location Requirements
 
 ## Page Title

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/trusted-devices
+type: docs
+fetched: 2026-08-05
+source_version: dbe0140b53f4e7ed4dc437f43b89eb8e311b5bad09cad4b6ca2084f81463321d
+---
+
 # Trusted Devices
 
 ## Summary

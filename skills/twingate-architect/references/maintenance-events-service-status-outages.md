@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/maintenance-events-service-status-outages
+type: docs
+fetched: 2026-08-05
+source_version: 5711d1ada5ebea7f0f5a59ef1706efadfd97e07159fb0c2a34a5d6fb4ad006a3
+---
+
 # Monitoring Twingate Service Status & Maintenance Events
 
 ## Summary

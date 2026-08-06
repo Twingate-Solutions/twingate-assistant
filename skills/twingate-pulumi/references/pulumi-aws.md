@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/pulumi-aws
+type: docs
+fetched: 2026-08-05
+source_version: c6fcd754b4323846e00e514ab79cbf1399a2386d23222b7705aca28dbef4f6ef
+---
+
 # Pulumi with AWS and Twingate
 
 ## Summary

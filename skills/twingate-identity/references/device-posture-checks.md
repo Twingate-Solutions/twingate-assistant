@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/device-posture-checks
+type: docs
+fetched: 2026-08-05
+source_version: 36bd8954e19f6daf617b0a67b42fa072bd1dc7e099ab042d3b66c8aab10943c6
+---
+
 # Device Posture Checks
 
 ## Page Title

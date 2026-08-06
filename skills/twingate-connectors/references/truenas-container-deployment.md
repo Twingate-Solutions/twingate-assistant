@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/truenas-container-deployment
+type: docs
+fetched: 2026-08-05
+source_version: 2a6a1a2c46c57751a04e73ef033343c420b54e1de1d93159f6211cc1c5b31fdb
+---
+
 # Deploy Twingate Connector on TrueNAS SCALE
 
 ## Summary

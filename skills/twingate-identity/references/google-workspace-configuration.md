@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/google-workspace-configuration
+type: docs
+fetched: 2026-08-05
+source_version: dbec0d81c1b7d2bdbe0b00e4837f5534da7980b85d8d50513baf7733ff1c3f54
+---
+
 # Google Workspace Configuration
 
 ## Page Title

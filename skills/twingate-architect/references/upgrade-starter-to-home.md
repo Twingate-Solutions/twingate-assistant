@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/upgrade-starter-to-home
+type: docs
+fetched: 2026-08-05
+source_version: b36e8c4dc287198496f494e3dfa3f534859507c2da8848af1e373952c57bf996
+---
+
 # Upgrade Starter to Twingate Home
 
 ## Summary

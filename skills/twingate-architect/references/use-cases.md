@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/use-cases
+type: docs
+fetched: 2026-08-05
+source_version: 25be03029716c7f6cf830fa7aeab5299c0b78243e002c7f3df236d2e9be3473b
+---
+
 # Twingate Use Cases
 
 ## Page Title

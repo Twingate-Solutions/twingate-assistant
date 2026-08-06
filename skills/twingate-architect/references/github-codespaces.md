@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/github-codespaces
+type: docs
+fetched: 2026-08-05
+source_version: a821b13ee7562f82ff6f38acea415f4514247acc0c2447da4404aa7e7a45e4e4
+---
+
 # Twingate in GitHub Codespaces
 
 ## Summary

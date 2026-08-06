@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/aws-ecs-headless-configurations
+type: docs
+fetched: 2026-08-05
+source_version: b62e8b533d78339ec4cf8b199091539a8cc37d7efdc8bcdf6d3ff6906867df86
+---
+
 # AWS ECS with Twingate (Headless & Userspace)
 
 ## Summary

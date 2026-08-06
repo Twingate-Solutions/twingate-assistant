@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/customer-networks
+type: docs
+fetched: 2026-08-05
+source_version: 41c4fa4efbb1a4729f84ee59d771ed45c10efa6d4a8184bf56a8a654d79f3138
+---
+
 # Customer Networks (MSP Portal)
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/proxmox-getting-started
+type: docs
+fetched: 2026-08-05
+source_version: cea0a9218a27ca510de47ed22b23bf3f475a3f6f04ec4ce15e9d4c7a85fb29f7
+---
+
 # Getting Started with Proxmox VE and Twingate
 
 ## Page Title

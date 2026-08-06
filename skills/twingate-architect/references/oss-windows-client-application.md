@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/oss-windows-client-application
+type: docs
+fetched: 2026-08-05
+source_version: 5536d760dab486a73d79470e46b00db346c7fdf6c6f681c50db38e41a3459e6a
+---
+
 # Windows Client Application - Open Source Components
 
 ## Page Title

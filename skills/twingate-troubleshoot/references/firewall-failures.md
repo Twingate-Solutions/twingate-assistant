@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/firewall-failures
+type: docs
+fetched: 2026-08-05
+source_version: 8e2250bae364876d58b706989d1bf05ff4ed50f6b0ce1a0749af0d038bb9175e
+---
+
 # Firewall Failures - Twingate Troubleshooting
 
 ## Page Title

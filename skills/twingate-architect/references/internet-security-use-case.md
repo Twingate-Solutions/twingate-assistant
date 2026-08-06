@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/internet-security-use-case
+type: docs
+fetched: 2026-08-05
+source_version: 1b737f52a0e27b5b6f841ced8826149255fa217699275486c334ee5ecdb746fc
+---
+
 # Internet Security Use Case
 
 ## Page Title

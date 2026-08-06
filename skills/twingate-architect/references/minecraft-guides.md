@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/minecraft-guides
+type: docs
+fetched: 2026-08-05
+source_version: 82c58b71f653ea5551e8fdfc199cac551a59fe1880d2ff00ae00e011e9ff0961
+---
+
 # Minecraft Server Guides
 
 ## Page Title

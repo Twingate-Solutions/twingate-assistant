@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/ip-based-access-use-case
+type: docs
+fetched: 2026-08-05
+source_version: f7a3bc03f69813acbb62f1689f356a51cc57b7e4cefc2b5746acab8a4ba994b1
+---
+
 # Application Gating (IP-Based Access) - Twingate
 
 ## Summary

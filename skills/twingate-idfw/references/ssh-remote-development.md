@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/ssh-remote-development
+type: docs
+fetched: 2026-08-05
+source_version: 47006706555f30f7f53b694ba90ed7a596efc28d66f9c27fd86529755f495b20
+---
+
 # Remote Development with Twingate SSH and VS Code
 
 ## Summary

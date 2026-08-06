@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/oss-android-and-chromeos-client-applications
+type: docs
+fetched: 2026-08-05
+source_version: c9f1d26e94c7cb7e8792c0ad83dc1ce259cfc44a6420a65437257c7ee8af2be0
+---
+
 # Android and ChromeOS Client Applications - OSS Third Party Notices
 
 ## Page Title

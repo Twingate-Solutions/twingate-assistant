@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connector-best-practices
+type: docs
+fetched: 2026-08-05
+source_version: b0613f3909ab2fc7d0517abd332cb32b3d761874cd2a350099abbfab1f6e3c46
+---
+
 # Connector Best Practices
 
 ## Page Title

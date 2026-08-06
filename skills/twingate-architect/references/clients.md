@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/clients
+type: docs
+fetched: 2026-08-05
+source_version: 0c587a4f4ca584f20e11066993288cf1c49e7149efdbf7c33fdee9932724ad52
+---
+
 # Twingate Client Application
 
 ## Summary

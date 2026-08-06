@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/firewalls-and-twingate
+type: docs
+fetched: 2026-08-05
+source_version: 65a4456def557df09ac63e29792cd4ae208fcc437b4dde6ba79d74418514f074
+---
+
 # How Firewalls Work with Twingate
 
 ## Summary

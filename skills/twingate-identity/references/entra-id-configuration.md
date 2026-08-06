@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/entra-id-configuration
+type: docs
+fetched: 2026-08-05
+source_version: 7ee560a6541ed69a1e8c80603c3e54e486fac1c742fb7cb618752762ee9f28f8
+---
+
 # Entra ID (Azure AD) Configuration
 
 ## Page Title

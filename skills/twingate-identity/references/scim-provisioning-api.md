@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/scim-provisioning-api
+type: docs
+fetched: 2026-08-05
+source_version: 0494f174f8ec032bb7bed51e74e828f981b7001ce24d2926aa5868595bf84375
+---
+
 # Twingate SCIM Provisioning API
 
 ## Summary

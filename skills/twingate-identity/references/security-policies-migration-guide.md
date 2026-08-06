@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/security-policies-migration-guide
+type: docs
+fetched: 2026-08-05
+source_version: 079f634faee7db0d829a53a03771859cabdc4978dc2e306d2e6c6f49a03c0d47
+---
+
 # Security Policies: Migration Guide
 
 ## Page Title

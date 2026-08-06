@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/deploy-connector-on-ubiquiti
+type: docs
+fetched: 2026-08-05
+source_version: 9f1bb837fd8ca50cf4ac41554b291ae43c617563b61e582239528bcefe8f8989
+---
+
 # Deploy Twingate Connector on Ubiquiti Gateways
 
 ## Summary

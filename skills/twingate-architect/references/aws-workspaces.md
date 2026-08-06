@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/aws-workspaces
+type: docs
+fetched: 2026-08-05
+source_version: ed9c61333cd4b814215e5c3ef9c6937fb636c68159d04ec238adf55b5bda5f7b
+---
+
 # How to Use Twingate with AWS Workspaces
 
 ## Summary

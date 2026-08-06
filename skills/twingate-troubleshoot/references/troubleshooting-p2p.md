@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/troubleshooting-p2p
+type: docs
+fetched: 2026-08-05
+source_version: f3b52cad788777366b04a944597bb31a1bdc1d2dc5bb6c833ad7d2ba9666c0f3
+---
+
 # Troubleshooting Peer-to-Peer Connections
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/getting-started-with-the-api
+type: docs
+fetched: 2026-08-05
+source_version: 964a587d2523d41b7b3559dbf8489634f613b1c3af64e8275eb19380a6e19b7d
+---
+
 # Getting Started with the Twingate API
 
 ## Summary

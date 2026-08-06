@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/entra-id-app-gating-office-365
+type: docs
+fetched: 2026-08-05
+source_version: c8f032ddfece84c8b8e2c4b3f1dcbf634b3d8d9703f04f4c53db3152f42d9261
+---
+
 # SaaS App Gate Office 365 with Microsoft Entra ID
 
 ## Summary

@@ -1,17 +1,167 @@
 # doc_mapping.yaml
 # Maps Twingate documentation URLs to the skill that owns them.
 # Generated from fixtures/content-catalog.csv + live sitemap.
-# GitHub refs at the bottom are manually maintained (not in sitemap).
+# GitHub repos are handled by the separate `repos:` section below (Session
+# 21) — discovered live across the four Twingate orgs, not diffed against a
+# static URL list. See scripts/github_repos.py + scripts/github_summarize.py.
 #
 # Schema:
-#   docs[].url     — full URL (twingate.com/docs/ or github.com)
+#   docs[].url     — full URL (twingate.com/docs/ or help.twingate.com)
 #   docs[].skill   — skill name (twingate-{domain})
 #   docs[].keywords — keyword hints for summarization
+#   repos[].full_name — GitHub "{org}/{repo}"
+#   repos[].skill      — skill name (twingate-{domain})
+#   repos[].track_releases — thread the repo's latest release notes into the prompt
 #
 # Auto-assign patterns apply to new sitemap URLs not yet in this file.
 # First matching pattern wins; unmatched docs go to _triage/ for review.
+# A discovered GitHub repo not listed in `repos:` also routes to _triage/.
 #
 # Last updated: 2026-07-06 (302 entries; docsTemplate, unlisted, WIP excluded)
+
+# ── Sources ─────────────────────────────────────────────────────────────────
+# Sitemaps the pipeline crawls. Each source pairs a sitemap URL with the URL
+# path substring that selects its pages (path_filter) and a type tag. This is a
+# declarative, additive key: Session 19 / Task B5 wires update_references.py to
+# read `sources`; until then fetch_sitemap defaults to the docs source below.
+#   - docs uses the same URL as fetch_sitemap.DEFAULT_SITEMAP_URL + /docs/ filter
+#   - help adds help.twingate.com's flat urlset with an /articles/ filter
+sources:
+  - name: docs
+    sitemap_url: https://www.twingate.com/sitemap/sitemap-0.xml
+    path_filter: /docs/
+    type: docs
+  - name: help
+    sitemap_url: https://help.twingate.com/sitemap.xml
+    path_filter: /articles/
+    type: help
+
+# ── GitHub repos (Session 21) ────────────────────────────────────────────────
+# Repo -> skill routing for the GitHub pipeline source (scripts/github_repos.py
+# + scripts/github_summarize.py). Independent of the sitemap `sources` above:
+# repos are discovered live across github_repos.DEFAULT_ORGS, not diffed
+# against a static URL list. An entry's `skill` routes its generated
+# gh-{org}-{repo}.md / gh-{org}-{repo}-wiki.md reference files; a repo
+# discovered but NOT listed here routes to skills/_triage/, mirroring the
+# docs auto-assign fallback. `track_releases: true` additionally threads the
+# repo's latest GitHub release notes into the LLM summarization prompt.
+repos:
+  - full_name: Twingate/terraform-provider-twingate
+    skill: twingate-terraform
+    track_releases: true
+  - full_name: Twingate-Solutions/general-scripts
+    skill: twingate-api
+  - full_name: Twingate/kubernetes-operator
+    skill: twingate-kubernetes
+    track_releases: true
+  - full_name: Twingate/kubernetes-access-gateway
+    skill: twingate-idfw
+    track_releases: true
+  # Repos hand-routed from _triage after the Session 23 baseline seed.
+  # --- twingate-api ---
+  - full_name: Twingate-Labs/Twingate-API-Intro-with-Python
+    skill: twingate-api
+  - full_name: Twingate-Labs/Twingate-CLI
+    skill: twingate-api
+  - full_name: Twingate-Labs/tg-aws-tag-sync
+    skill: twingate-api
+  - full_name: Twingate-Labs/tg-cli
+    skill: twingate-api
+  - full_name: Twingate-Labs/tgcli-web-py
+    skill: twingate-api
+  - full_name: Twingate-Solutions/health-report-generator
+    skill: twingate-api
+  - full_name: Twingate/github-action
+    skill: twingate-api
+    track_releases: true
+  # --- twingate-architect ---
+  - full_name: Twingate-Community/openclaw-secure-access
+    skill: twingate-architect
+  - full_name: Twingate-Solutions/railway-private-web-app
+    skill: twingate-architect
+  - full_name: Twingate-Solutions/twingate-assistant
+    skill: twingate-architect
+  # --- twingate-connectors ---
+  - full_name: Twingate-Community/dashboards
+    skill: twingate-connectors
+  - full_name: Twingate-Community/home-assistant-add-on
+    skill: twingate-connectors
+  - full_name: Twingate-Community/pi-starter
+    skill: twingate-connectors
+  - full_name: Twingate-Community/twindeck
+    skill: twingate-connectors
+  - full_name: Twingate-Community/ubiquiti-connector
+    skill: twingate-connectors
+  - full_name: Twingate-Community/unraid-template
+    skill: twingate-connectors
+  - full_name: Twingate-Labs/chocolatey-packages
+    skill: twingate-connectors
+  - full_name: Twingate-Labs/tg-coder
+    skill: twingate-connectors
+  - full_name: Twingate-Labs/tg-github-codespaces
+    skill: twingate-connectors
+  - full_name: Twingate-Labs/tg-render
+    skill: twingate-connectors
+  - full_name: Twingate-Labs/twingate-pagerduty
+    skill: twingate-connectors
+  - full_name: Twingate-Solutions/connector-local-ui
+    skill: twingate-connectors
+  - full_name: Twingate-Solutions/janus-updater-service
+    skill: twingate-connectors
+  - full_name: Twingate-Solutions/twingate-client-userspace-spacelift
+    skill: twingate-connectors
+  - full_name: Twingate-Solutions/twingate-connector-hyperv
+    skill: twingate-connectors
+  - full_name: Twingate-Solutions/twingate-connector-log-shipper
+    skill: twingate-connectors
+  - full_name: Twingate-Solutions/twingate-custom-connector-container
+    skill: twingate-connectors
+  - full_name: Twingate-Solutions/twingate-fleet-commander
+    skill: twingate-connectors
+  - full_name: Twingate-Solutions/twingate-raspberry-pi
+    skill: twingate-connectors
+  # --- twingate-dns-security ---
+  - full_name: Twingate-Community/diy-vpn
+    skill: twingate-dns-security
+  - full_name: Twingate-Community/ubiquiti-headless-gateway
+    skill: twingate-dns-security
+  # --- twingate-identity ---
+  - full_name: Twingate-Labs/saml_service_provider
+    skill: twingate-identity
+  - full_name: Twingate-Labs/tg-group-profile-manager
+    skill: twingate-identity
+  - full_name: Twingate-Labs/tg-group-profile-manager-helm
+    skill: twingate-identity
+  - full_name: Twingate-Solutions/idp-migrator
+    skill: twingate-identity
+  - full_name: Twingate-Solutions/twingate-mdm-connector
+    skill: twingate-identity
+  - full_name: Twingate-Solutions/twingate-wayfinder-app
+    skill: twingate-identity
+  # --- twingate-idfw ---
+  - full_name: Twingate-Solutions/gatorcast
+    skill: twingate-idfw
+  - full_name: Twingate/gateway
+    skill: twingate-idfw
+    track_releases: true
+  # --- twingate-kubernetes ---
+  - full_name: Twingate-Labs/tg-client-k8s-sidecar
+    skill: twingate-kubernetes
+  - full_name: Twingate/helm-charts
+    skill: twingate-kubernetes
+    track_releases: true
+  # --- twingate-pulumi ---
+  - full_name: Twingate-Solutions/pulumi-scripts
+    skill: twingate-pulumi
+  - full_name: Twingate/pulumi-twingate
+    skill: twingate-pulumi
+    track_releases: true
+  # --- twingate-terraform ---
+  - full_name: Twingate-Solutions/terraform-scripts
+    skill: twingate-terraform
+  # --- twingate-troubleshoot ---
+  - full_name: Twingate-Solutions/network-utilities
+    skill: twingate-troubleshoot
 
 docs:
 
@@ -1257,25 +1407,6 @@ docs:
     keywords: [troubleshooting, knowledge base, logs, client logs, connector logs, help center, community, "self-service"]
 
 
-  # ── GitHub repositories (manually maintained, not in sitemap) ──────────────
-
-  - url: https://github.com/Twingate/terraform-provider-twingate
-    skill: twingate-terraform
-    keywords: [terraform, provider, github, registry, iac]
-
-  - url: https://github.com/Twingate-Solutions/general-scripts
-    skill: twingate-api
-    keywords: [scripts, automation, github, "solutions-engineering"]
-
-  - url: https://github.com/Twingate/kubernetes-operator/wiki/Getting-Started
-    skill: twingate-kubernetes
-    keywords: [kubernetes, operator, crds, github, "getting-started"]
-
-  - url: https://github.com/Twingate/kubernetes-access-gateway/wiki
-    skill: twingate-idfw
-    keywords: [kubernetes, "access-gateway", idfw, pam, github]
-
-
 # ── Auto-assign patterns ────────────────────────────────────────────────────
 # Applied to URLs discovered in the sitemap that are not yet in this file.
 # First matching pattern wins. Unmatched docs go to _triage/ for manual review.
@@ -1369,3 +1500,67 @@ auto_assign_patterns:
     skill: twingate-architect
   - pattern: "/docs/minecraft"
     skill: twingate-architect
+
+  # ── help.twingate.com /articles/ overrides ──────────────────────────────────
+  # help content spans every domain, so the DEFAULT for /articles/ is
+  # twingate-troubleshoot (the catch-all at the end of this block). The entries
+  # below are OVERRIDES for slugs that clearly belong to another skill. Same
+  # schema as the /docs/ patterns above: substring match, first match wins.
+  #
+  # IMPORTANT: help URLs are /articles/{numeric-id}-{slug-words}, e.g.
+  #   https://help.twingate.com/articles/8458642629-twingate-client-logs
+  # so a keyword can never be anchored directly after "/articles/". Each override
+  # matches a HYPHEN-ANCHORED slug fragment (e.g. "-connector") that appears in
+  # the hyphenated slug. The leading hyphen keeps these disjoint from real /docs/
+  # routing: all 307 docs pages are explicitly mapped (auto_assign is never
+  # called for them), and any new /docs/ page that legitimately contains a
+  # fragment like "-kubernetes" routes to the matching skill, which is correct.
+  # The bare /articles/ catch-all MUST stay last — it is the fallback for every
+  # help page whose slug matches no override.
+  - pattern: "-connector"
+    skill: twingate-connectors
+  - pattern: "-relay"
+    skill: twingate-connectors
+  - pattern: "-terraform"
+    skill: twingate-terraform
+  - pattern: "-kubernetes"
+    skill: twingate-kubernetes
+  - pattern: "-helm"
+    skill: twingate-kubernetes
+  - pattern: "-k8s"
+    skill: twingate-kubernetes
+  - pattern: "-graphql"
+    skill: twingate-api
+  - pattern: "-scim"
+    skill: twingate-identity
+  - pattern: "-okta"
+    skill: twingate-identity
+  - pattern: "-entra"
+    skill: twingate-identity
+  - pattern: "-saml"
+    skill: twingate-identity
+  - pattern: "-sso"
+    skill: twingate-identity
+  - pattern: "-idp"
+    skill: twingate-identity
+  - pattern: "-provisioning"
+    skill: twingate-identity
+  - pattern: "-dns"
+    skill: twingate-dns-security
+  - pattern: "-resolver"
+    skill: twingate-dns-security
+  - pattern: "-client"
+    skill: twingate-troubleshoot
+  - pattern: "-desktop"
+    skill: twingate-troubleshoot
+  - pattern: "-macos"
+    skill: twingate-troubleshoot
+  - pattern: "-windows"
+    skill: twingate-troubleshoot
+  - pattern: "-linux"
+    skill: twingate-troubleshoot
+  - pattern: "-android"
+    skill: twingate-troubleshoot
+  # Catch-all: any remaining /articles/ page → troubleshoot (keep LAST).
+  - pattern: "/articles/"
+    skill: twingate-troubleshoot

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/analytics
+type: docs
+fetched: 2026-08-05
+source_version: 0bfbfbbfef541e2bdee9f3cb3ae72d997ae9fdac00cffad1fcb072351a52706f
+---
+
 # Twingate Analytics
 
 ## Summary

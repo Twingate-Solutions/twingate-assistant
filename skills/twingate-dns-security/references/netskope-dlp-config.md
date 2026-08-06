@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/netskope-dlp-config
+type: docs
+fetched: 2026-08-05
+source_version: 9f58baaacccbeb169a3e62a3c07d531e6f4eddca8e400384c106b2252356770c
+---
+
 # Netskope DLP Configuration for Twingate Compatibility
 
 ## Summary

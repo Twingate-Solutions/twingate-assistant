@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/database-access-gcp
+type: docs
+fetched: 2026-08-05
+source_version: 6379cd5e808f2fa0be0961b60b0697aae88b5419d6ae52204515de6beacd2282
+---
+
 # Google Cloud SQL Access with Twingate
 
 ## Summary

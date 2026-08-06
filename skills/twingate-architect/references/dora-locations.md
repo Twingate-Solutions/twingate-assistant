@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/dora-locations
+type: docs
+fetched: 2026-08-05
+source_version: a217c03c130f42e4f8a96d3466f34763b5990719fb274c19c4d6f348f90d20c8
+---
+
 # Twingate DORA Compliance - Location List
 
 ## Page Title

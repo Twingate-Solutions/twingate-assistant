@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/protect-legacy-apps-with-multi-factor-authentication
+type: docs
+fetched: 2026-08-05
+source_version: bc2179ca873823f79459c8b96b890a6fbea3c87d7668c8db830904b119863d02
+---
+
 # Protect Legacy Apps with Multi-Factor Authentication
 
 ## Summary

@@ -1,13 +1,8 @@
-"""Unit tests for diff_docs module.
-
-Tests use tmp_path to write real YAML files on disk rather than mocking
-file I/O, ensuring the YAML parsing path is exercised end-to-end.
-The conftest.py at scripts/tests/ adds scripts/ to sys.path.
-"""
+"""Unit tests for diff_docs module."""
 
 import yaml
 
-from diff_docs import auto_assign, diff_docs
+from diff_docs import auto_assign, diff_docs, load_mapping
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -149,7 +144,6 @@ def test_auto_assign_first_match_wins() -> None:
         {"pattern": "/docs/connector-deployment", "skill": "twingate-terraform"},
     ]
 
-    # Both patterns match this URL; first-match semantics should pick connectors
     result = auto_assign("https://www.twingate.com/docs/connector-deployment", patterns)
 
     assert result == "twingate-connectors"
@@ -160,3 +154,86 @@ def test_auto_assign_empty_patterns_returns_none() -> None:
     result = auto_assign("https://www.twingate.com/docs/anything", [])
 
     assert result is None
+
+
+# ── auto_assign with real doc_mapping.yaml patterns (help.twingate.com) ──────
+
+
+def _real_patterns() -> list[dict]:
+    """Load the auto_assign_patterns actually shipped in doc_mapping.yaml."""
+    mapping = load_mapping()
+    return mapping.get("auto_assign_patterns", [])
+
+
+def test_auto_assign_help_connector_url_routes_to_connectors() -> None:
+    url = "https://help.twingate.com/articles/1422554451-connector-offline-too-many-open-files-in-logs"
+    result = auto_assign(url, _real_patterns())
+    assert result == "twingate-connectors"
+
+
+def test_auto_assign_help_dns_url_routes_to_dns_security() -> None:
+    url = "https://help.twingate.com/articles/9988776655-twingate-dns-cisco-umbrella"
+    result = auto_assign(url, _real_patterns())
+    assert result == "twingate-dns-security"
+
+
+def test_auto_assign_help_generic_article_falls_back_to_troubleshoot() -> None:
+    """A help article slug matching no override falls back to troubleshoot."""
+    url = "https://help.twingate.com/articles/1111111111-something-nobody-anticipated"
+    result = auto_assign(url, _real_patterns())
+    assert result == "twingate-troubleshoot"
+
+
+# ── GitHub repos live under `repos:`, not `docs:` ───────────────────────────
+
+
+def test_load_mapping_exposes_a_non_empty_repos_key() -> None:
+    """The real doc_mapping.yaml carries a non-empty `repos:` list."""
+    mapping = load_mapping()
+
+    repos = mapping.get("repos")
+    assert repos
+    assert isinstance(repos, list)
+    for entry in repos:
+        assert entry.get("full_name")
+        assert entry.get("skill")
+
+
+def test_docs_list_has_no_github_com_urls() -> None:
+    """No `docs:` entry points at a github.com URL."""
+    mapping = load_mapping()
+
+    docs = mapping.get("docs", [])
+    github_doc_urls = [entry["url"] for entry in docs if "github.com" in entry.get("url", "")]
+
+    assert github_doc_urls == []
+
+
+def test_every_repos_entry_full_name_matches_org_slash_repo_shape() -> None:
+    """Each `repos:` entry's full_name is a plain '{org}/{repo}' identifier."""
+    mapping = load_mapping()
+
+    for entry in mapping.get("repos", []):
+        full_name = entry["full_name"]
+        assert full_name.count("/") == 1
+        assert not full_name.startswith("http")
+
+
+def test_auto_assign_help_okta_url_routes_to_identity() -> None:
+    url = "https://help.twingate.com/articles/2222222222-configuring-okta-scim"
+    result = auto_assign(url, _real_patterns())
+    assert result == "twingate-identity"
+
+
+def test_auto_assign_help_client_url_routes_to_troubleshoot() -> None:
+    """'-client' is an explicit troubleshoot override, not the bare catch-all."""
+    url = "https://help.twingate.com/articles/3333333333-macos-client-crash"
+    result = auto_assign(url, _real_patterns())
+    assert result == "twingate-troubleshoot"
+
+
+def test_auto_assign_real_docs_pattern_regression_guard() -> None:
+    """A /docs/ URL still routes correctly alongside the help overrides."""
+    url = "https://www.twingate.com/docs/connector-brand-new-page"
+    result = auto_assign(url, _real_patterns())
+    assert result == "twingate-connectors"

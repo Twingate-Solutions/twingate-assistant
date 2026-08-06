@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/site-2-site
+type: docs
+fetched: 2026-08-05
+source_version: 07ecbd5f9cfd6cd889a4c45e2e3a1cf32dc24a31e7392c1021612b15c86645ff
+---
+
 # Secure Site-to-Site Connections with Twingate
 
 ## Summary

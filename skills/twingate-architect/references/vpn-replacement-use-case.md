@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/vpn-replacement-use-case
+type: docs
+fetched: 2026-08-05
+source_version: ea00313ee0efcdde137e5f99220ff10ae51ffdf159b020c555b8984811238971
+---
+
 # VPN Replacement Use Case
 
 ## Page Title

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/aws
+type: docs
+fetched: 2026-08-05
+source_version: 323d11150a8f2dec6f4d896a13c4f4f7a7cef614af95f16761d7d03d7f2cdf1a
+---
+
 # Deploy a Connector on AWS
 
 ## Summary

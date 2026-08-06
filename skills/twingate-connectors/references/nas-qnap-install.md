@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/nas-qnap-install
+type: docs
+fetched: 2026-08-05
+source_version: e910ceef65935c6c609080592c5d84439699f5fe741dc5068cb7d8470bfda199
+---
+
 # Deploy a Connector on a QNAP NAS
 
 ## Summary

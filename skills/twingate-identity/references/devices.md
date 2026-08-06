@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/devices
+type: docs
+fetched: 2026-08-05
+source_version: b51d026799a8db582e5a77997a4a62095c25fcf8e64d14367d638eba6ec9f578
+---
+
 # Twingate Devices Overview
 
 ## Page Title

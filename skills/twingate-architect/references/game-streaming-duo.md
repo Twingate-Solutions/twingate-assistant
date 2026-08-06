@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/game-streaming-duo
+type: docs
+fetched: 2026-08-05
+source_version: 1d88b7b650496acee41a244a1ec68fe2b9c5f5e5edbe654f41dcee3e511339aa
+---
+
 # Duo Multi-User Remote Game Streaming with Twingate
 
 ## Summary

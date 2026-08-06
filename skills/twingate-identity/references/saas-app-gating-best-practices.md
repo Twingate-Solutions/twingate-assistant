@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/saas-app-gating-best-practices
+type: docs
+fetched: 2026-08-05
+source_version: d4a326821cd25cf6fe1bac5cbad00f0a94b98a4b39fd122f501fa9744897801e
+---
+
 # Best Practices for SaaS App Gating
 
 ## Summary

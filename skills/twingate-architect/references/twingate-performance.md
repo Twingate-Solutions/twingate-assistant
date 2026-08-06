@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/twingate-performance
+type: docs
+fetched: 2026-08-05
+source_version: 324aa99be4d23cfed7926ba53c8bdf7f99840f2b8594a5309176d1cc031cf92d
+---
+
 # Twingate Performance
 
 ## Summary

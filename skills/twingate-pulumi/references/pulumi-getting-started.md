@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/pulumi-getting-started
+type: docs
+fetched: 2026-08-05
+source_version: f85abde005e40a12db16b9ce8cf022f6ee0db028bc8d0d3551792c25f21246be
+---
+
 # Getting Started with Pulumi and Twingate
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/crowdstrike-configuration
+type: docs
+fetched: 2026-08-05
+source_version: def3b18f240c6b8bd0317838e5ffaa5911e6b4b209447625ea0b1693789d26dd
+---
+
 # CrowdStrike Configuration
 
 ## Page Title

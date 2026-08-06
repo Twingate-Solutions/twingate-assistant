@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/casaos-getting-started
+type: docs
+fetched: 2026-08-05
+source_version: caf231ab857b5e8303dfe964e3dcf1b2d05c5ff06be624074366b396f4f81dd7
+---
+
 # Getting Started with CasaOS and Twingate
 
 ## Summary

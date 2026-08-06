@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/windows-headless
+type: docs
+fetched: 2026-08-05
+source_version: 6fd5adec83978cfc1931cfa1082b979b7df119c1aa7f31fdc1d0df4940b4ef75
+---
+
 # Windows Headless Mode
 
 ## Summary

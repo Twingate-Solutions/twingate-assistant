@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/guides
+type: docs
+fetched: 2026-08-05
+source_version: d0bf6a3bf83c79abf0904c9c6700b23ab56abea6d8fa9b4febc07f36ca558279
+---
+
 # Twingate Guides Index
 
 ## Page Title

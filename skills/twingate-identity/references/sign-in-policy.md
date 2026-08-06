@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/sign-in-policy
+type: docs
+fetched: 2026-08-05
+source_version: 9e43da3afad3d49a8d354ed77c4185877aee9af805f19dd3d7d573dc0b83f97e
+---
+
 # Sign In Policy
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/1password-configuration
+type: docs
+fetched: 2026-08-05
+source_version: b5fd041aafefeb8eb6e6ba1d8a0e9e3269111bfb151718e171a840fa9ae4f743
+---
+
 # 1Password XAM Configuration
 
 ## Page Title

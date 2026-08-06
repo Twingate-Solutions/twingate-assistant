@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/automated-quick-start
+type: docs
+fetched: 2026-08-05
+source_version: 1b352359fae09b8e4f5528afc1936afcd91b19588ba36bdad9ad80d3dd0deb7d
+---
+
 # Automated Deployment - Twingate
 
 ## Summary

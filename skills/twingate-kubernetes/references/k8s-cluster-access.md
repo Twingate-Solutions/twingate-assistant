@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/k8s-cluster-access
+type: docs
+fetched: 2026-08-05
+source_version: 84b8851bfb8609ef5c9b0b378cb1e7219180247f3aea92d268ced8926ccc2961
+---
+
 # Route Traffic from Kubernetes via Twingate Headless Client
 
 ## Summary

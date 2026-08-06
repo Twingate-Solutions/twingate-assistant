@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/api
+type: docs
+fetched: 2026-08-05
+source_version: 0950f6343601021f04a640cf5e817345ac093b2f53ad0ab746f44e311686bcc1
+---
+
 # Twingate GraphQL API Reference
 
 ## Page Title

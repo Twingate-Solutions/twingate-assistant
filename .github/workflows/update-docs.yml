@@ -21,6 +21,10 @@ jobs:
       - name: Run update pipeline
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        # No GITHUB_TOKEN: the GitHub source runs unauthenticated. Every repo/wiki
+        # is public, so a token grants no access — it would only lift the 60 req/hr
+        # anonymous rate limit. The pipeline throttles to that limit instead
+        # (see github_repos._github_get rate-limit handling).
         run: python scripts/update_references.py
 # Note: no lint/type/test steps — ruff/mypy/pytest are local-only dev tools, not published in CI.
       - name: Check for changes

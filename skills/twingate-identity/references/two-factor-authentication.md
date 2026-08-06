@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/two-factor-authentication
+type: docs
+fetched: 2026-08-05
+source_version: f907c1ae7fa8715c1144557d87efb531bb11a9f8e03166586339f8f2e703d0c2
+---
+
 # Native MFA (Twingate)
 
 ## Summary

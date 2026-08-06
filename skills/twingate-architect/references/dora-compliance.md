@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/dora-compliance
+type: docs
+fetched: 2026-08-05
+source_version: f95d2ae1f8452fa5a8ab7cabdc0d53907a4cc6b92139ea8d0d8d856076af8ef0
+---
+
 # DORA Compliance
 
 ## Page Title

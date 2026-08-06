@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/homelab-step-by-step
+type: docs
+fetched: 2026-08-05
+source_version: d3474ddb88e9799ab71013afaf022dbdee37b0f5e43018cb823f72cdfbf0ce41
+---
+
 # How to Protect Your Home Lab with Twingate
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/cicd-pipelines-with-twingate
+type: docs
+fetched: 2026-08-05
+source_version: 0f3f7290527a52e62dae061612db3161ade8ed230717810699aa233d5019e0ed
+---
+
 # Securing CI/CD Pipelines with Twingate
 
 ## Summary

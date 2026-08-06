@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/how-encryption-works-in-twingate
+type: docs
+fetched: 2026-08-05
+source_version: dc6c80e48df5cc503231541328be35380d71b2ce0a02428e24fb1a58efb03dd7
+---
+
 # Encryption in Twingate
 
 ## Page Title

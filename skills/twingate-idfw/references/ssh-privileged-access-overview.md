@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/ssh-privileged-access-overview
+type: docs
+fetched: 2026-08-05
+source_version: c8dc6158c76b76046f4e58dddae115e7a7a979fe0badc95fdfed8f669123d250
+---
+
 # Privileged Access for SSH Overview
 
 ## Page Title

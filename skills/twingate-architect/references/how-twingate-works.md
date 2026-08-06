@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/how-twingate-works
+type: docs
+fetched: 2026-08-05
+source_version: 9bf0d06171386ba7cfa5247775245e5a44f07c3f22b7aab10e6a9967906153ad
+---
+
 # How Twingate Works
 
 ## Summary

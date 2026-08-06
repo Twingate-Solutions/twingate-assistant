@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/example-cicd-configurations
+type: docs
+fetched: 2026-08-05
+source_version: 1ac64f44f25f447c531801af9e3d857c469ce272a845b5b608ab8ed76842bf67
+---
+
 # CI/CD Configuration for Twingate
 
 ## Summary

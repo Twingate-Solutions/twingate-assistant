@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/how-to-set-up-twingate-on-a-synology-nas-dsm-6
+type: docs
+fetched: 2026-08-05
+source_version: 2c863625f1d3c94091a29eee05fc094cdf47da4fafd8a1ab9521c88e3b5b75b0
+---
+
 # Deploy Twingate Connector on Synology NAS (DSM 6.x)
 
 ## Summary

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connectors
+type: docs
+fetched: 2026-08-05
+source_version: 77c987e5a67e243646089fb0cd84d4ce03c34a3938d432a16258f16114dd4bea
+---
+
 # Twingate Connectors Overview
 
 ## Summary

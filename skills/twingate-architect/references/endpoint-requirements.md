@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/endpoint-requirements
+type: docs
+fetched: 2026-08-05
+source_version: 4e7ba26e0178151dd91569ee2e506052013b443c915d8b53948d3908211321d1
+---
+
 # Endpoint Requirements
 
 ## Page Title

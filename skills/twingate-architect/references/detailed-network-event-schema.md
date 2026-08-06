@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/detailed-network-event-schema
+type: docs
+fetched: 2026-08-05
+source_version: f5340b305b6cf7ae4fbecd841a61ac9ed1cd63a38a0c81460be7644f200f18f6
+---
+
 # Detailed Network Event Schema
 
 ## Page Title

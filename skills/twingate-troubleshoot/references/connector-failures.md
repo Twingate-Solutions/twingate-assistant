@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/connector-failures
+type: docs
+fetched: 2026-08-05
+source_version: 46b54fe52164efef96818373fc94cd6d83c5571af04614153c62c156a689927a
+---
+
 # Connector Failures Troubleshooting
 
 ## Page Title

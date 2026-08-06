@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/dns-ultimate-guide
+type: docs
+fetched: 2026-08-05
+source_version: 3c7c63af9d3b9a01fd6881f5130d1223b24f95ba03bbbd9a636a581479a31168
+---
+
 # The Ultimate Guide to DNS & Twingate
 
 ## Page Title

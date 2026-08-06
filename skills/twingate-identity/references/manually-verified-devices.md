@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/manually-verified-devices
+type: docs
+fetched: 2026-08-05
+source_version: d9ad18bc6a8ca1b44afc7b7cb495d0e3aa4778f79935e75dbed29d982aa516c7
+---
+
 # Manually Verified Devices
 
 ## Summary

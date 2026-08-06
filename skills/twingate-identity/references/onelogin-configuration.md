@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/onelogin-configuration
+type: docs
+fetched: 2026-08-05
+source_version: bb836099abb49bf4a50d4962cda4cfa1ae70aac4eda524b2aa0aba0745607211
+---
+
 # OneLogin Configuration
 
 ## Page Title

@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/remotely-access-a-coworkers-development-server
+type: docs
+fetched: 2026-08-05
+source_version: 42606e941405e13aea96ff7ae6d73b9063fe4404d820928f5c70db9324758486
+---
+
 # Remotely Access a Coworker's Development Server
 
 ## Summary

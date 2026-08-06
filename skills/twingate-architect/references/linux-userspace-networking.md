@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/linux-userspace-networking
+type: docs
+fetched: 2026-08-05
+source_version: bf7c0ecf521961e42c6af4b327f4a64a1476b7bbc18978c3109c2518ba34abd1
+---
+
 # Linux Userspace Networking (HTTP Proxy Mode)
 
 ## Summary

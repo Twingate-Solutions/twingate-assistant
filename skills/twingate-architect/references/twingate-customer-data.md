@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/twingate-customer-data
+type: docs
+fetched: 2026-08-05
+source_version: 575e89ed0ff481f82b18bdb53b280eecb676045534c91ef686e13b67cebcb8e9
+---
+
 # Twingate & Customer Data
 
 ## Page Title

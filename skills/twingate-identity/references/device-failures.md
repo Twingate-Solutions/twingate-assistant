@@ -1,3 +1,10 @@
+---
+source: https://www.twingate.com/docs/device-failures
+type: docs
+fetched: 2026-08-05
+source_version: 20ea8600e753ce31ef5b9db2ceb83d619d8c35299f28d49009c0d03cd63dee9f
+---
+
 # Device Failures - Twingate Troubleshooting
 
 ## Summary
