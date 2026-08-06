@@ -6,7 +6,9 @@ description: >
   provider, IaC provisioning of Remote Networks, Connectors, Resources, Groups, or
   Service Accounts, provider version questions, and terraform apply errors involving
   Twingate. Also trigger when existing AWS, Azure, GCP, or Kubernetes Terraform stacks
-  need to add Twingate.
+  need to add Twingate. Also trigger for provider source/schema questions (`internal/provider/`),
+  `group_ids` / `access` block migration errors, provider release version and changelog
+  questions, or requests for SE reference quick-start Terraform modules per cloud.
 ---
 
 ## Role
@@ -52,27 +54,40 @@ leaking credentials.
 - **Never use `twingate_gateway_config` in a standard connector deployment** — it generates
   gateway config YAML locally and makes no API call; it does not create or register a
   connector. It is an IDFW-only resource.
+- **Check `references/gh-twingate-terraform-provider-twingate.md` for the current stable
+  release and any open schema gotchas before pinning `required_providers` or writing HCL
+  from memory** — e.g. the `access_group`/`security_policy_id` inconsistency-after-apply
+  bug that was only fixed in v4.3.1.
+- **`references/gh-twingate-solutions-terraform-scripts.md` is SE demo/reference material,
+  not a hardened production module** — point users to it for quick-start patterns per
+  cloud, but flag that it isn't security-reviewed for production use.
 
-## When to Verify
+## Search References First
 
-This skill body contains opinions and guidelines, not authoritative resource
-schemas. **Before answering questions involving any of the following, read
-the relevant `references/` file first** — and cite it in your response:
+**Grep `references/` with the user's own keywords before answering, and cite what you
+find.** Filenames reveal only the topic — resource/argument names, error strings, and
+version numbers live in the file bodies, so a filename scan alone will miss them:
 
-- Provider version constraints, env var names, or provider block syntax
-- Specific resource attribute names, argument types, or default values
-- Whether a given field exists on a resource or data source
-- Cloud-specific Terraform integration (AWS Secrets Manager, Azure Key Vault,
-  GCP Secret Manager) when wiring tokens into compute resources
+```
+grep -ril "group_ids" references/       # -> the group_ids/access-block migration error,
+                                         #    terraform-provider-overview.md, and the
+                                         #    provider repo changelog note, all three
+grep -ril "v4.3.1" references/          # -> gh-twingate-terraform-provider-twingate.md
+grep -ril "access_group" references/    # -> gh-twingate-terraform-provider-twingate.md
+                                         #    (the inconsistency-after-apply bug note)
+```
 
-For **current resource schemas**, clone
-`https://github.com/Twingate/terraform-provider-twingate` and inspect
-`internal/provider/`. The Terraform Registry at
-`https://registry.terraform.io/providers/Twingate/twingate/latest/docs` is
-also authoritative for argument and attribute reference.
-
-Do not answer these from training-data memory — provider schemas evolve and
-training data is often months out of date.
+Never answer from training-data memory for: provider version constraints, env var names,
+or provider block syntax; specific resource attribute names, argument types, or default
+values; whether a given field exists on a resource or data source; or cloud-specific
+Terraform integration (AWS Secrets Manager, Azure Key Vault, GCP Secret Manager) when
+wiring tokens into compute resources. Provider schemas evolve and training data is often
+months out of date. For **current resource schemas**, clone
+`https://github.com/Twingate/terraform-provider-twingate` and inspect `internal/provider/`;
+the Terraform Registry at
+`https://registry.terraform.io/providers/Twingate/twingate/latest/docs` is also
+authoritative. If the user asks whether an SE reference module or script exists for a given
+cloud, **search before saying no.**
 
 ## Routing
 
@@ -91,17 +106,25 @@ training data is often months out of date.
 
 ## References
 
-`references/` contains current Twingate doc summaries, refreshed weekly.
-**Consult these before answering fact-shaped questions.**
+See [`references/`](./references/) for the current corpus, refreshed weekly. Three kinds
+of file live there:
+
+- **`{slug}.md`** — summaries of `twingate.com/docs` pages (product documentation).
+- **`{numeric-id}-{slug}.md`** — a Twingate help-center article: exact error text and the
+  fix.
+- **`gh-{org}-{repo}.md`** — summaries of public Twingate GitHub repos: the provider source
+  and SE reference scripts.
 
 | If the user asks about… | Read first |
 |---|---|
-| Provider config, version pinning, env var name, getting started | `terraform-provider-overview.md`, `terraform-provider-twingate.md`, `terraform-getting-started.md` |
+| Provider config, version pinning, env var name, getting started (product doc) | `terraform-provider-overview.md`, `terraform-getting-started.md` |
+| **Provider source, current stable release/changelog, build/test workflow, the `access_group`/`security_policy_id` bug fixed in v4.3.1** | `gh-twingate-terraform-provider-twingate.md` — note the `gh-` prefix; the old unprefixed filename no longer exists |
+| **"An argument named `group_ids` is not expected here"** — top-level `group_ids` moved into an `access { }` block in provider v1.0.0+ | `4693640683-terraform-error-an-argument-named-group-ids-is-not-expected-here.md` |
+| **SE quick-start / demo Terraform scripts per cloud** (reference only, not production-hardened) | `gh-twingate-solutions-terraform-scripts.md` |
 | AWS-specific Terraform patterns (ECS/EC2 + Twingate) | `terraform-aws.md` (and `skills/twingate-connectors/references/aws-connector-patterns.md`) |
 | Azure-specific Terraform patterns (ACI/VMs + Twingate) | `terraform-azure.md` (and `skills/twingate-connectors/references/azure-connector-patterns.md`) |
 | GCP-specific Terraform patterns (GCE/MIG + Twingate) | `terraform-gcp.md` (and `skills/twingate-connectors/references/gcp-connector-patterns.md`) |
-| Resource argument schemas, attribute references, exact field names | Provider source repo (`internal/provider/`) and the Terraform Registry |
+| Resource argument schemas, attribute references, exact field names | `gh-twingate-terraform-provider-twingate.md`, the provider source repo (`internal/provider/`), or the Terraform Registry |
 
-For comprehensive coverage, see [`references/`](./references/) for the full
-set of doc summaries. **Default to checking** — provider schemas drift between
-versions, and an out-of-date attribute name will fail at `terraform apply`.
+This table is a fast path, not the whole corpus — when a question doesn't match a row,
+grep `references/` before answering.

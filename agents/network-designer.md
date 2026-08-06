@@ -43,6 +43,26 @@ or the cloud-specific deployer agent rather than producing Terraform here.
 
 ---
 
+## Search References First
+
+`skills/*/references/` also holds `gh-{org}-{repo}.md` summaries of public Twingate
+GitHub repos and `{numeric-id}-{slug}.md` help-center articles — filenames hide the
+topology patterns and tool names in the bodies. **Grep before answering, and before
+telling a user no reference implementation exists for a topology they describe:**
+
+```bash
+grep -ril "exit network" skills/*/references/
+```
+
+A few community/SE repos document real-world topologies worth checking when a
+user's design resembles one: `skills/twingate-dns-security/references/gh-twingate-community-diy-vpn.md`
+(Exit Network as a personal VPN — Minikube, DO Droplet, or DOKS) and
+`skills/twingate-dns-security/references/gh-twingate-community-ubiquiti-headless-gateway.md`
+(headless client on a Ubiquiti gateway, giving a whole VLAN split-DNS access without
+per-device clients).
+
+---
+
 ## Design Methodology
 
 Work through this sequence before producing any design output. Ask for missing information rather than assuming.

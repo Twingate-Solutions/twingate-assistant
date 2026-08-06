@@ -1,3 +1,20 @@
+<!-- manual-reference: do-not-overwrite -->
+<!--
+  HAND-AUTHORED REFERENCE — richer than an auto-generated summary (CLI command
+  tables, exact client/connector minimum versions). It carries no `source:`
+  frontmatter, so the auto-update pipeline does not own it.
+
+  NOTE: a public doc page now exists at
+  https://www.twingate.com/docs/kubernetes-kubeconfig-sync, and its slug
+  resolves to THIS path. Without the marker above, the pipeline would silently
+  overwrite this file the next time that page's content hash changes. The marker
+  makes the pipeline skip it (see is_manual_reference in
+  scripts/update_references.py).
+
+  Trade-off: protected means never auto-refreshed. If you would rather have
+  pipeline-maintained content here, delete this marker block and let the next
+  run regenerate the file — but expect to lose the hand-written detail below.
+-->
 # Kubernetes Kubeconfig Sync
 
 ## Summary

@@ -51,6 +51,27 @@ from training-data memory.
 
 ---
 
+## Search References First
+
+`skills/*/references/` now also holds `gh-{org}-{repo}.md` summaries of public Twingate
+GitHub repos — including the gateway repo itself — and `{numeric-id}-{slug}.md`
+help-center articles. Filenames hide the tool names and capabilities described in the
+bodies, so **grep before answering, and before telling a user no tool exists for
+something:**
+
+```bash
+grep -ril "session recording" skills/*/references/
+```
+
+The gateway's own repo and wiki are summarized at
+`skills/twingate-idfw/references/gh-twingate-gateway.md` and `-wiki.md` — read these for
+current protocol support (Web App is listed as "coming soon") and the GAT/metrics/session
+format details before answering from memory. `skills/twingate-idfw/references/gh-twingate-solutions-gatorcast.md`
+is a self-hosted browse/replay UI for gateway session recordings — a community example
+project, not a supported Twingate product; label it as such if you recommend it.
+
+---
+
 ## Critical Architectural Distinction — Explain This First
 
 Before diving into any implementation detail, establish the difference between a Connector and a Gateway. This is the most common source of confusion.
@@ -261,7 +282,10 @@ source file in your response.**
 | Twingate Terraform gateway resources, IaC provisioning | `skills/twingate-terraform/references/terraform-provider-overview.md` |
 | Group structure, JIT, time-bounded access for contractor SSH flows | `skills/twingate-identity/references/groups.md`, `skills/twingate-identity/references/jit-access-requests.md`, `skills/twingate-identity/references/vendor-and-contractor-access-management.md`, `skills/twingate-identity/references/ephemeral-access-to-resources.md` |
 | Connector vs Gateway distinction (network layer vs protocol layer) | `skills/twingate-connectors/references/understanding-connectors.md` |
+| Gateway feature/protocol overview, GAT auth, session recording format, metrics | `skills/twingate-idfw/references/gh-twingate-gateway.md`, `skills/twingate-idfw/references/gh-twingate-gateway-wiki.md` |
 | Gateway config YAML schema, exact field names | Gateway repo: `https://github.com/Twingate/gateway` (`deploy/` directory) |
+| Self-hosted session-recording browse/replay UI (community example, unsupported) | `skills/twingate-idfw/references/gh-twingate-solutions-gatorcast.md` |
+| Kubernetes Operator (CRD-based Twingate resource automation, complements kubectl proxy mode) | `skills/twingate-kubernetes/references/gh-twingate-kubernetes-operator.md`, `skills/twingate-kubernetes/references/gh-twingate-kubernetes-operator-wiki.md` |
 
 **Default to checking** — do not write YAML schemas, UI labels, Vault paths,
 Smallstep syntax, or admin console nav paths from memory.

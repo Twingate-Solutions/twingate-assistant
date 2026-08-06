@@ -6,6 +6,9 @@ description: >
   @pulumi/twingate, or pulumi_twingate, or when an existing Pulumi stack needs to add
   Twingate resources. Also trigger when the user is migrating from Terraform to Pulumi
   for Twingate, or building a multi-language Pulumi stack that needs Twingate provisioning.
+  Also trigger for local-plugin build/install errors (`pulumi plugin install`, 404 on
+  `pulumi up`/`pulumi preview`, `+dirty`/alpha version strings), or requests for SE
+  reference quick-start Pulumi scripts per cloud.
 ---
 
 ## Role
@@ -37,25 +40,34 @@ resource behavior, `twingate-terraform` is the authoritative reference.
   underlying API behavior is identical.
 - **Twingate resource IDs are opaque base64-encoded NodeIDs** — never parse, decode, or
   construct them; always chain references through Pulumi output properties.
+- **Check `references/gh-twingate-pulumi-twingate.md` before troubleshooting a local plugin
+  build** — the 404-on-`pulumi up` failure and `+dirty`/alpha version-string handling are
+  documented gotchas specific to local development builds, not provider bugs.
 
-## When to Verify
+## Search References First
 
-This skill body contains opinions and guidelines, not authoritative SDK
-schemas. **Before answering questions involving any of the following, read
-the relevant `references/` file first** — and cite it in your response:
+**Grep `references/` with the user's own keywords before answering, and cite what you
+find.** Filenames reveal only the topic — SDK package names, config keys, and error
+strings live in the file bodies, so a filename scan alone will miss them:
 
-- Specific SDK method names, argument names, or default values per language
-- Pulumi config keys, secret-marking syntax, or stack output handling
-- Cloud-specific Pulumi integration (AWS Secrets Manager, Azure Key Vault,
-  GCP Secret Manager) when wiring tokens into compute resources
+```
+grep -ril "+dirty" references/          # -> gh-twingate-pulumi-twingate.md
+grep -ril "404" references/             # -> gh-twingate-pulumi-twingate.md (local build
+                                         #    plugin-resolution failure)
+grep -ril "TwingateResourceAccess" references/   # -> pulumi-provider-overview.md
+                                                  #    (the resource that actually grants
+                                                  #    access — creating a Resource alone
+                                                  #    doesn't)
+```
 
-For **current SDK examples and schemas**, inspect
-`https://github.com/Twingate/pulumi-twingate`. The Pulumi Registry at
-`https://www.pulumi.com/registry/packages/twingate/` is also authoritative.
-For reference programs, see `https://github.com/Twingate-Solutions/pulumi-scripts`.
-
-Do not answer these from training-data memory — SDK signatures vary across
-TypeScript / Python / Go / C# and evolve between releases.
+Never answer from training-data memory for: specific SDK method names, argument names, or
+default values per language; Pulumi config keys, secret-marking syntax, or stack output
+handling; or cloud-specific Pulumi integration (AWS Secrets Manager, Azure Key Vault, GCP
+Secret Manager) when wiring tokens into compute resources. SDK signatures vary across
+TypeScript / Python / Go / C# and evolve between releases. For **current SDK examples and
+schemas**, inspect `https://github.com/Twingate/pulumi-twingate`; the Pulumi Registry at
+`https://www.pulumi.com/registry/packages/twingate/` is also authoritative. If the user
+asks whether an SE reference script exists for a given cloud, **search before saying no.**
 
 ## Routing
 
@@ -69,18 +81,23 @@ TypeScript / Python / Go / C# and evolve between releases.
 
 ## References
 
-`references/` contains current Twingate doc summaries, refreshed weekly.
-**Consult these before answering fact-shaped questions.**
+See [`references/`](./references/) for the current corpus, refreshed weekly. Two kinds of
+file live there:
+
+- **`{slug}.md`** — summaries of `twingate.com/docs` pages (product documentation).
+- **`gh-{org}-{repo}.md`** — summaries of public Twingate GitHub repos: the maintained
+  provider source and SE reference scripts.
 
 | If the user asks about… | Read first |
 |---|---|
-| Provider config, getting started, secret-marking patterns | `pulumi-provider-overview.md`, `pulumi-getting-started.md` |
+| Provider config, getting started, secret-marking patterns (product doc) | `pulumi-provider-overview.md`, `pulumi-getting-started.md` |
+| **Provider source, package names per language, local dev build (`make development`), the 404-on-`pulumi up` / `+dirty` version-string gotcha** | `gh-twingate-pulumi-twingate.md` — this is `Twingate/pulumi-twingate`, the actively maintained provider (do not confuse with any `Twingate-Labs/pulumi-twingate`, which would be archived if it appears elsewhere) |
+| **SE quick-start / demo Pulumi scripts per cloud** (reference only, not production-hardened) | `gh-twingate-solutions-pulumi-scripts.md` |
 | AWS-specific Pulumi patterns (EC2/ECS + Twingate) | `pulumi-aws.md` (and `skills/twingate-connectors/references/aws-connector-patterns.md`) |
 | Azure-specific Pulumi patterns (ACI/VMs + Twingate) | `pulumi-azure.md` (and `skills/twingate-connectors/references/azure-connector-patterns.md`) |
 | GCP-specific Pulumi patterns (GCE/MIG + Twingate) | `pulumi-gcp.md` (and `skills/twingate-connectors/references/gcp-connector-patterns.md`) |
 | Resource semantics or API behavior the Pulumi docs don't cover | `skills/twingate-terraform/references/terraform-provider-overview.md` (underlying API is identical) |
-| Exact SDK method signatures per language | Provider source repo (`https://github.com/Twingate/pulumi-twingate`) and Pulumi Registry |
+| Exact SDK method signatures per language | `gh-twingate-pulumi-twingate.md`, the provider source repo, and the Pulumi Registry |
 
-For comprehensive coverage, see [`references/`](./references/) for the full
-set of doc summaries. **Default to checking** — SDK schemas drift, and an
-out-of-date method name fails at `pulumi up`.
+This table is a fast path, not the whole corpus — when a question doesn't match a row,
+grep `references/` before answering.

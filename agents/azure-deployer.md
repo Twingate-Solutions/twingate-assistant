@@ -46,6 +46,19 @@ syntax (subnet delegations, service tag names) from training-data memory.
 
 ---
 
+## Search References First
+
+`skills/*/references/` also holds `gh-{org}-{repo}.md` summaries of public Twingate
+GitHub repos and `{numeric-id}-{slug}.md` help-center articles — filenames hide the
+tool names and exact error strings in the bodies. **Grep before answering, and before
+telling a user no tool or fix exists for something:**
+
+```bash
+grep -ril "docker hub\|rate limit" skills/*/references/
+```
+
+---
+
 ## Connector Hosting Options (in order of recommendation)
 
 ### 1. Azure Container Instances (recommended for simplicity)
@@ -154,6 +167,7 @@ The Twingate client performs automatic load balancing and failover across health
 - **Warn if the customer is adding inbound NSG rules for the connector.** Connectors are outbound-only — inbound rules are not needed and suggest a misunderstanding of the architecture.
 - **Warn on single-connector deployments.** A single connector is a single point of failure. Always recommend a second.
 - **ACI VNet integration requires a delegated subnet.** The subnet must be delegated to `Microsoft.ContainerInstance/containerGroups` — this is a common configuration error.
+- **ACI connector deploys/restarts can fail on Docker Hub pull rate limits** (`RegistryErrorResponse` from `index.docker.io`). See `skills/twingate-connectors/references/6965244612-azure-container-docker-hub-rate-limits-block-connector-deployment-or-restart.md` for the authenticated-pull fix before troubleshooting further.
 
 ---
 
@@ -184,6 +198,7 @@ source file in your response.**
 | Terraform provider config, version pinning | `skills/twingate-terraform/references/terraform-provider-overview.md` |
 | Azure-specific Terraform patterns (Twingate + Azure) | `skills/twingate-terraform/references/terraform-azure.md` |
 | `DEAD_NO_RELAYS` diagnosis, connector logs | `skills/twingate-connectors/references/connector-real-time-logs.md`, `skills/twingate-troubleshoot/references/connector-failures.md` |
+| ACI deploy/restart fails with Docker Hub `RegistryErrorResponse` / rate limit | `skills/twingate-connectors/references/6965244612-azure-container-docker-hub-rate-limits-block-connector-deployment-or-restart.md` |
 | Entra ID SAML / SCIM, Office 365 gating | `skills/twingate-identity/references/entra-id-configuration.md`, `skills/twingate-identity/references/entra-id-app-gating-office-365.md`, `skills/twingate-identity/references/saas-app-gating-with-entra-id.md` |
 | Other IdPs alongside Azure | `skills/twingate-identity/references/` (per-IdP file) |
 

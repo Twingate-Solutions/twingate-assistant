@@ -6,6 +6,10 @@ description: >
   SCIM, Okta, Entra ID, Google Workspace, JumpCloud, OneLogin, Keycloak, device trust,
   device posture, MFA enforcement, groups, JIT access, ephemeral access, auto-lock,
   offboarding, deprovisioning, multi-IdP deployments, or security policy configuration.
+  Also activate for identity automation tooling: automating device trust from an MDM or
+  EDR inventory (Jamf, Kandji, Intune, CrowdStrike, SentinelOne, FleetDM, Automox,
+  JumpCloud, Mosyle, Datto RMM), migrating group access between IdPs, self-service or
+  Slack-based group access requests, and location-based group switching.
 ---
 
 ## Role
@@ -35,24 +39,27 @@ what conditions, and for how long, this skill governs those decisions.
   in the MDM or EDR. Enabling early locks out users whose devices aren't registered yet.
 - **When running multiple IdPs, enforce strict email uniqueness.** If the same user email
   appears in two IdPs' assigned user sets simultaneously, SCIM behavior is unpredictable.
+- **Prefer the supported native integration over custom automation.** Reach for the
+  community/SE tooling in `references/` only when no native path exists, and tell the user
+  which repos are experimental or reference-only rather than production-ready.
 
-## When to Verify
+## Search References First
 
-This skill body contains policy-design opinions, not the per-IdP configuration
-steps or device-trust integration details. **Before answering questions
-involving any of the following, read the relevant `references/` file first**
-— and cite it in your response:
+**Grep `references/` with the user's own keywords before answering, and cite what you
+find.** Filenames reveal only the topic — vendor names, tool names, error strings, and API
+details live in the file bodies, so a filename scan alone will miss them:
 
-- Per-IdP SAML and SCIM configuration steps (Okta, Entra ID, Google Workspace,
-  JumpCloud, OneLogin, Keycloak, etc.)
-- Specific MDM / EDR integration (Jamf, Kandji, Intune, CrowdStrike,
-  SentinelOne, 1Password, Omnissa)
-- Security policy field names, default values, or exact policy semantics
-- SCIM endpoint URLs, attribute mapping, or provisioning-mode options
-- Device posture check types and configuration
+```
+grep -ril "fleetdm" references/        # -> gh-twingate-solutions-twingate-mdm-connector.md
+grep -ril "no matching user" references/
+grep -ril "assignment required" references/
+```
 
-Do not answer per-IdP or per-MDM configuration questions from training-data
-memory — IdP UIs and SCIM connectors evolve frequently.
+Never answer from training-data memory for: per-IdP SAML/SCIM configuration steps,
+MDM/EDR integration, security-policy field names or semantics, SCIM endpoints and
+attribute mapping, or device-posture check types. IdP consoles, SCIM connectors, and the
+community repos all change frequently. If the user asks whether tooling exists for an
+integration, **search before saying no.**
 
 ## Routing
 
@@ -64,11 +71,19 @@ memory — IdP UIs and SCIM connectors evolve frequently.
   misconfiguration, device trust, group sync, or SCIM errors
 - **→ twingate-dns-security**: for DNS Security Profiles, exit networks, and per-group
   internet filtering — separate from access security policies
+- **→ twingate-api**: when the real task is scripting the Admin GraphQL API rather than
+  designing the identity model
 
 ## References
 
-`references/` contains current Twingate doc summaries, refreshed weekly.
-**Consult these before answering fact-shaped questions.**
+See [`references/`](./references/) for the current corpus, refreshed weekly. Three kinds
+of file live there:
+
+- **`{slug}.md`** — summaries of `twingate.com/docs` pages (product documentation).
+- **`{numeric-id}-{slug}.md`** — Twingate help-center articles: symptom-shaped support
+  content, exact error strings, and per-IdP gotchas.
+- **`gh-{org}-{repo}.md`** — summaries of public Twingate GitHub repos: SE and community
+  tooling, reference implementations, and automation.
 
 | If the user asks about… | Read first |
 |---|---|
@@ -84,13 +99,18 @@ memory — IdP UIs and SCIM connectors evolve frequently.
 | Security policies (overview, design, migration, sign-in) | `security-policies.md`, `security-policies-best-practices.md`, `security-policy-guides.md`, `security-policies-migration-guide.md`, `sign-in-policy.md` |
 | MFA / 2FA enforcement | `two-factor-authentication.md`, `two-factor-authentication-security-policies.md` |
 | Device trust (overview, posture checks, managed devices) | `trusted-devices.md`, `device-posture-checks.md`, `managed-devices.md`, `device-security-guide.md`, `windows-managed-devices.md`, `manually-verified-devices.md`, `managing-devices.md`, `device-failures.md`, `devices.md`, `device-only-resource-policies.md` |
-| MDM / EDR integration (Jamf, Kandji/Iru, Intune, etc.) | `jamf-configuration.md`, `jamf-mdm.md`, `kandji-configuration.md`, `kandji-mdm.md`, `iru-configuration.md`, `iru-mdm.md`, `intune-configuration.md`, `omnissa-workspace-one-mdm.md`, `crowdstrike-configuration.md`, `sentinelone-configuration.md`, `1password-configuration.md` |
+| MDM / EDR integration (native, per-vendor) | `jamf-configuration.md`, `jamf-mdm.md`, `kandji-configuration.md`, `kandji-mdm.md`, `iru-configuration.md`, `iru-mdm.md`, `intune-configuration.md`, `omnissa-workspace-one-mdm.md`, `crowdstrike-configuration.md`, `sentinelone-configuration.md`, `1password-configuration.md` |
+| **Automating device trust from an MDM/EDR inventory** — bridge/middleware for FleetDM, Automox, JumpCloud, Mosyle, Datto RMM and others; sets `isTrusted` via the API | `gh-twingate-solutions-twingate-mdm-connector.md` |
+| **Migrating group→resource access between IdPs** (fuzzy group matching, dry-run, rollback) | `gh-twingate-solutions-idp-migrator.md` |
+| **Self-service group access via Slack** (profiles, approval workflows, time-bound) | `gh-twingate-labs-tg-group-profile-manager.md`, `gh-twingate-labs-tg-group-profile-manager-helm.md` (Helm deploy) |
+| **Location-based group switching** (office vs. remote; experimental template) | `gh-twingate-solutions-twingate-wayfinder-app.md` |
+| **SAML SP reference implementation** (Django + pysaml2, JumpCloud IdP) | `gh-twingate-labs-saml_service_provider.md` |
 | JIT / ephemeral access, contractor patterns | `jit-access-requests.md`, `resources-reviewing-access-requests.md`, `ephemeral-access-to-resources.md`, `vendor-and-contractor-access-management.md`, `usage-based-auto-lock.md` |
 | Groups, users, admins, offboarding | `groups.md`, `users.md`, `admins.md`, `offboarding-users.md` |
 | Authentication, sessions, social logins | `authentication.md`, `how-sessions-work.md`, `social-logins.md` |
 | Service accounts | `service-accounts-guide.md` |
 | SaaS app gating | `saas-app-gating.md`, `saas-app-gating-best-practices.md` |
+| Entra ID login anomalies (unassigned users can log in; social login "no matching user") | `4707021810-entra-id-all-users-are-able-to-log-into-twingate-even-though-they-are-not-assigned.md`, `4139538626-microsoft-social-logins-fail-with-an-entraid-account-there-is-no-matching-user-in-this-tenant.md` |
 
-For comprehensive coverage, see [`references/`](./references/) for the full
-set of doc summaries. **Default to checking** — IdP and MDM integration
-guides change as vendor UIs and APIs evolve.
+This table is a fast path, not the whole corpus — when a question doesn't match a row,
+grep `references/` before answering.

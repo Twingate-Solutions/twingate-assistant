@@ -45,6 +45,19 @@ machine types from training-data memory.
 
 ---
 
+## Search References First
+
+`skills/*/references/` also holds `gh-{org}-{repo}.md` summaries of public Twingate
+GitHub repos and `{numeric-id}-{slug}.md` help-center articles — filenames hide the
+tool names and platform details in the bodies. **Grep before answering, and before
+telling a user no tool exists for something:**
+
+```bash
+grep -ril "gke\|compute engine" skills/*/references/
+```
+
+---
+
 ## Connector Hosting Options (in order of recommendation)
 
 ### 1. GCE with Docker (default recommendation)

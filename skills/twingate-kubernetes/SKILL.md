@@ -6,6 +6,10 @@ description: >
   cluster pods outward through Twingate, gates kubectl access via Twingate, or integrates
   Twingate into a GitOps workflow. Also trigger when an existing K8s stack needs connector
   deployment, token secret management, or declarative Twingate resource definitions.
+  Also trigger for Helm chart `values.yaml` fields, operator CRD kinds (`TwingateConnector`,
+  `TwingateResource`, `TwingateResourceAccess`, `TwingateGroup`, `TwingateGateway`,
+  `TwingateCertificateAuthority`), kubeconfig sync automation, or running the Twingate
+  headless client as a Kubernetes sidecar container.
 ---
 
 ## Role
@@ -60,25 +64,32 @@ duplicates.
 - **Always inspect the Helm chart `values.yaml` at the target chart version before writing
   configuration** — the schema evolves between releases; do not rely on third-party docs
   that may reference outdated field names.
+- **Check `references/gh-twingate-kubernetes-operator-wiki.md` before generating any CRD
+  manifest.** It carries the full CRD list, the fields that are immutable once set
+  (`remoteNetworkId`, `resourceRef`, `groupRef`, `principalId`, `principalExternalRef`,
+  resource `type`), and cross-field constraints (`accessPolicy`/`approvalMode`/`expiresAt`
+  must be `null` for a `ServiceAccount` principal) — writing a CRD from memory will produce
+  a spec that applies but silently violates one of these.
 
-## When to Verify
+## Search References First
 
-This skill body covers patterns and decisions, not chart values or CRD
-schemas. **Before answering questions involving any of the following, read
-the relevant `references/` file first** — and cite it in your response:
+**Grep `references/` with the user's own keywords before answering, and cite what you
+find.** Filenames reveal only the topic — CRD kinds, config field names, and gotcha
+strings live in the file bodies, so a filename scan alone will miss them:
 
-- Specific Helm chart values keys (token field names, image tag, anti-affinity)
-- CRD field names and schemas (`TwingateConnector`, `TwingateResource`, etc.)
-- Helm install / upgrade commands and chart version compatibility
-- Kubectl proxy mode configuration (when not in IDFW context)
+```
+grep -ril "kopf" references/               # -> gh-twingate-kubernetes-operator-wiki.md
+grep -ril "sidecar" references/            # -> gh-twingate-labs-tg-client-k8s-sidecar.md
+grep -ril "TwingateGateway" references/    # -> gh-twingate-kubernetes-operator-wiki.md
+```
 
-For the **authoritative Helm chart values schema**, clone
-`https://github.com/Twingate/helm-charts` and inspect
-`charts/connector/values.yaml`. For **CRD schemas**, clone
-`https://github.com/Twingate/kubernetes-operator` and check `config/crd/`.
-
-Do not answer these from training-data memory — chart values keys and CRD
-fields drift between releases.
+Never answer from training-data memory for: Helm chart values keys, CRD field names and
+schemas (`TwingateConnector`, `TwingateResource`, `TwingateResourceAccess`, `TwingateGroup`,
+`TwingateGateway`, `TwingateCertificateAuthority`), Helm install/upgrade commands and chart
+version compatibility, or kubectl proxy mode configuration outside IDFW. Chart values keys
+and CRD fields drift between releases. If the user asks whether tooling or a reference
+module exists for a Kubernetes pattern — sidecar access, kubeconfig sync, GitOps CRDs —
+**search before saying no.**
 
 ## Routing
 
@@ -96,21 +107,28 @@ fields drift between releases.
 
 ## References
 
-`references/` contains current Twingate doc summaries, refreshed weekly.
-**Consult these before answering fact-shaped questions.**
+See [`references/`](./references/) for the current corpus, refreshed weekly. Two kinds of
+file live there:
+
+- **`{slug}.md`** — summaries of `twingate.com/docs` pages (product documentation).
+- **`gh-{org}-{repo}.md`** — summaries of public Twingate GitHub repos: the Helm charts and
+  operator source, the operator wiki (CRD/API reference), and community tooling.
 
 | If the user asks about… | Read first |
 |---|---|
-| Helm chart deployment, values keys, install commands | `k8s-helm-chart.md` |
+| Helm chart deployment, values keys, install commands (product doc) | `k8s-helm-chart.md` |
 | Helm chart upgrades and chart version handling | `k8s-helm-chart-upgrades.md` |
-| Operator CRDs, GitOps with `TwingateResource` / `TwingateRemoteNetwork` | `kubernetes-operator.md`, `Getting-Started.md` |
+| **Helm chart repo structure, `helm repo add`, contributing a chart** | `gh-twingate-helm-charts.md` |
+| Operator overview, GitOps with `TwingateResource` / `TwingateRemoteNetwork` (product doc) | `kubernetes-operator.md` |
+| **Operator install (OCI vs. git clone), API token permission requirements, "CRDs are not auto-updated on Helm upgrade" gotcha** | `gh-twingate-kubernetes-operator.md` |
+| **Full CRD list and schema** (`TwingateConnector`, `TwingateResource`, `TwingateResourceAccess`, `TwingateGroup`, `TwingateGateway`, `TwingateCertificateAuthority`), immutable fields, `kopf`-based reconciliation, image auto-update policy | `gh-twingate-kubernetes-operator-wiki.md` — replaces the old "Getting-Started" wiki-page pointer, which no longer exists as a standalone reference file |
 | Cluster service exposure (private services to Twingate users) | `k8s-private-services.md`, `k8s.md` |
 | Public service exposure patterns | `k8s-public-services.md` |
 | kubectl access via Twingate (non-IDFW) | `k8s-cluster-access.md`, `k8s-kubectl.md` |
 | Kubeconfig sync automation | `kubernetes-kubeconfig-sync.md` |
-| Helm values schema (exact field names) | Helm chart repo: `charts/connector/values.yaml` |
-| CRD schemas (exact field names) | Operator repo: `config/crd/` |
+| **Running the Twingate client as a pod sidecar** (service-account key injection, `privileged: true` requirement, example-only — not a hardened chart) | `gh-twingate-labs-tg-client-k8s-sidecar.md` |
+| Helm values schema (exact field names) | `gh-twingate-helm-charts.md`, or clone `https://github.com/Twingate/helm-charts` and inspect `charts/connector/values.yaml` |
+| CRD schemas (exact field names) | `gh-twingate-kubernetes-operator-wiki.md`, or clone `https://github.com/Twingate/kubernetes-operator` and check `config/crd/` |
 
-For comprehensive coverage, see [`references/`](./references/) for the full
-set of doc summaries. **Default to checking** — chart values keys and CRD
-schemas drift between versions.
+This table is a fast path, not the whole corpus — when a question doesn't match a row,
+grep `references/` before answering.

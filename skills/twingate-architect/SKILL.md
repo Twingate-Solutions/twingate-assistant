@@ -6,7 +6,10 @@ description: >
   or is planning a ZTNA rollout. Activate for: zero trust, ZTNA, remote access
   architecture, network design with Twingate, VPN replacement, microsegmentation,
   split DNS, NAT traversal, P2P vs Relay, Remote Network topology, Resource definition
-  strategy, or deployment sequencing.
+  strategy, or deployment sequencing. Also activate for community/reference deployment
+  patterns: exposing a self-hosted AI chat assistant (OpenClaw, WhatsApp/Telegram bots)
+  with no public inbound ports, private Railway/PaaS app deployment with zero-ingress,
+  or "what does the twingate-assistant plugin itself do" meta-questions.
 ---
 
 ## Role
@@ -42,23 +45,25 @@ evaluating, or asking architecture-level questions, this skill answers them.
 - **Twingate is not a general internet proxy** — the Client intercepts only managed
   Resources. Exit Networks serve specific egress use cases.
 
-## When to Verify
+## Search References First
 
-This skill body covers design opinions and architectural concepts, not
-detailed component specifications. **Before answering questions involving any
-of the following, read the relevant `references/` file first** — and cite it
-in your response:
+**Grep `references/` with the user's own keywords before answering, and cite what you
+find.** Filenames reveal only the topic — vendor names, tool names, error strings, and
+architectural details live in the file bodies, so a filename scan alone will miss them:
 
-- Component-level technical specifications (Controller / Client / Connector / Relay)
-- Specific encryption protocols, ciphers, or key-exchange details
-- DNS interception flow specifics (which queries are intercepted, in what order)
-- P2P / NAT-traversal mechanics and which environments they fail in
-- Compliance-framework specifics (HIPAA, SOC 2, PCI, GDPR, DORA, FedRAMP)
-- Platform-specific Client behavior (macOS, Windows, Linux, iOS, Android, ChromeOS)
-- Specific use-case patterns (database access, bastion replacement, VPN replacement)
+```
+grep -ril "openclaw" references/       # -> gh-twingate-community-openclaw-secure-access.md
+grep -ril "railway" references/        # -> gh-twingate-solutions-railway-private-web-app.md
+grep -ril "nat traversal" references/
+```
 
-Do not answer architectural-detail or compliance questions from training-data
-memory — both Twingate's implementation details and compliance scope evolve.
+Never answer from training-data memory for: component-level technical specifications
+(Controller / Client / Connector / Relay), encryption protocols and key-exchange details,
+DNS interception flow specifics, P2P/NAT-traversal mechanics, compliance-framework scope
+(HIPAA, SOC 2, PCI, GDPR, DORA, FedRAMP), platform-specific Client behavior, or specific
+use-case/reference-deployment patterns. Both Twingate's implementation details and
+compliance scope evolve. If the user asks whether a deployment pattern or reference
+example exists for X, **search before saying no.**
 
 ## Routing
 
@@ -71,13 +76,17 @@ memory — both Twingate's implementation details and compliance scope evolve.
 
 ## References
 
-`references/` contains current Twingate doc summaries, refreshed weekly.
-**Consult these before answering fact-shaped questions.**
+See [`references/`](./references/) for the current corpus, refreshed weekly. Two kinds
+of file live there:
+
+- **`{slug}.md`** — summaries of `twingate.com/docs` pages (product documentation).
+- **`gh-{org}-{repo}.md`** — summaries of public Twingate GitHub repos: community and SE
+  reference deployments, and the twingate-assistant plugin itself.
 
 | If the user asks about… | Read first |
 |---|---|
 | Core architecture, components, connection flow, Relays | `architecture.md`, `how-twingate-works.md`, `client-connection-flow.md`, `detailed-client-connection-flow.md`, `understanding-relays.md` |
-| Network model, Remote Networks, Resources, aliases, exclusions, tags | `network-overview.md`, `remote-networks.md`, `remote-network-best-practices.md`, `resources.md`, `resource-aliases.md`, `resource-exclusion.md`, `resource-policies.md`, `policy-on-resource-migration.md`, `tags.md`, `location-requirements.md`, `ip-overlap.md`, `customer-networks.md` |
+| Network model, Remote Networks, Resources, aliases, exclusions, tags | `network-overview.md`, `remote-networks.md`, `remote-network-best-practices.md`, `resources.md`, `resource-aliases.md`, `resource-exclusion.md`, `exclusion.md` (older slug, same topic), `resource-policies.md`, `policy-on-resource-migration.md`, `tags.md`, `location-requirements.md`, `ip-overlap.md`, `customer-networks.md` |
 | DNS model, split DNS, DNS forwarding | `how-dns-works-with-twingate.md`, `how-twingate-forwards-dns.md`, `introduction-to-dns.md`, `private-dns-best-practices.md`, `supporting-unqualified-domain-names.md` |
 | P2P / NAT traversal | `peer-to-peer-communication-in-twingate.md`, `how-nat-traversal-works.md`, `local-peer-to-peer-best-practices.md` |
 | Encryption, cryptography | `how-encryption-works-in-twingate.md` |
@@ -101,7 +110,9 @@ memory — both Twingate's implementation details and compliance scope evolve.
 | Product lifecycle, service status, support, FAQ | `release-stages.md`, `maintenance-events-service-status-outages.md`, `ubuntu-18-04-eol.md`, `support.md`, `faq.md` |
 | MSP, multi-tenant, partner deployments | `msp.md`, `msp-billing.md` |
 | Quick start / onboarding | `quick-start.md`, `automated-quick-start.md`, `digitalocean-getting-started.md` |
+| **Self-hosted AI chat assistant with zero public ingress** (OpenClaw / WhatsApp / Telegram bot, localhost-bound gateway, Docker Compose or DigitalOcean Terraform) | `gh-twingate-community-openclaw-secure-access.md` |
+| **Private PaaS web app, no public domain** (Railway + Connector, Layer 4 only, proof-of-concept) | `gh-twingate-solutions-railway-private-web-app.md` |
+| **What the twingate-assistant plugin itself covers** (skill/agent inventory, install/update, forking) | `gh-twingate-solutions-twingate-assistant.md` |
 
-This table indexes every file in `references/` (~150 architecture-related
-summaries). **Default to checking** — architectural details, compliance
-scope, and use-case patterns evolve.
+This table is a fast path, not the whole corpus (~150 architecture-related
+summaries) — when a question doesn't match a row, grep `references/` before answering.

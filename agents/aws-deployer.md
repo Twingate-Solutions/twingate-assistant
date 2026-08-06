@@ -43,6 +43,19 @@ from training-data memory.
 
 ---
 
+## Search References First
+
+`skills/*/references/` also holds `gh-{org}-{repo}.md` summaries of public Twingate
+GitHub repos and `{numeric-id}-{slug}.md` help-center articles — filenames hide the
+tool names, AWS services, and error strings in the bodies. **Grep before answering, and
+before telling a user no tool exists for something:**
+
+```bash
+grep -ril "cloudwatch\|lambda" skills/*/references/
+```
+
+---
+
 ## Connector Hosting Options (in order of recommendation)
 
 ### 1. ECS Fargate (recommended for ECS shops)
@@ -190,6 +203,7 @@ source file in your response.**
 | AWS-specific Terraform patterns (Twingate + AWS) | `skills/twingate-terraform/references/terraform-aws.md` |
 | `DEAD_NO_RELAYS` diagnosis, connector logs | `skills/twingate-connectors/references/connector-real-time-logs.md`, `skills/twingate-troubleshoot/references/connector-failures.md` |
 | Identity Provider integration (SAML, SCIM) | `skills/twingate-identity/references/` (per-IdP file) |
+| Auto-creating Resources/groups from EC2/ECS/RDS tag changes (Lambda + CloudWatch Events) | `skills/twingate-api/references/gh-twingate-labs-tg-aws-tag-sync.md` |
 
 **Default to checking** — do not write port numbers, image tags, env var
 names, instance sizes, or Terraform field names from memory.

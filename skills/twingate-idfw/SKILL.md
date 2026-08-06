@@ -6,7 +6,10 @@ description: >
   configures Certificate Authorities (X.509 or SSH CA, local or HashiCorp Vault),
   routes kubectl through the Twingate gateway, automates IDFW setup with Terraform or
   Ansible, sets up contractor or vendor SSH access, or asks about the Identity Firewall
-  (IDFW). This skill owns protocol-level identity enforcement — not just network-level access.
+  (IDFW). This skill owns protocol-level identity enforcement — not just network-level
+  access. Also activate for: session-recording playback/archival (asciicast, .cast files),
+  reviewing recorded SSH or kubectl sessions for dangerous commands or leaked secrets, or
+  self-hosting a session-recording ingest/browse UI for Gateway audit logs.
 ---
 
 ## Role
@@ -53,29 +56,37 @@ capabilities. You need a gateway.
   for the current protocol support matrix and roadmap. Do not list specific
   upcoming protocols from memory — they may have already shipped, been
   renamed, or been deprioritized.
+- **The Gateway itself is the only production-supported component here.** Session-recording
+  *playback/archival* tooling (e.g. `gh-twingate-solutions-gatorcast.md`) is explicitly an
+  example/reference project with no warranty — recommend it for self-hosted review of
+  existing recordings, but tell the user it is not a supported Twingate product before they
+  put it in a compliance-critical path.
 
-## When to Verify
+## Search References First
 
-This skill body covers concepts and decisions, not gateway config schemas
-or CA setup steps. **Before answering questions involving any of the
-following, read the relevant `references/` file first** — and cite it in
-your response:
+**Grep `references/` with the user's own keywords before answering, and cite what you
+find.** Filenames reveal only the topic — Helm value names, env vars, and error strings
+live in the file bodies, so a filename scan alone will miss them:
 
-- Gateway config YAML keys and structure (recording, ssh.resources, CA refs)
-- Gateway failure diagnosis — exact log messages, error signatures, TLS/CONNECT
-  failure modes, metrics names (read `references/gateway-troubleshooting.md`)
-- Admin console navigation paths and UI labels
-- Specific Vault secrets engine paths or policy syntax
-- Smallstep CA configuration syntax
-- Helm chart values for kubectl proxy mode
-- Supported SSH features, protocol matrix, IDFW roadmap items
+```
+grep -ril "asciicast" references/      # -> gh-twingate-gateway-wiki.md, gh-twingate-gateway.md, gh-twingate-solutions-gatorcast.md
+grep -ril "vault" references/          # -> ssh-privileged-access-overview.md, ssh-installation.md
+grep -ril "prometheus" references/     # -> gh-twingate-gateway-wiki.md
+```
 
-For **gateway deployment examples** (Helm chart values, Docker Compose,
-systemd), inspect `https://github.com/Twingate/gateway` — the `deploy/`
-directory contains current configuration.
+Never answer from training-data memory for: gateway config YAML keys and structure
+(recording, ssh.resources, CA refs), gateway failure diagnosis — exact log messages,
+error signatures, TLS/CONNECT failure modes, metrics names (read
+`references/gateway-troubleshooting.md`), admin console navigation paths and UI labels,
+Vault secrets engine paths or policy syntax, Smallstep CA configuration syntax, Helm
+chart values for kubectl proxy mode or session recording, or the supported SSH/protocol
+matrix and IDFW roadmap. Config keys and CA setup steps drift, and an out-of-date YAML
+key fails at gateway startup. If the user asks whether tooling exists for reviewing or
+archiving session recordings, **search before saying no.**
 
-Do not answer protocol-support, CA-setup, or YAML-schema questions from
-training-data memory.
+For the **Gateway's own Helm chart values and deploy examples**, `gh-twingate-gateway-wiki.md`
+and `gh-twingate-gateway.md` summarize the repo and its wiki; for exact current YAML keys,
+inspect `https://github.com/Twingate/gateway` (`deploy/` directory) directly.
 
 ## Routing
 
@@ -97,10 +108,14 @@ training-data memory.
 
 ## References
 
-`references/` contains current Twingate doc summaries, refreshed weekly —
-plus `gateway-troubleshooting.md`, a hand-authored field guide from real
-gateway testing (no public doc equivalent; never auto-regenerated).
-**Consult these before answering fact-shaped questions.**
+See [`references/`](./references/) for the current corpus, refreshed weekly. Two kinds
+of file live there, plus one hand-authored field guide:
+
+- **`gateway-troubleshooting.md`** — hand-authored field guide from real gateway testing.
+  No public doc equivalent; never auto-regenerated.
+- **`{slug}.md`** — summaries of `twingate.com/docs` pages (product documentation).
+- **`gh-{org}-{repo}.md`** — summaries of the Gateway's own GitHub repo/wiki and
+  community/SE tooling built on top of its session recordings.
 
 | If the user asks about… | Read first |
 |---|---|
@@ -108,11 +123,13 @@ gateway testing (no public doc equivalent; never auto-regenerated).
 | IDFW feature overview, protocol support matrix, roadmap | `identity-firewall.md`, `identity-firewall-overview.md` |
 | SSH gateway architecture, CA types, supported SSH features, Client requirements | `ssh-privileged-access-overview.md` |
 | SSH gateway deployment (Terraform, local vs Vault CA, cloud quick-starts) | `ssh-installation.md` |
-| Kubectl proxy mode, K8s RBAC integration, K8s session recording | `kubernetes-access.md`, `wiki.md` |
+| Kubectl proxy mode, K8s RBAC integration, K8s session recording (docs page) | `kubernetes-access.md` |
+| **Gateway repo/wiki** — protocol support (K8s/SSH/Web App coming soon), GAT auth flow, identity propagation, asciicast v2 session recording, Prometheus metrics, Helm chart values, Docker image | `gh-twingate-gateway.md`, `gh-twingate-gateway-wiki.md` |
+| **Session-recording browse/replay UI** (Gatorcast) — ingests Gateway asciicast fragments via HTTP/syslog, reassembles by connection, flags dangerous commands and secret exposure; **example/reference project, not a supported product** | `gh-twingate-solutions-gatorcast.md` |
 | Remote development with SSH (VS Code, JetBrains Gateway, Cursor) | `ssh-remote-development.md` |
 | Smallstep CA integration | `ssh-smallstep.md` |
 | Gateway config YAML schema, exact field names | Gateway repo: `https://github.com/Twingate/gateway` (`deploy/` directory) |
 
-For comprehensive coverage, see [`references/`](./references/) for the full
-set of doc summaries. **Default to checking** — gateway config keys and CA
-setup steps drift, and an out-of-date YAML key fails at gateway startup.
+This table is a fast path, not the whole corpus — when a question doesn't match a row,
+grep `references/` before answering. Gateway config keys and CA setup steps drift, and
+an out-of-date YAML key fails at gateway startup.

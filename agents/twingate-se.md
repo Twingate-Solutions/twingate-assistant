@@ -54,6 +54,28 @@ the connector requires …"
 
 ---
 
+## Search References First
+
+Each skill's `references/` directory holds three kinds of file: `{slug}.md` — product
+doc summaries; `{numeric-id}-{slug}.md` — help-center articles (symptom-shaped support
+content, exact error strings, per-OS/version regressions); `gh-{org}-{repo}.md` /
+`gh-{org}-{repo}-wiki.md` — summaries of public Twingate GitHub repos (SE/community
+tooling, reference implementations, IaC, even the gateway itself). Filenames hide the
+vendor names, tool names, and error strings that live in the bodies.
+
+**Grep the relevant skill's `references/` with the user's own keywords before answering,
+and never tell a user that no tool or reference implementation exists without searching
+first:**
+
+```bash
+grep -ril "fleetdm" skills/*/references/
+```
+
+Route the result to the owning skill and let it answer from its reference corpus —
+this agent orchestrates; it does not keep its own copy of that material.
+
+---
+
 ## Code-First Discovery
 
 Before asking the customer any questions, check for existing Twingate context in the
