@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/7488571404-technical-support-priority-levels
 type: help
-fetched: 2026-08-06
-source_version: 9f632b414e2d868a7f1687766898dc6adc86b80fa76515d5706637ed23b02123
+fetched: 2026-08-09
+source_version: 1b6f362031440059560944784d0f450f0b079855a2f90d92123f22c04a97e56f
 ---
 
 # Technical Support Priority Levels
@@ -11,29 +11,27 @@ source_version: 9f632b414e2d868a7f1687766898dc6adc86b80fa76515d5706637ed23b02123
 Technical Support Priority Levels
 
 ## Summary
-Defines four priority levels (P1–P4) for classifying issues when engaging Twingate Technical Support. Proper priority alignment helps route and resolve issues appropriately.
+Defines four priority levels (P1–P4) for classifying issues when engaging Twingate Technical Support. Proper priority alignment helps route and resolve issues efficiently.
 
-## Priority Level Reference
+## Priority Level Definitions
 
-| Level | Name | Criteria | Example |
-|-------|------|----------|---------|
-| **P1** | Urgent | Core/mission-critical services non-functional for large number of users; no workaround | Most users cannot authenticate or access resources |
-| **P2** | High | Services functional but degraded performance; potentially severe impact for multiple users | Connector or Remote Network issue blocking multiple users |
-| **P3** | Normal | Non-critical; limited performance impact; affects specific users | Individual users having Client or Resource access issues |
-| **P4** | Low | Non-impacting; informational only | General questions, non-urgent inquiries |
+| Level | Name | Description | Example |
+|-------|------|-------------|---------|
+| **P1** | Urgent | Core/mission-critical services critically affected; large number of users impacted; no workaround | Most users cannot authenticate or access resources |
+| **P2** | High | Services functional but degraded performance; potentially severe impact for multiple users | Connector or Remote Network issue causing multiple users to lose resource access |
+| **P3** | Normal | Non-critical; limited performance impact; affects specific users only | Some users experiencing issues with Twingate Client or a specific Resource |
+| **P4** | Low | Non-impacting; informational only | General questions, FYIs |
 
-## Key Information
-- Four priority levels: P1 (Urgent), P2 (High), P3 (Normal), P4 (Low)
-- Scale is based on **scope of impact** (number of users affected) and **severity** (functional vs. degraded)
-- P1 requires: no workaround available + large user impact
-- P2 applies when services still respond but multiple users are affected
-- P3 is for isolated user issues with no significant service-wide impact
-- Accurate priority classification is explicitly requested by Twingate
+## Key Differentiators
+
+- **P1 vs P2**: P1 = service is down/not responding; P2 = service is up but degraded
+- **P2 vs P3**: P2 = multiple users affected; P3 = specific/individual users affected
+- **P3 vs P4**: P3 = user experience impacted; P4 = no impact
 
 ## Gotchas
-- Do not escalate to P1 unless there is **no workaround** and impact is **broad** — Twingate specifically notes that proper alignment is appreciated
-- A single Connector failure affecting multiple users is P2, not P1 (services are still responding)
-- Individual user Client issues are P3 even if the user considers them blocking
+
+- Misaligning priority to the reported issue is explicitly discouraged — use the definitions above to self-classify before submitting
+- P1 requires both broad user impact **and** no available workaround; partial outages with workarounds likely qualify as P2
 
 ## Related Docs
 - Engaging Technical Support (referenced but not linked in source)

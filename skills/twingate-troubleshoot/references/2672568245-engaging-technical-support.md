@@ -1,77 +1,78 @@
 ---
 source: https://help.twingate.com/articles/2672568245-engaging-technical-support
 type: help
-fetched: 2026-08-06
-source_version: 6a1171f7616bd89c8fa2b26db091f5b57810ec0ea6000fa6d4ac11376ea39214
+fetched: 2026-08-09
+source_version: 1677f217810f0dd3126d5278d30327f33201bad2311e0fb8119fe6b2caaff754
 ---
 
 # Engaging Technical Support
 
 ## Summary
-Guide for Twingate Admins to open technical support requests via the Twingate Customer Portal. End users must contact their Twingate Admin directly; Twingate support only works with Admins. Requires an active subscription with ticketed support entitlement.
+Describes how Twingate Admins can open technical support tickets via the Twingate Customer Portal. End users must contact their own Twingate Admins—Twingate support works only with Admins directly. Requires an active subscription with ticketed support entitlement.
 
 ## Key Information
 - **Who can engage support**: Twingate Admins only (not end users)
-- **Community support**: Available for all subscription tiers
-- **Ticketed support**: Requires active subscription entitlement
+- **Community support**: Available to all subscriptions
+- **Ticketed support**: Requires active subscription with that entitlement
 - **Portal access**: Admin Console → Help → Support
 
 ## What Support Covers
-**In scope:**
+**Supported:**
 - Native Connector or Client faults/errors
-- Features not working as expected
-- Connectivity troubleshooting (after self-serve steps exhausted)
+- Twingate component/feature not working as expected
+- Connectivity troubleshooting (after self-serve guide exhausted)
 
-**Out of scope:**
+**Not Supported:**
 - Billing (use Subscription Management)
-- Account/permission changes (2FA resets, role changes)
+- User account changes (2FA resets, role changes)
 - Implementation or configuration assistance (contact sales)
 - Third-party apps, OS, network issues
-- Twingate CLI, custom API scripts, deployment scripts
-
-## Prerequisites
-- Active subscription with ticketed support entitlement
-- Completed self-service troubleshooting steps
-- Must be a Twingate Admin
+- Twingate CLI, custom API scripts, or deployment scripts
 
 ## Step-by-Step: Opening a Ticket
-1. Sign into the Twingate Customer Portal
+1. Sign into Twingate Customer Portal
 2. Click **Create Ticket** (top right)
 3. Select **Technical Assistance** from dropdown
 4. Fill in required fields (see Configuration Values below)
-5. Attach full log bundle (Client Logs or Connector Logs)
+5. Attach full log bundle (Client or Connector logs)
 6. Click **Submit**
 
 ## Configuration Values (Ticket Fields)
 | Field | Notes |
 |-------|-------|
 | Issue Type | Type of issue observed |
-| Priority | Align to Technical Support Priority Levels; P1/Urgent = full org production down only |
+| Priority | Align to Priority Levels; P1/Urgent = full org production down only |
 | Twingate Component | Optional; affected component |
 | Subject | Brief issue statement |
 | Description | See required details below |
 | Attachments | Full log bundle required |
 
-**Required description details:**
+**Required Description Details:**
 - Name/ID of affected Connector, Resource, User, or Device
-- Self-serve troubleshooting results
+- Results from Self-Serve Troubleshooting Guide
 - Has this ever worked? Has anything changed?
 - Timestamp of occurrence
 - Frequency of issue
 - Error messages
-- Isolated vs. widespread impact
+- Isolated vs. widespread
 
 ## Gotchas
-- P1/Urgent priority is strictly for full production outages affecting the entire organization
-- Account changes (2FA reset, role changes) are not performed by support; exceptions require proof-of-identity showing email domain ownership
-- To view all organization tickets in the portal, request portal admin access from the support team
-- CLI, custom API scripts, and deployment scripts are explicitly out of scope
+- P1/Urgent priority is **only** for full production outages affecting the entire org—do not misuse
+- Twingate cannot perform account recovery without proof-of-identity showing ownership of the email domain
+- To view all organization tickets in portal, you must request **portal admin** access from Twingate Support
+- Environmental configurations that break Twingate functionality are not supported
+
+## Prerequisites
+- Active subscription with ticketed support entitlement
+- Self-serve troubleshooting already attempted
+- Must be a Twingate Admin
 
 ## Related Docs
-- Self-Service Resources / Self-Serve Troubleshooting Guide
+- Self-Service Resources
 - Technical Support Entitlement
 - Technical Support Coverage Hours
 - Technical Support Priority Levels
-- Subscription Management
+- Self-Serve Troubleshooting Guide
 - Client Logs / Connector Logs
 - Signing into the Twingate Customer Portal
+- Subscription Management
