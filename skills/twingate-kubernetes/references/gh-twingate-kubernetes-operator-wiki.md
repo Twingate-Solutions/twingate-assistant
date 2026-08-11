@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator/wiki
 type: github
-fetched: 2026-08-06
-source_version: 4221a38c45a5cf3bbc98f4942032d47c40631ff2
+fetched: 2026-08-09
+source_version: 30bad0d689c77c17db69a72fdffc5b12fc7658b6
 ---
 
 # Twingate Kubernetes Operator
@@ -62,6 +62,6 @@ A Kubernetes operator (OSS) that manages Twingate network resources as Kubernete
 - `isBrowserShortcutEnabled` only works on `Network`-type resources and cannot be used with wildcard addresses
 - `requestHeaderRewrites` only applies to `WebApp` resources
 - `TwingateGateway` and `TwingateResource` of type `Kubernetes`/`WebApp` require `gatewayRef`; `Network` resources do not allow it
+- `TwingateGateway.spec.remoteNetworkId` is immutable once set (overrides operator-wide default)
 - For HA, run multiple connectors with staggered `imagePolicy` schedules and pod anti-affinity rules
-- `principalExternalRef` name uniqueness is not enforced; if multiple entities share a name, the first match is used
-- Service annotation values must be quoted strings (unquoted `true` parses as boolean)
+- `principalExternalRef` name uniqueness is not enforced; if multiple

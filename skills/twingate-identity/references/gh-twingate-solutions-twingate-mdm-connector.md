@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-mdm-connector
 type: github
-fetched: 2026-08-06
-source_version: 167c50308d1cad7b31af56cc44b73aed80319f56
+fetched: 2026-08-09
+source_version: 9a512d6e94b5f2a7590dd336df5b63a538e6a973
 ---
 
 <!-- triage: unassigned -->
@@ -48,7 +48,7 @@ docker run --rm \
 | `twingate.tenant` | string | required | Subdomain from `acme.twingate.com` |
 | `twingate.api_key` | string | required | Twingate API key |
 | `trust.mode` | `any`/`all` | `any` | Trust if compliant in any vs. all providers |
-| `trust.max_days_since_checkin` | int | `7` | Skip devices not seen within this window |
+| `trust.max_days_since_checkin` | int \| `null` | `7` | Skip devices not seen within this window; `null` disables the recency check entirely |
 | `sync.interval_seconds` | int | `300` | Sync frequency |
 | `sync.dry_run` | bool | `false` | Log-only mode; no Twingate mutations |
 | `logging.level` | string | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
@@ -57,15 +57,13 @@ docker run --rm \
 ## Gotchas
 - **Never untrusts devices** — only sets `isTrusted: true`; removing trust requires manual action
 - Devices matched by zero providers are never trusted
-- Devices exceeding `max_days_since_checkin` are silently skipped
+- Devices exceeding `max_days_since_checkin` are silently skipped; set `max_days_since_checkin: null` to disable this check
 - `trust.mode: all` requires a device to appear in **every** enabled provider that recognizes it
 - If a provider errors, it is skipped for that cycle — not a fatal failure
 - Referenced `${ENV_VAR}` values that are unset cause startup exit
 - Several providers are implemented but **untested** against live instances
 
-## Related Docs
-- [docs/configuration.md](docs/configuration.md) — full config reference
-- [docs/providers/](docs/providers/) — per-provider setup guides
-- [docs/notifications.md](docs/notifications.md) — SMTP and webhook configuration
-- [docs/adding-a-provider.md](docs/adding-a-provider.md) — contributor guide for new providers
-- [docs/testing/overview.md](docs/testing/overview.md) — end-to-end testing guide
+## FleetDM Provider Notes
+- Config key is `url` (not `base_url`)
+- Pagination uses **0-indexed** pages with a page size of 500; stops when a page returns fewer rows than the page size
+- Online/offline state is read from Fleet's `status` field; only `status == "online"` is treated as online (`offline`, `new`, `mia`, `missing` are treated as not-online); set `trust.require_online
