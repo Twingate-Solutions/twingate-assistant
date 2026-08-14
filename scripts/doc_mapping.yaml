@@ -1484,9 +1484,6 @@ docs:
     type: help
 
   # twingate-dns-security
-  - url: https://help.twingate.com/articles/1263583820-dns-cisco-umbrella
-    skill: twingate-dns-security
-    type: help
   - url: https://help.twingate.com/articles/1402124326-windows-client-limitations-with-multiple-network-interfaces-with-differing-dns
     skill: twingate-dns-security
     type: help
@@ -1632,9 +1629,6 @@ docs:
     skill: twingate-troubleshoot
     type: help
   - url: https://help.twingate.com/articles/4838955865-netgear-router-blocking-twingate-connectivity
-    skill: twingate-troubleshoot
-    type: help
-  - url: https://help.twingate.com/articles/4898142252-how-to-download-a-list-of-app-store-macos-clients-from-your-twingate-tenant
     skill: twingate-troubleshoot
     type: help
   - url: https://help.twingate.com/articles/4982245028-using-nslookup-with-manually-defined-nameserver-fails-on-windows-with-twingate-client-running

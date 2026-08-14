@@ -4,8 +4,8 @@ fixtures/
 # Generated doc inventory (output of Session 9, used to pull fixtures)
 docs/doc-inventory.md
 
-# Claude Code session files — not part of the public plugin
-CLAUDE.md
+# Claude Code local settings — not part of the public plugin
+# (CLAUDE.md is now tracked and shipped as public contributor guidance)
 .claude/
 
 # Internal planning docs — kept local, not shipped with the plugin

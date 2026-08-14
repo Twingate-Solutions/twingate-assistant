@@ -46,7 +46,10 @@ it before theorizing about causes.** Never answer from training-data memory for:
 filtering category names, third-party DNS/AV product conflicts, exit-network
 configuration steps, or DNS Security Profile schema and priority mechanics — the
 category list and third-party integration behavior change and are documented per-vendor
-in `references/`.
+in `references/`. Filenames reveal only the topic — vendor names, tool names, and exact
+error strings live in the bodies. This skill also owns `gh-*` community repos (DIY VPN,
+Ubiquiti headless gateway); **if the user asks whether tooling or a reference build
+exists for X, grep before saying no.**
 
 ## Routing
 
@@ -80,7 +83,7 @@ of file live there:
 | Comprehensive DNS guide | `dns-ultimate-guide.md` |
 | **Personal/DIY exit-network VPN** — Terraform deploys for Minikube, DigitalOcean Droplets, or DigitalOcean Kubernetes; requires Home/Enterprise plan (Exit Networks unavailable on Starter) | `gh-twingate-community-diy-vpn.md` |
 | **Headless client on Ubiquiti UniFi gateways** — systemd-nspawn container intercepting a VLAN's DNS via iptables + bind9 and forwarding through Twingate split-DNS resolvers, for whole-VLAN access with no per-device client | `gh-twingate-community-ubiquiti-headless-gateway.md` |
-| **Third-party DNS filter / AV conflicts** — Cisco Umbrella, DNSFilter, AdGuard for Mac, Avast Real Site Protection running alongside Twingate | `1263583820-dns-cisco-umbrella.md`, `5745151855-dns-using-dnsfilter-alongside-twingate.md`, `8487611740-dns-using-adguard-for-mac-alongside-twingate.md`, `6928700605-dns-avast-real-site-protection.md` |
+| **Third-party DNS filter / AV conflicts** — DNSFilter, AdGuard for Mac, Avast Real Site Protection running alongside Twingate | `5745151855-dns-using-dnsfilter-alongside-twingate.md`, `8487611740-dns-using-adguard-for-mac-alongside-twingate.md`, `6928700605-dns-avast-real-site-protection.md` |
 | **CGNAT range & multi-interface DNS conflicts** — `100.96/12` collisions, Windows client only honoring the default-gateway interface's DNS, general multi-NIC DNS/resource-access issues | `4359531030-cgnat-ip-conflicts-dns-resolution-resource-access-issues-with-twingate.md`, `1402124326-windows-client-limitations-with-multiple-network-interfaces-with-differing-dns.md`, `3556574910-potential-dns-or-resource-access-issues-on-devices-with-multiple-network-interfaces-connected.md` |
 | **Linux DNS client bugs** — client fails to start with "All nameservers have failed" (Network Manager v1.42+ incompatibility), general DNS request delays | `9539322912-twingate-linux-client-fails-to-start-logs-show-dns-errors.md`, `4817674373-dns-request-delays-while-using-twingate-on-linux.md` |
 | **macOS Docker DNS resolution bug** — container's first DNS query succeeds, subsequent queries fall back to a non-CGNAT resolver; fix via pinning `--dns` flags to Twingate resolvers | `7318897884-macos-client-docker-container-s-second-connections-to-twingate-dns-resource-fails.md` |
