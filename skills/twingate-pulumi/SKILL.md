@@ -71,6 +71,15 @@ asks whether an SE reference script exists for a given cloud, **search before sa
 
 ## Routing
 
+**Co-activate, don't either/or.** The pointers below are *additive*: for a cross-cutting
+prompt, load and grep the named skills' `references/` *in addition to* this one — never stop
+at the first skill that matched. Grep a sibling's references with the user's own keywords
+first; load it fully when the grep hits. Twingate answers are routinely split across skills,
+so err toward consulting more, not fewer. Common cross-cutting clusters here: before writing
+IaC → **architect + connectors**; resource semantics / API behavior → **terraform** (the
+underlying API is identical); provisioning identity → **identity**; K8s secret passing →
+**kubernetes**.
+
 - **→ twingate-terraform**: for resource semantics and API behavior when Pulumi docs are
   incomplete — the underlying API is identical
 - **→ twingate-architect**: for Remote Network design, Resource strategy, or Group

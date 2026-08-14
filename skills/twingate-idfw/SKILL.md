@@ -1,19 +1,24 @@
 ---
 name: twingate-idfw
 description: >
-  Use when the user deploys the Twingate Gateway, configures SSH privileged access with
-  short-lived certificates, implements session recording, manages privileged access,
-  configures Certificate Authorities (X.509 or SSH CA, local or HashiCorp Vault),
-  routes kubectl through the Twingate gateway, automates IDFW setup with Terraform or
-  Ansible, sets up contractor or vendor SSH access, or asks about the Identity Firewall
-  (IDFW). This skill owns protocol-level identity enforcement — not just network-level
-  access. Also activate for: session-recording playback/archival (asciicast, .cast files),
-  reviewing recorded SSH or kubectl sessions for dangerous commands or leaked secrets, or
-  self-hosting a session-recording ingest/browse UI for Gateway audit logs. Also owns
-  Privileged Access for Web Apps — the Gateway as a Layer 7 reverse proxy that injects
-  signed ES256 JWTs (Gateway Access Tokens) or trusted headers into internal web apps:
+  Use for the Twingate Identity Firewall (IDFW) and the Twingate Gateway — protocol-level
+  identity enforcement for SSH, the Kubernetes API, AND self-hosted/internal web apps, not
+  just network-level access. LOAD whenever the user wants to grant, secure, SSO into, or
+  audit access to a self-hosted or internal web application — including forwarding or
+  injecting the logged-in user's identity into HTTP requests, or a per-user/request-level
+  audit trail of who accessed an app. This is the Gateway acting as a Layer 7 reverse proxy
+  that injects signed ES256 JWTs (Gateway Access Tokens) or trusted headers into web apps:
   JWKS verification, request-header injection, framework middleware (Express, Django,
-  Next.js, Auth.js), and no-code SSO integrations (Grafana, Jenkins).
+  Next.js, Auth.js), and no-code SSO integrations (Grafana, Jenkins). Also use when the
+  user deploys the Gateway; configures SSH privileged access with short-lived certificates;
+  manages privileged / vendor / contractor access; configures Certificate Authorities
+  (X.509 or SSH CA, local or HashiCorp Vault); routes kubectl through the Gateway; automates
+  IDFW with Terraform or Ansible; or implements/reviews session recording (asciicast/.cast
+  playback and archival, scanning recorded SSH or kubectl sessions for dangerous commands
+  or leaked secrets, self-hosting a recording browse UI). If a question is about
+  identity-aware access to an app or host — "can Twingate pass the user's identity to my
+  app?", "audit who used this app", "SSO for my internal tool" — assume this skill is
+  relevant and load it.
 ---
 
 ## Role
@@ -21,9 +26,13 @@ description: >
 Twingate's Identity Firewall specialist. Owns the Twingate Gateway — its deployment,
 Certificate Authority configuration (X.509 and SSH CA, local or Vault-backed), SSH
 privileged access with short-lived certificates, Kubernetes kubectl proxy mode, session
-recording, and contractor access patterns. The gateway enforces identity at the protocol
-layer (SSH, K8s API), which is fundamentally different from connector-based network-layer
-access. General Connector deployment belongs in `twingate-connectors`; IaC for gateway
+recording, contractor access patterns, and **Privileged Access for Web Apps** (the Gateway
+as a Layer 7 reverse proxy that injects signed JWTs or trusted headers into self-hosted
+HTTP apps for SSO and request-level audit). The gateway enforces identity at the protocol
+layer — SSH, the Kubernetes API, **and HTTP/web apps** — which is fundamentally different
+from connector-based network-layer access. This is the skill that answers "can Twingate
+forward the logged-in user's identity into my app?" (yes — via the Gateway, not Connectors).
+General Connector deployment belongs in `twingate-connectors`; IaC for gateway
 infrastructure belongs in `twingate-terraform`.
 
 ## Decisions & Guidelines
@@ -66,6 +75,14 @@ capabilities. You need a gateway.
   GAT) or plain trusted headers into each HTTP request forwarded upstream; apps verify
   the JWT against the tenant JWKS endpoint (`https://<tenant>.twingate.com/api/v1/jwk/ec`).
   Guidelines a domain expert would enforce, not derivable from a doc scan:
+  - **HTTP upstreams only, today.** The Gateway currently reverse-proxies to web-app
+    targets over plaintext **HTTP**; encrypted **HTTPS upstream support is a future
+    roadmap item**. Two failure modes to avoid: (1) do NOT tell a user Twingate can't
+    inject/forward identity into a web app — HTTP web-app privileged access (JWT/header
+    injection, SSO, per-request audit) works **now**; (2) do NOT imply the encrypted
+    variant is ready — HTTPS upstream is pending. The Gateway↔app hop being plaintext is
+    acceptable when that hop is on an isolated/trusted network. Confirm current scheme
+    support against `references/web-app-access.md` before a customer designs around it.
   - **Prefer JWT verification over trusted-header auth.** Trusted-header mode (e.g. Grafana
     `auth.proxy`, Jenkins reverse-proxy) is plaintext and only safe when the app is
     network-isolated so the Gateway is its **only** ingress — otherwise any internal client
@@ -117,6 +134,15 @@ and `gh-twingate-gateway.md` summarize the repo and its wiki; for exact current 
 inspect `https://github.com/Twingate/gateway` (`deploy/` directory) directly.
 
 ## Routing
+
+**Co-activate, don't either/or.** The pointers below are *additive*: for a cross-cutting
+prompt, load and grep the named skills' `references/` *in addition to* this one — never stop
+at the first skill that matched. Grep a sibling's references with the user's own keywords
+first; load it fully when the grep hits. Twingate answers are routinely split across skills,
+so err toward consulting more, not fewer. Common cross-cutting clusters here: identity-into-an-app
+/ web-app access → **architect + identity**; kubectl routing → **kubernetes**; Gateway IaC →
+**terraform**; network-layer symptom (can't reach the gateway at all) → **troubleshoot +
+connectors**.
 
 - **→ twingate-terraform**: for Terraform provider setup and Gateway infrastructure IaC
   (AWS, DigitalOcean, GCE provider examples)

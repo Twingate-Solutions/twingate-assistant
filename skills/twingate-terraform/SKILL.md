@@ -91,6 +91,15 @@ cloud, **search before saying no.**
 
 ## Routing
 
+**Co-activate, don't either/or.** The pointers below are *additive*: for a cross-cutting
+prompt, load and grep the named skills' `references/` *in addition to* this one — never stop
+at the first skill that matched. Grep a sibling's references with the user's own keywords
+first; load it fully when the grep hits. Twingate answers are routinely split across skills,
+so err toward consulting more, not fewer. Common cross-cutting clusters here: before writing
+IaC → **architect + connectors**; provisioning groups/policies → **identity**; Gateway (IDFW)
+infra → **idfw**; K8s Helm token passing → **kubernetes**; field missing from the provider →
+**api**.
+
 - **→ twingate-architect**: for Remote Network topology, Resource definition strategy, or
   Group design questions before writing IaC
 - **→ twingate-pulumi**: when the user wants the same patterns in TypeScript, Python, Go,

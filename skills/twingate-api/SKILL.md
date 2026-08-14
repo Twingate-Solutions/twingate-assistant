@@ -62,6 +62,14 @@ saying no.**
 
 ## Routing
 
+**Co-activate, don't either/or.** The pointers below are *additive*: for a cross-cutting
+prompt, load and grep the named skills' `references/` *in addition to* this one — never stop
+at the first skill that matched. Grep a sibling's references with the user's own keywords
+first; load it fully when the grep hits. Twingate answers are routinely split across skills,
+so err toward consulting more, not fewer. Common cross-cutting clusters here: automating a
+given object → also that object's skill (**connectors** / **identity** / **architect**);
+persistent lifecycle management → **terraform**/**pulumi**.
+
 - **→ twingate-terraform / twingate-pulumi**: when the user wants persistent IaC management rather than API scripting — IaC provides drift detection, audit trail, and lifecycle management that raw API scripts do not
 - **→ twingate-architect**: for understanding what resources, remote networks, groups, and connectors are before writing API automation against them
 - **→ twingate-connectors**: for `connectorGenerateTokens` context — token provisioning is an API operation, but the Connector deployment specifics (runtime env vars, restart behavior) live in twingate-connectors

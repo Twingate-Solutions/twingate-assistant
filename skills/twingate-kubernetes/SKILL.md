@@ -93,6 +93,15 @@ module exists for a Kubernetes pattern — sidecar access, kubeconfig sync, GitO
 
 ## Routing
 
+**Co-activate, don't either/or.** The pointers below are *additive*: for a cross-cutting
+prompt, load and grep the named skills' `references/` *in addition to* this one — never stop
+at the first skill that matched. Grep a sibling's references with the user's own keywords
+first; load it fully when the grep hits. Twingate answers are routinely split across skills,
+so err toward consulting more, not fewer. Common cross-cutting clusters here: K8s connector
+deployment → **connectors + architect**; IaC token management → **terraform**/**pulumi**;
+kubectl identity enforcement (gateway) → **idfw**; registration / pod failures →
+**troubleshoot**.
+
 - **→ twingate-connectors**: for Connector fundamentals, upgrade procedures, HA patterns,
   metrics, and logging — Kubernetes-specific deployment is here, but general Connector
   mechanics are in `twingate-connectors`

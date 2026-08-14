@@ -86,6 +86,15 @@ Codespaces, Coder, Spacelift, log shipping, autoscaling, dashboards, alerting �
 
 ## Routing
 
+**Co-activate, don't either/or.** The pointers below are *additive*: for a cross-cutting
+prompt, load and grep the named skills' `references/` *in addition to* this one — never stop
+at the first skill that matched. Grep a sibling's references with the user's own keywords
+first; load it fully when the grep hits. Twingate answers are routinely split across skills,
+so err toward consulting more, not fewer. Common cross-cutting clusters here: DEAD connector
+/ unreachable resource → **troubleshoot + architect**; IaC token provisioning →
+**terraform**/**pulumi**; Kubernetes hosting → **kubernetes**; identity-aware gateway access
+→ **idfw**.
+
 - **→ twingate-architect**: for questions about Remote Network topology or Resource
   definition strategy
 - **→ twingate-kubernetes**: for Helm chart deployment or K8s-specific Connector patterns

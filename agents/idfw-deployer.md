@@ -12,7 +12,7 @@ description: |
   'short-lived certs', 'privileged access management', 'web app access', 'JWT injection',
   or 'trusted header auth'.
 tools: Read, Grep, Glob, Bash, Write, Edit
-skills: twingate-idfw, twingate-kubernetes, twingate-terraform, twingate-identity
+skills: twingate-architect, twingate-connectors, twingate-terraform, twingate-pulumi, twingate-kubernetes, twingate-idfw, twingate-identity, twingate-api, twingate-dns-security, twingate-troubleshoot
 ---
 
 ## Role

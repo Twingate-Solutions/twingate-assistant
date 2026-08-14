@@ -53,6 +53,14 @@ exists for X, grep before saying no.**
 
 ## Routing
 
+**Co-activate, don't either/or.** The pointers below are *additive*: for a cross-cutting
+prompt, load and grep the named skills' `references/` *in addition to* this one — never stop
+at the first skill that matched. Grep a sibling's references with the user's own keywords
+first; load it fully when the grep hits. Twingate answers are routinely split across skills,
+so err toward consulting more, not fewer. Common cross-cutting clusters here: profile-to-group
+mapping → **identity**; split-DNS interception model → **architect**; filtering breaking
+access → **troubleshoot**.
+
 - **→ twingate-identity**: DNS Security Profiles attach to Groups; for group management, SCIM provisioning, or understanding how group membership determines which profile applies
 - **→ twingate-architect**: for split DNS model questions — understanding which DNS queries Twingate intercepts before configuring Internet Security
 - **→ twingate-troubleshoot**: when DNS filtering appears to be interfering with private resource access or general connectivity, or the symptom is a client-side bug rather than a DNS Security Profile design question

@@ -44,6 +44,17 @@ evaluating, or asking architecture-level questions, this skill answers them.
   separate from the IdP. SCIM makes the IdP the authoritative source of truth.
 - **Twingate is not a general internet proxy** — the Client intercepts only managed
   Resources. Exit Networks serve specific egress use cases.
+- **There are two access layers — never conflate them.** Connectors give *network-layer*
+  access: transparent TCP tunnels that route packets and do **not** inject or forward user
+  identity into traffic. The **IDFW Gateway** (`twingate-idfw`) is a *Layer 7* reverse proxy
+  that **does** inject the authenticated user's identity — signed JWTs or trusted headers —
+  into SSH, Kubernetes, and self-hosted **web app** requests, with per-request audit. So
+  when a user asks to grant, SSO into, or audit access to a self-hosted/internal web app, or
+  to "pass the logged-in user's identity to my app," that is an IDFW question: **load
+  `twingate-idfw`.** Never answer that Twingate can't forward identity into an app — HTTP
+  web-app privileged access works today (encrypted HTTPS upstream is a future item; the
+  network-layer connector path remains the fallback). Do not assert availability details
+  from memory — defer to `twingate-idfw`.
 
 ## Search References First
 
@@ -67,10 +78,23 @@ example exists for X, **search before saying no.**
 
 ## Routing
 
+**Co-activate, don't either/or.** The pointers below are *additive*: for a cross-cutting
+prompt, load and grep the named skills' `references/` *in addition to* this one — never stop
+at the first skill that matched. Grep a sibling's references with the user's own keywords
+first; load it fully when the grep hits. Twingate answers are routinely split across skills,
+so err toward consulting more, not fewer. Common cross-cutting clusters here: routing /
+connectivity diagnosis → **troubleshoot + connectors**; deployment or topology design →
+**connectors + identity** (+ **terraform**/**pulumi** for IaC); identity-aware or web-app
+access → **idfw + identity**.
+
 - **→ twingate-connectors**: for Connector deployment, HA, upgrade procedures, or
   platform-specific steps
 - **→ twingate-identity**: for IdP setup, SCIM, device trust, security policies, or
   group management
+- **→ twingate-idfw**: when the user wants identity-aware access to a self-hosted/internal
+  web app, SSO into an app, to inject/forward the user's identity into HTTP requests, or a
+  per-request audit of who accessed an app — plus SSH/kubectl privileged access and session
+  recording. Connectors give network reach; the IDFW Gateway adds the Layer 7 identity layer.
 - **→ twingate-troubleshoot**: when the user reports a symptom rather than a design question
 - **→ twingate-terraform / twingate-pulumi**: user wants to automate the deployment as IaC
 

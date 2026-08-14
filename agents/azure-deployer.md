@@ -7,7 +7,7 @@ description: |
   VNet networking for connectors, or troubleshooting connectivity in Azure. For
   multi-cloud or general architecture questions, use twingate-se instead.
 tools: Read, Grep, Glob, Bash, Write, Edit
-skills: twingate-architect, twingate-connectors, twingate-terraform, twingate-identity, twingate-troubleshoot
+skills: twingate-architect, twingate-connectors, twingate-terraform, twingate-pulumi, twingate-kubernetes, twingate-idfw, twingate-identity, twingate-api, twingate-dns-security, twingate-troubleshoot
 ---
 
 ## Role

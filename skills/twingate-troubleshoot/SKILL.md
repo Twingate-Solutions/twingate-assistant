@@ -117,6 +117,15 @@ weekly and documents bugs that did not exist when this model was trained.
 
 ## Routing
 
+**Co-activate, don't either/or.** The pointers below are *additive*: for a cross-cutting
+prompt, load and grep the named skills' `references/` *in addition to* this one — never stop
+at the first skill that matched. Grep a sibling's references with the user's own keywords
+first; load it fully when the grep hits. Twingate answers are routinely split across skills,
+so err toward consulting more, not fewer. Common cross-cutting clusters here: any
+connectivity diagnosis → **connectors + architect**; access-denied / policy / device trust →
+**identity**; DNS or exit-network symptom → **dns-security**; gateway / SSH cert / kubectl
+failures → **idfw**.
+
 - **→ twingate-connectors**: for Connector deployment, upgrade, or token questions
 - **→ twingate-identity**: for security policy configuration, device trust setup, or SCIM
   provisioning questions
