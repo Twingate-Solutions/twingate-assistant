@@ -5,8 +5,6 @@ fetched: 2026-08-14
 source_version: 171a5bb573f41b15099f0a1073c706e26bc58e97e0ea50e609726ad86489f328
 ---
 
-<!-- triage: unassigned -->
-
 # Django Middleware for Twingate Identity Firewall JWTs
 
 ## Summary

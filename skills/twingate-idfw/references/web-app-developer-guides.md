@@ -5,8 +5,6 @@ fetched: 2026-08-14
 source_version: 3fae5eceeeadd3a278e6705028b5b6c4d822b548759dadb8fd6c52c46a975f91
 ---
 
-<!-- triage: unassigned -->
-
 # Web App Developer Guides
 
 ## Summary

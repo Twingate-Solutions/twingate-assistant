@@ -5,8 +5,6 @@ fetched: 2026-08-14
 source_version: 43e5e92a491b571e0331bc53133906b0ffc44baba6f680697acc8e0dee427c50
 ---
 
-<!-- triage: unassigned -->
-
 # Jenkins Integration with Twingate SSO
 
 ## Summary

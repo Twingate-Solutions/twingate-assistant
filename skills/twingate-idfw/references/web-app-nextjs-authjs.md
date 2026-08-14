@@ -5,8 +5,6 @@ fetched: 2026-08-14
 source_version: 7a6858a05767b6d03a4670c41488a8fe1c43ffacbd3465cad7b1058c2bbb6f22
 ---
 
-<!-- triage: unassigned -->
-
 # Next.js + Auth.js (NextAuth v5) Twingate Integration
 
 ## Summary

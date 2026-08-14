@@ -5,8 +5,12 @@ description: |
   needs to deploy the Twingate Gateway for privileged access, configure Certificate
   Authorities (X.509 or SSH CA, local or HashiCorp Vault), implement session recording,
   enable identity-aware kubectl access, automate IDFW setup with Terraform or Ansible,
-  or grant contractors time-bounded SSH access. Also trigger on 'IDFW', 'gateway',
-  'SSH certificates', 'short-lived certs', or 'privileged access management'.
+  or grant contractors time-bounded SSH access. Also use for Privileged Access for Web
+  Apps — deploying the Gateway as a Layer 7 reverse proxy that injects ES256 JWTs or
+  trusted headers into internal web apps (Express/Django/Next.js middleware, Grafana/
+  Jenkins SSO, JWKS verification). Also trigger on 'IDFW', 'gateway', 'SSH certificates',
+  'short-lived certs', 'privileged access management', 'web app access', 'JWT injection',
+  or 'trusted header auth'.
 tools: Read, Grep, Glob, Bash, Write, Edit
 skills: twingate-idfw, twingate-kubernetes, twingate-terraform, twingate-identity
 ---
@@ -39,6 +43,18 @@ the relevant reference file first** — and cite it in your response:
 - Supported SSH features, protocol matrix, IDFW roadmap
   → `skills/twingate-idfw/references/identity-firewall.md`,
     `skills/twingate-idfw/references/identity-firewall-overview.md`
+- Web App privileged access — JWKS endpoint, JWT payload claims, `typ: GAT` gotcha,
+  header template variables, request flow
+  → `skills/twingate-idfw/references/web-app-access.md`
+- Web App framework middleware — exact library, env vars, and code per framework
+  → `skills/twingate-idfw/references/web-app-express.md`,
+    `skills/twingate-idfw/references/web-app-django.md`,
+    `skills/twingate-idfw/references/web-app-nextjs.md`,
+    `skills/twingate-idfw/references/web-app-nextjs-authjs.md`
+- Web App no-code SSO (trusted-header) — Grafana/Jenkins env vars, plugin IDs, security model
+  → `skills/twingate-idfw/references/web-app-integrations.md`,
+    `skills/twingate-idfw/references/web-app-grafana.md`,
+    `skills/twingate-idfw/references/web-app-jenkins.md`
 - Twingate Terraform provider gateway resources (`twingate_gateway_config`)
   → `skills/twingate-terraform/references/terraform-provider-overview.md`
 
@@ -65,8 +81,10 @@ grep -ril "session recording" skills/*/references/
 
 The gateway's own repo and wiki are summarized at
 `skills/twingate-idfw/references/gh-twingate-gateway.md` and `-wiki.md` — read these for
-current protocol support (Web App is listed as "coming soon") and the GAT/metrics/session
-format details before answering from memory. `skills/twingate-idfw/references/gh-twingate-solutions-gatorcast.md`
+current protocol support and the GAT/metrics/session format details before answering from
+memory. Web App privileged access has **shipped (Beta)** — the `web-app-*.md` references
+are authoritative for it; confirm Beta/GA status against `web-app-access.md` rather than
+asserting from memory. `skills/twingate-idfw/references/gh-twingate-solutions-gatorcast.md`
 is a self-hosted browse/replay UI for gateway session recordings — a community example
 project, not a supported Twingate product; label it as such if you recommend it.
 
@@ -174,6 +192,51 @@ The gateway can proxy `kubectl` commands with Twingate identity enforcement, eli
 
 ---
 
+## Web App Privileged Access Deployment Workflow
+
+Privileged Access for Web Apps (**Beta** — customer must request access) puts the Gateway
+in front of an internal web app as a Layer 7 reverse proxy. Instead of validating SSH
+certs, the Gateway injects a signed **ES256 JWT** (the Gateway Access Token / GAT) or plain
+trusted headers into every HTTP request forwarded upstream. The app reads identity from the
+header — no OIDC, client secrets, or redirect flow.
+
+**First, pick the integration model — it determines everything else:**
+
+| | Developer guides (JWT) | Integrations (trusted header) |
+| --- | --- | --- |
+| **Use when** | You own/can modify the app code | You run but cannot modify the app (off-the-shelf) |
+| **Mechanism** | App verifies the ES256 JWT against the tenant JWKS endpoint | App trusts a plaintext header the Gateway injects |
+| **Security** | Cryptographically verified per request | Only safe if the app is network-isolated so the Gateway is its **sole** ingress |
+| **Examples** | Express, Django, Next.js, Next.js + Auth.js | Grafana (`auth.proxy`), Jenkins (reverse-proxy-auth) |
+
+Prefer JWT verification whenever the app can reach the JWKS endpoint. Recommend
+trusted-header mode only for apps that can't verify a JWT, and always pair it with a header
+whitelist restricting acceptance to the Gateway IP — otherwise any internal client can forge
+identity.
+
+**Workflow:**
+
+1. **Publish the app as a Web App Resource** on a deployed Gateway, network-isolated so the
+   Gateway is the only ingress path.
+2. **Configure header injection** on the Web App Resource — nothing is injected by default.
+   Common templates: `Authorization: Bearer {{jwt}}` (JWT mode), or app-specific headers
+   like `X-WEBAUTH-USER: {{username}}` / `X-Forwarded-Groups: {{groups}}` (trusted-header).
+   Read the relevant `web-app-*.md` reference for the exact header names and env vars — do
+   not recite them from memory.
+3. **Implement verification** — drop in the framework middleware (developer guides) or enable
+   the app's native proxy/JWT auth (integrations). Map Twingate Groups to app roles via
+   `{{groups}}`.
+4. **Verify the token contract** — JWT is ES256 with `typ: GAT` (not `JWT` — libraries that
+   enforce `typ: JWT` reject it); always validate `exp`; JWKS at
+   `https://<tenant>.twingate.com/api/v1/jwk/ec`.
+
+> Read `skills/twingate-idfw/references/web-app-access.md` for the request flow and JWT
+> payload reference, and the per-framework `web-app-*.md` file for exact code, libraries,
+> and env vars. For operator/Helm syntax for gateway-wide header injection, see the
+> `twingate-kubernetes` skill.
+
+---
+
 ## Session Recording
 
 Session recording ties every SSH command to the Twingate user identity (email, IdP identity), not just the UNIX username. This is the compliance advantage over traditional SSH logging.
@@ -277,6 +340,9 @@ source file in your response.**
 | SSH gateway architecture, CA types, supported SSH features, Client requirements | `skills/twingate-idfw/references/ssh-privileged-access-overview.md` |
 | SSH gateway deployment (Terraform, local vs Vault CA, cloud quick-starts) | `skills/twingate-idfw/references/ssh-installation.md` |
 | Kubectl proxy mode, K8s RBAC integration, K8s session recording | `skills/twingate-idfw/references/kubernetes-access.md`, `skills/twingate-kubernetes/references/k8s-cluster-access.md` |
+| Web App privileged access — architecture, request flow, GAT/JWT claims, JWKS, `typ: GAT`, header variables (Beta) | `skills/twingate-idfw/references/web-app-access.md` |
+| Web App framework middleware (own the code → JWT verification) | `skills/twingate-idfw/references/web-app-developer-guides.md`, `.../web-app-express.md`, `.../web-app-django.md`, `.../web-app-nextjs.md`, `.../web-app-nextjs-authjs.md` |
+| Web App no-code SSO (off-the-shelf → trusted header) — security model, Grafana, Jenkins | `skills/twingate-idfw/references/web-app-integrations.md`, `.../web-app-grafana.md`, `.../web-app-jenkins.md` |
 | Remote development with SSH (VS Code, JetBrains Gateway, Cursor) | `skills/twingate-idfw/references/ssh-remote-development.md` |
 | Smallstep CA integration | `skills/twingate-idfw/references/ssh-smallstep.md` |
 | Twingate Terraform gateway resources, IaC provisioning | `skills/twingate-terraform/references/terraform-provider-overview.md` |

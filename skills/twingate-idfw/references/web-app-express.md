@@ -5,8 +5,6 @@ fetched: 2026-08-14
 source_version: 40b8fd91ce34624dcece89ccff3edf759af22d56117d7ae0439996808497717a
 ---
 
-<!-- triage: unassigned -->
-
 # Express.js Middleware for Twingate Identity Firewall JWTs
 
 ## Summary

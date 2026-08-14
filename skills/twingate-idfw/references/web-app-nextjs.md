@@ -5,8 +5,6 @@ fetched: 2026-08-14
 source_version: fd5d87a44a75cb317bd47c7f8aca186f0329dbfa8376f8c5c30e9fb85777845b
 ---
 
-<!-- triage: unassigned -->
-
 # Next.js Middleware - Twingate Identity Firewall JWT Verification
 
 ## Summary

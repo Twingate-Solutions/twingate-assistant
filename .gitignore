@@ -26,6 +26,9 @@ scripts/.batch_work/
 # .jsonl metrics (committed), not these .log files.
 docs/metrics/*.log
 
+# Raw GH Action run logs pulled locally for diagnosis — never publish.
+run_logs.txt
+
 # Python
 __pycache__/
 *.py[cod]

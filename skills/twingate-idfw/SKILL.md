@@ -9,7 +9,11 @@ description: >
   (IDFW). This skill owns protocol-level identity enforcement — not just network-level
   access. Also activate for: session-recording playback/archival (asciicast, .cast files),
   reviewing recorded SSH or kubectl sessions for dangerous commands or leaked secrets, or
-  self-hosting a session-recording ingest/browse UI for Gateway audit logs.
+  self-hosting a session-recording ingest/browse UI for Gateway audit logs. Also owns
+  Privileged Access for Web Apps — the Gateway as a Layer 7 reverse proxy that injects
+  signed ES256 JWTs (Gateway Access Tokens) or trusted headers into internal web apps:
+  JWKS verification, request-header injection, framework middleware (Express, Django,
+  Next.js, Auth.js), and no-code SSO integrations (Grafana, Jenkins).
 ---
 
 ## Role
@@ -55,7 +59,27 @@ capabilities. You need a gateway.
   `references/identity-firewall.md` and `references/identity-firewall-overview.md`
   for the current protocol support matrix and roadmap. Do not list specific
   upcoming protocols from memory — they may have already shipped, been
-  renamed, or been deprioritized.
+  renamed, or been deprioritized. Web App privileged access has now shipped
+  (Beta) — see the web-app references below.
+- **Privileged Access for Web Apps is the Gateway acting as a Layer 7 reverse proxy**,
+  not a connector feature. It injects a signed **ES256 JWT** (the Gateway Access Token,
+  GAT) or plain trusted headers into each HTTP request forwarded upstream; apps verify
+  the JWT against the tenant JWKS endpoint (`https://<tenant>.twingate.com/api/v1/jwk/ec`).
+  Guidelines a domain expert would enforce, not derivable from a doc scan:
+  - **Prefer JWT verification over trusted-header auth.** Trusted-header mode (e.g. Grafana
+    `auth.proxy`, Jenkins reverse-proxy) is plaintext and only safe when the app is
+    network-isolated so the Gateway is its **only** ingress — otherwise any internal client
+    can forge the identity header. Recommend JWT whenever the app can reach the JWKS endpoint.
+  - **The JWT `typ` header is `GAT`, not `JWT`.** Libraries that enforce `typ: JWT` by default
+    reject valid tokens — this is the single most common web-app integration failure.
+    Always validate `exp`.
+  - **Headers are opt-in.** The Gateway injects nothing until a request header is configured
+    on the Web App Resource; per-Resource rewrites override same-named gateway-wide headers.
+  - **Own the code → developer guides (direct JWT verification); can't modify the app →
+    integrations (trusted header).** Route by whether the customer controls the source.
+  - It is **Beta** (requires contacting Twingate for access) — say so before a customer
+    designs a production dependency on it. Confirm current status against
+    `references/web-app-access.md` rather than asserting GA from memory.
 - **The Gateway itself is the only production-supported component here.** Session-recording
   *playback/archival* tooling (e.g. `gh-twingate-solutions-gatorcast.md`) is explicitly an
   example/reference project with no warranty — recommend it for self-hosted review of
@@ -71,7 +95,8 @@ live in the file bodies, so a filename scan alone will miss them:
 ```
 grep -ril "asciicast" references/      # -> gh-twingate-gateway-wiki.md, gh-twingate-gateway.md, gh-twingate-solutions-gatorcast.md
 grep -ril "vault" references/          # -> ssh-privileged-access-overview.md, ssh-installation.md
-grep -ril "prometheus" references/     # -> gh-twingate-gateway-wiki.md
+grep -ril "jwks" references/           # -> web-app-*.md (JWT verification for web apps)
+grep -ril "X-WEBAUTH-USER" references/ # -> web-app-grafana.md (exact trusted-header env var)
 ```
 
 Never answer from training-data memory for: gateway config YAML keys and structure
@@ -79,8 +104,11 @@ Never answer from training-data memory for: gateway config YAML keys and structu
 error signatures, TLS/CONNECT failure modes, metrics names (read
 `references/gateway-troubleshooting.md`), admin console navigation paths and UI labels,
 Vault secrets engine paths or policy syntax, Smallstep CA configuration syntax, Helm
-chart values for kubectl proxy mode or session recording, or the supported SSH/protocol
-matrix and IDFW roadmap. Config keys and CA setup steps drift, and an out-of-date YAML
+chart values for kubectl proxy mode or session recording, the supported SSH/protocol
+matrix and IDFW roadmap, or web-app integration specifics — the JWKS endpoint path, JWT
+`typ`/`alg` values, header template variables (`{{jwt}}`/`{{username}}`/`{{groups}}`),
+and per-framework middleware config (library names, exact env vars like `X-JWT-Assertion`,
+Grafana/Jenkins plugin IDs). These drift; read the `web-app-*` references. Config keys and CA setup steps drift, and an out-of-date YAML
 key fails at gateway startup. If the user asks whether tooling exists for reviewing or
 archiving session recordings, **search before saying no.**
 
@@ -95,7 +123,8 @@ inspect `https://github.com/Twingate/gateway` (`deploy/` directory) directly.
 - **→ twingate-connectors**: for the distinction between the gateway (this skill) and
   Connectors (network layer) — and for general Connector deployment questions
 - **→ twingate-kubernetes**: for K8s operator, Helm chart, and Resource routing patterns
-  that complement the gateway's kubectl proxy mode
+  that complement the gateway's kubectl proxy mode — including the operator/Helm syntax for
+  Web App gateway-wide header injection and per-`TwingateResource` header rewrites
 - **→ twingate-identity**: for Group membership management, JIT access, and time-bounded
   access patterns used in contractor SSH flows
 - **→ twingate-architect**: for foundational questions about Remote Network topology and
@@ -124,7 +153,16 @@ of file live there, plus one hand-authored field guide:
 | SSH gateway architecture, CA types, supported SSH features, Client requirements | `ssh-privileged-access-overview.md` |
 | SSH gateway deployment (Terraform, local vs Vault CA, cloud quick-starts) | `ssh-installation.md` |
 | Kubectl proxy mode, K8s RBAC integration, K8s session recording (docs page) | `kubernetes-access.md` |
-| **Gateway repo/wiki** — protocol support (K8s/SSH/Web App coming soon), GAT auth flow, identity propagation, asciicast v2 session recording, Prometheus metrics, Helm chart values, Docker image | `gh-twingate-gateway.md`, `gh-twingate-gateway-wiki.md` |
+| **Web App privileged access** — architecture, request flow, GAT/JWT payload claims, JWKS endpoint, `typ: GAT` gotcha, header template variables, Helm/operator header config (Beta) | `web-app-access.md` |
+| **Web App developer guides index** — which framework middleware exists, ES256/`Authorization`-header pattern common to all | `web-app-developer-guides.md` |
+| Web App middleware — **Express.js** (`jose`, `req.twingateIdentity`, 401 on bad token) | `web-app-express.md` |
+| Web App middleware — **Django** (`PyJWT[crypto]`, `request.gat`, user provisioning, MIDDLEWARE ordering) | `web-app-django.md` |
+| Web App middleware — **Next.js** App Router (`jose`, Edge Runtime, re-verify per handler, matcher) | `web-app-nextjs.md` |
+| Web App middleware — **Next.js + Auth.js** (NextAuth v5, session cookie minting, `useSession()`/`auth()`, `twingateGroups`) | `web-app-nextjs-authjs.md` |
+| Web App **integrations** (no-code / trusted-header) — security model, JWT-vs-header choice, own-the-code vs off-the-shelf | `web-app-integrations.md` |
+| Web App SSO — **Grafana** (`auth.jwt` vs `auth.proxy`, `X-JWT-Assertion`/`X-WEBAUTH-USER`, whitelist) | `web-app-grafana.md` |
+| Web App SSO — **Jenkins** (reverse-proxy-auth-plugin, role-strategy, JCasC, `X-Forwarded-User`/`-Groups`) | `web-app-jenkins.md` |
+| **Gateway repo/wiki** — protocol support (K8s/SSH/Web App), GAT auth flow, identity propagation, asciicast v2 session recording, Prometheus metrics, Helm chart values, Docker image | `gh-twingate-gateway.md`, `gh-twingate-gateway-wiki.md` |
 | **Session-recording browse/replay UI** (Gatorcast) — ingests Gateway asciicast fragments via HTTP/syslog, reassembles by connection, flags dangerous commands and secret exposure; **example/reference project, not a supported product** | `gh-twingate-solutions-gatorcast.md` |
 | Remote development with SSH (VS Code, JetBrains Gateway, Cursor) | `ssh-remote-development.md` |
 | Smallstep CA integration | `ssh-smallstep.md` |

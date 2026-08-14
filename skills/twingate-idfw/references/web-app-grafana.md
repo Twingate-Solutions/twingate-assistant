@@ -5,8 +5,6 @@ fetched: 2026-08-14
 source_version: 44782b20adff20625d50109d8b4141775efa834571a801f31af8fdd3b375cb59
 ---
 
-<!-- triage: unassigned -->
-
 # Grafana Integration
 
 ## Summary

@@ -5,8 +5,6 @@ fetched: 2026-08-14
 source_version: 67257a2d02ee7284198568f2d3e0c6bdd2f0527f0efbc8b86cc75f315ebde087
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Privileged Access for Web Apps
 
 ## Summary
