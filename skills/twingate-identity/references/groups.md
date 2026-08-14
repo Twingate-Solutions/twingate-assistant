@@ -1,57 +1,65 @@
 ---
 source: https://www.twingate.com/docs/groups
 type: docs
-fetched: 2026-08-05
-source_version: 8e5d7ee40052e365a633865cb48f26897ce112e2f2edb164b618de7e76d0db1d
+fetched: 2026-08-14
+source_version: 45743d21e03e68ed83c797fbfe6f00e9229d556e60ff4ba1322e0b475dc615f2
 ---
 
 # Twingate Groups
 
 ## Summary
-Groups are the authorization mechanism in Twingate that connect Users to Resources. A user gains resource access by being a member of a Group that includes that Resource and passing the Resource's Security Policy. Groups come in three types: built-in, custom, and synced.
+Groups are the authorization mechanism in Twingate, linking Users to Resources. A user gains resource access by being a member of a Group that includes the Resource and passing the Resource's Security Policy. Groups come in three types: built-in, custom, and synced.
 
 ## Key Information
 - Groups define **who** (Users) can access **what** (Resources)
 - Users can belong to multiple Groups
-- Access per Resource can be time-limited via **expiration time** (full revocation) or **usage-based auto-lock** (temporary lock requiring admin unlock)
-- Two access conditions must both be met: group membership + Security Policy authentication
+- Resource access within a Group can have:
+  - **Expiration time**: fully revokes Group access after set period
+  - **Usage-based auto-lock**: temporarily locks access until admin unlocks
+- Access requires both: Group membership + successful Security Policy authentication (may include IdP re-auth or 2FA)
 
-## Built-in Groups
-- **Everyone** group: automatically includes all users; cannot be manually modified
-- Use for company-wide resources (dashboards, domain controllers, shared infrastructure)
+## Group Types
 
-## Custom Groups
-- Manually created/managed in the Admin console
+### Built-in: `Everyone`
+- Automatically includes **all users**
+- Cannot be modified for membership
+- Typical use cases: company-wide dashboards, domain controllers, shared infrastructure
+
+### Custom Groups
+- Manually created/managed in Admin console
 - Not modified by automated processes
-- Manageable via the **Twingate Admin API**
+- Manageable via [Admin API](https://www.twingate.com/docs/api)
 
-## Synced Groups
-- Auto-synchronized from a configured IdP
-- Resources and Access Policies can be set, but **user management is IdP-controlled**
-- IdP-specific scoping behavior:
+### Synced Groups
+- Auto-synchronized from configured IdP
+- User membership controlled from IdP side
+- Resources and Access policies can still be set in Twingate
+- IdP-specific sync behavior:
   - **Entra ID, Okta, OneLogin**: support SCIM-based scoping of synced users/groups
-  - **Google Workspace**: no native granular sync config; use **Selective Sync** feature
+  - **Google Workspace**: no native granular sync config; use Twingate's **Selective Sync** feature to limit which users, groups, and OUs sync
 
 ## Prerequisites
-- Configured IdP (for Synced Groups)
+- Configured Identity Provider (for Synced Groups)
 - Admin console access (for Custom Groups)
 - Admin API credentials (for API-managed Custom Groups)
 
-## Access Authorization Requirements
-1. User must be a member of a Group containing the target Resource
-2. User must authenticate successfully against the Resource's Security Policy (may require IdP re-auth or 2FA)
+## Configuration Values
+| Parameter | Notes |
+|---|---|
+| Expiration time | Per Resource, per Group; fully revokes access on expiry |
+| Usage-based auto-lock | Per Resource, per Group; requires manual admin unlock |
+| Security Policy | Per Resource; can enforce IdP re-auth, 2FA |
 
 ## Gotchas
-- Expiration time **fully revokes** group access; auto-lock only **temporarily locks** it (admin must unlock)
-- Google Workspace requires Selective Sync configuration — it does not support granular sync natively
-- Synced group membership cannot be modified in Twingate — changes must be made in the IdP
-- The Everyone group applies to **all** users automatically; assign Resources to it carefully
+- Synced group **user membership** cannot be modified in Twingate—changes must be made in the IdP
+- Google Workspace requires Selective Sync configuration since it lacks native SCIM scoping
+- Auto-lock from usage-based policy requires **manual admin intervention** to restore access (not automatic)
+- `Everyone` group assignments affect **all users**—use carefully for sensitive resources
 
 ## Related Docs
-- Users
-- Resources
-- Security Policy / 2FA
-- Admin API
+- Security Policies / 2FA configuration
+- Admin API (Custom Group management)
 - IdP Configuration (Entra ID, Okta, OneLogin, Google Workspace)
 - Selective Sync (Google Workspace)
-- SCIM
+- SCIM provisioning
+- Resource expiration and auto-lock settings

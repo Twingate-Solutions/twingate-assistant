@@ -1,31 +1,39 @@
 ---
 source: https://www.twingate.com/docs/github-codespaces
 type: docs
-fetched: 2026-08-05
-source_version: a821b13ee7562f82ff6f38acea415f4514247acc0c2447da4404aa7e7a45e4e4
+fetched: 2026-08-14
+source_version: 1015a211626ca44f5bb5e4fa8d64760165ac03080ced55eeec330fca5542f249
 ---
 
-# Twingate in GitHub Codespaces
+# How to Access Twingate Resources from GitHub Codespaces
 
 ## Summary
-Twingate can be run inside GitHub Codespaces to allow access to Twingate-protected resources from cloud-based development environments. The integration is maintained as an open source project. Setup details are provided in the Twingate open source repository.
+Enables Twingate connectivity within GitHub Codespaces cloud development environments. Works via browser or VS Code. Implementation details are maintained in Twingate's open source repository.
 
 ## Key Information
-- Enables access to Twingate-protected resources from within GitHub Codespaces
-- Works via both browser-based Codespaces and VS Code
+- Twingate can be run inside GitHub Codespaces environments
+- Accessible via web browser or Visual Studio Code
+- Full development environment runs in the cloud
 - Implementation is open source
 
 ## Prerequisites
 - GitHub Codespaces access
-- Twingate account with configured resources
-- VS Code or browser-based Codespace environment
+- Twingate account and network configured
+- VS Code (optional, browser access also supported)
 
 ## Configuration Values
-- Refer to the [Twingate Open Source Repository](https://github.com/Twingate) for specific configuration parameters, environment variables, and setup scripts
+- Refer to the [Twingate Open Source Repository](https://github.com/Twingate) for specific configuration parameters, env vars, and setup scripts
+
+## Step-by-Step
+- Full setup instructions are maintained in the Twingate open source repository (not detailed on this page)
+
+## Gotchas
+- This documentation page is minimal — the actual implementation guidance lives in the external open source repository
+- Check the OSS repo for current instructions, as cloud dev environment integrations may change frequently
 
 ## Related Docs
-- [Twingate Open Source Repository](https://github.com/Twingate)
-- GitHub Codespaces documentation
+- Twingate Open Source Repository (linked from page)
+- GitHub Codespaces official documentation
 
 ---
-**Note:** This documentation page is minimal and defers implementation details to the open source repository. For actionable setup instructions, consult the repository directly.
+*Note: This page contains very limited detail. For implementation, consult the Twingate open source repository directly.*

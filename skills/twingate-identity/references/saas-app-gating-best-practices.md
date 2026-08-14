@@ -1,45 +1,50 @@
 ---
 source: https://www.twingate.com/docs/saas-app-gating-best-practices
 type: docs
-fetched: 2026-08-05
-source_version: d4a326821cd25cf6fe1bac5cbad00f0a94b98a4b39fd122f501fa9744897801e
+fetched: 2026-08-14
+source_version: a9e74626418d50c46a455c22e94ee32ea8d3879e942546178826dfc32a6eacc8
 ---
 
 # Best Practices for SaaS App Gating
 
 ## Summary
-App Gating restricts access to SaaS applications using Twingate Resource Policies, treating the Identity Provider (IdP) itself as a protected resource. A catch-22 can occur where clients need to re-authenticate but cannot access the IdP sign-in page because it's behind a policy. Setting Minimum Authentication Requirements to 31 days prevents lockout scenarios.
+App Gating restricts access to SaaS applications using Twingate Resource Policies, treating the Identity Provider (IdP) itself as a protected resource. A catch-22 can occur when the IdP sign-in page is gated but the client needs to re-register. Setting a long Minimum Authentication Requirements period prevents lockouts.
 
 ## Key Information
-- **Resource Policies**: Define conditions for access (MFA, device encryption, re-auth frequency) — apply to all resources including SaaS apps
-- **Admin Console Policy**: Separate policy protecting only the Twingate Admin Panel, applies only to Administrators
-- **Minimum Authentication Requirements**: Controls how often a Twingate Client must re-register against the IdP — does NOT directly gate any resource itself
-- When App Gating is enabled, the IdP serves dual roles: **authentication provider** AND **protected resource**
-- Accessing any Resource resets the Minimum Authentication Requirements window
+- **Resource Policies**: Define conditions for access (MFA, device encryption, re-auth frequency); apply to all resources including SaaS apps
+- **Admin Console Policy**: Separate policy protecting only the Twingate Admin Panel, applies only to administrators
+- **Minimum Authentication Requirements**: Controls how frequently a Twingate Client must re-register against the IdP — does **not** grant access to any resource
+- When App Gating is enabled, the **IdP is simultaneously a Resource and the authentication provider** — this dual role creates potential lockout risk
+- Accessing any Resource **resets** the Minimum Authentication Requirements window
 
 ## Prerequisites
-- Twingate client deployed on user devices
-- Identity Provider configured for Twingate authentication
+- Identity Provider configured with Twingate
+- Twingate Client deployed on user devices
 - Devices must meet Trusted Profiles or minimum OS requirements (see Device Security page)
 
-## Gotchas
-- **Lockout catch-22**: If Minimum Authentication Requirements period is too short, clients needing re-registration cannot reach the IdP sign-in page (which is itself a protected resource). Restarting the Twingate Client resolves it but degrades UX.
-- Lockout only occurs when **both** conditions are true simultaneously:
-  1. User has not accessed any Resource for 31+ days
-  2. User has not restarted their device or Twingate Client for 31+ days
-- Minimum Authentication Requirements alone provides **no security benefit** for resource access — resources are protected by Resource Policies
+## The Catch-22 Problem
+Lockout occurs when both conditions are true simultaneously:
+1. Client needs to re-register (Minimum Authentication Requirements expired)
+2. IdP sign-in page is a protected resource requiring an already-registered client
+
+Workaround: restart the Twingate Client (not user-friendly)
 
 ## Configuration Values
 
-| Setting | Recommended Value | Notes |
-|---|---|---|
-| Minimum Authentication Requirements | **31 days** | Prevents IdP lockout in App Gating scenarios |
+| Setting | Recommended Value |
+|---|---|
+| Minimum Authentication Requirements period | **31 days** |
 
-## Step-by-Step: Avoiding App Gating Lockout
-1. Set Minimum Authentication Requirements to **31 days** (no security benefit to shorter periods)
-2. Configure IdP as a Twingate Resource with appropriate Resource Policy
-3. Ensure Resource Policies on IdP allow access for clients in re-registration states if needed
-4. Advise users that accessing any resource resets the authentication window
+## Step-by-Step: Avoid App Gating Lockouts
+1. Set Minimum Authentication Requirements to **31 days**
+2. Ensure Resource Policies are applied to the IdP resource as with other SaaS apps
+3. Note: lockout only possible if user has **not accessed any resource** AND **not restarted device or client** for the full 31-day period
+
+## Gotchas
+- Short Minimum Authentication Requirements periods provide **no added security benefit** for App Gating but significantly increase lockout risk
+- The Minimum Authentication Requirements clock **resets on any resource access**, so active users are rarely at risk
+- Minimum Authentication Requirements and Resource Policies are independent — do not conflate re-registration frequency with resource access control
+- Admin Console Policy is distinct from Resource Policies and cannot substitute for them
 
 ## Related Docs
 - Device Security (Trusted Profiles, minimum OS requirements)

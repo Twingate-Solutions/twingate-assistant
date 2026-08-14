@@ -1,48 +1,50 @@
 ---
 source: https://www.twingate.com/docs/connector-placement-best-practices
 type: docs
-fetched: 2026-08-05
-source_version: 39daabff2332f2efbde36d822f96270b82b0f3be2d88d9755c057a6349732c35
+fetched: 2026-08-14
+source_version: 5e0e615c7ce46ef58d437a1869e97acabad3fb9289ee8dc2f85bcb91643ee269
 ---
 
 # Best Practices for Connector Placement
 
 ## Summary
-Guide for determining optimal Twingate Connector placement in cloud and on-premises environments. Connectors must have network path access to Resources and DNS resolution capability for Resource FQDNs. Multiple deployment patterns are supported and can be combined.
+Guide for determining optimal Twingate Connector placement in cloud and on-premises environments. Connectors must have network path access to Resources and DNS resolution capability for Resource FQDNs. Multiple placement strategies can be combined and changed over time.
 
 ## Key Information
 - Connectors deploy on VMs or containers
 - Deploy in pairs/multiples for load balancing and high availability
 - No cap on number of Connectors or Remote Networks
-- Connectors must have network path to Resources they serve
-- Connectors must resolve FQDNs of Resources (e.g., host machine must resolve `myprivatewebapp.corp.int`)
-- Approaches can be mixed; design is not permanent
+- Connectors serve bidirectional connections (Client→Resource and Resource→Client)
+- Connector host machine must resolve FQDNs of Resources it serves
+- Combination of placement approaches is supported
 
 ## Prerequisites
-- Network path must exist between Connector host and target Resources
-- DNS resolution for Resource FQDNs must work from Connector host machine
+- Network path must exist between Connector and its Resources
+- Connector host must resolve FQDNs of served Resources (e.g., `myprivatewebapp.corp.int`)
+- Firewall rules allowing outbound Connector traffic
 
 ## Placement Options
 
 ### Cloud Environments
-| Pattern | Description |
-|---|---|
-| Within individual VPC/VNet | Deploy in same VPC/VNet as Resources; use dedicated or existing subnet |
-| Dedicated VPC/VNet (peered) | Deploy in isolated VPC/VNet peered to Resource VPCs/VNets |
+| Option | Description |
+|--------|-------------|
+| Within individual VPC/VNet | Deploy in same VPC/VNet as Resources; dedicated or shared subnet |
+| Dedicated VPC/VNet (peered) | Connector in own VPC/VNet with peering to Resource VPCs/VNets |
 | Transit/VNet Gateway | Deploy in AWS Transit Gateway or Azure VNet Gateway for access to underlying VPCs/VNets |
 
 ### On-Premises Environments
-| Pattern | Description |
-|---|---|
-| Within individual subnets | Deploy in same subnet as Resources |
-| Dedicated subnet | Deploy in separate subnet with routable access to Resource subnets |
+| Option | Description |
+|--------|-------------|
+| Within individual subnets | Deploy directly in subnets containing Resources |
+| Dedicated subnets | Deploy in separate subnet with routable access to Resource subnets |
 
 ## Gotchas
-- Connector host DNS resolution is required — not just Twingate routing. If the host can't resolve the FQDN, users can't access the Resource
-- Physical/network proximity matters for performance; place Connectors close to Resources
-- Single Connector = no HA; always deploy in pairs minimum for production
+- Connector placement must be **physically near** Resources for performance
+- DNS resolution must work **from the Connector host**, not just from user clients — internal FQDNs must be resolvable on the Connector's network
+- High availability requires **pairs or multiples** of Connectors; single Connector = single point of failure
+- Peered VPC/VNet architectures require peering to be configured before Connector can reach Resources
 
 ## Related Docs
-- Connector deployment (VM/container options)
+- Connector deployment (VM/container setup)
 - Remote Networks configuration
-- High availability setup
+- High availability and load balancing for Connectors

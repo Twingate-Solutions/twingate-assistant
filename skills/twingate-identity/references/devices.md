@@ -1,41 +1,41 @@
 ---
 source: https://www.twingate.com/docs/devices
 type: docs
-fetched: 2026-08-05
-source_version: b51d026799a8db582e5a77997a4a62095c25fcf8e64d14367d638eba6ec9f578
+fetched: 2026-08-14
+source_version: 96b5c2e0bf508bc4f34ffc4b4919758ca0460f0ae3f98b0e113a9e909265b63f
 ---
 
 # Twingate Devices Overview
 
 ## Page Title
-Devices — Twingate Documentation
+Devices — Practical Overview
 
 ## Summary
-Overview page for the Twingate Client application and device management. The Client runs on user devices to enable access to private Resources and Internet Security features, requiring admin privileges due to network traffic interception. Provides navigation to three core sub-topics.
+This page serves as a navigation hub for Twingate device-related documentation. It covers three main areas: installing the Twingate Client, deploying to managed devices via MDM/EMM, and administering device posture for zero trust access control.
 
 ## Key Information
-- Twingate Client handles both **private Resource access** and **Internet Security features**
-- Client requires **administrator privileges** on end-user devices (intercepts network traffic)
-- Devices are a **primary component** in zero trust access evaluation
-- Device posture and status are used in evaluating Resource access attempts
+- **Twingate Client**: Runs on end-user devices; enables access to private Resources and Internet Security features
+- **Admin privileges required**: Client intercepts network traffic, so it requires administrator privileges on the device
+- **MDM/EMM support**: For users without local admin rights, Client can be deployed via managed device management platforms
+- **Device posture**: Devices are a primary factor in zero trust access evaluation; Twingate provides posture checks and status monitoring
 
-## Three Core Sub-Topics
+## Three Core Topic Areas
 
 | Topic | Purpose |
-|-------|---------|
+|---|---|
 | Twingate Client Application | Download locations and platform-specific setup |
-| Deploying to Managed Devices | MDM/EMM deployment for users without admin rights |
-| Device Administration | Device posture, status, and zero trust policy configuration |
+| Deploying to Managed Devices | MDM/EMM deployment for non-admin users |
+| Device Administration | Posture checks, device status, access policy integration |
 
 ## Prerequisites
-- Administrator privileges required for Client installation on end-user devices
-- MDM/EMM product needed for managed device deployments (when users lack admin access)
+- Administrator privileges on the device (for manual Client install)
+- MDM/EMM platform (for managed deployments without user admin rights)
 
 ## Gotchas
-- Users **without local admin rights** cannot self-install the Client — must use MDM/EMM deployment path
-- Network traffic interception is why elevated privileges are required (not optional)
+- Users **without** local admin access cannot self-install; must use MDM/EMM deployment path
+- Device posture is actively used in access decisions — misconfigured posture policies can block legitimate access
 
 ## Related Docs
-- `/docs/client` — Twingate Client application details and platform setup
-- `/docs/managed-devices` — MDM/EMM deployment guide
-- `/docs/device-administration` — Device posture and zero trust policy administration
+- Twingate Client application (platform-specific install guides)
+- Managed device deployment (MDM/EMM setup)
+- Administering devices in Twingate (posture, status, policy configuration)

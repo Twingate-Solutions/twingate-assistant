@@ -1,57 +1,52 @@
 ---
 source: https://www.twingate.com/docs/okta-scim-configuration
 type: docs
-fetched: 2026-08-05
-source_version: 150cae403fb5286115c3ef9779626e31c1d601c7cf0ccb8fefa3fb1ad6ec63b2
+fetched: 2026-08-14
+source_version: ee115b55c725f16230f5c2639d1f34492ba6cd8365dc6206bae2ae2457b4def6
 ---
 
 # Okta SCIM User & Group Sync Configuration
 
 ## Summary
-Configures SCIM-based provisioning between Okta and Twingate to sync users and groups. Requires the Twingate Okta app to already be installed from the Integration Catalog. Available on Business and Enterprise plans only.
+Configures SCIM provisioning between Okta and Twingate to sync users and groups. Requires the Twingate Okta app to be installed first, then an API token-based integration is enabled. Supports user creation, attribute updates, deactivation, and group push.
 
 ## Key Information
-- Supported SCIM features: create users, update user attributes, deactivate users, group push
-- SCIM endpoint is pre-configured during initial app installation — no manual entry needed
+- Supported features: create users, update attributes, deactivate users, push groups
+- Plan requirement: Business or Enterprise only
+- SCIM endpoint URL is pre-configured during initial app installation — do not re-enter it
+- Do not modify SCIM Attribute Mappings in Okta
 - Previously assigned users sync to Twingate immediately upon enabling provisioning
 
 ## Prerequisites
 - Twingate Business or Enterprise plan
-- Twingate app installed from Okta Integration Catalog (SCIM endpoint already set)
+- Twingate app installed from Okta Integration Catalog (see Okta app configuration article)
 - SCIM Token from Twingate Admin Console
 
 ## Step-by-Step
 
 ### Enable SCIM Provisioning
-1. In Okta, open Twingate app → **Provisioning** tab → click **Configure API Integration**
-2. Copy SCIM Token from Twingate Admin Console
-3. Enable **API Integration**, paste SCIM Token, click **Test API Credentials** to verify
-4. Under Provisioning tab, enable all 3 provisioning options → **Save**
+1. In Okta, open the Twingate app → **Provisioning** tab → click **Configure API Integration**
+2. Copy the **SCIM Token** from the Twingate Admin Console
+3. Check **Enable API Integration**, paste the SCIM Token, click **Test API Credentials** to verify
+4. Under Provisioning tab, enable all 3 provisioning options → click **Save**
 
 ### Push Groups
 1. Go to **Push Groups** tab → click **Push Groups** → select **Find groups by name**
-2. Search for group, select it → **Save**
+2. Search for the group, select it → click **Save**
 
 ## Configuration Values
-| Field | Value |
-|-------|-------|
-| SCIM Token | Copied from Twingate Admin Console |
-| SCIM Endpoint | Pre-configured (do not modify) |
-| Attribute Mappings | Do not change |
+| Parameter | Source | Notes |
+|-----------|--------|-------|
+| SCIM Token | Twingate Admin Console | Paste into Okta API Integration field |
+| SCIM Endpoint | Pre-configured | Do not modify |
 
 ## Gotchas
-- **Do not modify SCIM Attribute Mappings** — will break sync
-- Group members only sync if they are **also assigned to the Twingate app** in Okta; pushing a group alone is insufficient
-- Removing a user from a group does **not** remove them from Twingate if they are individually assigned to the app — must remove from the app directly
-- Safest pattern: assign **groups** (not individual users) to the app; then removing from group removes from Twingate (unless in another push group)
-
-## Troubleshooting
-| Issue | Fix |
-|-------|-----|
-| Groups push but users not syncing | Assign users or the group itself to the Twingate app in Okta |
-| Removed user from group still appears in Twingate | Remove user from the Twingate app in Okta, or use group-only assignment model |
+- **Group members won't sync unless assigned to the app**: Setting up group push does not automatically provision users — users or the group itself must be explicitly assigned to the Twingate Okta app
+- **Removing user from group ≠ removing from Twingate** if the user is directly assigned to the app; must remove from the app itself, or use group-only assignment strategy
+- **Cleanest group sync approach**: Assign groups (not individual users) to the app — then removing a user from a group removes them from Twingate, provided they aren't in other push groups
+- Do not alter SCIM Attribute Mappings or provisioning will break
 
 ## Related Docs
-- Okta app configuration (Integration Catalog setup)
+- Okta app configuration (initial install from Integration Catalog)
+- Twingate Admin Console (SCIM Token location)
 - Twingate Okta overview article
-- Initial Twingate Okta app installation guide

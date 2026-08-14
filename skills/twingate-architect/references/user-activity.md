@@ -1,72 +1,70 @@
 ---
 source: https://www.twingate.com/docs/user-activity
 type: docs
-fetched: 2026-08-05
-source_version: 5cdbccea41b772ad867ac2859c92052b85a176e8ffea431123e2c0fe322b9f38
+fetched: 2026-08-14
+source_version: 808dfcb59632a32ebbaff724e66a2873ee0c68714f5d9ddedd6f2640b6628534
 ---
 
-# User Activity Reports
+# User Activity Reporting
+
+## Page Title
+User Activity
 
 ## Summary
-Twingate's Admin Console provides user activity reporting including authentication event logs and active/inactive user reports. Reports can be manually exported as CSV/JSON files or automatically synced to Amazon S3. Authentication events help troubleshoot IDP errors, device posture mismatches, and policy blocks.
+Twingate Admin Console provides user activity reporting including authentication event logs, active user reports, and inactive user reports. Reports can be exported manually as CSV/JSON (GZIP) or synced automatically to Amazon S3. Inactive users are automatically flagged after 90 days without Resource access.
 
 ## Key Information
-- **Authentication Events**: Track sign-in attempts (success/failure) to Twingate Client and Resource Policies; exported as JSON/GZIP
-- **Active Users Report**: Users who accessed Resources in selected time window; exported as CSV/GZIP
-- **Inactive Users Report**: Automatically identifies accounts with no Resource access in last **90 days**; exported as CSV/GZIP
-- Timestamps in exports are **UTC**; time range selection uses **local timezone**
-- Export delivery is async—email notification when ready; most complete in minutes, large exports may take hours
+- **Authentication Events**: Track sign-in attempts (success/fail), IDP errors, device posture mismatches, policy blocks, MFA setup/resets
+- **Active Users Report**: CSV with connection stats, bytes transferred, relay vs P2P percentages, client IPs
+- **Inactive Users Report**: Automatically identifies accounts with no Resource access in last 90 days
+- Export formats: JSON (authentication events), CSV (user activity) — both GZIP compressed
+- Timestamps in exports are UTC; time range selection uses local timezone
+- Large exports may take several hours; completion notification sent via email
 - S3 sync available for continuous authentication event streaming
 
 ## Prerequisites
 - Admin Console access
-- Amazon S3 bucket configured (optional, for auto-sync)
+- Amazon S3 bucket configured (for automatic sync only)
 
-## Step-by-Step: Generate Export
-1. Go to **Settings → Reports → User Activity**
+## Step-by-Step: Generating a Report
+1. Navigate to **Settings → Reports → User Activity**
 2. Click **Generate User Activity Report**
 3. Select report type: **Authentication Events** or **User Activity**
-4. Select time range
-5. For User Activity: choose **Active** or **Inactive** users
-6. Wait for email notification
-7. Return to Reports page to download
+4. Select time range (Authentication Events) or report subtype (Active/Inactive Users) + time range
+5. Wait for email notification when export is ready
+6. Return to Reports page to download
+7. Optionally configure Amazon S3 sync for automatic authentication event export
 
-## Configuration Values
-No CLI flags or env vars. Report types:
-- `admin_login` — Admin Console sign-in event
-- `reauth` — Resource authentication event
+## Viewing Exports
+- Files are GZIP compressed — decompress with any standard tool
+- After decompression, add `.csv` extension to open in spreadsheet editors
+- **Safari gotcha**: Disable "Open 'Safe' files after downloading" (Safari → Preferences → General) to prevent empty file issue
 
 ## Active User Report Columns
 | Column | Description |
 |--------|-------------|
 | `user_email` | User email |
 | `last_access_date` | Last Resource access timestamp |
-| `total_connections` | All connections in period |
-| `success_connections` | Successful connections |
-| `failed_connections` | Total failed connections |
-| `failed_connections_dns` | DNS-error failures |
-| `failed_connections_other` | Non-DNS failures |
-| `total_bytes` | Total bytes transferred |
-| `bytes_transferred` | Bytes sent to Resources |
-| `bytes_received` | Bytes received by user |
-| `percent_relay` | % connections via relay |
-| `percent_p2p` | % peer-to-peer connections |
-| `active_devices` | Active device count at report time |
-| `num_of_client_ip` | Unique IPs used |
-| `top_10_client_ips` | Top 10 source IPs |
+| `total_connections` | Total connections in period |
+| `success_connections` / `failed_connections` | Connection outcomes |
+| `failed_connections_dns` / `failed_connections_other` | Failure breakdown |
+| `total_bytes` / `bytes_transferred` / `bytes_received` | Bandwidth metrics |
+| `percent_relay` / `percent_p2p` | Connection type distribution |
+| `active_devices` | Device count at report generation time |
+| `num_of_client_ip` / `top_10_client_ips` | Client IP usage |
 
-## Authentication Event JSON Schema Fields
-- `version`, `time` (UTC), `action.type`, `action.user.email`, `action.user.id`
-- `action.user.policy.id/name`
-- Resource events also include: `action.user.device.id/name`, `action.user.resource.id/name`
+## Authentication Event JSON Schema
+Two event types with key fields:
+- **`admin_login`**: `version`, `time`, `action.type`, `action.user.email`, `action.user.id`, `action.user.policy.{id,name}`
+- **`reauth`**: Same as above plus `action.user.device.{id,name}` and `action.user.resource.{id,name}`
 
 ## Gotchas
-- Exports are GZIP compressed—must decompress before use; add `.csv` extension after decompression
-- **Safari**: Disable "Open 'safe' files after downloading" (Safari → Preferences → General) to prevent empty file issue
-- Inactive users threshold is fixed at **90 days**—not configurable
-- Time range filter uses local timezone but export timestamps are UTC
+- Time range selection uses **local timezone** but exported timestamps are **UTC**
+- Safari auto-unzip can corrupt downloads — disable the safe file setting
+- Inactive threshold is fixed at **90 days** (not configurable)
+- Active device count reflects time of report generation, not the selected period
 
 ## Related Docs
-- Amazon S3 Sync setup (referenced but separate doc)
-- Resource Policies documentation
-- Device Posture documentation
+- Amazon S3 Sync configuration
+- Resource Policies
+- Device Posture

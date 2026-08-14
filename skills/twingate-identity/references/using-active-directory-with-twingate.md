@@ -1,67 +1,53 @@
 ---
 source: https://www.twingate.com/docs/using-active-directory-with-twingate
 type: docs
-fetched: 2026-08-05
-source_version: 0b26d01a6ddf517009188f4386fc041f24df44a24f9e7aa7776974b24abf50ca
+fetched: 2026-08-14
+source_version: dd228a12778476473b9e0fa279bf2512b65a4ab4b355c6dc609d69003473fa19
 ---
 
 # Active Directory Configuration with Twingate
 
 ## Summary
-Configure Twingate to work with Active Directory by adding domain controllers and service discovery as Resources. This enables AD-dependent services (SMB/Samba, CIFS, LDAP) to function through Twingate without disruption.
+Configure Twingate to support Active Directory services (SMB/Samba, CIFS, LDAP) by adding domain controllers and service discovery resources. Clients must have access to specific Resources to enable AD authentication and domain discovery.
 
 ## Key Information
-- Domain joins over Twingate require additional "Windows Start Before Logon" configuration
-- Clients need access to domain controller Resources for any AD authentication to work
-- Assign AD Resources to the "Everyone" group (or all-Windows-users group) to simulate physical domain membership
+- Domain joins over Twingate also require **Windows Start Before Logon** configuration
+- Four Resources typically needed per AD domain
+- All Resources should be assigned to the **Everyone** group (or all Windows users group)
+- NetBIOS name resolution does **not** work over Twingate (broadcast-based); use IP or DNS names instead
 
 ## Prerequisites
-- Twingate network with at least one Connector deployed
-- Access to AD domain name (e.g., `yourcompany.com`)
-- Admin access to Twingate Admin Console
-- For Azure Container Connectors: manual Custom DNS Server configuration required
+- Twingate deployed with at least one Connector on the AD network
+- Access to run `nslookup` to discover domain controller hostnames
+- AD domain name (e.g., `yourcompany.com`)
 
-## Step-by-Step Configuration
+## Step-by-Step
 
-**1. Discover Domain Controllers**
-```bash
-# Linux/Mac
-nslookup -type=any _ldap._tcp.dc._msdcs.yourcompany.com
+1. **Discover domain controllers** — run nslookup to find DC hostnames:
+   - Linux/Mac: `nslookup -type=any _ldap._tcp.dc._msdcs.yourcompany.com`
+   - Windows: `nslookup -type=all _ldap._tcp.dc._msdcs.yourcompany.com`
 
-# Windows
-nslookup -type=all _ldap._tcp.dc._msdcs.yourcompany.com
-```
+2. **Add four Resources** in Twingate Admin Console:
 
-**2. Add Required Resources in Twingate**
-
-| Resource Label | Resource Address | Notes |
+| Resource Label | Resource Address | Purpose |
 |---|---|---|
 | AD Domain | `yourcompany.com` | Base AD domain |
-| Domain Controller 1 | `zr5cdi61eltc73z.yourcompany.com` | From nslookup SRV records |
-| Domain Controller N | `a1ks10fndwoyhax.yourcompany.com` | Add all returned DCs |
-| Domain Service Discovery | `*_tcp*.yourcompany.com` | Enables service discovery |
+| Domain Controller 1 | `zr5cdi61eltc73z.yourcompany.com` | DC hostname from nslookup |
+| Domain Controller 2 | `a1ks10fndwoyhax.yourcompany.com` | DC hostname from nslookup |
+| Domain Service Discovery | `*_tcp*.yourcompany.com` | SRV record discovery |
 
-**3. Assign Resources**
-Assign all AD Resources to the "Everyone" group or equivalent Windows-users group.
+3. **Assign all Resources** to the Everyone group (or Windows users group)
 
-**4. Verify Connectivity**
-Confirm Resources appear in client Resource lists and AD authentication works.
+4. **Verify** Resources appear in client Resource lists
 
-**5. (Optional) Restrict Ports**
-Limit to required ports only — reference [Microsoft's firewall guide for AD domains](https://support.microsoft.com/en-us/topic/how-to-configure-a-firewall-for-active-directory-domains-and-trusts-7c7a8bcd-61f5-e9c3-2b8a-1e2a4e9a82ed).
-
-## Configuration Values
-- **Service discovery wildcard pattern**: `*_tcp*.yourcompany.com`
-- **SRV lookup target**: `_ldap._tcp.dc._msdcs.yourcompany.com`
-- **Debug wildcard resource**: `*.yourcompany.com` (broad fallback for troubleshooting)
+5. **Optionally restrict ports** per [Microsoft's AD firewall documentation](https://support.microsoft.com/en-us/help/179442)
 
 ## Gotchas
-- **NetBIOS name resolution does not work** over Twingate — use IP or DNS name for file sharing instead
-- **Azure Container Connectors** do not inherit DNS settings automatically; must manually set Custom DNS Server to a DC IP, and the container subnet must be in the same VNet as the DC (or Linux VM Connectors avoid this issue entirely)
-- Number of domain controller Resources varies by AD configuration — add all IPs/hostnames returned by nslookup
-- Domain join scenarios require "Windows Start Before Logon" setup *in addition* to these steps
+- **Azure Container Connectors**: Must enable **Custom DNS Server** option using a DC IP during deployment; containers don't inherit VNet DNS settings automatically. Linux VM Connectors handle DNS correctly without extra config.
+- **Variable DC count**: Number of domain controllers returned by nslookup varies by domain — add all returned hostnames as Resources.
+- **Debugging**: Add `*.yourcompany.com` as a wildcard Resource temporarily; uncaptured AD traffic appears in Resource Activity in Admin Console.
+- **Port restrictions**: Only apply after verifying full connectivity first.
 
 ## Related Docs
-- [Windows Start Before Logon](https://www.twingate.com/docs/windows-start-before-logon) — required for domain joins
-- [Microsoft AD Firewall Ports](https://support.microsoft.com/en-us/topic/how-to-configure-a-firewall-for-active-directory-domains-and-trusts) — port restriction reference
-- Twingate Admin Console → Resource Activity — for debugging uncaptured AD traffic
+- Windows Start Before Logon (required for domain joins)
+- Microsoft: [How to configure a firewall for Active Directory domains and trusts](https://support.microsoft.com/en-us/help/179442)

@@ -1,46 +1,46 @@
 ---
 source: https://www.twingate.com/docs/administration
 type: docs
-fetched: 2026-08-05
-source_version: 3f96c5d05182a326fed0b32e3fb4b815fe76cce7a3e5659e015066abc2757b01
+fetched: 2026-08-14
+source_version: 5c01b17cbbff6e580e4bfa6d1428074329755b653faf356a93c70d34e664cd64
 ---
 
 # Twingate Administration
 
-## Page Title
-Administration Overview
-
 ## Summary
-This page serves as a top-level navigation hub for Twingate administration topics. It covers Admin Console security configuration, reporting options, and subscription/billing management.
+The Administration section covers Admin Console security configuration, subscription management, and reporting options. It provides access to authentication policies for admin users and billing/licensing management.
 
 ## Key Information
-- **Reporting**: Network-level and user activity reporting available within the account
-- **Admin Console Security**: Special authentication policy governs admin access; 2FA can be required or made optional
-- **Subscription Management**: Billing and licensing FAQ and management tools available
-
-## Prerequisites
-- Admin-level access to the Twingate Admin Console
+- Admin Console access is governed by a **special authentication policy** separate from standard user policies
+- 2FA enforcement for Admin Console access is configurable
+- Reporting covers both network-level and user activity
+- Subscription/billing management is available within the Admin Console
 
 ## Core Administration Areas
 
 ### Admin Console Security
-- Admins accessing the Admin Console are subject to a dedicated authentication policy
-- 2FA enforcement is configurable (required vs. optional)
-- See: Admin Console Security docs for configuration steps
+- Controls authentication requirements for admins accessing the Admin Console
+- 2FA can be set as required or optional for Admin Console access
+- Separate from standard user authentication policies
 
 ### Reporting
-- Provides visibility into network-level activity and user activity
-- See: Reporting docs for available report types
+- Network-level activity reporting available
+- User activity reporting available
+- Multiple reporting options/formats supported
 
 ### Subscription Management
-- Covers billing model and licensing questions
-- See: Subscription Management docs for plan changes and FAQs
+- Billing and licensing FAQ available
+- Plan changes managed through Admin Console
+
+## Prerequisites
+- Must have Admin role to access Admin Console settings
+- Account must be active on Twingate
 
 ## Gotchas
-- Admin Console authentication policy is **separate** from standard user authentication policies — changes here only affect admin access, not end-user access
-- 2FA settings for the Admin Console must be configured explicitly; default behavior may not enforce 2FA
+- Admin Console security policy is **distinct** from user-facing resource access policies — changes here only affect admin login, not end-user access
+- 2FA configuration for admins is managed separately from 2FA settings for regular users
 
 ## Related Docs
 - [Reporting](https://www.twingate.com/docs/reporting)
 - [Admin Console Security](https://www.twingate.com/docs/admin-console-security)
-- [Subscription Management](https://www.twingate.com/docs/subscription-management)
+- [Subscription Management](https://www.twingate.com/docs/subscription)

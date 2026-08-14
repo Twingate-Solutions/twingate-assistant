@@ -1,74 +1,74 @@
 ---
 source: https://www.twingate.com/docs/notifications
 type: docs
-fetched: 2026-08-05
-source_version: 77a4ede80193713ad68089f353f3419f550e119e8dfb90ca251eff0029ef16ac
+fetched: 2026-08-14
+source_version: 2145ea13bc6d4e053528f451790a3a3d4e4fc27798d0f20dca87e3958298016b
 ---
 
 # Twingate Notifications
 
 ## Summary
-Twingate provides configurable notification channels (email and webhooks) for admin alerts. Some notifications are mandatory email-only; others can be routed to specific recipients or webhook endpoints. Webhooks accept POST requests with JSON payloads.
+Twingate provides configurable notification channels (email and webhooks) for admin alerts. Some notifications are fixed (subscription updates, end-user notifications sent to all admins via email); others are customizable per recipient and delivery method.
 
 ## Key Information
-- **Fixed notifications** (always email to all admins): subscription updates, end-user notifications
-- **Configurable notifications**: can target specific email addresses or webhooks
-- Manage via Admin Console → Settings
-- Use **Slack Workflow Builder** (not Incoming Webhooks) for Slack integration — Incoming Webhooks only support plain text JSON
-- Test payloads available directly in Admin Console per notification type
+- Fixed notifications always go to all admin emails; cannot be customized
+- Customizable notifications support: specific email addresses, webhooks, or both
+- Granular control: configure per-channel (which notifications a channel receives) or per-notification (which channels receive it)
+- Webhook test payloads can be sent directly from Admin Console
+- **Slack**: Use Workflow Builder, not Incoming Webhooks (Incoming Webhooks only supports plain text JSON)
 
 ## Prerequisites
 - Admin access to Twingate Admin Console
-- Webhook endpoint that accepts HTTP **POST** requests with standard JSON
+- For webhooks: an endpoint that accepts HTTP POST requests with standard JSON payloads
 
-## Webhook Configuration
-Required inputs:
-- Webhook name
-- Webhook URL
-- Selected notification types
+## Step-by-Step: Configure Notifications
+1. Navigate to **Settings** in the Admin Console
+2. **Email**: Select an admin email address → choose which notifications it receives
+3. **Webhook**: Provide webhook name + URL → select notifications to route to it
+4. Use **Test Payload** button per notification to validate webhook delivery
 
-## Webhook Payload Fields (Common)
+## Webhook Configuration Requirements
+- Must accept **POST** requests (GET-only endpoints will error)
+- Must accept standard JSON payloads
+- Endpoint must respond without error to Twingate's payload format
+
+## Webhook Payload Fields
+
+### Common Fields (all payloads)
 | Field | Description |
 |-------|-------------|
-| `timestamp` | ISO 8601 datetime |
-| `tenant` | Twingate tenant domain |
-| `version` | Payload version (`"1"`) |
-| `type` | Notification type constant (see below) |
+| `timestamp` | ISO 8601 UTC timestamp |
+| `tenant` | Twingate tenant URL |
+| `version` | Payload version (currently `"1"`) |
+| `type` | Notification type identifier |
 
-## Notification Types & `type` Values
-| Notification | `type` constant |
-|---|---|
-| Usage-based Access Request | `ACCESS_REQUEST` (request_type: `AutoLock`) |
-| JIT Access Request | `ACCESS_REQUEST` (request_type: `AccessRequest`) |
-| Client update recommended | `CLIENT_UPDATE_RECOMMENDED` |
-| Client update required | `CLIENT_UPDATE_REQUIRED` |
-| Connector upgrade available | `CONNECTOR_UPGRADE_AVAILABLE` |
-| Connector offline | `CONNECTOR_STATUS_OFFLINE` |
-| Connector online | `CONNECTOR_STATUS_ONLINE` |
-| Device integration API token expiring | `DEVICE_INTEGRATION_API_TOKEN_EXPIRATION` |
-| Events sync errors | `EVENTS_SYNC_ERRORS` |
-| Events sync errors resolved | `EVENTS_SYNC_ERROR_RESOLVED` |
-| Events sync requires attention | `EVENTS_SYNC_REQUIRES_ATTENTION` |
-| Google Workspace sync error | `GOOGLE_WORKSPACE_SYNC_ERROR` |
-| Identity provider integration error | `IDENTITY_PROVIDER_INTEGRATION_ERROR` |
-| Integration error resolved | `INTEGRATION_ERROR_RESOLVED` |
-| Integration errors | `INTEGRATION_ERRORS` |
-| Service account keys expiring | `SERVICE_ACCOUNT_KEYS_EXPIRATION` |
-
-## Access Request Payload Notable Fields
-- `request_id`, `request_url` — link to approve/deny in console
-- `approval_mode` — `MANUAL` or automatic
-- `request_type` — `AutoLock` (usage-based) vs `AccessRequest` (JIT)
-- `request_duration_seconds` — requested access duration
+### Notification Types & Key Fields
+| `type` | Notable Fields |
+|--------|---------------|
+| `ACCESS_REQUEST` | `request_id`, `user_name`, `resource_name`, `approval_mode`, `request_type` (`AutoLock` or `AccessRequest`), `request_duration_seconds`, `reason` |
+| `CLIENT_UPDATE_RECOMMENDED` | `platform`, `devices_list` (URL) |
+| `CLIENT_UPDATE_REQUIRED` | `message`, `table` |
+| `CONNECTOR_UPGRADE_AVAILABLE` | `message`, `table` |
+| `CONNECTOR_STATUS_OFFLINE` | `message`, `table` |
+| `CONNECTOR_STATUS_ONLINE` | `message`, `table` |
+| `DEVICE_INTEGRATION_API_TOKEN_EXPIRATION` | `integration`, `days_remaining`, `manage_integration` |
+| `EVENTS_SYNC_ERRORS` | `message`, `manage_sync` |
+| `EVENTS_SYNC_ERROR_RESOLVED` | `sync_type`, `manage_sync` |
+| `EVENTS_SYNC_REQUIRES_ATTENTION` | `sync_type`, `manage_sync` |
+| `GOOGLE_WORKSPACE_SYNC_ERROR` | `message`, `message_integration` |
+| `IDENTITY_PROVIDER_INTEGRATION_ERROR` | `integration`, `manage_integration` |
+| `INTEGRATION_ERROR_RESOLVED` | `integration`, `manage_integration` |
+| `INTEGRATION_ERRORS` | `integration`, `manage_integration` |
+| `SERVICE_ACCOUNT_KEYS_EXPIRATION` | `table[]` with `service_account_name`, `service_key`, `link` |
 
 ## Gotchas
-- Webhook endpoints **must accept POST**; GET-only endpoints will error
-- Slack Incoming Webhooks reject standard JSON — use Workflow Builder instead
-- `CLIENT_UPDATE_REQUIRED` and connector/status payloads include a `table` array (may be empty in test payloads)
-- `SERVICE_ACCOUNT_KEYS_EXPIRATION` includes a `table` array with `service_account_name`, `service_key`, `link`
+- Slack Incoming Webhooks will fail — use Slack Workflow Builder instead
+- Webhook errors = your endpoint returned an error, not a Twingate-side issue
+- `table` field is an empty array `[]` in test payloads for some notification types
+- `ACCESS_REQUEST` type covers both JIT and Usage-based requests; differentiate via `request_type` field (`AccessRequest` vs `AutoLock`)
 
 ## Related Docs
-- Access Requests (JIT/Usage-based)
+- Access Requests (JIT and Usage-based)
 - Device Integrations settings
 - Connector management
-- Events sync configuration
+- Service Accounts

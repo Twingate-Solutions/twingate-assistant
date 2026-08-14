@@ -1,66 +1,65 @@
 ---
 source: https://www.twingate.com/docs/database-access-guide
 type: docs
-fetched: 2026-08-05
-source_version: c8ecb27e55804704b1c191740ced861e8c1fff3734f39f4bdff34cf3b6eb374d
+fetched: 2026-08-14
+source_version: d6940a351bb3b162660813ff93b7430ce0f4620b933c36fea0bca6a93a506631
 ---
 
 # Database Access Guide
 
 ## Page Title
-Database Access Guide - Twingate
+Database Access Guide (Twingate)
 
 ## Summary
-Twingate enables secure access to private and public/SaaS databases by routing traffic through a Connector deployed in the same network. Configuration requires adding the Connector's IP address (private or public) to the database's firewall/allow list and defining a Twingate Resource for the database endpoint.
+Covers configuring Twingate for secure database access across cloud and on-premises environments. Uses Connector IP addresses (private or public) added to database allow lists to restrict access. Requires a Remote Network and Connector deployed before configuring database-specific access.
 
 ## Key Information
-- **Private databases**: Use Connector's **private IP address** in firewall/security group rules
-- **SaaS/public databases**: Use Connector's **public egress IP address** in IP access lists
-- Find both IP addresses on the **Connectors page** in the Admin Console
-- Prefer private connectivity (AWS PrivateLink, VPC endpoints) over public when available
-- Supported GUIs: DBeaver (multi-DB) and SSMS (SQL Server)
+- **Private/self-hosted DBs**: Use Connector's **private IP address** in firewall/security group rules
+- **SaaS/public DBs**: Use Connector's **public egress IP address** in IP access lists
+- Prefer private IPs whenever possible; use public only when private connectivity isn't available
+- Connector IP addresses found on the **Connectors page** in Admin Console
+- Supported GUI clients: DBeaver (multi-DB) and SSMS (SQL Server)
 
 ## Prerequisites
 - Remote Network defined in Twingate Admin Console
 - Connector deployed within target network
-- Twingate Resource created for the database endpoint (IP or DNS name)
-- Twingate Client active on user device with Resource visible
+- Twingate Client active on user's machine
+- Resource created in Twingate for the database endpoint
 
-## Step-by-Step: General Setup
+## Step-by-Step (General Setup)
 
-**Private/Self-hosted Database:**
-1. Create a Twingate Resource for the database (e.g., `10.0.1.15` or `db.internal.example.com`)
-2. Find Connector's **private IP** on the Connectors page
-3. Add private IP to database host/VPC firewall rules on the appropriate port
+**Private Database:**
+1. Create a Twingate Resource (private IP or internal DNS, e.g., `10.0.1.15` or `db.internal.example.com`)
+2. Find Connector's private IP on the Connectors page
+3. Add Connector's private IP to database host/VPC firewall rules on the appropriate port
 
 **SaaS/Public Database:**
-1. Create a Twingate Resource for the public endpoint (e.g., `cloud.mongodb.com`)
-2. Find Connector's **public IP** on the Connectors page
-3. Add public IP to database service's IP access list/network policy
+1. Create a Twingate Resource for public endpoints (e.g., `cloud.mongodb.com`, `rds.amazonaws.com`)
+2. Find Connector's public IP on the Connectors page
+3. Add Connector's public IP to database service's IP access list/network policy
 
 ## Configuration Values
-| Context | Value to Use |
-|---|---|
-| Private DB / same VPC | Connector private IP |
-| SaaS DB (Atlas, RDS public, Snowflake, etc.) | Connector public egress IP |
-| DBeaver hostname field | Resource hostname/IP as defined in Twingate |
-| SSMS Server Name field | Resource hostname (e.g., `your-db-instance.rds.amazonaws.com`) |
+- Resource hostname examples: `your-db-instance.rds.amazonaws.com`, `db.internal.example.com`
+- Port: database-specific (configure in security group/firewall rules)
 
 ## Gotchas
-- **No Activity in logs**: Client isn't sending traffic to Connector — check Client is running, Resource access is granted, no VPN conflict
-- **DNS Failed**: Connector can't resolve hostname — verify DNS zone is tied to VPC or DNS server is itself a Twingate Resource
-- **Connection Failed**: Connector reached destination but was blocked — verify IP allow lists and port-level firewall rules on both ends
-- Never expose database public IPs when private connectivity is available
-- SaaS databases that support PrivateLink/VPC endpoints should use private IP instead of public
+- **DNS Failed**: Connector can't resolve hostname — check DNS zone is tied to VPC or DNS server is a Twingate Resource
+- **Connection Failed**: Connector can't reach destination — verify routes, IP allow lists, and firewall rules on both ends
+- **No Activity**: Client not sending traffic — check Client is running, Resource access granted, no other VPN intercepting
+- **Connection Refused**: Connector IP not in database allow list
+- Never expose database public IPs when Connector and DB share a private network
+
+## Database-Specific Guides
+- AWS RDS/Aurora → AWS Database Access Guide
+- GCP Cloud SQL → GCP Database Access Guide (supports Cloud SQL Auth Proxy)
+- Azure SQL → Azure Database Access Guide
+- Oracle DB → Oracle Database Access Guide (`sqlnet.ora`, SQL*Plus)
+- MongoDB/Atlas → MongoDB Access Guide (`mongosh`)
+- Redis/Redis Cloud → Redis Access Guide (`redis-cli`)
+- Snowflake → Snowflake Access Guide (network rules/policies)
 
 ## Related Docs
-- AWS Database Access Guide
-- GCP Database Access Guide
-- Azure Database Access Guide
-- Oracle Database Access Guide
-- MongoDB Access Guide
-- Redis Access Guide
-- Snowflake Access Guide
 - Twingate Troubleshooting Guide
+- How to Ingest Connector Logs into a SIEM
 - Best Practices for Connector Placement
 - Securing Resource Access with Policies

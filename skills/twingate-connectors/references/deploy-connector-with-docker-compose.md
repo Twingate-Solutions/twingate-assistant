@@ -1,25 +1,19 @@
 ---
 source: https://www.twingate.com/docs/deploy-connector-with-docker-compose
 type: docs
-fetched: 2026-08-05
-source_version: 843aa9171c07d86dd88a01d9d1a11754e97767e794ab35c6ee083e0ef296b438
+fetched: 2026-08-14
+source_version: 78dd9b863d6e5418094a73cff8996fa5c16f923cba7e43d843650b407bae5121
 ---
 
 # Deploy Connector with Docker Compose
 
 ## Summary
-Deploys a Twingate Connector using Docker Compose with required auth tokens and tenant configuration. Supports optional parameters for reliability, logging, DNS, and peer-to-peer connectivity. Log forwarding to syslog is also supported.
-
-## Key Information
-- Docker image: `twingate/connector:latest`
-- Three required environment variables; all others optional
-- `network_mode: host` enables local peer-to-peer connections
-- Syslog forwarding configured via Docker logging driver
+Deploys a Twingate Connector using Docker Compose with required auth tokens and tenant configuration. Supports optional parameters for logging, DNS, restart policies, and syslog forwarding.
 
 ## Prerequisites
-- Docker and Docker Compose installed
 - Access Token and Refresh Token (generated via Connector deployment flow in Admin Console)
 - Twingate tenant name (`<name>` from `https://<name>.twingate.com`)
+- Docker and Docker Compose installed
 
 ## Configuration Values
 
@@ -34,17 +28,16 @@ Deploys a Twingate Connector using Docker Compose with required auth tokens and 
 | Variable | Description |
 |---|---|
 | `TWINGATE_LOG_LEVEL` | Log verbosity (e.g., `3`) |
-| `TWINGATE_LOG_ANALYTICS` | Enable network event logs (`v2`) |
+| `TWINGATE_LOG_ANALYTICS` | Enable Network Events in logs (`v2`) |
 | `TWINGATE_DNS` | Custom DNS server IP (e.g., `8.8.8.8`) |
 
-### Optional Compose Fields
-| Field | Value | Purpose |
-|---|---|---|
-| `restart` | `always` | Auto-restart on crash |
-| `network_mode` | `host` | Enable local peer-to-peer |
-| `sysctls: net.ipv4.ping_group_range` | `"0 2147483647"` | Allow ICMP/ping |
+### Other Optional Settings
+- `container_name`: Match to Admin Console Connector name
+- `restart: always`: Auto-restart on crash
+- `network_mode: host`: Enables local peer-to-peer connections
+- `sysctls: net.ipv4.ping_group_range: "0 2147483647"`: Enables ICMP/ping support
 
-## Minimal Compose Template
+## Minimal Compose Config
 ```yaml
 services:
   twingate-connector:
@@ -55,7 +48,7 @@ services:
       - TWINGATE_REFRESH_TOKEN=<REFRESH TOKEN>
 ```
 
-## Recommended Compose Template
+## Recommended Compose Config
 ```yaml
 services:
   twingate_connector:
@@ -68,12 +61,13 @@ services:
       - TWINGATE_REFRESH_TOKEN=<REFRESH TOKEN>
       - TWINGATE_LOG_ANALYTICS=v2
       - TWINGATE_LOG_LEVEL=3
+      - TWINGATE_DNS=8.8.8.8
     network_mode: host
     sysctls:
       net.ipv4.ping_group_range: "0 2147483647"
 ```
 
-## Syslog Forwarding Addition
+## Syslog Forwarding Config
 ```yaml
     logging:
       driver: syslog
@@ -85,13 +79,12 @@ services:
 ```
 
 ## Gotchas
-- `network_mode: host` conflicts with bridge networking; choose based on whether local peer-to-peer is needed
-- `TWINGATE_DNS` overrides Remote Network DNS config — rarely needed; only set if required
-- `container_name` should match the Connector name in Admin Console for clarity
-- Without `restart: always`, container won't recover from crashes automatically
+- `TWINGATE_DNS` is rarely needed; Connector uses Remote Network's DNS by default
+- `network_mode: host` required for local peer-to-peer connections (bypasses bridge networking)
+- Without `restart: always`, connector won't recover from crashes automatically
+- Peer-to-peer connections are needed to comply with the Fair Use Policy for bandwidth
 
 ## Related Docs
 - How to deploy a Connector (token generation)
-- Support peer-to-peer connections
 - Twingate Connector logs (log level values)
-- Fair Use Policy (bandwidth)
+- Support peer-to-peer connections

@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/twingate-security
 type: docs
-fetched: 2026-08-05
-source_version: 638672e96a393e2cabd983ccf03fa0ebbe33ec610e1de860cc602719540316f6
+fetched: 2026-08-14
+source_version: d034365335a7dc3ffc715c106ee787ff2333701ecf85d3b440ea75d13b377f2b
 ---
 
 # Twingate Security Posture
@@ -11,58 +11,60 @@ source_version: 638672e96a393e2cabd983ccf03fa0ebbe33ec610e1de860cc602719540316f6
 Twingate Security (Last updated October 2024)
 
 ## Summary
-Documents Twingate's internal information security practices and product security architecture for customer transparency. Covers people security, data protection, infrastructure, and product design principles. Includes SOC 2 Type 2 compliance and third-party security testing details.
+Documents Twingate's internal information security practices and product security architecture for customer due diligence. Covers people security, data handling, infrastructure controls, and product design principles. Twingate holds SOC 2 Type 2 certification and undergoes annual audits.
 
 ## Key Information
 
-### Compliance & Audits
-- SOC 2 Type 2 report available (annual audits); request via Twingate contact
-- Third-party security testing by Hacker House (penetration testing, reverse engineering, fuzzing, threat modeling)
-- NIST SP 800-52 Rev. 2 cipher recommendations followed
-
-### Data Encryption
-- **In transit**: TLS/SSL
-- **At rest**: GCP-managed database, AES-256+, symmetric keys with master key in secure keystore
-- No custom/proprietary cryptographic implementations
-- Twingate does **not** store customer passwords
+### Certifications & Audits
+- SOC 2 Type 2 report (annual audits) — request copy from Twingate contact
+- Third-party security testing via Hacker House (penetration testing, fuzzing, reverse engineering, threat modeling)
+- Service status at `status.twingate.com`
 
 ### Data Handling
-- Customer data types: user details (email, names, group membership), infrastructure info (network/resource details, ACLs), event logs, crash reports
-- Automated daily database backups, stored for limited period, regularly tested
-- Customer data permanently deleted upon request per contractual terms
+- Customer data stored in GCP-managed databases encrypted at rest with **AES-256**
+- In transit: **TLS/SSL**; keys encrypted with master key in secure keystore
+- Twingate does **not** store customer passwords (delegates auth to IdP)
+- Data types collected: user details (email, name, group membership), infrastructure info (network/resource details, ACLs), event logs, crash reports
 - Customer data **not** used for testing
+- Daily automated backups; stored limited period; regularly tested
 
-### Access Control
-- Principle of least privilege; role-based provisioning
-- Internal access secured via Twingate + IdP SSO + MFA
-- Developers have **no** direct database access; generally no SSH access to production servers
-- Automated CI/CD removes need for manual production changes
+### Access Controls
+- Production access secured via Twingate itself + IdP SSO + MFA
+- Principle of least privilege; resource-level (not network-level) access control
+- Developers have no direct database access; no SSH access to production servers
+- Automated CI/CD deployment removes need for human production access
+
+### Cipher Policy
+- Follows **NIST SP 800-52 Rev. 2** recommendations
 
 ### Infrastructure
-- Hosted on GCP, multi-region for redundancy
-- Docker containers orchestrated with Kubernetes
-- Pre-hardened GCP server infrastructure
-- Commercial secrets management system for tokens, passwords, API credentials, certificates
-- Service status: `status.twingate.com`
+- Hosted on **Google Cloud Platform** across multiple physically separated data centers
+- Servers run Docker containers orchestrated with **Kubernetes**
+- GCP provides pre-hardened servers and DDoS protection
 
 ## Product Architecture Principles
-- No single component can independently authorize traffic — multiple components run multiple checks
-- User data flows and authentication flows handled by **separate** components with separate validation
+- No single component can independently authorize traffic — multiple components perform separate validation checks
+- User data flows and authentication flows handled by **separate components**
+- End-to-end encrypted data flows — relay infrastructure **cannot decrypt** user data
 - Authentication delegated to third-party IdP (separation of concerns)
-- End-to-end encrypted user data flows; relay infrastructure **cannot decrypt** traffic
-- Networks not publicly exposed; invisible to public internet
-
-## Prerequisites
-- Penetration testing requires prior written approval from Twingate security team + advance notice of timing/scope; may require signed agreement
-- Subdomain allocation governed by Twingate Customer Agreement
-
-## Configuration Values
-- None (security posture document, not implementation guide)
+- Networks not publicly exposed; customer infrastructure invisible to public internet
 
 ## Gotchas
-- Twingate relays handle traffic but **cannot decrypt** it — architecture by design
-- Subdomain names ultimately controlled by Twingate; trademark/spoofing violations can result in action
+- Penetration testing by customers requires **prior written approval** and advance notice to Twingate security team; may require signed agreement
+- Subdomain allocation is at Twingate's discretion under the Customer Agreement
 - Background checks outside the U.S. vary by local law
+- Employee offboarding access revocation is documented but timing described only as "timely manner"
+
+## Configuration Values / Standards
+| Control | Standard/Tool |
+|---|---|
+| Encryption at rest | AES-256 |
+| Encryption in transit | TLS/SSL |
+| Cipher selection | NIST SP 800-52 Rev. 2 |
+| Infrastructure | GCP + Kubernetes + Docker |
+| Secrets management | Commercial vendor (unnamed) |
+| MDM | Yes (vendor unnamed) |
+| SAST | Multiple tools (unnamed) |
 
 ## Related Docs
 - [Twingate Customer Agreement](https://www.twingate.com/customer-agreement)

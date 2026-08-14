@@ -1,40 +1,53 @@
 ---
 source: https://www.twingate.com/docs/api-overview
 type: docs
-fetched: 2026-08-05
-source_version: eee6375cbb5d1d0d5094f2d5eaff78dad3c119483b85e2c8f96e4172c618da6f
+fetched: 2026-08-14
+source_version: 3e8b79aebd571f3b8c90040478a901615406c0254a9ac4684876cec7329b28af
 ---
 
 # Twingate Admin API Overview
 
+## Page Title
+API Overview
+
 ## Summary
-Twingate provides a GraphQL-based Admin API for managing all core network resources including Remote Networks, Connectors, Resources, Groups, Service Accounts, Devices, and Users. Access requires an API token generated from the Admin Console. Rate limiting applies at 60 reads/min and 20 writes/min.
+Twingate provides a GraphQL-based Admin API for managing all core network objects (Remote Networks, Connectors, Resources, Groups, Service Accounts, Devices, Users, Policies). Access requires an API token generated from the Admin Console. The API endpoint is tenant-specific and schema is always available via introspection.
 
 ## Key Information
-- API is GraphQL-based with full schema introspection available at the endpoint
-- Supports CRUD operations for: Remote Networks, Connectors, Resources, Groups, Service Accounts/Keys, Devices, Users, Security Policies
-- Schema documentation is auto-generated and always current via introspection
-- Terraform provider available for infrastructure-as-code workflows
+- **API Type**: GraphQL
+- **Endpoint**: `https://<subdomain>.twingate.com/api/graphql/`
+- **Auth Header**: `X-API-KEY: <your-api-token>`
+- **Schema**: Self-documenting via GraphQL introspection
+- **Terraform Provider**: Available for IaC management of Twingate resources
 
 ## Prerequisites
-- Twingate Admin Console access
+- Access to Twingate Admin Console
 - API token generated via: **Settings → API → Generate Token**
-- Your Twingate account subdomain
+- Know your Twingate subdomain
 
 ## Configuration Values
 
 | Parameter | Value |
 |-----------|-------|
-| Endpoint URL | `https://<subdomain>.twingate.com/api/graphql/` |
-| Auth Header | `X-API-KEY: <your-api-token>` |
+| Endpoint | `https://<subdomain>.twingate.com/api/graphql/` |
+| HTTP Header | `X-API-KEY` |
+| Read limit | 60 requests/minute |
+| Write limit | 20 requests/minute |
+| Rate limit response | HTTP `429` |
 
-## API Rate Limits
+## Supported Operations by Object
 
-| Request Type | Limit |
-|-------------|-------|
-| Reads | 60/minute |
-| Writes | 20/minute |
-| Exceeded response | HTTP `429` with retry-after info |
+| Object | Operations |
+|--------|-----------|
+| Remote Networks | CRUD |
+| Connectors | CRUD + generate tokens |
+| Resources | CRUD |
+| Groups | CRUD |
+| Service Accounts/Keys | CRUD |
+| Devices | Read, archive, unarchive, block, unblock, update trust |
+| Security Policies | Read, update |
+| Users | Read only |
+| Social Users | Read, invite, update, delete |
 
 ## Example Query
 ```graphql
@@ -57,14 +70,14 @@ Twingate provides a GraphQL-based Admin API for managing all core network resour
 ## Recommended Clients
 - **GUI**: GraphiQL (`brew install --cask graphiql`) or Altair (has built-in introspection)
 - **Python**: `gql` library
-- **IaC**: Twingate Terraform Provider
 
 ## Gotchas
-- Tokens can be disabled/enabled after creation; manage carefully
-- HTTP `429` errors from Terraform: upgrade to latest Twingate provider version — older versions don't handle retry logic automatically
-- Pagination required for large result sets; use `pageInfo.hasNextPage` and cursor-based pagination
+- Rate limiting returns HTTP `429` — response includes retry timing
+- Terraform provider older versions do **not** handle `429` retries automatically; upgrade to latest version
+- Pagination required for large result sets (use `after`/`first` + `pageInfo`)
+- API tokens can be disabled/enabled but must be generated from Admin Console (no API-based token creation)
 
 ## Related Docs
-- Terraform Provider documentation
-- Terraform Getting Started guide
-- GraphQL introspection (for schema exploration via Altair or similar tools)
+- [Terraform Provider Documentation](https://www.twingate.com/docs/terraform)
+- [Terraform Getting Started Guide](https://www.twingate.com/docs/terraform-getting-started)
+- [GraphQL Introspection](https://graphql.org/learn/introspection/)

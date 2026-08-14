@@ -1,82 +1,71 @@
 ---
 source: https://www.twingate.com/docs/minecraft-forge-server
 type: docs
-fetched: 2026-08-05
-source_version: ad484d120f340411296c78927685b211097f17d8da1d33ca91678158c9999449
+fetched: 2026-08-14
+source_version: 72bc3c29c104a2863a7c70ba3c01730918384a81881f119d4a9b4bd592b0238b
 ---
 
 # Modded Minecraft Server (Forge) with Twingate
 
 ## Summary
-Deploy a private Forge modded Minecraft server using Docker Compose with a Twingate Connector for secure access. Supports CurseForge modpack auto-install or manual mod placement. Players connect via Twingate Client using the server's private IP with no public port forwarding.
+Deploy a private Forge modded Minecraft server using Docker Compose with a Twingate Connector sidecar. Players connect via Twingate Client to a private IP, keeping the server off the public internet. Supports both CurseForge modpack auto-install and manual mod placement.
 
 ## Key Information
-- Uses `itzg/minecraft-server` Docker image with Forge support
-- Server pinned to `172.30.0.10` on internal bridge network `172.30.0.0/24`
-- Port 25565 TCP — no host port published
-- CurseForge API key required for modpack auto-install (free at console.curseforge.com)
-- All players must have identical mods + versions; server rejects mismatches
-- First startup: 2–5 min (manual mods), 10+ min (CurseForge download)
+- Uses `itzg/minecraft-server` Docker image with `TYPE: AUTO_CURSEFORGE` or `TYPE: FORGE`
+- Server pinned to `172.30.0.10` on private bridge network `172.30.0.0/24`
+- No host ports published; Connector reaches server directly over Docker bridge
+- All players must have identical mods (same files, same versions) as the server
+- CurseForge modpacks auto-sync client/server mod lists via launcher
 
 ## Prerequisites
-- Host: 4 GB RAM min (6–8 GB for large packs), 2 CPU cores, 20 GB disk
+- Host: 4+ GB RAM (6-8 GB for large modpacks), 2 CPU cores, 20 GB disk
 - Docker Engine + Docker Compose installed
 - Twingate account with Admin Console access
-- CurseForge API key (Option A only)
+- CurseForge API key (free, from `console.curseforge.com`) — Option A only
 - Connector tokens from Twingate Admin Console
 
 ## Step-by-Step
 
-1. Create Remote Network + generate Connector tokens (follow vanilla Minecraft guide Step 1)
-2. Create project directory: `mkdir -p ~/minecraft-forge && cd ~/minecraft-forge`
-3. Create `docker-compose.yml` (see Configuration Values below)
-4. Start: `docker compose up -d`
-5. Monitor: `docker compose logs minecraft -f` — wait for `Done (...s)! For help, type "help"`
-6. Verify Connector in Admin Console: Controller + Relay both show **Connected**
-7. Add Resource: Address `172.30.0.10`, TCP port `25565`
-8. Assign Resource to player Group
-9. Players install Twingate Client + same mods, connect to `172.30.0.10`
+1. **Create Remote Network & Connector tokens** — follow vanilla Minecraft guide Step 1
+2. **Deploy server + Connector** — create `docker-compose.yml` (see configs below), run `docker compose up -d`
+3. **Add Resource in Admin Console** — Address: `172.30.0.10`, TCP port `25565`
+4. **Grant access** — assign Group to Resource
+5. **Players install Twingate Client** + same modpack/mods, connect to `172.30.0.10` in-game
 
 ## Configuration Values
 
-### Option A — CurseForge Modpack
-```yaml
-TYPE: "AUTO_CURSEFORGE"
-CF_PAGE_URL: "https://www.curseforge.com/minecraft/modpacks/<slug>"
-CF_API_KEY: "<YOUR_API_KEY>"   # escape $ as $$ (see Gotchas)
-MEMORY: "6G"
-```
+### Option A: CurseForge Modpack
+| Variable | Value |
+|---|---|
+| `TYPE` | `AUTO_CURSEFORGE` |
+| `CF_PAGE_URL` | Full modpack URL (e.g., `https://www.curseforge.com/minecraft/modpacks/all-the-mods-10`) |
+| `CF_API_KEY` | Your CurseForge API key |
+| `CF_FILE_ID` | (Optional) Pin specific modpack version |
+| `MEMORY` | `6G` (adjust per modpack size) |
 
-### Option B — Manual Mods
-```yaml
-TYPE: "FORGE"
-VERSION: "1.20.1"
-MEMORY: "4G"
-```
-Place `.jar` files in `./data/mods/`
-
-### General Variables
-| Variable | Default | Description |
-|---|---|---|
-| `EULA` | — | Must be `"TRUE"` |
-| `MEMORY` | `1G` | JVM heap; set 4–8G for modded |
-| `MAX_PLAYERS` | `20` | Concurrent player limit |
-| `MOTD` | none | Server browser message |
-| `OPS` | none | Comma-separated operator usernames |
-| `CF_FILE_ID` | — | Pin specific modpack version |
-| `FORGE_VERSION` | auto | Specific Forge build |
+### Option B: Manual Mods
+| Variable | Value |
+|---|---|
+| `TYPE` | `FORGE` |
+| `VERSION` | e.g., `1.20.1` |
+| `FORGE_VERSION` | (Optional) specific Forge build |
+| `MEMORY` | `4G` minimum |
 
 ### Twingate Connector
-```yaml
-TWINGATE_NETWORK: "<network>.twingate.com"
-TWINGATE_ACCESS_TOKEN: "<token>"
-TWINGATE_REFRESH_TOKEN: "<token>"
-```
+| Variable | Value |
+|---|---|
+| `TWINGATE_NETWORK` | Your network subdomain |
+| `TWINGATE_ACCESS_TOKEN` | From Admin Console |
+| `TWINGATE_REFRESH_TOKEN` | From Admin Console |
 
 ## Gotchas
-- **`$` in CurseForge API keys**: Keys start with `$2a$10$...` — escape every `$` as `$$` in `docker-compose.yml` or the key is silently corrupted; error appears as "Access forbidden" not key error
-- **`network_mode: host`** only works on native Linux; bridge network used here works cross-platform
-- **JVM overhead**: A `6G` heap uses 7+ GB total RAM in practice
-- **Mod version mismatch**: Players see "Mod rejections" screen; both mod files AND versions must match exactly
-- **Some CurseForge mods** block third-party distribution — must download manually to `./data/mods/`
-- **`EULA:
+- **Dollar sign escaping**: CurseForge API keys start with `$2a$10$`. Escape every `$` as `$$` in `docker-compose.yml` or the key is silently corrupted. Error manifests as a misleading "forbidden/rate-limit" API error.
+- **Mod version matching**: Client and server must have identical mod files/versions. Mismatch shows "Mod rejections" screen listing differences.
+- **Startup time**: First launch takes 2-5 minutes (Forge install); CurseForge modpacks add 10+ minutes for downloads on slow connections.
+- **RAM overhead**: JVM + Forge use ~1 GB above heap size (e.g., `6G` heap → ~7 GB actual). Connector adds <256 MB.
+- **`network_mode: host`**: Only works on native Linux — use bridge network for macOS/Windows Docker Desktop compatibility.
+- **Manual mods directory**: May not exist after first start; create with `mkdir -p ./data/mods` before copying jars.
+- **Third-party distribution restrictions**: Some CurseForge mods block API download; must be manually placed in `./data/mods/`.
+
+## Related Docs
+- [Vanilla

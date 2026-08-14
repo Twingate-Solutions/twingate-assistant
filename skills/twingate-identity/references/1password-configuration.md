@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/1password-configuration
 type: docs
-fetched: 2026-08-05
-source_version: b5fd041aafefeb8eb6e6ba1d8a0e9e3269111bfb151718e171a840fa9ae4f743
+fetched: 2026-08-14
+source_version: 9874218f2220dd0c1f46b002379bd87d273c202373566813bc6aacf92024890e
 ---
 
 # 1Password XAM Configuration
@@ -11,56 +11,56 @@ source_version: b5fd041aafefeb8eb6e6ba1d8a0e9e3269111bfb151718e171a840fa9ae4f743
 1Password Extended Access Management (XAM) Device Trust Integration
 
 ## Summary
-Twingate integrates with 1Password Device Trust to restrict resource access to verified devices by matching device serial numbers. Admins configure the integration via API key and incorporate it into Trusted Profiles within Security Policies. Available on Business and Enterprise plans only.
+Twingate integrates with 1Password Device Trust to restrict resource access to verified devices by matching device serial numbers between Twingate clients and 1Password-managed devices. Admins configure this via Trusted Profiles on macOS, Windows, and Linux. Available on Business and Enterprise plans only.
 
 ## Key Information
-- Matches device serial numbers from Twingate Client against 1Password Device Trust managed devices
-- Supports macOS, Windows, and Linux platforms
+- Verification matches **device serial numbers** from Twingate Client against 1Password Device Trust inventory
 - Device is considered verified if: serial number exists in 1Password AND device passes 1Password's device checks
-- Integration status visible on Device Integrations page after setup
-- Error retry window: 28 hours before integration stops attempting reconnection
-- Admin email notification sent if 28-hour reconnection window expires
+- Integration status visible on Device Integrations page
+- Initial sync shows "Waiting to sync" — resolves within a few minutes
+- Error recovery window: **28 hours** before integration stops retrying
+- Admins receive email notification if integration fails after 28 hours
 
 ## Prerequisites
-- Twingate Business or Enterprise plan
+- Business or Enterprise Twingate plan
 - Access to 1Password Device Trust Console
-- 1Password Device Trust API key (no special write permissions required)
 - Twingate Admin Console access
+- Supported platforms: macOS, Windows, Linux
 
 ## Step-by-Step
 
 ### Generate 1Password API Key
 1. Log into 1Password Device Trust Console
-2. Click user account (upper right)
-3. Navigate to **Settings → Developers**
+2. Click user account (upper right) → **Settings**
+3. Left panel → **Developers**
 4. Click **Create New Key**
-5. Name the key, click **Save** (no write permissions needed)
+5. Name the key → **Save** (no special write permissions needed)
 
 ### Configure in Twingate
-1. Go to **Settings → Device Integrations**
+1. Navigate to **Settings** → **Device Integrations**
 2. Click **Connect** next to 1Password
-3. Enter the 1Password Device Trust API Key
+3. Input the 1Password Device Trust API Key
 
 ### Apply to Security Policies
-1. Create a Trusted Profile for macOS/Windows/Linux
-2. Set **1Password Device Trust** as a Trust Method
-3. Incorporate the Trusted Profile into Security Policies
+1. Create a **Trusted Profile** (macOS/Windows/Linux)
+2. Set **1Password Device Trust** as the Trust Method
+3. Incorporate the Trusted Profile into a **Security Policy**
 
 ## Configuration Values
 | Parameter | Value/Location |
-|---|---|
-| API Key source | 1Password Device Trust Console → Settings → Developers |
+|-----------|---------------|
+| API Key | Generated in 1Password Device Trust Console → Developers |
 | Integration location | Twingate Admin → Settings → Device Integrations |
-| Supported OS | macOS, Windows, Linux |
+| Required permissions | None (read-only sufficient) |
 
 ## Gotchas
-- **Initial sync delay**: Status shows "Waiting to sync" after setup; device states may be incorrect for several minutes
-- **"1Password not verified" causes**: Device not managed by 1Password, OR device `auth_state` is `blocked`
-- **28-hour retry limit**: If 1Password API is unreachable for 28 hours, integration stops retrying and requires manual reconfiguration with new API credentials
-- **Error recovery**: After 28-hour failure, reconfigure integration with fresh API key—errors do not auto-resolve after the window expires
+- **"Waiting to sync"** is normal on initial setup — wait a few minutes before troubleshooting
+- Devices show `1Password not verified` if: not managed by 1Password OR device `auth_state` is `blocked`
+- After errors, integration shows **last successful sync time**, not current status
+- If unreachable for **28 hours**, integration stops retrying — must be manually reconfigured with new API credentials
+- Resolution for persistent errors: reconfigure integration and input new API client information
 
 ## Related Docs
-- Trusted Profiles documentation
-- Device Security / Security Policies
-- Twingate pricing page (plan eligibility)
-- Device Integrations settings
+- Twingate Trusted Profiles documentation
+- Twingate Security Policies documentation
+- [Pricing page](https://www.twingate.com/pricing) (Business/Enterprise plan comparison)

@@ -1,34 +1,30 @@
 ---
 source: https://www.twingate.com/docs/open-source-software
 type: docs
-fetched: 2026-08-05
-source_version: 911ef4d17619716841993796da45d6fd953747d628e26afd957e95ed35cf280c
+fetched: 2026-08-14
+source_version: 5837182ac17b6e4d30d7f571ac5839bc7873df2feaade0cf952b078aed10874a
 ---
 
 # Twingate Open Source Software
 
 ## Summary
-Twingate publishes source code for open source components used in their software. Currently, one open source component is listed: a fork/distribution of tap-windows6 under GPLv2 license.
+Twingate provides source code downloads for software components distributed under open source licenses. Currently, one open source component is listed: a Windows TAP driver based on the tap-windows6 project.
 
 ## Key Information
-- Twingate provides source code downloads to comply with open source license requirements
-- **tap-windows6**: Windows TAP driver component, licensed under GPLv2
-- Source code is available for direct download from the documentation page
+- Twingate publishes source code for GPL and other copylicense-obligated components
+- Current published component: **tap-windows6** (licensed under GPLv2)
+- Source code is available for direct download from this page
 
-## Configuration Values
-None applicable — this is a source code distribution page only.
-
-## Components Listed
+## Available Open Source Components
 
 | Component | License | Notes |
 |-----------|---------|-------|
-| tap-windows6 | GPLv2 | Windows virtual network adapter driver |
+| `tap-windows6` | GPLv2 | TAP network driver for Windows |
 
 ## Gotchas
-- Only one component is currently listed; other Twingate components are proprietary
-- tap-windows6 is a Windows-specific driver — only relevant if building/auditing Windows Client components
-- GPLv2 requires that any modifications to tap-windows6 also be distributed under GPLv2
+- This page appears to serve primarily as a license compliance disclosure page, not a development resource
+- No versioning information is displayed on the page — unclear if source matches current production binary
+- Only one component listed; other Twingate components are proprietary
 
 ## Related Docs
-- Twingate Client installation (Windows)
-- Twingate network architecture documentation
+- Twingate Client installation (Windows) — the tap-windows6 driver is a dependency of the Windows Twingate Client

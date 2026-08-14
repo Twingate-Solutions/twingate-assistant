@@ -1,53 +1,58 @@
 ---
 source: https://github.com/Twingate/pulumi-twingate
 type: github
-fetched: 2026-08-09
-source_version: 0c7c83cfaf0a89ee24e70eda71869c5548f3506c
+fetched: 2026-08-14
+source_version: 9f4488dd291c6faad9a88dd605d8793a02e9867d
 ---
 
 # Twingate Pulumi Provider
 
 ## Summary
-Pulumi provider for managing Twingate infrastructure (networks, resources, connectors, policies) using Python, TypeScript, Go, or .NET. Wraps the Twingate API and integrates with standard Pulumi workflows.
+A Pulumi resource provider for managing Twingate infrastructure as code. Supports Python, TypeScript/JavaScript, Go, and .NET. Wraps the Twingate API to allow declarative management of Twingate network resources.
 
 ## Key Information
-- Supports Node.js, Python, Go, and .NET SDKs
-- Built on top of the Twingate REST API
-- Full reference docs available on the [Pulumi Registry](https://www.pulumi.com/registry/packages/twingate/api-docs/)
+- Package names: `@twingate/pulumi-twingate` (Node.js), `pulumi-twingate` (Python), `Twingate.Twingate` (.NET)
+- Go module: `github.com/pulumi/pulumi-twingate/sdk/go/...`
+- Full API reference available on the [Pulumi Registry](https://www.pulumi.com/registry/packages/twingate/api-docs/)
 
 ## Prerequisites
 - Pulumi CLI installed
-- Twingate Admin Console access (to generate API token and find network ID)
-- **For local dev/build only:**
-  - Go 1.24+
-  - Node.js 22+
+- Twingate account with Admin Console access
+- Twingate API token (from Admin Console)
+- Twingate network ID
+- **For local development:** Go 1.24+, Node.js 22+
 
 ## Installation
 
-| Platform | Command |
-|----------|---------|
-| Node.js | `npm install @twingate/pulumi-twingate` or `yarn add @twingate/pulumi-twingate` |
-| Python | `pip install pulumi-twingate` |
-| Go | `go get github.com/pulumi/pulumi-twingate/sdk/go/...` |
-| .NET | `dotnet add package Twingate.Twingate` |
+```bash
+# Node.js
+npm install @twingate/pulumi-twingate
+
+# Python
+pip install pulumi-twingate
+
+# Go
+go get github.com/pulumi/pulumi-twingate/sdk/go/...
+
+# .NET
+dotnet add package Twingate.Twingate
+```
 
 ## Configuration Values
 
-| Config Key | Env Var | Required | Description |
-|------------|---------|----------|-------------|
+| Config Key | Environment Variable | Required | Description |
+|---|---|---|---|
 | `twingate:apiToken` | `TWINGATE_API_TOKEN` | Yes | API token from Twingate Admin Console |
-| `twingate:network` | `TWINGATE_NETWORK` | Yes | Network ID (subdomain portion of `<network>.twingate.com`) |
-| `twingate:url` | — | No | Defaults to `twingate.com`; do not change under normal use |
+| `twingate:network` | `TWINGATE_NETWORK` | Yes | Network ID (subdomain portion of Admin Console URL, e.g., `autoco` from `autoco.twingate.com`) |
+| `twingate:url` | — | No | Base URL; defaults to `twingate.com` |
 
-Set via Pulumi config:
+Set via Pulumi config or environment variables:
 ```bash
 pulumi config set twingate:apiToken <token>
 pulumi config set twingate:network <network-id>
 ```
 
-Or via environment variables.
-
-## Local Build (Development)
+## Local Development
 
 ```bash
 # Build all SDKs
@@ -56,7 +61,7 @@ make development
 # Build provider + Node.js SDK only
 make provider build_nodejs
 
-# Install local plugin after build
+# Install local plugin manually
 pulumi plugin install resource twingate <version> --file bin/pulumi-resource-twingate
 
 # Verify
@@ -64,21 +69,18 @@ pulumi plugin ls | grep twingate
 ```
 
 ## Gotchas
-- **404 on `pulumi up`/`pulumi preview`**: Local dev builds with versions like `v4.x.x-alpha...+dirty` are not published to GitHub Releases. Must manually install the plugin with `--file bin/pulumi-resource-twingate`. Check the error message for the exact version string.
-- The `twingate:url` config should not be changed unless working against a non-production Twingate environment.
-- Network ID is the subdomain only (e.g., `autoco` from `autoco.twingate.com`), not the full URL.
-- Local builds append `+dirty` to the version if there are uncommitted changes.
+- **404 on `pulumi up`/`pulumi preview` with local builds:** Local dev builds (with version strings like `v4.x.x-alpha+dirty`) won't be found on GitHub Releases. Must manually install with `pulumi plugin install ... --file bin/pulumi-resource-twingate`. Check the error message for the exact version string to use.
+- The `twingate:url` config value should not be changed under normal circumstances.
+- Build version strings include `+dirty` if there are uncommitted changes; the exact string appears in error messages and must match what's passed to `pulumi plugin install`.
 
-## Testing Workflows Locally
-Uses [`act`](https://github.com/nektos/act) to run GitHub Actions locally:
+## Testing CI Workflows Locally
+Uses [`act`](https://github.com/nektos/act) to run GitHub Actions locally. Choose "Medium" Docker image on first run.
 ```bash
 act --list
 act pull_request -j lint
 ```
-Select "Medium" Docker image size on first run.
 
 ## Related Docs
 - [Twingate API Overview](https://docs.twingate.com/docs/api-overview)
 - [Pulumi Registry – Twingate](https://www.pulumi.com/registry/packages/twingate/api-docs/)
-- [Pulumi CLI Install](https://www.pulumi.com/docs/install/)
-- [act (local GitHub Actions runner)](https://github.com/nektos/act)
+- [Pulumi CLI Installation](https://www.pulumi.com/docs/install/)

@@ -1,57 +1,60 @@
 ---
 source: https://www.twingate.com/docs/minecraft-guides
 type: docs
-fetched: 2026-08-05
-source_version: 82c58b71f653ea5551e8fdfc199cac551a59fe1880d2ff00ae00e011e9ff0961
+fetched: 2026-08-14
+source_version: 9b558f6b007a76018f3ce8017aff2c1c33166025bdf93d118138eb1d4462b0c8
 ---
 
 # Minecraft Server Guides
 
 ## Page Title
-Twingate Minecraft Server Guides (Index/Overview)
+Minecraft Server Guides (Twingate)
 
 ## Summary
-Index page for hosting private Minecraft servers using Twingate without port forwarding. Covers three server types (Java Vanilla, Java Forge, Bedrock) each with Docker Compose and Linux bare metal deployment options. The Twingate Connector opens outbound-only connections, keeping the server off the public internet.
+Index page for hosting private Minecraft servers secured with Twingate, eliminating public port forwarding. Covers three server editions (Java Vanilla, Java Forge, Bedrock) with two deployment methods each (Docker Compose and bare-metal Linux). Players connect via Twingate Client; no ports are exposed to the internet.
 
 ## Key Information
-- **Three server editions**: Java Vanilla, Java Forge (modded), Bedrock
-- **Two deployment methods each**: Docker Compose or Linux bare metal (systemd)
-- **No port forwarding required**: Connector uses outbound connections to Twingate Cloud
-- Players connect via private IP through Twingate Client
+- **6 total guides**: 3 editions × 2 deployment methods
+- Architecture: Player → Twingate Client → Twingate Cloud → Connector → Minecraft Server (outbound-only connection)
+- Connector runs alongside Minecraft server (as container or systemd service)
+- Players use server's **private IP address** to connect (not public IP)
 
 ## Prerequisites
 - Twingate account (free tier available)
 - Twingate Client installed on each player's device
-- **Docker path**: Docker + Docker Compose on host (Linux/macOS/Windows supported)
-- **Linux path**: Ubuntu 22.04/24.04 or Debian 12 + systemd
+- **Docker guides**: Docker + Docker Compose on host (Linux/macOS/Windows)
+- **Linux guides**: Ubuntu 22.04/24.04 or Debian 12; systemd; Java (Java editions) or Bedrock binary (x86_64 only)
 
-## Configuration Values / Comparison Table
+## Edition Comparison
 
-| Property | Java Vanilla | Java Forge | Bedrock |
-|----------|-------------|------------|---------|
-| Protocol | TCP 25565 | TCP 25565 | UDP 19132 |
+| | Java Vanilla | Java Forge | Bedrock |
+|---|---|---|---|
+| Protocol | TCP 25565 | TCP 25565 | **UDP 19132** |
 | Min RAM | 2 GB | 4–8 GB | 1 GB |
 | Platforms | Win/Mac/Linux | Win/Mac/Linux | Win/iOS/Android/ChromeOS |
 | Mod support | No | Yes | No |
-| Docker image | `itzg/minecraft-server` | `itzg/minecraft-server` | `itzg/minecraft-bedrock-server` |
 
-## Architecture
-```
-[Player's Device + Twingate Client]
-         ↕ Twingate Cloud ↕
-[Twingate Connector] ↔ [Minecraft Server]
-```
+## Deployment Options
+
+| Edition | Docker Image | Linux Method |
+|---|---|---|
+| Java Vanilla | `itzg/minecraft-server` | systemd native |
+| Java Forge | `itzg/minecraft-server` (CurseForge auto-download) | Manual Forge + systemd |
+| Bedrock | `itzg/minecraft-bedrock-server` | systemd native (x86_64 only) |
+
+## Configuration Values
+- Java port: `25565/TCP`
+- Bedrock port: `19132/UDP`
+- Bedrock Linux: x86_64 architecture required
 
 ## Gotchas
-- Bedrock uses **UDP** 19132 (not TCP); ensure Connector/network config supports UDP
-- Forge minimum RAM is 4–8 GB vs 2 GB for Vanilla — plan host resources accordingly
-- Bedrock Linux bare metal is **x86_64 only** (no ARM support)
-- Bedrock supports cross-platform play; Java does not (no mobile/console)
-- Docker Compose Forge guide supports automated CurseForge modpack downloads; Linux guide is manual only
+- Bedrock uses **UDP**, not TCP — firewall/Twingate Resource rules must specify UDP 19132
+- Bedrock bare-metal requires x86_64 (no ARM support noted)
+- Forge RAM minimum (4–8 GB) is significantly higher; modpack requirements vary
+- Players must have Twingate Client installed **before** attempting to connect
 
 ## Related Docs
-- Java Vanilla: Docker Compose guide | Linux guide
-- Java Forge: Docker Compose guide | Linux guide
-- Bedrock: Docker Compose guide | Linux guide
+- Java Vanilla: Docker Compose guide, Linux guide
+- Java Forge: Docker Compose guide (CurseForge modpacks), Linux guide
+- Bedrock: Docker Compose guide, Linux guide
 - Twingate Connector setup documentation
-- Twingate Client installation

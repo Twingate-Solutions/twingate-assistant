@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/how-nat-traversal-works
 type: docs
-fetched: 2026-08-05
-source_version: 3db5befadf6ab79ca6e336c491883905662c7d1121d25659856f9237d7201e51
+fetched: 2026-08-14
+source_version: 20b0a3e206cb42efdcf520b27f7428a7e57590219b433b351f5fee0fcce5603a
 ---
 
 # How NAT Traversal Works
@@ -11,38 +11,39 @@ source_version: 3db5befadf6ab79ca6e336c491883905662c7d1121d25659856f9237d7201e51
 How NAT Traversal Works
 
 ## Summary
-Twingate never requires open inbound ports. Instead, it establishes connectivity between Clients and Connectors via two methods: Relay servers (intermediaries) and NAT traversal (direct peer-to-peer tunnels). NAT traversal exploits the firewall rule that allows inbound packets from a public IP/port if the private network previously sent packets to that same address/port.
+Twingate never requires open inbound ports. Instead, it uses two methods to establish Client-Connector connectivity: Relay servers (intermediaries) and NAT traversal (direct peer-to-peer tunnels). NAT traversal works by having both parties simultaneously send outbound packets to each other's public IP/port, exploiting the firewall rule that allows return traffic from addresses you've already contacted.
 
 ## Key Information
-- **Two connectivity methods**: Relay (intermediary) and NAT traversal (P2P direct tunnel)
-- **NAT**: Translates private IPs (e.g., `192.168.1.4`) to unique public IPs using port mapping to track sessions
-- **Ports**: 65,535 per IP address; NAT uses public IP + port combos to disambiguate multiple devices behind the same public IP
-- **Firewall rule exploited by NAT traversal**: Inbound packets allowed only if outbound packets were first sent to that same public IP + port
-- **Relay dual role**: Acts as both STUN server (exchanges IP/port info between peers) and fallback data relay
-- **P2P tunnel requires simultaneous outbound connections**: Both Client and Connector must send packets to each other at the same time, coordinated by the Relay
+- **Two connectivity methods**: Relays (fallback, adds latency) and NAT traversal (preferred, peer-to-peer)
+- **NAT traversal core mechanic**: Firewalls allow inbound packets from a public IP/port *only if* outbound packets were previously sent to that same address/port
+- **Relay dual role**: Acts as both traffic relay (fallback) and STUN/broker server (coordinates NAT traversal)
+- **End-to-end encryption**: Traffic is encrypted between Client and Connector; Relays cannot decrypt it even when proxying
+- **NAT**: Translates private IPs (e.g., `192.168.1.4`) to unique public IPs using port assignments to track sessions
+- **Ports**: 65,535 per IP address; NAT devices use source port + IP combos to track which private device initiated which session
 
 ## Prerequisites
-- Understanding that Twingate Connectors require no open inbound firewall ports
-- Relays are deployed globally to minimize latency for both relay-based and NAT traversal coordination
+- Understanding that open inbound ports are avoided by design
+- Twingate Relay infrastructure is always available as fallback
+- Both Client and Connector must be able to make outbound connections
 
 ## Step-by-Step: NAT Traversal Connection Establishment
-1. Client and Connector each connect outbound to a Twingate Relay (acting as STUN server) and report their public IP + port
-2. Relay shares each peer's public IP + port with the other peer via an encrypted messaging channel
-3. Relay coordinates **simultaneous** outbound packet transmission from both Client → Connector and Connector → Client
-4. Each firewall allows inbound packets because outbound packets were already sent to that peer's address/port
-5. P2P tunnel is established; Relay is no longer needed for data transfer
+1. Client and Connector each connect to a Relay, reporting their public IP/port
+2. Relay brokers exchange: shares Client's public IP/port with Connector, and vice versa
+3. Relay establishes an encrypted messaging channel between Client and Connector
+4. Client and Connector **simultaneously** send packets to each other's public IP/port
+5. Because each side sent packets first, each side's firewall allows the return packets through
+6. Peer-to-peer tunnel is established — no open inbound ports required
 
 ## Configuration Values
-- No user-configurable parameters for NAT traversal — handled automatically by Twingate platform
-- HTTPS default port example: `:443`
+- None specific to this conceptual page; see troubleshooting guide for network-specific tuning
 
 ## Gotchas
-- **Symmetric NAT or restrictive firewalls** can prevent P2P tunnel establishment — fallback to Relay occurs automatically
-- **Simultaneous packet exchange is required**: if timing is off or one side is blocked, P2P fails
-- **Opening inbound ports is explicitly discouraged**: open ports attract continuous bot scanning and exploit attempts
-- **Port forwarding is not needed** and should not be configured for Twingate Connectors
-- Relay sees encrypted traffic only — end-to-end encryption between Client and Connector means Relay cannot decrypt payload
+- **Certain network conditions can block NAT traversal** (e.g., symmetric NAT); in those cases, traffic falls back to Relays automatically
+- **Never open inbound ports**: open ports are continuously scanned and probed by bots; VPN gateways with open ports are a known attack surface
+- **Simultaneous packet send is critical**: timing must be coordinated by the Relay; if one side sends before the other has sent, the return packet will be dropped
+- Port forwarding on consumer routers bypasses these protections — avoid for Connector deployments
 
 ## Related Docs
-- [Troubleshooting NAT traversal / P2P connections](https://www.twingate.com/docs/) (referenced as "troubleshooting guide")
-- Twingate Relays worldwide deployment documentation
+- [Twingate Relay documentation] (referenced but not linked inline)
+- [NAT traversal troubleshooting guide](https://www.twingate.com/docs/) — for cases where P2P cannot be established
+- [Global Relay deployment](https://www.twingate.com/docs/) — Relay locations worldwide

@@ -1,61 +1,45 @@
 ---
 source: https://www.twingate.com/docs/oss-macos-and-ios-client-applications
 type: docs
-fetched: 2026-08-05
-source_version: 54f2d3a588e3ecef40d14d861771040f0257d555859a0c4ef7f46fd8d9ed6b0f
+fetched: 2026-08-14
+source_version: b5a1f8a3e35c2b530ac7db79ed514e33a4bdcb205f6947c4f96a6e462d557b72
 ---
 
-# Twingate macOS and iOS Client Applications - OSS Third Party Notices
+# Twingate macOS and iOS Client Applications – OSS Notices
 
 ## Page Title
-macOS and iOS Client Applications (Open Source Third Party Notices)
+macOS and iOS Client Applications – Open Source Component Licenses
 
 ## Summary
-This page lists all third-party open source components bundled in Twingate's macOS and iOS client applications, along with their full license texts. It serves as the required legal attribution notice for OSS components used in the clients.
+This page lists all third-party open source components bundled in Twingate's macOS and iOS client applications, along with their full license texts. It serves as the legally required third-party notice disclosure for these clients.
 
 ## Key Information
 
-- **Total components**: 14 third-party libraries
-- **License breakdown**:
-  - **Apache 2.0**: `libssl` (OpenSSL Project)
-  - **BSD 3-Clause**: `libevent`, `lwip`
-  - **CC0 1.0 Universal**: `siphash`
-  - **MIT**: `libjansson`, `jwt-cpp`, `args`, `Sentry-cocoa`, `pubnub`, `quicly`
-  - **Boost Software License 1.0**: `catch2`
-  - **zlib**: `zlib`, `nanopb`
-  - **Custom (MIT-like)**: `fmt` (with embedded object code exception)
-
-## Component Inventory
-
-| Component | License | Purpose |
-|-----------|---------|---------|
-| args | MIT | CLI argument parsing |
-| catch2 | Boost 1.0 | Testing framework |
-| fmt | Custom/MIT-like | String formatting |
-| jwt-cpp | MIT | JWT handling |
-| libevent | BSD 3-Clause | Event notification |
-| libjansson | MIT | JSON processing |
-| libssl | Apache 2.0 | TLS/SSL (OpenSSL) |
-| lwip | BSD 3-Clause | Lightweight TCP/IP stack |
-| nanopb | zlib | Protocol Buffers (small footprint) |
-| pubnub | MIT | Real-time messaging |
-| quicly | MIT | QUIC protocol |
-| Sentry-cocoa | MIT | Error reporting |
-| siphash | CC0 1.0 | Hash function |
-| zlib | zlib | Compression |
+**Components included:**
+| Component | License |
+|-----------|---------|
+| libssl | Apache 2.0 |
+| libevent, lwip | BSD 3-Clause |
+| siphash | CC0 1.0 Universal |
+| libjansson, jwt-cpp, args, Sentry-cocoa, pubnub, quicly | MIT |
+| catch2 | Boost Software License 1.0 |
+| zlib, nanopb | zlib License |
+| fmt | MIT-variant (with embedded object code exception) |
 
 ## Prerequisites
-- None (informational/legal page only)
+- None — reference/compliance document only
+
+## Step-by-Step
+N/A — informational/legal disclosure page
 
 ## Configuration Values
-- None applicable
+N/A
 
 ## Gotchas
-- **`fmt` has an embedded object code exception**: redistribution of compiled object code does not require including the copyright notice — unlike standard MIT
-- **`siphash` uses CC0** (public domain dedication), not a standard permissive license; no attribution legally required but included here
-- **`libssl` is Apache 2.0**, not OpenSSL License — relevant if combining with GPL code (Apache 2.0 + GPLv3 is compatible; Apache 2.0 + GPLv2 is not)
-- `catch2` (Boost 1.0) only requires copyright notice inclusion in source/non-object-code distributions
+- **fmt** has a non-standard license with an additional exception: embedded portions in machine-executable object code may be redistributed without including copyright/permission notices
+- **siphash** uses CC0 (public domain dedication), not a traditional license — no attribution required, but trademark/patent rights are not waived
+- BSD 3-Clause components (libevent, lwip) prohibit using contributor names for endorsement without permission
 
 ## Related Docs
-- Twingate OSS notices for other platforms (Linux, Windows clients likely have separate pages)
-- [Twingate Client documentation](https://www.twingate.com/docs/)
+- [Twingate OSS notices for other platforms] (Linux/Windows client equivalents, if available)
+- Twingate main client documentation for macOS/iOS deployment

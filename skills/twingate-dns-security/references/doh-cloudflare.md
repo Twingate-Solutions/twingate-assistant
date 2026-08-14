@@ -1,56 +1,55 @@
 ---
 source: https://www.twingate.com/docs/doh-cloudflare
 type: docs
-fetched: 2026-08-05
-source_version: 723fc4640a8c048423d766f2c4b039e11d45952fa202bff41db96e7dbac0fedc
+fetched: 2026-08-14
+source_version: 8e9905aa2b95a1662f0f3c46c72ec75d385bf6a78e814e15766854e983a1dd20
 ---
 
 # How to Configure Cloudflare DoH and DNS Filtering with Twingate
 
-## Page Title
-How to Configure Cloudflare DoH and DNS Filtering
-
 ## Summary
-This guide explains how to integrate Cloudflare's DNS-over-HTTPS (DoH) and DNS filtering capabilities with Twingate. The process involves creating a DNS location in Cloudflare Zero Trust, retrieving the custom DoH URL, and adding it to Twingate's Admin Console.
+Configures Twingate to use Cloudflare Zero Trust's DNS-over-HTTPS (DoH) for encrypted DNS resolution and optional DNS filtering. Requires a Cloudflare Zero Trust account and uses Twingate's custom DoH provider feature.
 
 ## Key Information
-- Enables Cloudflare DNS filtering on top of DoH protection when used with Twingate
-- Cloudflare DNS filtering policies are optional but available if needed
-- Integration is completed on the Twingate side by adding a custom DoH provider
+- Enables Cloudflare Gateway DNS filtering alongside DoH protection in Twingate
+- DNS filtering policies are optional — DoH alone can be configured without them
+- The custom DoH URL from Cloudflare is added to Twingate Admin Console as a custom DoH provider
 
 ## Prerequisites
-- Valid Cloudflare Zero Trust account (trial account is sufficient)
+- Valid Cloudflare Zero Trust account (free trial sufficient)
 - Access to Twingate Admin Console
+- Ability to configure custom DoH resolver in Twingate
 
 ## Step-by-Step
 
-1. **Add a DNS Location in Cloudflare**
-   - Navigate to Cloudflare Zero Trust dashboard
-   - Go to **Gateway → DNS Locations**
+1. **Add DNS Location in Cloudflare**
+   - Navigate to Cloudflare Zero Trust dashboard → **Gateway** → **DNS Locations**
    - Create a new DNS location
    - Save and close the location
 
-2. **Retrieve the Custom DoH URL**
-   - Return to **Gateway → DNS Locations**
+2. **Retrieve Custom DoH URL**
+   - Return to **Gateway** → **DNS Locations**
    - Click on the newly created location
    - Copy the **DNS over HTTPS** URL
 
-3. **Set Up DNS Filtering Rules (Optional)**
-   - Navigate to **Policies** in Cloudflare Zero Trust
-   - Create filtering policies as needed
+3. **Configure DNS Filtering Policies (Optional)**
+   - Navigate to **Policies** in Cloudflare Zero Trust dashboard
+   - Create desired filtering policies
 
-4. **Configure Twingate with Cloudflare's DoH URL**
-   - Add the copied DoH URL as a custom DoH provider in the Twingate Admin Console
+4. **Add DoH URL to Twingate**
+   - Go to Twingate Admin Console
+   - Add the Cloudflare DoH URL as a custom DoH provider
    - Follow Twingate's "Configure a Custom DoH resolver" documentation
 
 ## Configuration Values
-- **DoH URL**: Retrieved from Cloudflare Zero Trust → Gateway → DNS Locations → [your location] → DNS over HTTPS field
-- **Twingate setting**: Custom DoH provider (configured in Twingate Admin Console)
+| Parameter | Source | Notes |
+|-----------|--------|-------|
+| DoH URL | Cloudflare Gateway → DNS Locations → location detail | Per-location unique URL |
 
 ## Gotchas
-- The Cloudflare DoH URL is location-specific — must be copied from your specific DNS location, not a generic endpoint
-- DNS filtering policies must be configured in Cloudflare separately; they are not automatically applied
+- DNS filtering policies must be created in Cloudflare separately — adding the DoH URL alone does not enable filtering
+- The DoH URL is location-specific; ensure you copy from the correct location if managing multiple
 
 ## Related Docs
-- [Configure a Custom DoH Resolver in Twingate](https://www.twingate.com/docs/custom-doh) *(referenced but URL not provided on this page)*
-- Cloudflare Zero Trust Gateway documentation (external)
+- [Configure a Custom DoH Resolver in Twingate](https://www.twingate.com/docs/custom-doh) *(referenced in page)*
+- Cloudflare Zero Trust Gateway DNS Locations documentation

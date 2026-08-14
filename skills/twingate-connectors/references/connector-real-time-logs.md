@@ -1,78 +1,101 @@
 ---
 source: https://www.twingate.com/docs/connector-real-time-logs
 type: docs
-fetched: 2026-08-05
-source_version: e7270f196ae43bcc1e38a83b4668d2a24a008ee5786d678663a0844bf022deff
+fetched: 2026-08-14
+source_version: 9ff25df08c60b217330768747d05d863ef54a798a610b151dc9fc2bc80f8f310
 ---
 
 # Connector Real-Time Logs
 
 ## Summary
-Twingate Connectors support multiple service log levels and real-time traffic logging output as single-line JSON to stdout. Traffic logs can be ingested by SIEM platforms (CloudWatch, Datadog, Splunk, Loki, etc.) by filtering for lines prefixed with `ANALYTICS`.
+Twingate Connectors support configurable service log levels and real-time traffic logging via environment variables. Traffic logs are output as single-line JSON to stdout, prefixed with `ANALYTICS`, enabling ingestion by SIEM platforms like Splunk, Datadog, and CloudWatch.
 
 ## Key Information
-- Service logs have 4 levels: 3 (ERROR/default), 4 (WARN), 5 (INFO), 7 (DEBUG)
-- Real-time traffic logs output as single-line JSON to stdout when `TWINGATE_LOG_ANALYTICS=v2` is set
-- Filter log output for lines starting with `ANALYTICS` to isolate traffic logs
-- Each connection generates `established_connection` and `closed_connection` events sharing the same `connection.id`
-- Error states do **not** generate a corresponding `closed_connection` event
+- Service logs output to stdout; traffic logs also output to stdout in single-line JSON format
+- Filter for lines starting with `ANALYTICS` to isolate traffic logs from service logs
+- Traffic logs capture per-connection events: `established_connection` and `closed_connection`
+- `connection.id` links related events for the same network connection
+- Error states produce no corresponding `closed_connection` event
+- `connection.client_ip` = internet-facing NAT IP; `connection.resource_ip` = private resource IP
+- `location` field is a stringified JSON (double-encoded), not a native JSON object
+
+## Prerequisites
+- Twingate Connector installed (Docker, systemd, or Kubernetes/Helm)
+- Access to connector config file or Docker run command
 
 ## Configuration Values
 
-| Variable | Values | Purpose |
-|----------|--------|---------|
+| Variable | Value | Purpose |
+|---|---|---|
 | `TWINGATE_LOG_LEVEL` | `3` (default), `4`, `5`, `7` | Service log verbosity |
 | `TWINGATE_LOG_ANALYTICS` | `v2` | Enable real-time traffic logging |
 
-**Config file (systemd):** `/etc/twingate/connector.conf`
+**Log levels:**
+- `3` = ERROR only (default)
+- `4` = WARN+
+- `5` = INFO+
+- `7` = DEBUG+ (very verbose, not recommended long-term)
 
-**Docker flag:** `--env TWINGATE_LOG_ANALYTICS="v2"`
+## Step-by-Step: Enable Traffic Logging
 
-**Helm:** Set via `env` parameter in values
-
-## JSON Schema Fields (v2)
-
-```
-connection.id          - shared across established/closed events for same connection
-connection.client_ip   - internet-facing NAT IP of client
-connection.resource_ip - private IP of resource (DNS resolved by Connector)
-connection.rx / .tx    - bytes received/transmitted
-connection.duration    - connection lifetime
-connection.protocol    - tcp/udp
-connection.tunnel_path - direct or relay
-connection.tunnel_proto
-device.id              - internal Twingate device ID
-resource.address       - as defined in Admin console (DNS name if applicable)
-location               - stringified JSON with geoip data
-event_type             - established_connection | closed_connection
-timestamp              - Unix ms
-user.email / user.id
-connector.id / connector.name
-remote_network.id / remote_network.name
+**Docker:**
+```bash
+--env TWINGATE_LOG_ANALYTICS="v2"
 ```
 
-## Step-by-Step: Enable Traffic Logging (systemd)
+**systemd** — add to `/etc/twingate/connector.conf`:
+```
+TWINGATE_LOG_ANALYTICS=v2
+```
 
-1. Edit `/etc/twingate/connector.conf`
-2. Add: `TWINGATE_LOG_ANALYTICS=v2`
-3. Restart Connector
-4. View logs: `journalctl -u twingate-connector -n 100 -f`
-5. Filter for traffic lines: grep for `ANALYTICS` prefix
+**Kubernetes/Helm** — set via `env` parameter in Helm chart values.
 
-## Gotchas
-- Log level 7 is very verbose — avoid long-duration use if storage is limited
-- `connection.client_ip` is the NAT/internet-facing IP, not the device's local IP
-- `device.id` is internal to Twingate and may not match OS-reported device IDs (standardization planned)
-- `location` field is a **stringified** JSON string, not a nested object — requires double-parse
-- Service logs and traffic logs are mixed in stdout; must filter by `ANALYTICS` prefix
+**Read systemd logs:**
+```bash
+journalctl -u twingate-connector -n 100 -f
+```
+
+## JSON Schema (v2) Key Fields
+```
+connection.id          # Shared across events for same connection
+connection.client_ip   # Internet-facing NAT IP of client
+connection.resource_ip # Private IP of resource (DNS resolved by Connector)
+connection.rx / .tx    # Bytes received/transmitted (lifetime of connection)
+connection.duration    # Connection duration
+connection.protocol    # tcp/udp
+connection.tunnel_path # direct or relay
+event_type             # established_connection | closed_connection
+device.id              # Twingate internal device ID
+resource.address       # Resource address as defined in Admin console
+location               # Stringified JSON with geoip data
+timestamp              # Unix milliseconds
+```
 
 ## SIEM Integration (Vector Example)
-Filter with `starts_with!(.message, "ANALYTICS")`, then parse with grok pattern:
-```
-ANALYTICS%{SPACE}%{GREEDYDATA:json_event}
+```toml
+[sources.twingate_connector]
+type = "journald"
+include_units = ["twingate-connector"]
+
+[transforms.tg_analytics_filter]
+type = "filter"
+inputs = ["twingate_connector"]
+condition = """starts_with!(.message, "ANALYTICS")"""
+
+[transforms.tg_analytics_transform]
+type = "remap"
+inputs = ["tg_analytics_filter"]
+source = """.message = parse_json!(parse_grok!(.message, "ANALYTICS%{SPACE}%{GREEDYDATA:json_event}").json_event)"""
+drop_on_abort = true
 ```
 
+## Gotchas
+- Level 7 logging is very verbose — avoid long-term use if storage is limited
+- `location` is a **stringified** JSON string, requires double-parse
+- `device.id` may not match OS-reported device IDs (standardization planned)
+- DNS-defined resources: `resource.address` shows DNS name, `connection.resource_ip` shows resolved IP
+
 ## Related Docs
-- Exporting historical network traffic
+- Exporting historical network traffic (separate guide)
 - How DNS Works with Twingate
-- Twingate Helm Chart README
+- Official Twingate Helm Chart README

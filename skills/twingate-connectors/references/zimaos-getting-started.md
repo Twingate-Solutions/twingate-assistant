@@ -1,68 +1,70 @@
 ---
 source: https://www.twingate.com/docs/zimaos-getting-started
 type: docs
-fetched: 2026-08-05
-source_version: 8ad00df48ec883d2925e29b0d54f0a193ed0c7f4ec1a1af170f295323e9336b2
+fetched: 2026-08-14
+source_version: 7aec958636fc032d279aacc679728c8ae231e1b5de49a245a27761695271668d
 ---
 
 # Getting Started with ZimaOS and Twingate
 
 ## Summary
-Deploys a Twingate Connector on ZimaOS via the ZimaOS App Store to enable secure remote access to a ZimaOS environment. The Connector bridges the ZimaOS local network to Twingate's remote access infrastructure.
+Deploys a Twingate Connector on ZimaOS via the ZimaOS App Store to enable secure remote access to ZimaOS resources. Connector is configured through ZimaOS app settings using tokens generated from the Twingate Admin Console.
 
 ## Prerequisites
-- Running ZimaOS instance with web UI accessible locally
+- Running ZimaOS instance
 - Twingate account with Admin Console access
-- Existing Remote Network configured in Twingate Admin Console
 
 ## Step-by-Step
 
 ### 1. Generate Connector Tokens
-1. Admin Console → **Remote Networks** → select target network
-2. Add new Connector or select undeployed one → choose **ZimaOS** option
-3. Scroll to **Step 2** → click **Generate Tokens** → authenticate
-4. Copy **Access Token** and **Refresh Token**
+1. Admin Console → Remote Networks → select target network
+2. Add new Connector or select undeployed one
+3. Select **ZimaOS** as connector type
+4. Click **Generate Tokens** (Step 2 of connector setup)
+5. Copy **Access Token** and **Refresh Token**
 
-### 2. Deploy Connector via App Store
-1. Open ZimaOS web UI → navigate to **App Store**
-2. Search "Twingate" → click Twingate Connector app → **Install**
-3. On dashboard, hover over Twingate tile → click **…** → **Settings**
-4. Set **Web UI** dropdown to `https`, add `{network_name}.twingate.com/networks/overview`
+> Each Connector must have its own unique token set — do not reuse tokens.
+
+### 2. Deploy Connector via ZimaOS App Store
+1. Open ZimaOS web UI → App Store
+2. Search "Twingate" → install **Twingate Connector** app
+3. On dashboard, hover over app tile → click `...` → **Settings**
+4. Set Web UI: `https` + `{network_name}.twingate.com/networks/overview`
 5. Fill **Environment Variables** with tokens and network name
 6. Click **Save** — container starts automatically
 
 ### 3. Verify Installation
-Admin Console → **Remote Networks** → select network → select Connector → confirm **Controller** and **Relay** statuses show **Connected**
+- Admin Console → Remote Networks → select network → select connector
+- Confirm **Controller** and **Relay** statuses show **Connected**
 
-### 4. Expose ZimaOS Dashboard as Resource
-1. Admin Console → **Resources** → **+ Resource**
-2. Select the remote network, provide a name (e.g., "ZimaOS")
-3. Enter dashboard's local IP (format: `192.168.x.x`)
-4. Select a group → **Grant Access**
-5. Connect Twingate client → navigate to dashboard IP to verify remote access
+### 4. Add ZimaOS as a Resource
+1. Admin Console → Resources → **+ Resource**
+2. Select the remote network with the new Connector
+3. Name the resource (e.g., "ZimaOS")
+4. Enter dashboard's private IP (format: `192.168.x.x`)
+5. Assign a group and click **Grant Access**
 
 ## Configuration Values
 
-| Field | Value |
-|---|---|
-| `TWINGATE_ACCESS_TOKEN` | Token from Admin Console Step 2 |
-| `TWINGATE_REFRESH_TOKEN` | Token from Admin Console Step 2 |
-| `TWINGATE_NETWORK` | Subdomain of Twingate URL (e.g., `example` from `example.twingate.com`) |
+| Parameter | Value |
+|-----------|-------|
+| `TWINGATE_NETWORK` | Subdomain from `https://{name}.twingate.com` |
+| `ACCESS_TOKEN` | Generated from Admin Console Step 2 |
+| `REFRESH_TOKEN` | Generated from Admin Console Step 2 |
 | Web UI URL | `https://{network_name}.twingate.com/networks/overview` |
 
 ## Gotchas
-- **Do not reuse token sets** — each Connector requires its own unique Access/Refresh token pair
-- Network name = subdomain only (e.g., `example`, not `example.twingate.com`)
-- Container does not connect successfully until environment variables are saved post-install
-- Dashboard IP must be the same private IP used for local access (`192.168.x.x`)
+- Install app first, **then** configure — app won't connect successfully until environment variables are set
+- Network name = subdomain only (e.g., `example` from `example.twingate.com`)
+- Token reuse across connectors will cause errors
 
 ## Troubleshooting
-- Token errors: re-verify Access/Refresh token values are copied exactly
-- Connectivity issues: confirm ZimaOS web UI is locally accessible and container is running
-- Reference: [Twingate Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)
+- **Token Errors**: Verify exact copy/paste of Access and Refresh tokens
+- **Connectivity**: Confirm ZimaOS web UI is locally accessible and container is running
+- See [Twingate troubleshooting docs](https://www.twingate.com/docs/troubleshooting)
 
 ## Related Docs
-- [CasaOS Setup Guide](https://www.twingate.com/docs/casaos-getting-started)
-- [Home Assistant Setup Guide](https://www.twingate.com/docs/home-assistant)
-- [Unraid Helper Script Guide](https://www.twingate.com/docs/unraid)
-- [Configuring Resources](https://www.twingate.com/docs/resources)
+- CasaOS Setup Guide
+- Home Assistant Setup Guide
+- Unraid Helper Script Guide
+- Twingate Resources configuration

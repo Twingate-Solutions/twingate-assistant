@@ -1,72 +1,68 @@
 ---
 source: https://www.twingate.com/docs/database-access-mongodb
 type: docs
-fetched: 2026-08-05
-source_version: b93d692b44f90b99fe49a75dc02f007017928b9c1035b7ed4e7da930be181d8d
+fetched: 2026-08-14
+source_version: 095437782e2a19fa01317ee99375102884ea03f2202f2cb4df7b69f6b2077f8c
 ---
 
 # MongoDB Access with Twingate
 
 ## Summary
-Twingate secures access to MongoDB Atlas and self-hosted MongoDB by routing traffic through Connectors and enforcing network access controls. Atlas deployments require adding Connector public IPs to Atlas IP Access Lists; self-hosted deployments use firewall rules or `bindIp` configuration. Both database and Atlas Admin Console access can be secured.
+Configure Twingate to secure access to MongoDB Atlas (managed) or self-hosted MongoDB instances. Twingate enforces network access controls by routing traffic through Connectors whose IP addresses are allowlisted in MongoDB's access controls.
 
 ## Key Information
-- Atlas uses TLS on TCP port **27017** by default; DNS requires UDP port **53**
-- Atlas Admin Console (`cloud.mongodb.com`) IP access lists are configured at the **organization level**, separate from project-level database access lists
-- PrivateLink (AWS/Azure) and Private Service Connect (GCP) eliminate need for public IP allowlisting in Atlas
-- Two connection string formats have different network requirements: `mongodb+srv://` (needs DNS/SRV) vs `mongodb://` (direct host connection)
+- Supports MongoDB Atlas (SRV and direct connections) and self-hosted MongoDB
+- Atlas uses TLS on TCP port 27017; DNS resolution requires UDP port 53
+- Atlas UI (`cloud.mongodb.com`) access control is separate from database project IP allowlists
+- PrivateLink (AWS/Azure) or Private Service Connect (GCP) eliminates need to use public Connector IPs with Atlas
 
 ## Prerequisites
-- Twingate Remote Network created with one or more Connectors deployed
-- Connectors placed inside same network as database (self-hosted) or secure egress location (Atlas)
+- Twingate Remote Network created with Connector(s) deployed
 - MongoDB Atlas project/cluster or self-hosted MongoDB server
+- For Atlas: Connector **public** IPs for IP Access List (unless using PrivateLink)
+- For self-hosted: Connector **private** IPs for firewall rules
 
 ## Step-by-Step
 
-### MongoDB Atlas: Database Access
-1. Create Twingate Resource for cluster host (e.g., `*.mongodb.net`), TCP port 27017, UDP port 53
-2. Note Connector public IP addresses
-3. In Atlas console → **Network Access** → **Add IP Address** → add each Connector public IP
-4. Connect: `mongosh "mongodb+srv://cluster0.abc123.mongodb.net/mydatabase" --username <user> --password <pass>`
+### Atlas Database Access
+1. Create Twingate Resource: `*.mongodb.net`, TCP 27017 + UDP 53
+2. Add Connector public IPs to Atlas **Network Access → IP Access List**
+3. Connect via `mongosh` with Twingate Client running
 
-### MongoDB Atlas: Admin Console Access
-1. In Atlas → **Organization → Settings**, enable IP Access List for Atlas UI (may require MongoDB Support)
-2. Create Twingate Resource for `cloud.mongodb.com`, port 443, same Remote Network as database Connectors
-3. Add Connector public IPs to **Organization → Settings → IP Access List**
-4. Verify: run Twingate Client, access `https://cloud.mongodb.com`
+### Atlas Admin Console Access
+1. Enable IP Access List for Atlas UI (Organization → Settings; may require MongoDB Support)
+2. Create Twingate Resource: `cloud.mongodb.com`, port 443
+3. Add Connector public IPs to Organization → Settings → IP Access List
 
 ### Self-Hosted MongoDB
-1. Create Twingate Resource with server IP/DNS name, port 27017
-2. Restrict inbound firewall to Connector **private IP** only
-3. Optionally configure `net.bindIp` in `mongod.conf` to limit listening interfaces
-4. Connect via `mongosh` through Twingate Client
+1. Create Twingate Resource: server IP/hostname, port 27017
+2. Restrict firewall to allow inbound only from Connector **private** IP, OR set `net.bindIp` in `mongod.conf`
+3. Connect via `mongosh` through Twingate Client
 
 ## Configuration Values
 | Parameter | Value |
 |-----------|-------|
-| MongoDB TCP port | `27017` |
-| DNS port | UDP `53` |
-| Atlas UI port | `443` |
+| MongoDB TCP port | 27017 |
+| DNS port | UDP 53 |
+| Atlas UI port | TCP 443 |
+| Atlas hostname pattern | `*.mongodb.net` |
 | Atlas UI hostname | `cloud.mongodb.com` |
-| Atlas IP Access List scope | Organization-level (UI) / Project-level (DB) |
+| mongod config key | `net.bindIp` |
 
 ## Gotchas
-- **Use public IPs** for Atlas IP Access List; use **private IPs** for self-hosted firewall rules
-- `mongodb+srv://` requires DNS resolution — Twingate Resource must allow port 53, not just 27017
-- Mismatches between connection string type and Resource definition are a common failure cause
-- Atlas UI IP access lists must be explicitly enabled by MongoDB Support if not visible
-- SRV-based discovery may resolve to multiple cluster node hostnames — ensure all are reachable
+- **`mongodb+srv://` vs `mongodb://`**: SRV format requires DNS (port 53) in addition to TCP 27017; direct format requires each host to be explicitly reachable
+- Atlas UI IP Access List is **organization-level**, separate from per-project database IP allowlists
+- Use Connector **public** IP for Atlas (internet-facing); use Connector **private** IP for self-hosted firewalls
+- PrivateLink removes need for public IP allowlisting entirely
+- Other VPNs running alongside Twingate Client can block traffic (check Recent Activity for "No Activity")
 
-## Troubleshooting
-| Symptom | Cause |
-|---------|-------|
-| Connection refused | Connector IP not in Atlas allowlist or firewall blocking |
-| Auth error | Wrong credentials or missing TLS |
-| DNS Failed (Activity log) | DNS routing/resolution issue |
-| Connection Failed (Activity log) | DNS OK but firewall/IP allowlist blocking |
-| No Activity | Client not running, Resource missing, or conflicting VPN |
+## Troubleshooting via Admin Console
+- **DNS Failed**: Connector cannot resolve hostname → check DNS routing
+- **Connection Failed**: DNS resolved but TCP blocked → check firewall/IP allowlist
+- **No Activity**: Client not routing traffic → check Client is running, Resource exists, no conflicting VPN
 
 ## Related Docs
+- [Twingate Troubleshooting Guide](https://www.twingate.com/docs/troubleshooting)
 - [MongoDB Private Endpoint Connections](https://www.mongodb.com/docs/atlas/security-private-endpoint/)
 - [MongoDB Connection String Reference](https://www.mongodb.com/docs/manual/reference/connection-string/)
-- Twingate: Redis Access Guide, Snowflake Access Guide, SaaS App Gating Guide, Connector Best Practices
+- Redis Access Guide, Snowflake Access Guide, SaaS App Gating Guide, Connector Best Practices

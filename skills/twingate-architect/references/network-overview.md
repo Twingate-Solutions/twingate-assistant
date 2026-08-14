@@ -1,78 +1,57 @@
 ---
 source: https://www.twingate.com/docs/network-overview
 type: docs
-fetched: 2026-08-05
-source_version: 9e7d6424460dfbac681098e5721d92a7ba81585722d1da34bd25885ad60b4499
+fetched: 2026-08-14
+source_version: 895668983e8236b627510419cfee2a99d3d8a7f7225f6d34d81e82a4f037aa2b
 ---
 
 # Network Overview
 
 ## Page Title
-Network Overview (Twingate Admin Console)
+Network Overview
 
 ## Summary
-The Network Overview tab provides a dashboard snapshot of network health, usage metrics, and activity for admins. It aggregates device status, resource availability, user role counts, and connection history in one view.
+The Network Overview tab is an admin dashboard providing a high-level snapshot of Twingate network health, including device status, resource availability, user role distribution, and connection history. It enables admins to monitor usage and drill into specific events for detailed traffic analysis.
 
 ## Key Information
 
-- **Access**: Available via the Network Overview tab in the Twingate admin console
-- **Purpose**: High-level monitoring and quick drill-down into network activity
-- **Data refresh**: Real-time status indicators for devices, resources, and remote networks
+### Network Insights Metrics
+- **Active Devices**: Devices with `Active` status
+- **Online Devices**: Devices with a user logged into the Twingate Client
+- **Trusted Devices**: Devices meeting Trusted Profile requirements
+- **Resources**: Total Resources added to Twingate
+- **Online/Disconnected Resources**: Based on Remote Network connector status
+- **Online Remote Networks**: Has ≥1 online Connector
+- **Offline Remote Networks**: Has 0 online Connectors
 
-## Network Insights Metrics
+### Users and Services Metrics
+Counts users by role: Admin, DevOps, Helpdesk, Support, Reviewer (Access Reviewer), Billing, Member
+- **Services**: Total Service Accounts created
 
-**Devices**
-- `Active Devices` — devices with Active status
-- `Online Devices` — devices with a logged-in Twingate Client user
-- `Trusted Devices` — devices meeting a Trusted Profile's requirements
+### Connection History
+- Time ranges: 7, 30, or 90 days
+- **7-day graph**: Each bar = connections per **hour**
+- **30/90-day graphs**: Each bar = connections per **day**
+- Displays successful vs. failed connections
 
-**Resources**
-- `Resources` — total Resources in Twingate
-- `Online Resources` — Resources in Online Remote Networks
-- `Disconnected Resources` — Resources in Offline Remote Networks
-
-**Remote Networks**
-- `Remote Networks` — total count
-- `Online Remote Networks` — networks with ≥1 online Connector
-- `Offline Remote Networks` — networks with no online Connectors
-
-**Users and Services**
-- Separate counts per role: Admin, DevOps, Support, Reviewer, Billing, Member
-- `Services` — total Service Accounts created
-
-## Connection History
-
-- Time ranges: **7 days**, **30 days**, **90 days**
-- 7-day graph: each bar = connections per **hour**
-- 30/90-day graphs: each bar = connections per **day**
-- Tracks both **successful** and **failed** connections
-
-## Recent Activity
-
-- Shows network traffic across **all** Remote Networks
-- Click individual events to view:
-  - Resource IP address
-  - Protocol
-  - Connection type
-  - Duration
-
-## Gotchas
-
-- A Remote Network is **Offline** if it has **zero** online Connectors — even one online Connector makes it Online
-- `Active Devices` ≠ `Online Devices` — Active is a device status flag; Online requires an authenticated Client session
-- `Disconnected Resources` reflects Remote Network status, not individual Resource configuration issues
-- Connection History granularity changes by time range (hourly vs. daily bars)
+### Recent Activity
+- Shows network traffic across all Remote Networks
+- Clicking an event reveals: Resource IP address, protocol, connection type, duration
 
 ## Prerequisites
-
 - Admin role required to access Network Overview tab
-- Connectors must be deployed and online for Remote Networks to appear active
-- Twingate Client must be installed and users logged in for Online Device counts
+
+## Gotchas
+- A Remote Network is **Online** only if it has **at least one** online Connector — a single offline Connector does not make the network offline if others are online
+- Resource online/offline status is derived from its Remote Network's Connector status, not the Resource itself
+- The 7-day graph granularity is hourly (not daily), which differs from the 30/90-day views — important when interpreting spike patterns
+
+## Configuration Values
+None — this is a read-only dashboard with no configurable parameters or API fields documented on this page.
 
 ## Related Docs
-
-- Device Status / Trusted Profiles
-- Remote Networks and Connectors
-- Resources configuration
-- Service Accounts
-- User Roles (Admin, DevOps, Support, Reviewer, Billing, Member)
+- Trusted Profiles (for Trusted Devices criteria)
+- Remote Networks & Connectors (for online/offline status behavior)
+- Service Accounts (for Services count)
+- User Roles (Admin, DevOps, Helpdesk, Support, Reviewer, Billing, Member)
+- Connection Logs / Activity reporting

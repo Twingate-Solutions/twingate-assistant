@@ -1,79 +1,71 @@
 ---
 source: https://www.twingate.com/docs/audit-logs-schema
 type: docs
-fetched: 2026-08-05
-source_version: 1ccbac3627e4149088651631950c147e80673960340c63b61e028c419efe77f0
+fetched: 2026-08-14
+source_version: 900bdc4e2fe40848c6c0d3623949bd8ba295b92eebd289797e92ab776f6d4f82
 ---
 
 # Audit Logs Schema
 
 ## Summary
-Twingate audit logs are structured JSON events capturing who made a change, what action was taken, and what objects were affected. Logs can be consumed directly or synced to S3 with a wrapper envelope. Each event contains actor, action, and targets fields.
+Twingate audit logs use a versioned JSON schema capturing actor, action, and target information for all administrative events. Logs can be consumed directly or via S3 sync with a wrapper object. Multiple target types are supported with their own schemas.
 
 ## Key Information
-
-- **Schema version**: Current version is `"1"`
-- **Time format**: UTC ISO 8601 datetime string (e.g., `"2021-08-15T14:30Z"`)
-- **Actor types**: `"User"`, `"API"`, `"Twingate Support"`
-- **Action values**: `"create"`, `"edit"`, `"delete"`
-- **Target types**: `remoteNetwork`, `connector`, `resource`, `publicAPIKey`, `user`, `group`, `device`, `serviceAccount`, `serviceAccountKey`
+- Schema `version` is currently `"1"` at both root and target levels
+- `time` is UTC ISO 8601 format representing start of network communication
+- Actor types: `"User"`, `"API"`, `"Twingate Support"`
+- Action types: `"create"`, `"edit"`, `"delete"`
+- `targets` is an array (multiple objects can be impacted per event)
+- S3-synced logs wrap events in `{"event_type": "audit_log", "event": {...}}`
 
 ## Root Event Schema
-
 ```json
 {
   "version": "1",
-  "time": "<UTC ISO datetime>",
+  "time": "2021-08-15T14:30Z",
   "actor": {
     "type": "User|API|Twingate Support",
-    "id": "<unique-id>",
+    "id": "unique-id",
     "info": { "email": "...", "name": "..." }
   },
   "action": "create|edit|delete",
-  "targets": [ { ... } ]
+  "targets": [{ ... }]
 }
 ```
 
-## S3 Wrapper Schema
+## Target Types & Key Fields
 
-```json
-{
-  "event_type": "audit_log",
-  "event": { /* standard event schema */ }
-}
-```
-
-## Target Schemas Reference
-
-| Target Type | Key Fields |
-|---|---|
-| `remoteNetwork` | `name`, `location`, `isActive` |
-| `connector` | `name`, `remoteNetwork{id,name}` |
-| `resource` | `name`, `address{type,value}`, `protocols`, `isActive` |
-| `publicAPIKey` | `name`, `permission`, `allowedIpRange` |
-| `user` | `name`, `email`, `isAdmin`, `isActive` |
-| `group` | `name` |
-| `device` | `name`, `displayName`, `platform`, `osName`, `serialNumber`, `user`, `isTrusted`, `clientVersion` |
-| `serviceAccount` | `name` |
-| `serviceAccountKey` | `name`, `state`, `serviceAccount` |
+| Target Type | `type` Value | Notable Fields |
+|---|---|---|
+| Remote Network | `remoteNetwork` | `name`, `location`, `isActive` |
+| Connector | `connector` | `name`, `remoteNetwork` |
+| Resource | `resource` | `address`, `protocols`, `isActive` |
+| API Key | `publicAPIKey` | `permission`, `allowedIpRange` |
+| User | `user` | `email`, `isAdmin`, `isActive` |
+| Group | `group` | `name` |
+| Device | `device` | `platform`, `osName`, `serialNumber`, `isTrusted`, `clientVersion` |
+| Service Account | `serviceAccount` | `name` |
+| Service Account Key | `serviceAccountKey` | `state`, `serviceAccount` |
 
 ## Enum Values
 
 - **`publicAPIKey.permission`**: `"read only"`, `"read write"`, `"provision"`
 - **`serviceAccountKey.state`**: `"active"`, `"expired"`, `"revoked"`, `"deleted"`
-- **`resource.address.type`**: `"DNS"` (implied from example)
-- **`resource.protocols.tcp/udp.policy`**: `"ALLOW_ALL"` (implied from example)
+- **`resource.address.type`**: `"DNS"` (shown in example)
+- **`resource.protocols.tcp/udp.policy`**: `"ALLOW_ALL"` (shown in example)
+
+## Actor Info by Type
+- **User**: `{ "email": "...", "name": "..." }`
+- **API**: `{ "name": "Terraform API key" }`
+- **Twingate Support**: `null`
 
 ## Gotchas
-
-- `"Twingate Support"` actor has `null` info field — handle null checks when parsing
-- S3-synced logs have an extra wrapper object; direct API logs do not — parsers need to handle both formats
-- `targets` is an array; a single event can affect multiple objects
-- `time` represents **beginning** of network communication, not event processing time
-- `serviceAccountKey` includes nested `serviceAccount` object (not just an ID reference)
+- S3-synced logs have an extra wrapper layer (`event_type` + `event` keys) — parsers must handle both formats
+- `targets` is always an array; handle multi-target events
+- `actor.info` is `null` for Twingate Support actors — guard against null dereference
+- Device `name` (internal) vs `displayName` (user-facing) are distinct fields
+- Service Account Key embeds full `serviceAccount` object as nested target
 
 ## Related Docs
-
-- Audit Logs setup/configuration (Twingate admin docs)
-- S3 integration for log syncing
-- Twingate API reference
+- Audit Logs configuration (sync to S3)
+- Twingate API documentation

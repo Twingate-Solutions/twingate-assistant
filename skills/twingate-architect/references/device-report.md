@@ -1,58 +1,56 @@
 ---
 source: https://www.twingate.com/docs/device-report
 type: docs
-fetched: 2026-08-05
-source_version: 29c0411a8d377ef7dbf76db3c796fa846dcf811d5755997f575b391ff324eac8
+fetched: 2026-08-14
+source_version: 11fe21e14f522641df17026edfd32b586d491011c05eacf1fd5b61cc5d87d0d6
 ---
 
 # Device Report
 
 ## Summary
-Twingate Admin Console allows exporting device inventory data as a CSV file. Reports can be filtered by device state and include hardware, software, and ownership details. Generation happens asynchronously with email notification on completion.
+Twingate's device report exports detailed device inventory data to CSV from the Admin Console. The report includes device metadata, Client version, and owner information. Reports are generated asynchronously and downloaded from the Reports page.
 
 ## Key Information
 - Export format: CSV file
-- Two entry points: Devices page or Settings → Reports page
+- Two generation paths: Devices page or Settings → Reports page
 - Filter options: Active, Archived, Blocked, or All Devices
-- Generation is asynchronous; email sent when ready
-- Download completed reports from the Reports page
+- Generation is asynchronous; notification via email or manual page refresh
+- Typical generation time: seconds; large datasets may take minutes
 
 ## Prerequisites
 - Access to Twingate Admin Console
-- Appropriate admin permissions
+- Sufficient admin permissions to view Devices/Reports sections
 
 ## Step-by-Step
 
-### Option 1: From Devices Page
-1. Navigate to **Devices** tab in Admin Console
-2. Click **Download** button above device table
-3. Select device filter (Active/Archived/Blocked/All Devices)
-4. Click **Generate Report**
-5. Wait for email notification or refresh page
-6. Download from **Settings → Reports**
+**Option 1 – From Devices page:**
+1. Navigate to **Devices** tab
+2. Click **Download** button above the device table
 
-### Option 2: From Reports Page
+**Option 2 – From Reports page:**
 1. Navigate to **Settings → Reports → Device List**
 2. Click **Generate Device Report**
-3. Select device filter (Active/Archived/Blocked/All Devices)
-4. Click **Generate Report**
-5. Wait for email notification or refresh page
-6. Download from the same Reports page
+
+**Complete report generation:**
+1. Select device filter: `Active`, `Archived`, `Blocked`, or `All Devices`
+2. Click **Generate Report**
+3. Wait for email notification or refresh the Reports page
+4. Download completed report from **Reports** page
 
 ## Report Schema (CSV Columns)
 
 | Column | Description |
-|--------|-------------|
+|---|---|
 | Device ID | Twingate device ID |
-| Owner user ID | Twingate user ID of owner |
+| Owner user ID | Twingate user ID of device owner |
 | Owner name | Device owner's name |
 | Device name | Twingate-assigned device name |
 | Device type | `mobile`, `desktop`, or `laptop` |
 | Active state | `active`, `archived`, or `blocked` |
-| Is manually trusted | Boolean: manually trusted status |
-| Client version | Twingate Client version |
+| Is manually trusted | Boolean — manual trust status |
+| Client version | Twingate Client version installed |
 | Hostname | Device hostname |
-| Local username | Owner's local system username |
+| Local username | Owner's local OS username |
 | Serial number | Device serial number |
 | Device manufacturer | Hardware manufacturer |
 | Device model | Hardware model |
@@ -61,10 +59,10 @@ Twingate Admin Console allows exporting device inventory data as a CSV file. Rep
 | Last resource access time | Timestamp of last Resource access |
 
 ## Gotchas
-- Large device inventories may take **several minutes** to generate (not just seconds)
-- Report is not instantly available — must be downloaded from Reports page after generation, not immediately after clicking Generate
-- No direct download from Devices page; final download always from **Settings → Reports**
+- Report download is only available from the **Reports** page, not the Devices page (even if generated from there)
+- No real-time generation — must wait for background processing before downloading
+- No API or CLI method documented; Admin Console UI only
 
 ## Related Docs
 - Devices documentation
-- Twingate Admin Console Settings
+- Reports page (Settings → Reports)

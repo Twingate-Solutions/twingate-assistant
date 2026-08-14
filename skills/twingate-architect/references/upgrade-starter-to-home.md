@@ -1,46 +1,47 @@
 ---
 source: https://www.twingate.com/docs/upgrade-starter-to-home
 type: docs
-fetched: 2026-08-05
-source_version: b36e8c4dc287198496f494e3dfa3f534859507c2da8848af1e373952c57bf996
+fetched: 2026-08-14
+source_version: c1fb596f53ddd596241a72469ef590dbab27d314c70a03742fb4e93b630e2c6f
 ---
 
 # Upgrade Starter to Twingate Home
 
+## Page Title
+Upgrade to Twingate Home
+
 ## Summary
-Guides existing Starter plan users through redeeming a promo code to upgrade to Twingate Home. The upgrade takes effect immediately upon successful code redemption.
+Guide for redeeming a promo code to upgrade a Twingate Starter plan account to Twingate Home. The upgrade takes effect immediately upon successful code redemption.
 
 ## Key Information
-- Requires a valid Twingate Home promo/access code obtained separately
-- Upgrade is immediate — no waiting period
+- Requires an existing Starter plan account
+- Upgrade is instant — no waiting period
 - Success confirmed by green banner: "Promo code applied successfully!"
-- Home plan features become available instantly after upgrade
+- Access to all Twingate Home features begins immediately after redemption
 
 ## Prerequisites
-- Active Twingate Starter plan account
+- Active Twingate Starter account
 - Admin Console access
-- Valid Twingate Home promo code
+- Valid Twingate Home promo/access code
 
 ## Step-by-Step
 
 1. Sign into the **Admin Console**
 2. Click **Settings**
 3. Click **Manage Plan** (navigates to billing tab)
-4. Locate **Redeem Twingate Home Promo Code** section under current plan
-5. Click the **Redeem Twingate Home Promo Code** section to expand it
-6. Enter your access code in the promo code field
+4. Locate the **Redeem Twingate Home Promo Code** section under current plan
+5. Click to expand the **Redeem Twingate Home Promo Code** section
+6. Enter the promo/access code in the field
 7. Click **Apply Code**
-8. Verify green success banner appears at top of page
+8. Verify success via green banner confirmation message
 
 ## Configuration Values
-- No environment variables or API parameters
-- Input: promo/access code (alphanumeric string, format not documented)
+- None (UI-only workflow, no CLI flags or API parameters)
 
 ## Gotchas
-- Code must be entered exactly as provided — no documented retry behavior if code fails
-- Only applicable to Starter plan accounts (not other plan tiers)
-- Promo code acquisition process is not covered in this guide — code must be obtained beforehand
+- Promo code section is nested under the current plan display — must scroll to locate it
+- No indication of what happens if an invalid code is entered (no error behavior documented)
+- Only applicable to Starter plan accounts; other plan types not mentioned
 
 ## Related Docs
-- Twingate Pricing Page (for Home plan feature comparison)
-- Admin Console Settings / Billing documentation
+- Twingate Pricing Page (referenced for Home plan feature details)

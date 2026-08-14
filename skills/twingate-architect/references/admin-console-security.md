@@ -1,46 +1,50 @@
 ---
 source: https://www.twingate.com/docs/admin-console-security
 type: docs
-fetched: 2026-08-05
-source_version: 45596f09a9e534fe2f740db2971ccfef872149df0480a0dfc7c68ba887208b26
+fetched: 2026-08-14
+source_version: 6906336e2bb599a928e5be98ba585173fd46f9f95462325dc351d3fa2fbcbf61
 ---
 
 # Admin Console Security
 
 ## Summary
-Twingate allows administrators to configure MFA requirements specifically for Admin Console access. This setting is separate from end-user authentication policies (Minimum Authentication Requirements and Device Security). MFA can be enforced via biometrics or a security key.
+Twingate allows administrators to configure MFA requirements specifically for Admin Console access. This setting is separate from end-user authentication policies (Minimum Authentication Requirements and Device Security do not apply to admins). MFA options include biometrics or a security key.
 
 ## Key Information
-- Located under **Settings** tab in Admin Console
-- Applies **only to Twingate administrators** signing into the Admin Console
-- Admins do not sign into the Twingate Client to access the Admin Console, so standard user auth policies do not apply
+- Setting location: **Settings tab** in the Admin Console
+- Applies only to **Twingate administrators** signing into the Admin Console
+- Admins do not sign into the Twingate Client to access the Admin Console, so user-facing auth policies are irrelevant here
 - MFA options: **biometrics** or **security key**
-- "Don't ask me again" suppresses the MFA setup prompt on subsequent logins
-- MFA setup can be initiated later via **account dropdown → Configure MFA** (upper right corner)
+- When MFA is set to "required," admins are prompted to configure one of these methods post-authentication
 
 ## Prerequisites
-- Twingate Admin role
-- Access to Settings tab in Admin Console
+- Admin role with access to the Settings tab
+- Identity provider authentication already configured (MFA is layered on top)
 
-## Configuration Steps
-1. Navigate to **Settings** tab in Admin Console
-2. Locate **Admin Console Security** section
-3. Set MFA to **Required** or optional (default)
-4. Admins will be prompted to configure biometrics or security key on next login if Required is set
+## Step-by-Step: Configuring MFA for Admin Console
+
+1. Navigate to **Settings** tab in the Admin Console
+2. Locate the **Admin Console Security** section
+3. Set MFA to **"required"**
+4. On next login, admins will be prompted to configure biometrics or a security key
+5. Complete the setup flow, or select **"Don't ask me again"** to defer
+
+**To configure MFA later:**
+- Select **"Configure MFA"** from the account dropdown (upper right corner)
 
 ## Configuration Values
-| Setting | Options |
-|---|---|
-| Admin Console MFA | Required / Not Required |
-| MFA Methods | Biometrics, Security Key |
+
+| Option | Description |
+|--------|-------------|
+| MFA: Required | Admins must configure biometrics or security key |
+| MFA: Not Required | No additional MFA enforced for Console access |
 
 ## Gotchas
-- **Biometric isolation**: Biometrics configured *in* the Admin Console **cannot** be reused for the Twingate Client. The reverse is allowed — Client biometrics **can** authenticate into the Admin Console.
-- "Don't ask me again" permanently suppresses the MFA setup modal until manually triggered via Configure MFA
-- Minimum Authentication Requirements and Device Security policies have **no effect** on Admin Console access
-- Admin Console security policy is entirely separate from end-user/client security policies
+- **Biometric isolation**: Biometrics configured for Admin Console sign-in **cannot** be reused for the Twingate Client — but biometrics previously set up on the Client **can** be used for the Admin Console (one-way compatibility)
+- **"Don't ask me again"** suppresses the MFA setup prompt on future logins — admins must manually configure via account dropdown if they opt out initially
+- Admin Console Security is **independent** of Minimum Authentication Requirements and Device Security policies
 
 ## Related Docs
 - Minimum Authentication Requirements
-- Device Security
+- Device Security policies
 - Twingate Client authentication

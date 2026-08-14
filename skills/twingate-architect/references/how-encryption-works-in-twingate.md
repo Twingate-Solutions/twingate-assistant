@@ -1,61 +1,54 @@
 ---
 source: https://www.twingate.com/docs/how-encryption-works-in-twingate
 type: docs
-fetched: 2026-08-05
-source_version: dc6c80e48df5cc503231541328be35380d71b2ce0a02428e24fb1a58efb03dd7
+fetched: 2026-08-14
+source_version: 6d1f3edc17af9af7edc26bea53118d7741fe23fa1c93aa5c819ee23820b034f2
 ---
 
 # Encryption in Twingate
 
-## Page Title
-How Encryption Works in Twingate
-
 ## Summary
-Twingate secures communications between Clients, Connectors, Relays, and Controller using TLS for public-facing components and a custom mutual authentication scheme for Client-Connector traffic. No inbound ports are required because all connections are outbound. Twingate (including Relay operators) cannot decrypt Client-Connector traffic.
+Twingate secures communications between Clients, Connectors, Relays, and Controller using TLS for public-facing components and a custom certificate-pinning scheme for Client-Connector traffic. No inbound ports are required because all connections are outbound. Twingate (including its own Relays) cannot decrypt Client-Connector traffic.
 
 ## Key Information
-- **Two security goals**: Confidentiality (no third-party decryption, including Twingate) and Authentication (components verify legitimacy of peers)
-- **Four components**: Client and Connector (customer-hosted); Relay and Controller (Twingate-hosted)
+
+- **Four components**: Client (end-user device), Connector (behind firewall) — customer-hosted; Relay and Controller — Twingate-hosted
+- **Two security goals**: Confidentiality (no third-party decryption, including Twingate) and Authentication (verify legitimacy of all components)
 - **Client/Connector → Relay/Controller**: Standard TLS/HTTPS with CA-signed certificates (same as browser-to-bank)
-- **Client ↔ Connector**: Custom scheme using Controller as root of trust; encrypted with session key that Relays cannot decrypt
-- **Transport agnostic**: Client-Connector encryption applies whether traffic is peer-to-peer or routed through Relays
+- **Client ↔ Connector**: Custom trust chain using Controller as root of trust; session key encrypted with Connector's self-signed cert public key
+- **Relay cannot decrypt** Client-Connector traffic; it only relays encrypted packets
 
-## Client-Connector Authentication Flow (Step-by-Step)
+## Client-Connector Trust Establishment (Step-by-Step)
 
-1. **Connector startup**: Generates RSA public/private key pair; creates self-signed certificate
-2. **Connector heartbeat**: Sends SHA-256 digest/fingerprint of its self-signed cert to Controller periodically
-3. **Client connects**: Requests self-signed certificate directly from Connector
-4. **Client requests Connection Token (CT)**: JWT signed by Controller, containing SHA-256 digest of Connector's certificate
-5. **Client validates**: Compares SHA-256 digest in CT (from Controller) against digest received directly from Connector
-6. **Trust established**: Client encrypts session key using Connector's public key; sends to Connector
-7. **Encrypted session**: All subsequent data encrypted with session key (symmetric)
+1. Connector generates a public/private key pair and self-signed certificate at startup
+2. Connector sends SHA-256 digest/fingerprint of its certificate to Controller via periodic heartbeat
+3. Client connects → requests Connector's self-signed certificate
+4. Client requests a **Connection Token (CT)** from Controller (JWT signed by Controller)
+5. CT contains the SHA-256 digest of the Connector's certificate (sourced from heartbeat)
+6. Client verifies CT authenticity and compares the digest from CT against digest received directly from Connector
+7. On match, Client encrypts a session key using Connector's public key and shares it
+8. All subsequent traffic encrypted via session key (symmetric)
+
+## Encryption Flow Summary
+
+| Communication Path | Method |
+|---|---|
+| Client → Controller | TLS (CA-signed cert) |
+| Connector → Controller | TLS (CA-signed cert) |
+| Client → Relay | TLS (CA-signed cert) |
+| Client ↔ Connector (data) | Symmetric encryption via session key |
 
 ## Configuration Values
-- None exposed to end users; internal to Twingate components
-- Certificate digest algorithm: **SHA-256**
-- Connection Token format: **JWT** signed by Controller
-
-## Key Cryptographic Details
-| Component | Method |
-|-----------|--------|
-| Relay/Controller auth | TLS with CA-signed certs (standard PKI) |
-| Connector identity | Self-signed cert + SHA-256 fingerprint |
-| Session establishment | Asymmetric (RSA) key exchange |
-| Data transfer | Symmetric session key |
-| CT signing | JWT signed by Controller private key |
+- None required; encryption is automatic and built into the Twingate components
 
 ## Gotchas
-- Relays **cannot decrypt** Client-Connector traffic — session key is shared only between Client and Connector
-- Connector generates a **new** key pair at each startup — fingerprint in Controller updates via heartbeat
-- Controller is the **root of trust**; if Controller is compromised, the authentication chain breaks
-- Clients come prepackaged with CA root certificates to validate Relay/Controller TLS certs (standard browser behavior)
 
-## Prerequisites
-- No special configuration needed by end users; encryption is automatic
-- Connector must have outbound connectivity to Controller to maintain heartbeat/fingerprint registration
+- **Relays are transit-only**: Even when traffic routes through Relays, the session key is never shared with them — Relays cannot inspect payload
+- **Controller is root of trust**: Both Client and Connector must trust the Controller for the Client-Connector authentication to work
+- **Self-signed certs are valid here**: Connector uses a self-signed certificate, but trust is established via Controller-signed JWT containing the cert digest — not CA validation
+- **Heartbeat is security-critical**: The Connector's periodic heartbeat to Controller keeps the cert digest current; stale or missing heartbeats would break trust establishment
 
 ## Related Docs
 - Twingate architecture overview
 - Connector deployment documentation
-- Relay documentation
-- Zero Trust network access concepts
+- Relay configuration

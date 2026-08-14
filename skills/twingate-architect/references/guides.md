@@ -1,75 +1,61 @@
 ---
 source: https://www.twingate.com/docs/guides
 type: docs
-fetched: 2026-08-05
-source_version: d0bf6a3bf83c79abf0904c9c6700b23ab56abea6d8fa9b4febc07f36ca558279
+fetched: 2026-08-14
+source_version: 193d656db8d4965c85795e004551cf73e065b4641bfdd2c9fe93e0182f1c70f8
 ---
 
 # Twingate Guides Index
 
 ## Page Title
-Twingate Guides — Documentation Index
+Twingate Guides — Documentation Hub
 
 ## Summary
-This is the top-level index page for Twingate's documentation guides, organizing all deployment, configuration, and management topics. It serves as a navigation hub covering infrastructure deployment, client setup, policy configuration, service integrations, and architectural best practices.
+This is the top-level index page for all Twingate documentation guides. It organizes deployment, configuration, management, and best practice guides across infrastructure types, use cases, and integrations. Use this page to navigate to specific implementation guides.
 
 ## Key Information
 
 ### Deployment Targets
 - **Cloud**: AWS EC2, GCP Compute, Azure Compute, Kubernetes, DigitalOcean
-- **On-premises**: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP, TrueNAS, Proxmox
-- **Homelabs**: Home Assistant, Unraid, ZimaOS, CasaOS
+- **On-premises**: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP, TrueNAS SCALE
+- **Homelabs**: Home Assistant, Proxmox, Unraid, ZimaOS, CasaOS
 - **IaC**: Terraform, Pulumi
 
 ### Client Deployment (MDM)
 - Jamf, Iru, Omnissa Workspace ONE, Microsoft Intune & Endpoint Manager
 
 ### Service Integrations
-- **Identity/Directory**: Active Directory, Okta, Microsoft Entra ID, JumpCloud, OneLogin
-- **Security tools**: Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler
-- **Databases**: MongoDB, AWS, GCP, Azure, Oracle, Snowflake, Redis
+- Identity/SSO: Active Directory, Okta, JumpCloud, Microsoft Entra ID, OneLogin
+- Security tools: Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler
+- Databases: MongoDB, AWS RDS, GCP, Azure, Oracle, Snowflake, Redis
 
-### Key Feature Areas
-- **Internet Security**: DNS-over-HTTPS (DoH), DNS filtering
-- **SaaS App Gating**: IP-based access control for SaaS apps
-- **Security Policies**: Per-network and per-resource policy definitions
-- **Logging**: Audit log export and SIEM ingestion
+### SaaS App Gating
+- Works with Google Workspace, JumpCloud, Entra ID, Okta, OneLogin
+- Supports AWS Exit Nodes, CloudFront, Office 365
 
-## Notable Use Cases
-- Replace AWS VPN with Twingate
-- Secure CI/CD pipelines
-- Site-to-site connections
-- IoT headless client gateway
-- Vendor/contractor access management
-- SSH resource access management
-- GitHub Codespaces integration
-- AI/LLM access control
+### Kubernetes
+- Route traffic from K8s, private/public resources, kubectl management
 
-## Best Practices Docs Available
-- Connector placement and routing optimization
-- Private DNS configuration
-- Overlapping IP address handling
-- Security policy design
-- Non-production environment access
-- SaaS App Gating architecture
-- Internal network with local peer-to-peer
+## Key Topic Areas
 
-## Technical Reference Topics
-- NAT traversal mechanics
-- Encryption implementation
-- Firewall interaction
-- Connector shutdown process
-- Service accounts
-- Windows Start Before Logon
-- Performance evaluation
-
-## Related Docs
-- Individual guide pages linked throughout (no direct URLs provided on this index page)
-- Start with **Client Deployment** for end-user rollout
-- Start with **Cloud Infrastructure** or **On-premises Networks** for Connector setup
-- See **Best Practices** section before production deployment
+| Category | Notable Guides |
+|----------|---------------|
+| Security | Security Policies, Internet Security (DoH), MFA for legacy tech |
+| Networking | NAT traversal, peer-to-peer, overlapping IPs, private DNS |
+| Access Patterns | SSH, databases, CI/CD pipelines, vendors/contractors, site-to-site |
+| Observability | Audit logging, SIEM ingestion, connector logs |
+| Architecture | AWS reference network, connector placement, connector best practices |
 
 ## Gotchas
-- This page is navigation-only; no configuration values or step-by-step procedures are present here
-- SaaS App Gating requires separate IdP configuration (Okta, Entra ID, etc.)
-- Kubernetes deployment has multiple sub-guides depending on whether resources are private or publicly exposed
+- No single setup path — guide selection depends heavily on infrastructure type and use case
+- SaaS App Gating requires separate configuration per IdP
+- Kubernetes deployment has multiple sub-guides (routing, private vs public resources)
+
+## Related Docs
+- Remote Network Best Practices
+- Connector Best Practices
+- Best Practices for Security Policies
+- Best Practices for Overlapping IP Addresses
+- How Encryption Works in Twingate
+- How Firewalls Work with Twingate
+- Troubleshooting Peer-to-peer Connections

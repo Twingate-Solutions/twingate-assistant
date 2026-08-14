@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/use-cases
 type: docs
-fetched: 2026-08-05
-source_version: 25be03029716c7f6cf830fa7aeab5299c0b78243e002c7f3df236d2e9be3473b
+fetched: 2026-08-14
+source_version: 9508dcf7a39e95e9f13fdeecf87498384f6bb2c78d594058f9b10053489382fb
 ---
 
 # Twingate Use Cases
@@ -11,42 +11,44 @@ source_version: 25be03029716c7f6cf830fa7aeab5299c0b78243e002c7f3df236d2e9be3473b
 Use Cases Overview
 
 ## Summary
-Twingate supports multiple network security and access control scenarios spanning VPN replacement, infrastructure access, device security, and internet filtering. It targets both enterprise and personal/homelab users. Each use case leverages Twingate's zero-trust architecture to replace or supplement traditional network security tools.
+This page catalogs Twingate's primary deployment scenarios across enterprise and personal contexts. It serves as a navigation hub linking to detailed documentation for each use case. Twingate positions itself as a Zero Trust Network Access (ZTNA) solution covering network access, device security, DNS filtering, and compliance.
 
 ## Key Use Cases
 
-- **VPN Replacement**: Remote access to office networks, cloud VPCs, and private corporate resources from computers and mobile devices
-- **Infrastructure Access**: Secure, automated access management for engineers and DevOps to on-premises and cloud infrastructure
-- **Device Security Controls**: Policy enforcement based on device characteristics (OS type, screen lock, MDM/EDR status, etc.)
-- **Application Gating**: IP allowlisting for SaaS apps and private services; supports staging server security and lightweight CASB deployments
-- **Homelab/Personal Use**: Remote access to home networks and self-hosted services (Home Assistant, Plex, cameras); free Starter plan available
-- **Internet Security**: DNS filtering, DNS-over-HTTPS (DoH) for public internet traffic on employee devices
-- **Compliance**: Controls supporting CPRA, GDPR, PCI DSS, and SOC 2 requirements
+- **VPN Replacement** – Remote access to office networks, cloud VPCs, and private corporate resources from any device
+- **Infrastructure Access** – Engineer/DevOps access management and automation for on-prem and cloud infrastructure
+- **Device Security Controls** – Policy enforcement based on device attributes (OS type, screen lock, MDM/EDR status)
+- **Application Gating** – IP allowlisting for SaaS apps and private services; lightweight CASB alternative for staging servers
+- **Homelab/Personal Use** – Remote access to home networks and self-hosted services (Home Assistant, Plex, cameras); free Starter plan available
+- **Internet Security** – DNS filtering, DNS-over-HTTPS (DoH) for public internet traffic on employee devices
+- **Compliance** – Controls supporting CPRA, GDPR, PCI DSS, SOC 2
 
-## Configuration Values
+## Configuration Values / Supported Integrations
 
-- **Supported DNS Resolvers** (Internet Security): Google, Cloudflare, OpenDNS (configurable)
-- **Connector Platforms** (Homelab): Raspberry Pi, major NAS devices
-- **Pricing**: Free Starter plan for personal/homelab use
+- **DNS Resolvers supported**: Google, Cloudflare, OpenDNS (configurable)
+- **Connector platforms**: Raspberry Pi, major NAS devices, standard cloud/on-prem hosts
+- **Compliance frameworks**: CPRA, GDPR, PCI DSS, SOC 2
 
-## Prerequisites
+## Notable Implementation Details
 
-- Varies by use case; homelab setup advertised as under 15 minutes
-- No inbound port forwarding required for homelab deployments
-- MDM or EDR presence detectable for device security policy enforcement
+- Homelab setup target: under 15 minutes
+- No port forwarding or inbound open ports required
+- No dynamic IP management needed for home use
+- Device policy screening attributes: OS type, screen lock, MDM enrollment, EDR status
+- Application gating supports IP-based restrictions for third-party services
 
 ## Gotchas
 
-- Application Gating requires the third-party service to support IP address-based access or whitelisting — Twingate does not add this capability to services that don't support it
-- Device security controls require device characteristics to be reported; MDM/EDR must be present on device for those checks to pass
-- Homelab use eliminates need for VPN server management and dynamic IP handling, but requires running a Twingate Connector on local hardware
+- Free Starter plan is personal use only; enterprise features require paid plans
+- Application gating (IP whitelisting use case) requires the third-party service to support IP-based access controls — Twingate doesn't bypass services that lack this feature
+- Device security controls require compatible MDM/EDR integrations to report device posture
 
 ## Related Docs
 
-- VPN Replacement (linked)
-- Infrastructure Access (linked)
-- Device Security Controls (linked)
-- Application Gating (linked)
-- Homelab & Personal Use Cases (linked)
-- Internet Security (linked)
-- Compliance (linked)
+- VPN Replacement (linked from page)
+- Infrastructure Access (linked from page)
+- Device Security Controls (linked from page)
+- Application Gating (linked from page)
+- Homelab & Personal Use (linked from page)
+- Internet Security (linked from page)
+- Compliance (linked from page)

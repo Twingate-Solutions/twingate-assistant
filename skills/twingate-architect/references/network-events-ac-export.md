@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/network-events-ac-export
 type: docs
-fetched: 2026-08-05
-source_version: 4e9d4353c8843ada5dfd376df338da6b976f63467974388ac4a4ee8fffc06fb9
+fetched: 2026-08-14
+source_version: de74e2c479e6d7cb5760441c999c197080136e09cdb6b69878db5865d3547101
 ---
 
 # Network Events Admin Console Export
@@ -11,48 +11,44 @@ source_version: 4e9d4353c8843ada5dfd376df338da6b976f63467974388ac4a4ee8fffc06fb9
 Network Events Admin Console Export
 
 ## Summary
-Twingate allows exporting Network Events from the Admin Console as GZIP-compressed JSON files. Exports run in the background and are delivered via email notification or manual page refresh. Each event is represented as a single JSON line (JSONL format).
+Twingate allows administrators to export Network Events from the Admin Console Reports page as GZIP-compressed JSON files. Exports run as background jobs and are delivered via email notification or manual page refresh. Files can be large and require decompression before use.
 
 ## Key Information
-- Exports are in **GZIP format**, containing **JSONL** (one JSON object per line)
-- Timestamps in export are **UTC**, but the selection UI uses **local timezone**
-- Time range filtering is based on **connection end time**, not start time
-- Remote Networks default to **all** if not specified
-- Export duration: seconds to minutes typically; large exports may take hours
-- Detailed schema available separately (linked from source page)
+- Exports are in **GZIP format**, containing **JSON** (one event per line / JSONL format)
+- Timestamps in the export are **UTC**, but the date/time range selector uses **local timezone**
+- Time range filtering uses the **end time** of connections, not start time
+- Remote Networks filter defaults to **all networks**
+- Export schema documented separately (linked as "here" on source page)
+- Large exports may take **a few hours**; typical exports complete in seconds to minutes
 
 ## Prerequisites
-- Admin Console access with permissions to view Reports/Settings
-- Report Type must be set to **Events** (not another report type)
+- Admin Console access with permissions to view Reports
+- Access to Settings > Reports page
 
-## Step-by-Step: Generating an Export
+## Step-by-Step
+
 1. Navigate to **Settings → Reports**
 2. Click the **Network Events** tab
 3. Click **Generate Network Events Report**
 4. Set **Report Type** to `Events`
-5. Select **date & time range** (uses local timezone)
-6. Select **Remote Network(s)** (defaults to all)
-7. Wait for background processing; refresh page or await email notification
-8. Return to Reports page to download completed export
-
-## Viewing/Using the Export
-1. Decompress the GZIP file using any standard compression tool
-2. Rename the decompressed file to add `.csv` extension for spreadsheet editors
-3. Be aware: large time ranges may produce millions of rows, potentially causing spreadsheet performance issues
+5. Select desired **date & time range** and **Remote Network(s)**
+6. Wait for background processing; refresh page or await **email notification**
+7. Return to Reports page to **download** the completed report
 
 ## Configuration Values
 | Parameter | Options/Notes |
 |-----------|---------------|
 | Report Type | Must be set to `Events` |
 | Date/Time Range | Local timezone input; UTC in output |
-| Remote Networks | One or more; defaults to all |
+| Remote Networks | Single or multiple; defaults to all |
 
 ## Gotchas
-- **Safari auto-unpack issue**: If file appears empty in Safari, disable "Open 'Safe' files after downloading" under Safari → Preferences → General before re-downloading
-- **Timezone mismatch**: UI selection is local time, but exported timestamps are UTC — account for this when filtering
-- **End-time filtering**: Connections that *started* outside the range but *ended* within it will be included; connections that started within but ended outside will not
-- **Large exports**: May take hours and could crash spreadsheet editors — consider processing programmatically
+- **Safari users**: If file appears empty, disable auto-unpack via Safari → Preferences → General → uncheck "Open 'Safe' files after downloading"
+- **Large datasets**: Millions of rows can cause spreadsheet editors to crash or fail to open
+- **File rename required**: After decompression, manually add `.csv` extension for spreadsheet compatibility (even though underlying format is JSON/JSONL — note the doc recommends `.csv` but data is JSON)
+- **Timezone mismatch**: Input range is local time; exported timestamps are UTC — account for offset when filtering
+- **Connection timing**: Filter applies to connection *end time*, not start time — connections that started before the range but ended within it will be included
 
 ## Related Docs
-- Network Events schema (linked from source as "here")
-- Twingate Reports documentation
+- Network Events export schema (referenced inline as "here" — check Twingate docs for schema detail page)
+- Reports page documentation

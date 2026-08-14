@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/trust-center
 type: docs
-fetched: 2026-08-05
-source_version: 5b124a49b9c09c7372cb7257c82af7f35705e794f8f706d29ec4882d26b29eda
+fetched: 2026-08-14
+source_version: bfbfdc2030242d5c4e39bd7a80f3f88973b52d5c6a74d5be8f9f1f331e03d839
 ---
 
 # Twingate Trust Center
@@ -11,43 +11,45 @@ source_version: 5b124a49b9c09c7372cb7257c82af7f35705e794f8f706d29ec4882d26b29eda
 Twingate Trust Center
 
 ## Summary
-Central hub for Twingate's security, compliance, privacy, and legal documentation. Provides access to certifications, policies, and resources needed to evaluate Twingate for enterprise procurement or compliance reviews.
+The Trust Center is a centralized hub for Twingate's security, privacy, legal, and compliance documentation. It provides customers and evaluators with resources to assess Twingate's trustworthiness and regulatory compliance posture.
 
 ## Key Information
-- **Security**: Security information and responsible disclosure policy available
-- **Service reliability**: Live service status page linked
-- **Compliance certifications**: SOC 2, GDPR, HIPAA, PCI DSS, DORA
-- **Privacy**: Privacy Policy and California Supplemental Privacy Notice (CCPA)
-- **Legal**: Customer Agreement and User Terms of Service
-- **Additional**: W-9 form and Twingate & Customer Data documentation available
 
-## Available Documents/Resources
+- **Security documentation**: Security information and responsible disclosure policy available
+- **Service reliability**: Live service status page accessible
+- **Compliance certifications**: SOC 2, HIPAA, PCI DSS, GDPR, DORA
+- **Privacy notices**: General privacy policy plus California-specific supplemental notice (CCPA)
+- **Legal documents**: Customer Agreement and User Terms of Service
+- **Additional resources**: IRS Form W-9 and "Twingate & Customer Data" document available
 
-| Category | Resources |
-|----------|-----------|
-| Security | Security Information, Responsible Disclosure Policy |
-| Status | Service Status page |
-| Privacy | Privacy Policy, California Supplemental Privacy Notice |
-| Legal | Customer Agreement, User Terms of Service |
-| Compliance | DORA, GDPR, HIPAA, PCI DSS, SOC 2 Report |
-| Misc | W-9 Form, Twingate & Customer Data |
+## Compliance Standards Covered
+
+| Standard | Document Available |
+|----------|-------------------|
+| SOC 2 | Report |
+| HIPAA | Compliance page |
+| PCI DSS | Compliance page |
+| GDPR | Compliance page |
+| DORA | Compliance page |
 
 ## Prerequisites
-- None — publicly accessible page
-- SOC 2 report and some compliance docs may require contacting Twingate directly
+None — all linked resources are publicly accessible from the Trust Center page.
+
+## Configuration Values
+None applicable — this is an informational/reference page only.
 
 ## Gotchas
-- Compliance certifications not listed on the page require direct contact with Twingate
-- California Supplemental Privacy Notice is separate from the main Privacy Policy (relevant for CCPA obligations)
-- DORA compliance documentation is available, relevant for EU financial sector customers
 
-## Use Cases
-- **Security reviews / vendor assessments**: Reference SOC 2, security info
-- **Legal/procurement**: Customer Agreement, User Terms, W-9
-- **Regulatory compliance**: HIPAA (healthcare), PCI DSS (payments), GDPR (EU), DORA (EU financial)
-- **Bug reporting**: Responsible Disclosure Policy
+- Compliance certifications not listed on the page require contacting Twingate directly
+- California privacy rights are covered under a **separate** supplemental notice, not the main Privacy Policy
+- SOC 2 is listed as a "Report" (implying a downloadable artifact), while others link to compliance overview pages — may require NDA or request to obtain full report
 
 ## Related Docs
-- Twingate & Customer Data (data handling specifics)
-- Service Status page (uptime/incidents)
-- Contact Twingate for unlisted compliance certifications
+
+- [Security Information](https://www.twingate.com/docs/security-information)
+- [Responsible Disclosure Policy](https://www.twingate.com/docs/responsible-disclosure)
+- [GDPR Compliance](https://www.twingate.com/docs/gdpr)
+- [HIPAA Compliance](https://www.twingate.com/docs/hipaa)
+- [SOC 2 Report](https://www.twingate.com/docs/soc2)
+- [Customer Agreement](https://www.twingate.com/docs/customer-agreement)
+- [Twingate & Customer Data](https://www.twingate.com/docs/customer-data)

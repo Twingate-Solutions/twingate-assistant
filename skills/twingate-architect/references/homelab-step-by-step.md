@@ -1,62 +1,71 @@
 ---
 source: https://www.twingate.com/docs/homelab-step-by-step
 type: docs
-fetched: 2026-08-05
-source_version: d3474ddb88e9799ab71013afaf022dbdee37b0f5e43018cb823f72cdfbf0ce41
+fetched: 2026-08-14
+source_version: b312f50ba2d2df81b10e919e95c50a034caaac1c4b47d78fbc39b21aad5a6931
 ---
 
 # How to Protect Your Home Lab with Twingate
 
 ## Summary
-Step-by-step guide to securing a home lab using Twingate, enabling remote access for family/friends without opening router ports or running a traditional VPN. Covers Connector deployment, Resource creation, user/group management, and access policies.
+Step-by-step guide for securing a home lab using Twingate to replace VPN/port forwarding with zero-trust access. Covers Connector deployment, Resource creation, multi-user access control via Groups, and Security Policies for a typical home lab environment.
 
 ## Key Information
-- No open ports required — replaces port forwarding and VPN server entirely
-- Connector minimum footprint: 2GB RAM, 2 vCPUs
-- Deployment options: Docker container, systemd (Linux/Raspberry Pi), Hyper-V VM
-- Two Connectors per Remote Network recommended (auto HA + load balancing); only one required
-- Resources defined by IP/CIDR range or DNS pattern (FQDN/wildcard)
-- Zero trust default: no permissions granted until explicitly assigned
-- Groups function as roles; Resources are assigned to Groups, not individual users
+- Twingate replaces router VPN, port forwarding, and dynamic DNS entirely
+- Uses zero-trust model: no permissions granted by default
+- Connectors deployed in pairs for HA/load balancing (single Connector works but not recommended)
+- Connector footprint: 2GB RAM, 2 vCPUs minimum
+- Resources identified by IP/CIDR, FQDN, or DNS pattern + optional port restrictions
+- Traffic interception determined by Resource definitions in the Client
 
 ## Prerequisites
-- Twingate free account registered
+- Free Twingate account registered
 - Twingate Client installed on admin device
-- At least one device in home lab for Connector deployment
+- Device to host Connector (NAS, Raspberry Pi, Linux machine, Windows with Docker/Hyper-V)
 
 ## Step-by-Step
 
-1. **Create Remote Network**: Admin Console → Network → Remote Networks → `+ Remote Network` → select "On Premise" → name it (e.g., "Home Lab")
-2. **Deploy Connector**: Click a Connector in the Remote Network → choose deployment method → follow console instructions → verify Connector shows as connected
-3. **Sign into Twingate Client** on your device
-4. **Create initial Resource**: Network → Resources → `Add Resource` → CIDR (e.g., `192.168.100.0/24`) or DNS pattern (e.g., `*.int`) → assign to "Everyone" group
-5. **Disable router VPN/port forwarding** once connectivity is confirmed
-6. **Invite users**: Team → Add User → enter email addresses
-7. **Create Groups**: Team → Groups → `Add Group` (e.g., Standard Users, Power Users, Admin Users) → add users
-8. **Map services to groups**: List all `host:port` services → determine per-service group access
-9. **Create granular Resources**: One Resource per service or logical grouping → assign correct Groups → do NOT assign "Everyone"
-10. **Delete the broad "Everything" Resource**
-11. **Configure Security Policies** (optional): assign to Groups to enforce 2FA, auth frequency, device requirements
+1. **Create Remote Network**: Admin Console → Network → Remote Networks → `+ Remote Network` → Select `On Premise` → Name it (e.g., "Home Lab")
+2. **Deploy Connector**: Click Remote Network → select a Connector → choose deployment method (Docker, systemd, etc.) → follow console instructions → verify Connected status
+3. **Create initial Resource**: Network → Resources → `Add Resource` → label "Everything" → CIDR `192.168.100.0/24` (or DNS pattern `*.int`) → assign to `Everyone` Group
+4. **Test access**: Use alternate internet (mobile tether) → verify internal services reachable
+5. **Shut down VPN server**, close its port, remove port forwarding rules from router
+6. **Invite users**: Team → Add User → enter email for each
+7. **Create Groups** (suggested roles):
+   - `Standard Users` – basic service access only
+   - `Power Users` – elevated but non-admin access
+   - `Admin Users` – full access including SSH, RDP, router UI
+8. **Map services to Groups** (see table below)
+9. **Create granular Resources**: Replace "Everything" with per-service Resources, assign correct Groups, exclude `Everyone` Group
+10. **Delete "Everything" Resource**
+11. **(Optional)** Configure Security Policies for 2FA, device posture, re-auth frequency
 
 ## Configuration Values
 
-| Field | Example Value |
+| Setting | Example Value |
 |---|---|
-| Remote Network Location | On Premise |
+| Remote Network location | `On Premise` |
 | CIDR Resource | `192.168.100.0/24` |
-| DNS Resource | `*.int` |
+| DNS pattern Resource | `*.int` |
 | Connector RAM | 2GB |
 | Connector vCPUs | 2 |
 
+## Service-to-Group Mapping Example
+
+| Service | Port | Groups |
+|---|---|---|
+| NAS UI, Plex, Calibre, Jellyfin | various | Standard, Power, Admin |
+| NAS Home Assistant, Router UI | 8123, 8001 | Standard, Power |
+| Win RDP, Linux SSH, Portainer | 3389, 22, 9000 | Admin only |
+
 ## Gotchas
-- If users connect via both IP and FQDN for the same host, create two separate Resources (one per addressing method)
-- Docker on Windows is noted as "not always very stable" — prefer Linux-based Connector deployment
-- Do not assign sensitive Resources to the "Everyone" group; create explicit groups
-- Twingate Client must re-authenticate or be restarted to see newly added Resources
-- One Connector covers all Resources in a Remote Network — no per-Resource Connector needed
+- Resources must be explicitly assigned to Groups — zero permissions by default
+- If users connect via both IP and FQDN, create separate Resources for each
+- Docker on Windows can be unstable; prefer Hyper-V Linux VM for Windows hosts
+- Do **not** assign granular Resources to the `Everyone` Group (only initial test Resource)
+- Two Connectors per Remote Network provide automatic HA — deploying one works but is single point of failure
 
 ## Related Docs
-- [Connector Deployment Options](https://www.twingate.com/docs/connector)
-- [Security Policies](https://www.twingate.com/docs/security-policies)
-- [Download Twingate Client](https://www.twingate.com/download)
-- [Register for Free Account](https://auth.twingate.com/signup)
+- [Connector deployment options](https://www.twingate.com/docs/connector)
+- [Security Policies](https://www.twingate.com/docs/policies)
+- [Twingate Client download](https://www.twingate.com/docs/client)

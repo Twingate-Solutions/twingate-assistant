@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/device-controls-use-case
 type: docs
-fetched: 2026-08-05
-source_version: fc70b3cc156c426cde1db22557f2232c23ade79f6ee75e8e9d8f2ec8b719d896
+fetched: 2026-08-14
+source_version: ebb8a92519f13626ca9f48248458a065217a070c31f6ba5af6c3f1c4333f7dae
 ---
 
 # Device Security Controls Use Case
@@ -11,49 +11,54 @@ source_version: fc70b3cc156c426cde1db22557f2232c23ade79f6ee75e8e9d8f2ec8b719d896
 Device Security Controls Use Case
 
 ## Summary
-Twingate provides granular device-based access controls that screen users and devices against permitted characteristics (OS type, screen lock, MDM/EDR status, etc.). Policies are enforced at the edge on client devices rather than in the cloud. Supports integration with major IdPs, MDM providers, and EDR solutions.
+Twingate provides granular device-based access controls that screen users and devices against permitted characteristics (OS type, screen lock, MDM/EDR status). Policies are enforced at the edge on client devices rather than centrally. Integrates with major IdP, MDM, and EDR providers.
 
 ## Key Information
-- Access policies can require specific device characteristics per resource
+- Access policies evaluate device attributes: OS type, screen lock status, MDM enrollment, EDR presence
 - Split tunneling enabled by default (unlike traditional VPNs)
-- Policy enforcement happens on client devices (edge), not cloud
-- Web-based admin console available; programmatic config via Public API
-- Supports delegating device trust to third-party security tools
+- Policy enforcement happens on client devices (edge), not in the cloud
+- Web-based admin console available; Public API available for programmatic configuration
+- Supports principle of least privilege with per-resource device requirements
 
 ## Prerequisites
 - Twingate account with admin access
 - Identity Provider configured (Okta, JumpCloud, Entra ID, OneLogin, or Google)
-- Optional: MDM or EDR solution for delegated trust
+- Optional: MDM provider (Intune, Jamf, Iru) or EDR solution (CrowdStrike, SentinelOne) for delegated trust
 
-## Supported Integrations
-**Identity Providers:** Okta, JumpCloud, Entra ID, OneLogin, Google
+## Integrations Supported
 
-**MDM Providers:** Intune, Jamf, Iru
+**Identity Providers:**
+- Okta, JumpCloud, Entra ID, OneLogin, Google
 
-**EDR Solutions:** CrowdStrike, SentinelOne
+**MDM Providers:**
+- Intune, Jamf, Iru
 
-**Password Managers:** 1Password XAM
+**EDR Solutions:**
+- CrowdStrike, SentinelOne
 
-## Configuration Areas
-- Device posture checks (OS type, screen lock, MDM enrollment, EDR status)
-- Per-resource device requirements (least privilege per resource)
-- Delegated device trust to MDM/EDR providers
-- Automated device trust via Python or JavaScript CLIs
+**Password Managers:**
+- 1Password XAM
+
+## Configuration Guides (Step-by-Step References)
+1. Device Security Guide (primary setup reference)
+2. List of Device Security Posture Checks
+3. Automate Trusting Devices – Python CLI
+4. Automate Trusting Devices – JavaScript CLI
+5. Delegate Device Trust to CrowdStrike
+6. Delegate Device Trust to SentinelOne
+7. Delegate Device Trust to Intune
+8. Delegate Device Trust to Jamf
+9. Delegate Device Trust to Iru
+10. Delegate Device Trust to 1Password XAM
+
+## Gotchas
+- Device posture checks apply at the resource level, so different resources can have different device requirements — plan policy structure carefully
+- Delegated trust (MDM/EDR) requires additional integration setup beyond basic Twingate configuration
+- Split tunneling is on by default; non-Twingate traffic routes normally outside the tunnel
 
 ## Related Docs
 - Device Security Guide
 - List of Device Security Posture Checks
-- How to Automate Trusting Devices (Python CLI)
-- How to Automate Trusting Devices (JavaScript CLI)
-- How to Delegate Device Trust to CrowdStrike
-- How to Delegate Device Trust to SentinelOne
-- How to Delegate Device Trust to Intune
-- How to Delegate Device Trust to Jamf
-- How to Delegate Device Trust to Iru
-- How to Delegate Device Trust to 1Password XAM
-- Public API docs (for programmatic config)
-
-## Gotchas
-- This is an overview/use-case page — implementation details are in linked sub-guides
-- Device trust delegation requires separate configuration per MDM/EDR provider
-- No VPN-style full-tunnel routing; split tunneling is the default behavior
+- Identity Provider integration docs
+- Resources, Networks, and Policies administration
+- Twingate Public API

@@ -1,52 +1,57 @@
 ---
 source: https://www.twingate.com/docs/omnissa-workspace-one-mdm
 type: docs
-fetched: 2026-08-05
-source_version: 8344bc47cf72f657054901c356744e3c951c7609f704431422d5e142a5b9d326
+fetched: 2026-08-14
+source_version: 8ffd9e8ba107f6eab6f00119b74b52c3da3ac9648082ecf7a0a4ba931c836c53
 ---
 
 # Deploying macOS & iOS Clients with Omnissa Workspace ONE
 
 ## Summary
-Guide for distributing Twingate clients via Omnissa Workspace ONE MDM on macOS and iOS. macOS uses PKG-based non-App Store deployment; iOS requires Apple Business Manager integration.
+Guide for distributing the Twingate Client via Omnissa Workspace ONE MDM for both macOS and iOS platforms. macOS uses PKG-based deployment; iOS uses Apple Business Manager integration.
 
 ## Key Information
-- macOS deployment uses PKG installer (non-App Store app distribution)
-- iOS deployment requires Apple Business Manager linked to Workspace ONE
-- Pre-configuration profiles available for macOS to automate VPN setup, system extension, and Network pre-population
+- macOS deployment uses non-App Store (PKG) distribution method
+- iOS deployment requires Apple Business Manager (ABM) linked to Workspace ONE
+- Pre-configuration profiles available for macOS to automate VPN, system extension, and Network setup
 
 ## Prerequisites
-- Workspace ONE admin access
-- **macOS**: Twingate PKG downloaded from Twingate download page
-- **iOS**: Twingate app added to Apple Business Manager; Workspace ONE linked to ABM via VPP Managed Distribution
+- Omnissa Workspace ONE instance with admin access
+- **macOS**: Twingate PKG installer (from Twingate download page)
+- **iOS**: Apple Business Manager account with Twingate iOS app added; Workspace ONE linked to ABM
 
 ## Step-by-Step
 
 ### macOS
-1. Download Twingate PKG from Twingate download page
+1. Download Twingate PKG from the Twingate download page
 2. Upload PKG to Workspace ONE as a non-App Store app
-3. Follow Workspace ONE documentation for PKG distribution
-4. Optionally apply configuration profiles for pre-configuration
+3. Follow Workspace ONE's official documentation for PKG distribution
+4. (Optional) Apply configuration profiles to pre-configure VPN, system extension, and Network
 
 ### iOS
-1. Add Twingate to Apple Business Manager
-2. In Workspace ONE: **Settings → Apple (Devices & Users) → VPP Managed Distribution**
-3. Link Apple Business Manager account; ensure **"Automatically Send Invites" is unchecked**
-4. Navigate to **Applications → Native → Purchased**, select Twingate
-5. From **More Actions → Enable Device Assignment** (prevents personal Apple ID requirement)
-6. From **More Actions → Enable Auto Updates** (recommended)
+1. Add Twingate iOS app to Apple Business Manager
+2. In Workspace ONE, navigate to **Settings → Apple (under Devices & Users) → VPP Managed Distribution**
+3. Follow guided steps to link ABM account
+4. Ensure **"Automatically Send Invites" is unchecked**
+5. Navigate to **Applications → Native → Purchased**, select Twingate iOS app
+6. From **More Actions**, select **Enable Device Assignment** (prevents personal Apple ID requirement)
+7. From **More Actions**, select **Enable Auto Updates** (recommended)
 
 ## Configuration Values
-- macOS pre-configuration via configuration profiles (separate guide): enables VPN config, system extension, Network pre-population
+| Setting | Location | Value |
+|---|---|---|
+| Automatically Send Invites | VPP Managed Distribution setup | Unchecked |
+| Device Assignment | More Actions → Enable Device Assignment | Enabled |
+| Auto Updates | More Actions → Enable Auto Updates | Enabled (recommended) |
 
 ## Gotchas
-- **Manually installed clients must be removed first** — version mismatch between user-installed and MDM-distributed versions causes issues
-  - Create a temporary removal policy targeting all devices, deactivate it before rolling out MDM distribution
-- **"Automatically Send Invites" must be unchecked** during ABM linking
-- **Device Assignment must be explicitly enabled** — default deployment requires personal Apple ID
+- **Manually installed clients must be removed first**: Users with pre-existing manual installs may encounter version conflicts. Create a temporary removal policy before rollout, then deactivate it
+- **"Automatically Send Invites" must be unchecked** during ABM linking or app assignment flow breaks
+- Device Assignment must be explicitly enabled — default deployment method requires personal Apple ID
 
 ## Related Docs
-- [Twingate Configuration Profiles (macOS)](https://www.twingate.com/docs/configuration-profiles)
-- [Twingate Download Page](https://www.twingate.com/downloads)
+- [Twingate macOS Configuration Profiles](https://www.twingate.com/docs/configuration-profiles) — for pre-configuring VPN, system extension, Network
+- Twingate download page (for PKG installer)
 - Workspace ONE official PKG distribution documentation
 - Apple Business Manager documentation
+- Workspace ONE × Apple Business Manager integration guide
