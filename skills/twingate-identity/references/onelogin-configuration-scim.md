@@ -1,44 +1,43 @@
 ---
 source: https://www.twingate.com/docs/onelogin-configuration-scim
 type: docs
-fetched: 2026-08-05
-source_version: b4fcd36e1d13ba3b0efbd1e7dab2f6ff15ca03917b9501f6c1e12483422b4dac
+fetched: 2026-08-14
+source_version: 935b4010633769baffa7bddf35500a5e5d71057d7a8f6ed22aa0e88cfdb758de
 ---
 
 # Configure SCIM User & Group Sync (OneLogin)
 
 ## Summary
-Configures SCIM provisioning between OneLogin and Twingate to sync users and groups. Requires the OneLogin Twingate application to be set up first. Supports user creation, updates, deactivation, and group membership sync.
+Configures SCIM-based provisioning between OneLogin and Twingate to sync users and groups. Requires the OneLogin Twingate application to be set up first. Supports user creation, updates, deactivation, and group membership sync.
 
 ## Key Information
 - Supported operations: create users, update attributes, deactivate users, provision groups/membership
-- SCIM username field is used as the unique identifier for synced users
-- Groups are synced via OneLogin Roles mapped to SCIM Groups using Rules
+- Requires Twingate **Business or Enterprise** plan
+- SCIM sync is unidirectional: OneLogin → Twingate
 
 ## Prerequisites
+- OneLogin Twingate application configured (separate setup step)
 - Twingate Business or Enterprise plan
-- OneLogin Twingate application already configured (catalog app)
 - SCIM Endpoint and SCIM Token from Twingate Admin Console
 
 ## User Sync Configuration
 
 1. Copy **SCIM Endpoint** and **SCIM Token** from Twingate Admin Console
-2. In OneLogin Twingate app → **Configuration** tab: paste into **SCIM Base URL** and **SCIM Bearer Token** → click **Enable**
+2. In OneLogin Twingate app → **Configuration** tab: paste into **SCIM Base URL** and **SCIM Bearer Token** fields → click **Enable**
 3. In **Parameters** tab: verify **SCIM Username** mapping
    - Default: maps `Username` → `SCIM Username`
    - If not using Username field: change mapping to `Email`
 4. In **Provisioning** tab:
    - Check **Enable provisioning**
-   - Set "When users are deleted in OneLogin" → **Delete**
-   - Optionally uncheck **Require admin approval** for all 3 actions
+   - Set "When users are deleted in OneLogin…" → **Delete**
    - Click **Save**
-5. In **Users** tab: **Apply to all** → **Reapply Mappings**
+5. In **Users** tab: click **Apply to all** → **Reapply Mappings**
 
 ## Group Sync Configuration
 
 1. **Parameters** tab → **Optional Parameters** → click **Groups** → check **Include in User Provisioning** → **Save**
 2. **Rules** tab → **Add Rule**:
-   - Actions: `Set Groups in Twingate`
+   - Actions: **Set Groups in Twingate**
    - For each: `role`
    - With value matching: `.*` (all roles) or specific pattern
    - Save
@@ -46,20 +45,19 @@ Configures SCIM provisioning between OneLogin and Twingate to sync users and gro
 
 ## Configuration Values
 
-| Field | Source |
-|-------|--------|
-| SCIM Base URL | Twingate Admin Console → SCIM Endpoint |
-| SCIM Bearer Token | Twingate Admin Console → SCIM Token |
-| SCIM Username mapping | `Username` (default) or `Email` |
-| Role regex pattern | `.*` for all roles |
+| Field | Source | Destination |
+|-------|--------|-------------|
+| SCIM Base URL | Twingate Admin Console (SCIM Endpoint) | OneLogin Configuration tab |
+| SCIM Bearer Token | Twingate Admin Console (SCIM Token) | OneLogin Configuration tab |
 
 ## Gotchas
-- **Admin approval**: If left enabled, all synced users show "Pending" status until manually approved in the Users tab
-- **Deletion behavior**: Must explicitly set deleted user action to "Delete" — default may not remove users from Twingate
-- **SCIM Username**: Must match the field actually used in your OneLogin config; wrong mapping causes user identification failures
-- **Group sync**: Requires both the Parameters change AND a Rules mapping — neither alone is sufficient
-- **Reapply Mappings**: Must be run after both user and group configuration changes to trigger immediate sync
+- **Admin approval**: By default enabled — requires manual approval per user before sync. Uncheck "Require admin approval" for create/delete/update to enable automatic sync.
+- **Deletion behavior**: Must explicitly set deletion action to **Delete** (not default); otherwise deactivated users won't be removed from Twingate.
+- **SCIM Username field**: Must match the field actually used for usernames in your OneLogin config — use `Email` if `Username` is not populated.
+- **Group sync**: Uses OneLogin Roles as the recommended mapping mechanism; any attribute can technically be used but Roles is default.
+- Users show as **Pending** state until manually approved if admin approval is enabled.
 
 ## Related Docs
-- OneLogin Twingate Application Setup (prerequisite)
-- Twingate Admin Console (SCIM token generation)
+- OneLogin Twingate application setup (prerequisite)
+- Twingate SCIM overview
+- OneLogin provisioning documentation

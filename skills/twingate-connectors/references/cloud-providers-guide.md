@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/cloud-providers-guide
 type: docs
-fetched: 2026-08-05
-source_version: 957efad7465a09a35a5648526420f760f94b5347ddf8d12b0d132de83b6698e0
+fetched: 2026-08-14
+source_version: 8c73b5f80a17fa3a3ff64e9285e8947fa590d14ff1020414bca828b4a689ef25
 ---
 
 # Cloud Providers Guide
@@ -11,62 +11,66 @@ source_version: 957efad7465a09a35a5648526420f760f94b5347ddf8d12b0d132de83b6698e0
 Twingate Cloud Providers Guide
 
 ## Summary
-Covers deploying and configuring Twingate Connectors across AWS, GCP, Azure, and DigitalOcean. The setup pattern is identical across all providers: create a Remote Network, deploy a Connector, then define Resources using private IPs or internal DNS names. No inbound firewall rules are required on the Connector host.
+Covers deploying and configuring Twingate Connectors across AWS, GCP, Azure, and DigitalOcean. Setup pattern is identical across providers: create a Remote Network, deploy a Connector, then define Resources using private IPs or internal DNS names.
 
 ## Key Information
-- **Universal setup pattern**: Remote Network → Connector → Resources
-- Connectors make **outbound-only connections** — no inbound ports needed
-- Resources are defined by private IP (e.g., `10.0.1.15`) or internal DNS (e.g., `app.internal.example.com`)
-- **Production requirement**: Deploy ≥2 Connectors per Remote Network for high availability
+- Connectors make **outbound-only connections** — no inbound firewall rules or public port exposure required
+- Deploy **minimum 2 Connectors per Remote Network** for production high availability
+- Users need Twingate Client installed + permissions to access Resources
 
 ## Prerequisites
 - Twingate Admin Console access
-- Cloud VM/instance to host the Connector (EC2, Compute Engine, Azure VM, or Droplet)
-- Twingate Client installed on end-user devices
+- Cloud provider VM/compute access
+- Outbound internet access from Connector VM
 
-## Provider-Specific Guides
-| Provider | Topics Covered |
-|---|---|
-| **AWS** | EC2 deployment, VPN migration, Workspaces, reference architecture, RDS/Aurora access |
-| **GCP** | Compute Engine VM, Cloud SQL + Auth Proxy |
-| **Azure** | Azure VM, VNet resource access, Azure SQL/SQL Managed Instance |
-| **DigitalOcean** | Droplet deployment, VPC access |
+## Provider-Specific Deployment Notes
+
+### AWS
+- Deploy Connector on EC2 instance (see EC2 deployment guide for sizing, security groups, IAM)
+- Migration path available from AWS Client VPN / Site-to-Site VPN
+- Supports AWS Workspaces client installation
+- Reference architecture covers multi-AZ Connector placement
+
+### Google Cloud (GCP)
+- Deploy Connector on Compute Engine VM
+- Requires VPC firewall rules and service account setup
+- Cloud SQL access requires authorized network config + Cloud SQL Auth Proxy consideration
+
+### Azure
+- Deploy Connector as Azure Virtual Machine
+- Configure Network Security Group (NSG) rules
+- Supports Azure SQL Database and SQL Managed Instance
+
+### DigitalOcean
+- Deploy Connector on a Droplet within DigitalOcean VPC
 
 ## Configuration Values
-| Requirement | Value |
+
+| Purpose | Value |
 |---|---|
-| Outbound HTTPS | Port `443` |
-| Outbound Relay | TCP `30000–31000` |
-| Inbound rules | None required |
+| Required outbound port (HTTPS) | `443` |
+| Required outbound port (Relay) | TCP `30000–31000` |
+| Inbound rules required | None |
 
 ## Troubleshooting
 
-**Connector won't connect:**
-- Verify outbound access on port `443` and TCP `30000-31000`
-- Confirm Connector tokens are valid and not expired
-
-**Resources unreachable:**
-- Security group/firewall must allow outbound traffic from Connector to Resource's private IP and port
-- Connector needs network-level path to the Resource (same as any host in the VPC)
-
-**DNS resolution failures:**
-- Connector VM must be able to resolve internal DNS names
-- Check VPC DNS settings and hosted zone VPC association
-
-**Slow connections:**
-- Check Connector health in Admin Console
-- Deploy Connector closer to the Resource region
-- Enable peer-to-peer connections
+| Issue | Fix |
+|---|---|
+| Connector won't connect | Verify outbound `443` and TCP `30000-31000`; check Connector tokens valid |
+| Resources unreachable | Confirm Connector security group allows outbound to Resource's private IP/port |
+| DNS resolution failures | Verify Connector VM can resolve internal DNS; check VPC DNS settings and hosted zone association |
+| Slow connections | Check Connector health in Admin Console; deploy Connector closer to Resource; enable peer-to-peer |
 
 ## Gotchas
-- DNS: If using internal DNS names for Resources, the Connector's VM must have DNS resolution configured for those names — this is a common misconfiguration
-- Security groups must allow Connector → Resource traffic (not just internet → Connector)
-- Expired or incorrect Connector tokens are a frequent cause of connection failures
+- Connector VM must have a **network path to the Resource** (treat it like any other VPC host)
+- Connector tokens can expire — verify they are current when troubleshooting connectivity
+- Internal DNS names require the Connector's VM to use the VPC's DNS resolver with correct hosted zone association
 
 ## Related Docs
-- [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
-- [Remote Network Best Practices](https://www.twingate.com/docs/remote-network-best-practices)
-- [Database Access Guide](https://www.twingate.com/docs/database-access)
-- [Terraform Getting Started](https://www.twingate.com/docs/terraform)
-- [Pulumi Getting Started](https://www.twingate.com/docs/pulumi)
-- [Twingate Troubleshooting Guide](https://www.twingate.com/docs/troubleshooting)
+- Connector Best Practices
+- Remote Network Best Practices
+- Best Practices for Connector Placement
+- Database Access Guide
+- Terraform Getting Started
+- Pulumi Getting Started
+- Twingate Troubleshooting Guide

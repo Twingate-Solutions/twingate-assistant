@@ -1,47 +1,52 @@
 ---
 source: https://www.twingate.com/docs/two-factor-authentication
 type: docs
-fetched: 2026-08-05
-source_version: f907c1ae7fa8715c1144557d87efb531bb11a9f8e03166586339f8f2e703d0c2
+fetched: 2026-08-14
+source_version: 52d84e6f94f5474093a42eae093ec5119172fa16345822f9494447fe31134db7
 ---
 
-# Native MFA (Twingate)
+# Twingate Native MFA
 
 ## Summary
-Twingate provides native MFA independent of your identity provider, configurable at sign-in, resource access, or Admin Console login. MFA is managed at the policy level with per-policy authentication frequency controls. Supports TOTP, biometrics (WebAuthn), and physical security keys.
+Twingate provides native MFA independent of identity provider configuration, applicable at sign-in, resource access, or Admin Console login. MFA is configured at the policy level with configurable authentication frequency. Three MFA methods are supported: TOTP, biometrics (WebAuthn), and security keys (WebAuthn).
 
 ## Key Information
-- MFA scope is determined by where it's configured: Sign In Policy, Resource Policies, or Admin Console Settings
-- Authentication frequency is inherited from the policy it's attached to (e.g., 24-hour frequency = MFA once per day)
-- TOTP is always configured as a backup even when biometrics or security keys are the primary method
-- Admins can reset individual user MFA methods from the user detail page in the Admin Console
+- MFA operates independently from IdP-level MFA — enabling both forces users to complete MFA twice
+- MFA frequency is tied to the policy's authentication frequency setting (e.g., once per 24 hours)
+- TOTP is always configured as a backup even when biometrics/security keys are primary method
+- Admin or Helpdesk role required to reset user MFA methods
 
 ## Prerequisites
-- Admin access to Twingate Admin Console
-- Users need a TOTP app (Google Authenticator, Authy, 1Password) or WebAuthn-compatible device/key
+- Access to Twingate Admin Console
+- Security policies configured (Sign In Policy or Resource Policies)
+- Users must have a supported authenticator app, biometric-capable device, or FIDO2/CTAP2 security key
 
 ## Configuration Locations
 
 | Scope | Location | Effect |
 |---|---|---|
-| Sign-in | Sign In Policy | MFA required every Client login |
-| Resource access | Resource Policies | MFA required per-resource access |
-| Admin Console | Settings → Security | MFA required for admin logins |
+| Sign-in | Sign In Policy | MFA required every client sign-in |
+| Resource access | Resource Policies | MFA required when accessing specific Resources |
+| Admin Console | Settings → Admin Console Security | MFA required for admin logins |
 
 ## Supported MFA Methods
-- **TOTP**: Time-based codes via authenticator app
+- **TOTP**: Google Authenticator, Authy, 1Password (always configured as backup)
 - **Biometrics (WebAuthn)**: Touch ID, Windows Hello
-- **Security Keys (WebAuthn)**: YubiKey or other FIDO2/CTAP2 keys only — non-FIDO2 keys not supported
+- **Security Keys (WebAuthn)**: YubiKey — FIDO2/CTAP2 only
+
+## Admin: Reset User MFA
+1. Navigate to user's detail page in Admin Console
+2. Select the authentication method to reset or delete
+3. User completes setup flow on next MFA prompt
 
 ## Gotchas
-- **Do not enable MFA in both Twingate and your IdP** — users will be prompted twice per authentication
-- FIDO2/CTAP2 required for security keys; older key formats unsupported
-- WebAuthn (biometrics/security keys) has variable browser/platform support — check [webauthn.me/browser-support](https://webauthn.me/browser-support)
-- Biometric/security key users are still required to configure TOTP as backup
-
-## Admin Actions
-- **Reset lost MFA**: User detail page → select method → reset or delete → user re-enrolls on next MFA prompt
+- **Double MFA**: Do not enable native MFA if IdP already enforces MFA — users will authenticate twice
+- **Security key compatibility**: Only FIDO2/CTAP2 keys supported; older U2F-only keys will not work
+- **WebAuthn limitations**: Browser/platform support varies; check [webauthn.me/browser-support](https://webauthn.me/browser-support) for compatibility
+- **Backup TOTP requirement**: Users registering biometrics or security keys must also configure TOTP — cannot skip backup method setup
+- **New devices**: Biometric and security key credentials are device-bound; users will need TOTP backup on new devices
 
 ## Related Docs
-- Security Policies (authentication frequency configuration)
-- webauthn.me/browser-support (WebAuthn compatibility reference)
+- Security Policies (policy-level configuration)
+- Sign In Policy (authentication frequency settings)
+- Resource Policies (per-resource MFA configuration)

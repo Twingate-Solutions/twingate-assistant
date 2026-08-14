@@ -1,60 +1,64 @@
 ---
 source: https://www.twingate.com/docs/split-tunnel-failures
 type: docs
-fetched: 2026-08-05
-source_version: 718d075684972b6e2120fc7730ad42954a3c091690fb54f41944d0b96482a3ab
+fetched: 2026-08-14
+source_version: 53eced3f1241374884f2dfeaa67f948545130d5fe9cdecd3f536e82b264e23f0
 ---
 
 # Split Tunnel Failures
 
 ## Summary
-Twingate uses split tunneling by default, routing only explicitly defined Resource traffic through the tunnel. Two failure categories exist: local subnet collisions (Twingate captures traffic it shouldn't) and missing Resource definitions (Twingate doesn't capture traffic it should).
+Twingate uses split tunneling by default, routing only explicitly defined Resource traffic through the tunnel. Two failure categories exist: local subnet collisions (Twingate captures traffic it shouldn't) and missing Resource definitions (Twingate misses traffic it should capture).
 
 ## Key Information
-- Split tunnel = only defined Resources are tunneled; all other traffic follows normal network path
-- Two failure modes: **local subnet collisions** and **missing Resource definitions**
-- Exit Networks enable full-tunnel mode (intentional, user-selectable)
-- `.local` domains conflict with mDNS/Bonjour — requires special handling
+- Split tunnel = only defined Resources are routed through Twingate
+- Local traffic and public internet traffic bypass Twingate by default
+- Exit Networks provide full-tunnel mode (user-selectable, not default)
+- `.local` domains conflict with mDNS/Bonjour protocol
 
 ## Local Subnet Collision Troubleshooting
 
-**Symptoms:** Can't reach home printer, local NAS, or another VPN client while Twingate is active
+### Symptoms
+- Local printer/NAS inaccessible when Twingate active
+- Other VPN clients fail when Twingate is running
 
-**Steps:**
-1. Get user's local IP/subnet via `ipconfig` (Windows) or `ifconfig`/`ip addr` (macOS/Linux)
-2. Compare against Resource definitions in Admin Console for overlapping CIDR ranges
-3. Refine Resource definitions to be more specific (e.g., `10.0.5.23` instead of `10.0.0.0/16`)
+### Diagnosis Steps
+1. User runs `ipconfig` (Windows) or `ifconfig`/`ip addr` (macOS/Linux) to find local subnet
+2. Check Admin Console Resource definitions for overlapping CIDR ranges
+3. If corporate Resource matches user's local subnet (e.g., both `192.168.1.0/24`), collision confirmed
 
-**Best Practice:** Use specific IPs or small CIDR blocks rather than broad ranges
+### Fix
+- Use specific IPs (`10.0.5.23`) instead of broad CIDR blocks (`10.0.0.0/16`)
+- Use smallest precise CIDR blocks possible
 
-## Missing Resource Definitions (Web App Gating)
+## Missing Resource Definitions Troubleshooting
 
-**Symptoms:** App partially loads, broken features, HTTP 401/403 errors, intermittent failures
+### Symptoms
+- SaaS app partially loads, broken features
+- HTTP 401/403 errors on gated applications
+- Missing styles, scripts, or embedded content
+- Intermittent failures across pages
 
-### Method 1: Browser Developer Tools
-1. Open app in browser with Twingate active
-2. Press `F12` → Network tab → reload page
-3. Filter for failed requests (401, 403, blocked/cancelled)
-4. Note domains of failed requests
-5. Add wildcard DNS Resources (e.g., `*.partnersite.com`) in Admin Console
-6. Assign same Groups/Security Policies as primary Resource
-7. Wait for Client sync, reload, repeat
+### Method 1: Browser DevTools
+1. Open app in browser with Twingate active → F12 → Network tab
+2. Reload page, filter by error status codes (401, 403, blocked/cancelled)
+3. Identify failing domains
+4. Add `*.parentdomain.com` wildcard DNS Resource in Admin Console
+5. Assign same Groups/Security Policies as primary Resource
+6. Retest after Client updates
 
-**Best Practice:** Use `*.domain.com` wildcards to cover all current and future subdomains
-
-### Method 2: Test Resources (Temporary Full-Tunnel Diagnostic)
-1. Create two Resources on same Remote Network as problem app:
+### Method 2: Test Resources (temporary diagnostic)
+1. Create two Resources on same Remote Network:
    - DNS Resource: `*.*` (name: "Test DNS")
    - IP Resource: `0.0.0.0/0` (name: "Test IP")
-   - No port/protocol restrictions; **assign to no Groups initially**
-2. Create new Group (e.g., "Test Group"), add both test Resources
-3. Add affected user to Test Group; wait for Resources to appear in Client
-4. User loads app — should work fully with all traffic tunneled
-5. **Remove user from Test Group immediately after test**
-6. Review activity logs on user profile or Resource activity page for uncovered domains/IPs
-7. Add missing entries as permanent Resources with proper Groups/Policies
-8. Retest without test Resources
-9. Delete/disable Test Group and test Resources
+2. Assign **no Groups** initially
+3. Create new Group (e.g., "Test Group"), add both Resources
+4. Add affected user to Test Group → wait for Resources to appear in Client
+5. User completes failing workflow (should work now)
+6. **Immediately remove user from Test Group**
+7. Review activity logs on user profile or Resource pages for uncovered domains/IPs
+8. Add missing entries as permanent Resources with proper Groups/Policies
+9. **Delete/disable Test Group and test Resources**
 
 ## Configuration Values
 | Resource Type | Test Value | Purpose |
@@ -64,14 +68,12 @@ Twingate uses split tunneling by default, routing only explicitly defined Resour
 | Wildcard DNS | `*.domain.com` | Cover all subdomains |
 
 ## Gotchas
-- **Test Resources must be removed after testing** — leaving them active causes unexpected behavior
-- `.local` domains conflict with mDNS; see separate KB article
-- Full-tunnel mode requires Exit Networks, not broad Resource definitions
-- Web apps commonly depend on CDN, auth, and third-party domains not obvious from the main URL
-- Subnet collision applies to both CIDR ranges AND specific IPs within a range
+- **Test Resources must be removed after use** — leaving them active causes unexpected behavior
+- `.local` TLD conflicts with mDNS (Bonjour); requires special handling per KB article
+- Modern web apps use many domains (CDN, auth, assets) — all must be defined as Resources
+- Specific IP collision possible even without full subnet overlap if individual IPs match
 
 ## Related Docs
-- Exit Networks documentation
+- Exit Networks (full-tunnel mode)
 - `.local` domain KB article
-- Activity/log review (user profile page or Resource activity page)
-- Twingate log collection for unresolved issues
+- Activity/logging documentation

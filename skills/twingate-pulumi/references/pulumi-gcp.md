@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/pulumi-gcp
 type: docs
-fetched: 2026-08-05
-source_version: d845524db220bdbc110a680e245de92111baa278b2af237b894f36597e23b494
+fetched: 2026-08-14
+source_version: ad51fa43498e672c26ec168a34ff7c8e1805c783c8f50f9c41de6fff91455627
 ---
 
 # Pulumi with GCP and Twingate
@@ -11,14 +11,16 @@ source_version: d845524db220bdbc110a680e245de92111baa278b2af237b894f36597e23b494
 How to Use Pulumi with GCP and Twingate
 
 ## Summary
-Step-by-step guide for automating Twingate deployments on Google Cloud Platform using Pulumi with TypeScript. Creates a complete setup including a Twingate Remote Network, Connector, Group, Resource, and GCP infrastructure (VPC, subnet, firewall, two VMs).
+Step-by-step guide for automating Twingate deployments on GCP using Pulumi with TypeScript. Creates a complete stack including GCP VPC/subnet/firewall, a webserver VM, a Twingate connector VM, and Twingate remote network/group/resource configuration.
 
 ## Key Information
-- Uses TypeScript/JavaScript for IaC configuration
-- Creates two GCP VMs: one webserver (`e2-micro`) and one Twingate Connector (`e2-micro`)
-- Connector VM bootstrapped via startup script pulling tokens from Twingate API
-- Uses `pulumi.interpolate` to inject dynamic values (connector tokens) into startup scripts
-- Additional examples available at Twingate GitHub repository
+- Language: TypeScript/JavaScript (Node.js required)
+- NPM packages: `@pulumi/gcp`, `@twingate/pulumi-twingate`
+- Connector VM installs via curl script using generated access/refresh tokens
+- Resource access restricted to TCP port 80 (RESTRICTED policy); UDP ALLOW_ALL
+- GCP VM type: `e2-micro`, image: `ubuntu-2204-lts`
+- Subnet CIDR: `172.16.0.0/24`, region: `europe-west2`
+- Additional examples in Twingate GitHub repository
 
 ## Prerequisites
 - GCP account with permissions to create/delete resources
@@ -31,15 +33,16 @@ Step-by-step guide for automating Twingate deployments on Google Cloud Platform 
 ## Step-by-Step
 
 1. `mkdir twingate_pulumi_gcp_demo && cd twingate_pulumi_gcp_demo`
-2. `pulumi new typescript`
+2. `pulumi new typescript` (set project name, description, stack name)
 3. `gcloud auth application-default login`
 4. Set Pulumi config (see Configuration Values below)
 5. `npm install @pulumi/gcp @twingate/pulumi-twingate`
-6. Write `index.ts` with Twingate + GCP resources
+6. Write `index.ts` with Twingate + GCP resources (see full file in docs)
 7. `pulumi preview` to validate
 8. `pulumi up` to deploy
 9. Assign Twingate user to the created group in admin panel
-10. `pulumi down` to destroy
+10. Test access via private IP in browser
+11. `pulumi down` to destroy
 
 ## Configuration Values
 
@@ -54,25 +57,20 @@ pulumi config set twingate:apiToken YOUR_TOKEN --secret
 pulumi config set twingate:network democompany
 ```
 
-**Connector startup script env vars:**
+**Connector startup env vars** (injected via `pulumi.interpolate`):
 - `TWINGATE_ACCESS_TOKEN` — from `TwingateConnectorTokens.accessToken`
 - `TWINGATE_REFRESH_TOKEN` — from `TwingateConnectorTokens.refreshToken`
 - `TWINGATE_URL` — `https://<network>.twingate.com`
 
-**Key resource settings:**
-- Subnet CIDR: `172.16.0.0/24`
-- Firewall: allows ICMP + TCP:80, source tag `demo`
-- TwingateResource TCP policy: `RESTRICTED` (port 80), UDP: `ALLOW_ALL`
-- VM image: `ubuntu-os-cloud/ubuntu-2204-lts`
-
 ## Gotchas
-- `accessConfigs: [{}]` must be present but empty to request ephemeral public IP on GCP instances
-- Must use `pulumi.interpolate` (not template literals) when embedding Pulumi Output values (connector tokens) in startup scripts
-- After `pulumi up`, manually assign users to the created Twingate group — not automated in this config
-- Firewall uses source tags (`demo`), not IP ranges — VMs must have matching tag
+- Use `pulumi.interpolate` (not template literals) when embedding Pulumi Output values (like tokens) in startup scripts
+- `accessConfigs: [{}]` must be present but empty to request ephemeral IP on GCP VM network interfaces
+- After `pulumi up`, must manually assign the Twingate user to the created group — not automated in this config
+- Firewall uses `sourceTags: ["demo"]` — only applies to VMs tagged `"demo"`; adapt rules for production use
+- API token should always be set with `--secret` flag
 
 ## Related Docs
-- Twingate Pulumi provider: `@twingate/pulumi-twingate` (npm)
-- GCP Pulumi provider: `@pulumi/gcp` (npm)
-- General Pulumi prerequisites guide (referenced but not linked)
-- Twingate GitHub repository for additional examples
+- Twingate Pulumi provider (general prerequisites guide)
+- GCP IAM permissions for resource creation
+- Twingate API token generation
+- Twingate GitHub repository (additional Pulumi/GCP examples)

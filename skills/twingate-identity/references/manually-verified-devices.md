@@ -1,49 +1,50 @@
 ---
 source: https://www.twingate.com/docs/manually-verified-devices
 type: docs
-fetched: 2026-08-05
-source_version: d9ad18bc6a8ca1b44afc7b7cb495d0e3aa4778f79935e75dbed29d982aa516c7
+fetched: 2026-08-14
+source_version: ab04e546eb70b45da46b4959149883eb7783aa88288b7f9918748646db0ac12e
 ---
 
 # Manually Verified Devices
 
+## Page Title
+Manually Verified Devices
+
 ## Summary
-Admins can manually verify devices to satisfy Trusted Profile requirements using two methods: serial number verification (recommended) or device instance verification. Serial numbers can be bulk-uploaded pre- or post-deployment; device instance verification targets specific user-device combinations.
+Admins and Helpdesk admins can manually verify devices via the Admin Console or API to satisfy Trusted Profile requirements. Two verification methods exist: serial number (recommended) and device instance (for devices without unique serial numbers).
 
 ## Key Information
-- **Serial number verification**: Any device matching a specified serial number is verified — recommended for most cases
-- **Device instance verification**: Verifies a specific user-device pair — use when device lacks a unique or any serial number
-- Serial numbers managed under **Devices > Serial Numbers** tab in Admin Console
-- Bulk upload of serial numbers supported before or after devices have signed into Twingate
-- Both methods satisfy Trusted Profile requirements
+- **Serial number verification**: Any device matching a specified serial number is verified; managed under **Devices > Serial Numbers** tab
+- **Device instance verification**: Verifies a specific user-device combination; available on the Devices tab or a device's detail page
+- Bulk serial number upload supported before or after devices have signed into Twingate (enables pre-deployment verification)
+- Manual verification is retained when a device is archived or blocked
 
 ## Prerequisites
-- Admin access to Twingate Admin Console
-- Trusted Profile configured to use manual verification as a verification method
+- Admin or Helpdesk Admin role required
+- Trusted Profile must be configured to use manual verification as a verification method
 
 ## Step-by-Step
 
 ### Serial Number Verification
 1. Navigate to **Devices > Serial Numbers** tab in Admin Console
-2. Bulk-upload serial numbers (CSV or similar)
-3. Devices matching uploaded serial numbers are automatically considered verified
+2. Upload serial numbers (individually or bulk)
+3. Any device matching an uploaded serial number is considered verified
 
 ### Device Instance Verification
 1. Navigate to **Devices** tab or a specific device's detail page
 2. Open the device verification modal
-3. Select option to verify the device instance
+3. Select the option to verify the device instance
 
 ## Configuration Values
-- No environment variables or API parameters documented on this page
-- API-based verification available (referenced but not detailed here)
+- No specific env vars or CLI flags documented
+- API access available (no specific endpoints listed on this page)
 
 ## Gotchas
-- Devices with **no serial number** can only be device instance verified
-- Archived and blocked devices **can** be manually verified; verification status is retained through archive/block actions
-- If a serial number is applied to an already device-instance-verified device, it is **reclassified** as serial number verified
-- If that serial number is later **deleted**, the device loses verified status entirely — it does **not** revert to device instance verified state
-- Serial number and device instance verification are mutually exclusive per device at any given time
+- If a serial number is deleted after a device was reclassified from device instance → serial number verified, the device loses verification entirely and does **not** revert to device instance verified
+- Devices with no serial number can **only** be device instance verified
+- Verifying a serial number on a device that was previously device instance verified reclassifies it as serial number verified (prior state lost)
+- Archived/blocked devices can be verified, but this may have unintended access implications depending on Trusted Profile rules
 
 ## Related Docs
-- Trusted Profiles (verification method configuration)
-- Devices tab (Admin Console)
+- Trusted Profiles
+- Devices (Admin Console)

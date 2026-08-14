@@ -1,55 +1,54 @@
 ---
 source: https://www.twingate.com/docs/services-headless-clients
 type: docs
-fetched: 2026-08-05
-source_version: 1264b9a119fa2b5ad11b7cf261f32ed8ead943a83567b7a6b0db3e96b912181c
+fetched: 2026-08-14
+source_version: 052c52be5dd32e6337d925d2d4e93a5fc77c1b697e53387de0ddb438832ce7c2
 ---
 
 # Headless Clients
 
 ## Page Title
-Services Headless Clients
+Headless Clients (Twingate Services)
 
 ## Summary
-Twingate clients (Linux and Windows) can operate in headless mode using a Service Key to access Service Resources without a GUI or user interaction. This enables automated and infrastructure-based access patterns.
+Twingate clients (Linux and Windows) can operate in headless mode using a Service Key to access Service Resources without a GUI or user authentication. This enables automated/non-interactive workloads to connect to Twingate-protected resources.
 
 ## Key Information
-- Headless mode supports **Linux** and **Windows** clients
+- Headless mode is available for both **Windows** and **Linux** Twingate clients
 - Requires a **Service Key** (not user credentials) for authentication
-- **Userspace Networking Mode** available for Linux (no root/kernel module required)
-- Intended for automated/non-interactive workloads
+- **Userspace Networking Mode** available for Linux (useful in environments without root/kernel module access)
+- Designed for automated workloads, not interactive user sessions
 
 ## Prerequisites
-- A Twingate Service with at least one Resource assigned
-- A valid Service Key generated for the Service
-- Linux or Windows Twingate client installed
+- A Twingate Service and Service Key configured in the admin console
+- Twingate Linux or Windows client installed
+- Resources assigned to the Service
 
-## Supported Configurations
-| Mode | Platform |
-|------|----------|
-| Headless | Linux |
-| Headless | Windows |
-| Userspace Networking | Linux only |
+## Available Modes
+| Mode | Platform | Use Case |
+|------|----------|----------|
+| Headless | Linux | Automated Linux workloads |
+| Headless | Windows | Automated Windows workloads |
+| Userspace Networking | Linux | Environments without kernel module access |
 
 ## Step-by-Step
-Detailed instructions are platform-specific — follow linked guides:
-1. **Linux headless mode** → see Linux headless mode instructions
-2. **Windows headless mode** → see Windows headless mode instructions
-3. **Linux userspace networking** → see Linux userspace networking instructions
+Refer to platform-specific documentation:
+1. **Linux headless**: See Linux headless mode instructions
+2. **Windows headless**: See Windows headless mode instructions
+3. **Linux userspace networking**: See Linux userspace networking instructions
 
 ## Example Use Cases
-- **CI/CD pipelines** — authenticate automated build/deploy agents to private Resources
-- **AWS ECS** — run Twingate client as a sidecar or task in ECS configurations
+- **CI/CD Configurations** — Running Twingate client in pipeline environments (GitHub Actions, GitLab CI, etc.)
+- **AWS ECS Configurations** — Running Twingate client as a sidecar or task in ECS
 
 ## Gotchas
-- Service Keys are distinct from user auth tokens — cannot be used interchangeably with interactive client sessions
-- Userspace networking mode is Linux-only; Windows headless uses standard networking stack
-- No GUI is present in headless mode — all configuration is CLI/file-based
+- Service Keys are distinct from user credentials — must be generated specifically for Services in the admin console
+- Userspace networking mode exists specifically for environments where the standard kernel-level networking isn't available (e.g., containers without elevated privileges)
 
 ## Related Docs
-- Linux Headless Mode Instructions
-- Windows Headless Mode Instructions
-- Linux Userspace Networking Instructions
+- Linux headless mode instructions
+- Windows headless mode instructions
+- Linux userspace networking instructions
 - CI/CD Configurations
 - AWS ECS Configurations
-- Services & Service Keys (concept docs)
+- Twingate Services (Service Key generation)

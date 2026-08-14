@@ -1,41 +1,37 @@
 ---
 source: https://www.twingate.com/docs/hipaa-compliance
 type: docs
-fetched: 2026-08-05
-source_version: 3115bbae7f69b4cc2bf97e2c2174982f8545b57738b0d7fb50d382716d0ec292
+fetched: 2026-08-14
+source_version: 9700f53796d6bd65079f5564896697538b5cff0cfad46aff7b79684bb2818df9
 ---
 
 # HIPAA Compliance
 
 ## Page Title
-HIPAA Compliance - Twingate for Companies Requiring HIPAA Compliance
+HIPAA Compliance
 
 ## Summary
-Twingate supports HIPAA compliance requirements for covered entities and business associates handling sensitive health information. Organizations can obtain a Business Associate Agreement (BAA) from Twingate by contacting their privacy team directly.
+Twingate supports HIPAA compliance requirements for covered entities and business associates handling sensitive health information. Organizations requiring HIPAA compliance can obtain a Business Associate Agreement (BAA) from Twingate.
 
 ## Key Information
-- Twingate supports applicable HIPAA compliance requirements
-- Applies to both **covered entities** and **business associates**
+- Twingate supports HIPAA compliance for both **covered entities** and **business associates**
 - Business Associate Agreements (BAAs) are available upon request
-- Contact: **privacy@twingate.com** for HIPAA inquiries and BAA requests
+- Contact `privacy@twingate.com` for HIPAA-specific inquiries and BAA requests
 
 ## Prerequisites
-- Organization must be regulated by HIPAA (as a covered entity or business associate)
-- Must reach out directly to Twingate to initiate BAA process
-
-## Step-by-Step
-1. Email **privacy@twingate.com** to request information about HIPAA compliance and BAA
-2. Review Twingate's security measures documentation
-3. Execute BAA with Twingate as needed for your compliance requirements
+- Organization must be subject to HIPAA regulation (covered entity or business associate)
+- Must contact Twingate directly to arrange compliance documentation
 
 ## Configuration Values
-None specified — HIPAA compliance enablement is handled through direct communication with Twingate, not through product configuration.
+- None documented on this page
+
+## Step-by-Step
+1. Email `privacy@twingate.com` to initiate HIPAA compliance discussion
+2. Request Business Associate Agreement (BAA) as needed
 
 ## Gotchas
-- No self-serve BAA process; requires direct email contact
-- No specific plan tier mentioned as required for HIPAA support — confirm eligibility when contacting Twingate
-- Page does not specify which data Twingate processes that would qualify as PHI
+- No self-service BAA process — requires direct contact with Twingate
+- Page contains minimal technical detail; compliance support specifics are handled via direct communication
 
 ## Related Docs
-- [Twingate Security Measures](https://www.twingate.com/docs/security) — referenced but not linked explicitly on this page
-- privacy@twingate.com — primary contact for compliance questions
+- [Twingate Security Measures](https://www.twingate.com/docs/security) — referenced as "Learn more about the security measures we take at Twingate"

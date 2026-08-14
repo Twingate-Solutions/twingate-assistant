@@ -1,53 +1,60 @@
 ---
 source: https://www.twingate.com/docs/oss-linux-client-application
 type: docs
-fetched: 2026-08-05
-source_version: 95839b0ad38add6ae7e170456479d2d4fa42778a39d3b5ed90fc116dbecb7976
+fetched: 2026-08-14
+source_version: 4411ae11bdbba4acba5a1bc1375372855b66f9c6e3685b3fc04d814f079bbf46
 ---
 
-# Linux Client Application - OSS Third Party Notices
+# Linux Client Application - OSS Third-Party Notices
 
 ## Page Title
-Twingate Linux Client Application — Open Source Components & Licenses
+Twingate Linux Client Application – Open Source Component Licenses
 
 ## Summary
-This page documents the open-source third-party components bundled in the Twingate Linux client application. It serves as the legal third-party notice disclosure required by the licenses of each included component. No implementation guidance or configuration details are provided.
+This page documents the open-source software components used in the Twingate Linux client application. It provides full license texts for all third-party dependencies. This is a legal/compliance reference page with no configuration or setup guidance.
 
 ## Key Information
 
-### Components Included
-| Component | License |
-|-----------|---------|
-| libssl | Apache 2.0 |
-| libevent, lwip | BSD 3-Clause |
-| siphash | CC0 1.0 Universal |
-| libjansson, jwt-cpp, args, pubnub, quicly | MIT |
-| catch2 | Boost Software License 1.0 |
-| zlib, nanopb | zlib License |
-| fmt | MIT-like (with optional exception) |
+### Components by License
 
-### License Summary by Type
-- **Apache 2.0**: Requires license copy, notice file, and change documentation on redistribution
-- **BSD 3-Clause**: Prohibits use of contributor names for endorsement without permission
-- **CC0 1.0**: Public domain dedication; no restrictions on use
-- **MIT**: Requires copyright notice inclusion in copies/substantial portions
-- **Boost 1.0**: Similar to MIT; copyright notice required except in binary-only distributions
-- **zlib**: Prohibits misrepresentation of origin; notice must be preserved in source distributions
+| License | Components |
+|---------|-----------|
+| Apache 2.0 | `libssl` (OpenSSL Project) |
+| BSD 3-Clause | `libevent`, `lwip` |
+| CC0 1.0 Universal | `siphash` |
+| MIT | `libjansson`, `jwt-cpp`, `args`, `pubnub`, `quicly` |
+| Boost 1.0 | `catch2` |
+| zlib | `zlib`, `nanopb` |
+| Custom (MIT-like) | `fmt` |
+
+### Component Purposes
+- **libssl** – TLS/SSL cryptography
+- **libevent** – Async event notification
+- **lwip** – Lightweight TCP/IP stack
+- **jwt-cpp** – JWT token handling
+- **quicly** – QUIC protocol implementation
+- **pubnub** – Real-time messaging
+- **nanopb** – Protocol Buffers (small footprint)
+- **catch2** – C++ testing framework
+- **fmt** – String formatting
+- **args** – CLI argument parsing
+- **libjansson** – JSON handling
+- **siphash** – Hash function
 
 ## Prerequisites
-- N/A — this is a legal disclosure page, not a setup guide
+N/A – Reference/compliance page only.
 
 ## Step-by-Step
-- N/A
+N/A – No configuration steps.
 
 ## Configuration Values
-- N/A
+None.
 
 ## Gotchas
-- **fmt** includes an optional exception: embedded portions in machine-executable object code may be redistributed without including copyright/permission notices
-- **catch2** (Boost license) does not require copyright notices in binary-only (machine-executable object code) distributions — differs from MIT
-- **CC0 (siphash)** does **not** waive trademark or patent rights
+- `fmt` includes an **optional exception**: embedded portions in machine-executable object code may be redistributed without including copyright/permission notices.
+- `siphash` is CC0 (public domain dedication), not a traditional license — no attribution required.
+- Redistribution of Apache 2.0 components requires preserving NOTICE files if present.
 
 ## Related Docs
-- Twingate Linux Client installation documentation
-- Other platform OSS notices (macOS, Windows, iOS, Android clients)
+- [Twingate Linux Client Setup](https://www.twingate.com/docs/linux)
+- [Twingate OSS notices for other platforms] (check Twingate docs for macOS/Windows equivalents)

@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/remote-networks
 type: docs
-fetched: 2026-08-05
-source_version: fc9c6b9f155119c711b8274b0a76296e3bca3362615553b44b58c71d4affa967
+fetched: 2026-08-14
+source_version: aba6495c460e8ed54919e229923e3d8d660abaf6cbc972639b2eda44a79d4b53
 ---
 
 # Remote Networks
@@ -11,38 +11,34 @@ source_version: fc9c6b9f155119c711b8274b0a76296e3bca3362615553b44b58c71d4affa967
 Remote Networks
 
 ## Summary
-Remote Networks are logical containers that group Twingate Resources together. Each Remote Network maps to a physical network or VPC and requires at least one deployed Connector to enable access. Connectors sit behind the firewall and handle traffic routing for authenticated users.
+A Remote Network is a logical container in Twingate that groups Resources together. All Resources in a Remote Network must be reachable by any Connector deployed within it. Each Remote Network roughly maps to a physical network or VPC.
 
 ## Key Information
-- Remote Network = logical grouping of Resources corresponding to a physical network/VPC
-- All Resources in a Remote Network must be reachable by any Connector deployed within it
-- No running Connector = Resources are inaccessible to end users
+- Remote Networks group Resources logically
+- All Resources must be accessible from **any** Connector in the same Remote Network
+- At least one Connector required per Remote Network to enable access
+- Resources are completely inaccessible without a running Connector
 - Load balancing across Connectors is automatic and adjusts as Connectors are added/removed
-- Single Connector can handle traffic for hundreds of users depending on usage patterns
+- A single Connector can typically handle traffic for hundreds of users
 
 ## Prerequisites
-- At least one Connector deployed and running per Remote Network
-- Connectors must be deployed behind the firewall with network access to all Resources in that Remote Network
+- At least one Connector deployed per Remote Network
+- Connector(s) deployed behind the firewall
 
 ## Best Practices
-- **Deploy minimum 2 Connectors per Remote Network** for:
-  - Load balancing and automatic failover
-  - Scalability as user count grows
+- **Deploy at least two Connectors** per Remote Network for:
+  - **Failover**: If one Connector fails, others remain available
+  - **Load balancing**: Automatically distributed across all active Connectors
+  - **Scalability**: Add more Connectors as user count grows
 - All Connectors within the same Remote Network must have **identical network routing and access rules**
-- Add more Connectors as needed—no upper limit specified
-
-## Architecture Notes
-- Connectors within a Remote Network are **interchangeable** (stateless from a routing perspective)
-- Failover is automatic—if one Connector fails, others handle traffic
-- Scaling is horizontal: add more Connectors to handle increased traffic load
+- Connectors within the same Remote Network are interchangeable
 
 ## Gotchas
-- Resources become completely inaccessible if all Connectors in a Remote Network go offline
-- Connectors must have uniform network access rules—inconsistent rules across Connectors in the same Remote Network will cause unpredictable behavior
-- One Remote Network per discrete network boundary (don't mix networks with different routing rules into one Remote Network)
+- If Connectors within the same Remote Network have different network routing/access rules, behavior will be inconsistent since any Connector may handle a given request
+- No Connector = no access, regardless of Resource or policy configuration
+- Resources must be reachable from **all** Connectors in the network, not just one — plan network topology accordingly
 
 ## Related Docs
-- Connectors (deployment details)
-- Deploying Connectors (scaling guidance)
-- Resources (configuration)
-- Best Practices documentation
+- Resources
+- Connectors / Deploying Connectors
+- Remote Network Best Practices

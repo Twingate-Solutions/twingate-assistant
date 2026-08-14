@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/endpoint-requirements
 type: docs
-fetched: 2026-08-05
-source_version: 4e7ba26e0178151dd91569ee2e506052013b443c915d8b53948d3908211321d1
+fetched: 2026-08-14
+source_version: 8536e1fa217fd08bb185b36b465830393266c1c5f095c1c863f30797aa4dc673
 ---
 
 # Endpoint Requirements
@@ -11,18 +11,17 @@ source_version: 4e7ba26e0178151dd91569ee2e506052013b443c915d8b53948d3908211321d1
 Endpoint Requirements
 
 ## Summary
-The Twingate Client must be installed and running on a device to access Twingate-protected Resources. It uses the host OS's native VPN functionality to intercept traffic, requiring less than 10MB and minimal system resources.
+The Twingate Client must be installed and running on a device to access protected Resources. It uses the host OS's native VPN functionality to intercept traffic, so a VPN connection appearing on the device is expected behavior. The app is under 10MB and lightweight on system resources.
 
 ## Key Information
-- Client size: <10MB, minimal resource usage
-- Download URL: `get.twingate.com` (auto-detects platform)
-- Uses native OS VPN stack — VPN connection activation is expected/normal
-- Compatible with most device management (MDM/EMM) solutions
+- Client download available at `get.twingate.com` (auto-detects platform)
+- Compatible with most device management/MDM solutions
+- Uses native OS VPN stack — VPN activation is normal and expected
+- No special firewall rules typically required; list below is for troubleshooting
 
 ## Prerequisites
-- Device running a supported OS
-- Outbound internet access on required ports (see below)
-- Twingate network/account to connect to
+- Device must have the Twingate Client installed and running
+- Outbound internet connectivity on required ports
 
 ## Configuration Values
 
@@ -30,28 +29,16 @@ The Twingate Client must be installed and running on a device to access Twingate
 
 | Protocol | Port(s) | Purpose |
 |----------|---------|---------|
-| TCP | 443 | Controller and Relay infrastructure communication |
-| TCP | 30000–31000 | Relay fallback when peer-to-peer is unavailable |
+| TCP | 443 | Communication with Twingate Controller and Relay infrastructure |
+| TCP | 30000–31000 | Relay connections when peer-to-peer is unavailable |
 | UDP/QUIC (HTTP/3) | 1–65535 | Peer-to-peer connectivity (optimal performance) |
 
-- All connections are **outbound-initiated** — no inbound rules required
-- UDP/QUIC ports enable best performance; blocking them forces Relay fallback
-
-## Step-by-Step: Client Installation
-1. Navigate to `get.twingate.com`
-2. Client auto-downloads for the detected platform
-3. Install and launch the Client
-4. Connect using your Twingate network address
-
-For advanced/managed deployments, refer to the Managed Devices section.
-
 ## Gotchas
-- A VPN connection appearing in the OS is **expected behavior**, not an error
-- Firewall rules are generally not needed in standard environments — only troubleshoot if connectivity issues arise
-- UDP ports 1–65535 must be open for peer-to-peer; if blocked, traffic falls back to Relay via TCP 30000–31000 with degraded performance
-- QUIC/HTTP/3 UDP traffic uses the full port range — overly restrictive UDP egress policies will impact performance
+- **VPN prompt is expected** — the Client activates a VPN connection on the device; this is not an error and should not alarm end users
+- **UDP 1–65535** is required for peer-to-peer; blocking this degrades performance but doesn't break connectivity (falls back to Relay via TCP 30000–31000)
+- TCP 443 is the minimum required port; without it, the Client cannot communicate at all
 
 ## Related Docs
-- Download & Installation (detailed install guide)
-- Managed Devices (MDM/EMM deployment)
-- QUIC/HTTP/3 guide (UDP peer-to-peer connectivity details)
+- [Download & Installation](https://www.twingate.com/docs/download-and-installation)
+- [Managed Devices](https://www.twingate.com/docs/managed-devices)
+- QUIC/HTTP3 guide (linked inline on the docs page)

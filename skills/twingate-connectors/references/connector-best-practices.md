@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/connector-best-practices
 type: docs
-fetched: 2026-08-05
-source_version: b0613f3909ab2fc7d0517abd332cb32b3d761874cd2a350099abbfab1f6e3c46
+fetched: 2026-08-14
+source_version: 00abbc7ba9f6eb3e3aa604b34cc5c11fd6359916248168d5170575ca50ddb7b6
 ---
 
 # Connector Best Practices
@@ -11,57 +11,57 @@ source_version: b0613f3909ab2fc7d0517abd332cb32b3d761874cd2a350099abbfab1f6e3c46
 Connector Best Practices
 
 ## Summary
-Guidelines for deploying Twingate Connectors optimally across network environments. Covers redundancy, token management, network requirements, hardware sizing, and load balancing behavior. Connectors in the same Remote Network auto-cluster for failover and load balancing.
+Covers deployment best practices, network requirements, hardware sizing, and load balancing/failover behavior for Twingate Connectors. Key principles: deploy multiple Connectors per Remote Network for redundancy, each Connector requires unique tokens, and Connectors should be co-located with target Resources.
 
 ## Key Information
-- **Minimum 2 Connectors per Remote Network** for redundancy and automatic load balancing/failover
-- Each Connector requires a **unique token pair** — reusing tokens causes connection failure
-- Connectors in the same Remote Network should have **identical network scope and permissions** (they're interchangeable)
-- Deploy Connectors **close to target Resources** to minimize last-mile latency
-- **Geographic routing**: deploy multiple Connectors across locations in one Remote Network; users auto-route to nearest active Connector
-- Hardware priority order: **Network bandwidth > Memory > CPU**
-- Adding CPU/memory to one Connector does NOT improve performance — add more Connectors instead
+- **Minimum 2 Connectors per Remote Network** for automatic load balancing and failover
+- Multiple Connectors in same Remote Network are auto-clustered — no manual configuration needed
+- Traffic automatically routes to the Connector associated with a Resource
+- Users can be simultaneously connected to multiple Connectors across different Remote Networks
+- Geographic routing: single Remote Network + Connectors in each location → users auto-routed to nearest active Connector
 
 ## Prerequisites
-- Admin console access to provision Connectors
-- Outbound internet access from Connector host
-- Routing/permission rules allowing Connector to reach private Resources
+- Unique token pair per Connector (generated in Admin Console at provision time)
+- All Connectors in same Remote Network must have identical network scope/permissions
+- Connector host needs outbound Internet access only (no inbound required)
 
 ## Network Requirements
-| Traffic Type | Port(s) | Purpose |
+| Traffic Type | Ports | Purpose |
 |---|---|---|
-| Outbound TCP | 443 | Controller/Relay communication |
-| Outbound TCP | 30000–31000 | Relay fallback (no P2P) |
-| Outbound UDP/QUIC (HTTP/3) | 1–65535 | Peer-to-peer (optimal performance) |
+| TCP outbound | 443 | Controller/Relay communication |
+| TCP outbound | 30000–31000 | Relay fallback (no P2P) |
+| UDP/QUIC outbound | 1–65535 | Peer-to-peer (optimal performance) |
 
-- **No inbound internet access required or recommended**
-- For public exit nodes: Connector host needs static public IP (direct or via NAT gateway)
+- Connector host must have routing + permission to reach private Resources
+- ICMP: explicitly grant if required by environment
+- Public exit nodes: requires static public IP (direct or via NAT gateway)
 
-## Configuration Values
+## Hardware Recommendations
+| Platform | Recommendation |
+|---|---|
+| AWS | t3a.micro Linux EC2 |
+| GCP | e2-small |
+| Azure | Container Instance service |
+| On-prem/VPS | 1 CPU, 2GB RAM Linux VM |
 
-**Hardware Recommendations by Platform:**
-- **AWS**: `t3a.micro` Linux EC2
-- **GCP**: `e2-small`
-- **Azure**: Container Instance service (no hardware selection needed)
-- **On-prem/VPS**: 1 CPU, 2GB RAM Linux VM (x86, AMD64, or ARM)
+**Priority order for host optimization:** Network bandwidth > Memory > CPU
 
-**Azure-specific**: If using custom DNS for VNet, specify DNS server manually using "Custom DNS" option during deployment.
-
-## Step-by-Step: Multi-Location Geographic Routing
-1. Create a **single Remote Network** for all replicated Resources
-2. Deploy Connectors in each geographic location within that Remote Network
-3. Twingate automatically routes users to nearest active Connector
+- Adding CPU/memory to a single Connector does **not** improve performance — deploy additional Connectors instead
+- Supported architectures: x86, AMD64, ARM
 
 ## Gotchas
-- Token reuse across multiple Connectors → connection failure; always provision a new Connector in admin console per physical deployment
-- Connectors with different network permissions in the same Remote Network can cause inconsistent Resource access depending on which Connector handles traffic
-- Azure Container Instances won't auto-detect custom VNet DNS servers — must configure manually
-- ICMP traffic requires explicit permission on Connector host if needed by environment
-- Do not consolidate Connectors to reduce count — no performance or cost benefit from fewer Connectors
+- **Reusing tokens across multiple Connectors causes connection failure** — provision one Connector in Admin Console per physical Connector deployed
+- Azure Container Instances don't auto-detect custom VNet DNS — must specify DNS server manually via "Custom DNS" option
+- Connectors in same Remote Network must be interchangeable (same permissions/scope); mismatched configs cause inconsistent Resource access
+- "Last mile" latency matters — deploy Connectors on same network segment as Resources
+
+## Configuration Values
+- No environment variables or CLI flags documented on this page
+- Token pairs generated via Twingate Admin Console UI
 
 ## Related Docs
-- Understanding Connectors
-- Help Me Choose (deployment method selector)
-- UDP/QUIC/HTTP3 guide
-- Public exit nodes
-- Connector deployment options (systemd, Docker, Helm)
+- [Understanding Connectors](https://www.twingate.com/docs/understanding-connectors)
+- [Help Me Choose (deployment method guide)](https://www.twingate.com/docs/help-me-choose)
+- [UDP/QUIC HTTP3 guide](https://www.twingate.com/docs/quic)
+- [Public exit nodes](https://www.twingate.com/docs/exit-nodes)
+- [Additional Connectors deployment](https://www.twingate.com/docs/connector-deployment)

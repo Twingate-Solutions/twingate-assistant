@@ -1,46 +1,56 @@
 ---
 source: https://www.twingate.com/docs/analytics
 type: docs
-fetched: 2026-08-05
-source_version: 0bfbfbbfef541e2bdee9f3cb3ae72d997ae9fdac00cffad1fcb072351a52706f
+fetched: 2026-08-14
+source_version: 59ae4a450836ccbf31d48a20505653e760e479387277aa73c4ae90220577b1b9
 ---
 
-# Twingate Analytics
+# Analytics
+
+## Page Title
+Analytics Overview
 
 ## Summary
-Twingate provides analytics covering network traffic, admin audit logs, and user activity reports. Data is accessible via the Admin Console and exportable in CSV format. Network connection logs are also available in real-time via advanced Connector configuration.
+Twingate provides analytics covering network traffic, admin audit logs, and user activity reports. Data is accessible via the Admin Console and exportable in CSV format. This page serves as an index to the three main analytics features.
 
 ## Key Information
-- **Three report types**: Network traffic logs, audit logs, and usage/activity reports
-- Network logs are viewable per User and per Resource in the Admin Console
+- **Three analytics categories**: Network Traffic, Audit Logs, Usage Reporting
+- Network connection logs are available per User and per Resource in Admin Console
 - Audit logs cover most Admin Console actions and are retained for the lifetime of the account
-- User activity report shows last access time for every user
+- User activity reports show last access time per user
 - All reports are exportable in CSV format
 
-## Report Types
+## Analytics Features
 
-| Report | Location | Export | Real-time |
-|--------|----------|--------|-----------|
-| Network Traffic | User/Resource detail pages | CSV | Via Connector config |
-| Audit Logs | Admin Console | CSV | No |
-| User Activity | Admin Console | CSV | No |
+### Network Traffic Logs
+- Logged for all Client-to-Connector connections
+- Viewable in Admin Console under individual User and Resource detail pages
+- Available as real-time output via advanced Connector configuration
+- Exportable in CSV from Admin Console
+
+### Audit Logs
+- Captures most actions performed by Admins in the Admin Console
+- Exportable in CSV format
+- Retained for the lifetime of the account
+
+### Usage Reporting
+- User activity report showing last access time per user
+- Exportable from Admin Console
 
 ## Prerequisites
-- Admin role required to access Admin Console reports
-- Advanced Connector configuration needed for real-time network log streaming
+- Admin role required to access Admin Console analytics
+- Twingate account with active Connectors (for network traffic logs)
 
-## Access Points
-- **Network traffic**: Admin Console → individual User or Resource detail pages
-- **Audit logs**: Admin Console → export option
-- **User activity**: Admin Console → export option
+## Configuration Values
+- Real-time network traffic logs require **advanced Connector configuration** (see Connector docs)
 
 ## Gotchas
-- Audit logs only cover *most* admin actions, not necessarily all actions
-- Real-time network log output requires additional Connector configuration (advanced option), not enabled by default
-- Network logs record connections between Clients and Connectors only
+- Not all Admin actions may be captured in audit logs ("most actions" — not explicitly "all")
+- Real-time log streaming is an advanced Connector option, not enabled by default
+- No mention of log retention limits for network traffic logs (audit logs are lifetime)
 
 ## Related Docs
-- Analyzing network traffic (detailed guide)
-- Advanced Connector configuration (for real-time log output)
-- Audit log export guide
-- User activity report export guide
+- [Analyzing Network Traffic](https://www.twingate.com/docs/network-traffic) — detailed network log analysis
+- [Advanced Connector Configuration](https://www.twingate.com/docs/connector-advanced) — real-time log output setup
+- [Audit Logs Export](https://www.twingate.com/docs/audit-logs) — how to export admin audit logs
+- [User Activity Reports](https://www.twingate.com/docs/user-activity) — export usage reports

@@ -1,59 +1,56 @@
 ---
 source: https://www.twingate.com/docs/msp-billing
 type: docs
-fetched: 2026-08-05
-source_version: 587e011526a2ab53c6b5218f87e86c0171efb5f99549cae3e7e2286e711ea422
+fetched: 2026-08-14
+source_version: 3a3a86ff7434ab20a64748a0a84b01720b87bea4f2dc83b386166594aa6d56ab
 ---
 
 # MSP Billing
 
-## Page Title
-MSP Billing
-
 ## Summary
-MSP billing is consolidated and charged on the first of each calendar month, with separate line items per Customer Network. License count is calculated as total Users and Service Accounts minus Admins across all subtenants at end of billing period.
+Twingate MSP accounts receive consolidated monthly billing on the first of each calendar month, with separate line items per Customer Network. License counts are calculated based on total Users and Service Accounts minus Admins across all subtenants at end of billing period.
 
 ## Key Information
-- Billing cycle: Monthly, charged on the 1st of each calendar month
+- Billing date: 1st of every calendar month
 - Each Customer Network has a minimum charge of **1 license** regardless of user count
-- License formula: `(Total Users + Service Accounts) - Admins = Licenses charged`
-- Admins are excluded from license count
-- Billing is snapshot-based at end of month (e.g., March 31 count → April 1 charge)
-- Invoices sent only to MSP portal signup email, not to Customer Networks
+- Invoice recipients: MSP portal email only — Customer Networks do **not** receive invoices
+- Billing page is only visible in the MSP portal, not in Customer Network Admin Consoles
 
-## Prerequisites
-- Must be operating through the Twingate MSP portal
-- Billing page is only accessible from the MSP portal, not Customer Network Admin Consoles
+## License Calculation
+```
+Licenses Charged = (Total Users + Service Accounts across all subtenants) - (Total Admins across all subtenants)
+```
+Snapshot taken on **last day of the month**; charged on the **1st of the following month**.
 
-## Navigation
-**Settings → Billing → "Manage Plan" button → Manage Subscriptions modal**
+**Example:**
+| Date | Users + Service Accounts | Admins | Licenses Charged (next month 1st) |
+|------|--------------------------|--------|-----------------------------------|
+| Feb 28 | 100 | 5 | 95 |
+| Mar 31 | 150 | 5 | 145 |
 
-Modal options:
-| Button | Function |
-|--------|----------|
-| Child subscriptions | View all Customer Networks and monthly prices |
-| Payment Methods | Update credit card information |
-| Billing History | View or download past invoices |
+## Configuration & Management (UI)
+Navigate: **Settings > Billing > Manage Plan**
 
-## Configuration Values / Parameters
-None (UI-only management)
-
-## Licensing Example
-| Event | Value |
-|-------|-------|
-| Users + Service Accounts on Feb 28 | 100 |
-| Admins on Feb 28 | 5 |
-| **Charged March 1** | **95** |
-| Add 50 users March 25 → total March 31 | 150 |
-| Admins March 31 | 5 |
-| **Charged April 1** | **145** |
+| Action | Location in Modal |
+|--------|-------------------|
+| View Customer Networks & pricing | "Child subscriptions" button |
+| Update credit card | "Payment Methods" button |
+| View/download invoices | "Billing History" button |
+| Change Customer Network plan | Email partnersupport@twingate.com |
+| Update billing email | Billing page > Manage > Account Information |
 
 ## Gotchas
-- Billing page does **not** appear in Customer Network Admin Consoles — only in the MSP portal
-- Plan changes for individual Customer Networks require emailing `partnersupport@twingate.com` (cannot self-serve)
-- Invoice email is tied to MSP portal signup email; update via Billing → Manage → Account Information
-- Each Customer Network is billed a minimum of 1 license even with zero non-admin users
+- Admins are **excluded** from license count; adding admins reduces billable licenses
+- Mid-month user additions are counted in the **end-of-month** snapshot (not prorated mid-month)
+- Customer Network plan changes require contacting partner support — not self-serve
+- Invoices go to the MSP signup email; if not receiving them, update Account Information in billing settings
+- Minimum 1 license per Customer Network even with zero non-admin users
+
+## Prerequisites
+- Must have MSP portal access (not a standard Customer Network account)
+- Billing management requires MSP-level credentials
 
 ## Related Docs
-- MSP Portal documentation
-- Contact: `partnersupport@twingate.com` for Customer Network plan changes
+- MSP Portal overview
+- Customer Network management
+- User/Service Account administration

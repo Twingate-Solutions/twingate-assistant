@@ -1,66 +1,63 @@
 ---
 source: https://www.twingate.com/docs/saas-app-gating-with-okta
 type: docs
-fetched: 2026-08-05
-source_version: 1aa51b667eb36dd76c23e75b7109ac35cb92731f3f945697443e0ce784103218
+fetched: 2026-08-14
+source_version: d3260ffa77f8b4741f196680bcda43bf1f1ec9d35c7333b834888892faa52ab4
 ---
 
 # SaaS App Gating with Okta
 
 ## Summary
-Configure Twingate and Okta to restrict SaaS application access by requiring users to route through a Twingate Connector as a prerequisite for Okta authentication. Access is denied at the IdP auth stage if the user's IP doesn't match the Connector's exit IP, replacing traditional IP whitelisting in SaaS apps.
+Configure Twingate and Okta to enforce network-level access control for SaaS applications. Users must be connected to Twingate (routing through a Connector) before Okta will allow authentication to protected apps. This replaces IP whitelisting configured in the SaaS app itself, moving the check to the IdP layer.
 
 ## Key Information
-- Works by adding Connector exit IP(s) as an Okta Network Zone, then denying app sign-on from IPs outside that zone
-- Supports both Okta Classic Engine and Okta Identity Engine (OIE)
-- Multiple Connectors typically share one public IP via NAT; multiple IPs only needed if Connectors have direct internet access (uncommon)
+- Access control works by routing Okta auth traffic through a Twingate Connector, making requests appear from a known Connector exit IP
+- Okta denies app authentication if the request doesn't originate from the approved IP Zone
+- Supports both Okta Classic Engine and Identity Engine (OIE)
+- Multiple Connectors behind NAT typically share one public IP; without NAT, add each Connector IP separately
 
 ## Prerequisites
-- Twingate: Add IdP authentication FQDN (e.g., `tenant.okta.com`) as a Resource assigned to relevant Groups
-- Twingate: Apply **Device-only Resource Policy** to the IdP Resource — prevents authentication loop where users can't reach Okta without being authenticated through Twingate first
-- Okta: Admin console access with permissions to manage Networks and App Sign On Policies
-- Know the public exit IP address(es) of your Twingate Connector(s)
+- Twingate Admin Console access
+- Okta Admin Console access
+- Connector exit IP address(es) known
+- **Twingate setup required:**
+  1. Create a Resource for `tenant.okta.com` and assign to appropriate Groups
+  2. Apply a **Device-only Policy** to the Okta Resource (prevents auth loop where users can't reach Okta because Okta access requires prior auth)
 
 ## Step-by-Step
 
-### Twingate Setup
-1. Create a Resource for `tenant.okta.com`, assign to appropriate Groups
-2. Apply Device-only Policy to that Resource
-
 ### Okta Classic Engine
-1. **Security > Networks** → **Add Zone > IP Zone**
-2. Set Zone Name (e.g., `Twingate Connector Exit IP`), enter Connector public IP in **Gateway IPs**, save
-3. **Applications > Applications** → select target app → **Sign On** tab → **Sign On Policy** → **+ Add Rule**
-4. Configure rule:
-   - People: `Users assigned to this app`
-   - Location: `Not in Zone` → select your IP Zone
-   - Client: `Any client`
-   - Access: `Denied`
+1. **Security > Networks** → Add Zone > IP Zone
+2. Set Zone Name (e.g., "Twingate Connector Exit IP"), enter Connector public IP in Gateway IPs → Save
+3. **Applications > Applications** → select target app → Sign On tab → Sign On Policy → Add Rule:
+   - Who: Users assigned to this app
+   - Location: **Not in Zone** → select your IP Zone
+   - Access: **Denied**
 
 ### Okta Identity Engine (OIE)
-1. **Security > Networks** → **Add Zone > IP Zone** → same IP Zone setup as Classic
-2. **Security > Authentication Policies** → **Add a policy** → name and save
-3. Within policy, **Add rule**:
-   - `AND User's IP is` → `Not in any of the following zones` → select IP Zone
-   - `THEN Access is` → `Denied`
-4. Navigate to **Applications** tab within the policy → **Add app** → select target SaaS app
-   - *Alternatively*: Open app in **Applications > Applications** → **Sign On** tab → set Authentication Policy
+1. **Security > Networks** → Add Zone > IP Zone → same IP Zone config as above
+2. **Security > Authentication Policies** → Add a policy → Save
+3. Within policy → Add rule:
+   - User's IP is: **Not in any of the following zones** → select IP Zone
+   - Access is: **Denied**
+4. Navigate to Applications tab within the policy → Add app → select target app
 
 ## Configuration Values
 
 | Setting | Value |
 |---|---|
-| Okta Zone Type | IP Zone |
-| Gateway IPs | Connector public exit IP(s) |
+| Resource to create | `tenant.okta.com` |
+| Resource Policy | Device-only |
+| Okta Zone type | IP Zone |
+| Gateway IPs | Connector exit public IP(s) |
 | Rule condition | NOT in zone |
 | Rule action | Denied |
-| Twingate Resource Policy | Device-only |
 
 ## Gotchas
-- **Must use a DENY rule** (not allow) — deny access when user is *not* in the approved zone
-- **Authentication loop risk**: Without Device-only Policy on the IdP Resource, users can't reach Okta to authenticate, creating a deadlock
-- OIE uses "Authentication Policies" instead of "Sign On Policy" — found under Security menu, not Applications
-- Applications can be assigned to OIE policy via the policy's Applications tab OR via the app's Sign On settings — both work
+- **Auth loop risk**: Without a Device-only policy on the Okta Resource, users can't reach Okta to authenticate, which Twingate requires — a chicken-and-egg deadlock
+- The Okta rule must be a **deny** rule (deny if NOT in zone), not an allow rule
+- Connectors not behind NAT require listing each Connector's public IP individually in the zone
+- OIE uses "Authentication Policies" instead of "Sign On Policy" — different navigation path
 
 ## Related Docs
 - [Create a Twingate Resource](https://www.twingate.com/docs)

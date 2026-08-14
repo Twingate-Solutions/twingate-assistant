@@ -1,51 +1,55 @@
 ---
 source: https://www.twingate.com/docs/kubernetes-access
 type: docs
-fetched: 2026-08-05
-source_version: e16838d0a5c4bfe367e004ec9d461ad6d1f53f37a60174c61993fe44f0d087d4
+fetched: 2026-08-14
+source_version: dd6c75dc1dad5ee0b398dad12d8f7ac71b956fa9953ada27f2a34482ff455ca0
 ---
 
-# Privileged Access for Kubernetes Overview
+# Twingate Privileged Access for Kubernetes Overview
 
 ## Summary
-Twingate Privileged Access for Kubernetes extends Zero Trust to the application layer (L7) for Kubernetes clusters, enabling identity propagation, least-privilege RBAC enforcement, and session auditing. It deploys a Gateway reverse proxy within your environment that forwards authenticated user identity to Kubernetes and records all cluster interactions.
+Twingate Privileged Access for Kubernetes extends Zero Trust to the application layer (Layer 7) within Kubernetes clusters, enabling identity propagation, least-privilege RBAC enforcement, and session recording. A Twingate Gateway (reverse proxy) is deployed inside your environment to handle identity forwarding and audit logging. Free for up to 5 resources.
 
 ## Key Information
-- Free for up to 5 resources; contact Twingate for additional pricing
-- Introduces a **Twingate Gateway** (L7 reverse proxy) deployed in your environment
-- User identity passed through to Kubernetes — no separate Kubernetes credentials needed
-- All activity logged to `stdout` in **asciicast v2 format**; logs stay on your infrastructure (not uploaded to Twingate)
+- Introduces a **Twingate Gateway** — Layer 7 reverse proxy deployed in your environment
+- User identity is forwarded to Kubernetes; configure RBAC via `ClusterRoleBindings`/`RoleBindings`
+- All actions audited via `stdout` in **asciicast v2 format**; logs stay on your infrastructure (not uploaded to Twingate)
 - Session replay available at `https://www.twingate.com/sessionplayer`
-- Creates a new Resource type **"Kubernetes Cluster"** in the Admin Console
+- Creates a new **Kubernetes Cluster** Resource type in the Admin Console
 
 ## Prerequisites
 - **Connector version**: ≥ 1.82.0 for all Connectors associated with Kubernetes Resources
 - **Client version**: ≥ 2025.175 for end users
 - **Platforms**: macOS, Windows, Linux only
-- Existing `.kube` folder on user machines (create manually or run `kubectl` if missing)
+- Existing `.kube` folder on user machines (create manually or run `kubectl` if absent)
 
 ## Setup Steps
 1. Deploy via the **Twingate Kubernetes Operator** (recommended for ease and updates)
-2. Configure Kubernetes RBAC using `ClusterRoleBindings` or `RoleBindings` mapped to Twingate-propagated user identities
-3. Grant users access to the Kubernetes Cluster Resource in the Admin Console
-4. Users sync kubeconfig on their machines (manual sync, per-resource sync, or auto-sync)
+2. Configure Kubernetes RBAC (`ClusterRoleBindings`/`RoleBindings`) using propagated user identity
+3. Grant users access to the Kubernetes Cluster Resource in Admin Console
+4. Users sync kubeconfig via Twingate Client:
+   - Sync specific Resource
+   - Sync all Resources
+   - Enable auto-sync
+5. For headless/CI-CD usage, see Kubernetes Kubeconfig Sync docs
 
 ## Configuration Values
 | Item | Value/Notes |
 |------|-------------|
-| Minimum Connector version | 1.82.0 |
-| Minimum Client version | 2025.175 |
 | Log format | asciicast v2 |
 | Log destination | `stdout` only |
 | Session player URL | `https://www.twingate.com/sessionplayer` |
+| Min Connector version | 1.82.0 |
+| Min Client version | 2025.175 |
 
 ## Gotchas
-- Logs are **not** stored by Twingate — you must configure your own log export/storage pipeline from `stdout`
-- `.kube` folder must exist before kubeconfig sync; it is not created automatically
-- Privileged Access is **not** available on mobile platforms
-- All Connectors tied to Kubernetes Resources must meet the minimum version requirement
+- Logs are **not** stored by Twingate — export/storage is your responsibility
+- `.kube` directory must exist before kubeconfig sync; create it manually if needed
+- Privileged Access is **not available** on mobile platforms
+- All Connectors tied to Kubernetes Resources must meet minimum version requirement
 
 ## Related Docs
-- Kubernetes Operator setup
+- Twingate Kubernetes Operator setup
 - Gateway configuration
-- [Kubernetes Kubeconfig Sync](https://www.twingate.com/docs/) (headless/CI/CD usage covered there)
+- Kubernetes Kubeconfig Sync (headless/CI-CD usage)
+- Twingate RBAC / Access Policies

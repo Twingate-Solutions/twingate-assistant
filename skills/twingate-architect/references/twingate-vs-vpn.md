@@ -1,57 +1,58 @@
 ---
 source: https://www.twingate.com/docs/twingate-vs-vpn
 type: docs
-fetched: 2026-08-05
-source_version: 9cf7ddf5b0f326ac0ab3b3f6256b5c1c6cbf134f510989cd4902c4a394bfa4b1
+fetched: 2026-08-14
+source_version: bf06072b23b5f7d2de33bfd1d87573762971277bbc6a0f6f30e801aea37f8510
 ---
 
 # Twingate vs. VPNs
 
 ## Page Title
-Twingate vs. VPNs — Conceptual Overview
+Twingate vs. VPNs
 
 ## Summary
-Explains architectural and operational differences between traditional VPN-based perimeter security and Twingate's Zero Trust Networking (ZTN) model. Covers security, performance, deployment, UX, and cost dimensions. Intended as an evaluation/decision guide rather than implementation reference.
+Conceptual overview comparing Twingate's Zero Trust Networking (ZTN) model against traditional corporate VPNs. Explains architectural differences, security model distinctions, and practical advantages across security, performance, deployment, and cost dimensions. Not a technical implementation guide—primarily educational/decision-making content.
 
 ## Key Information
 
-**Security Advantages over VPN:**
-- Per-application access control (not network-level)
-- No public-facing gateway; connectors make outbound-only connections
-- Authorization uses contextual factors: SSO/MFA, location, time, device posture, risk score
-- Lateral movement blocked — attackers cannot traverse network even if one resource is compromised
-- Centralized logging; SIEM integration supported
+### Security Advantages Over VPNs
+- **Application-level access control** vs. network-level (least-privilege enforcement)
+- **No public-facing gateway**—Connectors use outbound-only connections; network stays hidden
+- **Rich authorization context**: SSO/MFA, location, time-of-day, device posture, risk scores
+- **Blast radius limitation**: Breached credentials expose only specific apps, not entire network
+- **Centralized logging** across all networks; SIEM integration supported
 
-**Performance Advantages:**
-- Split tunneling by default — only private traffic routes internally
-- No backhauling — traffic routes directly, not through central VPN server
-- Edge-based authorization processing (Twingate ViPR technology in client)
-- Reduced corporate network congestion
+### Performance Advantages
+- **No backhauling**: Traffic routes directly, not through distant VPN server
+- **Split tunneling by default**: Only private resource traffic routed internally
+- **Edge processing (ViPR technology)**: Auth handled client-side before connection initiation; reduces tromboning latency
 
-**Deployment Differences:**
+### Deployment Advantages
 - No hardware/appliances required
-- Single lightweight connector (container) per network
-- No IP/DNS changes required
+- No network reconfiguration needed
+- Connector = single lightweight container installed inside target network
+- Existing resource names/IPs unchanged
+- Can coexist with existing VPNs (no rip-and-replace)
 - Protocol agnostic
-- Can coexist with existing VPNs — no rip-and-replace needed
 
-**Management:**
-- Centralized admin console for all networks
-- Scaling via UI clicks vs. hardware procurement
+### Scalability/Operations
+- Managed service: load balancing, redundancy, maintenance handled by Twingate
+- Scaling via admin console (no hardware procurement)
+- Centralized admin console for org-wide access control
 
 ## Prerequisites
-- None for evaluation
-- Connector deployment requires a host within the target private network (container-based)
+- None for evaluation (free trial available)
+- Requires installing a connector container inside target network
 
 ## Configuration Values
-None specified in this document (conceptual overview only).
+None specified (conceptual page only)
 
 ## Gotchas
-- VPN = full tunnel (all traffic); Twingate = split tunnel by default — behavior change users should expect
-- VPN gateways are publicly visible and probed by attackers; Twingate connectors are internal and initiate outbound connections only
-- Twingate can run alongside existing VPNs during phased migration — no forced cutover
+- VPN gateways are publicly visible and regularly exploited (zero-days, unpatched CVEs)—Twingate eliminates this exposure
+- VPN "full tunnel" routes all traffic through corporate network causing congestion; Twingate split-tunnel is default
+- Twingate can run **alongside existing VPNs**—phased rollout is supported without infrastructure changes
 
 ## Related Docs
-- [Quick, simple and low risk migration guide](#) (linked inline)
-- Zero Trust Networking explanation (covered inline in this doc)
-- Free trial signup (linked inline)
+- [Quick, simple and low risk migration](https://www.twingate.com/docs/) (internal link referenced)
+- Zero Trust Networking concepts (explained inline on this page)
+- SIEM integration documentation (referenced but not linked)

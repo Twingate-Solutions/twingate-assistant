@@ -1,59 +1,58 @@
 ---
 source: https://www.twingate.com/docs/macos-and-ios
 type: docs
-fetched: 2026-08-05
-source_version: 73360edbf74f2a61012ad873d69c5ec9c88e9c2fa6a7bc7669ec15ab43db1905
+fetched: 2026-08-14
+source_version: f21b9524372ee6ba750147da325dc6890c50f93c295fd427064da7d6836e95eb
 ---
 
 # macOS & iOS Client Distribution via MDM
 
 ## Summary
-Twingate clients for macOS and iOS can be deployed and configured via MDM solutions (Iru/Kandji, Jamf, Omnissa Workspace ONE) using custom `.mobileconfig` configuration profiles. The Standalone Client is preferred over the App Store version as it supports more features. Silent install is achievable by deploying a configuration profile alongside the app.
+Twingate clients for macOS and iOS can be distributed and configured via MDM solutions (Iru, Jamf, Omnissa Workspace ONE) using custom `.mobileconfig` configuration profiles. The Standalone Client is preferred over App Store version for full feature availability. Clients older than 12 months are unsupported and cannot connect.
 
 ## Key Information
-- macOS: Available as Standalone App or Mac App Store
-- iOS: Available on App Store only
-- Clients older than 12 months are unsupported and cannot connect
-- Standalone App supports additional config keys: `automaticallyInstallSystemExtension`, `SUEnableAutomaticChecks`, `SUAutomaticallyUpdate`
-- Profile manifest (JSON schema) available for Jamf integration
-- Apple Business Manager (ABM) required to distribute App Store version via MDM without personal Apple IDs
+- macOS: Available as Standalone App or Mac App Store; iOS: App Store only
+- Standalone Client recommended—enables system extension auto-install, auto-update controls
+- Configuration profiles are XML `.mobileconfig` files deployed via MDM
+- Tools for building profiles: iMazing Profile Editor, ProfileCreator, or MDM-native tools
+- Apple Business Manager (ABM) required to distribute App Store version without personal Apple IDs
 
 ## Prerequisites
 - MDM solution (Iru, Jamf, or Omnissa Workspace ONE)
-- For App Store distribution: Apple Business Manager account with "purchased" (free) Twingate seats
-- Tools for profile creation: iMazing Profile Editor or ProfileCreator (optional)
+- For ABM distribution: company Apple Business Manager account
+- For Standalone: direct download/deployment outside App Store
 
 ## Configuration Values (Profile Key/Value Pairs)
 
 | Key | Type | Description | Standalone Only |
-|-----|------|-------------|----------------|
-| `network` | String | Pre-populates Twingate network name | No |
-| `PresentedDataPrivacy` | Boolean | `true` bypasses privacy screen on first launch | No |
-| `PresentedEducation` | Boolean | `true` bypasses education screen on first launch | No |
-| `automaticallyInstallSystemExtension` | Boolean | `true` auto-installs system extension | Yes |
-| `LaunchApp` | Boolean | `true` launches app on login | No |
-| `SUEnableAutomaticChecks` | Boolean | `true` enables automatic update checks | Yes |
-| `SUAutomaticallyUpdate` | Boolean | `true` auto-downloads updates and prompts install | Yes |
+|-----|------|-------------|-----------------|
+| `network` | String | Pre-populates Twingate network name (e.g., `acme`) | No |
+| `PresentedDataPrivacy` | Boolean | `true` = bypass Privacy screen on first launch | No |
+| `PresentedEducation` | Boolean | `true` = bypass education screen on first launch | No |
+| `automaticallyInstallSystemExtension` | Boolean | `true` = auto-install system extension | Yes |
+| `LaunchApp` | Boolean | `true` = launch on login | No |
+| `SUEnableAutomaticChecks` | Boolean | `true` = auto-check for updates | Yes |
+| `SUAutomaticallyUpdate` | Boolean | `true` = auto-download updates, prompt to install | Yes |
 
 **Key identifiers:**
-- App bundle ID: `com.twingate.macos`
-- Tunnel provider: `com.twingate.macos.tunnelprovider`
+- App Bundle ID: `com.twingate.macos`
+- Tunnel Provider: `com.twingate.macos.tunnelprovider`
 - Team ID: `6GX8KVTR9H`
 
-## Step-by-Step: Apple Business Manager Distribution
+## Apple Business Manager Distribution Steps
 1. Sign in to Apple Business Manager with company Apple ID
-2. Search for "Twingate" and provision seats (free)
-3. Seats appear in MDM solution for deployment without user Apple IDs
+2. Search "Twingate" and provision required seats (free)
+3. Allocated seats appear in MDM for device deployment—no personal Apple ID required from users
 
 ## Gotchas
-- `LaunchApp: true` conflicts with the Twingate Launch Agent/keep-alive daemon — set to `false` if using the daemon
-- Disable `SUEnableAutomaticChecks` on fully managed devices and implement a manual update process to avoid clients aging past 12 months
-- `automaticallyInstallSystemExtension` is Standalone App only; not applicable to App Store version
-- Must generate unique UUIDs for `PayloadUUID` and `PayloadIdentifier` fields in custom profiles
-- App Store version requires ABM seat "purchase" before MDM distribution is possible
+- **`LaunchApp` conflict**: Set to `false` if using a keep-alive launch daemon to avoid conflicts
+- **`SUEnableAutomaticChecks`/`SUAutomaticallyUpdate`**: Standalone only—not available for App Store version
+- **`automaticallyInstallSystemExtension`**: Standalone only
+- **Client expiry**: Clients >12 months old stop working; if disabling auto-updates, establish a manual update process
+- UUIDs in example profile must be replaced with unique values per deployment (use `uuidgen`)
 
 ## Related Docs
-- Iru (Kandji) MDM Guide
-- Jamf MDM Guide
-- Omnissa Workspace ONE Guide
-- Apple Business Manager User Guide
+- [Iru (Kandji) MDM Guide]
+- [Jamf MDM Guide]
+- [Omnissa Workspace ONE Guide]
+- [Apple Configuration Profile Tutorial](https://developer.apple.com)

@@ -1,25 +1,25 @@
 ---
 source: https://www.twingate.com/docs/pulumi-getting-started
 type: docs
-fetched: 2026-08-05
-source_version: f85abde005e40a12db16b9ce8cf022f6ee0db028bc8d0d3551792c25f21246be
+fetched: 2026-08-14
+source_version: 3813cac14cf16e5789338e1a4dcb10ad3325da4acd3749d2c33265fbade1007a
 ---
 
 # Getting Started with Pulumi and Twingate
 
 ## Summary
-Twingate supports Infrastructure as Code deployment via Pulumi, allowing automated management of entire Twingate environments. Guides are available for the three major cloud providers: GCP, AWS, and Azure.
+Twingate supports Infrastructure as Code deployment via Pulumi, allowing automated management of entire Twingate environments. Guides are available for the three major cloud providers (GCP, AWS, Azure).
 
 ## Key Information
 - Pulumi is the supported IaC platform for Twingate automation
 - Cloud provider guides available: GCP, AWS, Azure
-- Uses declarative code to deploy and configure Twingate infrastructure
+- Uses Node.js as the runtime for Pulumi programs
 
 ## Prerequisites
 - Node.js installed
-- Pulumi installed and authenticated to your Pulumi account
+- Pulumi CLI installed and authenticated to your Pulumi account
 
 ## Related Docs
-- GCP deployment guide
-- AWS deployment guide
-- Azure deployment guide
+- Twingate + Pulumi on GCP
+- Twingate + Pulumi on AWS
+- Twingate + Pulumi on Azure

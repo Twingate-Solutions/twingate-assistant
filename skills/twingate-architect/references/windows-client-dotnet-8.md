@@ -1,62 +1,58 @@
 ---
 source: https://www.twingate.com/docs/windows-client-dotnet-8
 type: docs
-fetched: 2026-08-05
-source_version: ca0a2eb2ec493a7c897fc4ec0c3bb7b718ebd0dcfa89028ac5a0e4fa97b864bb
+fetched: 2026-08-14
+source_version: 3c6c7c89ce82f8d1430932dbf778b777bb50bd1e2c9bb813977f61d0e3555a9c
 ---
 
 # Windows Client Migration to .NET 8
 
 ## Summary
-Twingate Windows Client migrated to .NET 8 in November 2024 following Microsoft's end of .NET 6 support. EXE installer handles the .NET 8 dependency automatically; MSI deployments require manual .NET 8 Desktop Runtime installation.
+Twingate Windows Client migrated to .NET 8 in November 2024 following Microsoft's end of support for .NET 6. EXE installer handles the dependency automatically; MSI deployments require manual .NET 8 Desktop Runtime installation.
 
 ## Key Information
-- Migration occurred in **early November 2024** (Microsoft ended .NET 6 support November 12, 2024)
-- **EXE installer**: Automatically installs .NET 8 Desktop Runtime — no admin action needed
-- **MSI installer**: Admins must separately deploy .NET 8 Desktop Runtime x64 to each device
-- Without .NET 8 Desktop Runtime, future client versions will not launch
+- Migration occurred in **early November 2024** (November 12, 2024 was Microsoft's .NET 6 EOL date)
+- **EXE installer**: Automatically installs .NET 8 Desktop Runtime — no admin action required
+- **MSI installer**: Admins must manually deploy .NET 8 Desktop Runtime to each device
+- Without .NET 8 Desktop Runtime, future Twingate Windows Client versions will **not run**
 
 ## Prerequisites
-- .NET 8 Desktop Runtime x64 (required for MSI deployments)
-- Download from: [Microsoft website](https://dotnet.microsoft.com/download/dotnet/8.0)
-
-## Silent Installation (MSI Path)
-
-Push .NET 8 Desktop Runtime via MDM or manually using:
-
-```cmd
-c:\path\to\windowsdesktop-runtime-8.0.10-win-x64.exe /install /quiet /norestart
-```
+- .NET 8 Desktop Runtime x64 (for MSI deployments)
+- Download from: [Microsoft website](https://dotnet.microsoft.com)
+- Local or domain admin permissions for deployment
 
 ## Configuration Values
 
-| Flag | Purpose |
-|------|---------|
-| `/install` | Install the runtime |
-| `/quiet` | Silent install (no UI) |
-| `/norestart` | Suppress automatic reboot |
+### Silent Install Flags (for remote/MDM deployment)
+```
+c:\path\to\windowsdesktop-runtime-8.0.10-win-x64.exe /install /quiet /norestart
+```
 
-## Verify Installation
+## Step-by-Step (MSI Deployment)
+1. Download .NET 8 Desktop Runtime x64 from Microsoft
+2. Push runtime installer via MDM using silent install flags above
+3. Verify installation on target devices (see verification methods below)
+4. Deploy updated Twingate Windows Client MSI as usual
 
-**GUI**: Control Panel → Programs → Programs and Features → look for ".NET 8 Desktop Runtime"
+## Verification
 
-**PowerShell**:
+**GUI:** Control Panel → Programs → Programs and Features → look for ".NET 8 Desktop Runtime"
+
+**PowerShell:**
 ```powershell
 Get-WmiObject -Query "SELECT * FROM Win32_Product WHERE Name LIKE '%.NET%Runtime%8.%.%'"
 ```
-
-Expected output confirms installation:
+Expected output includes:
 ```
-Name    : Microsoft .NET Runtime - 8.0.10 (x64)
-Vendor  : Microsoft Corporation
-Version : 64.40.21578
+Name: Microsoft .NET Runtime - 8.0.10 (x64)
+Vendor: Microsoft Corporation
 ```
 
 ## Gotchas
-- MSI deployments will **silently fail to run** if .NET 8 is not pre-installed — no automatic fallback
-- Must use x64 variant of the runtime
-- EXE and MSI deployment paths have different admin responsibilities — don't assume EXE behavior applies to MSI
+- MSI deployments have **no automatic dependency handling** — runtime must be pre-installed
+- Skipping the runtime update will break **all future client versions**, not just new installs
+- Use x64 variant specifically; ensure architecture matches device
 
 ## Related Docs
-- [Twingate Client Download Page](https://www.twingate.com/downloads)
-- [Windows Client Deployment Documentation](https://www.twingate.com/docs/windows-client-deployment)
+- [Twingate Windows Client download page](https://www.twingate.com/downloads)
+- [Windows Client deployment documentation](https://www.twingate.com/docs/windows-client-deployment)

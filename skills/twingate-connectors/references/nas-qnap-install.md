@@ -1,58 +1,59 @@
 ---
 source: https://www.twingate.com/docs/nas-qnap-install
 type: docs
-fetched: 2026-08-05
-source_version: e910ceef65935c6c609080592c5d84439699f5fe741dc5068cb7d8470bfda199
+fetched: 2026-08-14
+source_version: 212dd961bea66798b4b52473c088dda0362bcd5da16d8556dc795f3d3bc91bed
 ---
 
-# Deploy a Connector on a QNAP NAS
+# Deploy Twingate Connector on QNAP NAS
 
 ## Summary
-Install a Twingate Connector on a QNAP NAS using Container Station (Docker) to enable secure remote access to the NAS and other local network devices. The process involves creating a Remote Network in Twingate, generating tokens, then deploying the official `twingate/connector` Docker image via QNAP's Container Station.
+Install a Twingate Connector on a QNAP NAS using Container Station (Docker). This enables secure remote access to the NAS and other local network devices without VPN server setup or port forwarding.
 
 ## Key Information
 - QNAP runs QTS (Linux-based OS); Connector runs as a Docker container via Container Station
-- Two Connectors are auto-created when you create a new Remote Network
-- After deployment, add the NAS as a Resource using its local IP address
-- Peer-to-peer connections recommended to improve performance and stay within Fair Use Policy bandwidth limits
+- Two Connectors are auto-created when you create a Remote Network; only one needs to be deployed
+- After deployment, add QNAP as a Resource using its local IP address for remote access
+- Peer-to-peer connections recommended to improve performance and comply with Fair Use Policy
 
 ## Prerequisites
 - Twingate account (Starter plan is free)
-- QNAP device configured and running QTS
-- **Container Station** installed and configured on the QNAP device
+- QNAP device configured per [QNAP getting started guide](https://www.qnap.com)
+- Container Station installed on QNAP
 
 ## Step-by-Step
 
-1. **Create Remote Network** in Twingate Admin Console (e.g., "Home", location: "On Premise" or "Other")
-2. Click **Deploy Connector** on one of the auto-created Connectors
-3. Select default Docker option → click **Generate Tokens** (re-authentication required)
-4. Copy the `docker run` command — retain the three token values
-5. In QNAP Container Station → **Create** → search for "twingate" → select `twingate/connector` image → version: `latest`
-6. Set container **Name** (use Connector name), configure CPU & Memory limits
-7. Click **Advanced Settings** → **Environment** section → add three variables (see below)
-8. Click **Network** tab → set hostname (e.g., Connector name)
-9. Click **Continue** → **OK** to start container
-10. Verify in Admin Console that Connector shows as connected
-11. Add NAS as a **Resource** using its local network IP address
+1. **Create Remote Network** in Twingate Admin Console (type: "On Premise" or "Other")
+2. **Generate tokens**: Click "Deploy Connector" → select default Docker option → click "Generate Tokens" → copy the `docker run` command
+3. **Open Container Station** on QNAP → click "Create" → search "Twingate"
+4. **Select image**: Choose `twingate/connector`, version `latest`
+5. **Basic config**: Set container Name (use Connector name), configure CPU & Memory limits
+6. **Advanced Settings → Environment**: Add three variables from the `docker run` command:
+   - `TWINGATE_NETWORK`
+   - `TWINGATE_ACCESS_TOKEN`
+   - `TWINGATE_REFRESH_TOKEN`
+7. **Advanced Settings → Network**: Set hostname (e.g., use Connector name)
+8. Click **Continue → OK** to start the container
+9. Verify in Admin Console that Connector shows as connected
 
 ## Configuration Values
 
 | Environment Variable | Description |
 |---|---|
-| `TWINGATE_NETWORK` | Your Twingate network name/ID |
-| `TWINGATE_ACCESS_TOKEN` | Access token from generated deploy command |
-| `TWINGATE_REFRESH_TOKEN` | Refresh token from generated deploy command |
+| `TWINGATE_NETWORK` | Your Twingate network name |
+| `TWINGATE_ACCESS_TOKEN` | Generated access token |
+| `TWINGATE_REFRESH_TOKEN` | Generated refresh token |
 
-- **Docker image:** `twingate/connector:latest`
+**Docker Image:** `twingate/connector:latest`
 
 ## Gotchas
-- Tokens are only shown once after re-authentication — copy the full `docker run` command before leaving the page
+- Tokens require re-authentication to view after clicking "Generate Tokens"
+- Copy the full `docker run` command to a text editor before switching to QNAP — values are needed during container setup
 - Container Station must be installed separately on QNAP before starting
-- CPU/Memory limits depend on specific QNAP hardware — set appropriately to avoid resource contention
-- To access the NAS remotely, it must be explicitly added as a Resource in the Admin Console (not automatic)
+- After connector is running, the NAS itself still needs to be added as a Resource in the Admin Console (not automatic)
 
 ## Related Docs
-- [Resources Guide](https://www.twingate.com/docs/resources) — adding Resources after Connector deployment
-- [Support Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
+- [Resources Guide](https://www.twingate.com/docs/resources) — add QNAP NAS as a Resource
+- [Peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer) — recommended for bandwidth optimization
 - [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)
-- [QNAP Getting Started Guide](https://www.qnap.com) (external)
+- [Twingate Starter Plan](https://www.twingate.com/pricing)

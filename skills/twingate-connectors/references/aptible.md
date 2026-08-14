@@ -1,27 +1,27 @@
 ---
 source: https://www.twingate.com/docs/aptible
 type: docs
-fetched: 2026-08-05
-source_version: e1406a8fb4e12e781de74c2256f02883cc409867b5b8c6e36112950e7686f425
+fetched: 2026-08-14
+source_version: a26a1d39f033e1adaa90eb49e1e4bbb02de8f8561878d664e6abc97d8e207a0d
 ---
 
 # Deploy a Twingate Connector on Aptible
 
 ## Summary
-Aptible is a serverless platform with automatic security/compliance management. Twingate Connectors can be deployed on Aptible via two methods: automated (Twingate CLI) or manual (Aptible CLI). Peer-to-peer connections are recommended for better performance and Fair Use Policy compliance.
+Aptible is a serverless platform with built-in security/compliance. Twingate Connectors can be deployed on Aptible via two methods: automated (Twingate CLI) or manual (Aptible CLI). Peer-to-peer connections are recommended for bandwidth efficiency.
 
 ## Key Information
-- Two deployment methods: Twingate CLI (automated) or Aptible CLI (manual)
-- HA setup requires running the deploy command twice, selecting the same Remote Network
-- Success indicated by green status lights in the Admin Console Connector detail page
+- Two deployment approaches: Twingate CLI (automated) or Aptible CLI (manual)
+- HA setup requires running the automated command twice, selecting the same Remote Network
+- Green status indicators in Admin Console confirm successful deployment
 
 ## Prerequisites
-**Automated:**
+**Automated method:**
 - Twingate CLI installed and configured
 - API token with **Read, Write & Provision** permissions
 - Aptible CLI installed and configured
 
-**Manual:**
+**Manual method:**
 - Aptible CLI installed and configured
 - Twingate Admin Console access to generate Connector tokens
 
@@ -32,14 +32,16 @@ Aptible is a serverless platform with automatic security/compliance management. 
 ### Automated (Twingate CLI)
 1. Run `./tg deploy aptible app` (add `--environment NAME` for multiple Aptible environments)
 2. Enter Twingate account name and API token when prompted
-3. Select existing Remote Network or create new one
-4. Verify green status indicators in Admin Console
+3. Select existing or create new Remote Network
+4. Verify deployment via green status indicators in Admin Console
 
-**HA Setup:** Re-run step 1, select the same Remote Network — second Connector auto-provisions with load balancing/failover.
+**HA setup:** Repeat step 1, select the same Remote Network → second Connector auto-provisions with load balancing/failover
+
+---
 
 ### Manual (Aptible CLI)
-1. Create Remote Network in Admin Console → **Network** page, select a Connector
-2. Choose **Manual** deployment → **Generate Tokens** → copy both tokens (requires re-auth)
+1. Create Remote Network in Admin Console → select a Connector
+2. Choose **Manual** deployment → click **Generate Tokens** → copy both tokens (re-auth required)
 3. Create Aptible app:
    ```
    aptible apps:create [APP]
@@ -66,20 +68,16 @@ Aptible is a serverless platform with automatic security/compliance management. 
 | `TWINGATE_NETWORK` | Twingate account name |
 | `TWINGATE_ACCESS_TOKEN` | Generated Connector access token |
 | `TWINGATE_REFRESH_TOKEN` | Generated Connector refresh token |
-| `--environment NAME` | (CLI flag) Target Aptible environment |
 | `--docker-image` | `twingate/connector:1` |
-
----
+| `--environment NAME` | Aptible environment (CLI flag, multi-env only) |
 
 ## Gotchas
-- Token generation requires **re-authentication** in the Admin Console — copy tokens immediately as they won't be shown again
-- Tokens are per-Connector; each HA instance needs its own token set (automated method handles this)
-- Replace `[APP]`, `[ACCOUNT]`, `[ACCESS_TOKEN]`, `[REFRESH_TOKEN]` in all commands — brackets are placeholders
-
----
+- Token generation requires **re-authentication** in the Admin Console — copy tokens immediately, they won't be shown again
+- Tokens are one-time-view; losing them requires generating new ones
+- HA requires selecting the **exact same Remote Network** on second deployment
 
 ## Related Docs
-- [Twingate CLI](https://www.twingate.com/docs/cli)
-- [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
-- [Peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer)
-- [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)
+- Twingate CLI setup
+- Connector Best Practices
+- Peer-to-peer connections / Fair Use Policy
+- Remote Network configuration

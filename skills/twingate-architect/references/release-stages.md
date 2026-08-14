@@ -1,33 +1,32 @@
 ---
 source: https://www.twingate.com/docs/release-stages
 type: docs
-fetched: 2026-08-05
-source_version: 3f4ecfdce59764cd670a5cf4428ca6119ccffed1685de7d5caa92601cb019262
+fetched: 2026-08-14
+source_version: 293d2b430ac24ea96301b23b2d3bc53181023484d17e4af4d6a8b877c2392698
 ---
 
 # Twingate Release Stages
 
 ## Summary
-Twingate releases features in two stages: Beta and General Availability (GA). Beta is for testing with limited support guarantees, while GA indicates production-ready features with full support.
+Twingate releases features in two stages: Beta and General Availability (GA). Beta is for testing with limited support guarantees, while GA indicates production-ready status with full support.
 
 ## Key Information
 
 ### Beta Stage
 - Feature available for testing but may be incomplete or buggy
+- No guaranteed support
 - Documentation provided but may be incomplete
-- Support **not guaranteed**
 - May have breaking changes
-- Opt-in or only enabled for new networks
+- Opt-in only, or enabled for new networks only
 - Not fully optimized for performance
 
 ### General Availability (GA) Stage
-- Production-ready, feature-complete with polished UI/UX
-- Thoroughly tested across various real-world environments
-- Full formal support via regular channels
-- Breaking changes avoided whenever possible
-- Optimized and scalable for production
-- Available to both new and existing networks
+- Production-ready; fully tested with no known major issues
+- Full formal support through standard channels
 - Comprehensive documentation with known feature gaps outlined
+- Breaking changes avoided
+- Available to both new and existing networks
+- Optimized and scalable
 
 ## Comparison Table
 
@@ -35,17 +34,17 @@ Twingate releases features in two stages: Beta and General Availability (GA). Be
 |------|------|----|
 | Functionality | May be incomplete | Feature-complete |
 | Reliability | Possible minor issues | Performs as expected |
-| Stability | May have breaking changes | Breaking changes avoided |
-| Performance | Not optimized | Optimized for production |
+| Stability | Breaking changes possible | Breaking changes avoided |
+| Performance | Not fully optimized | Optimized for production |
 | Support | Not guaranteed | Full formal support |
 | Documentation | May be incomplete | Comprehensive |
 | Testing | Limited environments | Various real-world environments |
 | Availability | Opt-in / new networks only | New and existing networks |
 
 ## Gotchas
-- Beta features should **not** be relied upon for production workloads due to potential breaking changes and lack of guaranteed support
-- Beta availability may be restricted to new networks only — existing networks may need to opt-in explicitly
-- GA documentation may still note known feature gaps even though the feature is fully released
+- **No support SLA in Beta**: Do not rely on Beta features for production workloads where support response is critical
+- **Breaking changes in Beta**: Integrations or configs built on Beta features may break without notice
+- **Availability restriction**: Beta features may not be accessible to existing networks — only new networks or opt-in
 
 ## Related Docs
-- Individual feature documentation will indicate which release stage applies
+- Individual feature documentation will indicate Beta or GA status where applicable

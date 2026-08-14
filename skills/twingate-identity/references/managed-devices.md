@@ -1,40 +1,43 @@
 ---
 source: https://www.twingate.com/docs/managed-devices
 type: docs
-fetched: 2026-08-05
-source_version: 979e15d93285fb0d1c4a87ded7f24935f53794549dbb0385c1ec917ae69210e3
+fetched: 2026-08-14
+source_version: 34153b41f9e0649f205d4fa37c91da3996cc9c72817ccca63bb16481922ce857
 ---
 
 # Managed Devices
 
 ## Summary
-Twingate supports deployment on managed devices via MDM solutions including AirWatch, Intune, Jamf, and Iru (formerly Kandji). The client creates a local VPN profile for internal routing only—no traffic leaves the device via VPN.
+Twingate supports deployment on managed devices via MDM solutions including AirWatch, Intune, Jamf, and Kandji (formerly Iru). Platform-specific installation packages are available for Windows, macOS, and iOS with silent/pre-configuration options.
 
 ## Key Information
-- Compatible MDMs: AirWatch, Intune, Jamf, Iru (formerly Kandji)
-- Windows: EXE or MSI installer with silent install and pre-configuration options
+- Compatible MDMs: AirWatch, Intune, Jamf, Kandji (formerly Iru)
+- Windows: EXE or MSI installer with silent install and pre-configuration support
 - macOS/iOS: Available via Apple App Store or standalone PKG
 - Mac/iOS MDM deployment requires apps allocated through **Apple Business Manager**
 - Client requires no special device privileges
-- Creates a VPN profile, but VPN server address is `127.0.0.1` (local only—no VPN traffic leaves the device)
+- Client creates a local VPN profile to operate (VPN server address: `127.0.0.1`)
+- No VPN traffic leaves the device — local VPN is used only for Twingate's internal routing
 
 ## Prerequisites
+- For macOS/iOS MDM deployment: Apple Business Manager account with Twingate allocated
 - MDM solution already configured and managing target devices
-- For Mac/iOS App Store deployment: Apple Business Manager account with Twingate allocated
+- Windows: Access to EXE or MSI package
 
-## Platform Notes
-
-| Platform | Installer Type | Silent Install |
-|----------|---------------|----------------|
-| Windows | EXE or MSI | Yes |
-| macOS | PKG or App Store | Via MDM |
-| iOS | App Store | Via MDM |
+## Configuration Values
+| Platform | Package Type | Notes |
+|----------|-------------|-------|
+| Windows | EXE, MSI | Supports silent install, pre-configuration |
+| macOS | PKG, App Store | MDM requires Apple Business Manager |
+| iOS | App Store | MDM requires Apple Business Manager |
 
 ## Gotchas
-- The VPN profile creation may trigger OS-level VPN permission prompts if not pre-approved via MDM configuration profiles
-- iOS/macOS App Store deployment **requires Apple Business Manager**—direct App Store links alone are insufficient for MDM push
-- VPN address `127.0.0.1` is expected behavior, not a misconfiguration
+- VPN profile creation is required for operation — ensure MDM policy allows VPN profile installation by apps
+- macOS/iOS MDM deployment via App Store **requires Apple Business Manager** allocation; direct App Store installs won't work with MDM deployment
+- The `127.0.0.1` VPN server address is expected behavior, not a misconfiguration
 
 ## Related Docs
-- Platform-specific sub-articles: Windows MDM, Jamf, AirWatch, Iru/Kandji, Intune
-- Apple Business Manager integration documentation
+- Twingate Windows MDM deployment (sub-article)
+- Twingate macOS MDM deployment (sub-article)
+- Twingate iOS MDM deployment (sub-article)
+- Apple Business Manager integration

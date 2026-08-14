@@ -1,60 +1,58 @@
 ---
 source: https://www.twingate.com/docs/ssh-remote-development
 type: docs
-fetched: 2026-08-05
-source_version: 47006706555f30f7f53b694ba90ed7a596efc28d66f9c27fd86529755f495b20
+fetched: 2026-08-14
+source_version: 39a2be8858fc1c3085ede54a3418bbdfd79568edea88d1e2750cd44e7ed1801a
 ---
 
 # Remote Development with Twingate SSH and VS Code
 
 ## Summary
-Configures VS Code Remote SSH for development against private SSH Resources protected by Twingate Privileged Access. No public IP, VPN, or SSH key files required. Relies on Twingate's certificate-based SSH auth and config sync.
+Configures VS Code Remote SSH extension to connect to private SSH Resources via Twingate without public IPs, VPNs, or key files. Requires Privileged Access for SSH to be pre-configured with Gateway, Connector, and SSH Resource.
 
 ## Key Information
-- VS Code Remote SSH opens remote folders as if local, with full IntelliSense, debugging, and terminal
-- Twingate handles authentication via certificates—no manual key management
-- SSH config sync eliminates TOFU prompts by pre-trusting the Gateway's CA public key
-- First connection has a delay while VS Code installs its server component on the remote VM
+- Remote development uses VS Code's Remote - SSH extension against Twingate SSH Resources
+- No public IP, VPN, or SSH key files required on the client side
+- SSH Config Auto-Sync eliminates TOFU prompts by pre-trusting the Gateway's CA public key
+- First connection installs VS Code server component on remote VM (may take a few seconds)
+- Full IntelliSense, debugging, and terminal access available once connected
 
 ## Prerequisites
-- Twingate Client installed and running (minimum version requirements met)
-- Privileged Access for SSH configured:
+- Twingate Client installed and running (minimum version requirements must be met)
+- Privileged Access for SSH fully configured:
   - Gateway and Connector deployed in same network as target VM
   - SSH Resource configured and accessible to your group
-- VS Code with **Remote - SSH** extension (`ms-vscode-remote.remote-ssh`)
+- VS Code with Remote - SSH extension (`ms-vscode-remote.remote-ssh`)
 
 ## Step-by-Step
 
-### Enable SSH Config Sync (one-time)
+### Enable SSH Config Sync
 1. Open Twingate Client → **More**
 2. Enable **SSH Server Configuration Auto-Sync**
-3. This writes the SSH CA's public key to `~/.ssh/known_hosts`
+3. This syncs SSH CA public key to `~/.ssh/known_hosts` automatically
 
-### Connect via VS Code
+### Connect via VS Code Remote SSH
 1. Open VS Code
-2. Open Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`)
-3. Run `Remote-SSH: Connect to Host`
-4. Enter SSH Resource address or alias (e.g., `10.124.16.7` or `my-server.int`)
-5. VS Code opens new window connected to remote host
-
-### Open a Project
-1. Click **Open Folder** in welcome screen
-2. Navigate to project directory on remote VM
+2. Install extension `ms-vscode-remote.remote-ssh` if not present
+3. Open Command Palette (`Cmd+Shift+P` macOS / `Ctrl+Shift+P` Windows/Linux)
+4. Run `Remote-SSH: Connect to Host`
+5. Enter SSH Resource address or alias (e.g., `10.124.16.7` or `my-server.int`)
+6. Click **Open Folder** → navigate to project directory on remote VM
 
 ## Configuration Values
-| Item | Value/Location |
-|------|---------------|
-| VS Code extension ID | `ms-vscode-remote.remote-ssh` |
-| SSH known_hosts path | `~/.ssh/known_hosts` |
-| Config sync toggle | Twingate Client → More → SSH Server Configuration Auto-Sync |
+| Setting | Location | Value |
+|---|---|---|
+| SSH Config Auto-Sync | Twingate Client → More | Enable toggle |
+| Known hosts file | Local machine | `~/.ssh/known_hosts` |
+| VS Code extension ID | VS Code marketplace | `ms-vscode-remote.remote-ssh` |
 
 ## Gotchas
-- **Config sync must be enabled** before connecting, or you'll get TOFU certificate trust prompts on first connection
-- First connection is slower—VS Code installs a server component on the remote VM; subsequent connections are faster
-- Remote host must be an SSH Resource configured in Twingate, not an arbitrary host
+- SSH Config Auto-Sync must be enabled **before** first connection to avoid TOFU prompts; without it, SSH client won't automatically trust Gateway-issued certificates
+- First connection is slower than subsequent connections due to VS Code server installation on the remote VM
+- Gateway and Connector must be in the **same network** as the target VM — cross-network deployments won't work
 
 ## Related Docs
-- Privileged Access for SSH (architecture, CAs, session recording)
-- SSH Minimum Version Requirements
-- Privileged Access Setup Guide
-- User Configuration (SSH config sync details)
+- [Privileged Access for SSH](https://www.twingate.com/docs/privileged-access-ssh) — architecture, CAs, session recording
+- [SSH Setup Guide](https://www.twingate.com/docs/privileged-access-ssh#setup)
+- [User Configuration / SSH Config Sync](https://www.twingate.com/docs/privileged-access-ssh#user-configuration)
+- [Twingate Client minimum version requirements](https://www.twingate.com/docs/client-version-requirements)

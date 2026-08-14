@@ -1,53 +1,54 @@
 ---
 source: https://www.twingate.com/docs/iru-configuration
 type: docs
-fetched: 2026-08-05
-source_version: a7dfcf0269b8b9049cb12313502191fb338dc81b4fe47a4b1f75513d5893a32a
+fetched: 2026-08-14
+source_version: 432065d46f17cc57860e73020ee78518669f83fb9750f99e15bc3609135f24d0
 ---
 
 # Iru (Kandji) Configuration
 
 ## Summary
-Twingate integrates with Iru (formerly Kandji) to verify macOS devices for managed device access enforcement. The integration uses the Iru API to match device serial numbers against managed device lists. Available on Business and Enterprise plans only.
+Twingate integrates with Iru (formerly Kandji) to verify macOS devices via the Iru API, matching device serial numbers against managed device lists. Verified devices can be used as trust requirements in Security Policies. Available on Business and Enterprise plans only.
 
 ## Key Information
-- **macOS only** — only macOS devices can be verified through this integration
-- Device verification pulls serial numbers via Iru API and matches against Twingate Client-reported serial numbers
-- Sync delay expected after initial setup ("Waiting to sync" state lasts a few minutes)
+- **macOS only** — Iru verification applies exclusively to macOS devices
+- Twingate pulls managed device list via Iru API; matches on device serial number
+- Sync shows "Waiting to sync" initially; resolves within a few minutes
 - Recoverable errors (API unresponsive): auto-resolves when API is reachable again
-- Unrecoverable errors (invalid credentials/permissions): triggers admin email notification, requires manual reconfiguration
+- Unrecoverable errors (invalid credentials/permissions): admin email notification sent; requires manual reconfiguration
 
 ## Prerequisites
 - Business or Enterprise Twingate plan
-- Iru account with admin access to generate API tokens
-- Iru API token with permissions: **Device details** + **Device list** (under Devices)
+- Iru tenant with admin access to generate API tokens
+- API token permissions: **Device details** + **Device list** (under Devices)
 
-## Device Verification Requirements (all must be true)
+## Device Verification Requirements
+A device is considered Iru-verified only if **all** conditions are met:
 - Serial number present in Iru
-- Reported to Iru within past **7 days**
+- Reported to Iru within the past **7 days**
 - Iru agent installed
 - MDM profile installed
 - Not removed from Iru
 
 ## Step-by-Step
 
-### Generate Iru API Token
-1. Iru web app → **Settings** → **Access** (top bar)
+### Generate Iru API Key
+1. Iru web app → **Settings** → **Access** tab
 2. Scroll to **API Token** → **Add Token**
-3. Enter Name and Description → save token value
+3. Enter Name and Description → save the token
 4. In **Manage API Permissions** modal → **Configure**
 5. Under Devices, enable **Device details** and **Device list**
 
 ### Configure in Twingate
 1. Twingate Admin → **Settings** → **Device Integration**
-2. Select **Connect** next to Iru
+2. Click **Connect** next to Iru
 3. Enter Iru URL and API token
 
 ### Incorporate into Security Policies
 1. Navigate to Device Security → Trusted Profiles
 2. Create/edit a macOS Trusted Profile
-3. Set Iru as a **Trust Method**
-4. Apply Trusted Profile to Security Policies
+3. Set Iru as a required Trust Method
+4. Attach Trusted Profile to Security Policies
 
 ## Configuration Values
 
@@ -57,12 +58,12 @@ Twingate integrates with Iru (formerly Kandji) to verify macOS devices for manag
 | Iru URL (EU) | `<subdomain>.api.eu.kandji.io` |
 
 ## Gotchas
-- Initial sync shows "Waiting to sync" — devices may show incorrect verification state during this window
-- Unrecoverable errors **stop retry attempts** entirely; must reconfigure manually
-- Altering API token permissions after setup causes unrecoverable error
-- 7-day reporting window is strict — inactive devices fail verification automatically
+- Initial sync shows "Waiting to sync" — devices may have incorrect verification state during this window
+- Altering API token permissions after setup causes unrecoverable error requiring full reconfiguration
+- Devices not reporting to Iru for >7 days will lose verified status even if otherwise managed
+- Unrecoverable errors halt all sync attempts until admin manually reconfigures
 
 ## Related Docs
-- Device Security / Trusted Profiles documentation
-- Security Policies configuration
+- Device Security / Trusted Profiles configuration
+- Security Policies documentation
 - Twingate pricing page (plan eligibility)

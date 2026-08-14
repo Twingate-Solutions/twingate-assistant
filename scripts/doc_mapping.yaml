@@ -1026,6 +1026,43 @@ docs:
     skill: twingate-idfw
     keywords: [ssh, installation]
 
+  # Privileged Access for Web Apps (Beta) — Gateway L7 reverse proxy, ES256 JWT injection
+  - url: https://www.twingate.com/docs/web-app-access
+    skill: twingate-idfw
+    keywords: [web app, privileged access, Layer 7, reverse proxy, ES256, JWT, JWKS, GAT, Gateway Access Token, request headers, groups, beta]
+
+  - url: https://www.twingate.com/docs/web-app-developer-guides
+    skill: twingate-idfw
+    keywords: [web app, developer guides, middleware, JWT verification, ES256, jose, PyJWT, Express, Django, Next.js, Auth.js]
+
+  - url: https://www.twingate.com/docs/web-app-express
+    skill: twingate-idfw
+    keywords: [web app, Express.js, Node.js, middleware, jose, JWKS, ES256, JWT, twingateIdentity, Bearer]
+
+  - url: https://www.twingate.com/docs/web-app-django
+    skill: twingate-idfw
+    keywords: [web app, Django, Python, middleware, PyJWT, JWKS, ES256, JWT, request.gat, session, get_or_create]
+
+  - url: https://www.twingate.com/docs/web-app-nextjs
+    skill: twingate-idfw
+    keywords: [web app, Next.js, App Router, Edge Middleware, jose, JWKS, ES256, JWT, Server Components, route handlers]
+
+  - url: https://www.twingate.com/docs/web-app-nextjs-authjs
+    skill: twingate-idfw
+    keywords: [web app, Next.js, Auth.js, NextAuth, session cookie, useSession, auth(), JWT, ES256, middleware, twingateGroups]
+
+  - url: https://www.twingate.com/docs/web-app-integrations
+    skill: twingate-idfw
+    keywords: [web app, integrations, trusted header, proxy auth, no code changes, "{{jwt}}", "{{username}}", "{{groups}}", off-the-shelf apps]
+
+  - url: https://www.twingate.com/docs/web-app-grafana
+    skill: twingate-idfw
+    keywords: [web app, Grafana, auth.jwt, auth.proxy, X-JWT-Assertion, X-WEBAUTH-USER, trusted header, auto-provision, whitelist]
+
+  - url: https://www.twingate.com/docs/web-app-jenkins
+    skill: twingate-idfw
+    keywords: [web app, Jenkins, reverse-proxy-auth-plugin, role-strategy, JCasC, X-Forwarded-User, X-Forwarded-Groups, SSO, trusted header]
+
 
   # ── twingate-identity ───────────────────────────────────────────────────────
 
@@ -1423,6 +1460,8 @@ auto_assign_patterns:
   - pattern: "/docs/idfw"
     skill: twingate-idfw
   - pattern: "/docs/identity-firewall"
+    skill: twingate-idfw
+  - pattern: "/docs/web-app"
     skill: twingate-idfw
   - pattern: "/docs/terraform"
     skill: twingate-terraform

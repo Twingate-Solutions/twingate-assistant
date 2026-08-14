@@ -1,56 +1,53 @@
 ---
 source: https://www.twingate.com/docs/home-assistant-getting-started
 type: docs
-fetched: 2026-08-05
-source_version: dda99254d2e6ce356e0cde0846967a9c1464d88c36071386393d8ee131205ece
+fetched: 2026-08-14
+source_version: abbfc7012c44a6b063e4c325ab9b3f3b2f3c8c9a500edad5cefbf1241532fe9f
 ---
 
 # Getting Started with Home Assistant and Twingate
 
-## Page Title
-Getting Started with Home Assistant and Twingate
-
 ## Summary
-Installs a Twingate Connector as an app on Home Assistant OS to enable secure remote access to smart home devices. The setup involves adding a third-party repository, installing the app, and configuring it with tokens generated from the Twingate Admin Console.
+Integrates Twingate Connector as a Home Assistant app to enable secure remote access to smart home devices. Installation involves adding a third-party repository, generating connector tokens from the Twingate Admin Console, and configuring the app with those tokens.
 
 ## Key Information
-- Only works on **Home Assistant OS** — containers are not supported
-- Twingate runs as a Docker container managed by the Home Assistant app framework
-- Each Connector requires its own unique Access/Refresh token pair — do not reuse tokens
-- Repository source available on Twingate's Community GitHub page
+- Works **only on Home Assistant OS** — containers are not supported
+- The Twingate app runs a Docker container in the background that installs and connects the Connector
+- Source repository available on Twingate's Community GitHub page
+- Each Connector requires its own unique token set — do not reuse tokens
 
 ## Prerequisites
-- Running Home Assistant OS instance
+- Home Assistant OS (not container install)
 - Twingate account with Admin Console access
-- Basic familiarity with Home Assistant configuration
+- Existing Remote Network configured in Twingate Admin Console
 
 ## Step-by-Step
 
-1. **Add Repository** — Open Home Assistant App Store → Repository Manager → Add Twingate repository URL
-2. **Check for Updates** — Use ellipses menu → "Check for updates"; refresh page if needed
-3. **Install App** — App Store → Search "Twingate" → Select entry under "Twingate Connector app repository" → Install
-4. **Generate Tokens** — Admin Console → Remote Networks → Select network → Add/select Connector → Manual → Step 2 → Generate Tokens → Copy Access Token and Refresh Token
-5. **Configure App** — Twingate app → Configuration tab → Enter Network domain, Access Token, Refresh Token
-6. **Start App** — Info tab → Click Start → Check Logs tab for errors
-7. **Verify** — Admin Console → Remote Networks → Select Connector → Confirm Controller and Relay show **connected**
+1. **Add Repository** — Add Twingate repository via Home Assistant App Store repository manager
+2. **Check for Updates** — Use ellipses menu → "Check for updates" in App Store; refresh page if needed
+3. **Install App** — Search "Twingate" in App Store, install from "Twingate Connector app repository" section
+4. **Generate Tokens** — Admin Console → Remote Networks → select network → add/select Connector → Manual → Step 2 → Generate Tokens
+5. **Configure App** — Configuration tab: enter Network domain, Access Token, Refresh Token
+6. **Start App** — Click Start; verify in Logs tab
+7. **Verify** — Admin Console → Remote Networks → Connector → confirm Controller and Relay show **connected**
 
 ## Configuration Values
 
 | Field | Value |
 |-------|-------|
-| Network | `<network>.twingate.com` |
-| Access Token | Generated from Admin Console |
-| Refresh Token | Generated from Admin Console |
+| Network | `<network-name>.twingate.com` |
+| Access Token | Generated from Admin Console (Step 2 of Connector setup) |
+| Refresh Token | Generated from Admin Console (Step 2 of Connector setup) |
 
 ## Gotchas
-- **Container installs unsupported** — must be Home Assistant OS, not Docker/container deployments
-- After adding the repository, a manual "Check for updates" is required before the app appears; page refresh may also be needed
-- Token reuse across Connectors will cause issues — generate a fresh token set per Connector
-- Tokens are only shown once at generation time — copy immediately
+- After adding the repository, manually trigger "Check for updates" — new apps don't appear automatically
+- Page refresh may also be required after checking for updates
+- Token sets must be unique per Connector; reusing tokens will cause issues
+- If tokens are entered incorrectly, the Connector will fail to authenticate
 
 ## Related Docs
-- [Twingate Troubleshooting Docs](https://www.twingate.com/docs/troubleshooting)
-- [Setting Up Resources](https://www.twingate.com/docs/resources)
-- [Proxmox Helper Script Guide](https://www.twingate.com/docs/proxmox)
-- [Unraid Helper Script Guide](https://www.twingate.com/docs/unraid)
-- [Apps GitHub Page](https://github.com/twingate) (for issue reporting)
+- Twingate troubleshooting docs
+- Proxmox Helper Script Guide
+- Unraid Helper Script Guide
+- Setting Up Resources (configuring Twingate resources for private apps/services)
+- Apps GitHub page (bug reports/feedback)
