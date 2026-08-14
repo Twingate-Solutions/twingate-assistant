@@ -40,12 +40,18 @@ def load_mapping(mapping_path: str | Path = DEFAULT_MAPPING_PATH) -> dict:
 def diff_docs(
     sitemap_urls: list[str],
     mapping_path: str | Path = DEFAULT_MAPPING_PATH,
+    path_filter: str | None = None,
 ) -> tuple[list[str], list[str]]:
     """Compute new and removed URLs between the sitemap and doc_mapping.yaml.
 
     Args:
         sitemap_urls: Documentation URLs discovered from the live sitemap.
         mapping_path: Filesystem path to the YAML mapping file.
+        path_filter: When set, restrict the mapped-URL set to URLs containing
+            this substring before diffing. This scopes the comparison to a
+            single source (e.g. ``"/docs/"`` or ``"/articles/"``) so URLs owned
+            by *other* sources are not reported as removed — the mapping holds
+            every source's URLs, but each source only sees its own sitemap.
 
     Returns:
         A tuple of ``(new_urls, removed_urls)``, each a sorted list of URLs.
@@ -54,6 +60,8 @@ def diff_docs(
     mapped_urls: set[str] = {
         entry["url"] for entry in mapping.get("docs", []) if "url" in entry
     }
+    if path_filter is not None:
+        mapped_urls = {u for u in mapped_urls if path_filter in u}
     sitemap_set: set[str] = set(sitemap_urls)
 
     new_urls = sorted(sitemap_set - mapped_urls)

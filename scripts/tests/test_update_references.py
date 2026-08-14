@@ -971,7 +971,7 @@ def test_main_iterates_both_sources_and_stamps_correct_type(tmp_path):
         patch("update_references.TRIAGE_DIR", triage_dir),
         patch("update_references.HASH_CACHE_PATH", hash_cache_path),
         patch("update_references.fetch_sitemap", side_effect=fake_fetch_sitemap),
-        patch("update_references.diff_docs", side_effect=lambda urls: (urls, [])),
+        patch("update_references.diff_docs", side_effect=lambda urls, path_filter=None: (urls, [])),
         patch("update_references.load_mapping", return_value=fake_mapping),
         patch("update_references.fetch_doc_html", return_value="<html></html>"),
         patch("update_references.extract_text_from_html", return_value="content"),
@@ -998,6 +998,57 @@ def test_main_iterates_both_sources_and_stamps_correct_type(tmp_path):
     _, help_fm, _ = help_written.split("---\n", 2)
     assert yaml.safe_load(help_fm)["type"] == "help"
     assert yaml.safe_load(help_fm)["source"] == new_help_url
+
+
+def test_main_excludes_configured_urls_from_discovery(tmp_path):
+    """A URL in the mapping's `exclude` list is dropped before diffing and never
+    processed — no reference, no triage file. Regression: /docs/unlisted (a dead
+    page still in the sitemap) re-triaged on every run."""
+    skills_dir = tmp_path / "skills"
+    triage_dir = skills_dir / "_triage"
+    hash_cache_path = tmp_path / ".doc_hashes.json"
+
+    excluded_url = "https://www.twingate.com/docs/unlisted"
+    kept_url = "https://www.twingate.com/docs/connector-new-feature"
+
+    fake_mapping = {
+        "sources": [
+            {
+                "name": "docs",
+                "sitemap_url": "https://www.twingate.com/sitemap/sitemap-0.xml",
+                "path_filter": "/docs/",
+                "type": "docs",
+            },
+        ],
+        "docs": [],
+        "exclude": [excluded_url],
+        "auto_assign_patterns": [
+            {"pattern": "/docs/connector", "skill": "twingate-connectors"},
+        ],
+    }
+
+    with (
+        patch("update_references.check_api_health", return_value=True),
+        patch("update_references.process_github_source"),
+        patch("update_references.SKILLS_DIR", skills_dir),
+        patch("update_references.TRIAGE_DIR", triage_dir),
+        patch("update_references.HASH_CACHE_PATH", hash_cache_path),
+        patch("update_references.fetch_sitemap", side_effect=lambda url, pf: [excluded_url, kept_url]),
+        patch("update_references.diff_docs", side_effect=lambda urls, path_filter=None: (urls, [])),
+        patch("update_references.load_mapping", return_value=fake_mapping),
+        patch("update_references.fetch_doc_html", return_value="<html></html>"),
+        patch("update_references.extract_text_from_html", return_value="content"),
+        patch("update_references.content_hash", return_value="samehash"),
+        patch("update_references.summarize_with_backoff", return_value="## Summary"),
+    ):
+        exit_code = main()
+
+    assert exit_code == 0
+    # The kept URL was auto-assigned and written.
+    assert (skills_dir / "twingate-connectors" / "references" / "connector-new-feature.md").exists()
+    # The excluded URL was never written anywhere.
+    assert not (triage_dir / "unlisted.md").exists()
+    assert not (skills_dir / "twingate-connectors" / "references" / "unlisted.md").exists()
 
 
 # ---------------------------------------------------------------------------
@@ -1039,11 +1090,17 @@ def test_process_doc_raw_hash_unchanged_seeds_norm_cache_without_summarizing(tmp
     assert norm_cache[url] == "hash001"
 
 
-def test_process_doc_raw_change_with_matching_norm_hash_classifies_noise_only(tmp_path):
-    """Raw hash changed but normalized hash matches baseline: classified noise_only."""
+def test_process_doc_footer_only_change_is_skipped(tmp_path):
+    """Raw hash changed but normalized hash matches baseline (footer-only churn):
+    the page is skipped, not re-summarized, and hash_cache is not bumped."""
     skills_dir = tmp_path / "skills"
     triage_dir = skills_dir / "_triage"
     url = "https://www.twingate.com/docs/connector-deployment"
+
+    # A skip requires the output file to already exist.
+    output_file = skills_dir / "twingate-connectors" / "references" / "connector-deployment.md"
+    output_file.parent.mkdir(parents=True)
+    output_file.write_text("old summary", encoding="utf-8")
 
     hash_cache = {url: "old-raw-hash"}
     stats = {"updated": 0, "skipped": 0, "failed": 0}
@@ -1060,16 +1117,20 @@ def test_process_doc_raw_change_with_matching_norm_hash_classifies_noise_only(tm
         patch("update_references.extract_text_from_html", return_value="raw-text-v2"),
         patch("update_references.normalize_for_hash", return_value="stable-normalized-text"),
         patch("update_references.content_hash", side_effect=fake_content_hash),
-        patch("update_references.summarize_with_backoff", return_value="## Summary"),
+        patch("update_references.summarize_with_backoff") as mock_summarize,
     ):
         process_doc(
             url, "twingate-connectors", hash_cache, stats, metrics=metrics, norm_cache=norm_cache
         )
 
-    assert stats == {"updated": 1, "skipped": 0, "failed": 0}
-    assert metrics.sources["docs"]["resummarized"] == 1
-    assert metrics.sources["docs"]["noise_only"] == 1
-    assert metrics.sources["docs"]["real_change"] == 0
+    assert stats == {"updated": 0, "skipped": 1, "failed": 0}
+    mock_summarize.assert_not_called()
+    assert metrics.sources["docs"]["skipped"] == 1
+    assert metrics.sources["docs"]["resummarized"] == 0
+    assert metrics.sources["docs"]["noise_only"] == 0
+    # hash_cache is deliberately NOT rewritten to the new raw hash — bumping it
+    # every run (the footer always differs) would break .doc_hashes.json idempotency.
+    assert hash_cache[url] == "old-raw-hash"
     assert norm_cache[url] == "stable-norm-hash"
 
 
@@ -1210,17 +1271,22 @@ def test_process_doc_triage_records_metrics_triaged(tmp_path):
     assert metrics.sources["docs"]["triaged"] == 1
 
 
-def test_process_doc_norm_hash_never_gates_the_resummarize_decision(tmp_path):
-    """norm_hash never gates the summarize decision; only the raw hash does.
+def test_process_doc_norm_hash_gates_the_skip_decision(tmp_path):
+    """The normalized hash gates the skip. Either 'unchanged' signal skips:
 
-    Case A: raw hash changed, norm_hash identical to baseline -> summarizer called.
-    Case B: raw hash unchanged, norm baseline stale -> summarizer not called.
+    Case A: raw hash changed, norm_hash identical to baseline (footer-only) -> skip.
+    Case B: raw hash matches -> skip even when the norm baseline is stale.
     """
     skills_dir = tmp_path / "skills"
     triage_dir = skills_dir / "_triage"
     url = "https://www.twingate.com/docs/connector-deployment"
 
-    # --- Case A: raw changed, norm_hash unchanged from baseline ------------
+    # A skip requires the output file to already exist.
+    output_file = skills_dir / "twingate-connectors" / "references" / "connector-deployment.md"
+    output_file.parent.mkdir(parents=True)
+    output_file.write_text("existing summary", encoding="utf-8")
+
+    # --- Case A: raw changed, norm_hash unchanged from baseline -> skip -----
     hash_cache_a = {url: "old-raw-hash"}
     stats_a = {"updated": 0, "skipped": 0, "failed": 0}
     norm_cache_a = {url: "same-norm-hash"}
@@ -1235,18 +1301,14 @@ def test_process_doc_norm_hash_never_gates_the_resummarize_decision(tmp_path):
         patch("update_references.extract_text_from_html", return_value="raw-text"),
         patch("update_references.normalize_for_hash", return_value="normalized-text"),
         patch("update_references.content_hash", side_effect=fake_content_hash_a),
-        patch(
-            "update_references.summarize_with_backoff", return_value="## Summary"
-        ) as mock_summarize_a,
+        patch("update_references.summarize_with_backoff") as mock_summarize_a,
     ):
         process_doc(url, "twingate-connectors", hash_cache_a, stats_a, norm_cache=norm_cache_a)
 
-    mock_summarize_a.assert_called_once()
-    assert stats_a["updated"] == 1
+    mock_summarize_a.assert_not_called()
+    assert stats_a == {"updated": 0, "skipped": 1, "failed": 0}
 
-    # --- Case B: raw unchanged (skip), norm baseline stale/mismatched ------
-    output_file = skills_dir / "twingate-connectors" / "references" / "connector-deployment.md"
-    assert output_file.exists()  # written by Case A above
+    # --- Case B: raw hash matches -> skip regardless of a stale norm baseline
     hash_cache_b = {url: "same-raw-hash"}
     stats_b = {"updated": 0, "skipped": 0, "failed": 0}
     norm_cache_b = {url: "stale-mismatched-norm-hash"}

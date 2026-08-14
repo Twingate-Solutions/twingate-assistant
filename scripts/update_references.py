@@ -349,9 +349,10 @@ def process_doc(
 ) -> None:
     """Fetch, hash-check, summarize, and write one documentation page.
 
-    Modifies ``hash_cache`` and ``stats`` in-place. Never raises; failures
-    are logged and counted in ``stats["failed"]``. ``metrics`` and
-    ``norm_cache`` are observation-only and never affect control flow.
+    Modifies ``hash_cache``, ``norm_cache``, and ``stats`` in-place. Never
+    raises; failures are logged and counted in ``stats["failed"]``. ``metrics``
+    is observation-only; ``norm_cache`` gates the skip decision (a normalized-hash
+    match means only the volatile footer changed, so the page is skipped).
 
     Args:
         url: Documentation page URL to process.
@@ -366,7 +367,8 @@ def process_doc(
             ``"github"``.
         source_name: Source name used to tag recorded metrics.
         metrics: Optional churn-attribution accumulator (observation only).
-        norm_cache: Optional shadow-hash cache (observation only).
+        norm_cache: URL-to-normalized-hash cache; gates the skip decision so
+            footer-only ("Last updated … ago") changes don't force a re-summarize.
     """
     resolved_fetched = fetched if fetched is not None else date.today().isoformat()
     slug = url_to_slug(url)
@@ -397,11 +399,24 @@ def process_doc(
     if metrics is not None:
         metrics.record(source_name, "fetched_ok")
 
-    # Skip if content is identical to last run and the file exists.
+    # Skip if the page is unchanged and the file exists. Two independent signals
+    # each count as "unchanged":
+    #   * raw hash matches       -> the extracted text is byte-for-byte identical.
+    #   * normalized hash matches -> only the volatile "Last updated … ago" footer
+    #     moved (see normalize_for_hash); the substantive content is unchanged.
+    # The normalized signal is the important one: without it the entire corpus
+    # re-summarizes every run as the relative-age footer ticks over between runs.
+    # On a skip we deliberately do NOT rewrite hash_cache[url] to the new raw hash
+    # — doing so would make .doc_hashes.json churn every run (the footer always
+    # differs) and defeat idempotency. norm_cache is refreshed (a no-op when the
+    # normalized hash already matched).
     text = extract_text_from_html(html)
     current_hash = content_hash(text)
     norm_hash = content_hash(normalize_for_hash(text))
-    if hash_cache.get(url) == current_hash and output_path.exists():
+    prev_norm = norm_cache.get(url) if norm_cache is not None else None
+    raw_unchanged = hash_cache.get(url) == current_hash
+    norm_unchanged = prev_norm is not None and prev_norm == norm_hash
+    if (raw_unchanged or norm_unchanged) and output_path.exists():
         logger.info("Content unchanged for %s, skipping", url)
         stats["skipped"] += 1
         if metrics is not None:
@@ -410,8 +425,9 @@ def process_doc(
             norm_cache[url] = norm_hash
         return
 
-    # Classify the re-summarize as timestamp noise vs a real edit (metrics only).
-    prev_norm = norm_cache.get(url) if norm_cache is not None else None
+    # Re-summarizing. Classify footer-noise vs real edit for metrics. Post-fix this
+    # should be real_change for ~everything reaching here; a nonzero noise_only now
+    # means a footer-only change slipped the skip (e.g. the file was missing).
     is_noise_only = prev_norm is not None and prev_norm == norm_hash
     if metrics is not None:
         metrics.record(source_name, "resummarized")
@@ -1100,6 +1116,7 @@ def main() -> int:
     norm_cache = load_norm_cache(NORM_HASH_CACHE_PATH)
     metrics = RunMetrics()
     patterns = mapping.get("auto_assign_patterns", [])
+    exclude_urls: set[str] = set(mapping.get("exclude", []))
     stats: dict[str, int] = {"updated": 0, "skipped": 0, "failed": 0}
     sources = load_sources(mapping)
     logger.info(
@@ -1134,19 +1151,28 @@ def main() -> int:
         logger.info(
             "Source %r returned %d URLs matching %r", name, len(sitemap_urls), path_filter
         )
-        new_urls, removed_urls = diff_docs(sitemap_urls)
-        # Scope removed URLs to this source's path; reported only, never pruned.
-        removed_scoped = [u for u in removed_urls if path_filter in u]
-        if removed_scoped:
+        # Drop excluded URLs (dead/unlisted pages that linger in the sitemap but
+        # have no usable content — they would otherwise re-triage every run).
+        if exclude_urls:
+            before = len(sitemap_urls)
+            sitemap_urls = [u for u in sitemap_urls if u not in exclude_urls]
+            dropped = before - len(sitemap_urls)
+            if dropped:
+                logger.info("Source %r: excluded %d URL(s) via the exclude list", name, dropped)
+        # Scope the diff to this source's path so URLs owned by other sources
+        # (the mapping holds all sources' URLs) are not reported as removed.
+        new_urls, removed_urls = diff_docs(sitemap_urls, path_filter=path_filter)
+        if removed_urls:
+            # Reported only, never pruned.
             logger.info(
                 "Source %r: %d URL(s) removed from sitemap: %s",
                 name,
-                len(removed_scoped),
-                removed_scoped,
+                len(removed_urls),
+                removed_urls,
             )
         discovered.append((source, new_urls))
         total_new += len(new_urls)
-        total_removed += len(removed_scoped)
+        total_removed += len(removed_urls)
 
     # Step 3: Process all docs already in the mapping, stamped as ``docs``.
     mapped_docs = mapping.get("docs", [])
@@ -1156,15 +1182,18 @@ def main() -> int:
         skill = entry.get("skill", "")
         if not url or not skill:
             continue
-        logger.info("Processing mapped doc: %s -> %s", url, skill)
+        # Per-entry ``type`` (default "docs") so help articles carried in the
+        # mapping stamp type/metrics as "help", not "docs".
+        entry_type = entry.get("type", DEFAULT_SOURCE_TYPE)
+        logger.info("Processing mapped doc: %s -> %s (%s)", url, skill, entry_type)
         process_doc(
             url,
             skill,
             hash_cache,
             stats,
             fetched=fetched,
-            doc_type=DEFAULT_SOURCE_TYPE,
-            source_name=DEFAULT_SOURCE_TYPE,
+            doc_type=entry_type,
+            source_name=entry_type,
             metrics=metrics,
             norm_cache=norm_cache,
         )

@@ -85,6 +85,30 @@ def test_empty_sitemap_all_mapped_are_removed(tmp_path) -> None:
     assert "https://www.twingate.com/docs/connectors" in removed_urls
 
 
+def test_diff_docs_path_filter_scopes_to_one_source(tmp_path) -> None:
+    """path_filter restricts the mapped set so other sources' URLs are not
+    reported as removed. Regression: the help source once reported every mapped
+    /docs/ URL as 'removed' because the whole mapping was diffed against one
+    source's sitemap."""
+    mapping_path = _write_mapping(tmp_path, docs=[
+        {"url": "https://www.twingate.com/docs/architecture", "skill": "twingate-architect"},
+        {"url": "https://www.twingate.com/docs/connectors", "skill": "twingate-connectors"},
+        {"url": "https://help.twingate.com/articles/1-foo", "skill": "twingate-troubleshoot",
+         "type": "help"},
+    ])
+    help_sitemap = ["https://help.twingate.com/articles/1-foo"]
+
+    new_urls, removed_urls = diff_docs(help_sitemap, mapping_path, path_filter="/articles/")
+
+    # The /docs/ URLs belong to the docs source and must not show as removed here.
+    assert removed_urls == []
+    assert new_urls == []
+
+    # Without the filter, the old behavior reports both /docs/ URLs as removed.
+    _, removed_unscoped = diff_docs(help_sitemap, mapping_path)
+    assert len(removed_unscoped) == 2
+
+
 def test_diff_docs_returns_sorted_lists(tmp_path) -> None:
     """Both new_urls and removed_urls are returned in sorted order."""
     mapping_path = _write_mapping(tmp_path, docs=[
@@ -207,6 +231,21 @@ def test_docs_list_has_no_github_com_urls() -> None:
     github_doc_urls = [entry["url"] for entry in docs if "github.com" in entry.get("url", "")]
 
     assert github_doc_urls == []
+
+
+def test_help_entries_are_well_formed() -> None:
+    """Every help-type entry in docs: has a skill and a help-center article URL.
+
+    Help articles are carried in the mapping (type: help) so the sitemap diff is
+    accurate and they survive a hash-cache loss without being re-summarized.
+    """
+    mapping = load_mapping()
+    helps = [d for d in mapping.get("docs", []) if d.get("type") == "help"]
+
+    assert helps, "expected help-center articles carried in the mapping"
+    for entry in helps:
+        assert "/articles/" in entry.get("url", "")
+        assert entry.get("skill")
 
 
 def test_every_repos_entry_full_name_matches_org_slash_repo_shape() -> None:

@@ -19,6 +19,12 @@
 #
 # Last updated: 2026-07-06 (302 entries; docsTemplate, unlisted, WIP excluded)
 
+# ── Exclude ─────────────────────────────────────────────────────────────────
+# URLs present in a sitemap but with no usable content (dead/unlisted/placeholder
+# pages). Dropped from discovery before diffing so they don't re-triage every run.
+exclude:
+  - https://www.twingate.com/docs/unlisted
+
 # ── Sources ─────────────────────────────────────────────────────────────────
 # Sitemaps the pipeline crawls. Each source pairs a sitemap URL with the URL
 # path substring that selects its pages (path_filter) and a type tag. This is a
@@ -1442,6 +1448,303 @@ docs:
   - url: https://www.twingate.com/docs/troubleshooting
     skill: twingate-troubleshoot
     keywords: [troubleshooting, knowledge base, logs, client logs, connector logs, help center, community, "self-service"]
+
+# ── Help-center articles (help.twingate.com) ────────────────────────────────
+# type: help so frontmatter/metrics stamp as help, not docs. These were seeded
+# into references/ but previously lived only in the hash cache; listing them here
+# makes the sitemap diff accurate and protects them from a cache-loss re-summarize.
+
+  # twingate-connectors
+  - url: https://help.twingate.com/articles/1364033881-repeating-token-is-expired-error-in-connector-logs
+    skill: twingate-connectors
+    type: help
+  - url: https://help.twingate.com/articles/1422554451-connector-offline-too-many-open-files-in-logs
+    skill: twingate-connectors
+    type: help
+  - url: https://help.twingate.com/articles/2906603735-twingate-connector-logs
+    skill: twingate-connectors
+    type: help
+  - url: https://help.twingate.com/articles/4104282255-connector-offline-status-flapping-offline-online-or-goes-offline-some-time-after-restart
+    skill: twingate-connectors
+    type: help
+  - url: https://help.twingate.com/articles/4908519978-connector-offline-gone-code-410-in-logs
+    skill: twingate-connectors
+    type: help
+  - url: https://help.twingate.com/articles/4995810632-connector-cannot-connect-to-the-twingate-relay
+    skill: twingate-connectors
+    type: help
+  - url: https://help.twingate.com/articles/5202917932-connector-upgrade-produces-gpg-error-in-apt
+    skill: twingate-connectors
+    type: help
+  - url: https://help.twingate.com/articles/5872386799-using-sse-kms-s3-realtime-connector-logs-sync-results-in-your-s3-sync-is-experiencing-issues
+    skill: twingate-connectors
+    type: help
+  - url: https://help.twingate.com/articles/6965244612-azure-container-docker-hub-rate-limits-block-connector-deployment-or-restart
+    skill: twingate-connectors
+    type: help
+
+  # twingate-dns-security
+  - url: https://help.twingate.com/articles/1263583820-dns-cisco-umbrella
+    skill: twingate-dns-security
+    type: help
+  - url: https://help.twingate.com/articles/1402124326-windows-client-limitations-with-multiple-network-interfaces-with-differing-dns
+    skill: twingate-dns-security
+    type: help
+  - url: https://help.twingate.com/articles/3556574910-potential-dns-or-resource-access-issues-on-devices-with-multiple-network-interfaces-connected
+    skill: twingate-dns-security
+    type: help
+  - url: https://help.twingate.com/articles/4359531030-cgnat-ip-conflicts-dns-resolution-resource-access-issues-with-twingate
+    skill: twingate-dns-security
+    type: help
+  - url: https://help.twingate.com/articles/4817674373-dns-request-delays-while-using-twingate-on-linux
+    skill: twingate-dns-security
+    type: help
+  - url: https://help.twingate.com/articles/5745151855-dns-using-dnsfilter-alongside-twingate
+    skill: twingate-dns-security
+    type: help
+  - url: https://help.twingate.com/articles/6928700605-dns-avast-real-site-protection
+    skill: twingate-dns-security
+    type: help
+  - url: https://help.twingate.com/articles/7318897884-macos-client-docker-container-s-second-connections-to-twingate-dns-resource-fails
+    skill: twingate-dns-security
+    type: help
+  - url: https://help.twingate.com/articles/8487611740-dns-using-adguard-for-mac-alongside-twingate
+    skill: twingate-dns-security
+    type: help
+  - url: https://help.twingate.com/articles/9539322912-twingate-linux-client-fails-to-start-logs-show-dns-errors
+    skill: twingate-dns-security
+    type: help
+
+  # twingate-identity
+  - url: https://help.twingate.com/articles/4139538626-microsoft-social-logins-fail-with-an-entraid-account-there-is-no-matching-user-in-this-tenant
+    skill: twingate-identity
+    type: help
+  - url: https://help.twingate.com/articles/4707021810-entra-id-all-users-are-able-to-log-into-twingate-even-though-they-are-not-assigned
+    skill: twingate-identity
+    type: help
+
+  # twingate-terraform
+  - url: https://help.twingate.com/articles/4693640683-terraform-error-an-argument-named-group-ids-is-not-expected-here
+    skill: twingate-terraform
+    type: help
+
+  # twingate-troubleshoot
+  - url: https://help.twingate.com/articles/1111227325-windows-troubleshooting-the-twingate-tap-adaptor
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/1139605544-zscaler
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/1198271128-allowlist-for-outbound-connections-to-twingate-infrastructure
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/1239565250-technical-support-entitlement
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/1268656324-self-service-resources
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/1384415743-when-hard-disk-encryption-is-activated-in-device-posture-attached-usb-storage-devices-may-cause-the-check-to-fail
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/1639815268-windows-client-aws-workspaces-pools-terminates-20-minutes-after-starting-twingate
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/1666262145-windows-how-to-generate-a-windows-system-report
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/1782897307-untrusted-certificate-warning-when-accessing-websites-through-embedded-browsers-in-ides
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/1834259102-admin-console-network-events-report-is-blank-when-using-safari
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/1900346829-twingate-client-system-requirements-and-supported-operating-systems
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/1933606039-disabling-browser-doh
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/2009013512-joining-a-twingate-network-fails-with-unable-to-join-network
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/2009351280-macos-crowdstrike-device-verification-not-working-even-though-data-zta-is-present
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/2020664128-windows-client-system-service-is-not-running
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/2024206011-crowdstrike-is-not-detected
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/2110427262-windows-checking-network-interfaces
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/2331236562-security-information-for-the-twingate-network
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/2349456124-linux-client-crashes-on-fedora-40-if-the-disk-is-encrypted
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/2367000005-unable-to-access-local-service-on-macos-docker-host
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/2672568245-engaging-technical-support
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/2740543226-internal-as-draft-then-public-peer-to-peer-connection-troubleshooting
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/2783921459-checking-resource-definitions
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/3181164424-macos-client-no-resources-available-after-client-update
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/3201241878-vpn-profile-fails-to-deploy-for-macos-using-jamf-pro
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/3353935754-connectivity-timeout-issues-when-using-passive-pasv-ftp-mode
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/3391673762-reset-totp-two-factor-authentication-2fa
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/3646943674-checking-for-blocked-outbound-ports
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/3657481671-technical-support-coverage-hours
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/3973356701-windows-client-freezes-after-clicking-join-network
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/3992697531-client-connection-fails-with-unknown-network-name
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/4097879304-browser-local-network-access-lna-blocking-twingate-resources
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/4186450837-tcp-ip-port-tests-or-scans-produce-inaccurate-results
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/4209242719-macos-client-enabling-notifications-for-additional-authentication-prompts
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/4838955865-netgear-router-blocking-twingate-connectivity
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/4898142252-how-to-download-a-list-of-app-store-macos-clients-from-your-twingate-tenant
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/4982245028-using-nslookup-with-manually-defined-nameserver-fails-on-windows-with-twingate-client-running
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/5098803549-checking-for-resource-ambiguity
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/5428888738-updating-an-existing-user-s-email-address
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/5666924507-device-security-windows-screen-lock-is-activated-but-not-detected-by-the-posture-check
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/5856392229-how-do-i-delete-my-twingate-network-tenant
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/5946128544-known-incompatibility-overview
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/5974826840-unable-to-access-a-resource
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/5986942828-windows-client-v2025-138-232-unexpected-re-authentication-prompts-or-windows-twingate-service-stopped
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/6183198873-checking-connection-events
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/6310565542-unable-to-ping-a-twingate-resource-though-it-is-accessible-on-other-ports
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/6334957429-windows-how-to-export-windows-event-logs
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/6581096205-signing-into-the-twingate-help-center
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/6706399509-consumer-vpns
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/6847496306-where-can-i-download-a-previous-version-of-the-twingate-client
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/6848754023-login-to-chromebook-fails-with-device-security-not-met
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/7071403289-handling-internal-domains-ending-in-local
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/7488571404-technical-support-priority-levels
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/7690090540-macos-client-unable-to-resolve-twingate-com
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/8044397985-windows-client-upgrades-via-intune-from-2024-63-and-older-to-2024-142-fail-to-honor-network-param
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/8310367817-linux-nixos-twingate-not-detecting-firewall-on-nixos
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/8458642629-twingate-client-logs
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/8503680533-linux-client-unable-to-authenticate-on-ubuntu-24-04
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/8531799362-macos-client-uninstalling-twingate
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/8595638268-active-directory-users-and-computer-aduc-is-slow-over-twingate
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/8616217757-troubleshooting-access-issues-to-twingate-ip-resources-on-macos
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/8648750331-checking-network-interfaces
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/8933604231-access-being-denied-to-macos-users-due-to-screen-lock-posture-check
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/9261433921-installation-of-the-windows-twingate-client-fails-with-setup-wizard-ended-prematurely
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/9287595551-self-serve-troubleshooting-guide
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/9450787885-macos-client-twingate-menu-bar-icon-not-visible
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/9474557518-android-auto-refuses-to-start-when-twingate-is-connected-error-21
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/9546556496-vpn-clients-with-installed-tap-adapter
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/9756496886-windows-client-v2026-7-client-fails-connect-unexpected-disconnections-or-client-unresponsive
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/9784439823-windows-checking-the-client-service
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/9841905042-unsupported-regions
+    skill: twingate-troubleshoot
+    type: help
+  - url: https://help.twingate.com/articles/9900337970-collecting-and-exporting-a-packet-capture
+    skill: twingate-troubleshoot
+    type: help
 
 
 # ── Auto-assign patterns ────────────────────────────────────────────────────
