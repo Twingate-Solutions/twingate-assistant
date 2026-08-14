@@ -209,8 +209,8 @@
   },
   "Twingate-Solutions/twingate-assistant": {
     "doc_path": "skills/twingate-architect/references/gh-twingate-solutions-twingate-assistant.md",
-    "last_sha": "6bbd03decc9ac6fc0b52fbf78418af829fb7a7e9",
-    "pushed_at": "2026-08-14T17:51:27Z"
+    "last_sha": "c40147a5198ba8b84faeb9e5e1f8c6b2bb75c94c",
+    "pushed_at": "2026-08-14T18:50:19Z"
   },
   "Twingate-Solutions/twingate-client-userspace-spacelift": {
     "doc_path": "skills/twingate-connectors/references/gh-twingate-solutions-twingate-client-userspace-spacelift.md",

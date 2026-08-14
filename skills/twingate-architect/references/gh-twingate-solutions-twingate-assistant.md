@@ -2,7 +2,7 @@
 source: https://github.com/Twingate-Solutions/twingate-assistant
 type: github
 fetched: 2026-08-14
-source_version: 6bbd03decc9ac6fc0b52fbf78418af829fb7a7e9
+source_version: c40147a5198ba8b84faeb9e5e1f8c6b2bb75c94c
 ---
 
 # twingate-assistant
