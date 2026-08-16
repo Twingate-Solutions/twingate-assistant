@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/api
 type: docs
-fetched: 2026-08-05
-source_version: 0950f6343601021f04a640cf5e817345ac093b2f53ad0ab746f44e311686bcc1
+fetched: 2026-08-16
+source_version: faea69a3047182e89ceaeec8027b9d99c2b22a6f8e4f207be0876aa4b2685a75
 ---
 
 # Twingate GraphQL API Reference
@@ -11,62 +11,61 @@ source_version: 0950f6343601021f04a640cf5e817345ac093b2f53ad0ab746f44e311686bcc1
 Twingate GraphQL API Reference
 
 ## Summary
-Complete GraphQL schema reference for the Twingate API, covering queries and mutations for managing all Twingate resources. The API uses per-tenant endpoints with API key authentication. Supports CRUD operations for connectors, remote networks, resources, groups, users, devices, service accounts, and more.
+Complete GraphQL schema reference for Twingate's API, covering queries and mutations for managing resources, groups, connectors, users, devices, and network infrastructure. All requests require an API token in the header. The API uses cursor-based pagination for list operations.
 
 ## Key Information
-- **API Type**: GraphQL (queries + mutations)
-- **Endpoint pattern**: `https://<network-name>.twingate.com/api/graphql/`
-- **Auth**: Header-based API key (`X-API-KEY`)
-- **Pagination**: Cursor-based (`before`, `after`, `first`, `last`) on all list queries
+- **API Type**: GraphQL
+- **Endpoint**: `https://<network-name>.twingate.com/api/graphql/`
+- **Auth Header**: `X-API-KEY: <YOUR_TOKEN_HERE>`
+- **Pagination**: Cursor-based (`before`, `after`, `first`, `last` args on all list queries)
 - **List responses**: Return `pageInfo`, `edges`, and `totalCount`
-- **Mutation responses**: Always return `ok` (Boolean) and `error` (String)
+- **Mutation responses**: Return `ok` (Boolean), `error` (String), and optionally `entity`
 
 ## Prerequisites
-- Twingate account with admin access
-- API token generated from the admin console
-- Network name (subdomain) for your tenant
-
-## Configuration Values
-
-| Parameter | Value |
-|-----------|-------|
-| Header | `X-API-KEY: <YOUR_TOKEN_HERE>` |
-| Endpoint | `https://<network name>.twingate.com/api/graphql/` |
+- Twingate network with admin access
+- API token generated from admin console
+- Network name (subdomain) for endpoint construction
 
 ## Available Queries
-- `accessRequest(id)` / `accessRequests(filter)`
-- `certificateAuthority(id)` / `certificateAuthorities()`
-- `connector(id)` / `connectors(filter)`
-- `device(id)` / `devices(filter)` / `devicePosture(id)`
-- `dnsFilteringProfile(id)` / `dnsFilteringProfiles()`
-- `gateway(id)` / `gateways()`
-- `group(id)` / `groups(filter)`
-- `remoteNetwork(id|name)` / `remoteNetworks(filter)`
-- `resource(id)` / `resources(filter)`
-- `securityPolicy(id|name)` / `securityPolicies(filter)`
-- `serialNumbers(filter)`
-- `serviceAccount(id)` / `serviceAccounts(filter)` / `serviceAccountKey(id|name)`
-- `user(id)` / `users(filter)`
+| Query | Description |
+|-------|-------------|
+| `accessRequest(id)` | Single access request |
+| `accessRequests(filter)` | List access requests |
+| `connector(id)` / `connectors(filter)` | Connector(s) |
+| `device(id)` / `devices(filter)` | Device(s) |
+| `devicePosture(id)` | Device posture status |
+| `dnsFilteringProfile(id)` / `dnsFilteringProfiles` | DNS filtering |
+| `gateway(id)` / `gateways` | Gateway(s) |
+| `group(id)` / `groups(filter)` | Group(s) |
+| `remoteNetwork(id\|name)` / `remoteNetworks(filter)` | Remote network(s) |
+| `resource(id)` / `resources(filter)` | Resource(s) |
+| `securityPolicy(id\|name)` / `securityPolicies(filter)` | Security policies |
+| `serviceAccount(id)` / `serviceAccounts(filter)` | Service accounts |
+| `user(id)` / `users(filter)` | User(s) |
+| `serialNumbers(filter)` | Serial numbers |
+| `certificateAuthority(id)` / `certificateAuthorities` | CAs |
 
 ## Available Mutations
-- **Access Requests**: `accessRequestApprove`, `accessRequestReject`
-- **Connectors**: `connectorCreate`, `connectorUpdate`, `connectorDelete`, `connectorGenerateTokens`
-- **Devices**: `deviceArchive`, `deviceUnarchive`, `deviceBlock`, `deviceUnblock`, `deviceUpdate`
-- **DNS Filtering**: `dnsFilteringProfileCreate`, `dnsFilteringProfileUpdate`, `dnsFilteringProfileDelete`
-- **Gateways**: `gatewayCreate`, `gatewayUpdate`, `gatewayDelete`
-- **Groups**: `groupCreate`, `groupUpdate`, `groupDelete`
-- **Kubernetes Resources**: `kubernetesResourceCreate`, `kubernetesResourceUpdate`
-- **Remote Networks**: `remoteNetworkCreate`, `remoteNetworkUpdate`, `remoteNetworkDelete`
-- **Resources**: `resourceCreate`, `resourceUpdate`, `resourceDelete`, `resourceAccessAdd`, `resourceAccessRemove`, `resourceAccessSet`
-- **Security Policies**: `securityPolicyUpdate`
-- **Serial Numbers**: `serialNumbersCreate`, `serialNumbersDelete`
-- **Service Accounts**: `serviceAccountCreate`, `serviceAccountDelete`, `serviceAccountKeyCreate`
+**Access**: `accessRequestApprove`, `accessRequestReject`  
+**Connectors**: `connectorCreate`, `connectorUpdate`, `connectorDelete`, `connectorGenerateTokens`  
+**Devices**: `deviceArchive`, `deviceUnarchive`, `deviceBlock`, `deviceUnblock`, `deviceUpdate`  
+**DNS**: `dnsFilteringProfileCreate`, `dnsFilteringProfileUpdate`, `dnsFilteringProfileDelete`  
+**Gateways**: `gatewayCreate`, `gatewayUpdate`, `gatewayDelete`  
+**Groups**: `groupCreate`, `groupUpdate`, `groupDelete`  
+**Remote Networks**: `remoteNetworkCreate`, `remoteNetworkUpdate`, `remoteNetworkDelete`  
+**Resources**: `resourceCreate`, `resourceUpdate`, `resourceDelete`, `resourceAccessAdd`, `resourceAccessRemove`, `resourceAccessSet`  
+**Kubernetes**: `kubernetesResourceCreate`, `kubernetesResourceUpdate`  
+**Security Policies**: `securityPolicyUpdate`  
+**Service Accounts**: `serviceAccountCreate`, `serviceAccountDelete`, `serviceAccountKeyCreate`  
+**Serial Numbers**: `serialNumbersCreate`, `serialNumbersDelete`
+
+## Configuration Values
+- **Header**: `X-API-KEY` — required on all requests
+- **Endpoint pattern**: `https://<network_name>.twingate.com/api/graphql/`
 
 ## Gotchas
-- `remoteNetwork` query accepts **either** `id` or `name` (both optional, use one)
-- `groupUpdate` has both full-replace (`resourceIds`, `userIds`) and incremental (`addedResourceIds`, `removedResourceIds`) patterns — using both simultaneously may conflict
-- `resourceUpdate`: passing `securityPolicyId: null` resets to Default Policy; omitting it leaves it unchanged
-- `resourceUpdate`: passing `alias: null` clears the alias; omitting it leaves it unchanged
-- `serviceAccountKeyCreate`: `expirationTime` is in days, range 0–365 inclusive
-- `gatewayUpdate`: setting `sshCAId: null` **unassigns** the SSH CA
-- DNS filtering
+- `remoteNetwork` query accepts either `id` OR `name` (both optional, not both required)
+- `securityPolicyId: null` in updates resets to Default Policy (not unchanged); omitting leaves it unchanged
+- `alias: null` clears the alias; omitting leaves it unchanged — distinct behaviors
+- `tags: null` removes all tags; omitting leaves tags unchanged
+- `resourceAccessSet` replaces **all** existing access; use `resource
