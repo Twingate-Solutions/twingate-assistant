@@ -209,8 +209,8 @@
   },
   "Twingate-Solutions/twingate-assistant": {
     "doc_path": "skills/twingate-architect/references/gh-twingate-solutions-twingate-assistant.md",
-    "last_sha": "6bbd03decc9ac6fc0b52fbf78418af829fb7a7e9",
-    "pushed_at": "2026-08-14T17:51:27Z"
+    "last_sha": "1f7a641c9281bc662dba9f8096c2a3d7e22ffb2c",
+    "pushed_at": "2026-08-14T20:59:48Z"
   },
   "Twingate-Solutions/twingate-client-userspace-spacelift": {
     "doc_path": "skills/twingate-connectors/references/gh-twingate-solutions-twingate-client-userspace-spacelift.md",
@@ -239,8 +239,8 @@
   },
   "Twingate-Solutions/twingate-mdm-connector": {
     "doc_path": "skills/twingate-identity/references/gh-twingate-solutions-twingate-mdm-connector.md",
-    "last_sha": "9a512d6e94b5f2a7590dd336df5b63a538e6a973",
-    "pushed_at": "2026-08-07T15:21:31Z"
+    "last_sha": "b1d145ae5a680b069d9d9299fe288ddbc770e3f1",
+    "pushed_at": "2026-08-15T00:57:38Z"
   },
   "Twingate-Solutions/twingate-raspberry-pi": {
     "doc_path": "skills/twingate-connectors/references/gh-twingate-solutions-twingate-raspberry-pi.md",
@@ -260,7 +260,7 @@
   "Twingate/gateway": {
     "doc_path": "skills/twingate-idfw/references/gh-twingate-gateway.md",
     "last_sha": "4567b90e0a5e1b3ec39a028946c55b8f11a9e91d",
-    "pushed_at": "2026-08-11T17:54:53Z",
+    "pushed_at": "2026-08-14T23:24:50Z",
     "wiki_last_sha": "72ec57300f323657f7f32ebc864d7517fe1fe059"
   },
   "Twingate/github-action": {

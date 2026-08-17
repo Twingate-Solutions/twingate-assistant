@@ -1,47 +1,79 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-assistant
 type: github
-fetched: 2026-08-14
-source_version: 6bbd03decc9ac6fc0b52fbf78418af829fb7a7e9
+fetched: 2026-08-16
+source_version: 1f7a641c9281bc662dba9f8096c2a3d7e22ffb2c
 ---
 
 # twingate-assistant
 
 ## Summary
-A Claude Code plugin that gives Claude Code Twingate ZTNA implementation expertise — architecture design, deployment playbooks, IaC generation, and troubleshooting. Once installed, any Claude Code session can act as a Twingate solutions engineer: assess an environment, design Remote Networks, generate Terraform or Pulumi, and walk through connector deployments on AWS, Azure, GCP, or Kubernetes.
+A Claude Code plugin that embeds Twingate ZTNA domain expertise into Claude Code sessions. It provides skills (auto-loaded domain knowledge) and agents (explicit end-to-end workflow orchestrators) covering architecture design, IaC generation, and troubleshooting. Documentation is refreshed weekly via GitHub Actions from Twingate's public docs and GitHub orgs.
 
 ## Key Information
-- Distributed as a Claude Code plugin via the `twingate-solutions` marketplace, not a runtime service — no MCP server, no live API calls.
-- Adds **skills** (10 domain modules, auto-load on topic detection) and **agents** (6 orchestrators, invoked explicitly by name).
-- Skills: `twingate-architect`, `-connectors`, `-terraform`, `-pulumi`, `-kubernetes`, `-idfw`, `-identity`, `-api`, `-dns-security`, `-troubleshoot`.
-- Agents: `twingate-se` (primary orchestrator), `aws-deployer`, `azure-deployer`, `gcp-deployer`, `network-designer`, `idfw-deployer`.
-- Each skill carries a `references/` directory of summarized docs refreshed weekly by a GitHub Action pulling from the Twingate docs site, help center, and four public GitHub orgs (`Twingate`, `Twingate-Solutions`, `Twingate-Labs`, `Twingate-Community`).
-- License: Apache 2.0.
+- Plugin type: Claude Code marketplace plugin
+- IaC support: Terraform and Pulumi
+- Cloud targets: AWS, Azure, GCP, Kubernetes
+- License: Apache 2.0
+- Auto-updates: Weekly GitHub Action refreshes skill reference docs
+- Context persistence: Supports committing a `twingate-context.md` file to persist environment details across sessions
 
 ## Prerequisites
-- Claude Code with plugin/marketplace support.
-- A Twingate tenant for real deployment work (the plugin generates guidance and code; it does not provision).
+- Claude Code installed and configured
+- Access to the Claude Code plugin marketplace
+- (For IaC generation) Terraform or Pulumi CLI with appropriate cloud credentials
 
 ## Usage / Step-by-Step
-1. Add the marketplace: `/plugin marketplace add Twingate-Solutions/twingate-assistant`
-2. Install: `/plugin install twingate-assistant@twingate-solutions`
-3. Skills load automatically when relevant; invoke agents by name, e.g. *"Use the twingate-se agent to deploy Twingate to my AWS environment."*
-4. Document an existing deployment once with the `twingate-se` agent to produce `twingate-context.md`, then commit it — future sessions read it automatically. Template: `docs/twingate-context-template.md`.
-5. Update later by re-running the same `/plugin install` command.
+
+**Install:**
+```bash
+/plugin marketplace add Twingate-Solutions/twingate-assistant
+/plugin install twingate-assistant@twingate-solutions
+```
+
+**Update:** Re-run the same `/plugin install` command.
+
+**Invoke an agent:**
+```text
+Use the twingate-se agent to help me deploy Twingate to my AWS environment.
+Use the aws-deployer agent to generate Terraform for two HA connectors in us-east-1.
+Use the network-designer agent to plan our resource structure for three environments.
+```
+
+**Persist environment context:**
+```text
+Use the twingate-se agent to document my current Twingate deployment as twingate-context.md.
+```
+Commit the resulting file; future sessions load it automatically.
+
+**Invoke a skill explicitly:**
+```bash
+/skill twingate-troubleshoot
+```
 
 ## Configuration Values
-- No CLI flags, env vars, or API parameters for end users — the plugin is invoked through Claude Code slash commands and natural-language agent/skill triggers.
-- `/skill <name>` explicitly loads a skill; agents are triggered by naming them in a prompt.
-- Pipeline configuration (doc routing, source list) lives in the repo's `scripts/doc_mapping.yaml` and matters only to forkers/maintainers.
+
+| Item | Value/Notes |
+|---|---|
+| Context template | `docs/twingate-context-template.md` |
+| Maintenance docs | `docs/MAINTAINING.md` |
+| Contribution docs | `CONTRIBUTING.md` |
+| Skill references dir | `references/` inside each skill directory |
+
+## Available Skills (auto-load on topic detection)
+`twingate-architect`, `twingate-connectors`, `twingate-terraform`, `twingate-pulumi`, `twingate-kubernetes`, `twingate-idfw`, `twingate-identity`, `twingate-api`, `twingate-dns-security`, `twingate-troubleshoot`
+
+## Available Agents (explicit invocation)
+`twingate-se`, `aws-deployer`, `azure-deployer`, `gcp-deployer`, `network-designer`, `idfw-deployer`
 
 ## Gotchas
-- The plugin produces expertise and code; it performs no live provisioning or API calls against a tenant.
-- Reference summaries are only as current as the last weekly Action run — re-run `/plugin install` to pull updates.
-- Skills auto-activate on keyword detection; agents do not — they must be named explicitly.
-- Committing the generated `twingate-context.md` is what makes future sessions skip re-assessment; without it, each session re-asks.
+- Skills activate automatically on keyword detection — no explicit invocation needed in most cases, but you can force them with `/skill <name>`
+- Environment context (`twingate-context.md`) must be committed to the repo to persist across sessions; it is not stored by the plugin itself
+- Plugin updates require manually re-running `/plugin install` — no automatic in-session updates
+- Reference docs are summaries, not live API calls; there is a lag between Twingate releasing changes and the weekly refresh running
 
 ## Related Docs
-- `docs/twingate-context-template.md` — deployment context template.
-- `docs/MAINTAINING.md` — forking, customizing, running the pipeline against your own docs.
-- `CONTRIBUTING.md` — contributing upstream.
-- `LICENSE` — Apache 2.0.
+- [Context template](docs/twingate-context-template.md)
+- [Maintaining/forking guide](docs/MAINTAINING.md)
+- [Contributing guide](CONTRIBUTING.md)
+- [Twingate documentation](https://www.twingate.com/docs) (external)
