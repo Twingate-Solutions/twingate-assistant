@@ -1,28 +1,28 @@
 ---
 source: https://www.twingate.com/docs/web-app-django
 type: docs
-fetched: 2026-08-14
-source_version: 171a5bb573f41b15099f0a1073c706e26bc58e97e0ea50e609726ad86489f328
+fetched: 2026-08-23
+source_version: acc7242479398a67c6a121d13480a16a914065bba9c2df34d4f8b12a499c0ad0
 ---
 
-# Django Middleware for Twingate Identity Firewall JWTs
+# Django JWT Middleware for Twingate Identity Firewall
 
 ## Summary
-Verifies Twingate Identity Firewall JWTs in Django using PyJWT. The middleware extracts Bearer tokens from the Authorization header, validates signatures via JWKS, and provisions/manages Django session users automatically.
+Verifies Twingate Identity Firewall JWTs in Django applications using PyJWT. The middleware validates tokens injected by the Twingate Gateway, provisions Django users automatically, and attaches decoded claims to `request.gat` for use in views.
 
 ## Key Information
-- JWT algorithm: ES256
+- Uses EC256 (ES256) signature verification via JWKS endpoint
 - JWKS keys cached for 24 hours to avoid per-request fetches
-- Middleware passes through requests without valid tokens (doesn't block)
-- Attaches decoded claims to `request.gat` for use in views
-- Provisions Django users via `get_or_create` on first login
-- Groups available at `gat["user"]["groups"]` for authorization
+- Middleware is non-blocking: invalid/missing tokens pass through to other auth middleware
+- Auto-provisions Django users via `get_or_create` on first login
+- Attaches decoded JWT claims to `request.gat`
+- Twingate groups available at `gat["user"]["groups"]`
 
 ## Prerequisites
 - Python 3.8+
-- Django project with sessions and auth middleware enabled
-- `pip install pyjwt[crypto]`
-- Twingate Gateway configured to inject JWT header on Web App Resource
+- Django project with sessions and auth middleware configured
+- `pip install pyjwt[crypto]` (requires `cryptography` package)
+- Twingate Gateway configured to inject JWT header on the Web App Resource
 
 ## Step-by-Step
 
@@ -34,35 +34,40 @@ Verifies Twingate Identity Firewall JWTs in Django using PyJWT. The middleware e
 
 3. **Create `twingate_middleware.py`** in your Django app with `TwingateMiddleware` and `TwingateVerifier` classes
 
-4. **Register in `settings.py`** after `SessionMiddleware` and `AuthenticationMiddleware`:
-   ```python
-   MIDDLEWARE = [
-       "django.contrib.sessions.middleware.SessionMiddleware",
-       "django.contrib.auth.middleware.AuthenticationMiddleware",
-       "yourapp.twingate_middleware.TwingateMiddleware",
-   ]
-   ```
+4. **Register middleware** in `settings.py` — must appear after `SessionMiddleware` and `AuthenticationMiddleware`
+
+5. **Access identity in views** via `request.gat`
 
 ## Configuration Values
 
 | Setting | Value |
 |---|---|
 | `TWINGATE_JWKS_URL` | `https://<your-tenant>.twingate.com/api/v1/jwk/ec` |
-| `AUDIENCE` | Your Twingate network name (must match token `aud` claim) |
-| `allowed_issuers` | `["twingate"]` |
-| JWT algorithm | `ES256` |
+| `AUDIENCE` | `<your-tenant>` (must match token `aud` claim) |
+| Allowed issuer | `"twingate"` |
+| Algorithm | `ES256` |
 | JWKS cache lifespan | 24 hours |
 | JWKS fetch timeout | 5 seconds |
 
+**Required `settings.py` middleware order:**
+```python
+MIDDLEWARE = [
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "yourapp.twingate_middleware.TwingateMiddleware",  # must be after both above
+]
+```
+
 ## Gotchas
-- `TwingateMiddleware` **must** run after `SessionMiddleware` and `AuthenticationMiddleware`—it calls `login()`/`logout()` which depend on both
-- The `[crypto]` extra for PyJWT is required; plain `pip install pyjwt` won't work for signature verification
-- Middleware is **non-blocking**: invalid/missing tokens fall through to next middleware, not a 401 response—views must check `request.gat` themselves
-- Two-pass JWT decode: first without signature to check `iss`/`aud`, then with full verification—prevents fetching JWKS for untrusted tokens
-- `get_or_create` only sets `email`/`first_name`/`last_name` on creation, not on subsequent logins
+- `TwingateMiddleware` **must** come after `SessionMiddleware` and `AuthenticationMiddleware` — it calls `login()`/`logout()` which depend on both
+- If a different user is already authenticated, the middleware forces logout before logging in the JWT user
+- Token verification decodes twice: once without signature to check `iss`/`aud` allow-lists, then fully with signature — both checks must pass
+- Missing `kid` in token header raises `InvalidTokenError`
+- `exp` claim validated automatically by PyJWT
+- Gateway injects **no headers by default** — must explicitly configure header injection on the Resource
 
 ## Related Docs
-- Identity Firewall for Web Apps overview
-- JWT Payload Reference (full token structure)
-- Request Headers (Gateway injection options and template variables)
-- Framework guides: Express.js, Next.js, Next.js + Auth.js
+- [Identity Firewall for Web Apps overview](#) — architecture and full JWT reference
+- [JWT Payload Reference](#) — full token structure and claims
+- [Request Headers](#) — configuring Gateway header injection options
+- Other framework guides: Express.js, Next.js, Next.js + Auth.js

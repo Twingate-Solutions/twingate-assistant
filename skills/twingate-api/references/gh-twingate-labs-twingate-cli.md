@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Labs/Twingate-CLI
 type: github
-fetched: 2026-08-06
-source_version: b61e7235a9a34d1bddd522391a1cfc748d741758
+fetched: 2026-08-23
+source_version: afca900a5882249c98de28e8b469b4e70c53dc9f
 ---
 
 <!-- triage: unassigned -->
@@ -85,7 +85,4 @@ tgcli group migrate --execute --name-suffix " (Manual)" --report out.csv
 - Rate limits vary by account (typically 60 reads/min, 20 writes/min); the CLI handles retries automatically but long bulk operations may be slow
 - `mappings resource-connectivity` joins resources and connectors client-side — no direct API link exists between them
 - `key create` with `-e 0` creates a non-expiring key
-
-## Related Docs
-- [Twingate Admin API overview](https://docs.twingate.com/docs/api-overview)
-- [Internet Security Client Configuration](https://www.twingate.
+- `key rotate` prints the new key's secret token — save it immediately, it cannot be retrieved again. There is no native rotate mutation in the Twingate API; this

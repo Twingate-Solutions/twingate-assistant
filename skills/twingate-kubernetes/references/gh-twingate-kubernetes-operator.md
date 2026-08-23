@@ -1,8 +1,12 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator
 type: github
-fetched: 2026-08-14
-source_version: 337b3d782df1c42ca782d29734b1436d4ea79ba6
+fetched: 2026-08-23
+source_version: 8eddac286be1147d12224fa668ae856b6cb9c765
+---
+
+The change is a minor GitHub Actions workflow update (pinning `docker/setup-buildx-action` to v4.3.0). This does not affect any user-facing behavior, CRDs, configuration, or documented gotchas. The summary requires no content changes.
+
 ---
 
 # Twingate Kubernetes Operator
@@ -58,6 +62,3 @@ Alternative: clone the repo and point `helm upgrade` at the local `./deploy/twin
 - `Twingate/helm-charts` — Connector deployment (Remote Network prerequisite)
 - Repo Wiki: Getting Started, API Reference, v1→v2 Migration
 - Twingate forum and help center for support
-
----
-Want this written to `skills/twingate-kubernetes/references/gh-twingate-kubernetes-operator.md` with the standard provenance frontmatter?

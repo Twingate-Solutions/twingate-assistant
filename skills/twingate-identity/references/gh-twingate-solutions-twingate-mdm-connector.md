@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-mdm-connector
 type: github
-fetched: 2026-08-16
-source_version: b1d145ae5a680b069d9d9299fe288ddbc770e3f1
+fetched: 2026-08-23
+source_version: e56c6bef2b78500eed160a792c66f758fef38cde
 ---
 
 # Twingate MDM Connector
@@ -10,7 +10,7 @@ source_version: b1d145ae5a680b069d9d9299fe288ddbc770e3f1
 ## Summary
 Open-source middleware that automatically marks devices as trusted in Twingate by cross-referencing MDM/EDR provider inventories. Runs on a configurable schedule, matches devices by serial number, and calls the Twingate API to set `isTrusted: true` on compliant devices. Stateless Docker container; never untrusts a device.
 
-> Community project — not officially supported by Twingate. Experimental/proof-of-concept.
+> Meant as a working example and foundation for teams who want to build device-trust automation of their own. Fork it, adapt it, and make it fit your environment. Not officially supported by Twingate's support team; use the issue tracker for bug reports and questions. Provided under Apache License 2.0 without warranty; use in production is at your own discretion and risk.
 
 ---
 
@@ -79,6 +79,4 @@ Open-source middleware that automatically marks devices as trusted in Twingate b
 ## Gotchas
 - Serial number matching is normalized to `strip().upper()` — mismatches due to case/whitespace are handled, but malformed serials will silently fail to match
 - Provider errors skip that provider for the cycle; they do not abort the run or untrust devices
-- `trust.mode: all` requires the device to appear in **every** configured provider — use `any` for mixed environments
-- All provider inventories are held in memory simultaneously; very large fleets (>>10k devices/provider) may need a streaming approach
-- `dry_run: false` is the default — set to `true` before first production run to validate behavior
+- `trust.mode: all` requires the device to appear in **every** configured provider —
