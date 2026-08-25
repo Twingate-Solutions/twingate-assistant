@@ -61,8 +61,8 @@
   },
   "Twingate-Labs/Twingate-CLI": {
     "doc_path": "skills/twingate-api/references/gh-twingate-labs-twingate-cli.md",
-    "last_sha": "b61e7235a9a34d1bddd522391a1cfc748d741758",
-    "pushed_at": "2026-08-06T00:24:21Z"
+    "last_sha": "afca900a5882249c98de28e8b469b4e70c53dc9f",
+    "pushed_at": "2026-08-18T19:09:47Z"
   },
   "Twingate-Labs/chocolatey-packages": {
     "doc_path": "skills/twingate-connectors/references/gh-twingate-labs-chocolatey-packages.md",
@@ -209,8 +209,8 @@
   },
   "Twingate-Solutions/twingate-assistant": {
     "doc_path": "skills/twingate-architect/references/gh-twingate-solutions-twingate-assistant.md",
-    "last_sha": "1f7a641c9281bc662dba9f8096c2a3d7e22ffb2c",
-    "pushed_at": "2026-08-14T20:59:48Z"
+    "last_sha": "1c12d13260d61cf7101bdb071e7d5abd5acce0c6",
+    "pushed_at": "2026-08-17T02:10:58Z"
   },
   "Twingate-Solutions/twingate-client-userspace-spacelift": {
     "doc_path": "skills/twingate-connectors/references/gh-twingate-solutions-twingate-client-userspace-spacelift.md",
@@ -239,8 +239,8 @@
   },
   "Twingate-Solutions/twingate-mdm-connector": {
     "doc_path": "skills/twingate-identity/references/gh-twingate-solutions-twingate-mdm-connector.md",
-    "last_sha": "b1d145ae5a680b069d9d9299fe288ddbc770e3f1",
-    "pushed_at": "2026-08-15T00:57:38Z"
+    "last_sha": "e56c6bef2b78500eed160a792c66f758fef38cde",
+    "pushed_at": "2026-08-22T00:40:32Z"
   },
   "Twingate-Solutions/twingate-raspberry-pi": {
     "doc_path": "skills/twingate-connectors/references/gh-twingate-solutions-twingate-raspberry-pi.md",
@@ -259,8 +259,8 @@
   },
   "Twingate/gateway": {
     "doc_path": "skills/twingate-idfw/references/gh-twingate-gateway.md",
-    "last_sha": "4567b90e0a5e1b3ec39a028946c55b8f11a9e91d",
-    "pushed_at": "2026-08-14T23:24:50Z",
+    "last_sha": "2e7b9e69bf3febcd6bb13f018732773846aa784d",
+    "pushed_at": "2026-08-21T23:12:20Z",
     "wiki_last_sha": "72ec57300f323657f7f32ebc864d7517fe1fe059"
   },
   "Twingate/github-action": {
@@ -275,18 +275,18 @@
   },
   "Twingate/kubernetes-operator": {
     "doc_path": "skills/twingate-kubernetes/references/gh-twingate-kubernetes-operator.md",
-    "last_sha": "337b3d782df1c42ca782d29734b1436d4ea79ba6",
-    "pushed_at": "2026-08-14T13:17:12Z",
+    "last_sha": "8eddac286be1147d12224fa668ae856b6cb9c765",
+    "pushed_at": "2026-08-21T03:48:17Z",
     "wiki_last_sha": "72f0d716f6096328f27a5b37d8c70f22a68cfcd3"
   },
   "Twingate/pulumi-twingate": {
     "doc_path": "skills/twingate-pulumi/references/gh-twingate-pulumi-twingate.md",
-    "last_sha": "9f4488dd291c6faad9a88dd605d8793a02e9867d",
-    "pushed_at": "2026-08-09T08:10:36Z"
+    "last_sha": "c854fc969dcc32275a2895d3ef90cb2535d08ef2",
+    "pushed_at": "2026-08-20T17:33:20Z"
   },
   "Twingate/terraform-provider-twingate": {
     "doc_path": "skills/twingate-terraform/references/gh-twingate-terraform-provider-twingate.md",
-    "last_sha": "57f5b1571bc333d6bd6fa398fc68c0184d939a42",
-    "pushed_at": "2026-08-14T18:13:21Z"
+    "last_sha": "6875b07f8528f796df1498039e2414a58c087042",
+    "pushed_at": "2026-08-21T14:48:12Z"
   }
 }

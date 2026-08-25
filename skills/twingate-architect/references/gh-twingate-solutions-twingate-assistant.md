@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-assistant
 type: github
-fetched: 2026-08-16
-source_version: 1f7a641c9281bc662dba9f8096c2a3d7e22ffb2c
+fetched: 2026-08-23
+source_version: 1c12d13260d61cf7101bdb071e7d5abd5acce0c6
 ---
 
 # twingate-assistant
@@ -72,8 +72,19 @@ Commit the resulting file; future sessions load it automatically.
 - Plugin updates require manually re-running `/plugin install` — no automatic in-session updates
 - Reference docs are summaries, not live API calls; there is a lag between Twingate releasing changes and the weekly refresh running
 
-## Related Docs
-- [Context template](docs/twingate-context-template.md)
-- [Maintaining/forking guide](docs/MAINTAINING.md)
-- [Contributing guide](CONTRIBUTING.md)
-- [Twingate documentation](https://www.twingate.com/docs) (external)
+## Skill Reference Notes (selected, as of 2026-08-16 refresh)
+
+### twingate-api / GraphQL API
+- Endpoint: `https://<network-name>.twingate.com/api/graphql/`; auth via `X-API-KEY` header
+- Mutation responses return `ok`, `error`, and optionally `entity`
+- `securityPolicyId: null` resets to Default Policy; omitting leaves unchanged — distinct behaviors
+- `alias: null` clears alias; omitting leaves unchanged
+- `tags: null` removes all tags; omitting leaves unchanged
+- `resourceAccessSet` replaces **all** existing access entries
+- `remoteNetwork` query accepts `id` OR `name`, not both required simultaneously
+
+### twingate-api / JavaScript CLI (`tg`)
+- Community-maintained; not supported by Twingate product engineering
+- Binaries for Windows/Mac/Linux; extensible for Node/Deno
+- IDs are base64-encoded GraphQL node IDs
+- `connector create` returns `ACCESS_TOKEN` and `REFRESH_TOKEN
