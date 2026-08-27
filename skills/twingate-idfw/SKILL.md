@@ -1,24 +1,17 @@
 ---
 name: twingate-idfw
 description: >
-  Use for the Twingate Identity Firewall (IDFW) and the Twingate Gateway — protocol-level
-  identity enforcement for SSH, the Kubernetes API, AND self-hosted/internal web apps, not
-  just network-level access. LOAD whenever the user wants to grant, secure, SSO into, or
-  audit access to a self-hosted or internal web application — including forwarding or
-  injecting the logged-in user's identity into HTTP requests, or a per-user/request-level
-  audit trail of who accessed an app. This is the Gateway acting as a Layer 7 reverse proxy
-  that injects signed ES256 JWTs (Gateway Access Tokens) or trusted headers into web apps:
-  JWKS verification, request-header injection, framework middleware (Express, Django,
-  Next.js, Auth.js), and no-code SSO integrations (Grafana, Jenkins). Also use when the
-  user deploys the Gateway; configures SSH privileged access with short-lived certificates;
-  manages privileged / vendor / contractor access; configures Certificate Authorities
-  (X.509 or SSH CA, local or HashiCorp Vault); routes kubectl through the Gateway; automates
-  IDFW with Terraform or Ansible; or implements/reviews session recording (asciicast/.cast
-  playback and archival, scanning recorded SSH or kubectl sessions for dangerous commands
-  or leaked secrets, self-hosting a recording browse UI). If a question is about
-  identity-aware access to an app or host — "can Twingate pass the user's identity to my
-  app?", "audit who used this app", "SSO for my internal tool" — assume this skill is
-  relevant and load it.
+  Use for the Twingate Identity Firewall (IDFW) and Twingate Gateway — protocol-level identity
+  enforcement for SSH, the Kubernetes API, AND self-hosted/internal web apps, not just network
+  access. LOAD when the user wants to grant, secure, SSO into, or audit a self-hosted/internal web
+  app — identity forwarding/injection into HTTP requests, per-request audit trails. Gateway = Layer
+  7 reverse proxy injecting ES256 JWTs (Gateway Access Tokens) or trusted headers: JWKS
+  verification, request-header injection, framework middleware (Express, Django, Next.js, Auth.js),
+  no-code SSO (Grafana, Jenkins). Covers Gateway deployment; SSH privileged access with short-lived
+  certs; vendor/contractor access; Certificate Authorities (X.509/SSH CA, local or Vault); kubectl
+  via the Gateway; Terraform/Ansible automation; session recording (.cast playback, scanning for
+  dangerous commands/leaked secrets). Assume this skill for "can Twingate pass the user's identity
+  to my app?", "audit who used this app", or "SSO for my internal tool".
 ---
 
 ## Role
