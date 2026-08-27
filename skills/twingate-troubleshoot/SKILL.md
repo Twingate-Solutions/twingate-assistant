@@ -1,20 +1,17 @@
 ---
 name: twingate-troubleshoot
 description: >
-  Use when the user reports connectivity issues, access failures, DNS resolution
-  problems, or any error with Twingate. Activate for: "can't connect", "not working",
-  "resource not found", "access denied", DEAD connector, DNS not resolving, device
-  trust blocking access, security policy issues, P2P failure, or any Twingate
-  troubleshooting or diagnostic request. Also activate for symptom-shaped and
-  error-string queries: exact client error text ("unknown network name", "too many
-  open files", "setup wizard ended prematurely", "unable to join network"), OS-specific
-  client bugs on Windows, macOS, Linux (Fedora, Ubuntu, NixOS), ChromeOS, or Android
-  Auto; client crashes, freezes, or unresponsiveness; version-specific regressions
-  (e.g. a specific client build number misbehaving); TAP adapter or virtual network
-  adapter issues; device posture / screen lock / disk encryption check failures;
-  third-party AV, EDR, VPN, or DNS-filtering software conflicts (CrowdStrike, Zscaler,
-  Elastic AV, Avast, consumer VPNs); packet capture, system report, or client/connector
-  log collection; and engaging or escalating to Twingate technical support.
+  Use when the user reports connectivity issues, access failures, DNS resolution problems, or any
+  error with Twingate. Activate for: "can't connect", "not working", "resource not found", "access
+  denied", DEAD connector, DNS not resolving, device-trust blocks, security policy issues, P2P
+  failure, or any Twingate diagnostics. Also activate for symptom-shaped queries: exact client error
+  text ("unknown network name", "too many open files", "setup wizard ended prematurely", "unable to
+  join network"), OS-specific client bugs on Windows, macOS, Linux (Fedora, Ubuntu, NixOS),
+  ChromeOS, or Android Auto; client crashes, freezes, or unresponsiveness; version-specific
+  regressions (a specific build misbehaving); TAP/virtual network adapter issues; device posture,
+  screen-lock, or disk-encryption failures; third-party AV/EDR/VPN/DNS-filtering conflicts
+  (CrowdStrike, Zscaler, Elastic AV, Avast, consumer VPNs); packet capture, system reports,
+  client/connector logs; and engaging or escalating to Twingate technical support.
 ---
 
 ## Role
