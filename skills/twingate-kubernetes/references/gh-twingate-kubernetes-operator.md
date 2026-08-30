@@ -1,12 +1,8 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator
 type: github
-fetched: 2026-08-23
-source_version: 8eddac286be1147d12224fa668ae856b6cb9c765
----
-
-The change is a minor GitHub Actions workflow update (pinning `docker/setup-buildx-action` to v4.3.0). This does not affect any user-facing behavior, CRDs, configuration, or documented gotchas. The summary requires no content changes.
-
+fetched: 2026-08-30
+source_version: f439cbc49ce64b3e517e1d4df6169e419b657094
 ---
 
 # Twingate Kubernetes Operator
@@ -56,9 +52,15 @@ Alternative: clone the repo and point `helm upgrade` at the local `./deploy/twin
 - Deprecated Kubernetes versions removed in v2; changing a Service's `resource.twingate.com/type` value now recreates the `TwingateResource`.
 - On uninstall, the gateway's Twingate CRs are deleted before the operator.
 - License changed to Apache 2.0 in v2.
+- **EKS compatibility (v2.0.1 / v1.3.1):** `ssl.VERIFY_X509_STRICT` was relaxed so the operator can reach the Kubernetes API server on EKS (fixes issue #1128).
+
+## Recent Releases
+
+- **v2.0.1 / v1.3.1 (2026-08-24):** Bug fix — relaxed `ssl.VERIFY_X509_STRICT` to restore connectivity to the API server on EKS clusters. Dependency bumps only otherwise.
+- **v1.3.0 (2026-07-30):** The Kubernetes Resource is now retained when a Service annotation is removed; Helm can adopt operator-generated Kubernetes Resources.
+- **v2.0.0 (2026-08-12):** Breaking release — see migration guide.
 
 ## Related Docs
 
 - `Twingate/helm-charts` — Connector deployment (Remote Network prerequisite)
-- Repo Wiki: Getting Started, API Reference, v1→v2 Migration
-- Twingate forum and help center for support
+-

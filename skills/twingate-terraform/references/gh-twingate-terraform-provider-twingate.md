@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/terraform-provider-twingate
 type: github
-fetched: 2026-08-23
-source_version: 6875b07f8528f796df1498039e2414a58c087042
+fetched: 2026-08-30
+source_version: 2547a7ef3becc430b4aee7a6bd75026259231552
 ---
 
 # Twingate Terraform Provider
@@ -12,9 +12,9 @@ Terraform provider for managing Twingate resources (networks, resources, groups,
 
 ## Key Information
 - Written in Go; published to the Terraform Registry
-- Covers resources: `twingate_resource`, `twingate_group`, `twingate_connector`, `twingate_remote_network`, `twingate_user`, `twingate_service_account`, and associated data sources
+- Covers resources: `twingate_resource`, `twingate_group`, `twingate_connector`, `twingate_remote_network`, `twingate_user`, `twingate_service_account`, `twingate_ssh_resource`, `twingate_kubernetes_resource`, `twingate_web_app_resource`, `twingate_gateway`, and associated data sources
 - Docs in `docs/` are auto-generated from `templates/`; edit templates, not generated files
-- Latest stable release: **v4.3.1**
+- Latest stable release: **v4.3.2**
 
 ## Prerequisites
 - Bash
@@ -68,14 +68,33 @@ make docs
 
 All three can also be set directly in the provider block as `api_token`, `network`, and `url`.
 
-## Gotchas
-- `docs/` is auto-generated — manual edits will be overwritten by `make docs`
-- Acceptance tests (`make testacc`) hit a real Twingate network; all three env vars must be set or tests fail
-- The repo description references "Kubernetes controller / CRDs," which is inaccurate metadata — this is a Terraform provider, not a Kubernetes controller
-- Recent fix (v4.3.1): `access_group` `security_policy_id` could show inconsistent state after `apply`; update if using that attribute
+## Resource Notes
 
-## Related Docs
-- [Terraform Registry – Twingate Provider](https://registry.terraform.io/providers/Twingate/twingate/latest/docs)
-- [Twingate API Docs](https://docs.twingate.com/docs/api-overview)
-- [Terraform Plugin Framework](https://developer.hashicorp.com/terraform/plugin/framework)
-- [Go Installation](https://golang.org/doc/install)
+### `twingate_ssh_resource`
+- `username` and `protocols` attributes have been removed from the schema (deprecated and dropped)
+- Required: `name`, `gateway_id`, `remote_network_id`, `address`
+- Optional: `alias`, `is_visible`, `security_policy_id`, `tags`, `access_group`, `access_policy`
+
+### `twingate_kubernetes_resource`
+- `protocols` attribute has been removed from the schema
+- Optional: `ca_file`, `in_cluster`, `is_visible`, `security_policy_id`, `tags`
+
+### `twingate_web_app_resource` (new)
+- Web App Resources accessed via a Gateway
+- Required: `address`, `downstream` (port), `gateway_id`, `name`, `remote_network_id`, `upstream` (port)
+- Optional: `alias`, `is_visible`, `request_header_rewrites` (map of HTTP headers to rewrite), `security_policy_id`, `tags`, `access_group`, `access_policy`
+- Read-only: `id`
+
+### `twingate_gateway_config` (removed)
+- The `twingate_gateway_config` Terraform resource has been removed
+- Gateway configuration is now done via a YAML file (e.g., `config.yaml.tftpl`) rendered with Terraform's `templatefile()` function and passed to the instance's startup script
+- Example YAML structure includes `twingate.network`, `twingate.host`, `port`, `metricsPort`, `tls`, `ssh.gateway`, `ssh.ca` (manual or vault), with camelCase field names (e.g., `certificateFile`, `privateKeyFile`, `caBundleFile`)
+
+## Gateway Configuration (YAML approach)
+
+The gateway reads a YAML config file. Use `templatefile()` to render it:
+
+```terraform
+locals {
+  gateway_port = 8443
+  gateway_config = templatefile("${path.module}/config.yaml.
