@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator/wiki
 type: github
-fetched: 2026-08-14
-source_version: 72f0d716f6096328f27a5b37d8c70f22a68cfcd3
+fetched: 2026-08-30
+source_version: 9703051c8d00007e758dec09dc1f5635dedb535d
 ---
 
 # Twingate Kubernetes Operator

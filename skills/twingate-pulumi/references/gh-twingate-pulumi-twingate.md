@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/pulumi-twingate
 type: github
-fetched: 2026-08-23
-source_version: c854fc969dcc32275a2895d3ef90cb2535d08ef2
+fetched: 2026-08-30
+source_version: 087202f1a2f1488361056fcd81ce1801343e43e0
 ---
 
 # Twingate Pulumi Provider
@@ -82,6 +82,9 @@ act --list
 act pull_request -j lint
 ```
 Select "Medium" Docker image size on first run.
+
+## CI – Release Workflow Notes
+- Java SDK builds use `actions/setup-java@v5.7.0` (Temurin distribution, Gradle cache enabled).
 
 ## Related Docs
 - [Twingate API Overview](https://docs.twingate.com/docs/api-overview)

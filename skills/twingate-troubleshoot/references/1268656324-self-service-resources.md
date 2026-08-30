@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/1268656324-self-service-resources
 type: help
-fetched: 2026-08-06
-source_version: b4e55360219993d0b7c8f6c2c4818f4eec48c120e5c26a8bde6e6c9ab1d130a1
+fetched: 2026-08-30
+source_version: 1af85e9365e25b2acdc94ea24f97f0a8d1142465a2aae839f65ae865c451b1ab
 ---
 
 # Self-Service Resources
@@ -11,27 +11,32 @@ source_version: b4e55360219993d0b7c8f6c2c4818f4eec48c120e5c26a8bde6e6c9ab1d130a1
 Self-Service Resources
 
 ## Summary
-A reference page listing Twingate's self-service support channels. Provides quick links to documentation, troubleshooting guides, community forums, billing, and status pages.
+A directory page listing Twingate's self-service support resources across documentation, troubleshooting, community, billing, and status channels. Serves as a quick-reference index for users seeking help without contacting support directly.
 
 ## Key Information
 - **Documentation**: [Twingate Docs](https://docs.twingate.com) — configuration and setup reference
 - **Knowledge Base**: [Twingate Help Center](https://help.twingate.com) — troubleshooting articles
-- **Self-Service Troubleshooting Guide**: Standalone guide for diagnosing common issues
-- **Known Incompatibilities**: Dedicated page listing software/environment conflicts
+- **Self-Service Troubleshooting Guide**: Dedicated guide for diagnosing common issues
+- **Known Incompatibilities**: List of software/environments with known conflicts
 - **Community Support**: [Twingate Subreddit](https://reddit.com/r/twingate) — peer support
-- **Billing**: Subscription Management portal for plan changes and invoices
-- **Status Page**: [Twingate Service Status](https://status.twingate.com) — live service health
-- **Changelog**: [Twingate Changelog](https://twingate.com/changelog) — new features and bug fixes
+- **Billing**: Subscription Management portal for plan/billing changes
+- **Status**: [Twingate Status Page](https://status.twingate.com) — real-time service health
+- **Changelog**: Twingate Changelog for new features and bug fixes
 
 ## Prerequisites
-None — all resources are publicly accessible or require existing account credentials for billing.
+None — public-facing resource directory.
+
+## Configuration Values
+None applicable.
 
 ## Gotchas
-- No direct support ticket or live chat link is included on this page; escalation path is not defined here
-- Known Incompatibilities page should be checked before deploying in complex network environments
+- Check the **Service Status** page before troubleshooting connectivity issues to rule out platform-wide incidents
+- Review **Known Incompatibilities** before deploying Connectors or Clients in non-standard environments
+- The Help Center (troubleshooting) and Twingate Docs (configuration) are separate properties — search both for complete coverage
 
 ## Related Docs
-- Twingate Docs (configuration)
-- Twingate Help Center (troubleshooting)
+- Twingate Docs (configuration reference)
+- Twingate Help Center (troubleshooting KB)
+- Twingate Changelog
+- Known Incompatibilities article
 - Self-Service Troubleshooting Guide
-- Known Incompatibilities
