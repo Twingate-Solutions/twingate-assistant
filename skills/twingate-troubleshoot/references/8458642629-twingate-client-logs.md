@@ -1,76 +1,78 @@
 ---
 source: https://help.twingate.com/articles/8458642629-twingate-client-logs
 type: help
-fetched: 2026-08-06
-source_version: 7127371db64efb7629d6e480582db75f44afd4901efff51150634fbf056262d8
+fetched: 2026-09-06
+source_version: 2744ff54aff83e0f47a5a60e650123d9e277b6d3ac97236c7397eed302ae68e9
 ---
 
 # Twingate Client Logs
 
 ## Summary
-Guide for collecting Twingate Client diagnostic logs across all supported platforms. Detailed logging must be enabled before reproducing issues, as it is not retroactive. Logs can be uploaded directly via the client or collected manually.
+Guidance for collecting Twingate Client diagnostic logs across all supported platforms (Android, iOS, Linux, macOS, Windows). Detailed logging must be enabled before reproducing issues, as it is not retroactive. Logs are submitted to support via upload or manual file attachment.
 
 ## Key Information
-- **Critical**: Enable "Collect Detailed Logs" before reproducing the issue — enabling is not retroactive
-- Two collection methods for Windows/Mac: automated upload (preferred) or manual file retrieval
-- Linux uses `sudo twingate report` to generate a ZIP bundle
-- Mobile platforms use in-app "Share with Developer" flow
-- Log uploads require an existing support ticket ID
+- **Detailed logging must be enabled first**, then issue reproduced, then logs collected
+- Two collection methods for Windows/Mac: automated upload or manual file retrieval
+- Linux uses `sudo twingate report` to generate ZIP bundle
+- Mobile platforms share logs directly from within the app
 
 ## Prerequisites
-- Active Twingate support ticket (get one at help.twingate.com → "Open a Support Request")
-- Detailed logging enabled on the affected device
-- Issue reproduced **after** enabling detailed logging
+- Active Twingate support ticket (required for log upload method)
+- "Collect Detailed Logs" enabled before reproducing the issue
+- Linux: debug log level set and client restarted before reproducing issue
 
 ## Step-by-Step
 
-### Windows/Mac — Upload (Preferred)
-1. Click Twingate tray icon → **More > Troubleshoot**
-2. Verify checkmark next to **Collect Detailed Logs** (enable if missing)
-3. Reproduce the issue
-4. **More > Troubleshoot > Upload Logs...**
-5. Click **Create Ticket**, enter existing ticket ID, description → **Upload Logs**
+### Enable Detailed Logs
+| Platform | Steps |
+|----------|-------|
+| macOS/Windows | Twingate tray icon → More → Troubleshoot → Collect Detailed Logs (verify checkmark) |
+| iOS | Gear icon → Enable Collect Detailed Logs |
+| Android | Burger menu → Advanced → Enable Collect Detailed Logs |
+| Linux | `sudo twingate config log-level debug` → `twingate stop` → `twingate start` |
 
-### Windows — Manual
-1. **More > Troubleshoot > View Logs**
-2. Collect from: `%LOCALAPPDATA%\Twingate\logs\` and `%PROGRAMDATA%\Twingate\logs\`
-3. Compress and attach to support ticket
+### Collect Logs
 
-### Mac — Manual
-- **App Store client**: `~/Library/Group Containers/group.com.twingate/Logs/`
-- **Standalone client**: `~/Library/Group Containers/6GX8KVTR9H.com.twingate.com/Logs/` and `/private/var/log/twingate/`
+**Windows/Mac (Upload):** Tray icon → More → Troubleshoot → Upload Logs → Create Ticket → enter ticket ID → Upload Logs
 
-### Linux
+**Windows (Manual):**
+- `%LOCALAPPDATA%\Twingate\logs\`
+- `%PROGRAMDATA%\Twingate\logs\`
+
+**Mac (Manual):**
+- App Store: `~/Library/Group Containers/group.com.twingate/Logs/`
+- Standalone: `~/Library/Group Containers/6GX8KVTR9H.com.twingate.com/Logs/` and `/private/var/log/twingate/`
+
+**Linux:**
 ```bash
 sudo twingate config log-level debug
 twingate stop && twingate start
 # Reproduce issue, then:
-sudo twingate report   # creates ZIP in current directory
+sudo twingate report   # generates ZIP in current directory
+# If no journalctl: /var/log/twingated.log
 ```
-Fallback log path (no journalctl): `/var/log/twingated.log`
-Live log review: `sudo journalctl -u twingate --since "1 hour ago"`
 
-### iOS
-- Not logged in: Settings gear → **Share with Developer > Save to Files**
-- Logged in: Profile image → **Share with Developer > Save to Files**
-- Enable detailed logs: gear icon → **Collect Detailed Logs**
+**Live Linux log review:**
+```bash
+sudo journalctl -u twingate --since "1 hour ago"
+```
 
-### Android/ChromeOS
-- Burger menu (top left) → **Advanced > Share Logs with Developer**
-- Enable detailed logs: **Advanced > Collect Detailed Logs**
+**iOS:** App → (Settings gear or Profile image) → Share with Developer → Save to Files → attach to ticket
+
+**Android/ChromeOS:** Burger menu → Advanced → Share Logs with Developer
 
 ## Configuration Values
-| Platform | Command/Setting |
-|----------|----------------|
-| Linux log level | `sudo twingate config log-level debug` |
-| Linux check config | `sudo twingate config` |
-| Linux generate bundle | `sudo twingate report` |
+| Parameter | Command |
+|-----------|---------|
+| Check log level | `sudo twingate config` |
+| Set debug logging | `sudo twingate config log-level debug` |
+| Generate log bundle | `sudo twingate report` |
 
 ## Gotchas
-- Detailed logging is **not retroactive** — must reproduce issue after enabling
-- Linux Client must be **restarted** after changing log level
-- Upload portal is **unmonitored** — always reference an existing support ticket
-- In containerized/headless Linux, `journalctl` may be unavailable; use `/var/log/twingated.log`
+- Enabling detailed logs is **not retroactive** — must reproduce the issue after enabling
+- Linux client must be **restarted** after changing log level
+- Upload method requires an existing support ticket ID; queue is unmonitored
+- In containerized/headless Linux environments without `journalctl`, use `/var/log/twingated.log`
 
 ## Related Docs
-- Twingate support portal: help.twingate.com
+- Twingate Support: [help.twingate.com](https://help.twingate.com) → Open a Support Request

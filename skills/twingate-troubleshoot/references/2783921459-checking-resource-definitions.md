@@ -1,53 +1,60 @@
 ---
 source: https://help.twingate.com/articles/2783921459-checking-resource-definitions
 type: help
-fetched: 2026-08-06
-source_version: ea076e5f5cd680a99c54ee04c390108ddf4f294a4f4d305bb1101d5d977bf99c
+fetched: 2026-09-06
+source_version: 82941e42d4ec394b80aeb9454829dc61539575d05c58f47a8429559270c02430
 ---
 
 # Checking Resource Definitions
 
+## Page Title
+Checking Resource Definitions
+
 ## Summary
-Twingate Resources define which traffic the Client intercepts; all other traffic passes through normally. Resources are either DNS type (hostname/FQDN) or CIDR type (IP address). Correct Resource definitions are required for connectivity to work.
+Twingate uses two Resource types (DNS and CIDR) to determine which traffic the Client intercepts. Resources must be explicitly defined for each asset users need to reach. Incorrect or missing Resource definitions are a common connectivity troubleshooting issue.
 
 ## Key Information
-- **Two Resource types**: DNS (hostname/FQDN) and CIDR (IP ranges)
-- Client only intercepts traffic matching defined Resources
-- Exception: DoH enabled causes all DNS traffic to be handled by the Client
-- Patterned DNS Resources support `*` and `?` wildcards in FQDNs
+- **CIDR Resources**: Used when connecting via private IP address
+- **DNS Resources**: Used when connecting via hostname or FQDN
+- Twingate Client only intercepts traffic matching defined Resources (all other traffic passes through normally)
+- **Exception**: With DoH enabled, all DNS traffic is also handled by the Client
 
-## Resource Type Selection
-| Use Case | Resource Type |
-|----------|--------------|
-| Users connect via private IP | CIDR |
-| Users connect via hostname/FQDN | DNS |
+## Resource Type Requirements
 
-## CIDR Resource Options
-- **Option 1**: Single IP — e.g., `10.1.2.3`
-- **Option 2**: CIDR range — e.g., `10.1.2.0/24`
+### CIDR Resources
+- Single IP (e.g., `10.1.2.3`) or CIDR range (e.g., `10.1.2.0/24`)
+- Use when users connect via private IP address
 
-## DNS Resource Options
+### DNS/FQDN Resources
+- Exact FQDN (e.g., `server1.corp.int`)
+- Patterned FQDN using wildcards `*` or `?` (e.g., `*.corp.int`)
 
-**FQDN only** (`server1.corp.int`):
-- Option 1: Exact FQDN match
-- Option 2: Patterned FQDN with wildcards (e.g., `*.corp.int`)
+### Hostname (Unqualified) Resources
+- Requires **two separate Resources**:
+  1. One for the FQDN (`server1.corp.int`)
+  2. One for the hostname alone (`server1`)
 
-**Hostname + FQDN** (`server1`):
-- Requires **two separate Resources**: one for the FQDN (`server1.corp.int`) and one for the bare hostname (`server1`)
-- Single Resource covering only the FQDN will not intercept bare hostname traffic
+## Step-by-Step: Verifying Resource Definitions
+1. Open the Admin Console → **Resources** list
+2. Confirm the target asset exists as a Resource
+3. For FQDN access: verify either the exact FQDN exists OR a wildcard pattern covers it
+4. For hostname access: verify both the FQDN Resource and bare hostname Resource exist
 
-## Troubleshooting Checklist
-1. Confirm asset exists in the **Resources** list in Admin Console
-2. For hostname access, verify both hostname and FQDN are covered (separate Resources or wildcard pattern)
-3. For IP access, verify the IP falls within a defined CIDR Resource
-4. Check if DoH is enabled — affects DNS traffic handling globally
+## Configuration Values
+
+| Connection Method | Resource Definition Options |
+|---|---|
+| Private IP | Single IP or CIDR range |
+| FQDN | Exact FQDN or wildcard pattern (`*`/`?`) |
+| Hostname only | Hostname Resource + separate FQDN Resource |
 
 ## Gotchas
-- Connecting via hostname (`server1`) when only an FQDN Resource (`server1.corp.int`) exists will fail — bare hostnames require their own Resource
-- Wildcard patterns (`*`, `?`) can cover multiple FQDNs under one Resource, but must be configured explicitly
-- Traffic not matching any Resource definition is ignored by the Client entirely
+- Connecting via hostname (`server1`) without a dedicated hostname Resource will fail even if the FQDN Resource (`server1.corp.int`) exists — both must be defined separately
+- Wildcard patterns (`*`, `?`) can cover FQDNs but **do not** cover bare hostnames
+- DoH mode changes Client behavior — all DNS traffic is intercepted, not just Resource-matched traffic
+- Missing Resource = traffic is not intercepted = connection appears to fail or bypass Twingate
 
 ## Related Docs
-- Patterned FQDN Resource definitions (wildcard details)
+- Patterned FQDN definitions (wildcard syntax details)
 - Unqualified domain names explanation
-- Twingate troubleshooting guide
+- Twingate troubleshooting guide (parent document)

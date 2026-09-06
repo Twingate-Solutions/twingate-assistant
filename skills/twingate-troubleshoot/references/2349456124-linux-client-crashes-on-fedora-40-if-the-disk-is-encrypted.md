@@ -1,52 +1,48 @@
 ---
 source: https://help.twingate.com/articles/2349456124-linux-client-crashes-on-fedora-40-if-the-disk-is-encrypted
 type: help
-fetched: 2026-08-06
-source_version: e0ef27df9148fab95ac7e766468c2bb59383bc6d9618c6ba0452a9bf26be6b84
+fetched: 2026-09-06
+source_version: 9e423c1494840a69ac1b7c550e8071b5025799694e05eaf9ab164168ab595f1a
 ---
 
 # Linux Client Crashes on Fedora 40 (Encrypted Disk)
 
 ## Page Title
-Linux Client Crashes on Fedora 40 if the Disk is Encrypted
+Linux Client crashes on Fedora 40 if the disk is encrypted
 
 ## Summary
-The Twingate Linux client fails to start on Fedora 40 systems due to an incompatibility with OpenSSL 3.2.1, which ships by default in Fedora 40. Encrypted disk installations are particularly noted as affected since Fedora 40 enables encryption by default.
+The Twingate Linux Client fails to start on Fedora 40 systems (which are encrypted by default) due to an incompatibility with OpenSSL 3.2.1 introduced in that OS version. The only current workaround is downgrading the OpenSSL library to the Fedora 39 version.
 
 ## Key Information
-- **Affected component:** Twingate Linux Client
-- **Affected OS:** Fedora Linux 40 (encrypted or unencrypted)
-- **Root cause:** Incompatibility with OpenSSL version 3.2.1 introduced in Fedora 40
-- **Status:** Known issue reported to development team; no permanent fix available at time of publication
+- Crash occurs on fresh installs of Fedora 40 with disk encryption enabled
+- Fedora 40 enables disk encryption by default, making this a widespread issue
+- Root cause: incompatibility with **OpenSSL 3.2.1** (shipped with Fedora 40)
+- Fix is under investigation by Twingate development team
+
+## Affected Components
+- **Component:** Twingate Client
+- **Platform:** Linux
+- **OS:** Fedora Linux 40 (encrypted disk)
 
 ## Prerequisites
 - Twingate Client installed on Fedora 40
 - `dnf` package manager available
-- Sudo/root access to downgrade system packages
+- sudo/root access
 
-## Workaround (Step-by-Step)
-
-Downgrade `openssl-libs` to the Fedora 39 version:
+## Workaround: Downgrade OpenSSL
 
 ```bash
 sudo dnf downgrade --releasever=39 openssl-libs
 ```
 
-After downgrade, attempt to start the Twingate client normally.
-
-## Configuration Values
-| Parameter | Value |
-|---|---|
-| Incompatible OpenSSL version | 3.2.1 (Fedora 40 default) |
-| Target downgrade version | 3.1.1 (from Fedora 39) |
-| `--releasever` flag value | `39` |
+This downgrades `openssl-libs` to the Fedora 39 version (3.1.1), which is compatible with the Twingate Client.
 
 ## Gotchas
-- Fedora 40 enables full disk encryption **by default** on fresh installs — most Fedora 40 users are likely affected regardless of whether they explicitly chose encryption
-- Downgrading `openssl-libs` is a system-wide change and may affect other applications depending on OpenSSL 3.2.x features
-- Future system updates via `dnf upgrade` may re-upgrade `openssl-libs` back to 3.2.x, breaking the client again — consider pinning or excluding the package after downgrade
-- No permanent fix ETA provided in documentation
+- Disk encryption is **on by default** in Fedora 40 — this affects standard installations, not just explicitly encrypted setups
+- Downgrading system OpenSSL libraries may affect other applications or security posture; evaluate before applying in production
+- No permanent fix available at time of publication; monitor Twingate release notes for updates
+- The workaround targets `openssl-libs` specifically, not the full `openssl` package
 
 ## Related Docs
 - Twingate Linux Client installation documentation
-- Fedora 40 release notes (OpenSSL 3.2.1 inclusion)
+- Fedora 40 release notes (OpenSSL 3.2.1 changes)

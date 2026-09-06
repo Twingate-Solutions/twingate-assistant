@@ -1,80 +1,87 @@
 ---
 source: https://help.twingate.com/articles/7071403289-handling-internal-domains-ending-in-local
 type: help
-fetched: 2026-08-06
-source_version: 30323019557a1783cd824629d5b5bd50793341a1e55941105f9faa08b6e3c3d6
+fetched: 2026-09-06
+source_version: ab080a5af81bc80b99992c09b5a6df27b0c7f29f08b3038c057ecd0f4fbf6cb8
 ---
 
 # Handling Internal Domains Ending in .local
 
 ## Summary
-The `.local` TLD is reserved for mDNS/Bonjour and conflicts with Twingate DNS resolution on Linux and macOS. This doc covers four approaches to resolve `.local` domain conflicts, ranging from minor configuration changes to disabling mDNS entirely.
+The `.local` TLD is reserved for multicast DNS (mDNS/Bonjour) per RFC 6762, causing conflicts when Twingate Resources use `.local` domains—especially on Linux and macOS. Three escalating solutions are available: subdomain restructuring, Twingate aliases, DNS reprioritization, or disabling mDNS entirely.
 
 ## Key Information
-- `.local` TLD conflicts arise because client OS mDNS services intercept resolution before Twingate can handle it
-- Linux's `systemd-resolved` stub listener won't forward `.local` DNS requests upstream
-- macOS Bonjour service similarly captures `.local` requests
-- Apple recommends using registered domains instead of `.local` for internal networks
+- `.local` conflicts with mDNS on Linux (systemd-resolved) and macOS (Bonjour/mDNSResponder)
+- Apple recommends avoiding `.local` for internal networks entirely
+- Solutions range from non-destructive (alias) to high-impact (disable mDNS)
 
-## Solutions (Ordered by Invasiveness)
+## Prerequisites
+- Twingate Resources already configured in a Remote Network
+- Admin access to Connector host (Linux solutions)
+- macOS: Recovery Mode access + willingness to disable SIP
 
-### 1. Use Subdomains
-Restructure `resource.local` → `resource.companyname.local`
-- Allows gradual migration without removing existing entries
-- Effectiveness depends on OS/client application
+## Solutions (Escalating Impact)
 
-### 2. Add a Twingate Alias
-In Twingate console: Resource → Edit → Alias → enter alternative domain (e.g., `resource.int`)
-- Avoids direct `.local` access from client
-- Test both the `.local` and aliased versions after applying
+### Option 1: Subdomain Restructuring
+Add a company subdomain to push `.local` to a sub-level:
+- `fileshare.local` → `fileshare.companyname.local`
+- Allows gradual migration; keep old entries during transition
 
-### 3. Reprioritize DNS in nsswitch.conf (Linux)
-Edit `/etc/nsswitch.conf`:
+### Option 2: Twingate Alias
+1. Open Resource in Twingate console → **Edit**
+2. Click **Alias** next to the domain name
+3. Enter alternate domain (e.g., `resource.int`)
+4. Verify change propagates to local Client
+5. Test access via both original `.local` and new alias
+
+### Option 3: Reprioritize DNS on Connector Host (Linux)
+```bash
+sudo nano /etc/nsswitch.conf
 ```
-# Before
+Change:
+```
 hosts: files mdns4_minimal [NOTFOUND=return] dns
-
-# After
+```
+To:
+```
 hosts: files dns mdns4_minimal [NOTFOUND=return]
 ```
-Then: `sudo systemctl restart systemd-resolved`
-
-### 4. Disable mDNS (Last Resort)
-
-**Linux** — Edit `/etc/systemd/resolved.conf`:
-```ini
-# Change from:
-#DNSStubListener=yes
-# To:
-DNSStubListener=no
+```bash
+sudo systemctl restart systemd-resolved
 ```
-Then: `sudo systemctl restart systemd-resolved`
 
-**macOS:**
-1. Boot into Recovery Mode (`Command+R`)
-2. Run `csrutil disable` in Recovery Terminal
-3. Reboot, then run:
+### Option 4: Disable mDNS (Last Resort)
+
+**Linux** — Disable systemd-resolved stub listener:
+```bash
+sudo nano /etc/systemd/resolved.conf
+# Change: #DNSStubListener=yes
+# To:     DNSStubListener=no
+sudo systemctl restart systemd-resolved
+```
+
+**macOS** — Requires disabling System Integrity Protection (SIP):
+1. Reboot → hold `Command+R` → Utilities → Terminal
+2. Run `csrutil disable`, then reboot
+3. After reboot:
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSresponder.plist
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSresponderHelper.plist
 ```
+To re-enable: replace `unload` with `load`, reboot, re-enable SIP via `csrutil enable`
 
 ## Configuration Values
 | File | Setting | Value |
 |------|---------|-------|
-| `/etc/nsswitch.conf` | `hosts:` order | `files dns mdns4_minimal [NOTFOUND=return]` |
 | `/etc/systemd/resolved.conf` | `DNSStubListener` | `no` |
+| `/etc/nsswitch.conf` | `hosts` order | `files dns mdns4_minimal [NOTFOUND=return]` |
 
 ## Gotchas
-- Disabling mDNS breaks network discovery, file shares, printers, and screen sharing
-- macOS mDNS disable requires disabling System Integrity Protection (SIP) — significant security trade-off
-- Re-enable SIP after re-enabling mDNS on macOS (`csrutil enable` in Recovery)
-- Changes to `launchctl unload -w` persist across reboots; use `load` to reverse
-
-## Prerequisites
-- Linux: `systemd-resolved` service
-- macOS: Admin access; SIP disable requires physical access for Recovery Mode boot
+- Disabling mDNS breaks network discovery: file shares, printers, screen sharing affected
+- macOS SIP disable gives full root access—security risk; re-enable after
+- The `-w` flag on `launchctl unload` makes changes persist across reboots
+- Alias and DNS reprioritization can be combined for better results
 
 ## Related Docs
-- [RFC 6762](https://tools.ietf.org/html/rfc6762) — `.local` mDNS specification
+- [RFC 6762 – mDNS](https://datatracker.ietf.org/doc/html/rfc6762)
 - Twingate Resource configuration (Alias feature)

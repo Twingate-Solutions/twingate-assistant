@@ -1,20 +1,20 @@
 ---
 source: https://help.twingate.com/articles/5202917932-connector-upgrade-produces-gpg-error-in-apt
 type: help
-fetched: 2026-08-06
-source_version: 55850789585cf8026a563fbf177cfaca09b3db41ff0a6c0011cb2d97279d2e72
+fetched: 2026-09-06
+source_version: 83e63bdcb21114a88192ff39e45da95ea9d9e411a75d1b7ccdb63d274a2d1f6f
 ---
 
 # Connector Upgrade Produces GPG Error in APT
 
 ## Summary
-A backend change to Twingate's package serving infrastructure causes GPG signature verification errors when running `apt update` on systems using the Twingate APT repository. In most cases this is a warning only and upgrades proceed normally, but some systems may fail to upgrade if the repository isn't marked as trusted.
+A backend change in Twingate's package serving infrastructure causes GPG verification errors when running `apt update` against the Twingate APT repository. The connector package is not currently signed, but systems without explicit trust configuration may block updates. Most cases result in a warning only, not a failure.
 
 ## Key Information
-- Error appears as: `NO_PUBKEY 5C363F09A9174A9E`
-- The Twingate Connector package is **not currently signed** — this is expected behavior
-- Systems deployed via the official Twingate Admin Console deployment script should already have `trusted=true` configured
-- The fix does not eliminate the warning — it only allows upgrades to proceed
+- Error affects systems using `https://packages.twingate.com/apt` repository
+- Systems deployed via official Twingate Admin Console deployment script are typically unaffected (trusted config already set)
+- Warning does not prevent `apt upgrade` from working in most cases
+- Fix is required only if `sudo apt upgrade` fails to upgrade the connector
 
 ## Symptoms
 ```
@@ -24,13 +24,7 @@ couldn't be verified because the public key is not available: NO_PUBKEY 5C363F09
 
 ## Resolution
 
-### Quick Check
-First try running the upgrade directly — the warning may not block it:
-```bash
-sudo apt upgrade
-```
-
-### Fix (if upgrade fails)
+### Step-by-Step (if upgrade fails)
 
 1. Edit the Twingate APT source list:
    ```bash
@@ -42,7 +36,7 @@ sudo apt upgrade
    deb [trusted=true] https://packages.twingate.com/apt/ /
    ```
 
-3. Save the file, then run:
+3. Save and exit, then run:
    ```bash
    sudo apt update && sudo apt upgrade
    ```
@@ -50,13 +44,13 @@ sudo apt upgrade
 ## Configuration Values
 | File | Setting | Value |
 |------|---------|-------|
-| `/etc/apt/sources.list.d/twingate.list` | `trusted` | `true` |
+| `/etc/apt/sources.list.d/twingate.list` | `trusted` option | `true` |
 
 ## Gotchas
-- Adding `trusted=true` suppresses the upgrade failure but **does not remove** the GPG warning from `apt update` output
-- Only apply the fix if `apt upgrade` actually fails — most systems only show a warning and work fine
-- Systems installed via Admin Console deployment script are likely already configured correctly
+- Adding `trusted=true` does **not** suppress the GPG warning — it only allows package updates to proceed
+- If you only see a warning (not a failure), no action is required; run `sudo apt upgrade` directly
+- The connector package is **not currently signed** — this is expected behavior, not a security incident
 
 ## Related Docs
-- Twingate Connector deployment (Admin Console)
-- APT repository: `https://packages.twingate.com/apt/`
+- Twingate Connector deployment (Admin Console deployment script)
+- Twingate APT repository: `https://packages.twingate.com/apt`

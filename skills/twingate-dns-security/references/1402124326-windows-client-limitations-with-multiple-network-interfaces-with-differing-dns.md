@@ -1,47 +1,50 @@
 ---
 source: https://help.twingate.com/articles/1402124326-windows-client-limitations-with-multiple-network-interfaces-with-differing-dns
 type: help
-fetched: 2026-08-06
-source_version: a6193d3abf2c8691f10d961fddf232f0dd9de0ff2dd0e38c642ea90971b36c1f
+fetched: 2026-09-06
+source_version: 2936846a4d1347c4d0907a45a1268d11398e4df11ad146f774c6e000832f3732
 ---
 
 # [Windows Client] Limitations with Multiple Network Interfaces with Differing DNS
 
 ## Summary
-The Windows Twingate Client only uses DNS servers assigned to the system's default gateway interface for non-Twingate traffic resolution. Systems with multiple network interfaces using separate DNS servers per interface will experience DNS resolution failures for resources tied to non-default interfaces.
+The Windows Twingate Client only uses DNS servers assigned to the system's default gateway interface for non-Twingate traffic resolution. Systems with multiple network interfaces, each with unique DNS servers, will experience failures when attempting to resolve hostnames that require a secondary interface's DNS servers.
 
 ## Key Information
-- Twingate acts as a transparent DNS proxy for a **single interface only**
-- All non-Twingate DNS queries route to DNS servers on the **default gateway interface**
-- Secondary interface DNS servers are never queried, regardless of configuration
-- Backend hostnames/FQDNs resolvable only via secondary interface DNS will fail
+- Twingate acts as a transparent DNS proxy but only for a single interface
+- All non-Twingate DNS queries are forwarded exclusively to DNS servers on the **default gateway interface**
+- Secondary interface DNS servers are completely ignored for non-Twingate traffic
+- Backend hostnames/FQDNs resolvable only via a secondary interface's DNS will fail
 
-## Prerequisites
-- Affected environments: Windows systems with multiple NICs (e.g., frontend + backend interfaces)
-- Each interface must have unique DNS servers assigned
-- Issue occurs when backend DNS records are only accessible through a non-default interface
+## Prerequisites / Affected Environments
+- Windows Twingate Client
+- Systems with multiple network interfaces (e.g., separate frontend and backend interfaces)
+- Each interface has distinct DNS servers accessible only through that specific interface
 
-## Configuration Values
-- Hosts file path: `C:\Windows\System32\drivers\etc\hosts`
+## Behavior Details
+| Traffic Type | DNS Behavior |
+|---|---|
+| Twingate Resources | Resolved by Twingate directly |
+| Non-Twingate (all) | Forwarded to default gateway interface DNS only |
+| Secondary interface DNS | Never queried for any traffic |
 
 ## Workarounds
 
-1. **DNS Forwarding (Preferred)**
-   - Configure internal DNS servers to forward queries between frontend and backend DNS zones
-   - Single DNS server on the default gateway interface handles all resolution
-   - No client-side changes required
+### Option 1: DNS Forwarding (Preferred)
+Configure internal DNS servers to forward queries between frontend and backend DNS zones, so a single DNS server reachable from the default gateway interface can resolve both frontend and backend records.
 
-2. **Static Hosts File Entries**
-   - Manually add backend resource IP/hostname mappings to `C:\Windows\System32\drivers\etc\hosts`
-   - Bypasses DNS resolution entirely for those entries
-   - Only viable if backend resources have static IPs
+### Option 2: Static hosts file entries
+For backend resources with static IPs, manually add entries to:
+```
+C:\Windows\System32\drivers\etc\hosts
+```
+This bypasses DNS resolution entirely for those hostnames.
 
 ## Gotchas
-- This is a **known limitation**, not a bug — no fix is implied
-- Twingate-destined traffic is unaffected; only non-Twingate DNS resolution is impacted
-- Hosts file workaround breaks if backend IPs change
-- DNS forwarding workaround requires control over internal DNS infrastructure
+- This is a **known limitation**, not a bug — multiple DNS configurations across interfaces are explicitly unsupported
+- Even if backend DNS servers are technically reachable, Twingate will not route DNS queries to them if they are not on the default gateway interface
+- The hosts file workaround only works for resources with **static IPs**; dynamic IPs require the DNS forwarding approach
 
 ## Related Docs
 - Twingate Windows Client documentation
-- Windows DNS configuration (multiple interface environments)
+- Windows DNS configuration and interface management

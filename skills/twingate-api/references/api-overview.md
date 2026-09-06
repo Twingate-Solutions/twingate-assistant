@@ -1,53 +1,49 @@
 ---
 source: https://www.twingate.com/docs/api-overview
 type: docs
-fetched: 2026-08-14
-source_version: 3e8b79aebd571f3b8c90040478a901615406c0254a9ac4684876cec7329b28af
+fetched: 2026-09-06
+source_version: 4dba3e500229c780ef51d7540ef05147db171d02e9906ab72aeefc6e24814fa5
 ---
 
 # Twingate Admin API Overview
 
-## Page Title
-API Overview
-
 ## Summary
-Twingate provides a GraphQL-based Admin API for managing all core network objects (Remote Networks, Connectors, Resources, Groups, Service Accounts, Devices, Users, Policies). Access requires an API token generated from the Admin Console. The API endpoint is tenant-specific and schema is always available via introspection.
+Twingate provides a GraphQL-based Admin API for programmatic management of network resources. Access requires generating an API token from the Admin Console and authenticating via a custom HTTP header. The API covers remote networks, connectors, resources, users, groups, devices, and service accounts.
 
 ## Key Information
-- **API Type**: GraphQL
 - **Endpoint**: `https://<subdomain>.twingate.com/api/graphql/`
-- **Auth Header**: `X-API-KEY: <your-api-token>`
-- **Schema**: Self-documenting via GraphQL introspection
-- **Terraform Provider**: Available for IaC management of Twingate resources
+- **Protocol**: GraphQL
+- **Auth header**: `X-API-KEY: <token>`
+- **Schema**: Self-documented via GraphQL introspection at the endpoint
 
 ## Prerequisites
-- Access to Twingate Admin Console
-- API token generated via: **Settings → API → Generate Token**
-- Know your Twingate subdomain
+- Admin Console access to generate API token
+- Token permission level appropriate for operations needed
+
+## Token Permission Levels
+| Level | Capabilities |
+|-------|-------------|
+| Read only | Read all API-exposed data |
+| Read & Write | Read + create, update, delete |
+| Read, Write & Provision | Read/Write + generate Connector tokens, create Service Keys |
 
 ## Configuration Values
-
 | Parameter | Value |
 |-----------|-------|
-| Endpoint | `https://<subdomain>.twingate.com/api/graphql/` |
-| HTTP Header | `X-API-KEY` |
-| Read limit | 60 requests/minute |
-| Write limit | 20 requests/minute |
-| Rate limit response | HTTP `429` |
+| Endpoint URL | `https://<subdomain>.twingate.com/api/graphql/` |
+| Auth header name | `X-API-KEY` |
+| Default allowed IP ranges | `0.0.0.0/0, ::/0` |
+| Max IP range entries per token | 10 |
+| Read rate limit | 60 requests/minute |
+| Write rate limit | 20 requests/minute |
+| Rate limit response code | `429` |
 
-## Supported Operations by Object
-
-| Object | Operations |
-|--------|-----------|
-| Remote Networks | CRUD |
-| Connectors | CRUD + generate tokens |
-| Resources | CRUD |
-| Groups | CRUD |
-| Service Accounts/Keys | CRUD |
-| Devices | Read, archive, unarchive, block, unblock, update trust |
-| Security Policies | Read, update |
-| Users | Read only |
-| Social Users | Read, invite, update, delete |
+## Setup Steps
+1. Log into Admin Console
+2. Navigate to **Settings → API → Generate Token**
+3. Assign minimum required permission level
+4. Optionally restrict to specific CIDR ranges or IPs
+5. Use token value in `X-API-KEY` header for all requests
 
 ## Example Query
 ```graphql
@@ -67,17 +63,17 @@ Twingate provides a GraphQL-based Admin API for managing all core network object
 }
 ```
 
-## Recommended Clients
-- **GUI**: GraphiQL (`brew install --cask graphiql`) or Altair (has built-in introspection)
+## Recommended GraphQL Clients
+- **GUI**: GraphiQL (`brew install --cask graphiql`) or Altair (has built-in introspection/schema browser)
 - **Python**: `gql` library
 
 ## Gotchas
-- Rate limiting returns HTTP `429` — response includes retry timing
-- Terraform provider older versions do **not** handle `429` retries automatically; upgrade to latest version
-- Pagination required for large result sets (use `after`/`first` + `pageInfo`)
-- API tokens can be disabled/enabled but must be generated from Admin Console (no API-based token creation)
+- Rate limiting returns `429` — response includes retry-after timing; upgrade Terraform provider to latest version to handle retries automatically
+- Requests from IPs outside allowed ranges fail authentication silently (auth failure, not IP error)
+- Grant tokens minimum required permissions (least privilege)
+- Schema is always current via introspection — prefer introspection over static docs for field-level details
 
 ## Related Docs
-- [Terraform Provider Documentation](https://www.twingate.com/docs/terraform)
-- [Terraform Getting Started Guide](https://www.twingate.com/docs/terraform-getting-started)
-- [GraphQL Introspection](https://graphql.org/learn/introspection/)
+- Terraform Provider documentation
+- Terraform Getting Started guide
+- GraphQL introspection (for schema/type exploration)

@@ -1,36 +1,38 @@
 ---
 source: https://help.twingate.com/articles/9450787885-macos-client-twingate-menu-bar-icon-not-visible
 type: help
-fetched: 2026-08-06
-source_version: b147d69eec3b82f442be96879ec43063f375e59c74c961f8d3023bbd15d1c6e1
+fetched: 2026-09-06
+source_version: b9bc5d83d1919ffde540d36334e58944a1192a95447577e70a170013b923c4e9
 ---
 
 # [macOS Client] Twingate Menu Bar Icon Not Visible
 
 ## Summary
-On MacBook devices with a camera notch, the menu bar truncates icons when too many applications occupy the menu bar space. The Twingate client process runs normally but its icon is hidden behind the notch area.
+On MacBook devices with a camera notch, the menu bar truncates icons when too many applications occupy the menu bar space. The Twingate client process runs normally but its icon is hidden behind or beyond the notch area.
 
 ## Key Information
 - Affects MacBook devices with camera notch (e.g., MacBook Pro M1 Pro and later)
-- Twingate process **is running** — this is purely a display/visibility issue
-- macOS truncates menu bar icons that would overlap the notch rather than showing them
+- Twingate process is running correctly — this is purely a display/UI issue
+- macOS truncates menu bar icons that would overlap the notch, hiding them entirely
+- Verify process is running via Activity Monitor if icon is not visible
 
 ## Prerequisites
-- Verify Twingate is actually running: check Activity Monitor for the Twingate process
-- Confirm this is a notch-related issue, not a crash or launch failure
+- Twingate macOS client installed and launched
+- Confirm issue is notch-related: check Activity Monitor for `Twingate` process running
 
-## Resolution Options (in order of ease)
+## Resolution Options
 
-1. **External monitor** — Connect a monitor without a notch; all icons including Twingate will appear on the extended display menu bar
-2. **Third-party menu bar managers** — Apps like Bartender or similar tools collapse/expand menu bar icons to reclaim space (use at own discretion)
-3. **Quit other menu bar apps** — Close other menu bar applications until the Twingate icon becomes visible
+1. **External monitor** — Connect a monitor without a notch; all menu bar icons including Twingate will display on the external display's menu bar
 
-**Once icon is visible:** Hold `Command` + click and drag to reorder icons, positioning Twingate away from the notch boundary.
+2. **Third-party menu bar managers** — Apps like Bartender or similar tools can collapse/expand menu bar icons to free up space (use at own discretion; not endorsed by Twingate)
+
+3. **Quit other menu bar apps** — Close other menu bar applications one at a time until Twingate icon becomes visible
+   - Once visible, hold **Command** + click and **drag** the Twingate icon to reorder/reposition it closer to the center or a preferred location
 
 ## Gotchas
-- No built-in macOS fix — this is an OS-level truncation behavior
-- Reordering icons (`Command` + drag) only works after the icon is visible; do this to prevent recurrence
-- Twingate does not endorse any specific third-party menu bar management applications
+- The Twingate client is **not crashed or broken** when the icon is missing — confirm via Activity Monitor before troubleshooting the client itself
+- Reordering icons (Command + drag) only works while icons are visible; resolve visibility first
+- macOS has no native built-in solution for notch icon truncation beyond removing icons
 
 ## Related Docs
 - Apple Community discussion: https://discussions.apple.com/thread/253393969

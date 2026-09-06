@@ -1,52 +1,53 @@
 ---
 source: https://help.twingate.com/articles/3556574910-potential-dns-or-resource-access-issues-on-devices-with-multiple-network-interfaces-connected
 type: help
-fetched: 2026-08-06
-source_version: 4f480a08a0777ae2d2f596af75d867f41dc753c4efb4f31909c9eeec88d6a555
+fetched: 2026-09-06
+source_version: 688cff0fc8809e79fe991f4b56b4236fb31e3797f4ae060d3e8cb5fe0670a1ca
 ---
 
-# Potential DNS or Resource Access Issues on Devices With Multiple Network Interfaces
-
-## Page Title
-Potential DNS or Resource Access Issues on Devices With Multiple Network Interfaces Connected
+# Potential DNS or Resource Access Issues: Multiple Network Interfaces
 
 ## Summary
-Windows and Linux clients may experience Twingate Resource accessibility or DNS resolution issues when both wired and wireless network interfaces are active simultaneously on the same subnet. The root cause is not fully identified but is linked to driver issues or traffic shaping software. Interim solutions exist while engineering investigates.
+Windows and Linux Twingate clients may experience resource accessibility or DNS resolution failures when a device uses both wired and wireless network interfaces simultaneously on the same subnet. Root cause is unconfirmed but likely involves driver issues or traffic shaping software interference.
+
+## Affected Components
+- Windows Client
+- Linux Client
 
 ## Key Information
-- **Affected platforms:** Windows Client, Linux Client
-- **Trigger condition:** Both wired and wireless interfaces active on the same subnet simultaneously
-- **Windows symptom:** Twingate Resource accessibility issues
-- **Linux symptom:** System DNS resolution failures
-- **Common hardware factor:** Realtek chipset NICs are frequently involved
-
-## Prerequisites
-- Device has multiple active network interfaces (wired + wireless)
-- Both interfaces connected to the same subnet
+- Issue triggers when **wired + wireless interfaces are both active on the same subnet**
+- Windows symptom: Twingate Resource inaccessibility
+- Linux symptom: System-wide DNS resolution failures
+- Realtek chipset NICs are commonly implicated
+- OEM-installed traffic shaping/network optimization software is a known contributor
 
 ## Resolution Steps
 
 ### 1. Update Network Drivers
-- **Windows:** Navigate to `Windows Update > View all optional updates` and install available NIC driver updates (particularly Realtek chipset drivers)
-- **Linux:** Check third-party sources or vendor-provided drivers for updated Realtek or other NIC drivers
+**Windows:**
+1. Open **Windows Update**
+2. Navigate to **View all optional updates**
+3. Install any available NIC driver updates (especially Realtek)
 
-### 2. Disable Traffic Shaping / Network Optimizing Software
-- OEM-installed traffic shapers or network optimizers can intercept traffic before it reaches the Twingate interface
-- Identify and disable any such software on the system
-- Common on OEM device images (laptops from major manufacturers)
+**Linux:**
+- Check third-party sources or vendor-provided drivers for updated NIC firmware
 
-### Workaround (if above steps fail)
-- Disconnect from either wired or wireless interface
-- Use only **one network interface per subnet** while Twingate is active
+### 2. Disable Traffic Shaping / Network Optimization Software
+- Identify any OEM-bundled traffic shapers or network optimizers
+- Disable or uninstall them — they can intercept traffic **before it reaches the Twingate interface**, disrupting routing
 
-## Configuration Values
-None applicable — issue is environmental/driver-level, not Twingate configuration.
+### 3. Workaround (if unresolved)
+- Disconnect from either the wired or wireless interface
+- **Use only one network interface per subnet** while Twingate is active
 
 ## Gotchas
-- Traffic shaping software may interfere with system-defined routing tables, bypassing the Twingate virtual interface entirely
-- Linux users must seek drivers outside standard OS update channels in some cases
-- Root cause is unconfirmed; Twingate engineering has been unable to reproduce consistently
-- Issue is subnet-specific — using both interfaces on *different* subnets may not trigger the problem
+- Simply having two interfaces active (even if one is idle) can trigger the issue if both are on the same subnet
+- Traffic shaping software may not be obvious — check OEM bloatware, especially on business laptops
+- Twingate engineering has not been able to reproduce this reliably; fix may depend on local environment specifics
+- Driver updates via OS update channels are preferred over manual downloads for stability
+
+## Configuration Values
+None applicable — resolution is environmental (drivers, software, interface configuration).
 
 ## Related Docs
 - Twingate Windows Client documentation

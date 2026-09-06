@@ -1,30 +1,44 @@
 ---
 source: https://help.twingate.com/articles/7318897884-macos-client-docker-container-s-second-connections-to-twingate-dns-resource-fails
 type: help
-fetched: 2026-08-06
-source_version: 9ca49c9f5b31189f52a5a79e3cfb7be29a4d6c9981250ecf5d63312b6d4c26b1
+fetched: 2026-09-06
+source_version: 08213d864f9e77ba35472b171ca361fa9734516aa4a7f8616127b5b2348b0682
 ---
 
-# macOS Client: Docker Container Second Connections to Twingate DNS Resource Fails
+# macOS Client: Docker Container Second Connections to Twingate DNS Resource Fail
 
 ## Summary
-On macOS, Docker containers can connect to Twingate DNS resources on the first attempt but fail on subsequent attempts. The root cause is that Docker containers switch DNS resolvers after the first query, returning non-CGNAT IPs instead of Twingate-assigned CGNAT IPs.
+On macOS, Docker containers can connect to Twingate DNS resources on the first attempt but fail on subsequent attempts. The root cause is that Docker containers switch away from Twingate resolvers after the first DNS query, returning non-CGNAT IPs instead of Twingate-assigned CGNAT addresses.
 
 ## Key Information
-- **Affected components**: Twingate Client on macOS host + Docker for Mac containers
-- **Symptom**: First connection succeeds; subsequent connections fail
-- **Root cause**: Container uses Twingate resolvers on first DNS query, then falls back to different resolvers that return the real (non-CGNAT) IP
-- **First query**: Returns CGNAT IP (e.g., `100.98.196.176`) — correct
-- **Subsequent queries**: Returns non-CGNAT IP (e.g., `10.140.140.65`) — incorrect
+- **Affected components**: Twingate Client (macOS) + Docker for Mac
+- **Symptom**: First connection succeeds; all subsequent connections fail
+- **Root cause**: Container uses correct Twingate resolver (returns CGNAT IP `100.x.x.x`) on first query, then falls back to different resolvers returning real IPs on subsequent queries
+- Docker's internal DNS (`192.168.65.5`) does not consistently forward to Twingate resolvers
 
 ## Prerequisites
 - Twingate Client running on macOS host
 - Docker for Mac installed
-- Container attempting to reach a Twingate-protected DNS resource
+- Access to Twingate-protected DNS resource
 
-## Fix: Force Twingate DNS Resolvers at Container Start
+## Diagnosis
+Run `nslookup` or `dig` inside the container twice and compare results:
 
-Add `--dns` flags to the `docker run` command to pin the container to Twingate resolvers:
+**First query (correct)** — returns CGNAT IP:
+```
+Server: 192.168.65.5
+Address: 100.98.196.176  ← CGNAT range, Twingate-assigned
+```
+
+**Second query (broken)** — returns real IP:
+```
+Server: 192.168.65.5
+Address: 10.140.140.65  ← non-CGNAT, bypasses Twingate
+```
+
+## Resolution
+
+Add explicit DNS flags to the `docker run` command to force the container to use Twingate resolvers:
 
 ```bash
 docker run --dns=100.95.0.251 --dns=100.95.0.252 --dns=100.95.0.253 --dns=100.95.0.254 <image>
@@ -39,23 +53,11 @@ docker run --dns=100.95.0.251 --dns=100.95.0.252 --dns=100.95.0.253 --dns=100.95
 | `--dns` (tertiary) | `100.95.0.253` |
 | `--dns` (quaternary) | `100.95.0.254` |
 
-## Diagnostics
-
-Run inside the container to verify which resolver is responding and what IP is returned:
-
-```bash
-nslookup <twingate_resource>
-# or
-dig <twingate_resource>
-```
-- ✅ Correct: Server returns a CGNAT IP (`100.x.x.x`)
-- ❌ Incorrect: Server returns a private/non-CGNAT IP (`10.x.x.x`, `172.x.x.x`, `192.168.x.x`)
-
 ## Gotchas
-- This is macOS-specific due to Docker for Mac's networking architecture (containers run in a Linux VM, not directly on the host network)
-- The `--dns` flags must be specified at container start; they cannot be applied to a running container
-- If using Docker Compose, add the `dns:` key under the service definition instead of CLI flags
+- All four Twingate resolver IPs should be specified; omitting them risks fallback behavior
+- This issue is specific to **Docker for Mac** — the macOS host client does not exhibit this behavior directly
+- Using `docker-compose`, add a `dns:` block under the service definition instead of CLI flags
 
 ## Related Docs
 - Twingate DNS resource configuration
-- Docker for Mac networking documentation
+- Docker networking documentation (`--dns` flag)

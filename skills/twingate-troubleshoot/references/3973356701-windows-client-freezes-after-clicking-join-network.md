@@ -1,49 +1,47 @@
 ---
 source: https://help.twingate.com/articles/3973356701-windows-client-freezes-after-clicking-join-network
 type: help
-fetched: 2026-08-06
-source_version: e8454691f44cd72802e1211653aa9c045e40de90918af55d7e92486e1cb24fdf
+fetched: 2026-09-06
+source_version: 9797f9b5ae92cb2053b559156960c447392ce90bc2c7d8a67454616c587163f4
 ---
 
 # [Windows Client] Freezes After Clicking Join Network
 
 ## Summary
-The Twingate Windows client freezes at the "Join Network" stage due to a corrupted WMI (Windows Management Instrumentation) win32 repository. The service fails to complete device posture checks required before establishing a connection.
+The Twingate Windows client freezes during network join when the WMI (Windows Management Instrumentation) win32 repository is corrupt, preventing device posture checks from completing. The Twingate service requires WMI to collect system/hardware information before establishing a connection.
 
 ## Key Information
-- **Affected component**: Twingate Windows Client
+- **Affected component**: Windows Twingate client during initial network join
+- **Root cause**: Corrupt WMI win32 repository (caused by improper shutdowns, BSODs, application crashes)
 - **Log file location**: `%LOCALAPPDATA%\Twingate\logs\Twingate.Service.log`
-- **Root cause**: Corrupt WMI win32 repository prevents hardware/OS identity verification
-- **Common corruption triggers**: Improper shutdowns, BSODs, application crashes
+- **Failure point**: `DevicePostureDataProvider.GenerateClientData` → `ServiceCommunication.RunPreconnectionChecks` faults
 
 ## Symptoms
 - Client UI freezes after clicking "Join Network"
-- Log shows error: `CommunicationObjectFaultedException` during `RunPreconnectionChecks`
+- Error in logs: `CommunicationObjectFaultedException` — service channel in Faulted state
 - Twingate errors appear in **Windows Event Viewer → Application**
 - PowerShell WMI queries fail to return data (e.g., `gwmi Win32_DISKDRIVE | select *`)
 
-## Diagnosis
-Verify WMI is broken by running in PowerShell:
+## Diagnostic Verification
+Run in PowerShell to confirm WMI corruption:
 ```powershell
 gwmi Win32_DISKDRIVE | select *
 ```
-If this returns no data or errors, WMI repository is corrupt.
+If this returns no data or errors, WMI is likely corrupt.
 
 ## Resolution
 
-**Recompile the WMI win32 MOF file from an administrative command prompt:**
-
+Run from an **administrative command prompt**:
 ```cmd
 mofcomp %windir%\system32\wbem\cimwin32.mof
 ```
-
-> **Requires**: Administrative command prompt (not PowerShell)
+This recompiles the win32 MOF (Managed Object Format) within WMI.
 
 ## Gotchas
-- Must run from an **elevated/administrative** command prompt
-- This recompiles the MOF (Managed Object Format) file specifically for the win32 namespace — it does not rebuild the entire WMI repository
-- If the issue persists after recompiling, full WMI repository rebuild may be needed (not covered in this article)
+- Must run command prompt as **Administrator** — standard user privileges will not work
+- WMI corruption can recur if underlying system stability issues (hardware faults, frequent crashes) are not addressed
+- Check Windows Event Viewer Application logs for additional Twingate service errors if recompilation does not resolve the issue
 
 ## Related Docs
-- [WMI Documentation (Microsoft)](https://docs.microsoft.com/en-us/windows/win32/wmisdk/wmi-start-page)
-- Twingate Device Posture configuration
+- [WMI documentation (Microsoft)](https://docs.microsoft.com/en-us/windows/win32/wmisdk/wmi-start-page)
+- Twingate device posture configuration

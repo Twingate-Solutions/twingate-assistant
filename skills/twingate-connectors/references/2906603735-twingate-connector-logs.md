@@ -1,30 +1,30 @@
 ---
 source: https://help.twingate.com/articles/2906603735-twingate-connector-logs
 type: help
-fetched: 2026-08-06
-source_version: 6f87b96b2498c48a0a86349f03bb19dbf1b2dd5cd008e772952ab3e572057284
+fetched: 2026-09-06
+source_version: dcba1da59ff33cf0267218f4a1d79c8994768e4218bd60cfe7083ade480d1bf6
 ---
 
 # Twingate Connector Logs
 
 ## Summary
-Covers enabling debug-level logging on Twingate Connectors for troubleshooting. Default log level is error; debug level (7) must be explicitly enabled. Process varies by deployment type: systemd vs. containerized.
+Covers enabling debug-level logging on Twingate Connectors across deployment types (systemd, Docker, and other container platforms). Default logging is error-level; debug level must be explicitly enabled for troubleshooting and disabled afterward to avoid excess disk usage.
 
 ## Key Information
-- Default log level: **error**
-- Debug log level value: **7**
-- Debug logging should be disabled after troubleshooting to avoid excessive disk usage
-- Applies to: Linux, Docker, ECS, ACI, Kubernetes
+- Default log level: error
+- Debug log level value: `7`
+- Environment variable: `TWINGATE_LOG_LEVEL=7`
+- Debug logs are verbose — disable when not actively troubleshooting
 
 ## Configuration Values
 | Variable | Value | Purpose |
-|----------|-------|---------|
+|---|---|---|
 | `TWINGATE_LOG_LEVEL` | `7` | Enable debug logging |
-| `TWINGATE_LOG_LEVEL` | *(absent)* | Restore default error logging |
+| *(unset/removed)* | — | Restores error-level logging |
 
 ---
 
-## Step-by-Step
+## Step-by-Step by Deployment Type
 
 ### Systemd (Linux / AWS AMI)
 **Enable:**
@@ -56,19 +56,21 @@ curl -s https://binaries.twingate.com/connector/docker-change-log-level.sh | sud
 ```
 
 ### Other Containers (ECS, ACI, Kubernetes)
-**Enable:** Add `TWINGATE_LOG_LEVEL=7` to deployment YAML, then redeploy.  
-**Disable:** Remove `TWINGATE_LOG_LEVEL=7` from YAML, then redeploy.  
-**Export:** Use platform-native log tooling; include both `stdout`/`stderr` and timestamps.
+**Enable:** Add `TWINGATE_LOG_LEVEL=7` to deployment YAML and redeploy.  
+**Disable:** Remove `TWINGATE_LOG_LEVEL=7` from YAML and redeploy.  
+**Export logs:** Platform-specific:
+- ECS: [AWS docs](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/logs.html)
+- ACI: `az container logs --resource-group <rg> --name <name>`
+- Kubernetes: `kubectl logs` ([docs](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#logs))
 
 ---
 
 ## Gotchas
-- Docker export command requires `2>&1` to capture full output (stderr + stdout)
+- `2>&1` is required in Docker log export to capture full output (both stdout and stderr)
 - Debug logging left enabled long-term causes unnecessary disk utilization
-- Container redeployment required for YAML-based deployments to pick up env var changes
-- Config file for systemd is `/etc/twingate/connector.conf`
+- For non-Docker containers, ensure exports include both `stderr`/`stdout` and timestamps before sending to support
 
 ## Related Docs
-- ECS logs: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/logs.html
-- ACI logs: https://docs.microsoft.com/en-us/azure/container-instances/container-instances-get-logs
-- Kubernetes logs: https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#logs
+- [AWS ECS Logging](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/logs.html)
+- [Azure Container Instance Logs](https://docs.microsoft.com/en-us/azure/container-instances/container-instances-get-logs)
+- [Kubernetes kubectl logs](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#logs)

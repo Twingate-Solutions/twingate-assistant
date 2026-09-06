@@ -1,19 +1,22 @@
 ---
 source: https://help.twingate.com/articles/3646943674-checking-for-blocked-outbound-ports
 type: help
-fetched: 2026-08-06
-source_version: 8584403de7dbc6f68e95d0922628cb0d7e9bd27a6d247a1c89e7f0f3a9109a23
+fetched: 2026-09-06
+source_version: 9fdb13219706b754253ce5d4934b798281916f080f936d4b169071bb0941af6e
 ---
 
 # Checking for Blocked Outbound Ports
 
+## Page Title
+Checking for Blocked Outbound Ports
+
 ## Summary
-Twingate Clients connect to Twingate's Relay infrastructure on ports 30000–31000. Some networks block non-standard outbound ports, which can prevent Twingate from functioning. This page explains how to test if those ports are blocked.
+Twingate Clients connect to Twingate's Relay infrastructure on ports 30000–31000. Some networks block non-standard outbound ports, which can prevent Twingate from functioning. Use `nmap` to verify these ports are reachable.
 
 ## Key Information
-- Twingate Relay infrastructure uses port range **30000–31000**
-- Networks that only allow ports 80/443 outbound will block Twingate Relay connections
-- Test tool: `nmap` against `portquiz.net`
+- Twingate Relay port range: **30000–31000**
+- Common blocking occurs at networks that only allow ports **80** and **443** outbound
+- Test target: `portquiz.net` (accepts connections on any port)
 
 ## Prerequisites
 - `nmap` installed:
@@ -28,13 +31,17 @@ Twingate Clients connect to Twingate's Relay infrastructure on ports 30000–310
    time nmap -p 30001 portquiz.net
    ```
 
-2. **Expected output (port open):**
+2. Check output for port state:
+
+   **Success (port open):**
    ```
    PORT      STATE  SERVICE
    30001/tcp open   pago-services1
    ```
 
-3. **If port is blocked**, the state will show `filtered` or `closed` instead of `open`, indicating a firewall or network policy is blocking outbound traffic on that port range.
+   **Failure (port blocked):** State will show `filtered` or `closed` instead of `open`
+
+3. If blocked, test additional ports in the range (30000–31000) to determine scope of blocking.
 
 ## Configuration Values
 | Parameter | Value |
@@ -44,10 +51,10 @@ Twingate Clients connect to Twingate's Relay infrastructure on ports 30000–310
 | Test host | `portquiz.net` |
 
 ## Gotchas
-- Testing only port 30001 is a representative sample — the full range is 30000–31000; a network could block some ports but not others
-- Corporate firewalls, hotel/airport Wi-Fi, and some ISPs commonly restrict non-standard ports
-- `portquiz.net` is a third-party service that accepts connections on all ports — availability depends on that service remaining operational
+- A single port test (30001) is representative but doesn't confirm the full range is open — test multiple ports if thorough verification is needed
+- Firewalls may allow the test but block specific IPs used by Twingate Relays; this test only validates port accessibility generically
+- `filtered` state in nmap typically means a firewall is dropping packets; `closed` means the host rejected the connection (different issue)
 
 ## Related Docs
-- Twingate Relay infrastructure documentation (port requirements)
-- Twingate troubleshooting guide (parent page)
+- [Twingate Relay infrastructure / port requirements](https://help.twingate.com)
+- Twingate Troubleshooting Guide (parent page)

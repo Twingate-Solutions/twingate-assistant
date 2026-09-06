@@ -1,46 +1,54 @@
 ---
 source: https://help.twingate.com/articles/3992697531-client-connection-fails-with-unknown-network-name
 type: help
-fetched: 2026-08-06
-source_version: c6144bef17bd94679abf36a965b16d13080fbc95ada9251d6db410dc230c6543
+fetched: 2026-09-06
+source_version: ded57806490b812805d986f2e6b47b27b4a38a0b1cd0715ab9205ded9bb5e258
 ---
 
 # Client Connection Fails with "Unknown Network Name"
 
 ## Summary
-Twingate Windows client fails to connect and reports "Unknown network name" due to antivirus/security software interfering with TLS connections. The issue manifests as SSL/TLS channel creation failures when the client attempts to reach the Twingate controller URL.
+Windows Twingate client fails to connect with "Unknown network name" error when antivirus/security software interferes with TLS connections. The root cause is SSL/TLS session termination by third-party security software (e.g., Elastic AV). Whitelisting the Twingate service in the AV solution resolves the issue.
 
 ## Key Information
 - **Component**: Twingate Client (Windows only)
-- **Root cause**: AV/security software (e.g., Elastic AV) blocks or intercepts TLS sessions
-- **Error code**: 602 (`open_url timeout`)
-- **Log files involved**: `Twingate.Service.log` and `twingate.log`
+- **Error**: "Unknown network name" in client UI
+- **Root cause**: Antivirus/security software blocking TLS handshake to Twingate controller
 
 ## Symptoms
-- Client UI shows "Unknown network name"
-- `Twingate.Service.log` error: `failed to get an access token: open_url timeout`, errorCode 602
-- `twingate.log` error: `Could not create SSL/TLS secure channel` when validating controller URL
+- Client UI reports "Unknown network name"
+- `Twingate.Service.log` shows: `[ERROR] failed to get an access token: open_url timeout` / `Auth failed. errorCode: 602`
+- `twingate.log` shows: `HttpRequestException: Could not create SSL/TLS secure channel`
+- No relevant errors in Windows Event Logs
 
 ## Diagnostic Steps
 
-1. Verify Twingate service is running in Windows Services
-2. Test TLS connectivity using PowerShell (.NET Framework, same stack as Twingate client):
+1. **Verify Twingate service is running** via Services console or Task Manager
+
+2. **Test TLS connectivity via PowerShell** (uses .NET Framework, same as Twingate client):
    ```powershell
-   invoke-webrequest -UseBasicParsing -uri "https://<tenant>.twingate.com" | Select-Object StatusCode
+   invoke-webrequest -UseBasicParsing -uri "https://<network>.twingate.com" | Select-Object StatusCode
    ```
-3. If output is `Could not create SSL/TLS secure channel` error (not a status code), TLS is being blocked
-4. Check Windows Event Logs (no relevant errors expected in this scenario)
-5. Review installed security/DNS/remote access software against Known Incompatibility list
+   - Expected: HTTP status code (e.g., `200`)
+   - Failure indicator: `Could not create SSL/TLS secure channel` → confirms TLS is being blocked
+
+3. **Check for conflicting software**: Review antivirus, DNS filtering, or remote access tools against the Known Incompatibility Overview
 
 ## Resolution
 1. Whitelist the Twingate service in your antivirus solution (e.g., Elastic AV)
 2. Disable Windows Defender if applicable
 3. Reboot the system
 
+## Log File Locations
+| Log | Key Errors |
+|-----|-----------|
+| `Twingate.Service.log` | `open_url timeout`, errorCode 602 |
+| `twingate.log` | SSL/TLS channel failure |
+
 ## Gotchas
-- No errors appear in Windows Event Logs, making this harder to diagnose without checking Twingate-specific logs
-- The PowerShell `invoke-webrequest` test is meaningful because it uses .NET Framework, the same underlying stack as the Twingate Windows client — browser tests may succeed while Twingate still fails
-- Other security software (DNS filters, remote access tools) can cause the same symptoms
+- Windows Event Logs will **not** show relevant errors — check Twingate-specific logs instead
+- The PowerShell test is specifically meaningful because it uses .NET Framework, matching the Twingate client's network stack
+- Issue is AV-specific; not a Twingate configuration problem
 
 ## Related Docs
-- [Known Incompatibility Overview](https://help.twingate.com/articles/known-incompatibility-overview)
+- Known Incompatibility Overview (Twingate help center)

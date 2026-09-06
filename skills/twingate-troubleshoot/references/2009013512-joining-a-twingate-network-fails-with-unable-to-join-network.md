@@ -1,40 +1,42 @@
 ---
 source: https://help.twingate.com/articles/2009013512-joining-a-twingate-network-fails-with-unable-to-join-network
 type: help
-fetched: 2026-08-06
-source_version: 19b1e8b0c32694b0af6511cd612a7393ac8e65eefbc5140b0e9f6315eb8beaf9
+fetched: 2026-09-06
+source_version: 1d1759cba54680b363ead10d6123f7c15b40f209664b1e98fa44d2ed2e46d072
 ---
 
-# Joining Twingate Network Fails: "Unable to join network"
+# Joining Twingate Network Fails with "Unable to Join Network"
 
 ## Summary
-On Windows, joining the Twingate network fails when the TAP adapter exists but has an incorrect `FriendlyName` (caused by another VPN's TAP adapter overwriting the registry entry). Reinstalling Twingate or cleaning the registry does not resolve this issue.
+On Windows, Twingate fails to connect when a TAP adapter exists but has an incorrect `FriendlyName` (set by another VPN application). The Twingate service cannot locate its TAP adapter despite it being present, and reinstalling Twingate does not resolve this.
 
 ## Key Information
 - Affects Windows OS only
-- TAP adapter is present in the interface list but has a wrong description
-- Root cause: another VPN application (current or previously installed) has claimed/renamed the TAP adapter registry entry
-- Twingate service identifies its adapter by `FriendlyName` = `Twingate TAP-Windows Adapter V9`
+- Occurs when another VPN application (past or present) has claimed/renamed the TAP adapter
+- Twingate requires its TAP adapter `FriendlyName` to be exactly `Twingate TAP-Windows Adapter V9`
+- Registry edit + reboot resolves the issue; reinstall alone does not
 
 ## Symptoms
 - Network join fails with "Unable to join network"
-- No other VPN currently installed (but may have been previously)
-- `Twingate.log` shows: `PreconnectionFault` / `TapAdapterExistence` error
-- `Twingate.Service.log` shows: `Twingate adapter is missing from the computer`
+- No other VPN currently installed
+- TAP adapter appears in interface list but with wrong description
+- `Twingate.log` error: `PreconnectionFault` / `TapAdapterExistence`
+- `Twingate.Service.log` error: `Twingate adapter is missing from the computer`
 
 ## Prerequisites
-- Registry editor access (admin privileges)
 - Registry backup completed before making changes
+- Administrative access to Windows Registry Editor
+- Other VPN software fully uninstalled (if still present)
 
 ## Step-by-Step Resolution
 
 1. **Uninstall conflicting VPN** (if still installed) as cleanly as possible
-2. **Back up the Windows registry** before making changes
-3. **Open Registry Editor** and navigate to:
+2. **Back up the Windows Registry** before proceeding
+3. Open Registry Editor and navigate to:
    ```
    HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Enum\ROOT\NET\0000
    ```
-4. **Update `FriendlyName` value** to exactly:
+4. Locate the `FriendlyName` value and change it to:
    ```
    Twingate TAP-Windows Adapter V9
    ```
@@ -42,16 +44,18 @@ On Windows, joining the Twingate network fails when the TAP adapter exists but h
 
 ## Configuration Values
 
-| Registry Path | Key | Required Value |
-|---|---|---|
-| `HKLM\SYSTEM\ControlSet001\Enum\ROOT\NET\0000` | `FriendlyName` | `Twingate TAP-Windows Adapter V9` |
+| Item | Value |
+|------|-------|
+| Registry path | `HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Enum\ROOT\NET\0000` |
+| Registry key | `FriendlyName` |
+| Required value | `Twingate TAP-Windows Adapter V9` |
 
 ## Gotchas
-- The TAP adapter *appears* present in the interface list — this is misleading; the issue is the adapter name mismatch, not a missing adapter
-- Reinstalling Twingate and registry cleanup **do not fix** this issue
-- The `0000` key may vary if multiple NET adapters exist — verify it corresponds to the Twingate TAP adapter
-- Always back up the registry before editing
+- The TAP adapter `\ROOT\NET\0000` key number (`0000`) may differ if multiple network adapters are present — verify you're editing the correct adapter entry
+- Reinstalling Twingate or cleaning the registry of Twingate entries alone will **not** fix this issue
+- Always back up the registry before editing; incorrect changes can break Windows networking
+- Previous VPN software (even if uninstalled) can leave a renamed TAP adapter behind
 
 ## Related Docs
 - Twingate Windows client troubleshooting
-- TAP adapter installation issues
+- Twingate TAP adapter installation requirements

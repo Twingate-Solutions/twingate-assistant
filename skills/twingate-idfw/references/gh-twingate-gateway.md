@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/gateway
 type: github
-fetched: 2026-08-23
-source_version: 2e7b9e69bf3febcd6bb13f018732773846aa784d
+fetched: 2026-09-06
+source_version: 104af64beb4f1b44640f6ea9a0b0c0300cca5e27
 ---
 
 <!-- triage: unassigned -->
@@ -13,12 +13,12 @@ source_version: 2e7b9e69bf3febcd6bb13f018732773846aa784d
 A Layer 7 reverse proxy deployed within your environment as part of Twingate Identity Firewall. It propagates user identity to upstream services and provides auditing for Kubernetes API servers, SSH servers, and web applications. Free for up to five Kubernetes, SSH, or Web App resources.
 
 ## Key Information
-- Supports **Kubernetes** (RBAC integration, `kubectl` session recording) and **SSH** (certificate-based auth, CA management, shell/exec/SFTP/port forwarding); Web App support is coming soon
+- Supports **Kubernetes** (RBAC integration, `kubectl` session recording), **SSH** (certificate-based auth, CA management, shell/exec/SFTP/port forwarding), and **Web App** resources (upstream and downstream TLS support added in v1.1.0)
 - Eliminates plaintext credentials on end-user machines via identity propagation
 - Provides session recording and replay for forensic/compliance use
 - Docker image published to [Docker Hub](https://hub.docker.com/r/twingate/gateway)
 - CI via GitHub Actions; coverage tracked via Codecov
-- Current release: **v1.0.0** (breaking changes from v0.21; see [migration guide](https://github.com/Twingate/gateway/wiki/Migration-0.21-to-1.0))
+- Current release: **v1.1.0** (breaking change to SSH host certificate principals; see migration notes below)
 
 ## Prerequisites
 - A Twingate account with Identity Firewall enabled
@@ -46,23 +46,20 @@ A Layer 7 reverse proxy deployed within your environment as part of Twingate Ide
 | Helm: Remote Network | Twingate Remote Network can now be specified via Helm values |
 
 ## Gotchas
+- **v1.1.0 changes SSH host certificate principals**: SSH host certificates now include resource addresses and aliases. When using a Vault-backed SSH CA, the role (configured via `ssh.ca.vault.gatewayHostCA.role` or top-level `ssh.ca.vault.role`) must permit the relevant hostnames. Migrate without downtime by first adding `allowed_domains=*` with `allow_empty_principals=true`, then upgrading, then removing `allow_empty_principals=true`. Deployments using a manual CA need no change.
 - **v1.0.0 introduces breaking changes** from v0.21; upgrade requires following the [migration guide](https://github.com/Twingate/gateway/wiki/Migration-0.21-to-1.0)
-- Web App protocol support is listed as "Coming Soon" — not yet available
 - Free tier is limited to **five** Kubernetes, SSH, or Web App resources; additional resources require contacting Twingate for pricing
 - The gateway must be deployed **inside** your environment (not externally); it is not a cloud-hosted service
 - Account-specific issues should go to Twingate support, not GitHub Issues
 
 ## Technical Details
-- **Language**: Go 1.26.6
+- **Language**: Go 1.27.0
 - **Build**: goreleaser, Docker buildx (v4.3.0), kind (testing)
-- **Linting**: golangci-lint v2.11.1
+- **Linting**: golangci-lint v2.13.1
 - **Testing**: testify, helm-unittest
 - Entry point: `main.go → cmd/start.go → proxy.NewProxy() → proxy.Start()`
+- Gateway identifies itself to Twingate via a `User-Agent` header on outbound requests
 
 ## Related Docs
 - [Wiki (main)](https://github.com/Twingate/gateway/wiki)
-- [How It Works](https://github.com/Twingate/gateway/wiki/How-It-Works)
-- [Kubernetes Overview](https://github.com/Twingate/gateway/wiki/Kubernetes-Overview)
-- [SSH Overview](https://github.com/Twingate/gateway/wiki/SSH-Overview)
-- [Developer Guide](https://github.com/Twingate/gateway/wiki/Developers)
-- [Migration Guide (v0.21 → v1.0)](https://github.com/Twingate/gateway/wiki/Migration-0.21-to-1.0
+- [How It Works](https://github.com/Twingate/gateway/wiki/How-It-Works

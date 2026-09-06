@@ -1,70 +1,68 @@
 ---
 source: https://www.twingate.com/docs/netskope-dlp-config
 type: docs
-fetched: 2026-08-14
-source_version: dfdd4e9acd0d3eef63b5b5484854fc99251963e270952a5695ed20b77ebe25fd
+fetched: 2026-09-06
+source_version: 67c381877de692224e68d08e43386bc8e9bda4fc213bbd54281b29d990c52560
 ---
 
 # How to Configure Netskope DLP to Work with Twingate
 
 ## Summary
-Configures Netskope DLP client to bypass inspection for Twingate Client processes when both are installed on the same device. Creates a certificate pinned application definition and steering exception so Netskope doesn't interfere with Twingate's traffic.
+Configures Netskope DLP client to coexist with Twingate Client on the same device by creating a certificate-pinned application exception. Only applies when Netskope is configured for **Web Traffic** steering mode.
 
 ## Key Information
-- Both Netskope and Twingate clients can coexist on the same device with proper configuration
-- Configuration is done in Netskope console (not Twingate)
+- Netskope steers traffic via a client app that can conflict with Twingate
+- Solution: Create a bypass exception using a certificate-pinned application definition
 - Applies to macOS and Windows platforms
-- Exception uses wildcard domain bypass (`*`)
+- Dynamic Steering users must check steering type for **both** on-premises and remote configurations
 
 ## Prerequisites
+- Netskope configured for **Web Traffic** or **All Traffic** steering (not Cloud Apps Only)
 - Access to Netskope admin console
-- Netskope Steering Configuration (existing or new)
 - Twingate Client installed on target devices
 
 ## Step-by-Step
 
 ### 1. Create Certificate Pinned Application
-- Navigate: Netskope Console → **Settings** → **App Definition**
-- Create new **certificate pinned application** (suggested name: "Twingate")
-- Add entries per platform with **Exact** match type:
+- Navigate to **Settings → App Definition**
+- Create new **certificate pinned application** (name: `Twingate`)
+- Add platform entries with `Exact` match type:
 
-| Platform | Process Names |
-|----------|--------------|
+| Platform | Definition |
+|----------|-----------|
 | macOS | `Twingate, Tunnel Provider macos` |
-| Windows | `twingate.exe, twingateupdater.exe` |
-
-> Windows processes: `twingate.exe`, `twingate.service.exe`, `twingateupdater.exe`
+| Windows | `twingate.exe, twingate.service.exe, twingateupdater.exe` |
 
 ### 2. Create Steering Exception
-- Navigate: **Settings** → **Steering Configuration** → open/create configuration
-- Go to **Exceptions** tab → create new exception
-- Exception type: **Certificate Pinned Application**
-- Select the Twingate app definition created in Step 1
-- Custom app domains: `*`
-- Per OS action: **bypass**
+- Navigate to **Settings → Steering Configuration**
+- Open existing config or create new one
+- Under **Exceptions** tab, create new exception:
+  - Exception type: **Certificate Pinned Application**
+  - Application: Select the `Twingate` app created above
+  - Custom app domains: `*`
+  - Action for each OS: **bypass**
 - Save the exception
 
-### 3. Apply Configuration to Clients
-- Click Netskope client icon → **Configuration** → **Update**
+### 3. Apply Configuration
+- Click Netskope client icon → **Configuration → Update**
 - Restart the Twingate Client
 
 ## Configuration Values
 
 | Field | Value |
 |-------|-------|
-| App type | Certificate Pinned Application |
-| macOS definition (match type) | Exact |
-| macOS definition | `Twingate, Tunnel Provider macos` |
-| Windows definition (match type) | Exact |
-| Windows definition | `twingate.exe, twingate.service.exe, twingateupdater.exe` |
+| macOS process names | `Twingate, Tunnel Provider macos` |
+| Windows process names | `twingate.exe, twingate.service.exe, twingateupdater.exe` |
+| Match type | `Exact` |
 | Custom app domains | `*` |
-| Exception action | bypass |
+| Exception action | `bypass` |
 
 ## Gotchas
-- Must restart Twingate Client after pulling updated Netskope config — updating Netskope config alone is not sufficient
-- All three Windows process names must be included; omitting any may cause partial interference
-- If no Steering Configuration exists, one must be created before adding exceptions
+- **Dynamic Steering**: Must verify steering type applies for both on-prem and remote profiles — if either uses Web Traffic, this config is needed
+- **Cloud Apps Only** steering does not require this configuration
+- Must restart Twingate Client after pulling updated Netskope config
+- All three Windows executables must be included in the definition
 
 ## Related Docs
-- Twingate Client installation guides
-- Netskope Steering Configuration documentation (Netskope-side)
+- Netskope Steering Configuration documentation
+- Twingate Client installation guides (macOS/Windows)

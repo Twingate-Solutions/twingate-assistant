@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/1239565250-technical-support-entitlement
 type: help
-fetched: 2026-08-06
-source_version: c1358c9c06f64b8cf4c50a230b0bad6e2b92a5029d678dd7f32a3fcf2dda361d
+fetched: 2026-09-06
+source_version: ee9ca3b3fc3bac2b8ef9663aa2cfc840d58cd2fa1b9a65c25fdab627bd49b450
 ---
 
 # Technical Support Entitlement
@@ -11,33 +11,42 @@ source_version: c1358c9c06f64b8cf4c50a230b0bad6e2b92a5029d678dd7f32a3fcf2dda361d
 Technical Support Entitlement
 
 ## Summary
-Twingate offers tiered support based on subscription plan. Community support is available to all plans, while ticketed break/fix support is limited to Teams, Business, and Enterprise subscriptions. End users are directed to work with their admins rather than contacting Twingate directly.
+Twingate offers tiered support channels based on subscription plan. Community support is available to all plans, while ticketed break/fix support is limited to Teams, Business, and Enterprise subscribers. End users are directed to work with their admins rather than contacting Twingate directly.
 
 ## Key Information
 
-### Support Channels by Plan
+- **Community Support (Subreddit):** Available to all plans including Starter and Home
+- **Ticketed Support:** Teams, Business, Enterprise only — not available for Home, Starter, or end users
+- **Pre-Sales/Trial Support:** Business/Enterprise POCs and Teams/Business trials qualify; Home and Starter do not
+- End users should contact their Twingate Admin or IT team, not Twingate support directly
+
+## Support Channel Matrix
 
 | Channel | Starter | Home | Teams | Business | Enterprise |
-|---------|---------|------|-------|----------|------------|
+|---|---|---|---|---|---|
 | Community (Subreddit) | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Ticketed Support | ❌ | ❌ | ✅ | ✅ | ✅ |
-
-### Pre-Sales / Trial Support
-- **Business/Enterprise POC or Teams/Business trials**: Eligible for pre-sales support
-- Contact sales rep to consolidate support through one channel
-- Self-serve trial users (no sales rep): Contact `onboarding@twingate.com` or use the Subreddit
-- **Home/Starter**: Not eligible for pre-sales support
+| Trial/Pre-Sales | ❌ | ❌ | ✅ | ✅ | ✅ |
 
 ## Prerequisites
-- Must be a Twingate admin to submit ticketed support (end users are not eligible)
-- Teams, Business, or Enterprise subscription required for ticketed support
+- Must be a Twingate Admin to submit ticketed support requests
+- Must be on Teams, Business, or Enterprise plan for ticketed support
+- Pre-sales/trial customers need a sales rep or must use onboarding email
+
+## Contact Points
+
+- **Ticketed Support:** Via Twingate support portal (see Twingate Plans page for details)
+- **Trial/Onboarding (no sales rep):** `onboarding@twingate.com`
+- **Community:** [Twingate Subreddit](https://www.reddit.com/r/Twingate/)
+- **Pre-sales POC:** Contact assigned sales representative directly
 
 ## Gotchas
-- **End users cannot open tickets** — must go through their Twingate admin or IT team
-- Home and Starter plans have no ticketed support path; community forum is the only option
-- Ticketed support covers **break/fix** scenarios only; scope details are in the Twingate Plans page
+
+- End users on any plan are explicitly **not** entitled to direct Twingate support — admins must open tickets
+- Home and Starter plans have **no ticketed support path** — community only
+- Self-serve trial customers without a sales rep have limited options (email onboarding team or subreddit)
+- Support scope for ticketed plans is **break/fix only** — not general consulting or configuration help
 
 ## Related Docs
-- [Twingate Plans](https://www.twingate.com/pricing) — full support coverage details by tier
-- [Twingate Subreddit](https://www.reddit.com/r/Twingate/) — community support channel
-- `onboarding@twingate.com` — self-serve trial onboarding contact
+- [Twingate Plans](https://www.twingate.com/pricing) — details on support coverage per plan
+- [Twingate Subreddit](https://www.reddit.com/r/Twingate/) — community support forum

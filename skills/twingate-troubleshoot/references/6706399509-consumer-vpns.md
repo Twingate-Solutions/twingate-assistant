@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/6706399509-consumer-vpns
 type: help
-fetched: 2026-08-06
-source_version: 70c16fa91305ae865dd8248f36476e297697258bc5b0ce19fb4c0f5e54398c23
+fetched: 2026-09-06
+source_version: aef14c776c3b07852250626792a9bb24e42fdec240cf2ffd662b621c3074db3d
 ---
 
 # Consumer VPNs Compatibility
@@ -11,40 +11,35 @@ source_version: 70c16fa91305ae865dd8248f36476e297697258bc5b0ce19fb4c0f5e54398c23
 Consumer VPNs
 
 ## Summary
-Certain consumer VPN clients are incompatible with the Twingate Client because both products compete for the same OS-level networking functionality. Consumer VPNs often run background processes even when appearing disconnected, preventing Twingate from connecting. Full uninstallation of conflicting VPN software is the recommended resolution.
+Certain consumer VPN clients are incompatible with the Twingate Client because both attempt to use the same system-level networking functionality. These VPNs often run background processes even when appearing disconnected, blocking Twingate from operating. Full uninstallation (not just disabling) is the recommended fix.
 
 ## Key Information
-- Incompatibility occurs at the OS networking layer — both products require exclusive access to the same system functions
-- Consumer VPNs may appear disconnected/disabled but still run background processes that block Twingate
-- Simply pausing or disabling a VPN client is insufficient; full uninstall is required
+- Incompatibility is caused by VPN software competing for the same OS networking interfaces Twingate requires
+- Consumer VPNs frequently run background processes even when the UI shows them as disconnected
+- Issue affects the **Twingate Client** component specifically
 
-## Prerequisites
-- Twingate Client installed
-- Awareness of any VPN software installed on the endpoint (even inactive ones)
+## Known Incompatible Software
+| Product | Vendor |
+|---|---|
+| TunnelBear | TunnelBear |
+| TunnelBlick | Open source |
+| NordVPN | Nord Security |
+| ExpressVPN | ExpressVPN |
+| InfoBlox BloxOne | InfoBlox |
+| PIA VPN (Private Internet Access) | Private Internet Access |
+| HMA VPN (HideMyAss) | Aura |
+| CSC/AnyConnect Umbrella Roaming Security Module | Cisco |
 
-## Known Incompatible Consumer VPN Clients
-- TunnelBear
-- TunnelBlick
-- NordVPN
-- ExpressVPN
-- InfoBlox BloxOne
-- PIA VPN (Private Internet Access)
-- HMA VPN (HideMyAss)
-- CSC/AnyConnect Umbrella Roaming Security Module
-
-## Step-by-Step Resolution
-1. Identify any installed VPN software on the endpoint
-2. Fully uninstall the conflicting VPN client (not just disable or disconnect)
-3. Retest Twingate Client connectivity
+## Resolution Steps
+1. Identify if any consumer VPN software is installed on the machine (even if not actively used)
+2. Perform a **full uninstall** of the conflicting VPN — do not merely disable or disconnect it
+3. Retest Twingate Client connectivity after uninstallation
 
 ## Gotchas
-- VPN software may appear disconnected or inactive in the UI but still runs background services that interfere — do not assume it is safe to leave installed
-- This applies even if the user does not actively use the consumer VPN
-- AnyConnect Umbrella Roaming Security Module is included — this is commonly deployed as a security tool, not a traditional VPN, so users may not realize it's installed
-
-## Affected Component
-- **Twingate Component:** Client
+- VPNs that *appear* disconnected may still have active background services blocking Twingate
+- Simply pausing or toggling off the VPN is insufficient — full removal is required
+- Cisco AnyConnect's **Umbrella Roaming Security Module** is listed separately from standard AnyConnect; standard enterprise AnyConnect compatibility is not addressed here
 
 ## Related Docs
-- Twingate Client troubleshooting documentation
-- Enterprise VPN split-tunneling compatibility (separate topic)
+- Twingate Client troubleshooting (general connectivity issues)
+- Enterprise VPN compatibility (separate from consumer VPNs)

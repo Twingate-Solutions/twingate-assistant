@@ -1,37 +1,47 @@
 ---
 source: https://help.twingate.com/articles/1384415743-when-hard-disk-encryption-is-activated-in-device-posture-attached-usb-storage-devices-may-cause-the-check-to-fail
 type: help
-fetched: 2026-08-06
-source_version: 48243c7c6aea407ecf02766a64b978df0245cdf6c64c3b8d2cd2734411280bde
+fetched: 2026-09-06
+source_version: 936e1fc500c0750994bec12085ff454643bae5241d220f1b65522595caaca5fd
 ---
 
-# When Hard Disk Encryption Device Posture Check Fails with USB Storage Devices
+# When Hard Disk Encryption Check Fails Due to USB Storage Devices
+
+## Page Title
+When hard disk encryption is activated in device posture, attached USB storage devices may cause the check to fail
 
 ## Summary
-On Windows, enabling hard disk encryption as a device posture condition can cause Twingate connection failures when USB storage devices are attached. Windows incorrectly identifies the USB device as a local disk, which typically lacks encryption, triggering a posture check failure.
+On Windows, enabling disk encryption as a device posture condition can cause false failures when USB storage devices are connected. Windows incorrectly identifies the USB device as a local disk, which then fails the encryption check since USB drives typically aren't encrypted.
 
 ## Key Information
 - **Component**: Twingate Client / Device Security
 - **Platform**: Windows only
-- **Trigger**: USB flash drives or other USB storage devices connected when encryption posture check is active
-- **Known issue**: Twingate is evaluating filtering USB drives from encryption checks (fix not yet available)
+- **Trigger**: USB flash drives or other USB storage devices connected during posture check
+- **Behavior**: Windows misidentifies USB device as local disk, checks it for encryption, finds none, fails posture check
+- **Status**: Twingate is evaluating filtering mechanisms to exclude USB drives; no permanent fix currently available
 
 ## Symptoms
-- Connection to Twingate fails with error: `"Device security not met"` or `"Device security error"`
+- Connection to Twingate fails with error: `"Device security not met"`
+- Error occurs specifically when disk encryption is a configured posture condition
+- Issue appears/disappears correlating with USB device connection state
 
-## Cause
-Windows incorrectly detects attached USB storage devices as local disks. Since USB drives typically do not have encryption enabled, the device posture encryption check fails.
+## Prerequisites
+- Device posture policy with hard disk encryption condition enabled
+- Windows client
+- USB storage device connected to the machine
 
-## Resolution
-**Immediate workaround**: Disconnect the USB storage device before connecting to Twingate.
+## Resolution (Workaround)
+1. Disconnect the USB storage device
+2. Retry Twingate connection
 
-No configuration-based fix is currently available. A platform-level fix to filter USB drives from encryption detection is under evaluation.
+No configuration-side workaround is currently available.
 
 ## Gotchas
-- This is a false positive — the USB device is not a local disk, but Windows reports it as one
-- Simply having the USB device plugged in (even if not actively used) is enough to trigger the failure
-- No client-side or admin-side configuration can currently bypass this without disconnecting the device
+- This is a false positive — the USB device is not actually a system disk
+- The issue is non-deterministic ("in some cases") — not all USB devices trigger the failure
+- No registry, policy, or Twingate setting currently resolves this without removing the USB device
+- Encryption requirement cannot be scoped to exclude removable media at this time
 
 ## Related Docs
-- Twingate Device Posture configuration
-- Device Security policy settings
+- Twingate Device Posture configuration (device security conditions)
+- Twingate Client troubleshooting (Windows)
