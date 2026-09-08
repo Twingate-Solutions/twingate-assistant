@@ -123,6 +123,8 @@ Cost: each page summarization is ~500 output tokens. A full first-run seed (~286
 
 Edit the `SKILL.md` file directly. The pipeline never overwrites it. See [CONTRIBUTING.md](../CONTRIBUTING.md) for the identity format if you're rewriting from scratch.
 
+Whatever product you fork this for, the frontmatter caps are hard: a skill `description` must be **≤ 1024 characters** and a `name` **≤ 64 characters** — enforced by the [Agent Skills spec](https://agentskills.io/specification), so an over-cap skill warns or fails to load. See [CONTRIBUTING.md](../CONTRIBUTING.md#updating-a-skillmd) for the full rules.
+
 ### Add a new skill
 
 1. Create `skills/twingate-{domain}/SKILL.md` using the identity format.

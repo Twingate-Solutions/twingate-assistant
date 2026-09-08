@@ -56,6 +56,13 @@ Target: under 400 words in the body. (`twingate-troubleshoot` is an approved exc
 
 The `description:` field in the skill frontmatter is the most important part for discoverability — write it in imperative trigger language ("Use when...", "Load when...", "Activate for..."). Be aggressive in claiming trigger conditions.
 
+**Hard frontmatter limits (enforced by the [Agent Skills spec](https://agentskills.io/specification), not just style):**
+
+- `description` — **maximum 1024 characters.** A skill over the cap warns or fails to load under spec-conformant validators. This is 1024 exactly, not a rounder number. Count the *rendered* description — a folded `>` block still counts every character it unfolds to. When a pushy description hits the cap, cut the least-load-bearing keywords; do not go over.
+- `name` — **maximum 64 characters**, lowercase letters/numbers/hyphens only, no leading/trailing/consecutive hyphens, must match the skill's directory name, must not contain `anthropic` or `claude`.
+
+Agent `description:` fields (in `agents/*.md`) are **not** bound by the 1024-char skill cap, but keep them tight: Claude Code warns when the combined descriptions of all custom subagents exceed 15,000 tokens.
+
 ---
 
 ## Updating doc mapping
@@ -132,6 +139,7 @@ Before opening a PR:
 - [ ] Lint passes: `ruff check scripts/`
 - [ ] Types pass: `mypy scripts/ --ignore-missing-imports`
 - [ ] Any changed `SKILL.md` follows the identity format (4 sections, under 400 words, no technical facts)
+- [ ] Every changed/added skill `description` is **≤ 1024 characters** and `name` is **≤ 64 characters** (hard spec caps — measure, don't eyeball)
 - [ ] Any new skill has `doc_mapping.yaml` entries and at least one `references/` file
 - [ ] Any `doc_mapping.yaml` change has been verified by running the pipeline locally
 - [ ] Any changed agent has accurate `skills:` frontmatter; skill names match actual directories

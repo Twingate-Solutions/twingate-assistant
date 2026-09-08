@@ -163,6 +163,22 @@ twingate-assistant/
 
 SKILL.md files follow the **identity format** — a lean document that answers: *Who are you? What decisions do you help with? What are your guidelines?* The authoritative source of technical facts is `references/`, not the skill body. Illustrative examples in the body (a short YAML/JSON/HCL/CLI snippet that shows the *shape* of a thing) are fine — they are examples, not the canonical spec, and the skill must still force a reference check (`## Search References First`) so exact values, current versions, and field names are read from `references/` rather than copied from the example.
 
+#### Frontmatter Hard Limits (Non-Negotiable)
+
+These are enforced by the [Agent Skills specification](https://agentskills.io/specification) and validated by spec-conformant loaders (e.g. `pi.dev`, `skills-ref validate`). An oversized field warns or **fails to load** — it is not a soft style guideline. Confirmed against Anthropic's [Agent Skills docs](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) (Sep 2026).
+
+| Field | Hard limit | Other rules |
+|---|---|---|
+| `name` | **≤ 64 characters** | Lowercase `a-z`, `0-9`, hyphens only. No leading/trailing/consecutive hyphens. Must match the parent directory name. Must not contain `anthropic` or `claude`. No XML tags. |
+| `description` | **≤ 1024 characters** | Non-empty. No XML tags. Count the *rendered* string — a folded `>` block still counts every character it unfolds to. |
+| `compatibility` (if used) | ≤ 500 characters | Optional; omit unless the skill has real environment requirements. |
+
+**Rules:**
+
+- **The cap is 1024, not ~1064 or any rounder number.** Measure before committing. A description at 1000–1024 has almost no headroom — a one-word trigger addition can push it over.
+- Claude Code additionally truncates the combined `description` text at 1536 chars in its skill listing, but that is a soft runtime truncation on a *different* surface. **The binding requirement is the 1024-char spec cap**, because this plugin must load under spec-conformant validators, not only inside Claude Code.
+- To verify locally: `python -c "import re,sys; t=open(sys.argv[1],encoding='utf-8').read(); m=re.search(r'description:\s*>?\s*\n((?:  .*\n)+)',t); print(len(' '.join(l.strip() for l in m.group(1).splitlines())))" skills/<name>/SKILL.md` — or just paste the rendered description into any character counter.
+
 **Length:** keep the *prose* lean (Role + Decisions & Guidelines ≈ 400 words). The `## References` routing table is navigation, not content, and is exempt — a skill owning 70–150 references legitimately runs 800–2000 words total. Never pad the prose; never truncate the routing table to hit a word count. **Every file in `references/` must be reachable from the routing table** — an unnamed reference is an invisible one.
 
 **Required sections (in order):**
@@ -238,12 +254,13 @@ Then a `| If the user asks about… | Read first |` routing table covering EVERY
 
 **Other conventions:**
 
-- Description must be "pushy" — aggressively claim trigger conditions per Anthropic guidance
+- Description must be "pushy" — aggressively claim trigger conditions per Anthropic guidance, **but never past the 1024-character hard cap** (see Frontmatter Hard Limits above). Pushiness is bounded by the cap, not the other way around: cut the least-load-bearing trigger keywords first.
 - Reference files using relative paths: `[guide](./references/file.md)`
 - Use imperative form in guidelines
 
 ### Agent .md Files
 - YAML frontmatter with `name`, `description`, `tools`, and `skills` fields
+- **Frontmatter limits:** `name` uses lowercase letters and hyphens only and must not contain `:` (reserved for plugin-scoped ids). Claude Code subagents do **not** enforce the 1024-char skill cap on `description`, but there is a cumulative ceiling: when the combined descriptions of all custom subagents exceed **15,000 tokens**, Claude Code warns at startup. Keep each agent description tight for that reason — all six current agents sit well under 800 chars; do not let them balloon.
 - Body contains the system prompt — role definition, workflow, guardrails
 - Agents orchestrate; skills hold the authoritative detail. Illustrative examples (a sample task definition, an NSG/firewall rule, an IdP setup outline, a config snippet) are acceptable in an agent body to make guidance concrete — provided the agent still forces a reference check (`## When to Verify` / `## Search References First`) and cites the owning skill's reference for exact values. Do not turn an agent into a second copy of a skill's reference corpus.
 
@@ -262,7 +279,7 @@ Then a `| If the user asks about… | Read first |` routing table covering EVERY
 
 1. **Evergreen knowledge is hand-authored and never auto-overwritten.** The pipeline only writes to `references/` directories.
 2. **Skills are expertise, agents are orchestrators.** Agents route to skills for authoritative implementation detail; a skill's `references/` remains the single source of truth. Illustrative examples in an agent body (a sample snippet showing the shape of a config or command) are permitted — what's prohibited is an agent becoming a parallel copy of a skill's reference corpus, or presenting inline content as the authoritative spec. The agent must always force a reference check (`## When to Verify` / `## Search References First`) and cite the owning skill's reference for exact values.
-3. **Descriptions must be pushy.** Aggressively claim trigger conditions per Anthropic guidance.
+3. **Descriptions must be pushy — but a skill `description` is hard-capped at 1024 characters and a `name` at 64.** Aggressively claim trigger conditions per Anthropic guidance, within those caps. The 1024-char limit is enforced by the Agent Skills spec and spec-conformant loaders (a skill over the cap warns or fails to load); it is not negotiable and is not ~1064. See **Frontmatter Hard Limits** under Code Style & Conventions. When pushiness collides with the cap, the cap wins — trim keywords, never exceed 1024.
 4. **GitHub repos are referenced, not bundled.** Skills instruct CC to clone/inspect at runtime.
 5. **Two sitemaps plus the GitHub API are the sources of truth for discovery.** `doc_mapping.yaml`'s `sources:` list declares both sitemaps (`www.twingate.com/docs`, `help.twingate.com`); sitemap diff catches new pages on either. GitHub repos are discovered independently — live, on every run — across the four Twingate orgs via the GitHub API (`github_repos.discover_org_repos`), not via a static list; `doc_mapping.yaml`'s `repos:` section only routes a discovered repo to a skill.
 6. **GraphQL SDL ships statically.** Hand-maintained in `twingate-api`.
