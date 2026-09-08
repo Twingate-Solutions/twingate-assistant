@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/pulumi-twingate
 type: github
-fetched: 2026-08-23
-source_version: c854fc969dcc32275a2895d3ef90cb2535d08ef2
+fetched: 2026-09-06
+source_version: fc1b072a600dc5eae31e3976317e7e002884c2c7
 ---
 
 # Twingate Pulumi Provider
@@ -28,7 +28,7 @@ A Pulumi provider for managing Twingate infrastructure as code. Supports Python,
 |---|---|
 | Node.js | `npm install @twingate/pulumi-twingate` |
 | Python | `pip install pulumi-twingate` |
-| Go | `go get github.com/pulumi/pulumi-twingate/sdk/go/...` |
+| Go | `go get github.com/Twingate/pulumi-twingate/sdk/v5/go/...` |
 | .NET | `dotnet add package Twingate.Twingate` |
 
 ## Configuration Values
@@ -75,16 +75,20 @@ pulumi plugin ls | grep twingate
 - **Version string mismatch**: The exact version string required for `pulumi plugin install` appears in the error message — copy it from there.
 - **Network ID format**: The network ID is the subdomain only, not the full URL (e.g., `autoco`, not `autoco.twingate.com`).
 
+## Breaking Changes (v5.0.0)
+
+Upgrades the bridged upstream provider from terraform-provider-twingate v4.3.2 to v5.0.0. The Go SDK module path moves from `github.com/Twingate/pulumi-twingate/sdk/v4` to `github.com/Twingate/pulumi-twingate/sdk/v5`.
+
+**Removed**
+- `TwingateGatewayConfig` — the upstream `twingate_gateway_config` resource no longer exists.
+- `username` and `protocols` fields on `TwingateSSHResource`.
+- `protocols` field on `TwingateKubernetesResource`. (`protocols` is unaffected on `TwingateResource`.)
+
+**Added**
+- `TwingateWebAppResource` — new upstream `twingate_web_app_resource`. Requires `address`, `gatewayId`, `remoteNetworkId`, and `upstream`/`downstream` port blocks.
+
 ## Testing Workflows Locally
 Uses [`act`](https://github.com/nektos/act) to run GitHub Actions locally:
 ```bash
 act --list
-act pull_request -j lint
-```
-Select "Medium" Docker image size on first run.
-
-## Related Docs
-- [Twingate API Overview](https://docs.twingate.com/docs/api-overview)
-- [Pulumi Registry – Twingate](https://www.pulumi.com/registry/packages/twingate/api-docs/)
-- [Pulumi CLI Install](https://www.pulumi.com/docs/install/)
-- [act Installation](https://github.com/nektos/act#installation)
+act pull_request -j

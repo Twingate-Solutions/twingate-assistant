@@ -1,51 +1,50 @@
 ---
 source: https://help.twingate.com/articles/4982245028-using-nslookup-with-manually-defined-nameserver-fails-on-windows-with-twingate-client-running
 type: help
-fetched: 2026-08-06
-source_version: 1f38e2509022091119261687dc3e8bc54d58be91eddd6bdf53610d7ccdf8d0dd
+fetched: 2026-09-06
+source_version: 38425da823b01cd00849ee3092c52c99c252a799cd3eac4b44ae679ecb468a5e
 ---
 
 # Using nslookup with Manually Defined Nameserver Fails on Windows with Twingate Client Running
 
 ## Summary
-When the Twingate Client is active on Windows, it routes all DNS through an internal transparent DNS proxy. Manually specifying a DNS server (e.g., `nslookup google.com 8.8.8.8`) bypasses this proxy and is blocked by design to prevent information leakage and maintain secure resource resolution.
+When the Twingate Client is active on Windows, it routes all DNS through an internal transparent proxy, blocking any attempt to manually specify an alternate DNS server. This is intentional behavior to enforce access control and prevent DNS leakage outside the Twingate-controlled path.
 
 ## Key Information
-- Twingate intercepts all DNS queries via a transparent DNS proxy on a virtual network interface
-- Proxy IP is typically in the `100.95.0.x` range (e.g., `100.95.0.251`)
-- Manual DNS server specification in `nslookup` is **blocked by design** — not a bug
-- Standard `nslookup` without a specified server works normally through the Twingate proxy
-- Applies to Windows only (this specific behavior/doc)
+- Twingate installs a transparent DNS proxy on a virtual network interface (IP range: `100.95.0.x`)
+- All DNS queries are intercepted and routed through this proxy
+- Manually specifying a DNS resolver (e.g., `8.8.8.8`) bypasses the proxy path and is blocked
+- Standard `nslookup` without a specified server works correctly via the Twingate proxy
+- Behavior is by design — not a bug or misconfiguration
 
-## Behavior Details
-
-**Fails (manual nameserver specified):**
+## Symptoms
+**Fails:**
 ```
 nslookup google.com 8.8.8.8
-# Result: DNS request timed out (repeated), then times out
+# DNS request timed out (4x), then "Request to UnKnown timed-out"
 ```
 
-**Works (system default via Twingate proxy):**
+**Succeeds:**
 ```
 nslookup google.com
-# Result: Resolves via 100.95.0.251
+# Resolves via 100.95.0.251 (Twingate proxy)
 ```
 
-## Why Requests Are Blocked
-1. DNS request would leave the Twingate-controlled resolution path
-2. Private resources may not be resolvable via public DNS
-3. Twingate enforces proxy routing to prevent information leakage
+## Why It's Blocked
+Two reasons DNS bypass attempts fail:
+1. The request exits the Twingate-controlled network path
+2. Private/internal domains may not be resolvable via public DNS servers
 
 ## Gotchas
-- Timeout errors (`DNS request timed out`) can look like a network failure — they are actually enforcement behavior
-- Server shows as `UnKnown` with the manually specified IP, which may be mistaken for a configuration error
-- Any tool or application that hardcodes a DNS resolver will encounter the same blocking behavior, not just `nslookup`
-- This is **expected behavior**, not a defect to troubleshoot
+- The Twingate proxy IP (`100.95.0.x`) may look unfamiliar but is expected — it's the virtual interface address
+- Tools or scripts that hardcode DNS servers (e.g., `dig @8.8.8.8`, `nslookup domain server`) will fail the same way
+- This applies system-wide on Windows when the client is running — no per-app exceptions
+- Not a network connectivity issue; the timeout is a deliberate block, not packet loss
 
-## Prerequisites
-- Twingate Client installed and running on Windows
-- Virtual network interface active (assigned `100.95.0.x` address)
+## Workaround
+Use standard system DNS resolution (no manually specified nameserver) while Twingate Client is active. All resolvable domains — public and private — are handled by the Twingate proxy.
 
 ## Related Docs
-- Twingate DNS proxy behavior / DNS resolution architecture
-- Private resource DNS configuration
+- Twingate DNS proxy architecture
+- Private resource name resolution configuration
+- Windows client behavior and virtual network interface

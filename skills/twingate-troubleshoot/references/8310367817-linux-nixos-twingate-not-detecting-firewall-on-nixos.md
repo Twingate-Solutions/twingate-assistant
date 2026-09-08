@@ -1,62 +1,68 @@
 ---
 source: https://help.twingate.com/articles/8310367817-linux-nixos-twingate-not-detecting-firewall-on-nixos
 type: help
-fetched: 2026-08-06
-source_version: fbdb401f24d79376e4a4ba008b220a077007be75f5b901e93c1b1bcff6f17ab0
+fetched: 2026-09-06
+source_version: 15116114b28cbc83e34432d5c79fc6b1c719b5365e6c053986def86da33026b9
 ---
 
 # [Linux - NixOS] Twingate Not Detecting Firewall on NixOS
 
 ## Summary
-The Twingate Client cannot detect firewall configuration on NixOS when `networking.firewall` is used, even though it uses `iptables` in the backend. To enable device posture firewall checks, NixOS's built-in firewall must be disabled and `iptables` configured directly.
+The Twingate Client cannot detect NixOS's native firewall when configured via `networking.firewall`, even though NixOS uses `iptables` as its backend. To satisfy Twingate's device posture firewall check, `networking.firewall` must be disabled and `iptables` configured directly.
 
 ## Key Information
-- **Affected component:** Twingate Client
-- **Platform:** Linux (NixOS) only
-- **Issue:** Twingate Client does not recognize `networking.firewall` as a valid firewall for device posture checks
-- **Root cause:** NixOS abstracts `iptables` through `networking.firewall`; Twingate cannot detect this abstraction layer
+- **Component**: Twingate Client
+- **Platform**: Linux (NixOS)
+- **Issue**: Twingate detects `iptables` as its supported firewall mechanism, but cannot recognize NixOS's abstraction layer (`networking.firewall`) over `iptables`
 
 ## Prerequisites
-- NixOS system with Twingate Client installed
-- Administrative access to modify NixOS configuration
-- Review of organization security policies before making changes
+- Access to NixOS system configuration
+- Ability to modify `configuration.nix`
+- Understanding of your organization's security policies before making changes
 
-## Requirements to Fix
+## Firewall Requirements for Twingate Detection
 
-Three conditions must ALL be met for Twingate to detect the firewall:
+All three conditions must be met:
 
 1. `networking.firewall` must be **disabled**
 2. `iptables` must be **installed**
-3. `INPUT` chain default policy must be set to **DROP**
+3. The `INPUT` chain's default policy must be set to **`DROP`**
 
 ## Configuration Steps
 
-1. Disable NixOS built-in firewall in `/etc/nixos/configuration.nix`:
+1. **Disable NixOS native firewall** in `configuration.nix`:
    ```nix
    networking.firewall.enable = false;
    ```
 
-2. Install `iptables` via NixOS configuration or ensure it is available
+2. **Ensure `iptables` is installed** (add to system packages if needed):
+   ```nix
+   environment.systemPackages = with pkgs; [ iptables ];
+   ```
 
-3. Set `INPUT` chain default policy to `DROP`:
+3. **Set INPUT chain default policy to DROP** via `iptables`:
    ```bash
    iptables -P INPUT DROP
    ```
+   Or configure this persistently through NixOS (e.g., using `networking.nftables` or custom scripts).
 
-4. Rebuild NixOS configuration:
-   ```bash
-   nixos-rebuild switch
-   ```
+## Configuration Values
+| Parameter | Required Value |
+|-----------|---------------|
+| `networking.firewall.enable` | `false` |
+| `iptables` INPUT chain policy | `DROP` |
 
-## ⚠️ Gotchas
+## Gotchas
+- ⚠️ Setting `INPUT` policy to `DROP` **will block all inbound traffic by default** — explicitly allow SSH, DNS, and other essential traffic before applying
+- Test changes in a controlled environment before production deployment
+- NixOS rebuilds may reset `iptables` rules; ensure rules are applied persistently
+- Simply having `iptables` installed is insufficient — the INPUT chain policy must explicitly be `DROP`
 
-- **SSH lockout risk:** Setting `INPUT` policy to `DROP` without explicitly allowing SSH will block remote access — ensure port 22 (or your SSH port) is allowed before applying
-- **DNS breakage:** DNS traffic must be explicitly allowed or resolution will fail
-- **Essential services:** All required traffic must have explicit ALLOW rules before switching to a DROP default policy
-- Always test in a controlled environment before applying to production systems
-- Changes are not automatically persistent across reboots unless configured in NixOS declarative config or a startup script
+## Reference Links
+- [`iptables` man page](https://linux.die.net/man/8/iptables)
+- Local: `man iptables`
 
 ## Related Docs
-- [iptables man page](https://linux.die.net/man/8/iptables)
-- `man iptables` (local system reference)
-- Twingate device posture / firewall check documentation
+- Twingate Device Posture (firewall checks)
+- NixOS `networking.firewall` documentation
+- NixOS `iptables` persistence configuration

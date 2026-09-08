@@ -1,54 +1,59 @@
 ---
 source: https://help.twingate.com/articles/4995810632-connector-cannot-connect-to-the-twingate-relay
 type: help
-fetched: 2026-08-06
-source_version: 3644cbd41c69c737e92c2b19eda883b2c70a2258f5a434e04a045fd955ff298e
+fetched: 2026-09-06
+source_version: 3e8f2814858296e5bd5606096baa1e9ac4d431e8d3b710b10ca18332e8ae3fc2
 ---
 
 # Connector Cannot Connect to Twingate Relay
 
 ## Summary
-Connector fails to establish connections to the Twingate Relay despite successful outbound internet traffic. Root cause is the Connector VM having only a public IPv6 address assigned. Fix requires assigning a public IPv4 address to the Connector instance.
+Connector fails to establish connections to Resources due to inability to connect to the Twingate Relay architecture. The root cause is the Connector VM having only a public IPv6 address assigned, as the Relay requires IPv4 connectivity.
 
 ## Key Information
-- Affects: Twingate Connector component only
-- Symptom: All Resource connections fail while Connector appears otherwise healthy
-- Admin console shows Connector unable to connect to Resource
-- Twingate Relay requires IPv4 connectivity
+- Affects: Twingate Connector component
+- Clients may work normally while Resource connections fail completely
+- Relay connectivity requires public IPv4 address on the Connector instance
+- Error appears in Connector logs, not Client logs
 
-## Prerequisites
-- Access to the Connector VM/instance networking configuration
-- Ability to assign a public IPv4 address to the instance (cloud provider or network admin access)
-
-## Symptoms Checklist
-- [ ] Connector has successful outbound internet traffic
-- [ ] All network requirements are otherwise met
-- [ ] Zero Resource connections succeed
-- [ ] Admin console connection details show Connector-to-Resource failures
+## Symptoms
+- Connector passes outbound internet traffic checks and meets all Network Requirements
+- Zero connections to any Resources succeed
+- Twingate Admin console shows Connector unable to connect to Resources
 
 ## Diagnostic Log Errors
 Look for these specific errors in Connector logs:
+
 ```
-[ERROR] [libsdwan] listen::channel_event: Failed to preconnect a relay listener "ice://any": 110 (Connection timed out)
-[ERROR] [libsdwan] listen::maintain_relay_connectivity: relay [IP address and port] is not available, disconnect
+[Timestamp][Connector]: [ERROR] [libsdwan] listen::channel_event: Failed to preconnect a relay listener "ice://any": 110 (Connection timed out)
+
+[Timestamp][Connector]: [ERROR] [libsdwan] listen::maintain_relay_connectivity: relay [IP address and port] is not available, disconnect
 ```
-Also look for: `resource temporarily unavailable`
+
+Also may appear:
+```
+resource temporarily unavailable
+```
+
+## Root Cause
+Connector VM instance is assigned **only a public IPv6 address** — no public IPv4 address. The Twingate Relay infrastructure requires IPv4.
 
 ## Resolution
-**Assign a public IPv4 address to the Connector instance.**
 
-Steps vary by environment:
-- **AWS**: Allocate and associate an Elastic IP (IPv4) to the EC2 instance
-- **GCP**: Assign an external IPv4 address to the VM network interface
-- **Azure**: Assign a public IPv4 address to the VM's NIC
-- **On-prem/other**: Ensure the host has a routable public IPv4 address or NAT with IPv4 egress
+**Assign a public IPv4 address to the Connector VM instance.**
+
+Steps vary by cloud provider:
+- **AWS**: Assign an Elastic IP or enable auto-assign public IPv4 on the subnet/instance
+- **GCP**: Assign an external IPv4 address to the network interface
+- **Azure**: Attach a public IP resource (IPv4) to the NIC
+
+After assigning the IPv4 address, restart the Connector service to re-establish relay connectivity.
 
 ## Gotchas
-- IPv6-only instances will appear to have working internet connectivity, making this hard to diagnose without checking the address type specifically
-- Connector logs may show generic timeout errors that don't immediately point to IPv6-only as the cause
-- The `resource temporarily unavailable` message is a secondary indicator, not the primary error
+- IPv6-only environments are **not supported** for Connector instances — even if general outbound internet works fine via IPv6
+- Passing standard network connectivity checks does not rule out this issue if those checks use IPv6
+- Admin console showing "Connector unable to connect to Resource" may appear identical to other failure modes — check logs for the specific relay errors above
 
 ## Related Docs
-- [Twingate Network Requirements](https://help.twingate.com/articles/network-requirements) — verify all port/protocol requirements are met before investigating this issue
-- Twingate Relay architecture documentation
-- Connector deployment guides (AWS, GCP, Azure)
+- [Twingate Network Requirements](https://help.twingate.com/articles/network-requirements)
+- Twingate Connector deployment guides (per cloud provider)

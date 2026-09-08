@@ -1,46 +1,48 @@
 ---
 source: https://help.twingate.com/articles/4838955865-netgear-router-blocking-twingate-connectivity
 type: help
-fetched: 2026-08-06
-source_version: 68f33a0992cecbba1d9ebf2538e7788e2cc2da51a5167b1ae2f76b00d8a13e72
+fetched: 2026-09-06
+source_version: 14157db09f589e53bbc791d91c99e03d3fd0ae2b7e6cacbb68452b46ed0c2333
 ---
 
 # Netgear Router Blocking Twingate Connectivity
 
 ## Summary
-NETGEAR routers with NETGEAR Armor security active will block Twingate connections, causing the client to appear connected but fail to route traffic. The fix requires either disabling NETGEAR Armor or configuring URL exceptions.
+NETGEAR Armor security feature blocks Twingate connections, causing the client to appear connected but fail to route traffic. Resolution requires either disabling NETGEAR Armor or configuring a URL exception.
 
 ## Key Information
 - Affects both Twingate Client and Connector components
-- NETGEAR Armor silently blocks Twingate URLs without clear error messaging
-- Client appears to connect successfully but traffic does not flow
-- Issue is router-level, not a Twingate configuration problem
+- NETGEAR Armor silently blocks Twingate infrastructure URLs
+- Symptom appears as successful connection UI state with no actual traffic routing
+- No error messages are typically shown to the user
 
 ## Symptoms
-- Network URL accepted and client appears to connect
-- No actual connectivity through Twingate
+- Network URL entered after successful installation
+- Client appears to connect but traffic does not flow
 - No other VPN active that could cause conflict
 - Other non-Twingate connections work normally
 
-## Resolution Options
+## Cause
+NETGEAR Armor (router-level security feature) blocks outbound connections to Twingate infrastructure URLs.
 
-### Option 1: Disable NETGEAR Armor
-Turn off NETGEAR Armor entirely via the NETGEAR router admin interface.
+## Resolution
 
-### Option 2: Configure URL Exceptions (Preferred)
-Add Twingate URLs to NETGEAR Armor's allowlist:
-1. Access NETGEAR Armor settings in router admin panel
-2. Follow NETGEAR's exception configuration process (refer to NETGEAR KB: *"NETGEAR Armor is blocking URLs that I want to access; what do I do?"*)
-3. Add all Twingate infrastructure URLs from the Twingate allowlist reference
+**Option 1: Disable NETGEAR Armor**
+- Disable NETGEAR Armor entirely on the router
+
+**Option 2: Configure URL Exception (preferred)**
+- Use NETGEAR's exception/allowlist feature to permit Twingate URLs
+- Follow NETGEAR KB: *"NETGEAR Armor is blocking URLs that I want to access; what do I do?"*
+- Add all Twingate infrastructure URLs to the NETGEAR Armor exception list
 
 ## Configuration Values
-- URLs to allowlist: Refer to Twingate's **Allowlist for outbound connections to Twingate infrastructure** documentation for the complete list of required URLs/domains
+- Refer to Twingate's **Allowlist for outbound connections to Twingate infrastructure** for the complete list of URLs/domains to whitelist in NETGEAR Armor
 
 ## Gotchas
-- No obvious error is presented — client appears to connect, making this difficult to diagnose
-- Simply reinstalling Twingate will not resolve the issue
-- Must allowlist all Twingate infrastructure URLs, not just the network URL
+- The client UI may show a connected state even when NETGEAR Armor is blocking traffic — do not rely on client status indicator alone for diagnosis
+- This issue occurs post-installation during initial network URL entry, which may be misdiagnosed as a configuration or credential problem
+- Disabling Armor network-wide may not be acceptable in security-conscious environments; use the exception method instead
 
 ## Related Docs
-- [Allowlist for outbound connections to Twingate infrastructure](https://help.twingate.com) — complete list of Twingate URLs requiring network access
-- NETGEAR KB: *NETGEAR Armor is blocking URLs that I want to access*
+- [Allowlist for outbound connections to Twingate infrastructure](https://help.twingate.com) — required URL list for NETGEAR Armor exceptions
+- NETGEAR KB: "NETGEAR Armor is blocking URLs that I want to access; what do I do?"

@@ -1,12 +1,8 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator
 type: github
-fetched: 2026-08-23
-source_version: 8eddac286be1147d12224fa668ae856b6cb9c765
----
-
-The change is a minor GitHub Actions workflow update (pinning `docker/setup-buildx-action` to v4.3.0). This does not affect any user-facing behavior, CRDs, configuration, or documented gotchas. The summary requires no content changes.
-
+fetched: 2026-09-06
+source_version: b9258ed54b3fdbddec1dcc54a8be162f36526592
 ---
 
 # Twingate Kubernetes Operator
@@ -56,9 +52,10 @@ Alternative: clone the repo and point `helm upgrade` at the local `./deploy/twin
 - Deprecated Kubernetes versions removed in v2; changing a Service's `resource.twingate.com/type` value now recreates the `TwingateResource`.
 - On uninstall, the gateway's Twingate CRs are deleted before the operator.
 - License changed to Apache 2.0 in v2.
+- **EKS users (v2.0.1+):** A bug where `ssl.VERIFY_X509_STRICT` prevented the operator from reaching the API server on EKS has been fixed.
 
-## Related Docs
+## Recent Releases
 
-- `Twingate/helm-charts` — Connector deployment (Remote Network prerequisite)
-- Repo Wiki: Getting Started, API Reference, v1→v2 Migration
-- Twingate forum and help center for support
+- **v2.0.2** (2026-09-04): Dependency bumps only (cryptography, pydantic, ruff, responses, syrupy, danger-js, hadolint-action, docker/setup-qemu-action, gateway 1.0.0→1.1.0); Python upgraded 3.14.5→3.14.7; `yq` GitHub Action removed from release workflow.
+- **v2.0.1** (2026-08-24): Bug fix — relaxed `ssl.VERIFY_X509_STRICT` for EKS compatibility; dependency bumps (orjson, mypy, ruff, pre-commit, types-pyyaml, docker/setup-buildx-action).
+-

@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-mdm-connector
 type: github
-fetched: 2026-08-23
-source_version: e56c6bef2b78500eed160a792c66f758fef38cde
+fetched: 2026-09-06
+source_version: 0a2b34521b0383e23f174b46b4401b21b018a5c9
 ---
 
 # Twingate MDM Connector
@@ -16,7 +16,7 @@ Open-source middleware that automatically marks devices as trusted in Twingate b
 
 ## Key Information
 - **Image:** `ghcr.io/twingate-solutions/twingate-mdm-connector:latest`
-- **Supported providers:** NinjaOne, Sophos, ManageEngine (cloud/on-prem), Automox, JumpCloud, FleetDM, Mosyle, Datto RMM, Rippling, Manual (rules-only)
+- **Supported providers:** NinjaOne, Sophos, CrowdStrike Falcon, ManageEngine (cloud/on-prem), Automox, JumpCloud, FleetDM, Mosyle, Datto RMM, Rippling, Manual (rules-only)
 - **Tested providers:** NinjaOne, ManageEngine (cloud), JumpCloud, Manual
 - **Webhook destinations:** Slack, Discord, raw JSON/SIEM (tested); Teams, PagerDuty, OpsGenie (untested)
 - **Trust modes:** `any` (compliant in at least one provider) or `all` (compliant in every provider that recognizes it)
@@ -76,7 +76,12 @@ Open-source middleware that automatically marks devices as trusted in Twingate b
 
 ---
 
-## Gotchas
-- Serial number matching is normalized to `strip().upper()` — mismatches due to case/whitespace are handled, but malformed serials will silently fail to match
-- Provider errors skip that provider for the cycle; they do not abort the run or untrust devices
-- `trust.mode: all` requires the device to appear in **every** configured provider —
+## Provider Configuration
+
+### CrowdStrike Falcon
+
+Auth: OAuth2 client credentials. Requires **Hosts: Read** scope only. Trial: 15-day free (Falcon Go bundle).
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `cloud` | enum | `us-1

@@ -1,41 +1,48 @@
 ---
 source: https://help.twingate.com/articles/8595638268-active-directory-users-and-computer-aduc-is-slow-over-twingate
 type: help
-fetched: 2026-08-06
-source_version: 09bb59c25c21e663e3012f33f514bc3865a5ce69bc04c33d4286d2268e372dee
+fetched: 2026-09-06
+source_version: d8bd39c04e10105d11ebf3c412a8b8b8e733df4e0fcaf4ac8585e947b6a1921f
 ---
 
-# Active Directory Users and Computers (ADUC) is Slow Over Twingate
+# Active Directory Users and Computers (ADUC) Slow Over Twingate
 
 ## Summary
-ADUC performance degrades when used over Twingate on Windows. The root cause is under investigation. Two workarounds are available: bypassing DNS via direct IP connection or using a jumpbox.
+ADUC performance degrades when accessed through the Twingate client on Windows. Root cause is under investigation. Two workarounds are available depending on environment configuration.
 
 ## Key Information
-- Affects ADUC (`dsa.msc`) running over Twingate on Windows clients
-- Issue is DNS-related in most cases
-- Not yet resolved at the Twingate client level
+- Affects: Twingate Client on Windows
+- Issue: ADUC slow performance when routed through Twingate
+- Status: Under active investigation by Twingate
 
 ## Prerequisites
 - Twingate Client installed on Windows
-- Access to domain controller IP address
+- Access to Domain Controller IP address
+- (Alternative) Jumpbox/admin host on same network as managed domain
 
 ## Workarounds (in order of preference)
 
-### Option 1: Bypass DNS with Direct IP
-Launch ADUC targeting the domain controller by IP instead of hostname:
+### Option 1: Bypass DNS, Connect via IP
+Run ADUC directly against the Domain Controller IP to bypass DNS resolution overhead:
+
 ```cmd
 dsa.msc /server="<domain controller IP>"
 ```
 
+Replace `<domain controller IP>` with the actual IP of your DC.
+
 ### Option 2: Use a Jumpbox/Administrative Host
-- Deploy a jumpbox or admin host on the **same network** as the managed domain
-- Perform all AD tasks from that host locally
-- Aligns with Microsoft's secure administrative host guidance
+If Option 1 doesn't resolve the issue, connect to a jumpbox or administrative host that resides on the **same network** as the managed domain. Perform all AD tasks from that host locally.
+
+## Configuration Values
+| Parameter | Value | Notes |
+|-----------|-------|-------|
+| `/server` flag | Domain Controller IP | Use IP, not hostname, to bypass DNS |
 
 ## Gotchas
-- Environment-specific: Option 1 (IP bypass) resolves the issue for many but not all users
-- Hardcoding IP addresses for domain controllers may require updates if DCs change IPs
-- Jumpbox approach adds operational overhead but is the more reliable fallback
+- Option 1 works for many but not all environments — results vary by customer setup
+- DNS resolution through Twingate appears to be a likely contributor; using IP sidesteps this
+- Option 2 (jumpbox) is the fallback and aligns with Microsoft's secure administrative host best practices
 
 ## Related Docs
-- [Microsoft Secure Administrative Hosts guidance](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/implementing-secure-administrative-hosts)
+- [Microsoft: Securing Privileged Access / Secure Administrative Hosts](https://learn.microsoft.com/en-us/security/privileged-access-workstations/privileged-access-devices)

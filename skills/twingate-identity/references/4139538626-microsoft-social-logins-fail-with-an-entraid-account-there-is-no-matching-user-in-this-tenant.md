@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/4139538626-microsoft-social-logins-fail-with-an-entraid-account-there-is-no-matching-user-in-this-tenant
 type: help
-fetched: 2026-08-06
-source_version: b26510ef7fd78aaec53930949370b9f237436135a0bfaf91265395eb287366c5
+fetched: 2026-09-06
+source_version: 92d372231ab912069c29c70505d0326e1fba99eec41e9f3f6d0a0a8776a78935
 ---
 
 # Microsoft Social Logins Fail: "There is no matching user in this tenant"
@@ -11,17 +11,19 @@ source_version: b26510ef7fd78aaec53930949370b9f237436135a0bfaf91265395eb287366c5
 Microsoft social logins fail with an EntraID account — There is no matching user in this tenant
 
 ## Summary
-Entra ID accounts can exist without a populated `Mail` attribute, but Twingate requires an email address for all Microsoft social logins. When the `Mail` attribute is empty in Entra ID, authentication fails with "There is no matching user in this tenant." This does not affect logins through a configured Entra ID IdP integration.
+Entra ID accounts (particularly admin/service accounts) can exist without a populated `Mail` attribute, even though they have a UPN-format username. Twingate requires a valid email address for Microsoft social logins, so users with unpopulated `Mail` attributes will fail authentication with "There is no matching user in this tenant."
 
 ## Key Information
-- **Affected component**: Identity Provider — Microsoft (social login) via Entra ID account
-- **Root cause**: Entra ID `Mail` attribute is not populated on the user account
-- **Scope**: Only affects Microsoft social login flow; Entra ID IdP (tenant-configured) login is unaffected
-- **Common affected accounts**: Admin accounts and service accounts that lack an email inbox but have a UPN (`user@domain.tld`)
+- **Affected component**: Identity Provider - Microsoft (social) via Entra ID account
+- Email is **required** for Microsoft social logins but **not** required for tenant-configured Entra ID IdP logins
+- Entra ID UPN (`user@domain.tld`) does not guarantee the `Mail` attribute is populated
+- Admin and service accounts are most commonly affected
+- Error occurs even if the user appears to have an email address in the directory
 
 ## Prerequisites
-- User must be invited to the Twingate network before login will succeed
-- User's email address in Twingate invite must match the `Mail` attribute in Entra ID
+- User must be invited to the Twingate network
+- User must be signing in to the correct tenant URL (`https://<network>.twingate.com`)
+- The `Mail` attribute in Entra ID must be populated
 
 ## Troubleshooting Steps
 
@@ -29,20 +31,29 @@ Entra ID accounts can exist without a populated `Mail` attribute, but Twingate r
 1. Confirm the user has been invited to the Twingate network
 
 **For Twingate Users:**
-1. Verify you are signing into the correct network: `https://<network>.twingate.com`
-2. Confirm the email used matches the one registered in Twingate
+1. Verify you are signing in to the correct Twingate network URL
+2. Confirm the email used matches the one registered with Twingate
 
 ## Resolution
-An Entra ID administrator must populate the `Mail` attribute on the affected user account:
-1. Navigate to the user in Entra ID (Azure AD)
-2. Set the **Mail** attribute to a valid email address
-3. Ensure this email matches the address used in the Twingate invitation
+The Entra ID administrator must populate the `Mail` attribute for the affected account:
+
+1. Open **Entra ID (Azure Active Directory)** admin portal
+2. Navigate to the affected user's profile
+3. Set/update the **Mail** attribute with a valid email address
+4. Ensure this email matches the address invited in Twingate
+5. Retry Microsoft social login
+
+## Configuration Values
+| Attribute | Location | Required For |
+|-----------|----------|--------------|
+| `Mail` | Entra ID user profile | Microsoft social login |
+| UPN | Entra ID user profile | Not sufficient alone |
 
 ## Gotchas
-- A UPN in `user@domain.tld` format does **not** mean the `Mail` attribute is set — these are separate fields
-- The error message "There is no matching user in this tenant" can appear even if the user exists in both Entra ID and Twingate, solely due to the missing `Mail` attribute
-- Social login and IdP-configured login have different attribute requirements; missing `Mail` only blocks social login
+- UPN format (`user@domain.tld`) is **not** the same as the `Mail` attribute — do not assume UPN presence means email is set
+- This issue does **not** affect users authenticating via a configured Entra ID IdP (only social login)
+- Admin/service accounts are commonly provisioned without the `Mail` attribute
 
 ## Related Docs
-- Twingate Identity Provider configuration (Microsoft/Entra ID)
-- Twingate user invitation workflow
+- Twingate Identity Provider configuration (Entra ID/Azure AD)
+- Microsoft social login setup

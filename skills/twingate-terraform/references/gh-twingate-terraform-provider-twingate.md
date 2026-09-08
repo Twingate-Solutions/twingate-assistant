@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/terraform-provider-twingate
 type: github
-fetched: 2026-08-23
-source_version: 6875b07f8528f796df1498039e2414a58c087042
+fetched: 2026-09-06
+source_version: 06a2f8d5358cb2df024bd7f2d1fe9b0462a403a8
 ---
 
 # Twingate Terraform Provider
@@ -12,9 +12,9 @@ Terraform provider for managing Twingate resources (networks, resources, groups,
 
 ## Key Information
 - Written in Go; published to the Terraform Registry
-- Covers resources: `twingate_resource`, `twingate_group`, `twingate_connector`, `twingate_remote_network`, `twingate_user`, `twingate_service_account`, and associated data sources
+- Covers resources: `twingate_resource`, `twingate_group`, `twingate_connector`, `twingate_remote_network`, `twingate_user`, `twingate_service_account`, `twingate_ssh_resource`, `twingate_kubernetes_resource`, `twingate_web_app_resource`, and associated data sources
 - Docs in `docs/` are auto-generated from `templates/`; edit templates, not generated files
-- Latest stable release: **v4.3.1**
+- Latest stable release: **v5.0.0**
 
 ## Prerequisites
 - Bash
@@ -68,14 +68,39 @@ make docs
 
 All three can also be set directly in the provider block as `api_token`, `network`, and `url`.
 
-## Gotchas
-- `docs/` is auto-generated — manual edits will be overwritten by `make docs`
-- Acceptance tests (`make testacc`) hit a real Twingate network; all three env vars must be set or tests fail
-- The repo description references "Kubernetes controller / CRDs," which is inaccurate metadata — this is a Terraform provider, not a Kubernetes controller
-- Recent fix (v4.3.1): `access_group` `security_policy_id` could show inconsistent state after `apply`; update if using that attribute
+## Breaking Changes in v5.0.0
 
-## Related Docs
-- [Terraform Registry – Twingate Provider](https://registry.terraform.io/providers/Twingate/twingate/latest/docs)
-- [Twingate API Docs](https://docs.twingate.com/docs/api-overview)
-- [Terraform Plugin Framework](https://developer.hashicorp.com/terraform/plugin/framework)
-- [Go Installation](https://golang.org/doc/install)
+### Removed: `twingate_gateway_config` resource
+The resource has been removed entirely. It only ever rendered a static YAML document; no remote object was created. Replace it with Terraform's built-in `templatefile()` function:
+
+```terraform
+locals {
+  gateway_config = templatefile("${path.module}/config.yaml.tftpl", {
+    twingate_network = var.tg_network
+    twingate_host    = var.tg_url
+    port             = local.gateway_port
+  })
+}
+```
+
+Remove the old resource from state:
+```bash
+terraform state rm twingate_gateway_config.<name>
+```
+
+Any reference to `twingate_gateway_config.config.content` becomes `local.gateway_config`. If a `lifecycle` block used `replace_triggered_by` pointing at the old resource, wrap the rendered config in a `terraform_data` resource instead.
+
+### Removed: `username` from `twingate_ssh_resource`
+The `username` attribute has been removed. It only fed the now-removed `twingate_gateway_config`; the Gateway now takes the username from the runtime connection. No state change is required since the attribute never reached the Twingate API. A config that still sets `username` fails with `Unsupported argument`.
+
+Note: `ssh.gateway.username` in the Gateway's YAML config (the OS user the Gateway process runs as) is unrelated and still required.
+
+### Removed: `protocols` from `twingate_ssh_resource` and `twingate_kubernetes_resource`
+Port restrictions do not apply to SSH and Kubernetes resources, so `protocols` never had any effect. Remove it from configs. A config that still sets `protocols` on either resource fails with `Unsupported argument`.
+
+## New in v5.0.0
+
+### New resource: `twingate_web_app_resource`
+Web App Resources are Twingate resources accessed via a Gateway.
+
+**Required attributes:** `address`, `downstream` (with `port

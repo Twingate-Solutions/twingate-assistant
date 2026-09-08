@@ -1,51 +1,53 @@
 ---
 source: https://help.twingate.com/articles/4908519978-connector-offline-gone-code-410-in-logs
 type: help
-fetched: 2026-08-06
-source_version: ff80c22519b1ed87b70d38d5086b5ec003916c5ea01ed2d481e40ae2e1b905e3
+fetched: 2026-09-06
+source_version: c372eec1c371cfccc80f3b59b537f306f1f523911617c64c801c46c293875626
 ---
 
 # Connector Offline—"Gone, code 410" in Logs
 
 ## Summary
-A Connector shows as "Offline" when launched with expired or deleted tokens, generating a 410 error. This commonly occurs after incomplete or unsuccessful update attempts. Resolution requires purging the Connector service and re-deploying with fresh tokens.
+When a Connector starts with expired or deleted authentication tokens, it goes offline and logs a `Gone, code 410` error. This typically occurs after a failed or incomplete Connector update. Resolution requires purging the Connector service and re-deploying with fresh tokens.
 
 ## Key Information
-- Error code 410 ("Gone") indicates the Connector's authentication tokens are expired or deleted server-side
-- Connector state will show as `Error` in logs, not a network issue
-- The error is unrecoverable without re-provisioning—the Connector cannot self-heal
+- Error indicates Connector is using **invalid, expired, or deleted tokens**
+- Connector appears **Offline** in the Admin Console
+- Common trigger: incomplete/failed update attempts
 
 ## Symptoms
-- Connector status: Offline in Admin Console
-- Log indicators:
-  - `Authentication [INFO] [libsdwan] sdwan_state: Offline User`
-  - `Gone, code 410`
-  - `[INFO] [connector] State: Error`
-  - `[DEBUG] [libsdwan] [controller] run_state_machine: Pre-unrecoverable error`
-  - `[DEBUG] [libsdwan] resetting configuration`
-  - `[WARN] [libsdwan] [controller] operator(): failed to get SD: Gone, code 410`
+Log output indicating this issue:
+```
+[INFO] [connector] State: Error
+[DEBUG] [libsdwan] [controller] run_state_machine: Pre-unrecoverable error
+[DEBUG] [libsdwan] resetting configuration
+[WARN] [libsdwan] [controller] operator(): failed to get SD: Gone, code 410
+```
+Also appears as:
+- `Authentication [INFO] [libsdwan] sdwan_state: Offline User`
 
-## Resolution Steps
+## Resolution (Step-by-Step)
 
-1. **Purge the existing Connector service** (choose based on distro):
-   ```bash
-   # Debian/Ubuntu
-   sudo apt purge twingate-connector
+1. **Purge the existing Connector service** from the host:
 
-   # RHEL/Fedora/CentOS
-   dnf rm twingate-connector
-   ```
+   - Debian/Ubuntu:
+     ```bash
+     sudo apt purge twingate-connector
+     ```
+   - RHEL/Fedora/CentOS:
+     ```bash
+     dnf rm twingate-connector
+     ```
 
-2. **Generate a new deployment script** from the Twingate Admin Console
+2. **Generate a new deployment script** from the Twingate Admin Console (creates fresh tokens).
 
-3. **Re-deploy** the Connector using the newly generated script
+3. **Re-run the new script** on the system to redeploy the Connector.
 
 ## Gotchas
-- Simply restarting the Connector service will not resolve this—the stale token state persists until purged
-- Must use `purge` (not just `remove`/`apt remove`) on Debian-based systems to clear configuration files
-- A new token/script must be generated from the Admin Console; the old script cannot be reused
-- If reusing the same host/VM, ensure full purge before re-installation to avoid stale config
+- Simply restarting the Connector service will **not** resolve this—tokens are invalid and must be regenerated
+- Use `purge` (not just `remove`/`uninstall`) on Debian systems to ensure configuration files with old tokens are cleared
+- Re-using the same machine requires full purge before redeployment
 
 ## Related Docs
-- Twingate Connector installation documentation
-- Admin Console: Connector deployment script generation
+- Twingate Connector deployment (Admin Console)
+- Connector update procedures

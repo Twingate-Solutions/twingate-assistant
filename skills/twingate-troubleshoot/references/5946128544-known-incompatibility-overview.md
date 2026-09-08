@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/5946128544-known-incompatibility-overview
 type: help
-fetched: 2026-08-06
-source_version: 9e524825754f280e39c0c52a2d78e98bb8e26b48d0fb8658d31fe1067fd101d3
+fetched: 2026-09-06
+source_version: af18971a5440c2a3786d46d12ef602b9b292dc56b6efe962f0834fd23f9330de
 ---
 
 # Known Incompatibility Overview
@@ -11,43 +11,42 @@ source_version: 9e524825754f280e39c0c52a2d78e98bb8e26b48d0fb8658d31fe1067fd101d3
 Known Incompatibility Overview
 
 ## Summary
-Twingate may conflict with VPN, DNS filtering, and security software that modifies network settings at the OS level. Conflicts arise when multiple applications compete over routing tables, DNS settings, or encrypted tunnels. This page outlines categories of incompatibility and links to specific workarounds.
+Twingate may conflict with VPN, DNS filtering, and security software that modifies network settings at the OS level. Conflicts arise when multiple applications compete over routing tables, DNS configuration, or encrypted tunnels. This page identifies known incompatible software and provides mitigation strategies.
 
 ## Key Information
 - Twingate operates at the network level and can conflict with other network-modifying software
-- Three primary conflict types: routing table modifications, custom DNS enforcement, overlapping encrypted tunnels
-- Twingate uses IPs in the **100.96/12 CGNAT range** — local network or DNS IPs in this range cause connectivity failures
-- Software can interfere even when **disabled but not uninstalled**
+- Three primary conflict vectors: routing table modifications, custom DNS enforcement, overlapping encrypted tunnels
+- Twingate uses the **100.96/12 CGNAT range** for Client-Connector-Resource communication — local network IPs in this range will cause conflicts
+- Software can interfere **even when disabled** (not just when actively running)
 
 ## Known Incompatible Software
-
-| Category | Applications |
-|----------|-------------|
+| Category | Software |
+|----------|----------|
 | VPN/ZTNA | Zscaler |
 | DNS Clients | Cisco Umbrella, DNSFilter, AdGuard (local), AdGuard for Mac |
 | Antivirus | Avast Real Site Protection |
 
 ## Troubleshooting Steps
-1. Temporarily **uninstall** (not just disable) the conflicting software to confirm it is the cause
-2. If uninstalling resolves the issue, try these workarounds before permanently removing:
-   - Enable **bypass/compatibility mode** in the conflicting VPN, ZTNA, or network filtering software
+1. Temporarily **uninstall** conflicting software to confirm it is the cause
+2. If uninstall resolves the issue, try these workarounds before permanently removing:
+   - Enable **bypass/compatibility mode** in VPN, ZTNA, or network filtering software
    - Add **DNS exclusions** for Twingate Resources and `*.twingate.com`
-   - For AV/EDR software, create **process/domain exceptions** for `*.twingate.com`
-3. If exclusions fail, full uninstall may be required
+   - For AV/EDR software, create **exceptions** for `*.twingate.com`
+3. If exclusions don't resolve the issue → **full uninstall required**
 
 ## Configuration Values
-- **CGNAT range used by Twingate:** `100.96/12`
-- **Wildcard domain for exclusions:** `*.twingate.com`
+- DNS exclusion domain: `*.twingate.com`
+- Conflicting IP range: `100.96/12` (CGNAT)
 
 ## Gotchas
-- Some security software intercepts network traffic even when toggled "off" — disabling is insufficient for testing; full uninstall required to isolate the issue
-- IP conflicts within `100.96/12` are non-obvious and may appear as general connectivity failures
-- Each listed incompatible application has its own dedicated troubleshooting article (linked from the source page)
+- Some security software continues intercepting traffic even when toggled "off" — disabling is not sufficient to test compatibility, uninstall is required
+- CGNAT range conflict (`100.96/12`) can cause silent connectivity failures if local network uses overlapping IPs
+- Each listed application has its own linked troubleshooting article with specific guidance (not covered on this page)
 
 ## Related Docs
-- CGNAT range conflict details: referenced via internal knowledge base article (linked in source)
-- Zscaler compatibility article
-- Cisco Umbrella compatibility article
-- DNSFilter compatibility article
-- AdGuard / AdGuard for Mac compatibility articles
-- Avast Real Site Protection compatibility article
+- Twingate KB article on DNS IP conflict within 100.96/12 CGNAT range
+- Zscaler-specific troubleshooting article
+- Cisco Umbrella-specific troubleshooting article
+- DNSFilter-specific troubleshooting article
+- AdGuard-specific troubleshooting articles (local app + Mac)
+- Avast Real Site Protection troubleshooting article

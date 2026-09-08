@@ -1,70 +1,70 @@
 ---
 source: https://help.twingate.com/articles/6310565542-unable-to-ping-a-twingate-resource-though-it-is-accessible-on-other-ports
 type: help
-fetched: 2026-08-06
-source_version: f9ffdf9e3c0299fd25e36e714d88d272a116e80bf453c55ed519a296ca3ffe45
+fetched: 2026-09-06
+source_version: 300d8b6d88f2e7ed4eaaef4136f7ff4d3e0ede012fd77cbc04eabef5e023db92
 ---
 
-# Unable to Ping a Twingate Resource (ICMP Failure)
+# Unable to Ping a Twingate Resource (ICMP Fails, Other Ports Work)
 
 ## Summary
-Linux kernels restrict ICMP Echo socket permissions by group ID. When `net.ipv4.ping_group_range` is set to the default `1 0`, no group can send ICMP packets through the Connector, causing ping failures even when TCP/UDP ports work normally.
+Linux kernels restrict ICMP Echo socket creation by group ID. The default `net.ipv4.ping_group_range="1 0"` blocks all groups, preventing the Twingate Connector from sending ping/ICMP packets even when TCP/UDP connections work normally.
 
 ## Key Information
-- Affects Twingate Connector on Linux systems
-- Default kernel value `net.ipv4.ping_group_range = 1 0` blocks all ICMP Echo sockets
-- TCP/UDP resource access unaffected; only ICMP/ping fails
-- Fix is a kernel-level sysctl change, applied differently per deployment method
+- Affects only ICMP/ping; TCP/UDP connections to the resource work fine
+- Issue is at kernel level via `sysctl`, not Twingate configuration
+- Applies to systemd deployments, Docker containers, and LXC containers
+- Default value `1 0` means **no group** is permitted to create ICMP Echo sockets
 
 ## Prerequisites
-- Connector deployed and functional on non-ICMP ports
-- Sudo/root access to Connector host
-- Identify deployment method: systemd, Docker, or LXC
+- Twingate Connector deployed and functioning (non-ICMP ports accessible)
+- sudo/root access on Connector host
 
 ## Step-by-Step
 
-### systemd Deployment
-1. Verify current value:
-   ```bash
-   sysctl net.ipv4.ping_group_range
-   ```
-2. If output is `1 0`, write fix to config:
-   ```bash
-   echo 'net.ipv4.ping_group_range = 0 2147483647' | sudo tee -a /etc/sysctl.conf
-   ```
-3. Apply changes:
-   ```bash
-   sudo sysctl -p
-   ```
+### Verify the Issue
+```bash
+sysctl net.ipv4.ping_group_range
+# If output is "1 0", apply fix below
+```
 
-### Docker Deployment
-Pass sysctl flag at container startup:
+### Fix: systemd Deployment
+```bash
+# Persist setting to config file
+echo 'net.ipv4.ping_group_range = 0 2147483647' | sudo tee -a /etc/sysctl.conf
+
+# Apply immediately without reboot
+sudo sysctl -p
+```
+
+### Fix: Docker Deployment
+Pass sysctl at container startup:
 ```bash
 --sysctl net.ipv4.ping_group_range="0 2147483647"
 ```
 
-### LXC Containers (e.g., Proxmox)
-- Container **must be Privileged** to allow ICMP through the Connector
-- Unprivileged LXC containers cannot be converted in-place; workaround:
-  1. Back up the existing container
+### Fix: LXC Containers (Proxmox, etc.)
+- Container **must be Privileged** — unprivileged LXC containers cannot grant ping access
+- If container is currently unprivileged:
+  1. Create a backup
   2. Restore with **Privileged** selected in privilege level settings
 
 ## Configuration Values
 
-| Parameter | Default (broken) | Fixed Value |
-|-----------|-----------------|-------------|
-| `net.ipv4.ping_group_range` | `1 0` | `0 2147483647` |
+| Parameter | Value | Meaning |
+|-----------|-------|---------|
+| `net.ipv4.ping_group_range` | `1 0` (default) | No groups allowed |
+| `net.ipv4.ping_group_range` | `0 2147483647` | All groups allowed |
 
-- Range format: `<min_gid> <max_gid>` (inclusive)
-- `0 2147483647` allows all groups (GID 0 through max signed 32-bit int)
+- Config file path: `/etc/sysctl.conf`
 
 ## Gotchas
-- The default `1 0` is intentionally restrictive (min > max = no groups allowed)
-- Docker: flag must be passed at container creation/run time, not post-deploy
-- LXC: no in-place privilege upgrade; requires backup + restore workflow
-- `sysctl -p` only reloads `/etc/sysctl.conf`; confirm the correct file for your distro (some use `/etc/sysctl.d/`)
+- The default value `1 0` is intentionally inverted (min > max) to represent an empty range — this is not a typo
+- Docker containers require the flag at **deploy time**; it cannot be applied to a running container without restart
+- LXC unprivileged containers cannot be converted in-place — backup/restore required to change privilege level
+- `sysctl -p` applies changes immediately but changes only persist across reboots if written to `/etc/sysctl.conf`
 
 ## Related Docs
-- Twingate Connector deployment (systemd)
-- Twingate Connector deployment (Docker)
-- Proxmox/LXC Connector setup
+- Twingate Connector deployment documentation
+- Linux `sysctl(8)` man page
+- Docker `--sysctl` runtime flag documentation
