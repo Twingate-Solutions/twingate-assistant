@@ -228,7 +228,10 @@ identity.
    `{{groups}}`.
 4. **Verify the token contract** — JWT is ES256 with `typ: GAT` (not `JWT` — libraries that
    enforce `typ: JWT` reject it); always validate `exp`; JWKS at
-   `https://<tenant>.twingate.com/api/v1/jwk/ec`.
+   `<admin-console-host>/api/v1/jwk/ec` — derive `<admin-console-host>` from your Admin
+   Console URL: `<tenant>.twingate.com` (legacy) or `<tenant>.<shard>.twingate.com`
+   (shard-based, e.g. `us1`). Copy the host from the console rather than assuming the
+   single-label shape.
 
 > Read `skills/twingate-idfw/references/web-app-access.md` for the request flow and JWT
 > payload reference, and the per-framework `web-app-*.md` file for exact code, libraries,

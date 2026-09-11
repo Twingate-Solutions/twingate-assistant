@@ -66,7 +66,10 @@ capabilities. You need a gateway.
 - **Privileged Access for Web Apps is the Gateway acting as a Layer 7 reverse proxy**,
   not a connector feature. It injects a signed **ES256 JWT** (the Gateway Access Token,
   GAT) or plain trusted headers into each HTTP request forwarded upstream; apps verify
-  the JWT against the tenant JWKS endpoint (`https://<tenant>.twingate.com/api/v1/jwk/ec`).
+  the JWT against the tenant JWKS endpoint at `<admin-console-host>/api/v1/jwk/ec`, where
+  `<admin-console-host>` is your Admin Console FQDN — `<tenant>.twingate.com` or the shard
+  form `<tenant>.<shard>.twingate.com` (e.g. `us1`). Always take the host from the Admin
+  Console URL rather than assuming a single label.
   Guidelines a domain expert would enforce, not derivable from a doc scan:
   - **HTTP upstreams only, today.** The Gateway currently reverse-proxies to web-app
     targets over plaintext **HTTP**; encrypted **HTTPS upstream support is a future

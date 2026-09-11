@@ -9,7 +9,7 @@
 
 | Setting | Value |
 |---|---|
-| Tenant subdomain | {name} (access at {name}.twingate.com) |
+| Admin Console host | {host} — the FQDN from the Admin Console URL, e.g. `{name}.twingate.com` or the shard form `{name}.us1.twingate.com` |
 | IaC tooling | Terraform / Pulumi / Kubernetes operator / manual |
 | IaC root path | {path in repo, e.g., `infra/twingate/`} |
 | Identity provider | {Okta / Entra ID / Google Workspace / other} |
