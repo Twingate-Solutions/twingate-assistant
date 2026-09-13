@@ -1,55 +1,56 @@
 ---
 source: https://www.twingate.com/docs/entra-id-configuration
 type: docs
-fetched: 2026-08-14
-source_version: 0abd69eaa339059052ab16f995e24d7cc957f9211d65b7023e2220d04e28464a
+fetched: 2026-09-13
+source_version: 32bd12d1243c57ea720d23fda8585a78d946f55c54b17096e782be16968f0509
 ---
 
-# Entra ID (Azure AD) Configuration
-
-## Page Title
-Entra ID (formerly Azure AD) Configuration
+# Entra ID Configuration – Twingate
 
 ## Summary
-Configures Entra ID integration with Twingate for OpenID Connect authentication and SCIM-based user/group sync. Requires two steps: enabling the integration in Twingate Admin Console, then configuring the Twingate gallery app in Microsoft Entra ID. Available on Business and Enterprise plans only.
+Configures Entra ID (formerly Azure AD) as both an OpenID Connect identity provider and SCIM user/group sync source for Twingate. Requires two distinct setup phases: Twingate-side tenant configuration, then Microsoft Gallery app setup. Available on Business and Enterprise plans only.
 
 ## Key Information
-- Enables both OIDC user authentication and user/group sync via SCIM
-- Uses the official Twingate app in the Microsoft Entra ID Gallery
-- SCIM handles ongoing user and group provisioning/deprovisioning
+- Enables OIDC authentication + SCIM-based user/group sync
+- Twingate does **not** poll Entra ID; Entra pushes changes via SCIM
+- "Last synced" timestamp reflects last received change, not last cycle run
+- Entra ID provisioning logs are authoritative for sync status verification
 
 ## Prerequisites
-- Twingate Business or Enterprise plan
-- Azure portal access with admin privileges
-- Entra ID Tenant ID (found at portal.azure.com → Entra ID → Tenant information)
+- Business or Enterprise Twingate plan
+- Azure tenant ID (found in Azure Portal → Entra ID → Tenant information)
+- Admin access to both Twingate Admin Console and Azure Portal
 
 ## Step-by-Step
 
-### Step 1: Twingate Admin Console
-1. Go to **Settings > Identity Provider > Entra ID**
-2. Retrieve Tenant ID from `portal.azure.com` → Entra ID → Tenant information box
+### Phase 1: Twingate Console
+1. Go to **Settings → Identity Provider → Entra ID**
+2. Retrieve Tenant ID from [portal.azure.com](https://portal.azure.com) → Entra ID → Tenant information
 3. Paste Tenant ID into Twingate
-4. Click **Sign in with Entra ID** and verify login succeeds
+4. Click **"Sign in with Entra ID"** and verify login
 
-### Step 2: Microsoft Entra ID Gallery App
-1. Follow [Microsoft's official Twingate Entra ID Gallery app instructions](https://learn.microsoft.com/en-us/azure/active-directory/saas-apps/twingate-provisioning-tutorial)
-2. Add Twingate app to your Entra ID instance
-3. Configure which users/groups sync to Twingate
-4. Enable SCIM provisioning
+### Phase 2: Microsoft Entra Gallery App
+1. Add [Twingate Entra ID Gallery app](https://learn.microsoft.com/en-us/azure/active-directory/saas-apps/twingate-provisioning-tutorial) to Entra ID instance
+2. Configure which users/groups to sync
+3. Enable SCIM provisioning
 
-## Configuration Values
-| Setting | Location | Recommended Value |
-|---|---|---|
-| Tenant ID | Twingate Admin Console | Your Azure Tenant ID |
-| Assignment Required | Entra ID Enterprise App settings | **Yes** (change from default `No`) |
+## Critical Configuration: Assignment Required
+| Setting | Default | Recommended |
+|---------|---------|-------------|
+| Assignment Required | No | **Yes** |
+
+- Default (`No`): Any Entra ID domain user can log into Twingate, creating unmanaged accounts outside SCIM control
+- Set to **Yes** to restrict access to explicitly assigned users only
 
 ## Gotchas
-
-- **Assignment Required defaults to `No`**: Any Entra ID domain user can log into Twingate even without explicit assignment, creating unmanaged Twingate users. **Set to `Yes` immediately** to restrict access to assigned users only.
-- **Accounts without email addresses**: Entra ID permits accounts without email. These accounts cannot access Twingate's Help Center (support portal). Fix by setting the `Email` property on the Entra ID account — it will sync to Twingate automatically.
-- Step 1 (Twingate console sign-in) must be completed **before** configuring the gallery app in Entra ID.
+- **Sync timestamp is misleading**: "Last synced" shows last *change received*, not last cycle. A healthy sync with no changes will show an old timestamp
+- **Check Entra provisioning logs** (not Twingate UI) to confirm provisioning is actively running
+- **On-demand provisioning** available to force push pending changes without waiting for next cycle
+- **Accounts without email addresses**: Users without email in Entra ID cannot access Twingate's Help Center (support portal). Fix by setting the `Email` property in Entra ID — it will sync to Twingate automatically
+- SCIM runs incremental cycles continuously; only changed objects are pushed each cycle
 
 ## Related Docs
-- [Microsoft Entra ID Gallery - Twingate provisioning tutorial](https://learn.microsoft.com/en-us/azure/active-directory/saas-apps/twingate-provisioning-tutorial)
-- [Twingate Pricing](https://www.twingate.com/pricing)
-- Azure portal: https://portal.azure.com
+- [Microsoft Twingate Gallery App Instructions](https://learn.microsoft.com/en-us/azure/active-directory/saas-apps/twingate-provisioning-tutorial)
+- [Entra ID Provisioning Logs](https://learn.microsoft.com/en-us/azure/active-directory/reports-monitoring/concept-provisioning-logs)
+- [On-demand Provisioning](https://learn.microsoft.com/en-us/azure/active-directory/app-provisioning/provision-on-demand)
+- Twingate Pricing Page (for plan eligibility)

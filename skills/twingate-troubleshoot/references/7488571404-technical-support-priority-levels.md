@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/7488571404-technical-support-priority-levels
 type: help
-fetched: 2026-08-09
-source_version: 1b6f362031440059560944784d0f450f0b079855a2f90d92123f22c04a97e56f
+fetched: 2026-09-13
+source_version: d42ca7ff1dadd7dbec379ec430d123b1a48583a681f47b9a6f5a4ef0dcaac3f2
 ---
 
 # Technical Support Priority Levels
@@ -17,21 +17,23 @@ Defines four priority levels (P1–P4) for classifying issues when engaging Twin
 
 | Level | Name | Description | Example |
 |-------|------|-------------|---------|
-| **P1** | Urgent | Core/mission-critical services critically affected; large number of users impacted; no workaround | Most users cannot authenticate or access resources |
-| **P2** | High | Services functional but degraded performance; potentially severe impact for multiple users | Connector or Remote Network issue causing multiple users to lose resource access |
-| **P3** | Normal | Non-critical; limited performance impact; affects specific users only | Some users experiencing issues with Twingate Client or a specific Resource |
-| **P4** | Low | Non-impacting; informational only | General questions, FYIs |
+| **P1** | Urgent | Core/mission-critical services not responding; large user impact; no workaround | Most users cannot authenticate or access resources |
+| **P2** | High | Services functional but degraded; potentially severe impact for multiple users | Connector or Remote Network issue blocking multiple users |
+| **P3** | Normal | Non-critical; minimal performance impact; affects specific users | Some users have issues with Client or a specific Resource |
+| **P4** | Low | Non-impacting; informational only | — |
 
-## Key Differentiators
+## Key Decision Criteria
 
-- **P1 vs P2**: P1 = service is down/not responding; P2 = service is up but degraded
-- **P2 vs P3**: P2 = multiple users affected; P3 = specific/individual users affected
-- **P3 vs P4**: P3 = user experience impacted; P4 = no impact
+- **Scale of impact**: Large number of users (P1/P2) vs. specific users (P3/P4)
+- **Service state**: Completely down (P1) vs. degraded (P2) vs. functional (P3/P4)
+- **Workaround availability**: No workaround = higher priority (P1)
+- **Component affected**: Auth/core services (P1) → Connector/Network (P2) → Client/single Resource (P3)
 
 ## Gotchas
 
-- Misaligning priority to the reported issue is explicitly discouraged — use the definitions above to self-classify before submitting
-- P1 requires both broad user impact **and** no available workaround; partial outages with workarounds likely qualify as P2
+- Misaligned priority levels are explicitly discouraged — assess actual impact before selecting
+- P2 requires services to still be *responding* but degraded; full outage = P1
+- P3 covers individual user issues even if the underlying cause is a shared component
 
 ## Related Docs
 - Engaging Technical Support (referenced but not linked in source)

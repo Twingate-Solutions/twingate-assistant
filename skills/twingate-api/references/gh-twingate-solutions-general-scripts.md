@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Solutions/general-scripts
 type: github
-fetched: 2026-08-06
-source_version: 47dec916d25a6fd71862bce5c604d08ec76267c5
+fetched: 2026-09-13
+source_version: a9bc0f3314d2f132b1655592a8b2228fd53eefe0
 ---
 
 # Twingate-Solutions/general-scripts
@@ -43,6 +43,8 @@ A collection of self-contained operational scripts for Twingate administration c
 4. Pass secrets (API tokens, service keys) at runtime via arguments, environment variables, or a local file — **never hardcode**
 
 ## Configuration Values
+- **Twingate network name:** The label(s) before `.twingate.com` in your Admin Console URL — `acme` for `acme.twingate.com`, or `acme.us1` for a shard-based `acme.us1.twingate.com`. Copy from the console rather than assuming a single label. Not the full FQDN.
+- **Group IDs:** Obtainable from the Admin Console URL, e.g. `https://<admin-console-host>/groups/123456789`, where `<admin-console-host>` is `acme.twingate.com` or `acme.us1.twingate.com`.
 - **Twingate API token:** Pass at runtime (env var or argument); never commit to repo
 - **Service keys:** Same — runtime only
 - Per-script parameters documented in each subfolder's README
@@ -53,9 +55,8 @@ A collection of self-contained operational scripts for Twingate administration c
 - Secrets committed to git are a security risk; repo convention explicitly forbids it
 - Each script is independent — there is no shared library or install step at the repo root
 - HyperV connector deployment has moved repos; the folder in this repo is stale
+- Network name field accepts one or more labels before `.twingate.com` (e.g. `acme` or `acme.us1`); shard-based tenants require both labels
 
 ## Related Docs
 - [Individual subfolder READMEs](https://github.com/Twingate-Solutions/general-scripts) (primary usage docs)
-- [Twingate-Solutions/twingate-connector-hyperv](https://github.com/Twingate-Solutions/twingate-connector-hyperv) (moved HyperV scripts)
-- [CONTRIBUTING.md](https://github.com/Twingate-Solutions/general-scripts/blob/main/CONTRIBUTING.md)
-- [Apache 2.0 LICENSE](https://github.com/Twingate-Solutions/general-scripts/blob/main/LICENSE)
+- [Twingate-Solutions/twingate-connector-hyperv](https://github.com/Twingate-

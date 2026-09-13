@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Solutions/idp-migrator
 type: github
-fetched: 2026-08-06
-source_version: cdbfd05f4b54cbccdafe80d28d8d76059a0b17ad
+fetched: 2026-09-13
+source_version: 375fc5b385a10cd3856b0adc2c10e470a93b22d8
 ---
 
 <!-- triage: unassigned -->
@@ -24,7 +24,9 @@ A desktop GUI tool for Twingate administrators to re-map group-to-resource acces
 ## Prerequisites
 - Twingate account with administrator access
 - API token with **Read** and **Write** scope (Settings → API → Generate Token)
-- Tenant subdomain (e.g., `acme` from `acme.twingate.com`)
+- Tenant name — the part of your Admin Console URL before `.twingate.com`; copy from the URL rather than assuming a single label:
+  - `acme.twingate.com` (legacy) → enter `acme`
+  - `acme.us1.twingate.com` (shard-based, where `us1` is the shard) → enter `acme.us1`
 - New IdP groups must already be synced into Twingate before running
 - **Source only:** Python 3.12+
 
@@ -39,7 +41,7 @@ A desktop GUI tool for Twingate administrators to re-map group-to-resource acces
 ## Configuration Values
 | Input | Description |
 |---|---|
-| Tenant Name | Subdomain of your Twingate admin URL |
+| Tenant Name | Part of your Admin Console URL before `.twingate.com` (e.g., `acme` or `acme.us1`) |
 | API Key | Twingate admin API token (held in memory only, never written to disk) |
 | `TEST` / `TEST` | Enter in both fields to activate offline demo mode |
 

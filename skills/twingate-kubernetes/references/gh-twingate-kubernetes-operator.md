@@ -1,61 +1,66 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator
 type: github
-fetched: 2026-09-06
-source_version: b9258ed54b3fdbddec1dcc54a8be162f36526592
+fetched: 2026-09-13
+source_version: 9fd6d5645b8d024b0bdd83b264cfbafbafcd5fb4
 ---
 
 # Twingate Kubernetes Operator
 
 ## Summary
-
-Custom Kubernetes controller that automates management of Twingate resources (Resources, Connectors, Gateways, Certificate Authorities) declaratively via CRDs, integrating a cluster with the Twingate Zero Trust network. Installed as a Helm chart published to an OCI registry; also manages Twingate objects in response to Kubernetes Service annotations. OSS, Apache 2.0 licensed.
+A Kubernetes custom controller (operator) that manages Twingate Zero Trust Network resources through Kubernetes CRDs. It bridges Kubernetes clusters with the Twingate API, allowing Twingate resources (networks, connectors, applications) to be declared and managed as Kubernetes objects.
 
 ## Key Information
-
-- Repo: `Twingate/kubernetes-operator`, default branch `main`, Dockerhub `twingate/kubernetes-operator`
-- Helm chart (OCI): `oci://ghcr.io/twingate/helmcharts/twingate-operator`
-- Documentation: repo Wiki, Getting Started, and API Reference wiki pages
-- CRDs: `TwingateResource`, `TwingateConnector`, `TwingateGateway`, `TwingateCertificateAuthority`, `TwingateResourceAccess`; `WebApp` resource type with `requestHeaderRewrites` support
-- Service annotation namespace is `resource.twingate.com` (the old `twingate.com/resource*` form is removed in v2)
+- Written in Python; images published to Docker Hub (`twingate/kubernetes-operator`)
+- Helm chart published to OCI registry: `oci://ghcr.io/twingate/helmcharts/twingate-operator`
+- CRDs are **not** auto-updated on `helm upgrade` — manual CRD updates required
+- Active dependency maintenance via Dependabot
 
 ## Prerequisites
+- Kubernetes 1.16+
+- Twingate account with a configured Remote Network for the cluster
+- Twingate connectors deployed (Helm chart: `github.com/Twingate/helm-charts`)
+- Twingate API token with **Read/Write/Provision** permissions (generated in Admin Console)
 
-- Kubernetes cluster 1.16+
-- Twingate account with a Remote Network for the cluster and Connectors deployed (use `Twingate/helm-charts` if needed)
-- Twingate API token with `Read/Write/Provision` permissions (generated in the Admin Console)
+## Installation (Helm via OCI — recommended)
 
-## Usage / Step-by-Step (Helm via OCI, recommended)
+1. Download the default values file from `deploy/twingate-operator/values.yaml`
+2. Edit `twingateOperator` section with your account details and API token
+3. Install:
+   ```bash
+   helm upgrade twop oci://ghcr.io/twingate/helmcharts/twingate-operator \
+     --install --wait -f ./values.yaml
+   ```
+   Add `-n <namespace>` to target a specific namespace.
 
-1. Copy the default `deploy/twingate-operator/values.yaml` to a custom `values.yaml`.
-2. Edit settings, specifically the `twingateOperator` block.
-3. Deploy (optionally scoped to a namespace with `-n [namespace]`):
+## Installation (Git clone)
 
 ```bash
-helm upgrade twop oci://ghcr.io/twingate/helmcharts/twingate-operator --install --wait -f ./values.yaml
+cp ./deploy/twingate-operator/values.yaml ./deploy/twingate-operator/values.local.yaml
+# Edit values.local.yaml
+helm upgrade twop ./deploy/twingate-operator --install --wait \
+  -f ./deploy/twingate-operator/values.local.yaml
 ```
 
-Alternative: clone the repo and point `helm upgrade` at the local `./deploy/twingate-operator` chart.
-
 ## Configuration Values
+Set in `values.yaml` under the `twingateOperator` key:
 
-- Primary config block: `twingateOperator` in `values.yaml` (API token, network settings)
-- Install namespace: `helm -n [namespace]`
-- API token requires `Read/Write/Provision` scope
+| Key | Description |
+|-----|-------------|
+| `twingateOperator.apiToken` | Twingate API token (Read/Write/Provision) |
+| `twingateOperator.account` | Twingate account name/URL |
+
+Full reference: [API Reference wiki](https://github.com/Twingate/kubernetes-operator/wiki/API-Reference) and [default values.yaml](https://github.com/Twingate/kubernetes-operator/blob/main/deploy/twingate-operator/values.yaml)
 
 ## Gotchas
+- **CRD upgrades are manual**: Helm v3 does not update CRDs on `helm upgrade`. You must apply CRD changes manually before upgrading the chart.
+- Connectors and a Remote Network must exist in Twingate **before** deploying the operator.
+- API token must have Provision-level permissions, not just Read/Write.
 
-- **v2.0.0 is a breaking release** — read the [v1→v2 migration guide](https://github.com/Twingate/kubernetes-operator/wiki/Migration-v1-to-v2) before upgrading.
-- **CRDs are not upgraded automatically** by Helm v3; update them manually on chart upgrade.
-- Deprecated `twingate.com/resource*` Service annotations are no longer reconciled — migrate to `resource.twingate.com` equivalents.
-- Object-reference `namespace` now defaults to the CR's own namespace (v2 behavior change).
-- Deprecated Kubernetes versions removed in v2; changing a Service's `resource.twingate.com/type` value now recreates the `TwingateResource`.
-- On uninstall, the gateway's Twingate CRs are deleted before the operator.
-- License changed to Apache 2.0 in v2.
-- **EKS users (v2.0.1+):** A bug where `ssl.VERIFY_X509_STRICT` prevented the operator from reaching the API server on EKS has been fixed.
-
-## Recent Releases
-
-- **v2.0.2** (2026-09-04): Dependency bumps only (cryptography, pydantic, ruff, responses, syrupy, danger-js, hadolint-action, docker/setup-qemu-action, gateway 1.0.0→1.1.0); Python upgraded 3.14.5→3.14.7; `yq` GitHub Action removed from release workflow.
-- **v2.0.1** (2026-08-24): Bug fix — relaxed `ssl.VERIFY_X509_STRICT` for EKS compatibility; dependency bumps (orjson, mypy, ruff, pre-commit, types-pyyaml, docker/setup-buildx-action).
--
+## Related Docs
+- [Wiki / Getting Started](https://github.com/Twingate/kubernetes-operator/wiki/Getting-Started)
+- [API Reference](https://github.com/Twingate/kubernetes-operator/wiki/API-Reference)
+- [Developer Guide](./DEVELOPER.md)
+- [Changelog](./CHANGELOG.md)
+- [Twingate Connector Helm Charts](https://github.com/Twingate/helm-charts)
+- [Twingate Community Forum](https://forum.twingate.com/)

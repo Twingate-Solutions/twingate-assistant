@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/terraform-provider-twingate
 type: github
-fetched: 2026-09-06
-source_version: 06a2f8d5358cb2df024bd7f2d1fe9b0462a403a8
+fetched: 2026-09-13
+source_version: e6ee512207988d59936e82457b3a9afdc0247702
 ---
 
 # Twingate Terraform Provider
@@ -14,7 +14,8 @@ Terraform provider for managing Twingate resources (networks, resources, groups,
 - Written in Go; published to the Terraform Registry
 - Covers resources: `twingate_resource`, `twingate_group`, `twingate_connector`, `twingate_remote_network`, `twingate_user`, `twingate_service_account`, `twingate_ssh_resource`, `twingate_kubernetes_resource`, `twingate_web_app_resource`, and associated data sources
 - Docs in `docs/` are auto-generated from `templates/`; edit templates, not generated files
-- Latest stable release: **v5.0.0**
+- Coverage reporting: Codecov (switched from Coveralls)
+- Latest stable release: **v5.0.2**
 
 ## Prerequisites
 - Bash
@@ -102,5 +103,3 @@ Port restrictions do not apply to SSH and Kubernetes resources, so `protocols` n
 
 ### New resource: `twingate_web_app_resource`
 Web App Resources are Twingate resources accessed via a Gateway.
-
-**Required attributes:** `address`, `downstream` (with `port

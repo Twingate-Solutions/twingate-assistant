@@ -1,43 +1,49 @@
 ---
 source: https://github.com/Twingate/pulumi-twingate
 type: github
-fetched: 2026-09-06
-source_version: fc1b072a600dc5eae31e3976317e7e002884c2c7
+fetched: 2026-09-13
+source_version: 0ebeb23bef7cd83e199cc529ffc159cfa2e2cde2
 ---
 
 # Twingate Pulumi Provider
 
 ## Summary
-A Pulumi provider for managing Twingate infrastructure as code. Supports Python, TypeScript/JavaScript, Go, and .NET. Wraps the Twingate API to allow declarative management of Twingate resources.
+Pulumi provider for managing Twingate infrastructure as code. Supports Python, TypeScript/JavaScript, Go, and .NET. Wraps the Twingate API to manage resources like networks, connectors, and access policies.
 
 ## Key Information
-- Provider package name: `twingate`
-- Pulumi Registry docs: https://www.pulumi.com/registry/packages/twingate/api-docs/
-- Source repo: `Twingate/pulumi-twingate`
-- Requires a Twingate account with API access
+- Package name varies by language: `@twingate/pulumi-twingate` (Node), `pulumi-twingate` (Python), `Twingate.Twingate` (.NET)
+- Go module: `github.com/pulumi/pulumi-twingate/sdk/go/...`
+- Full API reference at [Pulumi Registry](https://www.pulumi.com/registry/packages/twingate/api-docs/)
 
 ## Prerequisites
 - Pulumi CLI installed
-- Twingate API token (from Admin Console)
-- Twingate network ID
-- Language-specific runtime (Node.js, Python, Go, or .NET)
+- Twingate Admin Console access with API token
+- Your Twingate network ID
+- For local development: Go 1.24+, Node.js 22+
 
 ## Installation
 
-| Language | Command |
-|---|---|
-| Node.js | `npm install @twingate/pulumi-twingate` |
-| Python | `pip install pulumi-twingate` |
-| Go | `go get github.com/Twingate/pulumi-twingate/sdk/v5/go/...` |
-| .NET | `dotnet add package Twingate.Twingate` |
+```bash
+# Node.js
+npm install @twingate/pulumi-twingate
+
+# Python
+pip install pulumi-twingate
+
+# Go
+go get github.com/pulumi/pulumi-twingate/sdk/go/...
+
+# .NET
+dotnet add package Twingate.Twingate
+```
 
 ## Configuration Values
 
-| Config Key | Env Var | Required | Description |
+| Config Key | Env Variable | Required | Description |
 |---|---|---|---|
-| `twingate:apiToken` | `TWINGATE_API_TOKEN` | Yes | API token from Admin Console |
-| `twingate:network` | `TWINGATE_NETWORK` | Yes | Network ID (subdomain portion of Admin URL, e.g. `autoco` from `autoco.twingate.com`) |
-| `twingate:url` | — | No | Defaults to `twingate.com`; do not change normally |
+| `twingate:apiToken` | `TWINGATE_API_TOKEN` | Yes | API token from Twingate Admin Console |
+| `twingate:network` | `TWINGATE_NETWORK` | Yes | Network ID (subdomain prefix, e.g. `autoco` from `autoco.twingate.com`) |
+| `twingate:url` | — | No | Defaults to `twingate.com`; rarely changed |
 
 Set via Pulumi config:
 ```bash
@@ -45,50 +51,39 @@ pulumi config set twingate:apiToken <token> --secret
 pulumi config set twingate:network <network-id>
 ```
 
-## Local Development
+## Local Development (Step-by-Step)
 
-### Prerequisites
-- Go 1.24+
-- Node.js 22+
-- Pulumi CLI
+1. Build provider and SDKs:
+   ```bash
+   make development          # all SDKs
+   make provider build_nodejs  # provider + Node.js only
+   ```
 
-### Build Steps
-```bash
-# Full build (all SDKs)
-make development
+2. Install the local plugin manually (required for local builds):
+   ```bash
+   pulumi plugin install resource twingate <version> \
+     --file bin/pulumi-resource-twingate
+   ```
 
-# Provider + Node.js SDK only
-make provider build_nodejs
+3. Verify installation:
+   ```bash
+   pulumi plugin ls | grep twingate
+   ```
 
-# Install local plugin
-pulumi plugin install resource twingate <version> --file bin/pulumi-resource-twingate
-```
-
-### Verify Plugin
-```bash
-pulumi plugin ls | grep twingate
-```
+4. Test GitHub Actions workflows locally (optional):
+   ```bash
+   brew install act
+   act pull_request -j lint
+   ```
 
 ## Gotchas
 
-- **404 on `pulumi up` with local builds**: Pulumi tries to download the plugin from GitHub Releases. Local dev builds (version strings containing `+dirty` or alpha tags) won't exist there. Fix: manually install the plugin with `--file bin/pulumi-resource-twingate`.
-- **Version string mismatch**: The exact version string required for `pulumi plugin install` appears in the error message — copy it from there.
-- **Network ID format**: The network ID is the subdomain only, not the full URL (e.g., `autoco`, not `autoco.twingate.com`).
+- **404 on `pulumi up`/`pulumi preview`**: Local/alpha builds won't be found in GitHub Releases. Always install the plugin manually with `--file bin/pulumi-resource-twingate`. The exact version string (including `+dirty` suffix) must match what the build produced — check the error message for the exact string.
+- **Network ID format**: The `twingate:network` value is just the subdomain prefix, not the full hostname.
+- **`act` setup**: First run prompts for Docker image size — choose "Medium" for most workflows.
 
-## Breaking Changes (v5.0.0)
-
-Upgrades the bridged upstream provider from terraform-provider-twingate v4.3.2 to v5.0.0. The Go SDK module path moves from `github.com/Twingate/pulumi-twingate/sdk/v4` to `github.com/Twingate/pulumi-twingate/sdk/v5`.
-
-**Removed**
-- `TwingateGatewayConfig` — the upstream `twingate_gateway_config` resource no longer exists.
-- `username` and `protocols` fields on `TwingateSSHResource`.
-- `protocols` field on `TwingateKubernetesResource`. (`protocols` is unaffected on `TwingateResource`.)
-
-**Added**
-- `TwingateWebAppResource` — new upstream `twingate_web_app_resource`. Requires `address`, `gatewayId`, `remoteNetworkId`, and `upstream`/`downstream` port blocks.
-
-## Testing Workflows Locally
-Uses [`act`](https://github.com/nektos/act) to run GitHub Actions locally:
-```bash
-act --list
-act pull_request -j
+## Related Docs
+- [Twingate API Overview](https://docs.twingate.com/docs/api-overview)
+- [Pulumi Registry – Twingate](https://www.pulumi.com/registry/packages/twingate/api-docs/)
+- [Pulumi CLI Install](https://www.pulumi.com/docs/install/)
+- [act (local GitHub Actions runner)](https://github.com/nektos/act)
