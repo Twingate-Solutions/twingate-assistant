@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-connector-hyperv
 type: github
-fetched: 2026-08-06
-source_version: 9cde89c90d3945379db1c9aaaddf580463f4c9fd
+fetched: 2026-09-13
+source_version: edd2ed307d39afff46f87afa34867238e81f2757
 ---
 
 <!-- triage: unassigned -->
@@ -68,8 +68,5 @@ PowerShell scripts for deploying and managing Twingate Connector VMs on Windows 
 | Parameter | Default | Notes |
 |---|---|---|
 | `-Action` | *(required)* | `Deploy`, `Remove`, `UpdateConnector`, `UpdateOS`, `List`, `FixVM` |
-| `-TwingateNetwork` | prompted | Network slug (e.g. `acme` for `acme.twingate.com`) |
-| `-ApiToken` | prompted | Plain string or SecureString |
-| `-RemoteNetwork` | prompted | Display name from Admin Console |
-| `-ConnectorCount` | `2` | Deploy only |
-| `-VMPath` | `C:\TwingateConnectors` | Root for VM files, images, tools |
+| `-TwingateNetwork` | prompted | The part of the Admin Console URL before `.twingate.com`. Use `acme` for `acme.twingate.com`; use `acme.us1` for a shard-based URL like `acme.us1.twingate.com`. Copy from the console rather than assuming a single label. |
+| `-ApiToken` | prompted | Plain string or SecureString

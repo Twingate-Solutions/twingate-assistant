@@ -1,36 +1,31 @@
 ---
 source: https://www.twingate.com/docs/web-app-access
 type: docs
-fetched: 2026-08-14
-source_version: 67257a2d02ee7284198568f2d3e0c6bdd2f0527f0efbc8b86cc75f315ebde087
+fetched: 2026-09-13
+source_version: 6e4b808f0b33de564cdc5a4f148c7d42300a77d7e7845f5896bd8e36a211e711
 ---
 
 # Twingate Privileged Access for Web Apps
 
+## Page Title
+Privileged Access for Web Apps Overview
+
 ## Summary
-Twingate Privileged Access for Web Apps (Beta) acts as a Layer 7 reverse proxy via the Gateway, injecting signed ES256 JWTs into every HTTP request forwarded to internal web apps. Apps verify the JWT against Twingate's JWKS endpoint to get user identity without OIDC integration, client secrets, or redirect flows. Group-based authorization and convenience headers are also injected per-request.
+Twingate Privileged Access for Web Apps acts as a Layer 7 reverse proxy, injecting a signed ES256 JWT (Gateway Access Token) into every HTTP request forwarded to internal web applications. Apps verify the JWT against Twingate's JWKS endpoint to get user identity without OIDC integration or redirect flows. Currently in beta.
 
 ## Key Information
-- **Beta feature** — requires contacting Twingate for access
-- Gateway issues a Gateway Access Token (GAT) scoped per user/device/resource
-- JWT is ES256-signed; verify via JWKS endpoint
-- `typ` header is `GAT` (not `JWT`) — some libraries will reject this by default
-- Headers are opt-in; no headers injected until configured
-- Gateway-wide headers apply to all proxied apps; per-Resource rewrites override same-named gateway-wide headers
+- Gateway injects signed JWT per-request with user identity, device info, and resource metadata
+- No OIDC integration, client secrets, or redirect flows required
+- JWT contains user groups for authorization decisions
+- `X-Twingate-*` convenience headers available for logging/personalization without JWT parsing
+- Headers are opt-in; no identity injected until at least one header is configured
+- Gateway-wide headers apply to all proxied apps; per-Resource rewrites override them for specific apps
 
 ## Prerequisites
 - Twingate account with administrator privileges
 - Deployed Twingate Gateway with a Web App Resource configured
-- Beta access granted by Twingate
-
-## How It Works (Request Flow)
-1. User navigates to internal web app in browser
-2. Twingate Client intercepts and routes to assigned Gateway
-3. Client requests Gateway Access Token (GAT) from Controller if none cached
-4. Controller authorizes against existing session + Security Policy, issues ES256 JWT
-5. Client connects to Gateway, presents token; Gateway verifies
-6. Gateway injects configured headers into each HTTP request forwarded upstream
-7. App verifies JWT against JWKS endpoint
+- Kubernetes Operator (recommended deployment method)
+- Beta access (contact Twingate)
 
 ## Configuration Values
 
@@ -39,34 +34,25 @@ Twingate Privileged Access for Web Apps (Beta) acts as a Layer 7 reverse proxy v
 https://<your-tenant>.twingate.com/api/v1/jwk/ec
 ```
 
-**JWT Header fields:** `alg: ES256`, `typ: GAT`, `kid: <key-id>`
+**JWT Header fields:** `alg: ES256`, `typ: GAT` (not `JWT`), `kid: <key-id>`
 
-**Key JWT Payload Claims:**
-
-| Claim | Description |
+**Template Variables for Header Values:**
+| Variable | Description |
 |---|---|
-| `user.id` | Stable Twingate user ID |
-| `user.email` / `user.username` | User email |
-| `user.groups` | Groups authorizing access (always includes `twingate:authenticated`) |
-| `device.id` | Device identifier |
-| `resource.id` / `resource.type` | Always `WEB_APP` |
-| `exp` / `iat` | Expiry / issued-at timestamps |
-
-**Header Template Variables:**
-
-| Variable | Value |
-|---|---|
-| `{{jwt}}` | Full signed JWT |
+| `{{jwt}}` | Full signed ES256 JWT |
 | `{{username}}` | User email/username |
-| `{{groups}}` | Comma-separated group names |
-| `{{clientGeoCountry}}` / `{{clientGeoCity}}` / `{{clientGeoRegion}}` | Location fields |
+| `{{groups}}` | Comma-separated Twingate Group names |
+| `{{clientGeoLatLong}}` | Lat/lon |
+| `{{clientGeoCity}}` | City |
+| `{{clientGeoRegion}}` | Region/state |
+| `{{clientGeoCountry}}` | Country code |
 
-**Recommended Header Config:**
+**Recommended header config:**
 - `Authorization: Bearer {{jwt}}`
 - `X-Twingate-User: {{username}}`
 - `X-Twingate-Groups: {{groups}}`
 
-**Kubernetes Operator — Gateway-wide headers (Helm):**
+**Helm (gateway-wide headers):**
 ```yaml
 gateway:
   webApp:
@@ -75,26 +61,33 @@ gateway:
       Authorization: "Bearer {{jwt}}"
 ```
 
-**Kubernetes Operator — Per-Resource rewrites (TwingateResource):**
+**TwingateResource (per-resource rewrites):**
 ```yaml
 requestHeaderRewrites:
   - name: X-Twingate-User
     value: "{{username}}"
 ```
 
-**Service annotation (JSON string):**
-```
+**Service annotation (per-resource rewrites):**
+```yaml
 resource.twingate.com/requestHeaderRewrites: '{"Authorization": "Bearer {{jwt}}"}'
 ```
 
+## Key JWT Payload Fields
+- `user.id`, `user.email`, `user.username`, `user.first_name`, `user.last_name`
+- `user.groups` — always includes `twingate:authenticated` and `Everyone`
+- `device.id`, `device.location.*`
+- `resource.id`, `resource.type` (always `WEB_APP`), `resource.address`, `resource.aliases`
+- `exp`, `aud` (tenant network name), `jti`
+
 ## Gotchas
-- **`typ: GAT` not `JWT`**: Libraries enforcing standard `typ: JWT` will reject tokens — configure library to accept `GAT`
-- Headers are **opt-in** — no identity injected until at least one header is configured
-- Per-Resource rewrites are applied **after** gateway-wide headers and will override same-named headers
-- Always validate `exp` claim; reject expired tokens in middleware
+- **`typ: GAT` not `JWT`** — Some JWT libraries reject tokens where `typ ≠ "JWT"`. Configure library to accept `GAT` or it will fail signature verification even with a valid token.
+- Headers are **opt-in** — without configuration, requests reach your app with no identity headers
+- Per-Resource rewrites are applied **after** gateway-wide headers, overriding same-named headers
+- `user.groups` always includes built-in groups (`twingate:authenticated`, `Everyone`) plus assigned groups
 
 ## Related Docs
-- Developer guides: Express.js, Django, Next.js, Next.js + Auth.js middleware
-- Application integration guides: Grafana, Jenkins (trusted-header auth, no code changes)
+- Kubernetes Operator install guide
+- Developer guides (Express.js, Django, Next.js, Next.js + Auth.js middleware)
+- Application integration guides (Grafana, Jenkins — no-code trusted-header auth)
 - Identity Firewall Overview
-- Twingate Kubernetes Operator docs

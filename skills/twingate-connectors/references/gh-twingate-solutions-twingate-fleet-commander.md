@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-fleet-commander
 type: github
-fetched: 2026-08-06
-source_version: ca4b1f495b9b76aa7a2167a7991959577b1ce14e
+fetched: 2026-09-13
+source_version: 10ce60afa7eb61c32a7cf53809d1724fd6a46534
 ---
 
 <!-- triage: unassigned -->
@@ -50,8 +50,8 @@ docker compose --profile shipping down -v
 
 | Variable / Key | Type | Description |
 |---|---|---|
-| `TWINGATE_NETWORK` | env | Twingate network slug |
-| `TWINGATE_API_KEY` | env | Twingate Admin API key |
+| `TWINGATE_NETWORK` | env | The labels before `.twingate.com` in your Admin Console URL — `acme` (legacy) or `acme.us1` (shard-based). Copy the host from the console rather than assuming a single label. The GraphQL endpoint (`https://<TWINGATE_NETWORK>.twingate.com/api/graphql/`) is derived from this value. |
+| `TWINGATE_API_KEY` | env | Twingate Admin API key (Admin or DevOps role); stored as `SecretStr`, never logged |
 | `FC_PLATFORM` | env | Compute backend: `docker` (default), `ecs`, `aci` |
 | `FC_OVERRIDE_ENABLED` | env | Enable manual override endpoints (default: `false`) |
 | `FC_OVERRIDE_SECRET` | env | Shared secret for override header (≥16 chars) |
@@ -62,13 +62,6 @@ docker compose --profile shipping down -v
 
 ## Gotchas
 - **Teardown order is critical:** `docker compose down` without `fc-teardown` first leaves Connector containers and logical Connectors orphaned in the tenant
+- **`TWINGATE_NETWORK` format:** legacy tenants use a single label (e.g. `acme`); shard-based tenants use two labels (e.g. `acme.us1`). Copy the hostname from the Admin Console URL rather than guessing
 - **Docker socket = root-equivalent:** treat the FC host as a trusted node; never expose port 8080 publicly without TLS
-- **Socket proxy does not make the network safe:** allowlisting `containers/create` still permits host compromise; restrict network access to FC only
-- **Sticky-connector problem:** `scale_up_trigger: any` can cause runaway scaling when one Connector is hot but clients stay pinned; `quorum` is the safer default
-- **Override secret is a static bearer credential** sent in a plain header — only use behind TLS or over loopback
-- **`FC_PLATFORM` must be set explicitly** — there is no auto-detection, intentionally, because FC deletes compute
-
-## Related Docs
-- [`documentation/ARCHITECTURE.md`](documentation/ARCHITECTURE.md) — design rules, trust model, actuator interface
-- [`documentation/CONFIGURATION.md`](documentation/CONFIGURATION.md) — full config reference
-- [`documentation/OBSERVABILITY.md`](
+- **Socket proxy does not make the network safe:** allowlisting `containers/create` still permits host compromise; restrict network access to

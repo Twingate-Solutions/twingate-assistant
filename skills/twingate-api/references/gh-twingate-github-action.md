@@ -1,27 +1,26 @@
 ---
 source: https://github.com/Twingate/github-action
 type: github
-fetched: 2026-08-06
-source_version: bedc3e96674162a12a1222f3cecfa62945e59dc5
+fetched: 2026-09-13
+source_version: 7a7f18087d4bf841d7bced88bc877ecef1b1233b
 ---
 
-<!-- triage: unassigned -->
-
-# Twingate/github-action
+# Twingate Connect — GitHub Action
 
 ## Summary
-A GitHub Action that connects GitHub workflow runners to private resources via Twingate Services using zero-trust network access. It installs and starts the Twingate client on the runner using a Service Key, enabling access to IP-restricted or privately networked resources without granting broad network access.
+A GitHub Action that connects workflows to private resources via Twingate Services using zero-trust network access. It installs and starts the Twingate client on the runner, authenticating with a Service Key. Supports both direct private resource access and IP-allowlist bypass scenarios.
 
 ## Key Information
-- Supports Linux (x64/ARM) and Windows runners
-- Uses Twingate Service Keys (not user credentials) for authentication
-- Packages are cached by default, reducing install time by 30–45%
-- Major version tag (`v1`) always points to the latest release
+- **Repo:** `Twingate/github-action`
+- **Latest version:** `v1.8`
+- **Supported runners:** Linux (x64/ARM), Windows
+- **Auth mechanism:** Twingate Service Key (not user credentials)
+- Caching reduces installation time by 30–45%
 
 ## Prerequisites
 - A Twingate account with a configured [Service](https://docs.twingate.com/docs/services)
 - A Service Key stored as a GitHub Actions secret
-- Runner must support `NET_ADMIN` capability and `/dev/net/tun` (for local testing with `act`)
+- Runner must support `NET_ADMIN` capability and `/dev/net/tun` device (for local testing with `act`)
 
 ## Usage
 
@@ -31,8 +30,6 @@ A GitHub Action that connects GitHub workflow runners to private resources via T
     service-key: ${{ secrets.TWINGATE_SERVICE_KEY }}
 ```
 
-Place this step before any steps that require access to Twingate-protected resources.
-
 ## Configuration Values
 
 | Input | Required | Default | Description |
@@ -40,19 +37,31 @@ Place this step before any steps that require access to Twingate-protected resou
 | `service-key` | Yes | — | Twingate Service Key for authentication |
 | `cache` | No | `true` | Cache downloaded packages between runs |
 | `cache-version` | No | `3` | Increment to invalidate existing cache |
-| `debug` | No | `false` | Enable verbose logging for troubleshooting |
+| `debug` | No | `false` | Enable verbose logging |
 
 ## Gotchas
 
-- **Docker steps on Azure runners**: Containers inherit `resolv.conf` with Azure's internal nameserver (`168.63.129.16`), which can override Twingate's DNS. Remove it inside the container before making requests:
-  ```bash
-  sed '/^nameserver 168.63.129.16$/d; /^search/d' /etc/resolv.conf > /tmp/resolv.conf && cat /tmp/resolv.conf > /etc/resolv.conf
-  ```
-- **IP whitelisting workflows**: Routing `github.com` traffic through Twingate requires a Connector configured for that purpose — not automatic.
-- **Cache invalidation**: Bump `cache-version` if you encounter stale or corrupt cached packages.
-- **Local testing**: Requires `act` with `--cap-add NET_ADMIN --device /dev/net/tun` flags.
+**Docker container steps and DNS resolution**
+When a workflow step runs inside a Docker container, Azure injects `168.63.129.16` into the container's `resolv.conf`. This can override Twingate's DNS and break resource resolution. Fix by removing it inside the container:
+
+```bash
+sed '/^nameserver 168.63.129.16$/d; /^search/d' /etc/resolv.conf \
+  > /tmp/resolv.conf && cat /tmp/resolv.conf > /etc/resolv.conf
+```
+
+**Local testing with `act`**
+Requires additional Linux capabilities:
+```bash
+act -j test -s SERVICE_KEY --container-options "--cap-add NET_ADMIN --device /dev/net/tun"
+```
+
+**Cache invalidation**
+Increment `cache-version` (e.g., `3` → `4`) to force a fresh package download; do not rely on disabling `cache` alone for this purpose.
+
+**IP allowlisting use case**
+Requires a Twingate Connector configured to route `github.com` traffic. See [SaaS app gating docs](https://docs.twingate.com/docs/saas-app-gating).
 
 ## Related Docs
 - [Twingate Services](https://docs.twingate.com/docs/services)
-- [SaaS App Gating / IP Whitelisting](https://docs.twingate.com/docs/saas-app-gating)
-- [Azure IP 168.63.129.16 explanation](https://learn.microsoft.com/en-us/azure/virtual-network/what-is-ip-address-168-63-129-16)
+- [SaaS App Gating / IP Allowlisting](https://docs.twingate.com/docs/saas-app-gating)
+- [Azure IP 168.63.129.16 explained](https://learn.microsoft.com/en-us/azure/virtual-network/what-is-ip-address-168-63-129-16)

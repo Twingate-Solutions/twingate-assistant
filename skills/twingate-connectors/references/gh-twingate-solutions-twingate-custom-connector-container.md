@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-custom-connector-container
 type: github
-fetched: 2026-08-06
-source_version: d28eadc2fd8a8e4d6e4a831f87ab1aa1ce851fdc
+fetched: 2026-09-13
+source_version: 84a905c0fbf3fb564080bf46a9db3d6992940258
 ---
 
 <!-- triage: unassigned -->
@@ -46,7 +46,7 @@ A Docker image that runs the Twingate Linux/systemd Connector inside a container
 
 | Variable | Required | Description |
 |---|---|---|
-| `TWINGATE_NETWORK` | Yes | Network subdomain prefix (e.g., `mycompany` from `mycompany.twingate.com`) |
+| `TWINGATE_NETWORK` | Yes | The portion of your Admin Console URL before `.twingate.com`. Copy from the console; for `mycompany.twingate.com` it is `mycompany`, and for a shard-based URL like `mycompany.us1.twingate.com` it is `mycompany.us1`. |
 | `TWINGATE_ACCESS_TOKEN` | Yes | Access token from Admin Console |
 | `TWINGATE_REFRESH_TOKEN` | Yes | Refresh token from Admin Console |
 | `TWINGATE_LOG_ANALYTICS` | No | Set to `v2` for detailed traffic logging |
@@ -55,6 +55,7 @@ A Docker image that runs the Twingate Linux/systemd Connector inside a container
 ## Gotchas
 - Container must run with `privileged: true`
 - Tokens are generated once in the Admin Console; losing them requires re-generating
+- `TWINGATE_NETWORK` is the subdomain prefix before `.twingate.com`; for shard-based URLs (e.g., `mycompany.us1.twingate.com`) it includes the shard label (`mycompany.us1`) — copy from the console rather than assuming a single label
 - Metrics stream (stderr) and connector output (stdout) are intentionally separated — do not filter metrics by stream, use the `"event":"metrics"` JSON field
 - GHCR requires authentication even for public image pulls if you are unfamiliar with the registry
 - When forking, publish to your own registry; GHCR push requires `write:packages` PAT scope (add `repo` scope for private repos)
@@ -64,4 +65,4 @@ A Docker image that runs the Twingate Linux/systemd Connector inside a container
 - [Twingate Linux Connector documentation](https://www.twingate.com/docs/connectors-on-linux)
 - [Metrics field schema and platform guidance](docs/metrics.md)
 - [GitHub GHCR authentication](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry/authenticating-to-github-container-registry)
-- [GitHub PAT creation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+- [GitHub PAT

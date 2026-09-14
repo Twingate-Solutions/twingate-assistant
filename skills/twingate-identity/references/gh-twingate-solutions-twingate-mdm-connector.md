@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-mdm-connector
 type: github
-fetched: 2026-09-06
-source_version: 0a2b34521b0383e23f174b46b4401b21b018a5c9
+fetched: 2026-09-13
+source_version: f85809a42981c518a563b64724764653ce1c786c
 ---
 
 # Twingate MDM Connector
@@ -37,7 +37,7 @@ Open-source middleware that automatically marks devices as trusted in Twingate b
 1. **Create `config.yaml`** with `twingate` and `providers` keys (minimum required):
    ```yaml
    twingate:
-     tenant: acme
+     tenant: acme          # part before .twingate.com: acme (legacy) or acme.us1 (shard-based)
      api_key: ${TWINGATE_API_KEY}
    providers:
      - type: ninjaone
@@ -62,7 +62,7 @@ Open-source middleware that automatically marks devices as trusted in Twingate b
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `twingate.tenant` | string | — | Subdomain from `<tenant>.twingate.com` |
+| `twingate.tenant` | string | — | Part of your Admin Console URL before `.twingate.com`. Copy it from the console: `acme` for `acme.twingate.com` (legacy) or `acme.us1` for `acme.us1.twingate.com` (shard-based, where `us1` is your shard). |
 | `twingate.api_key` | string | — | Twingate API key |
 | `trust.mode` | `any`\|`all` | `any` | Trust threshold across providers |
 | `trust.max_days_since_checkin` | int\|`null` | `7` | Skip devices not seen within N days; `null` disables |
@@ -72,16 +72,4 @@ Open-source middleware that automatically marks devices as trusted in Twingate b
 
 **Env vars:**
 - `HEALTHZ_PORT` — enables HTTP liveness probe on specified port
-- Any config value supports `${ENV_VAR}` interpolation; missing vars cause startup failure
-
----
-
-## Provider Configuration
-
-### CrowdStrike Falcon
-
-Auth: OAuth2 client credentials. Requires **Hosts: Read** scope only. Trial: 15-day free (Falcon Go bundle).
-
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| `cloud` | enum | `us-1
+- Any config value supports `${ENV_VA

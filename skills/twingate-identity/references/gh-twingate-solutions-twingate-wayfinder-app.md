@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-wayfinder-app
 type: github
-fetched: 2026-08-06
-source_version: 61c60d6cdd810719e76f5ea0567f354c16e68a7f
+fetched: 2026-09-13
+source_version: 45f8efaecce0082942b442e1d6a8adce53f3864d
 ---
 
 <!-- triage: unassigned -->
@@ -39,8 +39,8 @@ Wayfinder is an experimental reference implementation that automatically moves a
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `WAYFINDER_TWINGATE_TOKEN` | Yes | — | Admin API token |
-| `WAYFINDER_TWINGATE_SUBDOMAIN` | Yes | — | Tenant subdomain (e.g. `acme`) |
+| `WAYFINDER_TWINGATE_TOKEN` | Yes | — | Admin API token. Treat as admin-grade; never commit. |
+| `WAYFINDER_TWINGATE_SUBDOMAIN` | Yes | — | The part of your Admin Console URL before `.twingate.com` — `acme` for `acme.twingate.com` (legacy single-label), or `acme.us1` for `acme.us1.twingate.com` (shard-based). Copy from the console URL rather than assuming a single label. |
 | `WAYFINDER_OFFICE_GROUP_ID` | Yes | — | Group ID for office routing path |
 | `WAYFINDER_AWS_GROUP_ID` | Yes | — | Group ID for remote/AWS routing path |
 | `WAYFINDER_OFFICE_IPS` | Yes | — | Comma-separated office egress IPs/CIDRs |
@@ -51,7 +51,4 @@ Wayfinder is an experimental reference implementation that automatically moves a
 
 ## Gotchas
 - **Network exposure:** Default `docker-compose.yml` binds port 8000 on all interfaces. Must restrict to Twingate interface IP, use a host firewall, or ensure the host has no public IP before deploying
-- **`tcp_probe` targets** must be LAN-only and not Twingate resources — a remote user with the tunnel up will otherwise probe successfully and be misidentified as on-site
-- **User must already be in one of the two routing groups** — service converges from any starting state but will not act if the user belongs to neither group
-- **Agent composite-verdict cache:** On second run onwards, agent may skip POSTing; delete `state.json` to force re-evaluation
-- **Image name is lowercase** — GHCR re
+- **`tcp_probe` targets** must be LAN-only and not Twingate resources — a remote user with the tunnel up will otherwise probe successfully and be misidentified
