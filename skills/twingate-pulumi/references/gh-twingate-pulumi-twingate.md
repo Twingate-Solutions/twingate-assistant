@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/pulumi-twingate
 type: github
-fetched: 2026-09-13
-source_version: 0ebeb23bef7cd83e199cc529ffc159cfa2e2cde2
+fetched: 2026-09-20
+source_version: 1f6f0b8dc754cbd4b08b428e8ac14f97514e8096
 ---
 
 # Twingate Pulumi Provider
@@ -81,6 +81,9 @@ pulumi config set twingate:network <network-id>
 - **404 on `pulumi up`/`pulumi preview`**: Local/alpha builds won't be found in GitHub Releases. Always install the plugin manually with `--file bin/pulumi-resource-twingate`. The exact version string (including `+dirty` suffix) must match what the build produced — check the error message for the exact string.
 - **Network ID format**: The `twingate:network` value is just the subdomain prefix, not the full hostname.
 - **`act` setup**: First run prompts for Docker image size — choose "Medium" for most workflows.
+
+## CI Notes
+- Release workflow uses `actions/setup-java@v6.0.1` (Temurin distribution, Gradle cache) for Java SDK builds.
 
 ## Related Docs
 - [Twingate API Overview](https://docs.twingate.com/docs/api-overview)

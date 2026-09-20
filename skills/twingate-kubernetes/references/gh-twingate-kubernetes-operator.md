@@ -1,8 +1,12 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator
 type: github
-fetched: 2026-09-13
-source_version: 9fd6d5645b8d024b0bdd83b264cfbafbafcd5fb4
+fetched: 2026-09-20
+source_version: 7c63ac598efa37793653962cc54b702c5a819b8c
+---
+
+The changes are minor CI workflow pin updates (QEMU and Buildx actions bumped to v4.4.0) with no impact on the summary's content. The summary remains accurate as-is.
+
 ---
 
 # Twingate Kubernetes Operator

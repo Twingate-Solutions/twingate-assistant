@@ -1,74 +1,70 @@
 ---
 source: https://www.twingate.com/docs/notifications
 type: docs
-fetched: 2026-08-14
-source_version: 2145ea13bc6d4e053528f451790a3a3d4e4fc27798d0f20dca87e3958298016b
+fetched: 2026-09-20
+source_version: f1ebe6488ffc4e0db383775e29a88b0cfc4142f382f6d49e376d8535b2a6aeee
 ---
 
 # Twingate Notifications
 
 ## Summary
-Twingate provides configurable notification channels (email and webhooks) for admin alerts. Some notifications are fixed (subscription updates, end-user notifications sent to all admins via email); others are customizable per recipient and delivery method.
+Twingate provides granular notification controls for admins, supporting both email and webhook delivery. Some notifications (subscription updates, end-user notifications) are always emailed to all admins; others can be customized per recipient and channel. Webhooks enable integration with external workflows and automation platforms.
 
 ## Key Information
-- Fixed notifications always go to all admin emails; cannot be customized
-- Customizable notifications support: specific email addresses, webhooks, or both
-- Granular control: configure per-channel (which notifications a channel receives) or per-notification (which channels receive it)
-- Webhook test payloads can be sent directly from Admin Console
-- **Slack**: Use Workflow Builder, not Incoming Webhooks (Incoming Webhooks only supports plain text JSON)
+- **Always-email notifications**: Subscription updates, end-user notifications → sent to all admins automatically
+- **Configurable notifications**: Can target specific email addresses or webhooks
+- **Management location**: Admin Console → Settings
+- **Test capability**: "Test Payload" button sends sample payload to configured webhook URL
+- **Webhook method**: Must accept `POST` requests with standard JSON
+- Notifications can be managed by channel (configure per email/webhook) OR by notification type (configure per event)
 
-## Prerequisites
-- Admin access to Twingate Admin Console
-- For webhooks: an endpoint that accepts HTTP POST requests with standard JSON payloads
+## Notification Types (Webhook-Supported)
+| Type Field | Description |
+|---|---|
+| `ACCESS_REQUEST` | Usage-based (AutoLock) or JIT access requests |
+| `CLIENT_UPDATE_RECOMMENDED` / `CLIENT_UPDATE_REQUIRED` | Client version alerts |
+| `CONNECTOR_UPGRADE_AVAILABLE` | Connector version alerts |
+| `CONNECTOR_STATUS_OFFLINE` / `CONNECTOR_STATUS_ONLINE` | Connector status changes |
+| `DEVICE_INTEGRATION_API_TOKEN_EXPIRATION` | Device integration token expiry |
+| `EVENTS_SYNC_ERRORS` / `EVENTS_SYNC_ERROR_RESOLVED` / `EVENTS_SYNC_REQUIRES_ATTENTION` | Event sync status |
+| `GOOGLE_WORKSPACE_SYNC_ERROR` | Google Workspace sync issues |
+| `IDENTITY_PROVIDER_INTEGRATION_ERROR` | IdP integration errors |
+| `INTEGRATION_ERROR_RESOLVED` / `INTEGRATION_ERRORS` | General integration status |
+| `SERVICE_ACCOUNT_KEYS_EXPIRATION` | Service account key expiry |
 
-## Step-by-Step: Configure Notifications
-1. Navigate to **Settings** in the Admin Console
-2. **Email**: Select an admin email address → choose which notifications it receives
-3. **Webhook**: Provide webhook name + URL → select notifications to route to it
-4. Use **Test Payload** button per notification to validate webhook delivery
+## Webhook Payload Common Fields
+```json
+{
+  "timestamp": "ISO8601",
+  "tenant": "yourco.twingate.com",
+  "version": "1",
+  "type": "NOTIFICATION_TYPE"
+}
+```
+- `table` field (array of structured data) appears in: Service Account key expiration, Connector status, Client updates
 
-## Webhook Configuration Requirements
-- Must accept **POST** requests (GET-only endpoints will error)
-- Must accept standard JSON payloads
-- Endpoint must respond without error to Twingate's payload format
-
-## Webhook Payload Fields
-
-### Common Fields (all payloads)
-| Field | Description |
-|-------|-------------|
-| `timestamp` | ISO 8601 UTC timestamp |
-| `tenant` | Twingate tenant URL |
-| `version` | Payload version (currently `"1"`) |
-| `type` | Notification type identifier |
-
-### Notification Types & Key Fields
-| `type` | Notable Fields |
-|--------|---------------|
-| `ACCESS_REQUEST` | `request_id`, `user_name`, `resource_name`, `approval_mode`, `request_type` (`AutoLock` or `AccessRequest`), `request_duration_seconds`, `reason` |
-| `CLIENT_UPDATE_RECOMMENDED` | `platform`, `devices_list` (URL) |
-| `CLIENT_UPDATE_REQUIRED` | `message`, `table` |
-| `CONNECTOR_UPGRADE_AVAILABLE` | `message`, `table` |
-| `CONNECTOR_STATUS_OFFLINE` | `message`, `table` |
-| `CONNECTOR_STATUS_ONLINE` | `message`, `table` |
-| `DEVICE_INTEGRATION_API_TOKEN_EXPIRATION` | `integration`, `days_remaining`, `manage_integration` |
-| `EVENTS_SYNC_ERRORS` | `message`, `manage_sync` |
-| `EVENTS_SYNC_ERROR_RESOLVED` | `sync_type`, `manage_sync` |
-| `EVENTS_SYNC_REQUIRES_ATTENTION` | `sync_type`, `manage_sync` |
-| `GOOGLE_WORKSPACE_SYNC_ERROR` | `message`, `message_integration` |
-| `IDENTITY_PROVIDER_INTEGRATION_ERROR` | `integration`, `manage_integration` |
-| `INTEGRATION_ERROR_RESOLVED` | `integration`, `manage_integration` |
-| `INTEGRATION_ERRORS` | `integration`, `manage_integration` |
-| `SERVICE_ACCOUNT_KEYS_EXPIRATION` | `table[]` with `service_account_name`, `service_key`, `link` |
+## Configuration Values
+- **Webhook configuration requires**: name, URL, selected notification types
+- **HTTP method**: POST (required)
+- **Content-Type**: Standard JSON
 
 ## Gotchas
-- Slack Incoming Webhooks will fail — use Slack Workflow Builder instead
-- Webhook errors = your endpoint returned an error, not a Twingate-side issue
-- `table` field is an empty array `[]` in test payloads for some notification types
-- `ACCESS_REQUEST` type covers both JIT and Usage-based requests; differentiate via `request_type` field (`AccessRequest` vs `AutoLock`)
+- **Slack Incoming Webhooks**: Only support plain-text JSON → use Slack Workflow Builder instead
+- **`table` field incompatibility**: Notifications containing `table` arrays cannot be ingested directly by Slack (either incoming webhooks or Workflow Builder) → requires middleware (serverless function, Zapier, Make) to transform before forwarding
+- **Webhook errors**: Usually caused by wrong HTTP method (GET instead of POST) or service rejecting standard JSON format
+
+## Prerequisites
+- Admin role on Twingate account
+- Webhook endpoint must: accept POST requests, handle standard JSON payloads
+
+## Step-by-Step: Configure Webhook
+1. Navigate to Admin Console → Settings → Notifications
+2. Add webhook with name + URL
+3. Select specific notification types to route to it
+4. Click "Test Payload" to validate connectivity
 
 ## Related Docs
-- Access Requests (JIT and Usage-based)
-- Device Integrations settings
-- Connector management
+- Access Requests (JIT/Usage-based)
 - Service Accounts
+- Connector management
+- Device integrations

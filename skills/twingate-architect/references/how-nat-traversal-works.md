@@ -1,8 +1,8 @@
 ---
 source: https://www.twingate.com/docs/how-nat-traversal-works
 type: docs
-fetched: 2026-08-14
-source_version: 20b0a3e206cb42efdcf520b27f7428a7e57590219b433b351f5fee0fcce5603a
+fetched: 2026-09-20
+source_version: 6cd71cb52de90f67265a99902177262670dd4810da4e014cf6e439ab5f6d2fb5
 ---
 
 # How NAT Traversal Works
@@ -11,39 +11,41 @@ source_version: 20b0a3e206cb42efdcf520b27f7428a7e57590219b433b351f5fee0fcce5603a
 How NAT Traversal Works
 
 ## Summary
-Twingate never requires open inbound ports. Instead, it uses two methods to establish Client-Connector connectivity: Relay servers (intermediaries) and NAT traversal (direct peer-to-peer tunnels). NAT traversal works by having both parties simultaneously send outbound packets to each other's public IP/port, exploiting the firewall rule that allows return traffic from addresses you've already contacted.
+Twingate establishes secure Client-to-Connector connections without opening inbound ports using two methods: Relay-based intermediary connections and NAT traversal for direct peer-to-peer (P2P) tunnels. NAT traversal works by coordinating simultaneous outbound connections from both Client and Connector through a Relay acting as a signaling broker, leveraging firewall behavior that permits inbound packets from addresses the local device has already sent packets to.
 
 ## Key Information
-- **Two connectivity methods**: Relays (fallback, adds latency) and NAT traversal (preferred, peer-to-peer)
-- **NAT traversal core mechanic**: Firewalls allow inbound packets from a public IP/port *only if* outbound packets were previously sent to that same address/port
-- **Relay dual role**: Acts as both traffic relay (fallback) and STUN/broker server (coordinates NAT traversal)
-- **End-to-end encryption**: Traffic is encrypted between Client and Connector; Relays cannot decrypt it even when proxying
-- **NAT**: Translates private IPs (e.g., `192.168.1.4`) to unique public IPs using port assignments to track sessions
-- **Ports**: 65,535 per IP address; NAT devices use source port + IP combos to track which private device initiated which session
+- **No open inbound ports required** — core security principle of Twingate's architecture
+- **Two connectivity methods:**
+  1. **Relays** — global intermediaries; both Client and Connector make outbound connections; traffic is end-to-end encrypted (Relay cannot decrypt)
+  2. **NAT Traversal** — direct P2P tunnel; removes relay hop, reduces latency
+- **NAT traversal mechanism:** Relay acts as STUN server + signaling broker; exchanges public IP/port between Client and Connector; coordinates simultaneous outbound connections so each side's firewall permits inbound packets from the other
+- **Local network optimization:** Client and Connector also exchange local (private) IP addresses; if on same LAN, attempt direct local connection in parallel with NAT traversal; avoids dependency on NAT hairpinning support
+- **Relays are worldwide** to minimize latency when P2P fails or isn't possible
+- Firewalls permit inbound packets from a public IP:port **only if** the local device previously sent packets to that same IP:port
 
 ## Prerequisites
-- Understanding that open inbound ports are avoided by design
-- Twingate Relay infrastructure is always available as fallback
-- Both Client and Connector must be able to make outbound connections
+- Understanding of private vs. public IP addresses
+- No open inbound ports needed on Connector or Client networks
 
-## Step-by-Step: NAT Traversal Connection Establishment
-1. Client and Connector each connect to a Relay, reporting their public IP/port
-2. Relay brokers exchange: shares Client's public IP/port with Connector, and vice versa
-3. Relay establishes an encrypted messaging channel between Client and Connector
-4. Client and Connector **simultaneously** send packets to each other's public IP/port
-5. Because each side sent packets first, each side's firewall allows the return packets through
-6. Peer-to-peer tunnel is established — no open inbound ports required
+## Step-by-Step: NAT Traversal P2P Establishment
+1. Client and Connector each connect outbound to Relay; Relay records their public IP:port combinations
+2. Relay creates an encrypted signaling channel between Client and Connector
+3. Client and Connector exchange public IP:port (and local IP:port) via signaling channel
+4. Relay coordinates **simultaneous** outbound packet sends from both sides to each other's public IP:port
+5. Each firewall sees prior outbound traffic to the other's address → permits inbound packets
+6. P2P tunnel established; Relay no longer in data path
 
 ## Configuration Values
-- None specific to this conceptual page; see troubleshooting guide for network-specific tuning
+- No user-configurable parameters documented on this page
+- Port **443** referenced as example (HTTPS convention)
+- IP ports range: 1–65,535
 
 ## Gotchas
-- **Certain network conditions can block NAT traversal** (e.g., symmetric NAT); in those cases, traffic falls back to Relays automatically
-- **Never open inbound ports**: open ports are continuously scanned and probed by bots; VPN gateways with open ports are a known attack surface
-- **Simultaneous packet send is critical**: timing must be coordinated by the Relay; if one side sends before the other has sent, the return packet will be dropped
-- Port forwarding on consumer routers bypasses these protections — avoid for Connector deployments
+- **NAT hairpinning** not supported by all routers — two devices on the same LAN may fail to reach each other via public IP; Twingate handles this with parallel local connection attempts
+- **Opening inbound ports is strongly discouraged** — open ports are continuously scanned by bots and probed for vulnerabilities
+- Relay fallback occurs when P2P cannot be established due to restrictive network conditions
+- Relay cannot decrypt Client↔Connector traffic (end-to-end encryption excludes Relay)
 
 ## Related Docs
-- [Twingate Relay documentation] (referenced but not linked inline)
-- [NAT traversal troubleshooting guide](https://www.twingate.com/docs/) — for cases where P2P cannot be established
-- [Global Relay deployment](https://www.twingate.com/docs/) — Relay locations worldwide
+- [Troubleshooting peer-to-peer and NAT traversal](https://www.twingate.com/docs/) — referenced for P2P connection issues
+- Twingate Relay documentation (referenced inline, separate page)

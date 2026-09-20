@@ -1,60 +1,50 @@
 ---
 source: https://help.twingate.com/articles/5974826840-unable-to-access-a-resource
 type: help
-fetched: 2026-09-13
-source_version: 94faaf352ed7ee6b0f6cb5c44371ada1a03259282a1c2bddc9d164bbff8a1cc6
+fetched: 2026-09-20
+source_version: db5adfda44986a7e7b117fe36742e18a8fbcd233ecb67a367c06b1c1c2599c09
 ---
 
-# Unable to Access a Twingate Resource
+# Unable to Access a Resource
 
 ## Summary
-Troubleshooting guide for when users cannot access a Twingate Resource. Covers the most common causes from authorization issues to DNS configuration, incompatible software, and network connectivity problems.
+Troubleshooting guide for when a Twingate Client cannot access an expected Resource. Covers authorization, DNS, software conflicts, network access, and connectivity verification in order of most-to-least common causes.
 
 ## Key Information
+- Issues are ordered by frequency: permissions → DNS → software conflicts → firewall → network flows → destination availability → geo-blocking → DNS rebind
+- Port tests from the **Client side** to a Twingate Resource return false positives; test from the Connector instead
+- DNS Resources resolve first at the Client (ACL check), then request DNS lookup from the Connector
 
-- Issues are ordered most-to-least common
-- Problems occur at two levels: **Client level** or **Connector level**
-- Network Traffic in Admin Console helps identify which level the failure occurs
+## Troubleshooting Steps
 
-## Troubleshooting Steps (In Order)
-
-1. **Authorization check** — Confirm user's Group includes the Resource. If Resource doesn't appear in the Client tray menu, it won't be reachable.
-
-2. **DNS interception** — Run `nslookup` or `dig` against the Resource name. Should return a **CGNAT IP** (not the real IP). If it returns the real IP, Twingate isn't intercepting DNS.
-
-3. **Local hosts file override** — Remove any Resource entries from:
-   - Windows: `c:\windows\system32\drivers\etc\hosts`
+1. **Check authorization** — Confirm user's Group includes the Resource; if Resource doesn't appear in tray menu, it's not accessible
+2. **Verify DNS interception** — Run `nslookup` or `dig` on the Resource; should return a CGNAT IP (not real IP); if not, DNS is not being intercepted
+3. **Check local hosts file** — Remove conflicting entries
+   - Windows: `C:\Windows\System32\drivers\etc\hosts`
    - macOS/Linux: `/etc/hosts`
-
-4. **Incompatible software** — Check endpoint security, DNS software, VPN, or VPN-like tools against the Known Incompatibilities list.
-
-5. **Outbound access blocked** — Ensure device can reach:
-   - `*.twingate.com`
-   - Full Google Cloud Provider external IP range (updated periodically by Google)
-
-6. **Check Network Traffic in Admin Console** — If no flows appear → Client-level issue. If flows appear → investigate Connector-to-Resource connectivity.
-
-7. **Verify destination availability** — Test from the Connector (not the Client):
+4. **Check for incompatible software** — Endpoint security, DNS tools, VPNs may conflict (see Known Incompatibilities doc)
+5. **Verify outbound internet access** — Allow `*.twingate.com` and all Google Cloud Provider external IPs
+6. **Review Network Traffic in Admin Console** — If no flows reach the Connector, issue is at Client level; if flows exist, investigate Connector-to-Resource access
+7. **Test destination availability** — SSH to Connector and run:
    ```bash
    curl -v telnet://<host>:<port>
    ```
-   > ⚠️ Port tests from the Client side return false positives
+8. **DNS Resource: verify resolution from Connector** — Run `dig` or `nslookup` from the Connector to confirm correct IP resolves
+9. **Check geo-blocking** — GCP blocks some regions; `*.twingate.com` may load but Controller/Relay services may still be blocked
+10. **Check DNS rebind protection** — Consumer routers/ISPs may block private IP lookups via public DNS; `dig`/`nslookup` returns empty response
 
-8. **DNS Resource resolution from Connector** — Run `dig` or `nslookup` from the Connector to confirm correct IP resolution. DNS Resources resolve first at the Client (ACL match), then request lookup from the Connector.
-
-9. **Geo-blocking** — GCP blocks some regions. Browser access to `.twingate.com` may work while Controller/Relay services are still blocked. See Unsupported Regions docs.
-
-10. **DNS Rebind Protection** — Private IP/CIDR Resources resolved via public DNS may be blocked by consumer routers/ISPs. Symptom: empty `dig`/`nslookup` response.
+## Configuration Values
+- Required outbound access: `*.twingate.com` + full Google Cloud Provider external IP range
 
 ## Gotchas
+- Resource not appearing in tray menu = not accessible, regardless of other config
+- TCP/IP port tests from Client side produce false positives — always test from Connector
+- DNS Resources: Connector must resolve the correct IP or connection fails silently
+- GCP geo-blocks may allow browser access to `twingate.com` but block Controller/Relay services
 
-- **False positives**: TCP/IP port tests or scans from the Client side are unreliable — always test from the Connector
-- **GCP IP list changes**: Google updates the GCP external IP list periodically; firewall rules may become stale
-- **DNS Resources**: Failure can occur at either the Client lookup stage or the Connector resolution stage — test both
-
-## Prerequisites for Support Request
-- Technical Support Entitlement required
-- Collect detailed client logs
+## Prerequisites for Support Escalation
+- Active Technical Support Entitlement
+- Collect detailed Client logs
 - Document: timestamps, Resource name/IP, steps already attempted
 
 ## Related Docs
@@ -64,4 +54,4 @@ Troubleshooting guide for when users cannot access a Twingate Resource. Covers t
 - Address Resolution of Resources
 - Unsupported Regions
 - TCP/IP port tests or scans produce inaccurate results
-- Detailed client logs collection
+- Detailed Client Logs collection guide

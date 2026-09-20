@@ -1,90 +1,73 @@
 ---
 source: https://www.twingate.com/docs/security-policies
 type: docs
-fetched: 2026-08-05
-source_version: b01b72f9ecb3d0b3d3a1943450a92fe7685a4c3d47ed7f5b76fe80d5852f0172
+fetched: 2026-09-20
+source_version: 1aed2e27cb8f56f0d904921bd96458a189e0f64080392c56b4a78060af6d5465
 ---
 
 # Security Policies
 
+## Page Title
+Security Policies
+
 ## Summary
-Twingate uses layered policies to control network access, configured under the **Policies** tab in the Admin Console. Three components work together: Resource Policies (per-resource access rules), Sign In Policy (baseline client access requirements), and Device Profiles (device trust definitions).
+Twingate uses a layered policy system to control network access, configured under the **Policies** tab in the Admin Console. Three components work together: Resource Policies (per-resource access requirements), Sign In Policy (baseline client authentication), and Device Profiles (device trust definitions).
 
 ## Key Information
-
 - **Three policy types**: Resource Policies, Sign In Policy, Device Profiles
-- **Evaluation order**: Device Profiles → Sign In Policy → Resource Policy
-- Device posture checked at sign-in and ~every 5 minutes thereafter
-- Admin Console has a fixed 1-hour session (non-configurable, non-rolling)
-- Sign In Policy session timer **resets** when a Resource Policy re-auth succeeds (if Resource Policy requirements are a superset of Sign In Policy)
-
-## Prerequisites
-
-- Admin Console access
-- Enterprise plan required for geoblocking (location requirements)
-- MDM/EDR integration configured if using Trusted Profiles with those providers
+- Every network includes a **Default Policy** auto-assigned to new Resources
+- Policy evaluation order: Device Profiles → Sign In Policy → Resource Policy
+- Device posture re-checked approximately **every 5 minutes**
+- Admin Console session is fixed at **1 hour** (non-configurable, non-rolling)
 
 ## Resource Policies
-
-**Requirements per policy (up to 3 types):**
-- Authentication frequency + MFA requirement
-- Device Security (Trusted Profiles or approved OS)
-- Location/geoblocking (Enterprise only)
-
-**Policy assignment:**
-- Assigned at Resource level; applies to all Groups on that Resource
-- Groups can have per-Resource policy overrides
-- When override exists, Twingate applies the **more permissive** of the two policies
-- Group overrides persist if the Resource-level policy changes
-
-**Best practice**: Set strictest policy at Resource level; use Group overrides to relax for specific teams.
-
-**Disable auth requirement** on a Resource Policy to create a device-only policy (user still needs valid Sign In Policy session).
+- Define per-Resource requirements: Authentication frequency/MFA, Device Security, Location (geoblocking, Enterprise only)
+- Assigned at Resource level; Groups can have **override policies**
+- Group-level override always takes precedence over Resource-level policy
+- If user belongs to both an override Group and a plain Group, Twingate disambiguates among Group-tied policies only
+- **Best practice**: Apply strictest policy at Resource level; use Group overrides to relax for specific teams
+- Authentication requirement can be **disabled** to create device-only policies (relies on Sign In Policy session validity)
 
 ## Sign In Policy
-
-Three requirements:
-1. Device Security (Approved OS or Trusted Profile)
-2. Authentication frequency (rolling window, resets on Resource Policy re-auth)
-3. MFA (Twingate native 2FA)
-
-**Recommended config**: Set lenient Sign In Policy (e.g., 30-day auth frequency); enforce strict requirements via Resource Policies.
+- Baseline requirements before any Resource access
+- Three settings: Device Security, Authentication frequency, MFA
+- Session timer uses a **rolling window** — resets when Resource Policy re-auth succeeds (if Resource Policy is a superset of Sign In Policy requirements)
+- **Best practice**: Keep lenient (e.g., 30-day frequency); use Resource Policies for sensitive resources
 
 ## Device Profiles
+**Trusted Profiles** — per-platform device verification:
+- Methods: Manual, CrowdStrike, Intune, Jamf, Kandji, SentinelOne, 1Password
+- Can include additional posture checks
+- Referenced in both Sign In Policy and Resource Policies
 
-### Trusted Profiles
-- One platform per profile
-- Verification methods: Manual, CrowdStrike, Intune, Jamf, Kandji, SentinelOne, 1Password
-- Can add device posture checks on top of verification method
-- Referenced in Sign In Policy and/or Resource Policies
-
-### Approved Operating Systems
-- Enable/disable per platform
-- Blocking a platform prevents sign-in entirely
-- Per-platform posture checks: disk encryption, screen lock, firewall, minimum OS version
-
-## Session/Auth Gotchas
-
-- **IdP session expiry is captured at sign-in**; Twingate stores the expiry timestamp and compares on each policy check — no redirect occurs until expiry passes
-- Resource Policy re-auth extends Sign In Policy session only if Resource Policy requirements are a **superset** of Sign In Policy
-- Admin Console session: **1 hour, static, cannot be changed**
-- Default Policy is auto-assigned to new Resources — configure it intentionally
+**Approved Operating Systems** — platform baselines:
+- Enable/disable per platform (blocking prevents sign-in entirely)
+- Posture checks: disk encryption, screen lock, firewall, minimum OS version (varies by platform)
 
 ## Configuration Values
+| Setting | Location | Notes |
+|---|---|---|
+| Authentication frequency | Resource Policy / Sign In Policy | Rolling window for Sign In; per-policy for Resources |
+| MFA requirement | Resource Policy / Sign In Policy | Twingate native 2FA |
+| Geoblocking | Resource Policy | Enterprise tier only |
+| Admin Console session | Fixed | 1 hour, static, cannot change |
 
-| Setting | Notes |
-|---|---|
-| Admin Console session | 1 hour (fixed) |
-| Device posture check interval | ~5 minutes |
-| Recommended Sign In Policy frequency | 30 days |
-| Geoblocking | Enterprise plan only |
+## Gotchas
+- **IdP session expiry is captured at sign-in** — Twingate stores the IdP-returned expiry time; re-auth check compares current time to stored expiry, not a fresh IdP check
+- A user in both an override Group and a non-override Group for the same Resource is **not** automatically locked into the override — the non-override Group still contributes the Resource-level policy to comparison
+- Group-level overrides persist even if the Resource-level policy changes — must be **explicitly reset**
+- Disabling authentication on a Resource Policy skips re-auth prompts but does **not** bypass Sign In Policy session validity
+
+## Prerequisites
+- Admin Console access
+- Enterprise plan for geoblocking/location requirements
 
 ## Related Docs
-
 - Resource Policies
+- How Twingate resolves multiple policies
 - Device-only Resource Policies
+- How Sessions Work
 - Device Profiles
 - Device Posture Checks
 - Approved Operating Systems
-- How Sessions Work
 - Admin Console Security

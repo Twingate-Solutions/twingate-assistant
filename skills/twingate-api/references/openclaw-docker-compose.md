@@ -1,67 +1,75 @@
 ---
 source: https://www.twingate.com/docs/openclaw-docker-compose
 type: docs
-fetched: 2026-08-14
-source_version: b8d911b3e23c52e24c612ca1351ba5b9124537f6a66c9eed2f47fdddb607d057
+fetched: 2026-09-20
+source_version: a2f1e8bf01fc7c97ef28e1910cf71412193bd10a5013f4bfa865a09c5277089b
 ---
 
 # How to Set Up and Secure OpenClaw with Docker Compose
 
 ## Summary
-Deploy OpenClaw (AI-powered WhatsApp/Telegram assistant) using Docker Compose with Caddy as a reverse proxy. Optionally add a Twingate Connector for Zero Trust remote access without exposing public ports or using SSH tunnels.
+Deploys OpenClaw (AI-powered WhatsApp/Telegram assistant) using Docker Compose with Caddy as a reverse proxy. Optionally adds a Twingate Connector for Zero Trust remote access without exposing public ports or using SSH tunnels.
 
 ## Key Information
 - OpenClaw gateway binds to `localhost:18789` inside the container; Caddy shares its network namespace to expose port 80
-- Only port 80 (bound to `127.0.0.1`) is mapped to the host
+- Only port mapped to host: `127.0.0.1:80:80` (localhost only by default)
 - Twingate Connector uses `network_mode: host` (required)
-- CLI container uses `profiles: ["cli"]` — does not auto-start
-- Caddy and CLI use `network_mode: "service:openclaw-gateway"` to reach gateway on shared localhost
+- CLI container uses `profiles: [cli]` — only runs when explicitly invoked
+- Config persisted in `./config` and `./workspace` bind mounts
 
 ## Prerequisites
 - Docker Engine 20.10+, Docker Compose v2
 - 4GB+ RAM, 10GB+ disk
-- Anthropic Claude or OpenAI API key
+- Anthropic or OpenAI API key
 - Twingate account (remote access only)
 
 ## Step-by-Step
 
-1. **Prepare environment**: `mkdir -p ~/openclaw-docker/config ~/openclaw-docker/workspace`
-2. **Create `Caddyfile`**: `reverse_proxy localhost:18789` on `:80`
-3. **Create `docker-compose.yml`** with `openclaw-gateway`, `openclaw-cli`, `caddy` services
-4. **Create `.env`** with API keys; leave `OPENCLAW_GATEWAY_TOKEN` blank initially
-5. **Run onboarding**: `docker compose run --rm openclaw-cli onboard`
-6. **Get token**: `docker compose run --rm openclaw-cli dashboard --no-open`
-7. **Update `.env`** with generated token, then `docker compose up -d`
-8. **Access locally**: `http://localhost/?token=<your-token>`
-9. **(Optional) Add Twingate**: Add connector service, create Remote Network + Resource in Admin Console, configure access policies, install Twingate Client on remote devices
+**Local deployment (~10 min):**
+1. `mkdir -p ~/openclaw-docker/{config,workspace} && cd ~/openclaw-docker`
+2. Create `Caddyfile` with `reverse_proxy localhost:18789`
+3. Create `docker-compose.yml` (see config below)
+4. Create `.env` with API key; leave `OPENCLAW_GATEWAY_TOKEN` blank
+5. `docker compose run --rm openclaw-cli onboard`
+6. `docker compose run --rm openclaw-cli dashboard --no-open` → copy token
+7. Add token to `.env`, then `docker compose up -d`
+8. Access at `http://localhost/?token=<token>`
+
+**Remote access via Twingate (~10 min additional):**
+1. Add `twingate-connector` service to `docker-compose.yml`
+2. Create Twingate account → Admin Console → Remote Networks → Add Remote Network
+3. Add Connector → Generate Tokens → copy Access Token + Refresh Token
+4. Add to `.env`: `TWINGATE_NETWORK`, `TWINGATE_ACCESS_TOKEN`, `TWINGATE_REFRESH_TOKEN`
+5. `docker compose up -d twingate-connector`
+6. Admin Console → Resources → Add Resource (address = Docker host IP, port 80, HTTP)
+7. Assign access to users/groups
+8. Install Twingate Client, connect, browse to `http://<docker-host-ip>/?token=<token>`
 
 ## Configuration Values
 
-### `.env` file
+**`.env` variables:**
 | Variable | Description |
 |---|---|
 | `CLAUDE_AI_SESSION_KEY` | Anthropic API key |
 | `OPENAI_API_KEY` | OpenAI API key (alternative) |
-| `OPENCLAW_GATEWAY_TOKEN` | Generated during onboarding |
-| `TWINGATE_NETWORK` | Network name only (no `.twingate.com`) |
-| `TWINGATE_ACCESS_TOKEN` | From Admin Console → Connectors |
-| `TWINGATE_REFRESH_TOKEN` | From Admin Console → Connectors |
-| `TWINGATE_LOG_LEVEL` | `3` |
-| `TWINGATE_LOG_ANALYTICS` | `v2` |
+| `OPENCLAW_GATEWAY_TOKEN` | Generated via CLI `dashboard --no-open` |
+| `TWINGATE_NETWORK` | Network subdomain only (e.g., `yourcompany`) |
+| `TWINGATE_ACCESS_TOKEN` | From Twingate Admin Console |
+| `TWINGATE_REFRESH_TOKEN` | From Twingate Admin Console |
+| `TWINGATE_LOG_LEVEL` | `3` (recommended) |
+| `TWINGATE_LOG_ANALYTICS` | `v3` |
 
-### Twingate Resource Config
-- **Address**: Docker host IP (use `host.docker.internal` on macOS/Windows Docker Desktop)
-- **Protocol**: HTTP, **Port**: `80` (not 18789)
+**Twingate Connector sysctl:**
+```yaml
+sysctls:
+  net.ipv4.ping_group_range: "0 2147483647"
+```
 
 ## Gotchas
-- Use Docker Compose v2 (`docker compose`), not legacy `docker-compose`
-- `TWINGATE_NETWORK` is just the prefix, not the full domain
-- Twingate Resource must point to port `80` (Caddy), not `18789` (gateway)
-- Volume permission errors are Linux-only; fix with `sudo chown -R $(id -u):$(id -g) config/ workspace/`
-- Token stored in `./config/gateway-token` if lost; re-run `dashboard --no-open` to display
-- After changing `OPENCLAW_GATEWAY_TOKEN` in `.env`, restart gateway: `docker compose restart openclaw-gateway`
+- **Connector must use `network_mode: host`** — other modes break Twingate Connector operation
+- **Caddy and CLI must use `network_mode: "service:openclaw-gateway"`** — required to reach `localhost:18789`; they don't join `openclaw-network`
+- **Twingate Resource address** = Docker host IP, **not** `localhost` — the Connector routes through the host network
+- Linux volume permission errors require `chown -R $(id -u):$(id -g) config/ workspace/`; macOS/Windows handle automatically
+- `TWINGATE_NETWORK` value is just the subdomain prefix, not the full `.twingate.com` domain
 
-## Related Docs
-- [Twingate Connector Deployment Options](https://www.twingate.com/docs)
-- [Docker Compose Documentation](https://docs.docker.com/compose/)
-- OpenClaw Documentation (openclaw.io)
+## Related

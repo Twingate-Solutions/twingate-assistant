@@ -1,44 +1,45 @@
 ---
 source: https://help.twingate.com/articles/5856392229-how-do-i-delete-my-twingate-network-tenant
 type: help
-fetched: 2026-08-23
-source_version: ae7fa45d475bf681958119d5ed7412b93a4a25629f1705b20e9da1cc635a17ba
+fetched: 2026-09-20
+source_version: 4cac4dc5649dd175bd2935d21a2746a527237b1a9fa7d3efa9a1283bf89ba44e
 ---
 
 # How Do I Delete My Twingate Network/Tenant?
 
 ## Summary
-Describes the process for permanently deleting a Twingate Network (tenant). Requires downgrading to a free Starter plan before deletion is available. Enterprise/invoice accounts must contact their Twingate representative instead.
+Describes the process for permanently deleting a Twingate network/tenant. Requires downgrading to a free Starter plan before deletion is available. Enterprise/invoice accounts must contact their Twingate representative instead.
 
 ## Key Information
-- **Not applicable to**: Enterprise or invoice accounts (contact Twingate rep), or end-users wanting to remove their own account (contact your Admin)
+- Only applies to **Teams** or **Business** plan admins (self-serve)
+- **Enterprise/invoice accounts**: contact Twingate representative directly
+- **End-users**: this does not delete individual user accounts — contact your admin to be removed from a network
 - Deletion option only appears after active subscription has fully downgraded to Starter
-- Downgrade takes effect at the **next billing period**, not immediately
 
 ## Prerequisites
-- Must be a Twingate Admin
-- Active Teams or Business subscription must be downgraded to Starter first
-- Must wait until current subscription period ends before Delete option appears
+- Active subscription (Teams/Business) must be downgraded to Starter plan first
+- Downgrade takes effect at the end of the current billing period
+- Must be a network Admin with access to Admin Console
 
 ## Step-by-Step
 
-### Step 1: Downgrade Subscription (if on Teams or Business)
-1. Follow the [Downgrade your subscription](https://help.twingate.com/articles/downgrade-your-subscription) process
-2. Verify scheduled downgrade via "How do I check that my subscription will downgrade?"
-3. Wait until next billing period for downgrade to take effect
+### Step 1: Downgrade Subscription (if on paid plan)
+1. Downgrade to Starter plan (see "Downgrade your subscription" doc)
+2. Wait until the end of the billing period for downgrade to take effect
+3. Verify downgrade is scheduled via "How do I check that my subscription will downgrade?"
 
 ### Step 2: Delete the Network
 1. Sign into the Admin Console
 2. Click **Settings**
 3. Click **Billing**
-4. Scroll to bottom → **Delete Network Account** section
+4. Scroll to the bottom — locate **Delete Network Account** section
 5. Click **Delete**
 6. Follow confirmation prompts
 
 ## Gotchas
-- **Delete Network Account option not visible?** — Active subscription is still in effect. The option is hidden until the subscription fully expires/downgrades. Check your subscription expiry date.
-- Downgrade is not instant — it applies at the end of the current billing period, so deletion may not be available immediately after requesting a downgrade.
-- End-users mistakenly attempting tenant deletion — this process deletes the entire network, not an individual user account.
+- **"Delete Network Account" option not visible?** The option is hidden while any active subscription exists. You must wait until the subscription period fully expires before the delete option appears.
+- Downgrade is not immediate — it applies at the next billing period, so plan ahead for timing.
+- Deleting the network is distinct from removing an individual user — wrong process if you're an end-user.
 
 ## Related Docs
 - Downgrade your subscription

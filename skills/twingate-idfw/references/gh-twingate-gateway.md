@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/gateway
 type: github
-fetched: 2026-09-13
-source_version: 0e069260c530b7b9bf0a7ed9d83343c411de9de4
+fetched: 2026-09-20
+source_version: 00d7ae3b047bf16b9390b2d73ac35463e0660369
 ---
 
 # Twingate Gateway
