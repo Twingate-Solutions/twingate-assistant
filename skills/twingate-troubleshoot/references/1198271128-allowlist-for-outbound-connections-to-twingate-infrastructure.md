@@ -1,58 +1,60 @@
 ---
 source: https://help.twingate.com/articles/1198271128-allowlist-for-outbound-connections-to-twingate-infrastructure
 type: help
-fetched: 2026-09-13
-source_version: 367c9e467acc62f09a2cb595291b93906009a0c7b325938e8dbf4ea41a44afd5
+fetched: 2026-09-20
+source_version: 4b2c3ee3d9de31b2d4a32d482d0b8a636bc3a8c834cb9c79c1b66c02289de059
 ---
 
 # Allowlist for Outbound Connections to Twingate Infrastructure
 
 ## Summary
-Twingate Clients and Connectors require specific outbound ports and FQDNs to be allowlisted for proper operation. Both IP ranges and FQDNs are needed — IP allowlisting alone is insufficient. Wildcard `*.twingate.com` is the simplest approach; explicit FQDN lists are also supported but subject to change.
+Twingate Clients and Connectors require specific outbound ports and FQDNs to communicate with Twingate's Controller and Relay infrastructure. A Twingate-owned IP block exists but is insufficient alone—FQDNs must also be allowlisted. Wildcard `*.twingate.com` is the simplest approach when supported.
 
 ## Key Information
-- Applies to: Twingate Client and Connector components
-- Static IP ranges available to **Enterprise customers only**
-- FQDN list is **subject to change at any time**
+- **Components affected**: Twingate Client and Connector
+- **IP block**: `167.254.176.0/21` (Twingate-owned; Enterprise customers only for static IPs)
+- **IP-only allowlisting is NOT sufficient**—FQDNs required alongside IPs
 - Relay connections use ephemeral IPs within Google Cloud IP ranges
+- FQDN list is subject to change at any time
+- Regional URLs follow pattern: `[network-name].[region].twingate.com` (e.g., `mynet.us1.twingate.com`)
 
-## Required Outbound Ports
+## Required Ports
 
 | Protocol | Port | Purpose |
 |----------|------|---------|
-| TCP | `*:443` | Controller and Relay communication |
-| TCP | `*:30000-31000` | Relay fallback (when P2P unavailable) |
-| UDP | `*:*` | Peer-to-peer connectivity (optimal performance) |
-
-## IP Allowlist
-- **Twingate-owned block:** `167.254.176.0/21`
-- ⚠️ **IPs alone are not sufficient** — FQDNs must also be allowlisted
-- Valid configurations: FQDNs only, or IPs + FQDNs together
+| TCP (outbound) | `*:443` | Controller and Relay communication |
+| TCP (outbound) | `*:30000-31000` | Relay fallback when P2P unavailable |
+| UDP (outbound) | `*:*` | Peer-to-peer connectivity (optimal performance) |
 
 ## FQDN Allowlist
 
-**Simplest option:** `*.twingate.com` (covers all cases including regional URLs)
+**Preferred**: `*.twingate.com` (wildcard covers all including regional URLs)
 
-**Explicit FQDNs (if wildcards not supported):**
-- `[your-network-name].twingate.com` — replace with actual tenant name
-- `[your-network-name].[region].twingate.com` — check admin console URL for your region (e.g., `us1`, `us2`)
+**Explicit FQDNs** (if wildcards unavailable):
+- `[your-subdomain].twingate.com`
+- `[your-network-name].[region].twingate.com` (check admin console URL for your region)
 - `admin.twingate.com`, `api.twingate.com`, `binaries.twingate.com`
-- `dns.twingate.com`, `oauth.twingate.com`, `relays.twingate.com`, `relays-prm.twingate.com`
-- `saml.twingate.com`, `sst.twingate.com`
+- `dns.twingate.com`, `oauth.twingate.com`, `relays.twingate.com`
+- `relays-prm.twingate.com`, `saml.twingate.com`, `sst.twingate.com`
+- `twingate.com`, `get.twingate.com`, `analytics.twingate.com`
 - PubNub: `h2.pubnubapi.com`, `pubsub.pubnub.com`, `ps.pndsn.com`
-- GCP relay: `relays443.twingate.com`, `relays443-prm.twingate.com`
-- GCP STUN: `stun.[region].twingate.com` and `stun-alt.[region].twingate.com` (multiple GCP regions)
-- DigitalOcean relay: `relays-do.twingate.com`, `relays-prm-do.twingate.com`
-- DigitalOcean STUN: `stun.[datacenter].twingate.com` (ams3, fra1, lon1, nyc1/2, sgp1, syd1, tor1, etc.)
+- Relay clusters: `relays443.twingate.com`, `relays443-prm.twingate.com`
+- `relays-do.twingate.com`, `relays-prm-do.twingate.com`
+- GCP STUN endpoints: `stun.[region].twingate.com` + `stun-alt.[region].twingate.com`
+- DigitalOcean STUN endpoints: `stun.[datacenter].twingate.com` + `stun-alt.[datacenter].twingate.com`
 
 ## Gotchas
-- **IP-only allowlisting will not work** — FQDNs are mandatory
-- Regional URLs (`[network].[region].twingate.com`) must be explicitly added if not using wildcard; identify your region from the admin console URL
-- FQDN list changes without notice — prefer wildcard when possible
-- Third-party domains required: PubNub (`pubnubapi.com`, `pubnub.com`, `pndsn.com`)
-- Relay fallback TCP port range `30000-31000` must be open or relay connections will fail
+- **IP-only allowlisting will not work**—must include FQDNs
+- Static IP ranges require Enterprise plan; contact Twingate representative
+- FQDN list changes without notice—prefer wildcard approach
+- Regional URLs (e.g., `us1`, `us2`) are expanding; wildcard covers future regions automatically
+- If using explicit FQDNs, identify your tenant's specific regional URL from the admin console URL
+- PubNub domains (`pubnubapi.com`, `pubnub.com`, `pndsn.com`) are third-party and must be included
+
+## Prerequisites
+- Enterprise plan required for static IP allowlisting
+- Know your network subdomain and region (visible in admin console URL)
 
 ## Related Docs
-- GCP IP ranges: [Google Cloud external IP ranges](https://cloud.google.com/compute/docs/faq#find_ip_range)
-- Relay Cluster Locations (referenced in source)
-- Endpoint Requirements - Firewall Rules (referenced in source)
+- [Relay Cluster Locations](#) — for GCP IP ranges used by Relay
+- [Google Cloud external IP ranges](https://cloud.google.com/compute/docs/faq#find_ip_range) — ephemeral relay IPs

@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Labs/Twingate-CLI
 type: github
-fetched: 2026-08-23
-source_version: afca900a5882249c98de28e8b469b4e70c53dc9f
+fetched: 2026-09-20
+source_version: a564930ffba44f241d72c6879c0d6849b0d9e02d
 ---
 
 <!-- triage: unassigned -->

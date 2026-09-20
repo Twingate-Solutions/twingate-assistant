@@ -1,45 +1,39 @@
 ---
 source: https://help.twingate.com/articles/8531799362-macos-client-uninstalling-twingate
 type: help
-fetched: 2026-09-06
-source_version: c8dc39add02cf1692d740b285303fa516417252c5cfa4f070ac52bd9efc2abdd
+fetched: 2026-09-20
+source_version: c3367afea995eec738ac78163e223782841005755e79b5954c80b9627fa72614
 ---
 
 # [macOS Client] Uninstalling Twingate
 
 ## Summary
-Uninstalling the Twingate macOS client involves moving the app to Bin, which also removes the System Extension for Standalone Client installs. macOS 15.3+ has a bug requiring manual System Extension removal after app deletion.
+Instructions for removing the Twingate macOS client application. The process is a standard macOS uninstall via Finder. Standalone Client installations that include a System Extension handle extension removal automatically during uninstall.
 
 ## Key Information
-- Quitting app + dragging to Bin is sufficient for most macOS versions
-- Uninstalling Standalone Client automatically triggers System Extension removal prompt
-- macOS 15.3+ has an Apple bug that orphans the System Extension even after apparent removal
+- Standard drag-to-Bin uninstall removes the application completely
+- Right-click → "Move to Bin" is an equivalent alternative method
+- Standalone Client (with System Extension) removes the System Extension as part of the same uninstall process
+- A confirmation prompt ("Continue") appears when removing the System Extension variant
 
 ## Prerequisites
-- Admin username and password (required for manual System Extension removal on macOS 15.3+)
-- Identify whether you're running the **Standalone Client** (includes System Extension) vs standard client
+- Twingate macOS client must be quit before dragging to Bin
 
 ## Step-by-Step
 
-### Standard Uninstall (all macOS versions)
 1. Quit the Twingate application
-2. Drag app to Bin **or** right-click → "Move to Bin"
-3. If prompted about System Extension removal, click **Continue**
-
-### Additional Steps for Standalone Client on macOS 15.3+
-1. Complete standard uninstall above first
-2. Navigate to: **System Settings → General → Login Items & Extensions**
-3. Click the **ⓘ (information)** button next to "Network Extensions"
-4. Click the **three dots (⋯)** next to Twingate
-5. Select **"Delete Extension"**
-6. Click **"Uninstall"**
-7. Enter admin username and password to confirm
+2. Locate Twingate in `/Applications`
+3. Drag to Bin **or** right-click → select "Move to Bin"
+4. If uninstalling the Standalone Client: when prompted, click **Continue** to confirm System Extension removal
 
 ## Gotchas
-- **macOS 15.3+ bug**: System Extension appears removed but is actually orphaned — manual deletion is required even if the standard uninstall seems to complete successfully
-- This extra step only applies to the **Standalone Client** (the variant that includes a System Extension)
-- Admin credentials are required for the manual extension removal step
+- If using the Standalone Client with System Extension, expect a system prompt — must click "Continue" to complete removal
+- No mention of residual files (preferences, logs, caches) being removed; manual cleanup of `~/Library/` directories may be needed if a clean removal is required
+- No MDM/enterprise silent uninstall instructions provided on this page
+
+## Configuration Values
+None applicable.
 
 ## Related Docs
-- Twingate macOS Client installation documentation
-- Twingate Standalone Client documentation
+- Twingate macOS Client installation guide
+- System Extension configuration (for managed/enterprise deployments)

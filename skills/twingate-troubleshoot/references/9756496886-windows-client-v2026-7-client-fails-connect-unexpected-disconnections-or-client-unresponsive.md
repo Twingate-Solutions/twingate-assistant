@@ -1,73 +1,63 @@
 ---
 source: https://help.twingate.com/articles/9756496886-windows-client-v2026-7-client-fails-connect-unexpected-disconnections-or-client-unresponsive
 type: help
-fetched: 2026-08-16
-source_version: f265e705524161302031dc3b8b5d374892785ba7dc5426ead1ee027d3dfa241c
+fetched: 2026-09-20
+source_version: 5c94cf13cfd9040481685ff67ed42ba9b3ff1fa393be2bac43678b8a5fb93ad3
 ---
 
 # [Windows Client] v2026.7 Connection Failures & Unresponsive Client
 
 ## Summary
-A known bug in Twingate Windows Client v2026.7 causes connection failures, unexpected disconnections, or an unresponsive client following network change events (power on, reboot, sleep/wake). The root cause is a failure to detect DNS servers when a network/DHCP/default route is not yet available at initialization. Fix is available in v2026.36.
+A known bug in Twingate Windows Client v2026.7 causes connection failures, unexpected disconnections, or a completely unresponsive client following network change events. The root cause is a failure to detect DNS servers when no default route exists at initialization time. The fix is available in v2026.36.
 
 ## Key Information
-- **Affected version**: Windows Client v2026.7 only
-- **Fix version**: Windows Client v2026.36
-- **Trigger**: Network change events (boot, reboot, sleep/wake) where network isn't immediately available
-- **Root cause**: Client fails DNS detection when DHCP hasn't assigned config or no default route exists; can enter zombie/stuck state with no self-recovery
+- **Affected version:** Windows Client v2026.7 only
+- **Fix version:** v2026.36
+- **Trigger:** Network change events (power on, reboot, sleep/wake) when network is not immediately available or DHCP hasn't assigned config yet
+- **Core failure:** Client fails to identify bypass interface → DNS detection fails → initialization hangs or crashes → service enters zombie state
 
 ## Symptoms
 - Login error: `Could not join network`
 - Connection toggle spins then returns to OFF
-- Client disconnects immediately after connecting
-- `services.msc` stop hangs on "Stopping"
-- Rebooting does not recover the client
+- Client disconnects shortly after connecting or cannot connect at all
+- Stopping Twingate service via `services.msc` hangs at "Stopping"
+- Rebooting does not reliably recover the client
 
-## Resolution: Upgrade to v2026.36
+## Resolution Steps
 
-### If client is functional:
-Download and install v2026.36 directly:
-- [EXE Installer](https://help.twingate.com/articles/9756496886) (consumer)
-- [MSI Installer](https://help.twingate.com/articles/9756496886) (managed deployments)
+1. **Quit the Twingate Client:** System tray → Twingate → Quit
+2. **Kill remaining processes:** Task Manager → end `Twingate.exe` and `Twingate.Service.exe`
+3. **Download and install v2026.36:**
+   - [EXE Installer](https://help.twingate.com/articles/9756496886) (standard)
+   - [MSI Installer](https://help.twingate.com/articles/9756496886) (managed deployments)
 
-### If client is in zombie/stuck state:
-1. System tray → Twingate → **Quit**
-2. Open Task Manager → end all Twingate processes:
-   - `Twingate.exe`
-   - `Twingate.Service.exe`
-3. Proceed with v2026.36 installer
+> **Note:** Manually terminating the service is required if the client has faulted — the service will be in a zombie state and block the installer.
 
-## Log Verification
+## Log Confirmation
 
-**Log locations** (via System tray → Client → More → Troubleshoot → View Logs):
-- `%PROGRAMDATA%\Twingate\logs\` (`C:\ProgramData\Twingate\logs`)
-- `%LOCALAPPDATA%\Twingate\logs\`
-
-**Check 1** — `Twingate.Service.log` for looping error:
+**Service log** (`%PROGRAMDATA%\Twingate\logs\Twingate.Service.log`):
 ```
 [INFO] [client] Start packet manager initialization.
 [ERROR] [libsdwan] failed to initialize libhydra: code -1
 ```
+Look for this looping continuously.
 
-**Check 2** — `system-events.log` for crash signature:
-```
-Application: Twingate.Service.exe
-Exception Info: System.AccessViolationException
-at .PktDevice_WFPBlockTrafficOutsideTun(_PktDevice*, Boolean)
-```
+**System events log** (`%LOCALAPPDATA%\Twingate\logs\system-events.log`):
+- `.NET Runtime` error with `System.AccessViolationException` in `PktDevice_WFPBlockTrafficOutsideTun`
+- `Windows Error Reporting` APPCRASH event with `P1: Twingate.Service.exe`, `P2: 2026.7.2078.0`
 
-**Check 3** — `system-events.log` for Windows Error Reporting:
-```
-Event Name: APPCRASH
-P1: Twingate.Service.exe
-P2: 2026.7.2078.0
-```
+## Log File Locations
+| Log | Path |
+|-----|------|
+| Service log | `C:\ProgramData\Twingate\logs\Twingate.Service.log` |
+| System events | `C:\Users\<user>\AppData\Local\Twingate\logs\system-events.log` |
+
+Access via: System tray → Twingate → Client → More → Troubleshoot → View Logs
 
 ## Gotchas
-- Rebooting alone does **not** reliably recover the client when in zombie state
-- Must forcefully kill `Twingate.Service.exe` via Task Manager before upgrading if service is hung
-- `system-events.log` is only created **after** clicking "View Logs" in the client UI
+- Rebooting alone does **not** reliably fix the zombie service state
+- The system events log is only created after clicking "View Logs" in the client UI
+- MSI installer is required for managed/enterprise deployments
 
 ## Related Docs
-- Twingate Downloads page (for latest client versions)
-- Windows Client troubleshooting logs guide
+- [Twingate Downloads Page](https://www.twingate.com/downloads)

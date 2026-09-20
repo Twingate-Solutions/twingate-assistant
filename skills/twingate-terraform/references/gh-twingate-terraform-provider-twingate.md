@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/terraform-provider-twingate
 type: github
-fetched: 2026-09-13
-source_version: e6ee512207988d59936e82457b3a9afdc0247702
+fetched: 2026-09-20
+source_version: 75c5a2a3a557217b61e69fe5e2fa8806332cc4b6
 ---
 
 # Twingate Terraform Provider
