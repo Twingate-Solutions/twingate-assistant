@@ -15,11 +15,21 @@ logger = logging.getLogger(__name__)
 # Diff file count above which a full re-summarize is used instead of a delta.
 MAX_DELTA_FILES = 30
 
+# Exact delta reply meaning "the changes do not affect the summary".
+NO_CHANGE_SENTINEL = "NO_CHANGE"
+
+_OUTPUT_ONLY_RULE = (
+    "Output only the summary markdown, starting with its '# ' title line. "
+    "Never add a preamble, commentary, or a description of what changed."
+)
+
 _DELTA_SYSTEM_PROMPT = (
     "You maintain a reference summary for a Twingate GitHub repository. "
     "Here is the current summary and the changes since it was written. "
     "Return an updated summary in the same structure. Preserve accurate "
-    "detail; revise only what the changes affect. No marketing language."
+    "detail; revise only what the changes affect. No marketing language. "
+    f"{_OUTPUT_ONLY_RULE} If the changes do not affect the summary, reply "
+    f"with exactly {NO_CHANGE_SENTINEL} and nothing else."
 )
 
 _FULL_SYSTEM_PROMPT = (
@@ -27,7 +37,8 @@ _FULL_SYSTEM_PROMPT = (
     "standard structure: Repo Title, Summary (2-3 sentences), Key "
     "Information (bullets), Prerequisites, Usage / Step-by-Step (if "
     "applicable), Configuration Values (env vars, CLI flags, API params), "
-    "Gotchas, Related Docs. Keep under 500 words. No marketing language."
+    f"Gotchas, Related Docs. Keep under 500 words. No marketing language. "
+    f"{_OUTPUT_ONLY_RULE}"
 )
 
 
@@ -59,6 +70,33 @@ def _extract_text(message: Any) -> str:
             f"Unexpected content block type from Claude API: {type(first_block)}"
         )
     return cast(str, first_block.text)
+
+
+def _clean_summary(text: str, *, label: str) -> str:
+    """Strip any model commentary preceding the summary's first heading.
+
+    Args:
+        text: The raw model output.
+        label: A human-readable identifier for log messages.
+
+    Returns:
+        The output starting at its first markdown heading line.
+
+    Raises:
+        ValueError: If the output contains no markdown heading, meaning it is
+            commentary rather than a summary and must not be written.
+    """
+    lines = text.strip().splitlines()
+    for index, line in enumerate(lines):
+        if line.startswith("#"):
+            if index:
+                logger.warning(
+                    "%s: dropped %d line(s) of commentary before the summary heading",
+                    label,
+                    index,
+                )
+            return "\n".join(lines[index:])
+    raise ValueError(f"{label}: model output has no markdown heading; not a summary")
 
 
 def _format_metadata(metadata: dict[str, Any]) -> str:
@@ -127,10 +165,13 @@ def summarize_repo_delta(prior_doc: str, filtered_diff: str, metadata: dict[str,
 
     Returns:
         A ``SummaryResult`` with the updated summary text and token usage.
+        When the model replies with ``NO_CHANGE_SENTINEL``, the text is
+        ``prior_doc`` unchanged.
 
     Raises:
         anthropic.APIError: Propagated from the API call.
-        ValueError: If the API response has an unexpected shape.
+        ValueError: If the API response has an unexpected shape or no
+            markdown heading.
     """
     user_message = (
         f"{_format_metadata(metadata)}\n\n"
@@ -149,7 +190,13 @@ def summarize_repo_delta(prior_doc: str, filtered_diff: str, metadata: dict[str,
         system=_DELTA_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_message}],
     )
+    label = str(metadata.get("full_name", "unknown"))
     text = _extract_text(message)
+    if text.strip() == NO_CHANGE_SENTINEL:
+        logger.info("%s: delta does not affect the summary, keeping prior text", label)
+        text = prior_doc
+    else:
+        text = _clean_summary(text, label=label)
     return SummaryResult(
         text=text,
         input_tokens=message.usage.input_tokens,
@@ -171,7 +218,8 @@ def summarize_repo_full(readme: str, key_docs: list[str], metadata: dict[str, An
 
     Raises:
         anthropic.APIError: Propagated from the API call.
-        ValueError: If the API response has an unexpected shape.
+        ValueError: If the API response has an unexpected shape or no
+            markdown heading.
     """
     label = str(metadata.get("full_name", "unknown"))
     corpus = _assemble_full_corpus(readme, key_docs, label=label)
@@ -185,7 +233,7 @@ def summarize_repo_full(readme: str, key_docs: list[str], metadata: dict[str, An
         system=_FULL_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_message}],
     )
-    text = _extract_text(message)
+    text = _clean_summary(_extract_text(message), label=label)
     return SummaryResult(
         text=text,
         input_tokens=message.usage.input_tokens,

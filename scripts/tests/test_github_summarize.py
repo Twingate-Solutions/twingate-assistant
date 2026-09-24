@@ -107,6 +107,51 @@ def test_summarize_repo_delta_token_usage_comes_from_message_usage(mock_anthropi
     assert result.output_tokens == 333
 
 
+@patch("github_summarize.anthropic.Anthropic")
+def test_summarize_repo_delta_no_change_sentinel_returns_prior_doc(mock_anthropic_cls) -> None:
+    """A NO_CHANGE reply keeps the prior summary text verbatim."""
+    mock_client = mock_anthropic_cls.return_value
+    mock_client.messages.create.return_value = _mock_message(
+        text=f"  {github_summarize.NO_CHANGE_SENTINEL}\n"
+    )
+
+    result = summarize_repo_delta("# Repo\n\nPrior body.", "diff", {"full_name": "Twingate/r"})
+
+    assert result.text == "# Repo\n\nPrior body."
+
+
+@patch("github_summarize.anthropic.Anthropic")
+def test_summarize_repo_delta_strips_commentary_before_heading(mock_anthropic_cls) -> None:
+    """Commentary the model puts before the summary heading is not written."""
+    mock_client = mock_anthropic_cls.return_value
+    mock_client.messages.create.return_value = _mock_message(
+        text=(
+            "The changes are minor CI workflow pin updates. The summary remains "
+            "accurate as-is.\n\n---\n\n# Repo\n\n## Summary\nBody."
+        )
+    )
+
+    result = summarize_repo_delta("prior", "diff", {"full_name": "Twingate/r"})
+
+    assert result.text == "# Repo\n\n## Summary\nBody."
+
+
+@patch("github_summarize.anthropic.Anthropic")
+def test_summarize_repo_delta_rejects_output_without_heading(mock_anthropic_cls) -> None:
+    """Pure commentary with no heading raises rather than overwriting the doc."""
+    mock_client = mock_anthropic_cls.return_value
+    mock_client.messages.create.return_value = _mock_message(
+        text="The summary remains accurate as-is."
+    )
+
+    with pytest.raises(ValueError, match="no markdown heading"):
+        summarize_repo_delta("prior", "diff", {"full_name": "Twingate/r"})
+
+
+def test_delta_prompt_names_the_no_change_sentinel() -> None:
+    assert github_summarize.NO_CHANGE_SENTINEL in github_summarize._DELTA_SYSTEM_PROMPT
+
+
 # ── summarize_repo_full ──────────────────────────────────────────────────────
 
 
@@ -210,3 +255,15 @@ def test_build_metrics_record_accepts_every_known_mode(mode: str) -> None:
         full_name="Twingate/r", mode=mode, result=None, wall_clock_s=0.0, diff_bytes=0
     )
     assert record["mode"] == mode
+
+
+@patch("github_summarize.anthropic.Anthropic")
+def test_summarize_repo_full_strips_commentary_before_heading(mock_anthropic_cls) -> None:
+    mock_client = mock_anthropic_cls.return_value
+    mock_client.messages.create.return_value = _mock_message(
+        text="Here is the summary:\n\n# Repo\n\nBody."
+    )
+
+    result = summarize_repo_full("readme", [], {"full_name": "Twingate/r"})
+
+    assert result.text == "# Repo\n\nBody."

@@ -97,7 +97,7 @@ so err toward consulting more, not fewer. Common cross-cutting clusters here: DE
 
 - **→ twingate-architect**: for questions about Remote Network topology or Resource
   definition strategy
-- **→ twingate-kubernetes**: for Helm chart deployment or K8s-specific Connector patterns
+- **→ twingate-kubernetes**: for any Connector inside a Kubernetes cluster — the Twingate operator (default) or the standalone Helm chart
 - **→ twingate-terraform / twingate-pulumi**: for IaC-automated token generation
 - **→ twingate-troubleshoot**: when a Connector is DEAD or a user cannot reach a resource
 

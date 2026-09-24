@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 1cbe50f5ccaba9c572ac4714eb0d90bfe11d4aa7
 ---
 
-<!-- triage: unassigned -->
-
 # Gatorcast
 
 ## Summary

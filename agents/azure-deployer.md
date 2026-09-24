@@ -29,7 +29,7 @@ first** — and cite it in your response:
   → `skills/twingate-connectors/references/connector-best-practices.md`
 - Connector image tag, environment variable names, container env config
   → `skills/twingate-connectors/references/connector-deployment.md`
-- Azure-specific connector deployment patterns (ACI, VMs, AKS Helm)
+- Azure-specific connector deployment patterns (ACI, VMs, AKS via operator or Helm)
   → `skills/twingate-connectors/references/azure-connector-patterns.md` and
     `skills/twingate-connectors/references/azure.md`
 - Hardware sizing recommendations
@@ -84,11 +84,11 @@ For customers who prefer full VM control or have compliance requirements around 
 
 Deploy two VMs in different Availability Zones for HA.
 
-### 3. AKS with Helm Chart (recommended for AKS shops)
+### 3. AKS with the Twingate Kubernetes Operator (recommended for AKS shops)
 
-If the customer already runs AKS, deploy connectors inside the cluster using the official Helm chart. This keeps the connector in the same network namespace as in-cluster services.
+If the customer already runs AKS, deploy connectors inside the cluster with the Twingate Kubernetes Operator. It runs Connectors as `TwingateConnector` objects and manages the Resources that expose cluster Services (`TwingateResource`, `TwingateResourceAccess`) declaratively, so the whole Twingate footprint lives alongside the customer's manifests. An in-cluster Connector can reach `ClusterIP` Services and cluster DNS names.
 
-Store tokens in Kubernetes Secrets or use the External Secrets Operator to sync from Azure Key Vault. Deploy two Helm releases with separate token pairs and configure pod anti-affinity to spread across nodes in different zones.
+Store the operator's API key in a Kubernetes Secret (`existingAPIKeySecret`), synced by the External Secrets Operator from Azure Key Vault in production. For HA, run two `TwingateConnector` objects with staggered `imagePolicy` schedules and pod anti-affinity across zones. For a simple or short-lived cluster (dev/test), or when Terraform already owns the Twingate objects, the standalone Connector Helm chart is the lightweight alternative: two releases, separate token pairs, anti-affinity. Load the `twingate-kubernetes` skill for operator values keys, CRD fields, and when to pick each path.
 
 ---
 
@@ -153,7 +153,7 @@ ACI does not support Availability Zones within a single container group, so HA r
 
 - **ACI**: Two `azurerm_container_group` resources, each with a separate token pair. For geographic redundancy, deploy to two different Azure regions. For simpler in-region HA, deploy both to the same region — ACI infrastructure is distributed across fault domains within a region.
 - **Azure VMs**: Two `azurerm_linux_virtual_machine` resources in different Availability Zones (`zones = ["1"]` and `zones = ["2"]`), each with its own Managed Identity and token pair.
-- **AKS**: Two Helm releases with pod anti-affinity using `topology.kubernetes.io/zone`.
+- **AKS**: Two operator-managed `TwingateConnector` objects (or two Helm releases on the lightweight path) with pod anti-affinity using `topology.kubernetes.io/zone`.
 - **Azure Container Apps**: Deploy two container app replicas with zone redundancy enabled on the Container Apps Environment.
 
 The Twingate client performs automatic load balancing and failover across healthy connectors. No Azure Load Balancer is needed.
@@ -192,7 +192,7 @@ source file in your response.**
 | If the user asks about… | Read first |
 | --- | --- |
 | Connector network requirements (ports, protocols, NSG rules) | `skills/twingate-connectors/references/connector-best-practices.md` |
-| Azure-specific connector deployment (ACI, VMs, AKS Helm) | `skills/twingate-connectors/references/azure-connector-patterns.md`, `skills/twingate-connectors/references/azure.md` |
+| Azure-specific connector deployment (ACI, VMs, AKS Helm commands; for the AKS operator path load `twingate-kubernetes`) | `skills/twingate-connectors/references/azure-connector-patterns.md`, `skills/twingate-connectors/references/azure.md` |
 | Connector image tag, env var names, container env | `skills/twingate-connectors/references/connector-deployment.md` |
 | Hardware sizing per cloud | `skills/twingate-connectors/references/connector-best-practices.md` |
 | Terraform provider config, version pinning | `skills/twingate-terraform/references/terraform-provider-overview.md` |

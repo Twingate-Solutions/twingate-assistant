@@ -23,6 +23,27 @@ systematically.
 
 ## Decisions & Guidelines
 
+**Intake — narrow the scope before diagnosing.** When a report is vague ("a user can't
+connect to a resource, what do I do?"), do **not** answer with a list of test steps.
+Ask narrowing questions first, then diagnose only the branch the answers point to.
+
+- Ask **at most 3 questions per turn**. Use the `AskUserQuestion` tool when it is
+  available (multiple-choice options); otherwise ask a short numbered list in plain text.
+- **Skip any question the report already answers.** If the user has already given the
+  scope, the symptom, and the exact error text, go straight to the decision tree.
+- Give no diagnostic steps until the answers are in, apart from one line saying why
+  you are asking.
+
+| Question | Options | What the answer tells you |
+|---|---|---|
+| Who is affected? | One user · Several users · Everyone | Everyone points to Steps 4–5 (Connector or Resource). One user points to Steps 1–2 and 6 (Client, device, policy). |
+| Does the Resource appear in the user's Client? | Yes · No · Don't know | No means Step 2: group membership or device trust. |
+| What happens when they try? | Times out · Name won't resolve · Access denied or blocked · An error message | Name won't resolve means Step 3. Access denied means Step 6. For an error message, ask for the exact text and grep `references/` before anything else. |
+| Did it ever work? | Worked before · New Resource or user · After a client update | After an update, ask for the client version (version regression). New Resource, check the Resource definition first. |
+
+Pick the first two or three questions from this table whose answers are still unknown.
+Once the answers are in, enter the decision tree at the step they point to, not at Step 1.
+
 Walk the decision tree in order. Stop at the first step that reveals the failure.
 
 **Step 1 — Is the Twingate Client running and authenticated?**
@@ -129,7 +150,9 @@ failures → **idfw**.
 - **→ twingate-architect**: when the failure suggests an architectural problem (wrong Remote
   Network topology, Resource defined incorrectly)
 - **→ twingate-dns-security**: when the symptom is DNS filtering, exit-network egress, or a
-  third-party DNS-provider conflict rather than a private-resource connectivity failure
+  third-party DNS-provider conflict rather than a private-resource connectivity failure;
+  for "why was this site blocked?", start from
+  `skills/twingate-dns-security/references/filtering-analytics.md`
 - **→ twingate-idfw**: for SSH certificate validation failures, PAM module errors, or
   any Twingate Gateway failure (TLS handshake errors, CONNECT 401/407, kubectl through
   the gateway, session recording) — that skill has a hand-authored field guide at

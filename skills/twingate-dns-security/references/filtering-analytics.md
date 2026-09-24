@@ -5,8 +5,6 @@ fetched: 2026-09-20
 source_version: 770d4a4b128849a2142a2149bd42f4caed361619d570967296114c043a0d7948
 ---
 
-<!-- triage: unassigned -->
-
 # Filtering Analytics
 
 ## Summary

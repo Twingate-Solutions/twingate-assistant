@@ -275,8 +275,6 @@
   },
   "Twingate/kubernetes-operator": {
     "doc_path": "skills/twingate-kubernetes/references/gh-twingate-kubernetes-operator.md",
-    "last_sha": "7c63ac598efa37793653962cc54b702c5a819b8c",
-    "pushed_at": "2026-09-19T00:36:32Z",
     "wiki_last_sha": "9703051c8d00007e758dec09dc1f5635dedb535d"
   },
   "Twingate/pulumi-twingate": {

@@ -5,8 +5,8 @@ description: >
   and DNS-over-HTTPS. Load when the user mentions DNS filtering, content filtering,
   internet security, exit networks, egress routing, browser security, NextDNS,
   DoH, DNS categories, or profile priority. Also trigger on 'Internet Security',
-  'DNS Security Profile', 'fixed egress IP', or 'SaaS allowlisting' in a Twingate
-  context. Also activate for DNS conflicts and symptom-shaped DNS queries: a
+  'DNS Security Profile', 'fixed egress IP', 'SaaS allowlisting', 'Filtering
+  Analytics', or AI usage/shadow-AI reporting in a Twingate context. Also activate for DNS conflicts and symptom-shaped DNS queries: a
   third-party DNS filter or AV product conflicting with Twingate (Cisco Umbrella,
   DNSFilter, AdGuard, Avast Real Site Protection), CGNAT range conflicts
   (`100.96/12`), multiple-network-interface DNS resolution problems, "all
@@ -17,7 +17,7 @@ description: >
 
 ## Role
 
-This skill owns Twingate's Internet Security product area: DNS filtering, exit networks, DNS-over-HTTPS, and browser security. It covers DNS Security Profile design, priority ordering, group-based policy assignment, exit network egress patterns, and the licensing boundary between Internet Security and Private Access. It is the authority on when to use DNS filtering versus exit networks versus resource-level access policy.
+This skill owns Twingate's Internet Security product area: DNS filtering, exit networks, DNS-over-HTTPS, and browser security. It covers DNS Security Profile design, priority ordering, group-based policy assignment, exit network egress patterns, Secure DNS reporting (Filtering Analytics and AI Usage visibility), and the licensing boundary between Internet Security and Private Access. It is the authority on when to use DNS filtering versus exit networks versus resource-level access policy.
 
 ## Decisions & Guidelines
 
@@ -27,6 +27,8 @@ This skill owns Twingate's Internet Security product area: DNS filtering, exit n
 - **Always configure the "Everyone" group as a baseline with the high-confidence threat categories blocked at minimum.** Users not in any group with a profile receive no filtering at all. "Everyone" is the safety net. Current category names and recommended baseline categories are in `references/dns-security-overview.md` and `references/dns-filtering.md`.
 - **Enable STRICT fallback mode only after pre-populating the allow list with the customer's known-good domains.** STRICT mode (deny-by-default) will block legitimate SaaS tools until they are explicitly allowed. Always roll out STRICT to a pilot group first.
 - **DNS-over-HTTPS in Twingate covers only DNS queries that flow through the Twingate Client.** It does not encrypt OS-level DNS for non-Twingate traffic or queries made before the Client starts. If full-device DoH is required, configure it at the OS or network level in addition to Twingate.
+- **Treat Filtering Analytics and AI Usage as partial views, not audit truth.** Both see only DNS queries Twingate resolved: devices not running the Client, other resolvers, and (for AI Usage) blocked queries are invisible, and device counts are not user counts. Before using either for compliance reporting, push the Client to run Internet Security always-on (Machine Key) so signed-out devices are covered.
+- **To answer "why was this domain blocked?", start in Filtering Analytics before touching profile config.** The blocked-event detail names the profile and rule that fired; most "wrong block" reports are a profile-priority or group-assignment issue, not a bad rule.
 - **A "DNS conflict" symptom is usually a CGNAT range collision or a competing DNS-modifying tool, not a Twingate misconfiguration.** Twingate claims the entire `100.96/12` range and acts as a transparent DNS proxy on only one interface (the default gateway's). Before redesigning a DNS Security Profile, rule out a third-party DNS filter/AV product or a multi-NIC environment — the help-center corpus documents the specific known conflicts and their workarounds.
 
 ## Search References First
@@ -39,6 +41,7 @@ filenames:
 grep -ril "all nameservers have failed" references/   # -> 9539322912-twingate-linux-client-fails-to-start-logs-show-dns-errors.md
 grep -ril "100.96/12" references/                     # -> 4359531030-cgnat-ip-conflicts-...md
 grep -ril "avast" references/                         # -> 6928700605-dns-avast-real-site-protection.md
+grep -ril "block reason" references/                  # -> filtering-analytics.md
 ```
 
 If the user reports an exact error message or names a third-party product, **grep for
@@ -82,6 +85,8 @@ of file live there:
 | DNS filtering categories, allow/block lists, profile priority | `dns-filtering.md` |
 | Internet Security product scope, licensing, client config | `internet-security.md`, `internet-security-client-configuration.md` |
 | Exit networks (egress IPs, configuration, AWS-specific patterns) | `exit-networks.md`, `configuring-aws-exit-nodes.md` |
+| **Filtering Analytics** — Secure DNS reporting: query charts, top block reasons, top domains/devices, Recent DNS Activity log, finding why a domain was blocked, signed-out device naming ("No hostname" on older clients) | `filtering-analytics.md` |
+| **AI Usage / shadow-AI visibility** — which AI tools (ChatGPT, Claude, Cursor, Granola) devices use, AI Exposure chart, AI Usage Summary Report CSV columns, what is *not* tracked (blocked queries, AI features inside existing products like Copilot) | `ai-services.md` |
 | Browser security features | `browser-security.md` |
 | DNS over HTTPS (Cloudflare integration) | `doh-cloudflare.md` |
 | NextDNS integration | `nextdns-configuration.md` |

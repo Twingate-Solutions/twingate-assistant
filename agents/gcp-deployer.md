@@ -29,7 +29,7 @@ first** — and cite it in your response:
   → `skills/twingate-connectors/references/connector-best-practices.md`
 - Connector image tag, environment variable names, container env config
   → `skills/twingate-connectors/references/connector-deployment.md`
-- GCP-specific connector deployment patterns (GCE, GKE Helm, MIG, Cloud Run)
+- GCP-specific connector deployment patterns (GCE, GKE via operator or Helm, MIG, Cloud Run)
   → `skills/twingate-connectors/references/gcp-connector-patterns.md` and
     `skills/twingate-connectors/references/gcp.md`
 - Hardware sizing recommendations
@@ -80,11 +80,11 @@ Verify a Cloud NAT gateway is configured on the subnet's router and permits
 **all** required outbound ports before deployment — a missing or restrictive
 Cloud NAT is the most common cause of `DEAD_NO_RELAYS` in GCP.
 
-### 2. GKE with Helm Chart (recommended for GKE shops)
+### 2. GKE with the Twingate Kubernetes Operator (recommended for GKE shops)
 
-If the customer already runs GKE, deploy connectors inside the cluster using the official Helm chart. This keeps the connector in the same network namespace as in-cluster services, allowing it to reach cluster-internal `ClusterIP` services and DNS names.
+If the customer already runs GKE, deploy connectors inside the cluster with the Twingate Kubernetes Operator. It runs Connectors as `TwingateConnector` objects and manages the Resources that expose cluster Services (`TwingateResource`, `TwingateResourceAccess`) declaratively, so the whole Twingate footprint lives alongside the customer's manifests. An in-cluster Connector can reach `ClusterIP` Services and cluster DNS names.
 
-For production clusters, use the External Secrets Operator with Workload Identity to sync tokens from Secret Manager into Kubernetes Secrets rather than passing them as Helm values. Deploy two Helm releases with separate token pairs and configure pod anti-affinity to spread connectors across nodes in different zones.
+Store the operator's API key in a Kubernetes Secret (`existingAPIKeySecret`), synced by the External Secrets Operator from Secret Manager (via Workload Identity) in production. For HA, run two `TwingateConnector` objects with staggered `imagePolicy` schedules and pod anti-affinity across zones. For a simple or short-lived cluster (dev/test), or when Terraform already owns the Twingate objects, the standalone Connector Helm chart is the lightweight alternative: two releases, separate token pairs, anti-affinity. Load the `twingate-kubernetes` skill for operator values keys, CRD fields, and when to pick each path.
 
 ### 3. Managed Instance Group (for resilience and autoscaling patterns)
 
@@ -156,7 +156,7 @@ Never write token values to Terraform output blocks without `sensitive = true`. 
 Deploy exactly two connector instances across different zones within the same region:
 
 - **GCE**: Two `google_compute_instance` resources — one in `${region}-a`, one in `${region}-b` — each with its own token pair and identical startup script (referencing its own secrets)
-- **GKE**: Two Helm releases with pod anti-affinity using `topology.kubernetes.io/zone`
+- **GKE**: Two operator-managed `TwingateConnector` objects (or two Helm releases on the lightweight path) with pod anti-affinity using `topology.kubernetes.io/zone`
 - **MIG**: `google_compute_region_instance_group_manager` with `distribution_policy_zones` set to two zones and `target_size = 2`
 
 The Twingate client performs automatic load balancing and failover across healthy connectors. No GCP load balancer is needed.
@@ -194,7 +194,7 @@ source file in your response.**
 | If the user asks about… | Read first |
 | --- | --- |
 | Connector network requirements (ports, protocols, firewall rules) | `skills/twingate-connectors/references/connector-best-practices.md` |
-| GCP-specific connector deployment (GCE, GKE Helm, MIG) | `skills/twingate-connectors/references/gcp-connector-patterns.md`, `skills/twingate-connectors/references/gcp.md` |
+| GCP-specific connector deployment (GCE, GKE Helm commands, MIG; for the GKE operator path load `twingate-kubernetes`) | `skills/twingate-connectors/references/gcp-connector-patterns.md`, `skills/twingate-connectors/references/gcp.md` |
 | Connector image tag, env var names, container env | `skills/twingate-connectors/references/connector-deployment.md` |
 | Hardware sizing per cloud | `skills/twingate-connectors/references/connector-best-practices.md` |
 | Terraform provider config, version pinning | `skills/twingate-terraform/references/terraform-provider-overview.md` |

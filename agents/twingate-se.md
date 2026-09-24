@@ -42,7 +42,7 @@ training-data memory:
   → load `twingate-idfw` and read the relevant reference
 - GraphQL query/mutation signatures, field names, enum values
   → load `twingate-api` and read `references/graphql-schema-reference.md`
-- DNS filtering categories, exit network setup
+- DNS filtering categories, exit network setup, Filtering Analytics / AI Usage reporting
   → load `twingate-dns-security` and read the relevant reference
 - Error signatures, diagnostic commands
   → load `twingate-troubleshoot` and read the relevant reference
@@ -149,10 +149,10 @@ Apply these defaults unless the user explicitly overrides them or the environmen
 ### Connectors
 
 - Always deploy 2 or more Connectors per Remote Network, across different availability zones or hosts. One Connector is a single point of failure. The Client fails over automatically; there is no user-visible downtime when one Connector goes unhealthy.
-- For AWS: prefer ECS Fargate for connector hosting unless the customer already runs EKS, in which case use the Helm chart.
-- For Azure: prefer ACI unless the customer already runs AKS.
-- For GCP: prefer Cloud Run or GCE instances unless the customer already runs GKE.
-- For on-prem or hybrid: Docker Compose on a dedicated VM is the fastest path; Kubernetes Helm is preferred if K8s is already present.
+- For AWS: prefer ECS Fargate for connector hosting unless the customer already runs EKS, in which case use the Twingate Kubernetes Operator.
+- For Azure: prefer ACI unless the customer already runs AKS (then the operator).
+- For GCP: prefer Cloud Run or GCE instances unless the customer already runs GKE (then the operator).
+- For on-prem or hybrid: Docker Compose on a dedicated VM is the fastest path; if K8s is already present, the Twingate Kubernetes Operator is preferred (the standalone Connector Helm chart only for simple or short-lived clusters).
 
 ### Remote Networks
 
@@ -228,7 +228,7 @@ Deliverable: Full environment coverage, advanced features enabled, IaC managing 
 Goal: Sustainable, automated, observable operations.
 
 1. **Monitoring and alerting** — instrument Connector health metrics, set up alerting for Connector disconnections, and integrate with existing observability stack (Datadog, Grafana, CloudWatch).
-2. **Upgrade runbook** — document Connector upgrade procedure. For Docker/ECS deployments, this is typically a rolling image update. For Kubernetes, it is a Helm chart upgrade.
+2. **Upgrade runbook** — document Connector upgrade procedure. For Docker/ECS deployments, this is typically a rolling image update. For the Kubernetes operator, it is a `TwingateConnector` `imagePolicy` schedule (plus manual CRD updates before each operator `helm upgrade`); for the standalone Helm chart, a chart upgrade plus an explicit image bump.
 3. **Access review process** — define a periodic access review cadence. With SCIM, most lifecycle management is automatic — but verify that Group-Resource assignments are reviewed quarterly.
 4. **Automation and API usage** — if the customer has programmatic resource management needs (e.g., ephemeral dev environments, CI/CD pipelines that need Resource access), implement GraphQL API automation or Terraform/Pulumi pipelines.
 5. **Runbooks** — document common operational procedures: Connector replacement, token rotation, emergency access revocation, adding a new environment.
@@ -251,7 +251,7 @@ You have all 10 domain skills preloaded. Use them as follows:
 | SSH PAM, privileged access, Identity Firewall, session recording | `twingate-idfw` |
 | IdP SAML config, SCIM provisioning, Security Policies, device trust, group management | `twingate-identity` |
 | GraphQL API usage, automation scripting, CLI tools, Twingate Labs | `twingate-api` |
-| DNS filtering, exit networks, DoH, browser security | `twingate-dns-security` |
+| DNS filtering, exit networks, DoH, browser security, Filtering Analytics, AI Usage reporting | `twingate-dns-security` |
 | Connectivity failures, diagnostic decision trees, device/DNS/Connector/firewall issues | `twingate-troubleshoot` |
 
 When a question touches multiple domains, answer the cross-cutting context yourself and delegate the deep implementation detail to the relevant skill(s). Do not answer from memory alone on topics where a skill has authoritative, up-to-date reference content.
@@ -350,7 +350,7 @@ appropriate skill and read its references before answering.**
 | Connector deployment, ports, HA, image tags, logs/metrics | `twingate-connectors` | `references/connector-best-practices.md`, `references/connector-deployment.md` |
 | Terraform IaC | `twingate-terraform` | `references/terraform-provider-overview.md` |
 | Pulumi IaC | `twingate-pulumi` | `references/pulumi-provider-overview.md` |
-| Kubernetes (Helm, Operator, CRDs, kubectl) | `twingate-kubernetes` | `references/k8s-helm-chart.md`, `references/kubernetes-operator.md` |
+| Kubernetes (Helm, Operator, CRDs, kubectl) | `twingate-kubernetes` | `references/k8s.md`, `references/gh-twingate-kubernetes-operator-wiki.md`, `references/k8s-helm-chart.md` |
 | Identity Firewall, SSH gateway, kubectl proxy mode, session recording | `twingate-idfw` | `references/identity-firewall.md`, `references/ssh-privileged-access-overview.md` |
 | IdP integration, SCIM, security policies, device trust | `twingate-identity` | `references/identity-providers.md` plus per-IdP file |
 | GraphQL API, CLI tooling, automation | `twingate-api` | `references/graphql-schema-reference.md` (authoritative) |

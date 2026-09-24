@@ -29,7 +29,7 @@ first** — and cite it in your response:
   → `skills/twingate-connectors/references/connector-best-practices.md`
 - Connector image tag, environment variable names, container env config
   → `skills/twingate-connectors/references/connector-deployment.md`
-- AWS-specific connector deployment patterns (ECS Fargate, EC2, EKS Helm, MIGs)
+- AWS-specific connector deployment patterns (ECS Fargate, EC2, EKS via operator or Helm, MIGs)
   → `skills/twingate-connectors/references/aws-connector-patterns.md` and
     `skills/twingate-connectors/references/aws.md`
 - Hardware sizing recommendations
@@ -87,11 +87,11 @@ Key configuration points:
 - Apply a dedicated Security Group with no inbound rules (see Security Group section)
 - Deploy two instances in different AZs for HA
 
-### 3. EKS with Helm Chart (recommended for EKS shops)
+### 3. EKS with the Twingate Kubernetes Operator (recommended for EKS shops)
 
-If the customer already runs EKS, deploy connectors inside the cluster using the official Helm chart. This keeps the connector in the same network namespace as in-cluster services and simplifies the deployment model.
+If the customer already runs EKS, deploy connectors inside the cluster with the Twingate Kubernetes Operator. It runs Connectors as `TwingateConnector` objects and manages the Resources that expose cluster Services (`TwingateResource`, `TwingateResourceAccess`) declaratively, so the whole Twingate footprint lives alongside the customer's manifests. An in-cluster Connector can reach `ClusterIP` Services and cluster DNS names.
 
-Store tokens in Kubernetes Secrets or use the External Secrets Operator to sync from Secrets Manager. Deploy two Helm releases with separate token pairs and configure pod anti-affinity so they land on different nodes.
+Store the operator's API key in a Kubernetes Secret (`existingAPIKeySecret`), synced by the External Secrets Operator from Secrets Manager in production. For HA, run two `TwingateConnector` objects with staggered `imagePolicy` schedules and pod anti-affinity across zones. For a simple or short-lived cluster (dev/test), or when Terraform already owns the Twingate objects, the standalone Connector Helm chart is the lightweight alternative: two releases, separate token pairs, anti-affinity. Load the `twingate-kubernetes` skill for operator values keys, CRD fields, and when to pick each path.
 
 ---
 
@@ -159,7 +159,7 @@ Always deploy exactly two connectors per Remote Network, each in a different AZ:
 
 - **ECS**: Two separate `aws_ecs_service` resources, one in each private subnet AZ (`desired_count = 1` each, not `desired_count = 2` on one service)
 - **EC2**: Two separate instances with separate instance profiles and token pairs, in different AZs
-- **EKS**: Two Helm releases with pod anti-affinity rules targeting `topology.kubernetes.io/zone`
+- **EKS**: Two operator-managed `TwingateConnector` objects (or two Helm releases on the lightweight path) with pod anti-affinity targeting `topology.kubernetes.io/zone`
 
 The Twingate client performs automatic load balancing and failover across healthy connectors. No load balancer or health check target group is needed.
 
@@ -195,7 +195,7 @@ source file in your response.**
 | If the user asks about… | Read first |
 | --- | --- |
 | Connector network requirements (ports, protocols, firewall rules) | `skills/twingate-connectors/references/connector-best-practices.md` |
-| AWS-specific connector deployment (ECS Fargate, EC2, EKS Helm) | `skills/twingate-connectors/references/aws-connector-patterns.md`, `skills/twingate-connectors/references/aws.md` |
+| AWS-specific connector deployment (ECS Fargate, EC2, EKS Helm commands; for the EKS operator path load `twingate-kubernetes`) | `skills/twingate-connectors/references/aws-connector-patterns.md`, `skills/twingate-connectors/references/aws.md` |
 | ECS headless / Fargate task definition patterns | `skills/twingate-connectors/references/aws-ecs-headless-configurations.md` |
 | Connector image tag, env var names, container env | `skills/twingate-connectors/references/connector-deployment.md` |
 | Hardware sizing per cloud | `skills/twingate-connectors/references/connector-best-practices.md` |

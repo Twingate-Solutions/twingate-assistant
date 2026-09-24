@@ -1414,6 +1414,14 @@ docs:
     skill: twingate-dns-security
     keywords: [browser security, browser extension, app gating, application control, copy, download, DNS filtering, enterprise]
 
+  - url: https://www.twingate.com/docs/filtering-analytics
+    skill: twingate-dns-security
+    keywords: [Filtering Analytics, Secure DNS, DNS activity, block reasons, top domains, blocked queries, signed-out devices, reporting]
+
+  - url: https://www.twingate.com/docs/ai-services
+    skill: twingate-dns-security
+    keywords: [AI usage, AI services, Secure DNS, AI exposure, AI Usage Summary Report, ChatGPT, Machine Key, reporting]
+
 
   # ── twingate-troubleshoot ───────────────────────────────────────────────────
 
