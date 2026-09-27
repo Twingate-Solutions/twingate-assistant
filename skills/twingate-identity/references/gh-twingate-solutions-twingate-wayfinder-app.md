@@ -1,11 +1,9 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-wayfinder-app
 type: github
-fetched: 2026-09-13
-source_version: 45f8efaecce0082942b442e1d6a8adce53f3864d
+fetched: 2026-09-27
+source_version: e8fa32fb00272bfa09b138195bd97bf1f9e5e163
 ---
-
-<!-- triage: unassigned -->
 
 # Twingate Wayfinder
 
@@ -19,6 +17,7 @@ Wayfinder is an experimental reference implementation that automatically moves a
 - **API rate limits respected:** 60 reads/min, 20 writes/min; configurable throttled write queue
 - **No application-layer auth:** security relies entirely on network-level Twingate access control
 - **Image:** `ghcr.io/twingate-solutions/wayfinder:latest` (GHCR)
+- **Request attribution:** every outbound Admin API call carries a structured `User-Agent` built by `build_user_agent()` in `twingate/client.py`, injected in `_execute()` — the single code path all reads and writes pass through
 
 ## Prerequisites
 - Twingate tenant with Admin API token (write access to group membership)
@@ -47,8 +46,5 @@ Wayfinder is an experimental reference implementation that automatically moves a
 | `WAYFINDER_POLL_INTERVAL_SECONDS` | No | `300` | Cache refresh interval |
 | `WAYFINDER_WRITE_RATE_PER_MIN` | No | `18` | Throttled write queue target rate |
 | `WAYFINDER_DEBOUNCE_SECONDS` | No | `60` | Min interval between switches per user |
-| `WAYFINDER_LOG_LEVEL` | No | `INFO` | Use `DEBUG` for per-signal verdict logging |
-
-## Gotchas
-- **Network exposure:** Default `docker-compose.yml` binds port 8000 on all interfaces. Must restrict to Twingate interface IP, use a host firewall, or ensure the host has no public IP before deploying
-- **`tcp_probe` targets** must be LAN-only and not Twingate resources — a remote user with the tunnel up will otherwise probe successfully and be misidentified
+| `WAYFINDER_LIVE_FALLBACK_COOLDOWN_SECONDS` | No | `30` | Global cooldown on the cache-miss live-fallback path. Prevents burst of simultaneous cache misses from overwhelming the read budget. |
+| `WAYFINDER_MAX_ROUTE_BODY_BYTES` |

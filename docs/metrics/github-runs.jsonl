@@ -157,3 +157,4 @@
 {"by_mode":{},"estimated_cost_usd":0.0,"repos_summarized":0,"run_ts":"2026-09-24T16:04:20.861443+00:00","total_input_tokens":0,"total_output_tokens":0,"total_wall_clock_s":0.009}
 {"by_mode":{},"estimated_cost_usd":0.0,"repos_summarized":0,"run_ts":"2026-09-24T16:04:20.999964+00:00","total_input_tokens":0,"total_output_tokens":0,"total_wall_clock_s":0.007}
 {"by_mode":{},"estimated_cost_usd":0.0,"repos_summarized":0,"run_ts":"2026-09-24T16:04:21.025004+00:00","total_input_tokens":0,"total_output_tokens":0,"total_wall_clock_s":0.006}
+{"by_mode":{"delta":{"count":5,"input_tokens":9617,"output_tokens":2931},"full":{"count":5,"input_tokens":11527,"output_tokens":4076}},"estimated_cost_usd":0.1685,"repos_summarized":10,"run_ts":"2026-09-27T06:24:14.278451+00:00","total_input_tokens":21144,"total_output_tokens":7007,"total_wall_clock_s":136.402}

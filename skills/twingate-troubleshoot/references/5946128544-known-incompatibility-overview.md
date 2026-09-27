@@ -1,52 +1,50 @@
 ---
 source: https://help.twingate.com/articles/5946128544-known-incompatibility-overview
 type: help
-fetched: 2026-09-06
-source_version: af18971a5440c2a3786d46d12ef602b9b292dc56b6efe962f0834fd23f9330de
+fetched: 2026-09-27
+source_version: 876dd282f5d851a073948b8aeb50cd68f55334b12c76a45891a95199d87d971e
 ---
 
 # Known Incompatibility Overview
 
-## Page Title
-Known Incompatibility Overview
-
 ## Summary
-Twingate may conflict with VPN, DNS filtering, and security software that modifies network settings at the OS level. Conflicts arise when multiple applications compete over routing tables, DNS configuration, or encrypted tunnels. This page identifies known incompatible software and provides mitigation strategies.
+Twingate may conflict with VPN, DNS filtering, and security software that modifies network settings. Conflicts arise when third-party applications attempt to modify routing tables, enforce custom DNS, or create overlapping encrypted tunnels. Some software causes issues even when disabled.
 
 ## Key Information
-- Twingate operates at the network level and can conflict with other network-modifying software
-- Three primary conflict vectors: routing table modifications, custom DNS enforcement, overlapping encrypted tunnels
-- Twingate uses the **100.96/12 CGNAT range** for Client-Connector-Resource communication — local network IPs in this range will cause conflicts
-- Software can interfere **even when disabled** (not just when actively running)
+- Twingate uses IPs in the **100.96/12 CGNAT range** — conflicts occur if local network/DNS also uses this range
+- Conflicts commonly involve: routing table modifications, custom DNS enforcement, overlapping encrypted tunnels
+- Some security software intercepts network traffic even when "disabled" — full uninstall may be required
 
-## Known Incompatible Software
-| Category | Software |
-|----------|----------|
-| VPN/ZTNA | Zscaler |
-| DNS Clients | Cisco Umbrella, DNSFilter, AdGuard (local), AdGuard for Mac |
-| Antivirus | Avast Real Site Protection |
+## Known Incompatible Applications
+
+**VPN/ZTNA:**
+- Zscaler
+
+**DNS Clients:**
+- Cisco Umbrella / Cisco Secure Client (AnyConnect replacement — broke DNS handling, no current workaround)
+- DNSFilter
+- AdGuard (local install), AdGuard for Mac
+- Avast Real Site Protection
 
 ## Troubleshooting Steps
-1. Temporarily **uninstall** conflicting software to confirm it is the cause
-2. If uninstall resolves the issue, try these workarounds before permanently removing:
-   - Enable **bypass/compatibility mode** in VPN, ZTNA, or network filtering software
-   - Add **DNS exclusions** for Twingate Resources and `*.twingate.com`
-   - For AV/EDR software, create **exceptions** for `*.twingate.com`
-3. If exclusions don't resolve the issue → **full uninstall required**
-
-## Configuration Values
-- DNS exclusion domain: `*.twingate.com`
-- Conflicting IP range: `100.96/12` (CGNAT)
+1. Temporarily uninstall conflicting software to confirm it's the cause
+2. If resolved, try these workarounds before permanent uninstall:
+   - Enable bypass/compatibility mode in VPN, ZTNA, or network filtering software
+   - Add DNS exclusions for Twingate Resources and `*.twingate.com`
+   - For AV/EDR: create exceptions for `*.twingate.com`
+3. If exclusions don't resolve the issue → full uninstall required
 
 ## Gotchas
-- Some security software continues intercepting traffic even when toggled "off" — disabling is not sufficient to test compatibility, uninstall is required
-- CGNAT range conflict (`100.96/12`) can cause silent connectivity failures if local network uses overlapping IPs
-- Each listed application has its own linked troubleshooting article with specific guidance (not covered on this page)
+- **Cisco Secure Client** (Umbrella module): previously, adding Resource domains to Umbrella's Internal Domains list worked as a workaround — this no longer functions after AnyConnect's EOL replacement
+- Software that appears disabled may still intercept traffic
+- CGNAT IP range conflict (100.96/12) requires separate remediation — see linked KB article
+
+## Configuration Values
+| Item | Value |
+|------|-------|
+| Twingate CGNAT range | `100.96/12` |
+| DNS/AV exception domain | `*.twingate.com` |
 
 ## Related Docs
-- Twingate KB article on DNS IP conflict within 100.96/12 CGNAT range
-- Zscaler-specific troubleshooting article
-- Cisco Umbrella-specific troubleshooting article
-- DNSFilter-specific troubleshooting article
-- AdGuard-specific troubleshooting articles (local app + Mac)
-- Avast Real Site Protection troubleshooting article
+- Twingate CGNAT range conflict KB article (linked in source)
+- Per-application guides: Zscaler, Cisco Umbrella, DNSFilter, AdGuard, Avast

@@ -1,71 +1,75 @@
 ---
 source: https://help.twingate.com/articles/2672568245-engaging-technical-support
 type: help
-fetched: 2026-09-20
-source_version: b317cd00ca3d6707c7ca2f29823af944a04710fe932f687264eeef9f112a338d
+fetched: 2026-09-27
+source_version: aabf728270496fe7d1f93947918f292dd3ce751302579a7fb4bfe9451b26b54d
 ---
 
 # Engaging Technical Support
 
 ## Summary
-Guide for Twingate Admins to open technical support requests via the Twingate Customer Portal. End users must contact their Twingate Admin directly; Twingate support only works with admins. Requires an active subscription with Technical Support Entitlement.
+Guide for Twingate Admins to open technical support requests via the Twingate Customer Portal. End users must contact their Twingate Admin directly; Twingate support only works with Admins. Requires an active subscription with Technical Support Entitlement.
 
 ## Key Information
 - **Who can engage support**: Twingate Admins only (not end users)
 - **Community support**: Available for all subscription tiers
-- **Portal access**: Admin Console → Help → Support
-
-## Prerequisites
-- Active subscription with Technical Support Entitlement
-- Review Self-Service Resources and Self-Serve Troubleshooting Guide first
-- Log bundles collected (Client Logs or Connector Logs)
+- **Paid support**: Requires Technical Support Entitlement on subscription
+- Portal admin status (to view all org tickets) must be requested from Twingate Support
 
 ## What Support Covers
-**Supported:**
+**In scope:**
 - Native Connector or Client faults/errors
-- Features not working as expected
-- Connectivity troubleshooting (after self-serve guide exhausted)
+- Twingate features not working as expected
+- Connectivity troubleshooting (after self-serve steps exhausted)
 
-**Not Supported:**
+**Out of scope:**
 - Billing (use Subscription Management)
-- User account changes (2FA reset, role changes)
-- Implementation or configuration (contact sales rep)
+- Account/permission changes (2FA resets, role changes)
+- Implementation or configuration assistance (contact sales)
 - Third-party apps, OS, network issues
 - Twingate CLI, custom API scripts, deployment scripts
 
-## Step-by-Step: Opening a Ticket
-1. Sign into Twingate Customer Portal
+## Prerequisites
+- Complete [Self-Service Troubleshooting Guide](https://help.twingate.com) steps first
+- Active subscription with Technical Support Entitlement
+- Access to Twingate Admin Console
+
+## Step-by-Step: Opening a Support Ticket
+
+1. Sign into Twingate Customer Portal (via Admin Console → **Help** → **Support**)
 2. Click **Create Ticket** (top right)
 3. Select **Technical Assistance** from dropdown
 4. Fill required fields:
-   - **Issue Type**: Type of issue observed
-   - **Priority**: Align to Technical Support Priority Levels (P1/Urgent = full production down, entire org impacted)
-   - **Twingate Component** (optional): Affected component
-   - **Subject**: Brief issue statement
-   - **Description**: Include all details below
-5. Attach full log bundle
-6. Click **Submit**
+   - **Issue Type**: Category of issue
+   - **Priority**: Align to Priority Levels (P1/Urgent = full production down, entire org impacted)
+   - **Twingate Component** *(optional)*: Affected component
+   - **Subject**: Brief description
+5. In **Description**, include:
+   - Name/ID of affected Connector, Resource, User, or Device
+   - Self-serve troubleshooting results
+   - Has this worked before? What changed?
+   - Timestamp of occurrence
+   - Frequency of issue
+   - Error messages
+   - Scope: isolated vs. widespread
+6. **Attachments**: Include full log bundle (Client Logs or Connector Logs)
+7. Click **Submit**
 
-## Required Description Details
-- Name or ID of affected Connector, Resource, User, or Device
-- Results from Self-Serve Troubleshooting Guide
-- Has this ever worked?
-- Has anything changed recently?
-- Timestamp of occurrence
-- Frequency of issue
-- Relevant error messages
-- Isolated vs. widespread impact
+## After Submission
+- Email confirmation sent on ticket creation
+- Twingate responds via email for follow-up or next steps
+- View/update open tickets in Customer Portal → select ticket → add replies or attachments
 
 ## Gotchas
-- P1/Urgent priority is strictly for full production outages affecting the entire organization
-- Account changes (2FA reset) require proof-of-identity showing ownership of the email domain
-- Portal admin access (to see all org tickets) must be explicitly requested from Twingate Support
-- Twingate will not support environments where third-party configurations break Twingate functionality
+- P1/Urgent priority is **only** for full production outages affecting the entire organization
+- Account recovery (e.g., 2FA reset) requires proof-of-identity showing ownership of the email domain
+- Environmental configurations that break Twingate functionality are not supported
+- To view all org tickets in portal, you must be enabled as a **portal admin** — request this from Twingate Support
 
 ## Related Docs
-- Technical Support Coverage Hours
-- Technical Support Priority Levels
 - Self-Serve Troubleshooting Guide
 - Client Logs / Connector Logs
+- Technical Support Priority Levels
+- Technical Support Coverage Hours
 - Signing into the Twingate Customer Portal
 - Subscription Management

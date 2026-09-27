@@ -1,27 +1,26 @@
 ---
 source: https://github.com/Twingate/terraform-provider-twingate
 type: github
-fetched: 2026-09-20
-source_version: 75c5a2a3a557217b61e69fe5e2fa8806332cc4b6
+fetched: 2026-09-27
+source_version: 4f76074fb8cd120143f6a02c426e12de20cfbf48
 ---
 
 # Twingate Terraform Provider
 
 ## Summary
-Terraform provider for managing Twingate resources (networks, resources, groups, connectors, policies) as infrastructure-as-code. Supports GitOps-driven access policy and network configuration via Twingate's API.
+Terraform provider for managing Twingate resources (networks, connectors, remote networks, resources, groups, users, service accounts). Enables infrastructure-as-code workflows for Twingate access policy and network configuration via the Twingate API.
 
 ## Key Information
-- Written in Go; published to the Terraform Registry
-- Covers resources: `twingate_resource`, `twingate_group`, `twingate_connector`, `twingate_remote_network`, `twingate_user`, `twingate_service_account`, `twingate_ssh_resource`, `twingate_kubernetes_resource`, `twingate_web_app_resource`, and associated data sources
-- Docs in `docs/` are auto-generated from `templates/`; edit templates, not generated files
-- Coverage reporting: Codecov (switched from Coveralls)
-- Latest stable release: **v5.0.2**
+- Written in Go; built on the Terraform Plugin Framework
+- Supports resources and data sources for groups, remote networks, connectors, resources, users, and service accounts
+- Documentation in `docs/` is auto-generated from `templates/`; edit only the templates
+- Acceptance tests require a live Twingate network and API token
 
 ## Prerequisites
 - Bash
-- Go 1.26+ (to build)
-- Terraform 1.14.x+
-- A Twingate account with an API token (Read, Write & Provision permissions)
+- Go 1.26+
+- Terraform 1.14.x
+- Twingate account with an API token (Read, Write & Provision permissions) for acceptance tests
 
 ## Usage / Step-by-Step
 
@@ -30,18 +29,9 @@ Terraform provider for managing Twingate resources (networks, resources, groups,
 make build
 ```
 
-**Install locally for testing**
+**Install locally**
 ```shell
 make install
-```
-
-**Configure the provider**
-```hcl
-provider "twingate" {
-  api_token = var.twingate_api_token
-  network   = "<slug>"          # your <slug>.twingate.com
-  url       = "twingate.com"
-}
 ```
 
 **Run unit tests**
@@ -49,8 +39,11 @@ provider "twingate" {
 make test
 ```
 
-**Run acceptance tests** (requires live network — see env vars below)
+**Run acceptance tests**
 ```shell
+export TWINGATE_URL=twingate.com
+export TWINGATE_NETWORK=<slug>
+export TWINGATE_API_TOKEN=<token>
 make testacc
 ```
 
@@ -61,45 +54,18 @@ make docs
 
 ## Configuration Values
 
-| Variable | Where Used | Description |
-|---|---|---|
-| `TWINGATE_API_TOKEN` | env / provider arg | API token with Read, Write & Provision permissions |
-| `TWINGATE_NETWORK` | env / provider arg | Network slug (`<slug>.twingate.com`) |
-| `TWINGATE_URL` | env / provider arg | Base URL, typically `twingate.com` |
+| Variable | Description |
+|---|---|
+| `TWINGATE_URL` | Base Twingate URL (e.g., `twingate.com`) |
+| `TWINGATE_NETWORK` | Network slug (`<slug>.twingate.com`) |
+| `TWINGATE_API_TOKEN` | API token with Read, Write & Provision permissions |
 
-All three can also be set directly in the provider block as `api_token`, `network`, and `url`.
+## Gotchas
+- Files under `docs/` are auto-generated; manual edits will be overwritten by `make docs`
+- Acceptance tests (`make testacc`) run against a real Twingate network and will create/modify live resources
+- The repo description references a Kubernetes controller/CRD pattern, but the actual repo is a standard Terraform provider
 
-## Breaking Changes in v5.0.0
-
-### Removed: `twingate_gateway_config` resource
-The resource has been removed entirely. It only ever rendered a static YAML document; no remote object was created. Replace it with Terraform's built-in `templatefile()` function:
-
-```terraform
-locals {
-  gateway_config = templatefile("${path.module}/config.yaml.tftpl", {
-    twingate_network = var.tg_network
-    twingate_host    = var.tg_url
-    port             = local.gateway_port
-  })
-}
-```
-
-Remove the old resource from state:
-```bash
-terraform state rm twingate_gateway_config.<name>
-```
-
-Any reference to `twingate_gateway_config.config.content` becomes `local.gateway_config`. If a `lifecycle` block used `replace_triggered_by` pointing at the old resource, wrap the rendered config in a `terraform_data` resource instead.
-
-### Removed: `username` from `twingate_ssh_resource`
-The `username` attribute has been removed. It only fed the now-removed `twingate_gateway_config`; the Gateway now takes the username from the runtime connection. No state change is required since the attribute never reached the Twingate API. A config that still sets `username` fails with `Unsupported argument`.
-
-Note: `ssh.gateway.username` in the Gateway's YAML config (the OS user the Gateway process runs as) is unrelated and still required.
-
-### Removed: `protocols` from `twingate_ssh_resource` and `twingate_kubernetes_resource`
-Port restrictions do not apply to SSH and Kubernetes resources, so `protocols` never had any effect. Remove it from configs. A config that still sets `protocols` on either resource fails with `Unsupported argument`.
-
-## New in v5.0.0
-
-### New resource: `twingate_web_app_resource`
-Web App Resources are Twingate resources accessed via a Gateway.
+## Related Docs
+- [Terraform Registry – Twingate Provider](https://registry.terraform.io/providers/Twingate/twingate/latest/docs)
+- [Twingate API documentation](https://docs.twingate.com/docs/api-overview)
+- [Terraform Plugin Framework](https://developer.hashicorp.com/terraform/plugin/framework)

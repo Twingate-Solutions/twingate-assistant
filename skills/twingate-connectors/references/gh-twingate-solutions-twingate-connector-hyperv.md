@@ -1,11 +1,9 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-connector-hyperv
 type: github
-fetched: 2026-09-13
-source_version: edd2ed307d39afff46f87afa34867238e81f2757
+fetched: 2026-09-27
+source_version: 2683b5ab2b76d882bc52d47dce3c81191542b38f
 ---
-
-<!-- triage: unassigned -->
 
 # Twingate Connector — Hyper-V Deployment Scripts
 
@@ -21,6 +19,18 @@ PowerShell scripts for deploying and managing Twingate Connector VMs on Windows 
 - Default `ubuntu` user is disabled; credentials shown once at deploy — save them
 - `FixVM` leaves the old connector record in the Admin Console and flags it — manual cleanup required
 - Legacy deployment method retained in `legacy-hyperv-deployment/` (deprecated)
+- Every Twingate Admin API call sends a structured `User-Agent` header: `twingate-connector-hyperv/<version> (mode=<action>; op=<operation>) PowerShell/<psversion>`; built by `Get-TwingateUserAgent`, injected via `Invoke-TwingateApi`
+
+## API User-Agent Format
+
+```text
+twingate-connector-hyperv/<version> (mode=<action>; op=<operation>) PowerShell/<psversion>
+```
+
+- `<version>` — from `$script:ScriptVersion` (default `1.0.0`; overridable via `TWINGATE_DEPLOY_VERSION` env var)
+- `mode=` — the `-Action` lowercased (`deploy`, `remove`, `updateconnector`, `updateos`, `list`, `fixvm`)
+- `op=` — the API operation: `network-lookup`, `connector-create`, `token-create`, `connector-status`, `connector-delete`, `connector-network`, `network-connectors`, `auth-check`
+- Key order (`mode` then `op`) is fixed — reordering breaks downstream log parsing; keys with no value are omitted; if no keys exist the parenthesised comment is dropped entirely
 
 ## Prerequisites
 - Windows Server 2022 or 2025
@@ -53,20 +63,3 @@ PowerShell scripts for deploying and managing Twingate Connector VMs on Windows 
 .\Deploy-TwingateConnector.ps1 -Action FixVM -TwingateNetwork "acme" -VMName "TG-Connector-Office-1"
 
 # Remove a single VM
-.\Deploy-TwingateConnector.ps1 -Action Remove -TwingateNetwork "acme" -VMName "TG-Connector-Office-1"
-
-# Remove all VMs in a Remote Network
-.\Deploy-TwingateConnector.ps1 -Action Remove -TwingateNetwork "acme" -RemoteNetwork "Office"
-
-# Full teardown after failed run (preview first, then force)
-.\Reset-TwingateConnectorEnvironment.ps1
-.\Reset-TwingateConnectorEnvironment.ps1 -Force
-```
-
-## Configuration Values
-
-| Parameter | Default | Notes |
-|---|---|---|
-| `-Action` | *(required)* | `Deploy`, `Remove`, `UpdateConnector`, `UpdateOS`, `List`, `FixVM` |
-| `-TwingateNetwork` | prompted | The part of the Admin Console URL before `.twingate.com`. Use `acme` for `acme.twingate.com`; use `acme.us1` for a shard-based URL like `acme.us1.twingate.com`. Copy from the console rather than assuming a single label. |
-| `-ApiToken` | prompted | Plain string or SecureString
