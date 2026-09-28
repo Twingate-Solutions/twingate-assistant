@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/github-action
 type: github
-fetched: 2026-09-13
-source_version: 7a7f18087d4bf841d7bced88bc877ecef1b1233b
+fetched: 2026-09-27
+source_version: bede1f6fb178083ee011815d1223e20df4fed7f7
 ---
 
 # Twingate Connect — GitHub Action
@@ -12,7 +12,7 @@ A GitHub Action that connects workflows to private resources via Twingate Servic
 
 ## Key Information
 - **Repo:** `Twingate/github-action`
-- **Latest version:** `v1.8`
+- **Latest version:** `v1.9`
 - **Supported runners:** Linux (x64/ARM), Windows
 - **Auth mechanism:** Twingate Service Key (not user credentials)
 - Caching reduces installation time by 30–45%
@@ -21,6 +21,7 @@ A GitHub Action that connects workflows to private resources via Twingate Servic
 - A Twingate account with a configured [Service](https://docs.twingate.com/docs/services)
 - A Service Key stored as a GitHub Actions secret
 - Runner must support `NET_ADMIN` capability and `/dev/net/tun` device (for local testing with `act`)
+- Container runners lacking `NET_ADMIN` will now fail fast with a clear error rather than hanging
 
 ## Usage
 
@@ -55,8 +56,14 @@ Requires additional Linux capabilities:
 act -j test -s SERVICE_KEY --container-options "--cap-add NET_ADMIN --device /dev/net/tun"
 ```
 
+**Container runners without NET_ADMIN**
+The action now detects missing `NET_ADMIN` capability at startup and fails immediately with a descriptive error, rather than timing out silently.
+
 **Cache invalidation**
 Increment `cache-version` (e.g., `3` → `4`) to force a fresh package download; do not rely on disabling `cache` alone for this purpose.
+
+**Windows MSI download**
+CI timeouts caused by slow MSI downloads and stale cache entries are fixed as of v1.9.
 
 **IP allowlisting use case**
 Requires a Twingate Connector configured to route `github.com` traffic. See [SaaS app gating docs](https://docs.twingate.com/docs/saas-app-gating).

@@ -1,67 +1,77 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-fleet-commander
 type: github
-fetched: 2026-09-13
-source_version: 10ce60afa7eb61c32a7cf53809d1724fd6a46534
+fetched: 2026-09-27
+source_version: effa0af4844c5f9300dabf26fd45cf53b0680b27
 ---
-
-<!-- triage: unassigned -->
 
 # Twingate Fleet Commander
 
-## Summary
-Fleet Commander (FC) is an example/reference containerized control plane that autoscales Twingate Connector fleets on a single host. It runs a continuous async loop that discovers managed Connector containers, evaluates load/liveness signals, and provisions or removes Connectors via the Docker socket and Twingate GraphQL Admin API. Provided as-is under Apache 2.0; not a supported product.
+A reference example (unsupported, Apache 2.0) of a containerized control plane that autoscales Twingate Connector fleets on a single Docker host. It runs a continuous async loop to discover, monitor, provision, drain, restart, and replace Connectors by driving the local Docker socket, with the Twingate GraphQL Admin API as the bookkeeping layer. Observability is provided via structured JSON stdout logs and a Prometheus `/metrics` endpoint.
 
 ## Key Information
-- Supports three compute backends: local Docker (default), AWS ECS, Azure ACI — set via `FC_PLATFORM`
-- Self-provisions Connectors; no seed Connectors or pre-minted tokens required
-- Exposes status UI, `/healthz`, `/readyz`, and `/metrics` (Prometheus) on port 8080 (loopback-bound by default)
-- Structured JSON logs to stdout; every cycle emits a `loop.cycle.complete` heartbeat
-- Optional: manual override endpoints (disabled by default), log-shipper to S3-compatible storage
-- `fc-teardown` must be run before `docker compose down` to avoid orphaned Connectors
+
+- Self-provisions Connectors — no seed tokens required; FC mints tokens via the Twingate API
+- Supports three compute backends: `docker` (default), `ecs` (AWS), `aci` (Azure)
+- Scale-up trigger modes: `any`, `mean`, `quorum` (default, configurable fraction)
+- Scale-down only when every Connector signal is below the low watermark
+- Optional manual overrides (scale ±1, cordon, replace) behind a shared-secret header
+- Optional log-shipper (Compose `shipping` profile) for S3-compatible analytics export
+- Status UI, `/healthz`, `/readyz`, `/metrics` all on port 8080 (loopback-bound by default)
+- FC restarts are safe — managed Connectors keep serving across manager restarts
 
 ## Prerequisites
-- Docker with socket access on the control-plane host
-- Twingate account with a Remote Network and an Admin API key
-- Python extras for non-Docker backends: `pip install -e '.[ecs]'` or `pip install -e '.[aci]'`
 
-## Usage / Step-by-Step
+- Docker with Compose plugin on the host
+- Twingate network name and Admin API key (`TWINGATE_API_KEY`)
+- Python extras for non-Docker backends: `pip install -e '.[ecs]'` or `'.[aci]'`
 
-**Bootstrap (fastest path):**
+## Usage
+
+**Bootstrap (idempotent):**
 ```bash
 git clone <repo> fleet-commander && cd fleet-commander
 TWINGATE_NETWORK=acme TWINGATE_API_KEY=tgp_xxx ./deploy/bootstrap.sh
 ```
 
-**Manual path:**
+**Manual start:**
 ```bash
-cp .env.example .env          # set TWINGATE_NETWORK + TWINGATE_API_KEY
-cp config/config.example.yaml config/config.yaml
+cp .env.example .env && cp config/config.example.yaml config/config.yaml
 docker compose up -d
+docker compose --profile shipping up -d  # include log-shipper
 ```
 
-**Teardown (order matters):**
+**Teardown (removes all managed Connectors before stopping stack):**
 ```bash
 docker compose exec fc fc-teardown
 docker compose --profile shipping down -v
 ```
 
+Cloud-init snippets for EC2, Azure VM, GCP, and Proxmox are in `deploy/cloud-init/`.
+
 ## Configuration Values
 
-| Variable / Key | Type | Description |
-|---|---|---|
-| `TWINGATE_NETWORK` | env | The labels before `.twingate.com` in your Admin Console URL — `acme` (legacy) or `acme.us1` (shard-based). Copy the host from the console rather than assuming a single label. The GraphQL endpoint (`https://<TWINGATE_NETWORK>.twingate.com/api/graphql/`) is derived from this value. |
-| `TWINGATE_API_KEY` | env | Twingate Admin API key (Admin or DevOps role); stored as `SecretStr`, never logged |
-| `FC_PLATFORM` | env | Compute backend: `docker` (default), `ecs`, `aci` |
-| `FC_OVERRIDE_ENABLED` | env | Enable manual override endpoints (default: `false`) |
-| `FC_OVERRIDE_SECRET` | env | Shared secret for override header (≥16 chars) |
-| `TWINGATE_SHIPPER_*` | env | Log-shipper config block (S3 endpoint, keys, filter) |
-| `min_connectors` / `max_connectors` | YAML | Fleet size floor/ceiling per Remote Network |
-| `scale_up_trigger` | YAML | `any`, `mean`, or `quorum` (default) |
-| `quorum_fraction` | YAML | Fraction of hot Connectors required to scale up (default: `0.5`) |
+| Variable | Description |
+|---|---|
+| `TWINGATE_NETWORK` | Subdomain prefix from Admin Console URL |
+| `TWINGATE_API_KEY` | Twingate Admin API key |
+| `FC_PLATFORM` | `docker` (default), `ecs`, or `aci` |
+| `FC_OVERRIDE_ENABLED` | Enable manual override endpoints (default `false`) |
+| `FC_OVERRIDE_SECRET` | Shared secret for overrides (≥16 chars) |
+| `TWINGATE_SHIPPER_*` | S3-compatible bucket config for log-shipper |
+
+Policy (watermarks, cooldowns, floor/ceiling, `scale_up_trigger`, `quorum_fraction`) is set in `config/config.yaml`. See `documentation/CONFIGURATION.md` for the full reference.
 
 ## Gotchas
-- **Teardown order is critical:** `docker compose down` without `fc-teardown` first leaves Connector containers and logical Connectors orphaned in the tenant
-- **`TWINGATE_NETWORK` format:** legacy tenants use a single label (e.g. `acme`); shard-based tenants use two labels (e.g. `acme.us1`). Copy the hostname from the Admin Console URL rather than guessing
-- **Docker socket = root-equivalent:** treat the FC host as a trusted node; never expose port 8080 publicly without TLS
-- **Socket proxy does not make the network safe:** allowlisting `containers/create` still permits host compromise; restrict network access to
+
+- **Docker socket is root-equivalent.** Use the socket-proxy Compose variant (`deploy/compose/socket-proxy-hardened.yml`) for hardened deployments; the proxy network itself remains a trust boundary.
+- Plain `docker compose down` leaves Connector containers running. Always run `fc-teardown` first.
+- Port 8080 binds to loopback by default. Reach it via SSH tunnel; never expose directly without TLS.
+- The override secret is a static header credential sent in clear text — only enable behind TLS.
+- Sticky connections mean one hot Connector may not justify scale-up; `quorum` mode avoids over-provisioning. A persistently high `hot_connector_max` with one Connector over watermark is a load-balancing issue, not a capacity one.
+- `TWINGATE_SHIPPER_DOCKER_CONTAINER_NAME_FILTER` must be updated if using the custom connector image (default filter `twingate/connector` won't match).
+
+## Related Docs
+
+- [Architecture](documentation/ARCHITECTURE.md)
+- [Configuration](documentation/

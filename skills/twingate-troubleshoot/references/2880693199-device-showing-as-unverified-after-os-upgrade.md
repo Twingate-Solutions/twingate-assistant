@@ -1,42 +1,48 @@
 ---
 source: https://help.twingate.com/articles/2880693199-device-showing-as-unverified-after-os-upgrade
 type: help
-fetched: 2026-09-20
-source_version: fabd8b00615dbe415005297bbf68571f553dcf744f396d8bcca9ddaf56697049
+fetched: 2026-09-27
+source_version: 517c38863981d7b368fff46bdd6c3ed2aa41005a590a82ffc25939ca4c0501bb
 ---
 
 # Device Showing as Unverified After OS Major Version Upgrade
 
 ## Summary
-When a device shows as unverified after a major OS upgrade, it's because Device Trust uses an explicit allowlist of major OS versions rather than a minimum version floor. Each new major OS version must be manually added to the Device Trust profile before devices running it can be verified.
+After a major OS version upgrade, devices may show as unverified because Twingate's Device Trust uses an explicit allowlist of major OS versions rather than a minimum version floor. Each new major OS version must be manually added to the Device Trust profile before devices running it can be verified.
 
 ## Key Information
-- Device Trust OS version settings work as an **allowlist**, not a minimum version check
-- Each major OS version must be explicitly added to the allowed versions list
-- Per major version, you can optionally set a **minimum minor version** requirement
-- Example: Allowing major version `27` with minimum minor `27.1.0` means `27.0.x` fails but `27.1.0+` passes
-- This applies every time a new major OS version is released
+- Device Trust OS version configuration is an **allowlist**, not a minimum version check
+- Each major OS version must be explicitly permitted in the Device Trust profile
+- Per major version, you can optionally set a **minimum minor version** (e.g., allow macOS 27 but require ≥ 27.1.0)
+- Devices on minor versions below the minimum minor version will fail verification even if the major version is allowed
+- This applies whenever any new major OS version is released
 
 ## Prerequisites
-- Access to Twingate Admin Console
-- Permission to modify Device Trust profiles
+- Admin access to the Twingate Admin Console
+- An existing Device Trust profile configured
 
-## Step-by-Step Resolution
+## Step-by-Step: Add a New Major OS Version
 
 1. Log in to the **Twingate Admin Console**
-2. Navigate to the **Device Trust profile**
-3. Locate the OS version settings
+2. Navigate to your **Device Trust profile**
+3. Locate the OS version settings section
 4. Add the new major OS version (e.g., macOS 27) to the allowed versions list
 5. Optionally set a minimum minor version requirement
 6. Save changes
 
-Affected users' devices will be verifiable immediately after the change is saved.
+Affected users' devices should pass verification immediately after saving.
+
+## Configuration Values
+
+| Setting | Description | Example |
+|---|---|---|
+| Allowed Major Version | Major OS version explicitly permitted | `27` (macOS 27) |
+| Minimum Minor Version | Optional floor within an allowed major version | `27.1.0` |
 
 ## Gotchas
-- **Not a minimum floor**: Adding macOS 26 does not automatically allow macOS 27 — each major version is independent
-- **Proactive updates needed**: Plan to update Device Trust profiles when new major OS versions release to avoid user disruption
-- Minor version gating is additive — if the major version isn't in the allowlist, minor version settings are irrelevant
+- Adding a major version with **no minimum minor version** allows all minor versions under it
+- Setting a minimum minor version of `27.1.0` blocks devices on `27.0.x` even though major version `27` is allowed
+- This behavior affects **every** new major OS release — plan to update Device Trust profiles proactively when OS upgrades roll out to users
 
 ## Related Docs
-- Twingate Device Trust configuration
-- Twingate Admin Console
+- Twingate Device Trust configuration (Admin Console → Device Trust)
