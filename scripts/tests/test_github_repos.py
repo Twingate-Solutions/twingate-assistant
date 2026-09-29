@@ -669,7 +669,7 @@ def test_get_default_branch_head_sha_both_endpoints_fail_returns_none(
 # ── dry_run: zero LLM calls, end-to-end aggregation ─────────────────────────
 
 
-def _dry_run_dispatch(url, params=None, timeout=None, headers=None):
+def _dry_run_dispatch(url, params=None, timeout=None, headers=None, **_kwargs):
     """Route a mocked requests.get call to a canned response by URL shape."""
     if "/orgs/" in url and url.endswith("/repos"):
         org = url.split("/orgs/")[1].split("/repos")[0]
@@ -721,7 +721,7 @@ def _make_org_listing_only_dispatch(org_repos: dict):
     """Build a requests.get side_effect that permits ONLY /orgs/{org}/repos
     listing calls, failing the test on any /branches/, /commits/, or /compare/ request."""
 
-    def _dispatch(url, params=None, timeout=None, headers=None):
+    def _dispatch(url, params=None, timeout=None, headers=None, **_kwargs):
         if "/orgs/" in url and url.endswith("/repos"):
             org = url.split("/orgs/")[1].split("/repos")[0]
             return _mock_response(json_data=org_repos[org], links={})
@@ -1060,6 +1060,66 @@ def test_clone_wiki_rev_parse_failure_returns_none(mock_run: MagicMock, tmp_path
     result = clone_wiki("Twingate", "example-repo", tmp_path)
 
     assert result is None
+
+
+# ── _iter_safe_wiki_files: symlink / traversal / size hardening ────────────
+
+
+def test_iter_safe_wiki_files_skips_symlinked_file(tmp_path) -> None:
+    """A symlinked .md file inside the clone is excluded, not followed."""
+    outside = tmp_path.parent / "outside-secret.md"
+    outside.write_text("host secret content", encoding="utf-8")
+    clone_dir = tmp_path / "wiki"
+    clone_dir.mkdir()
+    (clone_dir / "Home.md").write_text("# Home", encoding="utf-8")
+    link_path = clone_dir / "Evil.md"
+    try:
+        link_path.symlink_to(outside)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink creation not permitted in this environment")
+
+    result = github_repos._iter_safe_wiki_files(clone_dir)
+
+    names = {p.name for p in result}
+    assert "Home.md" in names
+    assert "Evil.md" not in names
+
+
+def test_iter_safe_wiki_files_skips_oversized_file(tmp_path) -> None:
+    """A file over MAX_WIKI_FILE_BYTES is excluded."""
+    clone_dir = tmp_path / "wiki"
+    clone_dir.mkdir()
+    (clone_dir / "Small.md").write_text("small content", encoding="utf-8")
+    big_path = clone_dir / "Big.md"
+    big_path.write_bytes(b"x" * (github_repos.MAX_WIKI_FILE_BYTES + 1))
+
+    result = github_repos._iter_safe_wiki_files(clone_dir)
+
+    names = {p.name for p in result}
+    assert "Small.md" in names
+    assert "Big.md" not in names
+
+
+def test_iter_safe_wiki_files_keeps_normal_files_under_cap(tmp_path) -> None:
+    clone_dir = tmp_path / "wiki"
+    clone_dir.mkdir()
+    (clone_dir / "A.md").write_text("a", encoding="utf-8")
+    (clone_dir / "B.md").write_text("b", encoding="utf-8")
+
+    result = github_repos._iter_safe_wiki_files(clone_dir)
+
+    assert {p.name for p in result} == {"A.md", "B.md"}
+
+
+def test_clone_wiki_uses_symlinks_disabled_git_config(tmp_path) -> None:
+    """clone_wiki disables symlinks at the git-config level for the clone."""
+    with patch("github_repos.subprocess.run") as mock_run:
+        mock_run.return_value = _mock_run(returncode=1, stderr="not found")
+        clone_wiki("Twingate", "example-repo", tmp_path)
+
+    clone_argv = mock_run.call_args_list[0].args[0]
+    assert "-c" in clone_argv
+    assert "core.symlinks=false" in clone_argv
 
 
 def test_clone_wiki_rejects_org_outside_default_orgs_before_any_subprocess_call(tmp_path) -> None:

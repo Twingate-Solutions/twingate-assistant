@@ -75,10 +75,17 @@ SITEMAP_XML_MIXED_DOCS_AND_ARTICLES = """\
 
 
 def _mock_response(content: str, status_code: int = 200) -> MagicMock:
-    """Build a mock requests.Response with the given XML content."""
+    """Build a mock requests.Response with the given XML content.
+
+    ``iter_content`` and ``headers`` are set up so the response also works
+    as-is through ``url_safety.safe_get``'s streaming size-capped reader.
+    """
+    encoded = content.encode("utf-8")
     mock_resp = MagicMock()
     mock_resp.status_code = status_code
-    mock_resp.content = content.encode("utf-8")
+    mock_resp.headers = {}
+    mock_resp.content = encoded
+    mock_resp.iter_content = MagicMock(return_value=[encoded] if encoded else [])
     mock_resp.raise_for_status = MagicMock()
     return mock_resp
 
@@ -86,23 +93,37 @@ def _mock_response(content: str, status_code: int = 200) -> MagicMock:
 # ── Tests ─────────────────────────────────────────────────────────────────────
 
 
-@patch("fetch_sitemap.requests.get")
+@patch("url_safety.requests.get")
 def test_fetch_sitemap_returns_docs_urls(mock_get: MagicMock) -> None:
     """Successful fetch returns only /docs/ URLs, sorted."""
     mock_get.return_value = _mock_response(SITEMAP_XML_NAMESPACED)
 
-    result = fetch_sitemap("https://example.com/sitemap.xml")
+    result = fetch_sitemap("https://www.twingate.com/sitemap.xml")
 
     assert result == [
         "https://www.twingate.com/docs/architecture",
         "https://www.twingate.com/docs/how-it-works",
     ]
     mock_get.assert_called_once_with(
-        "https://example.com/sitemap.xml", timeout=30, headers=REQUEST_HEADERS
+        "https://www.twingate.com/sitemap.xml",
+        params=None,
+        timeout=30,
+        headers=REQUEST_HEADERS,
+        allow_redirects=False,
+        stream=True,
     )
 
 
-@patch("fetch_sitemap.requests.get")
+@patch("url_safety.requests.get")
+def test_fetch_sitemap_rejects_disallowed_sitemap_url(mock_get: MagicMock) -> None:
+    """A sitemap URL outside the fetch allowlist is rejected before any request."""
+    with pytest.raises(ValueError, match="disallowed"):
+        fetch_sitemap("https://evil.com/sitemap.xml")
+
+    mock_get.assert_not_called()
+
+
+@patch("url_safety.requests.get")
 def test_non_docs_urls_are_filtered_out(mock_get: MagicMock) -> None:
     """URLs that do not contain /docs/ are excluded from the result."""
     mock_get.return_value = _mock_response(SITEMAP_XML_NAMESPACED)
@@ -113,7 +134,7 @@ def test_non_docs_urls_are_filtered_out(mock_get: MagicMock) -> None:
     assert len(result) == 2
 
 
-@patch("fetch_sitemap.requests.get")
+@patch("url_safety.requests.get")
 def test_request_exception_propagates(mock_get: MagicMock) -> None:
     """requests.RequestException is not caught — it propagates to the caller."""
     mock_get.side_effect = requests.RequestException("Connection timed out")
@@ -122,7 +143,7 @@ def test_request_exception_propagates(mock_get: MagicMock) -> None:
         fetch_sitemap()
 
 
-@patch("fetch_sitemap.requests.get")
+@patch("url_safety.requests.get")
 def test_malformed_xml_raises_parse_error(mock_get: MagicMock) -> None:
     """Malformed XML raises ElementTree.ParseError."""
     mock_get.return_value = _mock_response(SITEMAP_XML_MALFORMED)
@@ -131,7 +152,7 @@ def test_malformed_xml_raises_parse_error(mock_get: MagicMock) -> None:
         fetch_sitemap()
 
 
-@patch("fetch_sitemap.requests.get")
+@patch("url_safety.requests.get")
 def test_empty_sitemap_returns_empty_list(mock_get: MagicMock) -> None:
     """A sitemap with no <url> entries returns an empty list."""
     mock_get.return_value = _mock_response(SITEMAP_XML_EMPTY)
@@ -141,7 +162,7 @@ def test_empty_sitemap_returns_empty_list(mock_get: MagicMock) -> None:
     assert result == []
 
 
-@patch("fetch_sitemap.requests.get")
+@patch("url_safety.requests.get")
 def test_non_namespaced_loc_tags_are_parsed(mock_get: MagicMock) -> None:
     """Sitemaps without the standard xmlns still have their <loc> tags parsed."""
     mock_get.return_value = _mock_response(SITEMAP_XML_NO_NAMESPACE)
@@ -155,7 +176,7 @@ def test_non_namespaced_loc_tags_are_parsed(mock_get: MagicMock) -> None:
     assert "https://www.twingate.com/pricing" not in result
 
 
-@patch("fetch_sitemap.requests.get")
+@patch("url_safety.requests.get")
 def test_duplicate_urls_are_deduplicated(mock_get: MagicMock) -> None:
     """Duplicate URLs in the sitemap are collapsed to a single entry."""
     mock_get.return_value = _mock_response(SITEMAP_XML_DUPLICATES)
@@ -168,7 +189,7 @@ def test_duplicate_urls_are_deduplicated(mock_get: MagicMock) -> None:
     ]
 
 
-@patch("fetch_sitemap.requests.get")
+@patch("url_safety.requests.get")
 def test_http_error_status_propagates(mock_get: MagicMock) -> None:
     """Non-2xx HTTP status codes propagate via raise_for_status."""
     mock_resp = _mock_response("", status_code=500)
@@ -181,7 +202,7 @@ def test_http_error_status_propagates(mock_get: MagicMock) -> None:
         fetch_sitemap()
 
 
-@patch("fetch_sitemap.requests.get")
+@patch("url_safety.requests.get")
 def test_result_is_sorted(mock_get: MagicMock) -> None:
     """Returned URLs are in alphabetical order."""
     xml = """\
@@ -206,7 +227,7 @@ def test_result_is_sorted(mock_get: MagicMock) -> None:
 # ── Multi-source: path_filter="/articles/" (help.twingate.com) ────────────────
 
 
-@patch("fetch_sitemap.requests.get")
+@patch("url_safety.requests.get")
 def test_fetch_sitemap_articles_filter_keeps_only_articles_urls(mock_get: MagicMock) -> None:
     """path_filter='/articles/' keeps only /articles/ URLs, dropping others."""
     mock_get.return_value = _mock_response(SITEMAP_XML_HELP_ARTICLES)
@@ -221,7 +242,7 @@ def test_fetch_sitemap_articles_filter_keeps_only_articles_urls(mock_get: MagicM
     assert "https://help.twingate.com/categories/general" not in result
 
 
-@patch("fetch_sitemap.requests.get")
+@patch("url_safety.requests.get")
 def test_fetch_sitemap_articles_filter_ignores_docs_urls(mock_get: MagicMock) -> None:
     """path_filter='/articles/' does not accidentally match /docs/ URLs."""
     mock_get.return_value = _mock_response(SITEMAP_XML_MIXED_DOCS_AND_ARTICLES)
@@ -232,7 +253,7 @@ def test_fetch_sitemap_articles_filter_ignores_docs_urls(mock_get: MagicMock) ->
     assert "https://www.twingate.com/docs/architecture" not in result
 
 
-@patch("fetch_sitemap.requests.get")
+@patch("url_safety.requests.get")
 def test_fetch_sitemap_default_path_filter_still_keeps_docs_and_drops_articles(
     mock_get: MagicMock,
 ) -> None:

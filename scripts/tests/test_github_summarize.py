@@ -152,6 +152,51 @@ def test_delta_prompt_names_the_no_change_sentinel() -> None:
     assert github_summarize.NO_CHANGE_SENTINEL in github_summarize._DELTA_SYSTEM_PROMPT
 
 
+# ── prompt-injection hardening ──────────────────────────────────────────────
+
+
+@pytest.mark.parametrize(
+    "prompt",
+    [github_summarize._DELTA_SYSTEM_PROMPT, github_summarize._FULL_SYSTEM_PROMPT],
+)
+def test_system_prompts_instruct_to_ignore_embedded_instructions(prompt: str) -> None:
+    assert "untrusted" in prompt.lower()
+    assert "<untrusted_source>" in prompt
+    assert "binaries.twingate.com" in prompt
+
+
+@patch("github_summarize.anthropic.Anthropic")
+def test_summarize_repo_delta_wraps_content_in_untrusted_source_delimiters(
+    mock_anthropic_cls,
+) -> None:
+    mock_client = mock_anthropic_cls.return_value
+    mock_client.messages.create.return_value = _mock_message(text="## Updated Summary")
+
+    summarize_repo_delta("prior body", "diff text", {"full_name": "Twingate/r"})
+
+    user_message = mock_client.messages.create.call_args.kwargs["messages"][0]["content"]
+    assert "<untrusted_source>" in user_message
+    assert "</untrusted_source>" in user_message
+    assert user_message.index("<untrusted_source>") < user_message.index("prior body")
+    assert user_message.index("diff text") < user_message.index("</untrusted_source>")
+
+
+@patch("github_summarize.anthropic.Anthropic")
+def test_summarize_repo_full_wraps_corpus_in_untrusted_source_delimiters(
+    mock_anthropic_cls,
+) -> None:
+    mock_client = mock_anthropic_cls.return_value
+    mock_client.messages.create.return_value = _mock_message(text="## Fresh Summary")
+
+    summarize_repo_full("README body", [], {"full_name": "Twingate/r"})
+
+    user_message = mock_client.messages.create.call_args.kwargs["messages"][0]["content"]
+    assert "<untrusted_source>" in user_message
+    assert "</untrusted_source>" in user_message
+    assert user_message.index("<untrusted_source>") < user_message.index("README body")
+    assert user_message.index("README body") < user_message.index("</untrusted_source>")
+
+
 # ── summarize_repo_full ──────────────────────────────────────────────────────
 
 

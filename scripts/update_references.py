@@ -52,6 +52,7 @@ from pipeline_metrics import (
     load_norm_cache,
     save_norm_cache,
 )
+from reference_lint import SecurityReport, lint_and_record, write_markdown_report
 from summarize_docs import (
     CLAUDE_MODEL,
     MAX_TEXT_LENGTH,
@@ -72,6 +73,8 @@ PROJECT_ROOT = SCRIPTS_DIR.parent
 SKILLS_DIR = PROJECT_ROOT / "skills"
 TRIAGE_DIR = SKILLS_DIR / "_triage"
 HASH_CACHE_PATH = SCRIPTS_DIR / ".doc_hashes.json"
+PIPELINE_RUNS_PATH = PROJECT_ROOT / "docs" / "metrics" / "pipeline-runs.jsonl"
+GITHUB_RUNS_PATH = PROJECT_ROOT / "docs" / "metrics" / "github-runs.jsonl"
 
 # Exponential backoff for rate-limit retries.
 BACKOFF_BASE_SECONDS = 1.0
@@ -82,6 +85,23 @@ BACKOFF_MAX_RETRIES = 4
 MANUAL_REFERENCE_MARKER = "manual-reference: do-not-overwrite"
 
 DEFAULT_SOURCE_TYPE = "docs"
+
+# GitHub org whose repos/wikis are community-maintained rather than official
+# Twingate content; their generated references are stamped trust=community.
+COMMUNITY_TRUST_ORG = "Twingate-Community"
+
+
+def trust_tier_for_org(org: str) -> str:
+    """Return the frontmatter trust tier for a GitHub org's content.
+
+    Args:
+        org: GitHub organization login the content was discovered under.
+
+    Returns:
+        ``"community"`` for :data:`COMMUNITY_TRUST_ORG`, ``"official"``
+        otherwise.
+    """
+    return "community" if org == COMMUNITY_TRUST_ORG else "official"
 
 
 def is_manual_reference(path: Path) -> bool:
@@ -288,11 +308,15 @@ def write_reference_file(
     type_: str,
     fetched: str,
     source_version: str,
+    trust: str = "official",
 ) -> Path:
     """Write a summary to the skill's ``references/`` directory.
 
     Creates the directory tree if needed and prepends a provenance
-    frontmatter block (see :func:`build_frontmatter`).
+    frontmatter block (see :func:`build_frontmatter`). Content linting
+    happens upstream of this function (see :func:`reference_lint.lint_and_record`
+    at each call site) — by the time content reaches here it has already
+    been cleared for writing.
 
     Args:
         skill: Skill name (e.g. ``"twingate-connectors"``).
@@ -302,6 +326,8 @@ def write_reference_file(
         type_: Source category — ``"docs"``, ``"help"``, or ``"github"``.
         fetched: Fetch date as an ISO ``YYYY-MM-DD`` string.
         source_version: Version identifier of the source content.
+        trust: Frontmatter trust tier — ``"official"`` (default) or
+            ``"community"`` for Twingate-Community-sourced GitHub content.
 
     Returns:
         The absolute path of the file that was written.
@@ -323,7 +349,7 @@ def write_reference_file(
     if is_manual_reference(output_path):
         raise ValueError(f"Refusing to overwrite hand-authored reference: {resolved}")
 
-    frontmatter = build_frontmatter(source, type_, fetched, source_version)
+    frontmatter = build_frontmatter(source, type_, fetched, source_version, trust=trust)
     if MANUAL_REFERENCE_MARKER in frontmatter:
         raise ValueError(
             f"Refusing to write frontmatter containing the manual-reference marker: {resolved}"
@@ -346,6 +372,7 @@ def process_doc(
     source_name: str = "docs",
     metrics: RunMetrics | None = None,
     norm_cache: dict[str, str] | None = None,
+    security: SecurityReport | None = None,
 ) -> None:
     """Fetch, hash-check, summarize, and write one documentation page.
 
@@ -369,6 +396,11 @@ def process_doc(
         metrics: Optional churn-attribution accumulator (observation only).
         norm_cache: URL-to-normalized-hash cache; gates the skip decision so
             footer-only ("Last updated … ago") changes don't force a re-summarize.
+        security: Optional run-wide lint-finding accumulator. When the
+            generated summary contains a BLOCK-severity finding (see
+            :mod:`reference_lint`), nothing is written and the doc counts as
+            failed rather than updated; FLAG findings are recorded but do
+            not stop the write.
     """
     resolved_fetched = fetched if fetched is not None else date.today().isoformat()
     slug = url_to_slug(url)
@@ -435,6 +467,11 @@ def process_doc(
 
     summary = summarize_with_backoff(url, html)
     if summary is None:
+        stats["failed"] += 1
+        return
+
+    if not lint_and_record(summary, source=url, target_path=output_path, security=security):
+        logger.error("Skipping write for %s: generated content blocked by reference_lint", url)
         stats["failed"] += 1
         return
 
@@ -509,6 +546,7 @@ def process_new_urls(
     source_name: str = "docs",
     metrics: RunMetrics | None = None,
     norm_cache: dict[str, str] | None = None,
+    security: SecurityReport | None = None,
 ) -> None:
     """Auto-assign and process newly discovered URLs for one source.
 
@@ -525,6 +563,8 @@ def process_new_urls(
         source_name: Source name used to tag observation metrics.
         metrics: Optional churn-attribution accumulator (observation only).
         norm_cache: Optional shadow-hash cache (observation only).
+        security: Optional run-wide lint-finding accumulator, forwarded to
+            :func:`process_doc`.
     """
     for url in new_urls:
         assigned_skill = auto_assign(url, patterns) or ""
@@ -540,6 +580,7 @@ def process_new_urls(
                 source_name=source_name,
                 metrics=metrics,
                 norm_cache=norm_cache,
+                security=security,
             )
         else:
             logger.warning("No auto-assign match for %s, routing to triage", url)
@@ -554,6 +595,7 @@ def process_new_urls(
                 source_name=source_name,
                 metrics=metrics,
                 norm_cache=norm_cache,
+                security=security,
             )
 
 
@@ -667,12 +709,16 @@ def write_github_reference(
     source: str,
     fetched: str,
     source_version: str,
+    trust: str = "official",
 ) -> Path:
     """Write a GitHub-sourced reference file, routing unmapped repos to triage.
 
     A mapped repo (non-empty ``skill``) goes through
     :func:`write_reference_file`; an unmapped repo (``skill == ""``) is routed
-    to ``_triage/`` with a ``<!-- triage: unassigned -->`` marker.
+    to ``_triage/`` with a ``<!-- triage: unassigned -->`` marker. Content
+    linting happens upstream (see :func:`reference_lint.lint_and_record` at
+    each call site) — by the time content reaches here it has already been
+    cleared for writing.
 
     Args:
         skill: Target skill directory name, or ``""`` to route to triage.
@@ -681,6 +727,8 @@ def write_github_reference(
         source: Provenance URL — the repo's ``html_url`` or its ``/wiki`` page.
         fetched: ISO ``YYYY-MM-DD`` fetch date for the frontmatter.
         source_version: Git commit SHA this summary was generated from.
+        trust: Frontmatter trust tier — ``"official"`` (default) or
+            ``"community"`` for Twingate-Community-sourced content.
 
     Returns:
         The absolute path of the file that was written.
@@ -698,6 +746,7 @@ def write_github_reference(
             type_="github",
             fetched=fetched,
             source_version=source_version,
+            trust=trust,
         )
 
     TRIAGE_DIR.mkdir(parents=True, exist_ok=True)
@@ -706,7 +755,7 @@ def write_github_reference(
     if not resolved.is_relative_to(TRIAGE_DIR.resolve()):
         raise ValueError(f"Triage output path escapes triage directory: {resolved}")
 
-    frontmatter = build_frontmatter(source, "github", fetched, source_version)
+    frontmatter = build_frontmatter(source, "github", fetched, source_version, trust=trust)
     if MANUAL_REFERENCE_MARKER in frontmatter:
         raise ValueError(
             f"Refusing to write triage frontmatter containing the manual-reference marker: {resolved}"
@@ -803,6 +852,7 @@ def _process_github_repo(
     token: str | None,
     stats: dict[str, int],
     github_metrics: GitHubRunMetrics,
+    security: SecurityReport | None = None,
 ) -> None:
     """Process one discovered GitHub repo: gate, summarize, write, then its wiki.
 
@@ -819,10 +869,15 @@ def _process_github_repo(
         token: A GitHub token, or ``None``.
         stats: Mutable counters (``updated`` / ``skipped`` / ``failed``).
         github_metrics: Mutable per-repo LLM usage accumulator.
+        security: Optional run-wide lint-finding accumulator. A BLOCK finding
+            in the generated summary prevents the write and counts as failed
+            rather than updated; FLAG findings are recorded but do not stop
+            the write.
     """
     full_name = repo.full_name
     skill = (config_entry or {}).get("skill", "")
     track_releases = bool((config_entry or {}).get("track_releases", False))
+    trust = trust_tier_for_org(org)
 
     if not is_changed_since_last_run(repo, state):
         logger.info("%s: unchanged since last run, skipping", full_name)
@@ -842,25 +897,31 @@ def _process_github_repo(
         stats["skipped"] += 1
     elif repo.is_stub:
         summary_text = _stub_summary(repo)
-        write_github_reference(
-            skill,
-            slug,
-            summary_text,
-            source=repo.html_url,
-            fetched=fetched,
-            source_version=entry_state.get("last_sha") or "unknown",
-        )
-        state[full_name] = {
-            **entry_state,
-            "doc_path": state_doc_path(doc_path),
-            "pushed_at": repo.pushed_at,
-        }
-        github_metrics.append(
-            build_metrics_record(
-                full_name=full_name, mode="stub", result=None, wall_clock_s=0.0, diff_bytes=0
+        if not lint_and_record(
+            summary_text, source=repo.html_url, target_path=doc_path, security=security
+        ):
+            stats["failed"] += 1
+        else:
+            write_github_reference(
+                skill,
+                slug,
+                summary_text,
+                source=repo.html_url,
+                fetched=fetched,
+                source_version=entry_state.get("last_sha") or "unknown",
+                trust=trust,
             )
-        )
-        stats["updated"] += 1
+            state[full_name] = {
+                **entry_state,
+                "doc_path": state_doc_path(doc_path),
+                "pushed_at": repo.pushed_at,
+            }
+            github_metrics.append(
+                build_metrics_record(
+                    full_name=full_name, mode="stub", result=None, wall_clock_s=0.0, diff_bytes=0
+                )
+            )
+            stats["updated"] += 1
     else:
         head_sha = get_default_branch_head_sha(org, repo.name, repo.default_branch, token)
         if head_sha is None:
@@ -913,6 +974,10 @@ def _process_github_repo(
 
                 if result is None:
                     stats["failed"] += 1
+                elif not lint_and_record(
+                    result.text, source=repo.html_url, target_path=doc_path, security=security
+                ):
+                    stats["failed"] += 1
                 else:
                     write_github_reference(
                         skill,
@@ -921,6 +986,7 @@ def _process_github_repo(
                         source=repo.html_url,
                         fetched=fetched,
                         source_version=head_sha,
+                        trust=trust,
                     )
                     state[full_name] = {
                         **entry_state,
@@ -931,7 +997,7 @@ def _process_github_repo(
                     stats["updated"] += 1
 
     if repo.has_wiki:
-        _process_github_wiki(repo, org, skill, state, fetched, stats, github_metrics)
+        _process_github_wiki(repo, org, skill, state, fetched, stats, github_metrics, security=security)
 
 
 def _process_github_wiki(
@@ -942,6 +1008,7 @@ def _process_github_wiki(
     fetched: str,
     stats: dict[str, int],
     github_metrics: GitHubRunMetrics,
+    security: SecurityReport | None = None,
 ) -> None:
     """Process one repo's wiki as an independent source.
 
@@ -957,8 +1024,11 @@ def _process_github_wiki(
         fetched: ISO ``YYYY-MM-DD`` fetch date for the frontmatter.
         stats: Mutable counters.
         github_metrics: Mutable per-repo LLM usage accumulator.
+        security: Optional run-wide lint-finding accumulator; see
+            :func:`_process_github_repo`.
     """
     full_name = repo.full_name
+    trust = trust_tier_for_org(org)
     slug = github_wiki_slug(org, repo.name)
     doc_path = (
         references_dir_for_skill(skill) / f"{slug}.md" if skill else TRIAGE_DIR / f"{slug}.md"
@@ -1021,13 +1091,21 @@ def _process_github_wiki(
             stats["failed"] += 1
             return
 
+        wiki_source = f"{repo.html_url}/wiki"
+        if not lint_and_record(
+            result.text, source=wiki_source, target_path=doc_path, security=security
+        ):
+            stats["failed"] += 1
+            return
+
         write_github_reference(
             skill,
             slug,
             result.text,
-            source=f"{repo.html_url}/wiki",
+            source=wiki_source,
             fetched=fetched,
             source_version=snapshot.head_sha,
+            trust=trust,
         )
         state[full_name] = {**entry_state, "wiki_last_sha": snapshot.head_sha}
         stats["updated"] += 1
@@ -1037,6 +1115,7 @@ def process_github_source(
     fetched: str,
     stats: dict[str, int],
     github_metrics: GitHubRunMetrics,
+    security: SecurityReport | None = None,
 ) -> None:
     """Discover, diff, and LLM-summarize Twingate GitHub repos and wikis.
 
@@ -1051,6 +1130,8 @@ def process_github_source(
         fetched: ISO ``YYYY-MM-DD`` fetch date for the frontmatter.
         stats: Mutable counters (``updated`` / ``skipped`` / ``failed``).
         github_metrics: Mutable per-repo LLM usage accumulator for this run.
+        security: Optional run-wide lint-finding accumulator, forwarded to
+            :func:`_process_github_repo`.
     """
     token = os.environ.get("GITHUB_TOKEN")
     if token:
@@ -1078,7 +1159,15 @@ def process_github_source(
             for repo in org_discovery.kept:
                 try:
                     _process_github_repo(
-                        repo, org, repo_config.get(repo.full_name), state, fetched, token, stats, github_metrics
+                        repo,
+                        org,
+                        repo_config.get(repo.full_name),
+                        state,
+                        fetched,
+                        token,
+                        stats,
+                        github_metrics,
+                        security=security,
                     )
                 except Exception as exc:
                     logger.error("Unexpected error processing %s: %s", repo.full_name, exc)
@@ -1115,6 +1204,7 @@ def main() -> int:
     hash_cache = load_hash_cache(HASH_CACHE_PATH)
     norm_cache = load_norm_cache(NORM_HASH_CACHE_PATH)
     metrics = RunMetrics()
+    security = SecurityReport()
     patterns = mapping.get("auto_assign_patterns", [])
     exclude_urls: set[str] = set(mapping.get("exclude", []))
     stats: dict[str, int] = {"updated": 0, "skipped": 0, "failed": 0}
@@ -1196,6 +1286,7 @@ def main() -> int:
             source_name=entry_type,
             metrics=metrics,
             norm_cache=norm_cache,
+            security=security,
         )
 
     # Step 4: Handle newly discovered docs per source, stamping each source's type.
@@ -1220,6 +1311,7 @@ def main() -> int:
             source_name=source.get("name", DEFAULT_SOURCE_TYPE),
             metrics=metrics,
             norm_cache=norm_cache,
+            security=security,
         )
 
     # Step 4.5: GitHub repos + wikis — an independent source with its own
@@ -1227,7 +1319,7 @@ def main() -> int:
     logger.info("Step 4.5: Processing GitHub repos and wikis")
     github_metrics = GitHubRunMetrics()
     github_run_start = time.perf_counter()
-    process_github_source(fetched, stats, github_metrics)
+    process_github_source(fetched, stats, github_metrics, security=security)
 
     # Step 5: Persist the hash cache and the observation-only shadow cache.
     save_hash_cache(hash_cache, HASH_CACHE_PATH)
@@ -1238,7 +1330,7 @@ def main() -> int:
         metrics,
         run_ts=datetime.now(timezone.utc).isoformat(),
         wall_clock_s=time.perf_counter() - run_start,
-        jsonl_path=PROJECT_ROOT / "docs" / "metrics" / "pipeline-runs.jsonl",
+        jsonl_path=PIPELINE_RUNS_PATH,
         step_summary_path=os.environ.get("GITHUB_STEP_SUMMARY"),
     )
 
@@ -1247,9 +1339,31 @@ def main() -> int:
         github_metrics,
         run_ts=datetime.now(timezone.utc).isoformat(),
         wall_clock_s=time.perf_counter() - github_run_start,
-        jsonl_path=PROJECT_ROOT / "docs" / "metrics" / "github-runs.jsonl",
+        jsonl_path=GITHUB_RUNS_PATH,
         step_summary_path=os.environ.get("GITHUB_STEP_SUMMARY"),
     )
+
+    # Step 5.7: Security review report (BLOCK/FLAG findings from reference_lint).
+    security_report_path = os.environ.get("SECURITY_REVIEW_REPORT")
+    if security_report_path:
+        write_markdown_report(security, Path(security_report_path))
+        logger.info(
+            "Security review report written to %s (%d BLOCK, %d FLAG)",
+            security_report_path,
+            security.block_count,
+            security.flag_count,
+        )
+    if security.has_findings:
+        logger.warning(
+            "This run recorded %d BLOCK and %d FLAG content-lint finding(s); "
+            "see the security review report for details.",
+            security.block_count,
+            security.flag_count,
+        )
+    github_output_path = os.environ.get("GITHUB_OUTPUT")
+    if github_output_path:
+        with open(github_output_path, "a", encoding="utf-8") as fh:
+            fh.write(f"security_flagged={'true' if security.has_findings else 'false'}\n")
 
     # Step 6: Final report.
     logger.info(
@@ -1361,7 +1475,7 @@ def seed_github(fetched: str | None = None) -> int:
         github_metrics,
         run_ts=datetime.now(timezone.utc).isoformat(),
         wall_clock_s=time.perf_counter() - run_start,
-        jsonl_path=PROJECT_ROOT / "docs" / "metrics" / "github-runs.jsonl",
+        jsonl_path=GITHUB_RUNS_PATH,
         step_summary_path=os.environ.get("GITHUB_STEP_SUMMARY"),
     )
     logger.info(

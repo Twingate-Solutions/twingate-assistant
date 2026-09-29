@@ -101,7 +101,12 @@ def test_fetch_doc_html_returns_html_on_success(mock_get: MagicMock) -> None:
 
     assert result == "<html><body>OK</body></html>"
     mock_get.assert_called_once_with(
-        "https://www.twingate.com/docs/test", timeout=30, headers=REQUEST_HEADERS
+        "https://www.twingate.com/docs/test",
+        params=None,
+        timeout=30,
+        headers=REQUEST_HEADERS,
+        allow_redirects=False,
+        stream=True,
     )
 
 
@@ -268,6 +273,45 @@ def test_summarize_doc_long_html_still_calls_api(
     ]
     assert "Big Doc" in user_content
     assert "[Content truncated for length]" in user_content
+
+
+# ── prompt-injection hardening ──────────────────────────────────────────────
+
+
+def test_system_prompt_instructs_to_ignore_embedded_instructions() -> None:
+    """The system prompt tells the model the source is untrusted and never
+    to follow instructions embedded in it."""
+    from summarize_docs import SYSTEM_PROMPT
+
+    assert "untrusted" in SYSTEM_PROMPT.lower()
+    assert "<untrusted_source>" in SYSTEM_PROMPT
+    assert "never be followed" in SYSTEM_PROMPT.lower() or "must never be followed" in SYSTEM_PROMPT.lower()
+
+
+def test_system_prompt_forbids_pipe_to_shell_from_non_twingate_hosts() -> None:
+    from summarize_docs import SYSTEM_PROMPT
+
+    assert "binaries.twingate.com" in SYSTEM_PROMPT
+    assert "pipe" in SYSTEM_PROMPT.lower() or "curl" in SYSTEM_PROMPT.lower()
+
+
+@patch("summarize_docs.anthropic.Anthropic")
+def test_summarize_doc_wraps_page_text_in_untrusted_source_delimiters(
+    mock_anthropic_cls: MagicMock,
+) -> None:
+    """The scraped page text is fenced so the model can distinguish it from
+    the surrounding instructions."""
+    mock_client = MagicMock()
+    mock_anthropic_cls.return_value = mock_client
+    mock_client.messages.create.return_value = _mock_claude_message("# Summary")
+
+    summarize_doc("https://www.twingate.com/docs/test", MINIMAL_HTML)
+
+    user_content = mock_client.messages.create.call_args.kwargs["messages"][0]["content"]
+    assert "<untrusted_source>" in user_content
+    assert "</untrusted_source>" in user_content
+    assert user_content.index("<untrusted_source>") < user_content.index("Hello world")
+    assert user_content.index("Hello world") < user_content.index("</untrusted_source>")
 
 
 # ── normalize_for_hash tests (shadow-hash footer stripping) ─────────────────

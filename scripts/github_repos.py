@@ -21,7 +21,13 @@ from typing import Any, cast
 
 import requests
 
-from url_safety import REQUEST_HEADERS, _is_safe_url
+from url_safety import (
+    REQUEST_HEADERS,
+    ResponseTooLargeError,
+    TooManyRedirectsError,
+    _is_safe_url,
+    safe_get,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +40,12 @@ REPO_STATE_PATH = SCRIPTS_DIR / ".repo_state.json"
 GITHUB_API_BASE = "https://api.github.com"
 GITHUB_API_VERSION = "2022-11-28"
 REQUEST_TIMEOUT_SECONDS = 30
+
+# Size cap for a single GitHub API response or README fetch (decompressed bytes).
+MAX_GITHUB_RESPONSE_BYTES = 2 * 1024 * 1024
+
+# Per-file size cap for wiki markdown files read out of a clone.
+MAX_WIKI_FILE_BYTES = 1 * 1024 * 1024
 
 # GitHub-specific headers merged on top of the shared pipeline User-Agent.
 GITHUB_API_HEADERS: dict[str, str] = {
@@ -315,10 +327,19 @@ def _github_get(
     waits_used = 0
     while True:
         try:
-            response = requests.get(
-                url, params=params, timeout=REQUEST_TIMEOUT_SECONDS, headers=headers
+            response = safe_get(
+                url,
+                params=params,
+                timeout=REQUEST_TIMEOUT_SECONDS,
+                headers=headers,
+                max_bytes=MAX_GITHUB_RESPONSE_BYTES,
             )
-        except requests.RequestException as exc:
+        except (
+            requests.RequestException,
+            ValueError,
+            TooManyRedirectsError,
+            ResponseTooLargeError,
+        ) as exc:
             logger.warning("GitHub API request failed for %s: %s", url, exc)
             return None
 
@@ -868,6 +889,57 @@ def _wiki_clone_url(org: str, repo: str) -> str:
     return f"https://github.com/{org}/{repo}.wiki.git"
 
 
+def _iter_safe_wiki_files(dest: Path) -> list[Path]:
+    """Return a wiki clone's ``*.md`` files, excluding symlinks and oversized files.
+
+    A wiki page's content is attacker-controlled (anyone can edit a public
+    GitHub wiki). Without this guard, a page that is — or contains — a
+    symlink pointing outside ``dest`` would let the pipeline read and
+    summarize arbitrary files from the host filesystem. Also skips anything
+    that is not a regular file, anything whose resolved path escapes
+    ``dest`` (e.g. via a symlinked intermediate directory), and anything
+    over :data:`MAX_WIKI_FILE_BYTES`.
+
+    Args:
+        dest: The wiki clone's working-tree root.
+
+    Returns:
+        A sorted list of safe, readable ``*.md`` file paths.
+    """
+    dest_resolved = dest.resolve()
+    safe_files: list[Path] = []
+    for path in sorted(dest.rglob("*.md")):
+        if path.is_symlink():
+            logger.warning("Skipping symlinked wiki file: %s", path)
+            continue
+        if not path.is_file():
+            logger.warning("Skipping non-regular-file wiki entry: %s", path)
+            continue
+        try:
+            resolved = path.resolve()
+        except OSError as exc:
+            logger.warning("Skipping wiki file that could not be resolved: %s (%s)", path, exc)
+            continue
+        if not resolved.is_relative_to(dest_resolved):
+            logger.warning("Skipping wiki file resolving outside the clone: %s", path)
+            continue
+        try:
+            size = resolved.stat().st_size
+        except OSError as exc:
+            logger.warning("Skipping wiki file that could not be stat'd: %s (%s)", path, exc)
+            continue
+        if size > MAX_WIKI_FILE_BYTES:
+            logger.warning(
+                "Skipping oversized wiki file (%d bytes > %d-byte cap): %s",
+                size,
+                MAX_WIKI_FILE_BYTES,
+                path,
+            )
+            continue
+        safe_files.append(path)
+    return safe_files
+
+
 def clone_wiki(org: str, repo: str, dest: Path) -> WikiSnapshot | None:
     """Clone a repo's wiki and read its markdown files.
 
@@ -890,7 +962,7 @@ def clone_wiki(org: str, repo: str, dest: Path) -> WikiSnapshot | None:
 
     try:
         clone_result = subprocess.run(
-            ["git", "clone", "--quiet", clone_url, str(dest)],
+            ["git", "-c", "core.symlinks=false", "clone", "--quiet", clone_url, str(dest)],
             capture_output=True,
             text=True,
             timeout=60,
@@ -913,7 +985,7 @@ def clone_wiki(org: str, repo: str, dest: Path) -> WikiSnapshot | None:
         )
         return None
 
-    md_files = sorted(dest.rglob("*.md"))
+    md_files = _iter_safe_wiki_files(dest)
     if not md_files:
         logger.info("%s: wiki cloned but contains no .md files; treating as empty", full_name)
         return None

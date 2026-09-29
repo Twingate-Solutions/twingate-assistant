@@ -3,9 +3,7 @@
 import logging
 import xml.etree.ElementTree as ET
 
-import requests
-
-from url_safety import REQUEST_HEADERS, _is_safe_url
+from url_safety import REQUEST_HEADERS, _is_safe_url, safe_get
 
 logger = logging.getLogger(__name__)
 
@@ -33,24 +31,29 @@ def fetch_sitemap(
         A sorted, deduplicated list of URLs matching ``path_filter``.
 
     Raises:
+        ValueError: If ``url`` fails the fetch allowlist, or the sitemap
+            response exceeds ``MAX_SITEMAP_BYTES``.
         requests.RequestException: If the HTTP request fails.
-        ValueError: If the sitemap response exceeds MAX_SITEMAP_BYTES.
+        url_safety.TooManyRedirectsError: If the request redirects more than
+            ``safe_get``'s default hop limit.
         xml.etree.ElementTree.ParseError: If the response body is not valid XML.
     """
+    if not _is_safe_url(url):
+        raise ValueError(f"Refusing to fetch disallowed sitemap URL: {url}")
+
     logger.info("Fetching sitemap from %s", url)
-    response = requests.get(url, timeout=REQUEST_TIMEOUT_SECONDS, headers=REQUEST_HEADERS)
+    response = safe_get(
+        url,
+        timeout=REQUEST_TIMEOUT_SECONDS,
+        headers=REQUEST_HEADERS,
+        max_bytes=MAX_SITEMAP_BYTES,
+    )
     response.raise_for_status()
     logger.info(
         "Sitemap fetched successfully, status=%d, length=%d bytes",
         response.status_code,
         len(response.content),
     )
-
-    if len(response.content) > MAX_SITEMAP_BYTES:
-        raise ValueError(
-            f"Sitemap response too large ({len(response.content)} bytes); "
-            f"refusing to parse (limit: {MAX_SITEMAP_BYTES} bytes)"
-        )
 
     root = ET.fromstring(response.content)
 

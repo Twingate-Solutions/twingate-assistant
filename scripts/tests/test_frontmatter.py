@@ -62,6 +62,28 @@ def test_build_frontmatter_is_pure_function():
     assert build_frontmatter(*args) == build_frontmatter(*args)
 
 
+def test_build_frontmatter_defaults_trust_to_official():
+    """Omitting trust defaults to 'official' (docs/help are always official)."""
+    block = build_frontmatter("https://example.com/x", "docs", "2026-01-01", "hash")
+    inner = block[len("---\n") : -len("---\n")]
+    parsed = yaml.safe_load(inner)
+    assert parsed["trust"] == "official"
+
+
+def test_build_frontmatter_accepts_community_trust():
+    """A GitHub-Community-sourced reference can be stamped trust=community."""
+    block = build_frontmatter(
+        source="https://github.com/Twingate-Community/example",
+        type_="github",
+        fetched="2026-08-05",
+        source_version="deadbeef",
+        trust="community",
+    )
+    inner = block[len("---\n") : -len("---\n")]
+    parsed = yaml.safe_load(inner)
+    assert parsed["trust"] == "community"
+
+
 # ---------------------------------------------------------------------------
 # MAIN_CONTENT_SELECTORS — help.twingate.com knowledge-base layout
 # ---------------------------------------------------------------------------

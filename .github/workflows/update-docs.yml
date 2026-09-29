@@ -5,22 +5,27 @@ on:
     - cron: '0 6 * * 0'  # Sunday 6am UTC
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   update-references:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
       - run: pip install -r scripts/requirements.txt
       - name: Run update pipeline
+        id: pipeline
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SECURITY_REVIEW_REPORT: ${{ runner.temp }}/security-review.md
         # No GITHUB_TOKEN: the GitHub source runs unauthenticated. Every repo/wiki
         # is public, so a token grants no access — it would only lift the 60 req/hr
         # anonymous rate limit. The pipeline throttles to that limit instead
@@ -68,14 +73,33 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
               f.write(f'version={new_version}\n')
           PYEOF
+      - name: Build PR body with security report
+        id: pr-body
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          PLUGIN_VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          {
+            echo "Automated weekly update of documentation reference summaries."
+            echo ""
+            echo "Plugin version bumped to **v${PLUGIN_VERSION}** (CalVer: \`YYYY.DOY.patch\`)."
+
+            if [ -f "$RUNNER_TEMP/security-review.md" ]; then
+              echo ""
+              echo "## Security Review"
+              cat "$RUNNER_TEMP/security-review.md"
+            else
+              echo ""
+              echo "_Security review report not generated._"
+            fi
+          } > "$RUNNER_TEMP/pr-body.md"
       - name: Create PR
         if: steps.changes.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           title: 'docs: weekly reference update (v${{ steps.bump.outputs.version }})'
-          body: |
-            Automated weekly update of documentation reference summaries.
-
-            Plugin version bumped to **v${{ steps.bump.outputs.version }}** (CalVer: `YYYY.DOY.patch`).
+          body-path: ${{ runner.temp }}/pr-body.md
           branch: docs/weekly-update
           commit-message: 'docs: update reference summaries (v${{ steps.bump.outputs.version }})'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          labels: ${{ steps.pipeline.outputs.security_flagged == 'true' && 'needs-security-review' || '' }}
