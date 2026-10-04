@@ -1,53 +1,52 @@
 ---
 source: https://help.twingate.com/articles/3353935754-connectivity-timeout-issues-when-using-passive-pasv-ftp-mode
 type: help
-fetched: 2026-09-06
-source_version: 0003a0df52b1d9ad70f11a028b11b1e678753e3419f7a7fb8a61e88c3da89c89
+fetched: 2026-10-04
+source_version: f1c662de65fb8f1a7151bccc87f85d30878b79984fafe67ebb82fd7e1cb32b85
+trust: official
 ---
 
-# Connectivity/Timeout Issues with PASSIVE (PASV) FTP Mode
+# Connectivity/Timeout Issues with Passive (PASV) FTP Mode
 
 ## Summary
-PASV FTP mode fails through Twingate when only the FTP hostname is defined as a resource. The FTP server returns its actual IP in the PASV response, and Twingate doesn't intercept traffic to that raw IP, causing the data connection to fail.
+PASV FTP fails through Twingate when only the FTP hostname is defined as a resource. In passive mode, the FTP server returns its real IP address for data connections, which Twingate doesn't intercept since it only proxies traffic to the defined hostname—not the raw IP.
 
 ## Key Information
-- Affects PASV/passive mode FTP only; initial authentication succeeds but transfers fail
-- Root cause: Twingate intercepts by hostname/DNS, but PASV mode bypasses DNS by returning a raw IP in the `227` response
-- The FTP client then connects directly to that IP, which Twingate ignores, resulting in an unreachable host
-- Twingate replaces DNS responses with CGNAT IPs to proxy traffic — this mechanism doesn't apply to IPs embedded in FTP protocol responses
+- Affects FTP passive (PASV) mode only
+- Initial authentication succeeds; file transfers/directory listings time out
+- Root cause: PASV mode returns the server's actual IP (e.g., `1.2.3.4`), bypassing Twingate's CGNAT interception which only activates on the defined hostname/FQDN
+- Twingate intercepts DNS lookups and returns a CGNAT IP, but PASV data channel connects directly to the real server IP
 
 ## Symptoms
-- FTP resource defined by FQDN only
-- Authentication completes successfully
-- Data transfers time out
+- FTP resource defined by FQDN only (no IP)
+- Auth completes successfully
+- Transfers hang or timeout after `227 Entering Passive Mode (x,x,x,x,p,p)`
 - Error messages:
-  - `TLS/SSL connection refused, turning off session resuming and retrying`
-  - `425: Failed to establish connection`
+  - `TLS/SSL connection refused, turning off session resuming and retrying.`
+  - `425: Failed to establish connection.`
 
 ## Resolution (Two Options)
 
-### Option 1: Add the FTP Server's IP as a Twingate Resource (Recommended)
-1. Identify the actual IP of the FTP server (e.g., `1.2.3.4` from the `227` PASV response)
-2. Add that IP address as a separate Twingate resource in your network
-3. Twingate will then intercept the PASV data connection to that IP via the Connector
+**Option 1 — Add the FTP server's IP as a Twingate resource (recommended)**
+1. Identify the real IP address of the FTP server (e.g., `1.2.3.4`)
+2. In the Twingate Admin Console, add a new Resource using that IP address
+3. Assign it to the same Remote Network and the appropriate Group(s)
+4. Twingate will now intercept PASV data channel connections to that IP
 
-### Option 2: Disable Passive Mode
-- Configure the FTP client to use **active mode** instead of passive mode
-- Not always feasible depending on firewall/NAT constraints on the client side
+**Option 2 — Disable passive mode on the FTP client**
+- Switch the FTP client to Active (PORT) mode
+- Active mode does not involve the server advertising its own IP for the data channel
 
-## Configuration Values
-| Parameter | Value |
-|-----------|-------|
-| Resource type to add | IP address of FTP server |
-| Protocol | FTP (port 21 + data ports as needed) |
+## Prerequisites
+- Access to Twingate Admin Console
+- Knowledge of the FTP server's real IP address (resolve via DNS externally before adding resource)
 
 ## Gotchas
-- Adding only the FQDN is insufficient — **both** the hostname and the IP must be Twingate resources if using PASV mode
-- The `227` PASV response encodes the IP as comma-separated octets: `(1,2,3,4,24,123)` = IP `1.2.3.4`, ports derived from last two numbers
-- Active mode may be blocked by firewalls/NAT on the client side, making IP resource addition the more practical fix
-- This issue applies regardless of platform (Windows, macOS, Linux, etc.)
+- Defining the resource by FQDN alone is **insufficient** for PASV FTP—the IP must also be explicitly added
+- If the FTP server's IP changes (dynamic DNS), the IP resource will need to be updated manually
+- This is a PASV-specific issue; Active mode FTP is not affected
+- The PASV response encodes IP as comma-separated octets: `(1,2,3,4,24,123)` = IP `1.2.3.4`, port `24*256+123`
 
 ## Related Docs
-- Twingate Resource configuration
-- Twingate Connector setup
-- DNS interception behavior (CGNAT routing)
+- Twingate Resource configuration (Admin Console)
+- Twingate Component: Resource (connection via Client)

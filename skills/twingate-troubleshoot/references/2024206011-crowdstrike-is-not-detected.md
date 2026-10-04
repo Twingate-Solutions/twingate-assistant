@@ -1,38 +1,41 @@
 ---
 source: https://help.twingate.com/articles/2024206011-crowdstrike-is-not-detected
 type: help
-fetched: 2026-09-06
-source_version: 834d91c2555c6ede843a34f61a4492478c0e8b43eed468cad8000deeeeabbff6
+fetched: 2026-10-04
+source_version: d6a025600f55afe54e7bdae01037f71507ba10305dd9ba94cf790694a6bd391e
+trust: official
 ---
 
 # CrowdStrike Not Detected by Twingate
 
 ## Page Title
-CrowdStrike Is Not Detected
+CrowdStrike is Not Detected
 
 ## Summary
-CrowdStrike may be installed and reporting to its own dashboard but still show as "not detected" in Twingate. The root cause is that CrowdStrike's Zero Trust Assessment (ZTA) feature for third parties is not enabled, preventing Twingate from reading the required ZTA data file.
+CrowdStrike may be installed and reporting to its dashboard but still show as "not detected" in Twingate Device Security. The root cause is that CrowdStrike's Zero Trust Assessment (ZTA) feature for third parties is not enabled, which prevents the required `data.zta` file from being deployed on devices.
 
 ## Key Information
-- **Affected components:** Twingate Client, Device Security, CrowdStrike integration
-- **Affected platforms:** macOS, Windows
-- **The ZTA file (`data.zta`) must exist and be non-empty** for Twingate to detect CrowdStrike
-- CrowdStrike ZTA Third Party integration requires your organization's CID to be shared with CrowdStrike
+- Affects macOS and Windows platforms
+- Twingate reads CrowdStrike ZTA data via a local file (`data.zta`) written by CrowdStrike
+- The ZTA file will be missing or 0 bytes if the feature is not enabled
+- CrowdStrike must be explicitly configured to share ZTA data with third parties (Twingate)
 
 ## Prerequisites
 - CrowdStrike Falcon installed and reporting to CrowdStrike dashboard
-- CrowdStrike Falcon Zero Trust Assessment feature must be licensed/enabled
-- Twingate CID must be registered with CrowdStrike for third-party ZTA access
+- CrowdStrike Falcon Zero Trust Assessment feature enabled on your CrowdStrike account
+- Twingate CID provided to CrowdStrike to authorize the third-party integration
 
 ## Troubleshooting Steps
 
-1. **Check for the `data.zta` file** in the platform-specific directory:
+1. **Locate the `data.zta` file** on the device:
    - **macOS:** `/Library/Application Support/Crowdstrike/ZeroTrustAssessment/`
-   - **Windows:** `%ProgramData%\CrowdStrike\ZeroTrustAsssessment\`
+   - **Windows:** `%ProgramData%\CrowdStrike\ZeroTrustAsssessment\` *(note: double `s` in `Asssessment` is in the original path)*
 
-2. **Verify the file is not empty (0 KB)** — a missing or empty file confirms ZTA third-party access is not configured.
+2. **Check file status:**
+   - File missing → ZTA feature not enabled or not deployed
+   - File present but 0 KB → Third-party CID not configured with CrowdStrike
 
-3. **If file is missing or empty:** Contact CrowdStrike customer support to enable Zero Trust Assessment for third parties and provide them with the Twingate CID.
+3. **Enable the feature:** Contact CrowdStrike customer support to enable Zero Trust Assessment for third parties and provide Twingate's CID.
 
 ## Configuration Values
 
@@ -42,15 +45,9 @@ CrowdStrike may be installed and reporting to its own dashboard but still show a
 | ZTA file (Windows) | `%ProgramData%\CrowdStrike\ZeroTrustAsssessment\data.zta` |
 
 ## Gotchas
-- **Typo in Windows path in docs:** `ZeroTrustAsssessment` has three `s`s — verify actual filesystem path on the device
-- CrowdStrike being functional and reporting to its own console does **not** mean ZTA third-party access is enabled — these are separate configurations
-- The `data.zta` file being present at 0 KB is a known symptom of the ZTA feature not being enabled
-
-## Resolution
-Contact CrowdStrike customer support to:
-1. Enable the Falcon Zero Trust Assessment feature
-2. Register Twingate's CID as an authorized third party
+- CrowdStrike being installed and functional does **not** automatically enable ZTA for third parties — it requires explicit opt-in
+- The Windows path contains a typo (`ZeroTrustAsssessment` with three `s` characters) — verify against actual filesystem
+- The ZTA file can exist but be 0 KB, which is also an indicator of misconfiguration, not just absence
 
 ## Related Docs
-- [CrowdStrike Configuration](https://help.twingate.com/articles/crowdstrike-configuration) (Twingate docs — referenced but URL not provided)
-- CrowdStrike Falcon Zero Trust Assessment documentation (vendor)
+- [CrowdStrike Configuration (Twingate)](https://help.twingate.com/articles/crowdstrike-configuration) — referenced in article for enabling ZTA and CID setup

@@ -1,24 +1,25 @@
 ---
 source: https://www.twingate.com/docs/offboarding-users
 type: docs
-fetched: 2026-08-14
-source_version: 7d9d31482b92c43f09edfd15e5b6527e8d5f2ff5aa47306da26f3969e1707e04
+fetched: 2026-10-04
+source_version: b3f4fb7b018631c5cebe7416849de79bc1280aa02448c0a88a47b505377eb2d2
+trust: official
 ---
 
-# Offboarding Users
+# How to Offboard Users
 
 ## Summary
-Covers two offboarding scenarios: social login users (managed directly in Twingate Admin Console) and enterprise IdP users (managed in IdP with Twingate sync). Immediate access revocation requires blocking devices in the Admin Console regardless of scenario.
+Covers two offboarding scenarios: social login users (managed directly in Twingate Admin Console) and enterprise IdP users (managed in IdP with Twingate sync). For immediate access revocation with IdP users, blocking devices in the Admin Console is recommended to bypass sync delays.
 
 ## Key Information
-- **Disabled users**: Cannot log in, account data retained, still count toward billable users
+- **Disabled users**: Cannot log in, account info retained, still count toward billable users
 - **Deleted users**: Account permanently removed, no longer count toward billable users
-- **IdP sync**: Changes propagate automatically but with potential delay — device blocking provides immediate revocation
-- **Device blocking**: Prevents resource access immediately; device remains blocked until manually unblocked
+- **IdP sync**: Changes made in IdP propagate to Twingate automatically but with possible delay
+- **Device blocking**: Immediate revocation regardless of IdP sync status; device cannot access any Resources until unblocked
 
 ## Prerequisites
 - Admin Console access with administrative credentials
-- For IdP scenario: admin access to enterprise IdP (Okta, Entra ID, etc.)
+- For IdP scenario: admin access to the enterprise identity provider (Okta, Entra ID, etc.)
 
 ## Step-by-Step
 
@@ -26,23 +27,35 @@ Covers two offboarding scenarios: social login users (managed directly in Twinga
 1. Log in to Twingate Admin Console
 2. Navigate to **Teams** page
 3. Locate the target user
-4. Select **Disable** or **Delete**
+4. Select **Disable** (retains data, keeps billing) or **Delete** (permanent removal, stops billing)
 5. Confirm the action
 
 ### Scenario 2: Enterprise IdP (Okta, Entra ID, etc.)
-1. Log in to enterprise IdP
-2. **Full offboard**: Disable or delete user account in IdP
-   **Access removal only**: Remove user from groups synced to Twingate
-3. Changes auto-sync to Twingate (delay possible)
-4. For immediate revocation: log in to Admin Console → **Devices** → block user's device(s)
+**Full offboarding:**
+1. Log in to the enterprise IdP
+2. Disable or delete the user's account in the IdP
+3. Changes sync automatically to Twingate (delay may occur)
+
+**Access-only removal (keep IdP account):**
+1. Remove user from any groups synced to Twingate in the IdP
+
+**For immediate revocation (recommended in both cases):**
+1. Log in to Twingate Admin Console
+2. Navigate to **Devices** section
+3. Block the user's device(s)
+
+## Configuration Values
+- No CLI flags or API parameters documented on this page
+- Sync delay varies by IdP and its configuration settings
 
 ## Gotchas
-- Disabled accounts still count as billable users — delete if billing reduction is needed
-- IdP sync delay means a window of potential access remains after IdP-side changes; always block devices for immediate effect
-- Device block must be manually reversed to restore access
-- Removing a user from synced groups (not deleting them) only removes Twingate access, not the broader IdP account
+- **Billing**: Disabled users still count as billable; delete to stop billing
+- **IdP sync delay**: Do not rely solely on IdP changes for immediate access revocation — block devices in Admin Console as a failsafe
+- **Group-based sync**: If using group sync, removing a user from synced groups (rather than deleting the IdP account) is sufficient to revoke Twingate access
+- Blocked devices remain blocked until manually unblocked — verify intent before blocking
 
 ## Related Docs
-- Device management (Admin Console Devices section)
-- IdP integration guides (Okta, Entra ID)
-- Teams/user management in Admin Console
+- Twingate Teams/Users management
+- Device management in Admin Console
+- IdP integration setup (Okta, Entra ID)
+- Group synchronization configuration

@@ -1,27 +1,26 @@
 ---
 source: https://github.com/Twingate/github-action
 type: github
-fetched: 2026-09-27
-source_version: bede1f6fb178083ee011815d1223e20df4fed7f7
+fetched: 2026-10-04
+source_version: 358e205bb31e636fef1dfb706228ab60eb90c181
+trust: official
 ---
 
-# Twingate Connect — GitHub Action
+# Twingate GitHub Action
 
-## Summary
-A GitHub Action that connects workflows to private resources via Twingate Services using zero-trust network access. It installs and starts the Twingate client on the runner, authenticating with a Service Key. Supports both direct private resource access and IP-allowlist bypass scenarios.
+GitHub Action that installs and starts the Twingate client on a runner to allow workflow steps to access private resources protected by Twingate. Supports Linux (x64/ARM) and Windows runners.
 
 ## Key Information
-- **Repo:** `Twingate/github-action`
-- **Latest version:** `v1.9`
-- **Supported runners:** Linux (x64/ARM), Windows
-- **Auth mechanism:** Twingate Service Key (not user credentials)
-- Caching reduces installation time by 30–45%
+
+- Uses Twingate [Services](https://docs.twingate.com/docs/services) (service keys) for authentication, not user credentials
+- Supports two use cases: direct access to private resources (e.g., VPC databases), and routing traffic through a Connector for IP-allowlisted SaaS apps
+- Packages are cached by default; caching reduces install time by 30–45%
+- Latest release (v1.11): fixes a setup abort caused by a trailing newline in service keys on Linux
 
 ## Prerequisites
-- A Twingate account with a configured [Service](https://docs.twingate.com/docs/services)
-- A Service Key stored as a GitHub Actions secret
-- Runner must support `NET_ADMIN` capability and `/dev/net/tun` device (for local testing with `act`)
-- Container runners lacking `NET_ADMIN` will now fail fast with a clear error rather than hanging
+
+- A Twingate account with a configured Service and a generated Service Key
+- Service Key stored as a GitHub Actions secret
 
 ## Usage
 
@@ -37,38 +36,20 @@ A GitHub Action that connects workflows to private resources via Twingate Servic
 |---|---|---|---|
 | `service-key` | Yes | — | Twingate Service Key for authentication |
 | `cache` | No | `true` | Cache downloaded packages between runs |
-| `cache-version` | No | `3` | Increment to invalidate existing cache |
-| `debug` | No | `false` | Enable verbose logging |
+| `cache-version` | No | `3` | Increment to invalidate the package cache |
+| `debug` | No | `false` | Enable verbose logging for troubleshooting |
 
 ## Gotchas
 
-**Docker container steps and DNS resolution**
-When a workflow step runs inside a Docker container, Azure injects `168.63.129.16` into the container's `resolv.conf`. This can override Twingate's DNS and break resource resolution. Fix by removing it inside the container:
-
-```bash
-sed '/^nameserver 168.63.129.16$/d; /^search/d' /etc/resolv.conf \
-  > /tmp/resolv.conf && cat /tmp/resolv.conf > /etc/resolv.conf
-```
-
-**Local testing with `act`**
-Requires additional Linux capabilities:
-```bash
-act -j test -s SERVICE_KEY --container-options "--cap-add NET_ADMIN --device /dev/net/tun"
-```
-
-**Container runners without NET_ADMIN**
-The action now detects missing `NET_ADMIN` capability at startup and fails immediately with a descriptive error, rather than timing out silently.
-
-**Cache invalidation**
-Increment `cache-version` (e.g., `3` → `4`) to force a fresh package download; do not rely on disabling `cache` alone for this purpose.
-
-**Windows MSI download**
-CI timeouts caused by slow MSI downloads and stale cache entries are fixed as of v1.9.
-
-**IP allowlisting use case**
-Requires a Twingate Connector configured to route `github.com` traffic. See [SaaS app gating docs](https://docs.twingate.com/docs/saas-app-gating).
+- **Docker steps on Azure-hosted runners**: Docker containers inherit `168.63.129.16` (Azure internal nameserver) in `/etc/resolv.conf`, which can override Twingate's DNS. Fix by running inside the container before DNS-dependent steps:
+  ```bash
+  sed '/^nameserver 168.63.129.16$/d; /^search/d' /etc/resolv.conf > /tmp/resolv.conf && cat /tmp/resolv.conf > /etc/resolv.conf
+  ```
+- Service keys with trailing newlines previously caused setup to abort on Linux (fixed in v1.11).
+- `cache-version` must be manually incremented to force a fresh package download; there is no automatic invalidation on Twingate version changes.
 
 ## Related Docs
+
 - [Twingate Services](https://docs.twingate.com/docs/services)
-- [SaaS App Gating / IP Allowlisting](https://docs.twingate.com/docs/saas-app-gating)
-- [Azure IP 168.63.129.16 explained](https://learn.microsoft.com/en-us/azure/virtual-network/what-is-ip-address-168-63-129-16)
+- [SaaS App Gating / IP Whitelisting](https://docs.twingate.com/docs/saas-app-gating)
+- [Azure IP 168.63.129.16 explanation](https://learn.microsoft.com/en-us/azure/virtual-network/what-is-ip-address-168-63-129-16)

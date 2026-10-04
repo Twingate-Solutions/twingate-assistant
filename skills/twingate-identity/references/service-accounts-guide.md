@@ -1,68 +1,80 @@
 ---
 source: https://www.twingate.com/docs/service-accounts-guide
 type: docs
-fetched: 2026-08-14
-source_version: cb324e699786b12405c723d5b3ba89c5957c880d50ce390692a453fddb384f64
+fetched: 2026-10-04
+source_version: 2050677c9d0001bcf4c6a39b5a1de4047cc22f59d43e34c08346303170371e42
+trust: official
 ---
 
-# Service Accounts Guide
-
-## Page Title
-How Service Accounts Work
+# How Service Accounts Work
 
 ## Summary
-Service Accounts enable machine-to-machine secure communications in Twingate, operating via headless mode Client rather than interactive login. They use Service Keys for authentication instead of standard credentials or 2FA. Primary use cases include SaaS-to-private-resource connections and cross-site private resource communication.
+Service Accounts enable machine-to-machine secure communication in Twingate, replacing human credentials with Service Keys. They run the Twingate Client in headless (non-interactive) mode and are suited for SaaS-to-private-infrastructure, site-to-site, and device-pool-to-resource connectivity patterns.
+
+---
 
 ## Key Information
 - Service Accounts **cannot** fulfill 2FA requirements
 - Service Accounts **cannot** use standard credentials (social login, IdP accounts)
-- Authentication is handled via **Service Keys** (expirable, API-manageable)
-- Client runs in **headless (non-interactive) mode**
-- Three main use cases: SaaS↔private resources, private↔private cross-site, device pool↔private resources
+- Authentication uses **Service Keys**, which support expiration and API-based lifecycle management
+- Client runs in **headless mode** (non-interactive)
 
-## Prerequisites
-- Twingate tenant with Service Account created
-- Twingate Client installed on target machine
-- Service Key generated for the Service Account
+---
 
 ## Use Cases
+| Scenario | Approach |
+|---|---|
+| SaaS (CircleCI, GitHub Actions) → private Resources | Deploy Client in headless mode on SaaS runner/agent |
+| Private Resource ↔ Private Resource (different sites) | Deploy Client in headless mode on the connecting system |
+| Incompatible OS devices → private Resources | Deploy a gateway VM running Client in headless mode with IP forwarding |
 
-### SaaS to Private Resources
-Deploy Twingate Client in headless mode within SaaS CI/CD environments (CircleCI, GitHub Actions, GitHub Codespaces) to reach private infrastructure.
+---
 
-### Private Cross-Site Communication
-Deploy headless Client directly on systems needing connectivity to remote private Resources.
+## Ubuntu Gateway Setup (Step-by-Step)
 
-### Gateway for Unsupported OS (Pool of Devices)
-Use when target system OS is incompatible with Twingate Client:
-1. Deploy a separate VM running headless Twingate Client as gateway
-2. Enable IP forwarding on the gateway VM
-3. Configure layer 3 switch/router to route tunneled traffic through the gateway
+For device pools where the Client cannot run directly on the source system:
 
-## Step-by-Step: Ubuntu Gateway Setup
-
-1. Create a Service Account in your Twingate tenant
-2. Install the Twingate Client in headless mode (configured with Service Account)
-3. Enable IP forwarding — uncomment `#net.ipv4.ip_forward=1` in `/etc/sysctl.conf`
-4. Apply changes:
+1. Create a Service Account in your Twingate tenant (Admin Console)
+2. Install the Twingate Client in headless mode, configured to use the Service Account's Service Key
+3. Enable IP forwarding — uncomment the following line in `/etc/sysctl.conf`:
+   ```
+   net.ipv4.ip_forward=1
+   ```
+4. Apply the change:
    ```bash
    sudo sysctl -p
    ```
 5. Start the Twingate Client in headless mode
-6. Configure layer 3 switch/router to route tunneled resource traffic through the Ubuntu gateway
+6. Configure a route on a Layer 3 switch/router to direct tunneled resource traffic through the Ubuntu gateway VM
+
+---
+
+## Prerequisites
+- A Twingate tenant with admin access
+- Service Account created via Admin Console or API
+- Service Key generated and available
+- Target Resources already defined in Twingate
+- For gateway pattern: Ubuntu VM with network routing access
+
+---
 
 ## Configuration Values
-| Setting | Location | Value |
-|---|---|---|
-| IP forwarding | `/etc/sysctl.conf` | `net.ipv4.ip_forward=1` |
+- **Service Key**: replaces user credentials; set expiration via API
+- **Headless mode**: Client flag/mode — see headless mode documentation for CLI parameters
+- **IP forwarding sysctl key**: `net.ipv4.ip_forward=1`
+
+---
 
 ## Gotchas
-- Service Keys must be managed actively — set expiration and rotate via API to maintain security posture
-- The gateway VM approach adds a network hop; ensure routing is correct at the layer 3 switch/router level
-- Headless mode behavior differs from standard Client — interactive prompts and browser-based auth flows will not work
+- Service Accounts have no 2FA path — security relies entirely on Service Key rotation and expiration policies
+- If the source OS is incompatible with the Twingate Client, a gateway VM is required; direct deployment is preferred when possible
+- IP forwarding must be applied persistently via `sysctl.conf`; runtime-only changes won't survive reboots
+
+---
 
 ## Related Docs
-- Headless mode setup (referenced but not linked inline)
-- Service Keys documentation
+- Headless mode Client setup
+- Service Keys management
 - How to connect CircleCI and GitHub Actions to Private Resources
 - How to connect GitHub Codespaces to Private Resources
+- Twingate API (for automated Service Key management)

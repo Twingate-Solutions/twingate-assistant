@@ -1,27 +1,28 @@
 ---
 source: https://help.twingate.com/articles/1933606039-disabling-browser-doh
 type: help
-fetched: 2026-09-06
-source_version: d72e1cf9e928f74ea7c0b6585b4ee784dde469d4086373702762bee39dd0e319
+fetched: 2026-10-04
+source_version: 8a7f8fb1ca531d77a28dd706e31ab9343ed79f09638693644a22662ac18ec22c
+trust: official
 ---
 
-# Disabling Browser DoH
+# Disabling Browser DoH for Twingate
 
 ## Page Title
 Disabling Browser DNS-over-HTTPS (DoH)
 
 ## Summary
-Browsers increasingly enable DNS-over-HTTPS by default, which encrypts DNS requests and bypasses Twingate's DNS proxy. This prevents users from accessing private DNS Resources protected by Twingate. DoH must be disabled in each browser to restore Twingate DNS interception.
+Browsers with DNS-over-HTTPS (DoH) enabled bypass Twingate's DNS proxy, preventing access to private DNS Resources. DoH must be disabled in each browser so Twingate can intercept DNS lookups for protected resources. MDM solutions can push these settings centrally across managed devices.
 
 ## Key Information
 - Affected browsers: Google Chrome (v83+), Microsoft Edge, Mozilla Firefox
-- Twingate uses a DNS proxy to intercept traffic for private DNS Resources
-- DoH encrypts DNS requests, preventing Twingate from resolving private resources
-- MDM solutions can push these settings centrally to all managed devices
+- DoH encrypts DNS requests, bypassing Twingate's DNS proxy entirely
+- Private DNS Resources will be inaccessible when DoH is active on the client browser
+- MDM deployment recommended for enterprise-wide enforcement
 
 ## Prerequisites
-- Admin/MDM access recommended for fleet-wide deployment
-- Per-user browser access for individual configuration
+- Twingate Client installed and running
+- Admin access to browser settings (or MDM policy management for fleet deployment)
 
 ## Step-by-Step
 
@@ -33,14 +34,14 @@ Browsers increasingly enable DNS-over-HTTPS by default, which encrypts DNS reque
 
 ### Microsoft Edge
 1. Menu → **Settings**
-2. Search `Secure DNS`
+2. Search: `Secure DNS`
 3. Uncheck **Use secure DNS to specify how to lookup the network address for websites**
 4. Restart browser
 
 ### Mozilla Firefox (v116+)
 1. Menu → **Settings**
-2. Search `Secure DNS`
-3. Set **Enable secure DNS using** → **Off**
+2. Search: `Secure DNS`
+3. Under **Enable secure DNS using** → select **Off**
 
 ### Mozilla Firefox (pre-v116)
 1. Menu → **Settings**
@@ -49,16 +50,16 @@ Browsers increasingly enable DNS-over-HTTPS by default, which encrypts DNS reque
 4. Click **OK**
 
 ## Configuration Values
-- No env vars or API params; all settings are browser UI toggles
-- MDM-deployable via browser policy management (organization-specific)
+- No CLI flags or API parameters — browser UI settings only
+- For MDM/GPO deployment, reference each browser vendor's policy documentation for the corresponding policy key (e.g., Chrome: `DnsOverHttpsMode`, Firefox: `DNSOverHTTPS`)
 
 ## Gotchas
-- Chrome enables DoH by default starting at **version 83** — older installs may not be affected
-- Firefox changed the settings UI location at **version 116**; use the correct steps for your version
-- Failure to disable DoH results in private DNS Resources being **silently inaccessible**, not just slow
-- Browser updates may re-enable DoH; MDM enforcement is strongly recommended over manual configuration
+- Chrome enables DoH by default starting at **version 83** — older deployments may not be affected
+- Firefox enables DoH by default; the settings UI changed significantly at **version 116**
+- Disabling at the OS/network level alone is insufficient if browsers have DoH independently configured
+- Without disabling DoH, symptom is silent: private Resources simply fail to resolve with no clear error indicating DoH is the cause
 
 ## Related Docs
 - Twingate Client documentation
-- Twingate DNS Resources configuration
-- MDM integration guides (organization-specific)
+- Twingate DNS Resource configuration
+- Browser vendor MDM/GPO policy references for fleet-wide enforcement

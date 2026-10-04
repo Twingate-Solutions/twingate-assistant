@@ -1,37 +1,38 @@
 ---
 source: https://help.twingate.com/articles/1364033881-repeating-token-is-expired-error-in-connector-logs
 type: help
-fetched: 2026-09-06
-source_version: b90753245f8a0217443e99de77d886d1ab1072432fb7e00bfb5cc94ccaf6dafc
+fetched: 2026-10-04
+source_version: 6e9cd0f51d955afa843c0be25885ca38f3ed6faa4c8396f942d1d88d918e10de
+trust: official
 ---
 
 # Repeating 'Token is expired' Error in Connector Logs
 
 ## Summary
-Twingate connectors periodically log a `Token is expired` 403 error from the Access Manager service. This is expected behavior — the connector automatically renews the token and resumes normal operation without manual intervention.
+Twingate connectors periodically log a `Token is expired` 403 error from the Access Manager service. This is expected behavior — the connector automatically renews its token and resumes normal operation without manual intervention.
 
 ## Key Information
-- Error originates from PubNub subscription token expiration
+- Error originates from PubNub subscription token expiration (not authentication failure)
 - Connector self-heals by requesting a new token automatically
-- Error appears more alarming when detailed logging is disabled (may be one of few visible log messages)
-- No service interruption occurs during token renewal
+- Error is more visible when detailed logging is disabled, as it may be one of the few log entries shown
+- No service disruption occurs
 
-## Error Pattern
+## Sample Log Output
 ```
-{"error":true,"status":403,"service":"Access Manager","message":"Token is expired."}
+twingate-connector[6479]: Response was: {"error":true,"status":403,"service":"Access Manager","message":"Token is expired."}
+twingate-connector[6479]: pbcc_parse_subscribe_v2_response - AccessDenied: response from server
 ```
-- HTTP status: `403`
-- Service: `Access Manager`
-- Source file reference: `pubnub_netcore.c` / `pbcc_parse_subscribe_v2_response`
-- Error code: `AccessDenied`
 
 ## Resolution
 **No action required.** The connector handles token renewal automatically.
 
+If the error repeats continuously without recovery, investigate:
+- Network connectivity between connector and Twingate control plane
+- Connector process health (restart if stuck)
+
 ## Gotchas
-- If detailed/verbose logging is disabled, this 403 error may appear as one of the only visible log lines, making it look like a persistent failure when it is not
-- The repeated appearance does not indicate the connector is stuck or broken — check connector connectivity separately if actual resource access fails
+- With minimal logging enabled, this error may appear disproportionately prominent — it does not indicate the connector is broken
+- A single occurrence or occasional recurrence is normal; only persistent, non-recovering errors warrant investigation
 
 ## Related Docs
-- Twingate Connector documentation
-- Connector logging configuration
+- Twingate Connector documentation: https://help.twingate.com

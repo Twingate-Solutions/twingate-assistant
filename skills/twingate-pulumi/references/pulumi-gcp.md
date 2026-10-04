@@ -1,76 +1,91 @@
 ---
 source: https://www.twingate.com/docs/pulumi-gcp
 type: docs
-fetched: 2026-08-14
-source_version: ad51fa43498e672c26ec168a34ff7c8e1805c783c8f50f9c41de6fff91455627
+fetched: 2026-10-04
+source_version: 73487219413975dd53e9900ac3549b32f52c81067471ef38f65db8d914b5f958
+trust: official
 ---
 
 # Pulumi with GCP and Twingate
 
-## Page Title
-How to Use Pulumi with GCP and Twingate
-
 ## Summary
-Step-by-step guide for automating Twingate deployments on GCP using Pulumi with TypeScript. Creates a complete stack including GCP VPC/subnet/firewall, a webserver VM, a Twingate connector VM, and Twingate remote network/group/resource configuration.
-
-## Key Information
-- Language: TypeScript/JavaScript (Node.js required)
-- NPM packages: `@pulumi/gcp`, `@twingate/pulumi-twingate`
-- Connector VM installs via curl script using generated access/refresh tokens
-- Resource access restricted to TCP port 80 (RESTRICTED policy); UDP ALLOW_ALL
-- GCP VM type: `e2-micro`, image: `ubuntu-2204-lts`
-- Subnet CIDR: `172.16.0.0/24`, region: `europe-west2`
-- Additional examples in Twingate GitHub repository
+Step-by-step guide for automating Twingate deployments on Google Cloud Platform using Pulumi with TypeScript. Creates a complete stack: Twingate remote network, connector, group, resource, plus GCP VPC, subnet, firewall, and two VMs (web server + connector).
 
 ## Prerequisites
-- GCP account with permissions to create/delete resources
+- GCP account with permissions to create/delete compute resources
 - GCP CLI installed and configured
-- Pulumi CLI installed (general Pulumi prerequisites met)
-- Node.js installed
-- Twingate API token and network name
+- Pulumi CLI installed (see Pulumi prerequisites guide)
+- Node.js installed (`node -v` to verify)
+- Twingate API token and network name (from admin panel)
 - Bash-compatible OS
 
 ## Step-by-Step
 
-1. `mkdir twingate_pulumi_gcp_demo && cd twingate_pulumi_gcp_demo`
-2. `pulumi new typescript` (set project name, description, stack name)
-3. `gcloud auth application-default login`
-4. Set Pulumi config (see Configuration Values below)
-5. `npm install @pulumi/gcp @twingate/pulumi-twingate`
-6. Write `index.ts` with Twingate + GCP resources (see full file in docs)
-7. `pulumi preview` to validate
-8. `pulumi up` to deploy
-9. Assign Twingate user to the created group in admin panel
-10. Test access via private IP in browser
-11. `pulumi down` to destroy
+1. **Create project directory and init Pulumi**
+   ```bash
+   mkdir twingate_pulumi_gcp_demo && cd twingate_pulumi_gcp_demo
+   pulumi new typescript
+   ```
+
+2. **Authenticate with GCP**
+   ```bash
+   gcloud auth application-default login
+   ```
+
+3. **Set Pulumi config values**
+   ```bash
+   pulumi config set gcp:project your-gcp-project-id
+   pulumi config set gcp:region europe-west2
+   pulumi config set gcp:zone europe-west2-c
+   pulumi config set twingate:apiToken YOUR_TOKEN --secret
+   pulumi config set twingate:network democompany
+   ```
+
+4. **Install Node modules**
+   ```bash
+   npm install @pulumi/gcp @twingate/pulumi-twingate
+   ```
+
+5. **Write `index.ts`** — see Configuration Values below for resource order
+
+6. **Preview and deploy**
+   ```bash
+   pulumi preview
+   pulumi up
+   ```
+
+7. **Teardown**
+   ```bash
+   pulumi down
+   ```
 
 ## Configuration Values
 
-```bash
-# GCP config
-pulumi config set gcp:project your-gcp-project-id
-pulumi config set gcp:region europe-west2
-pulumi config set gcp:zone europe-west2-c
+| Config Key | Description |
+|---|---|
+| `gcp:project` | GCP project ID |
+| `gcp:region` | GCP region (e.g. `europe-west2`) |
+| `gcp:zone` | GCP zone (e.g. `europe-west2-c`) |
+| `twingate:apiToken` | Twingate API token (set as `--secret`) |
+| `twingate:network` | Twingate network name |
 
-# Twingate config
-pulumi config set twingate:apiToken YOUR_TOKEN --secret
-pulumi config set twingate:network democompany
-```
+**Resource creation order in `index.ts`:**
+1. `TwingateRemoteNetwork` → `TwingateConnector` → `TwingateConnectorTokens` → `TwingateGroup`
+2. GCP `Network` → `Subnetwork` → `Firewall`
+3. Web server `Instance` (runs nginx startup script)
+4. Connector `Instance` (startup script pulls from `binaries.twingate.com` using generated tokens)
+5. `TwingateResource` pointing to web server's private IP
 
-**Connector startup env vars** (injected via `pulumi.interpolate`):
-- `TWINGATE_ACCESS_TOKEN` — from `TwingateConnectorTokens.accessToken`
-- `TWINGATE_REFRESH_TOKEN` — from `TwingateConnectorTokens.refreshToken`
-- `TWINGATE_URL` — `https://<network>.twingate.com`
+**Connector startup script** uses `pulumi.interpolate` to inject `accessToken`, `refreshToken`, and network URL at deploy time. Installer downloads from `binaries.twingate.com`.
 
 ## Gotchas
-- Use `pulumi.interpolate` (not template literals) when embedding Pulumi Output values (like tokens) in startup scripts
-- `accessConfigs: [{}]` must be present but empty to request ephemeral IP on GCP VM network interfaces
-- After `pulumi up`, must manually assign the Twingate user to the created group — not automated in this config
-- Firewall uses `sourceTags: ["demo"]` — only applies to VMs tagged `"demo"`; adapt rules for production use
-- API token should always be set with `--secret` flag
+- `accessConfigs: [{}]` must be present but empty on `networkInterfaces` to get an ephemeral public IP
+- Connector tokens (`accessToken`, `refreshToken`) are runtime-generated outputs — use `pulumi.interpolate` when embedding in startup scripts
+- Firewall `sourceTags: ["demo"]` restricts to VMs tagged `"demo"` only; adapt rules for production
+- After `pulumi up`, manually assign the Twingate user to the created group to enable access
+- Subnet CIDR `172.16.0.0/24` and region `europe-west2` are hardcoded in example — update for your setup
 
 ## Related Docs
-- Twingate Pulumi provider (general prerequisites guide)
+- [Twingate Pulumi GitHub examples repository](https://github.com/Twingate)
+- Twingate Pulumi prerequisites guide (all Pulumi guides)
 - GCP IAM permissions for resource creation
-- Twingate API token generation
-- Twingate GitHub repository (additional Pulumi/GCP examples)

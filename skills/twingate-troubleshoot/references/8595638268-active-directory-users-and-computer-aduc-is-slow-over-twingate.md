@@ -1,48 +1,79 @@
 ---
 source: https://help.twingate.com/articles/8595638268-active-directory-users-and-computer-aduc-is-slow-over-twingate
 type: help
-fetched: 2026-09-06
-source_version: d8bd39c04e10105d11ebf3c412a8b8b8e733df4e0fcaf4ac8585e947b6a1921f
+fetched: 2026-10-04
+source_version: cc0180e5a67e7a20abf353ccfaa59c13ed6bc4805d8b64df7e69852b5b7fbb2d
+trust: official
 ---
 
 # Active Directory Users and Computers (ADUC) Slow Over Twingate
 
 ## Summary
-ADUC performance degrades when accessed through the Twingate client on Windows. Root cause is under investigation. Two workarounds are available depending on environment configuration.
+ADUC opens slowly (tens of seconds to minutes) when the Twingate Client is running on Windows because ADUC's domain controller discovery phase sends DNS queries that time out on physical adapters the Client intercepts. Each failed lookup costs ~12 seconds, and multiple lookups compound the delay. This is expected behavior, not a bug.
 
 ## Key Information
-- Affects: Twingate Client on Windows
-- Issue: ADUC slow performance when routed through Twingate
-- Status: Under active investigation by Twingate
+- Affects: Domain-joined Windows machines running Twingate Client (on or off corporate network)
+- Root cause: Windows queries all adapter DNS servers in parallel; Twingate intercepts physical adapter queries, causing timeouts (~12s each)
+- Only **failed** lookups are slow; successful resolutions return immediately
+- Packet captures on the affected machine will show nothing (queries are dropped below capture layer) — this is consistent with the cause
+- ADUC's DC location phase issues multiple non-existent name queries, each timing out individually
 
 ## Prerequisites
-- Twingate Client installed on Windows
-- Access to Domain Controller IP address
-- (Alternative) Jumpbox/admin host on same network as managed domain
+- Windows with Twingate Client running
+- Domain-joined machine or RSAT tools installed
+- Elevated PowerShell for Option 3
 
-## Workarounds (in order of preference)
+## Confirming the Issue
+Run in PowerShell while Twingate Client is active (replace domain name):
+```powershell
+ipconfig /flushdns
+Measure-Command { Resolve-DnsName -Type SRV "_ldap._tcp.doesnotexist.example.local" -ErrorAction SilentlyContinue }
+```
+- **~12 seconds** → confirmed Twingate timeout behavior
+- **< 1 second** → different root cause
 
-### Option 1: Bypass DNS, Connect via IP
-Run ADUC directly against the Domain Controller IP to bypass DNS resolution overhead:
+## Workarounds (Ordered by Ease)
 
+### Option 1: Direct DC Connection (No Config Changes)
 ```cmd
-dsa.msc /server="<domain controller IP>"
+dsa.msc /server="<domain-controller-IP>"
+```
+Use an IP address, not hostname, to skip resolution. Fast to apply; may not fully resolve delays in multi-domain environments.
+
+### Option 2: Administrative Jumpbox (Recommended for Regular Admins)
+Run ADUC from a host on the same network as the AD domain. Aligns with Microsoft secure admin host guidance. No per-machine config required.
+
+### Option 3: NRPT Rule (Most Effective, Persistent Config)
+Add rule in elevated PowerShell (replace namespace with your AD domain):
+```powershell
+Add-DnsClientNrptRule `
+  -Namespace ".ad.example.com" `
+  -NameServers "100.95.0.251","100.95.0.252","100.95.0.253","100.95.0.254" `
+  -DisplayName "Twingate AD DNS"
+```
+Verify and test:
+```powershell
+Get-DnsClientNrptPolicy -Effective
+ipconfig /flushdns
+```
+Remove when done:
+```powershell
+Get-DnsClientNrptRule | Where-Object { $_.DisplayName -eq "Twingate AD DNS" } | Remove-DnsClientNrptRule -Force
+ipconfig /flushdns
 ```
 
-Replace `<domain controller IP>` with the actual IP of your DC.
-
-### Option 2: Use a Jumpbox/Administrative Host
-If Option 1 doesn't resolve the issue, connect to a jumpbox or administrative host that resides on the **same network** as the managed domain. Perform all AD tasks from that host locally.
-
-## Configuration Values
-| Parameter | Value | Notes |
-|-----------|-------|-------|
-| `/server` flag | Domain Controller IP | Use IP, not hostname, to bypass DNS |
+## Configuration Values (Option 3)
+| Parameter | Value |
+|-----------|-------|
+| `-NameServers` | `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254` (Twingate DNS proxy) |
+| `-Namespace` | Your AD domain with leading dot (e.g., `.ad.example.com`) |
 
 ## Gotchas
-- Option 1 works for many but not all environments — results vary by customer setup
-- DNS resolution through Twingate appears to be a likely contributor; using IP sidesteps this
-- Option 2 (jumpbox) is the fallback and aligns with Microsoft's secure administrative host best practices
+- **NRPT rules have no fallback**: If Twingate Client is stopped/uninstalled, names under the scoped namespace will fail to resolve entirely, including on corporate network
+- **Never scope NRPT to `"."`** — this applies the rule to all lookups system-wide
+- **Must remove the NRPT rule** when uninstalling the Twingate Client
+- No Twingate Client setting can change the underlying timeout behavior
 
 ## Related Docs
-- [Microsoft: Securing Privileged Access / Secure Administrative Hosts](https://learn.microsoft.com/en-us/security/privileged-access-workstations/privileged-access-devices)
+- [Using nslookup with Manually Defined Nameserver Fails on Windows with Twingate Client Running](https://help.twingate.com) (same DNS interception behavior)
+- [Microsoft secure administrative hosts guidance](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/implementing-secure-administrative-hosts)

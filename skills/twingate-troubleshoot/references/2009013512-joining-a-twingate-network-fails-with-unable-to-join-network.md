@@ -1,68 +1,71 @@
 ---
 source: https://help.twingate.com/articles/2009013512-joining-a-twingate-network-fails-with-unable-to-join-network
 type: help
-fetched: 2026-09-27
-source_version: e45d029d8eeef88c57b2a3f4f929531c73a06fa2c3e91dc7d6c7d48dcb0a4f4d
+fetched: 2026-10-04
+source_version: ad2535b6480fee5505e7d3688d9c2567a74369ce5c32001f3c9526dad057da1c
+trust: official
 ---
 
-# [Windows Client] Joining Twingate Network Fails - "Unable to Join Network"
+# [Windows Client] Joining Twingate Network Fails with "Unable to join network"
 
 ## Summary
-Windows Twingate client fails to connect when it cannot locate a usable TAP adapter. The most common cause is a renamed TAP adapter `FriendlyName`, often introduced by OpenVPN or FortiClient installations (past or present).
+On Windows, Twingate fails to connect when the TAP adapter is missing, disabled, or has an incorrect `FriendlyName`. The most common cause is a renamed TAP adapter resulting from other VPN software (e.g., OpenVPN, FortiClient) that altered or conflicts with the adapter name.
 
 ## Key Information
-- **Log locations:**
-  - `%LOCALAPPDATA%\Twingate\logs\Twingate.log` (client)
-  - `%PROGRAMDATA%\Twingate\logs\Twingate.Service.log` (service)
-- Required adapter `FriendlyName`: `Twingate TAP-Windows Adapter V9` (exact string)
-- OpenVPN adapter name (`TAP-Windows Adapter V9`) differs only by the `Twingate ` prefix — easy to miss
-- Removing conflicting VPN software does **not** automatically restore the correct name
+- Error appears in two log files simultaneously
+- Root cause: Twingate service cannot locate a usable TAP adapter named exactly `Twingate TAP-Windows Adapter V9`
+- OpenVPN's adapter is named `TAP-Windows Adapter V9` (missing "Twingate" prefix) — easy to confuse
+- Uninstalling conflicting VPN software does **not** automatically restore the correct adapter name
+- Registry key index is **not** always `0000` — must be verified
 
-## Causes
-- TAP adapter is disabled
-- TAP adapter is absent/missing
-- TAP adapter `FriendlyName` was renamed (commonly by OpenVPN or FortiClient)
+## Log File Locations
+| Log File | Path |
+|---|---|
+| `Twingate.log` | `%LOCALAPPDATA%\Twingate\logs` |
+| `Twingate.Service.log` | `%PROGRAMDATA%\Twingate\logs` |
+
+## Prerequisites
+- Administrator/elevated PowerShell for registry and adapter commands
+- Back up registry key before editing
+
+---
 
 ## Step-by-Step Resolution
 
-### 1. Verify adapter exists and is enabled
+### 1. Check adapter exists and is enabled
 ```powershell
-Get-NetAdapter | Where-Object InterfaceDescription -like '*Twingate*' | Select-Object Name, InterfaceDescription, Status
+Get-NetAdapter | Where-Object InterfaceDescription -like '*Twingate*' |
+  Select-Object Name, InterfaceDescription, Status
 ```
-- If greyed out in Network Connections UI: right-click → **Enable**
+If greyed out in Network Connections UI: right-click → **Enable**, then retry.
 
 ### 2. Check adapter FriendlyName in registry
 ```powershell
-Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Enum\ROOT\NET\*' | Select-Object PSChildName, FriendlyName, DeviceDesc
+Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Enum\ROOT\NET\*' |
+  Select-Object PSChildName, FriendlyName, DeviceDesc
 ```
-- Note the `PSChildName` (key index) — **not always `0000`**
-- Confirm `FriendlyName` reads exactly: `Twingate TAP-Windows Adapter V9`
+- `FriendlyName` must be exactly: `Twingate TAP-Windows Adapter V9`
+- Note the `PSChildName` value (the key index, e.g., `0000`, `0001`) — needed for step 3
 
-### 3. Correct the FriendlyName
-```cmd
-# Backup first (substitute correct index)
-reg export "HKLM\SYSTEM\CurrentControlSet\Enum\ROOT\NET\0000" tap-backup.reg
-
-# Then set FriendlyName via regedit or reg add
-```
-- Uninstall any conflicting VPN software cleanly before editing
-- Reboot after correction
+### 3. Correct the FriendlyName (if wrong)
+1. Uninstall any conflicting VPN software first
+2. Back up the registry key (substitute correct index):
+   ```
+   reg export "HKLM\SYSTEM\CurrentControlSet\Enum\ROOT\NET\0000" tap-backup.reg
+   ```
+3. Set `FriendlyName` to `Twingate TAP-Windows Adapter V9` using Registry Editor or `reg add`
+4. Reboot
 
 ### 4. If still failing
-- Reinstall the Twingate Client
-- If unresolved, contact support with both log files
+Reinstall the Twingate Windows Client. If unresolved, contact support with both log files attached.
 
-## Configuration Values
-| Item | Value |
-|------|-------|
-| Required `FriendlyName` | `Twingate TAP-Windows Adapter V9` |
-| Registry path | `HKLM\SYSTEM\CurrentControlSet\Enum\ROOT\NET\<index>` |
+---
 
 ## Gotchas
-- The index key (`PSChildName`) is **not always `0000`** — verify before editing registry
-- Uninstalling OpenVPN/FortiClient does not restore the adapter name automatically
-- The name difference between OpenVPN and Twingate adapters is a single prefix word — compare full strings
-- A machine may show this error with **no VPN currently installed**
+- The adapter index in the registry path (`ROOT\NET\0000`) varies — do not assume `0000`
+- Removing OpenVPN/FortiClient may leave the renamed adapter behind with no visible other VPN installed
+- Name comparison must be exact — scanning for partial string `TAP-Windows Adapter V9` will miss the missing `Twingate` prefix
 
 ## Related Docs
-- Twingate Windows Client logs: `%LOCALAPPDATA%\Twingate\logs`, `%PROGRAMDATA%\Twingate\logs`
+- Twingate Windows Client installation
+- Twingate support contact (include both log files when escalating)

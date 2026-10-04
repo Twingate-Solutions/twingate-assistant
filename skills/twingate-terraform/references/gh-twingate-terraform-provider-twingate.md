@@ -1,8 +1,9 @@
 ---
 source: https://github.com/Twingate/terraform-provider-twingate
 type: github
-fetched: 2026-09-27
-source_version: 4f76074fb8cd120143f6a02c426e12de20cfbf48
+fetched: 2026-10-04
+source_version: a88e981b52ebf9f987b79cbdb541c042316d7d4f
+trust: official
 ---
 
 # Twingate Terraform Provider
@@ -64,6 +65,7 @@ make docs
 - Files under `docs/` are auto-generated; manual edits will be overwritten by `make docs`
 - Acceptance tests (`make testacc`) run against a real Twingate network and will create/modify live resources
 - The repo description references a Kubernetes controller/CRD pattern, but the actual repo is a standard Terraform provider
+- `twingate_kubernetes_resource`, `twingate_ssh_resource`, and `twingate_web_app_resource` each expose a read-only `tags_all` attribute (Map of String) that includes both resource-level tags and default tags from the provider configuration
 
 ## Related Docs
 - [Terraform Registry – Twingate Provider](https://registry.terraform.io/providers/Twingate/twingate/latest/docs)

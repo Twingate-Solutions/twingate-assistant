@@ -1,78 +1,92 @@
 ---
 source: https://help.twingate.com/articles/8458642629-twingate-client-logs
 type: help
-fetched: 2026-09-06
-source_version: 2744ff54aff83e0f47a5a60e650123d9e277b6d3ac97236c7397eed302ae68e9
+fetched: 2026-10-04
+source_version: 7f610e0fbcb10e8479c38bd17df9d2116084c57536b87e521419c3b61b466373
+trust: official
 ---
 
 # Twingate Client Logs
 
+## Page Title
+Twingate Client Logs
+
 ## Summary
-Guidance for collecting Twingate Client diagnostic logs across all supported platforms (Android, iOS, Linux, macOS, Windows). Detailed logging must be enabled before reproducing issues, as it is not retroactive. Logs are submitted to support via upload or manual file attachment.
+Instructions for collecting and uploading Twingate Client diagnostic logs across Android, iOS, Linux, macOS, and Windows. Detailed logging must be enabled **before** reproducing an issue, as it is not retroactive. Logs can be uploaded automatically (Windows/Mac preferred) or retrieved manually.
+
+---
 
 ## Key Information
-- **Detailed logging must be enabled first**, then issue reproduced, then logs collected
-- Two collection methods for Windows/Mac: automated upload or manual file retrieval
-- Linux uses `sudo twingate report` to generate ZIP bundle
-- Mobile platforms share logs directly from within the app
+- Detailed logs must be enabled first, then the issue reproduced, before collecting logs
+- Three collection methods: Client upload UI, manual file retrieval, or CLI (Linux)
+- Logs must be linked to an existing support ticket ID
+
+---
 
 ## Prerequisites
-- Active Twingate support ticket (required for log upload method)
-- "Collect Detailed Logs" enabled before reproducing the issue
-- Linux: debug log level set and client restarted before reproducing issue
+- Active Twingate support ticket (create at help.twingate.com → "Open a Support Request")
+- "Collect Detailed Logs" enabled on the client before reproducing the issue
 
-## Step-by-Step
+---
 
-### Enable Detailed Logs
-| Platform | Steps |
-|----------|-------|
-| macOS/Windows | Twingate tray icon → More → Troubleshoot → Collect Detailed Logs (verify checkmark) |
-| iOS | Gear icon → Enable Collect Detailed Logs |
-| Android | Burger menu → Advanced → Enable Collect Detailed Logs |
-| Linux | `sudo twingate config log-level debug` → `twingate stop` → `twingate start` |
+## Step-by-Step by Platform
 
-### Collect Logs
+### macOS / Windows — Enable Detailed Logs
+1. Click Twingate system tray icon → **More > Troubleshoot**
+2. Verify checkmark next to **Collect Detailed Logs**
 
-**Windows/Mac (Upload):** Tray icon → More → Troubleshoot → Upload Logs → Create Ticket → enter ticket ID → Upload Logs
+### macOS / Windows — Method 1: Upload (Preferred)
+1. **More > Troubleshoot > Upload Logs...**
+2. Click **Create Ticket** at prompt
+3. Enter existing ticket ID, description → **Upload Logs**
 
-**Windows (Manual):**
-- `%LOCALAPPDATA%\Twingate\logs\`
-- `%PROGRAMDATA%\Twingate\logs\`
+### macOS / Windows — Method 2: Manual Retrieval
+- **Windows log paths:**
+  - `%LOCALAPPDATA%\Twingate\logs\`
+  - `%PROGRAMDATA%\Twingate\logs\`
+- **macOS App Store log path:** `~/Library/Group Containers/group.com.twingate/Logs/`
+- **macOS Standalone log paths:**
+  - `~/Library/Group Containers/6GX8KVTR9H.com.twingate.com/Logs/`
+  - `/private/var/log/twingate/`
+- Compress and attach to support ticket
 
-**Mac (Manual):**
-- App Store: `~/Library/Group Containers/group.com.twingate/Logs/`
-- Standalone: `~/Library/Group Containers/6GX8KVTR9H.com.twingate.com/Logs/` and `/private/var/log/twingate/`
+### Linux
+1. Check log level: `sudo twingate config`
+2. Enable debug: `sudo twingate config log-level debug`
+3. Restart client: `twingate stop` then `twingate start`
+4. Reproduce the issue
+5. Generate log bundle: `sudo twingate report` (saves ZIP to current directory)
+6. If `journalctl` unavailable (containers/headless): retrieve `/var/log/twingated.log`
+7. Live log review: `sudo journalctl -u twingate --since "1 hour ago"`
 
-**Linux:**
-```bash
-sudo twingate config log-level debug
-twingate stop && twingate start
-# Reproduce issue, then:
-sudo twingate report   # generates ZIP in current directory
-# If no journalctl: /var/log/twingated.log
-```
+### iOS
+- **Not logged in:** Settings gear → **Share with Developer > Save to Files**
+- **Logged in:** Profile image → **Share with Developer > Save to Files**
+- Enable detailed logs: gear icon → **Collect Detailed Logs**
 
-**Live Linux log review:**
-```bash
-sudo journalctl -u twingate --since "1 hour ago"
-```
+### Android / ChromeOS
+- Burger menu (top left) → **Advanced > Share Logs with Developer**
+- Enable detailed logs: burger menu → **Advanced > Collect Detailed Logs**
 
-**iOS:** App → (Settings gear or Profile image) → Share with Developer → Save to Files → attach to ticket
-
-**Android/ChromeOS:** Burger menu → Advanced → Share Logs with Developer
+---
 
 ## Configuration Values
-| Parameter | Command |
-|-----------|---------|
+| Setting | CLI Command |
+|---|---|
 | Check log level | `sudo twingate config` |
 | Set debug logging | `sudo twingate config log-level debug` |
-| Generate log bundle | `sudo twingate report` |
+| Generate report bundle | `sudo twingate report` |
+
+---
 
 ## Gotchas
-- Enabling detailed logs is **not retroactive** — must reproduce the issue after enabling
-- Linux client must be **restarted** after changing log level
-- Upload method requires an existing support ticket ID; queue is unmonitored
-- In containerized/headless Linux environments without `journalctl`, use `/var/log/twingated.log`
+- Detailed logging is **not retroactive** — must enable before reproducing the issue
+- Support ticket queue is **unmonitored**; always reference an active ticket ID
+- In containerized/headless Linux, `journalctl` may be absent; use `/var/log/twingated.log`
+- Client restart required after changing Linux log level
+
+---
 
 ## Related Docs
-- Twingate Support: [help.twingate.com](https://help.twingate.com) → Open a Support Request
+- Twingate Help Center: help.twingate.com
+- Support requests: help.twingate.com → "Open a Support Request"
