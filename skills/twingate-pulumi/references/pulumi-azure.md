@@ -1,64 +1,77 @@
 ---
 source: https://www.twingate.com/docs/pulumi-azure
 type: docs
-fetched: 2026-08-14
-source_version: 98e7161eb32a5b566d0156f3c4a43ea89556a3b2ef7d6a6af93cdc373d202b1b
+fetched: 2026-10-04
+source_version: 3c24bd51b3052238f3bc8d52fe88d1668bbc4eeb4e52d0a38c92f65416b88fae
+trust: official
 ---
 
 # Pulumi with Azure and Twingate
 
 ## Summary
-Automates Twingate deployment on Azure using Pulumi with TypeScript. Creates a Connector VM and a test web server VM, then configures Twingate resources/groups to control access. The Connector VM auto-installs via a startup script using connector tokens.
-
-## Key Information
-- Language: TypeScript
-- Creates: RemoteNetwork, Connector, ConnectorTokens, Group, TwingateResource in Twingate + ResourceGroup, VNet, NSG, 2x VMs in Azure
-- Connector VM: Ubuntu 22.04 (Jammy), installs via `binaries.twingate.com/connector/setup.sh`
-- Test VM: Ubuntu 16.04-LTS, runs Python SimpleHTTPServer on port 80
-- VM size: `Standard_B1ms` for both VMs
+Automates Twingate deployment on Microsoft Azure using Pulumi (TypeScript). Creates a Connector VM and a test web server VM, wiring them together with Twingate Remote Network, Group, and Resource objects. Community-maintained open source tooling; support via GitHub Issues.
 
 ## Prerequisites
 - Azure account with permissions to create/delete resources
-- Pulumi CLI installed (see general Pulumi prerequisites)
-- `az` CLI installed and authenticated
+- Pulumi CLI installed and configured (see general Pulumi prerequisites)
+- Azure CLI (`az`) installed
+- Node.js / npm
 - Bash-compatible OS
 - Twingate API key and tenant name
 
 ## Step-by-Step
 
-1. `mkdir twingate_pulumi_azure_demo && cd twingate_pulumi_azure_demo`
-2. `pulumi new typescript`
-3. Install modules: `npm install @pulumi/azure-native @pulumi/azure @twingate/pulumi-twingate`
-4. `az login && az account list && az account set --subscription=<id>`
-5. Set Pulumi config (see below)
-6. Write `index.ts` (full code in docs)
-7. `pulumi preview` then `pulumi up`
-8. Assign Twingate user to the created group manually
-9. Teardown: `pulumi down`
+1. **Scaffold project**: `mkdir twingate_pulumi_azure_demo && cd twingate_pulumi_azure_demo && pulumi new typescript`
+2. **Install modules**: `npm install @pulumi/azure-native @pulumi/azure @twingate/pulumi-twingate`
+3. **Authenticate Azure**: `az login && az account set --subscription=<id>`
+4. **Set Pulumi config** (see Configuration Values below)
+5. **Write `index.ts`** with resources in order: Twingate objects → Azure Resource Group → Networking → VMs → Twingate Resource
+6. **Preview**: `pulumi preview`
+7. **Deploy**: `pulumi up`
+8. **Assign** Twingate user to the created Group manually
+9. **Teardown**: `pulumi down`
 
 ## Configuration Values
 
 ```bash
-pulumi config set twingate:network <yournetwork>
+pulumi config set twingate:network <yourNetwork>
 pulumi config set twingate:apiToken <yourToken> --secret
 pulumi config set twingate_pulumi_azure_demo:username tgadmin
 pulumi config set twingate_pulumi_azure_demo:password --secret <password>
 pulumi config set azure-native:location uksouth
 ```
 
-**Connector startup env vars:**
-- `TWINGATE_ACCESS_TOKEN` — from `TwingateConnectorTokens.accessToken`
-- `TWINGATE_REFRESH_TOKEN` — from `TwingateConnectorTokens.refreshToken`
-- `TWINGATE_URL` — `https://<network>.twingate.com`
+## Key Twingate Resources Created
+
+| Resource | Purpose |
+|---|---|
+| `TwingateRemoteNetwork` | Logical network in Twingate for Azure |
+| `TwingateConnector` | Connector bound to remote network |
+| `TwingateConnectorTokens` | Access/refresh tokens injected into Connector VM `userData` |
+| `TwingateGroup` | Group scoping access to the resource |
+| `TwingateResource` | Maps to web server private IP; TCP ports 22, 80 |
+
+## Azure Resources Created
+
+- Resource Group (UK South default)
+- Static Public IP (Standard SKU, Zone 1) — for Connector VM only
+- VNet `10.0.0.0/16`, subnet `10.0.1.0/24`
+- Network Security Group (inbound SSH/HTTP, restrict `sourceAddressPrefix`)
+- **Connector VM**: Ubuntu 22.04 LTS, `Standard_B1ms`, runs Twingate installer via `userData`
+- **Web Server VM**: Ubuntu 16.04 LTS, `Standard_B1ms`, runs `python -m SimpleHTTPServer 80`
+
+## Connector Installer
+The Connector VM installs via script fetched from `binaries.twingate.com/connector/setup.sh`, passing `TWINGATE_ACCESS_TOKEN`, `TWINGATE_REFRESH_TOKEN`, and `TWINGATE_URL` as environment variables via `userData` (base64-encoded).
 
 ## Gotchas
-- Azure password must meet [Azure Password Requirements](https://docs.microsoft.com/azure/virtual-machines/linux/faq#what-are-the-password-requirements-when-creating-a-vm)
-- NSG `sourceAddressPrefix` in the example is hardcoded (`88.98.90.108/32`) — replace with your IP
-- Connector uses `userData` (base64); test VM uses `customData` (base64) — different fields
-- After `pulumi up`, user-to-group assignment in Twingate must be done manually
-- Exclude `Pulumi.<stack>.yaml` from source control (contains encrypted secrets)
+- Azure VM passwords must meet [Azure Password Requirements](https://learn.microsoft.com/azure/virtual-machines/windows/faq#what-are-the-password-requirements-when-creating-a-vm)
+- `Pulumi.<stack>.yaml` stores encrypted secrets — exclude from source control
+- NSG `sourceAddressPrefix` in example is hardcoded to a specific IP; update for your environment
+- Web server VM uses Python 2 (`SimpleHTTPServer`); Ubuntu 16.04 is EOL — consider updating image
+- User-to-Group assignment must be done manually after `pulumi up`
+- `customData` vs `userData`: web server uses `customData`, Connector uses `userData` — both base64-encoded
 
 ## Related Docs
-- [Twingate Pulumi Provider](https://www.twingate.com/docs/pulumi)
-- [Generate API Key](https://www.twingate.com/docs/api-overview)
-- [GitHub Examples Repository](https://github.com/Twingate-Labs/pulumi-twingate)
+- [Twingate Pulumi GitHub repository](https://github.com/Twingate) (additional examples)
+- Twingate general Pulumi prerequisites guide
+- T

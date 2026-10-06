@@ -1,71 +1,61 @@
 ---
 source: https://help.twingate.com/articles/5974826840-unable-to-access-a-resource
 type: help
-fetched: 2026-09-27
-source_version: 84851bc8b01426f0bd19e88bdf8e4fb00898309731b30a7e972cb53dd6e064a0
+fetched: 2026-10-04
+source_version: 8a7b884f7a56fe029d59e9a052f7a83ac0b0640fedd1dbac3d687b00c285e655
+trust: official
 ---
 
-# Unable to Access a Resource
+# Unable to Access a Twingate Resource
 
 ## Page Title
-Unable to Access a Resource
+Unable to access a Resource
 
 ## Summary
-Troubleshooting guide for cases where a Twingate Client cannot reach an expected Resource. Covers authorization, DNS, software conflicts, network access, and connector-level diagnostics in order of most-to-least common cause.
+Troubleshooting guide for diagnosing why a user cannot access a Twingate Resource. Covers authorization, DNS, software conflicts, network restrictions, and Connector-side issues in order of most to least common cause.
 
-## Key Information
-- Resource must appear in the Client tray menu (Windows/macOS); if not visible, it's unreachable regardless of other config
-- DNS lookups for Resources should return a CGNAT IP, not the real IP — if returning real IP, Twingate is not intercepting DNS
-- DNS Resources resolve first at the Client (ACL match), then request lookup from Connector — both hops must succeed
-- Port tests from the Client side to a Twingate Resource return false positives; test from the Connector instead
+## Key Information (Ordered by Frequency)
 
-## Troubleshooting Steps (in order)
-
-1. **Authorization**: Confirm user is in a Group that contains the Resource. Check Admin Console group/resource assignments.
-
-2. **DNS interception**: Run `nslookup` or `dig` on the Resource — expect a CGNAT IP in response. If real IP returned, DNS is being resolved before reaching Twingate.
-
-3. **Hosts file override**: Remove conflicting entries.
-   - Windows: `c:\windows\system32\drivers\etc\hosts`
+1. **Authorization** – User must belong to a Group that has the Resource assigned. If Resource doesn't appear in the Client tray menu, access will fail.
+2. **DNS interception** – Run `nslookup` or `dig` against the Resource; result should be a CGNAT IP, not the real IP. If real IP is returned, Twingate isn't intercepting DNS.
+3. **Local hosts file override** – Remove conflicting entries:
+   - Windows: `C:\Windows\System32\drivers\etc\hosts`
    - macOS/Linux: `/etc/hosts`
+4. **Third-party software conflicts** – Endpoint security, VPN, or DNS software may interfere. See Known Incompatibilities docs.
+5. **Outbound firewall blocking** – Allow outbound access to `*.twingate.com` and all Google Cloud Provider external IPs (list maintained by Google).
+6. **Network Traffic in Admin Console** – Check if flows reach the Connector. No flow = Client-side issue; flow present = investigate Connector-to-Resource path.
+7. **Destination service unavailable** – SSH to Connector and test port: `curl -v telnet://<host>:<port>`
+8. **DNS Resources** – Connector must resolve the DNS Resource to the correct IP. Run `dig`/`nslookup` from the Connector directly.
+9. **Geo-blocking** – Google Cloud Platform blocks some regions; affects Twingate Controller/Relay even if `*.twingate.com` loads in browser. See Unsupported Regions.
+10. **DNS Rebind Protection** – Consumer routers/ISPs may block DNS lookups returning private IPs. `dig`/`nslookup` returns empty response.
 
-4. **Third-party software**: Check for incompatible endpoint security, DNS, VPN, or VPN-like software. See [Known Incompatibilities].
+## Configuration Values
 
-5. **Outbound internet access**: Ensure device can reach:
-   - `*.twingate.com`
-   - Full Google Cloud Provider external IP range (list updated periodically by Google)
-
-6. **Admin Console — Network Traffic**: Check for flows reaching the Connector.
-   - No flow → Client-level issue
-   - Flow present → investigate Connector-to-Resource connectivity
-
-7. **Destination availability**: SSH to Connector and test:
-   ```bash
-   curl -v telnet://<host>:<port>
-   ```
-
-8. **DNS Resource resolution from Connector**: Run `dig` or `nslookup` from the Connector to verify correct IP is returned.
-
-9. **Geo-blocking**: GCP blocks some regions/countries. Access to `*.twingate.com` in browser may succeed while Relay/Controller services are blocked. See [Unsupported Regions].
-
-10. **DNS Rebind Protection**: Consumer routers/ISPs may block DNS responses returning private IPs. Symptom: empty `dig`/`nslookup` response. See [Address Resolution of Resources].
+| Item | Value |
+|------|-------|
+| Allowed domain | `*.twingate.com` |
+| Required IP ranges | Full GCP external IP list (Google-maintained) |
+| Expected DNS result | CGNAT IP (not real Resource IP) |
 
 ## Gotchas
-- False positives on TCP/IP port tests run from the Client side — always test from the Connector
-- GCP IP list is updated periodically; firewall rules may become stale
-- DNS Resources have a two-stage resolution (Client → Connector); failure at either stage breaks access
-- Geo-blocking may be partial — browser access works but other Twingate services are blocked
+
+- Port tests from the **Client side** to a Twingate Resource return **false positives** — always test from the Connector.
+- DNS Resources are first matched client-side against ACL, then resolved via the Connector — both sides must work.
+- GCP geo-blocks may allow browser access to `*.twingate.com` but still block Relay/Controller traffic.
+- DNS rebind protection produces empty DNS responses (not NXDOMAIN), which can be mistaken for a Twingate issue.
 
 ## Prerequisites
-- Admin Console access for group/resource and network traffic verification
-- SSH access to Connector for port/DNS testing
-- Technical Support Entitlement required to open a support request
+
+- Admin Console access (to check Groups, Resources, Network Traffic)
+- SSH access to Connector host (for port/DNS testing)
+- Technical Support Entitlement (for opening support requests)
 
 ## Related Docs
+
 - How DNS Works with Twingate
 - Known Incompatibilities
 - Network Traffic in the Admin Console
 - TCP/IP port tests or scans produce inaccurate results
-- Unsupported Regions
 - Address Resolution of Resources
-- Detailed Client Logs (for support escalation)
+- Unsupported Regions
+- Detailed client logs (collection guide)

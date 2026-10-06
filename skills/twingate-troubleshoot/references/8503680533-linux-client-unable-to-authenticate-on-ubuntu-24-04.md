@@ -1,35 +1,43 @@
 ---
 source: https://help.twingate.com/articles/8503680533-linux-client-unable-to-authenticate-on-ubuntu-24-04
 type: help
-fetched: 2026-09-06
-source_version: d8483270dfc3ee26550aaa754d5658106c3c623a981c9a05431fe2299a73963b
+fetched: 2026-10-04
+source_version: 13d3cd6bcaf740936b4e8b3ac671bce58fa59f78b8807b8f5180cc998bacb6ce
+trust: official
 ---
 
 # [Linux Client] Unable to Authenticate on Ubuntu 24.04
 
 ## Summary
-Twingate Linux Client fails to authenticate on Ubuntu 24.04 due to NetworkManager failing D-Bus network deletion calls, which prevents network path creation for the client. This surfaces as `auth.sock` errors in the notifier logs and occurs primarily after upgrading to Ubuntu 24.04, but also on fresh installs and during sleep/wake network changes.
+Twingate Linux Client fails to authenticate on Ubuntu 24.04 due to NetworkManager failing D-Bus network deletion calls, blocking network path creation for the client. This manifests as `auth.sock` errors in notifier logs and affects upgrades, fresh installs, and sleep/wake network transitions.
 
 ## Key Information
-- **Symptom**: `twingate-notifier status` shows `[ERROR] Error: auth.sock socket is not found`
-- **Root cause**: NetworkManager fails D-Bus network deletions → cannot create network path for Twingate client
-- **Fix**: Switch netplan renderer from `NetworkManager` to `networkd`
-- **Triggers**: Ubuntu upgrade to 24.04, fresh installs (rare), sleep/wake cycle across different networks
+- **Affected component:** Twingate Linux Client (notifier service)
+- **Platform:** Linux / Ubuntu 24.04
+- **Primary trigger:** Upgrade from older Ubuntu versions; also seen on fresh installs and sleep/wake across different networks
+- **Root cause:** NetworkManager fails D-Bus calls → cannot create network path → notifier reports `auth.sock` failures
 
-## Prerequisites
-- Ubuntu 24.04
-- Twingate Linux Client installed
-- `sudo` access
+## Error Signature
+```
+twingate-notifier status
+17:43:07 [ERROR] Error: auth.sock socket is not found
+```
 
-## Step-by-Step Fix
+## Fix: Switch Netplan Renderer from NetworkManager to networkd
 
-1. Navigate to `/etc/netplan` and list files: `ls /etc/netplan`
+### Step-by-Step
 
-2. **Edit the appropriate file** (or create `01-network-manager-all.yaml` if neither exists):
-   - `01-network-manager-all.yaml`, OR
-   - `50-cloud-init.yaml`
+1. Check which netplan config file exists:
+   ```bash
+   ls /etc/netplan
+   ```
 
-3. Set file contents:
+2. Edit the existing file (`01-network-manager-all.yaml` **or** `50-cloud-init.yaml`), or create `01-network-manager-all.yaml` if neither exists:
+   ```bash
+   sudo nano /etc/netplan/<filename>.yaml
+   ```
+
+3. Update file contents:
    ```yaml
    network:
      version: 2
@@ -37,35 +45,35 @@ Twingate Linux Client fails to authenticate on Ubuntu 24.04 due to NetworkManage
      renderer: networkd
    ```
 
-4. Apply the netplan change:
+4. Apply the changes:
    ```bash
    sudo netplan apply
    ```
-   *(Warnings from this command are safe to ignore)*
+   *(Warnings from this command are safe to ignore.)*
 
-5. If browser auth prompt does not appear automatically:
+5. If auth prompt does not appear automatically:
    ```bash
    twingate stop && twingate start
    ```
 
-6. If still no auth prompt — reboot and verify changes persisted.
+6. If still no auth prompt, **reboot** and verify changes persisted.
 
 ## Configuration Values
-
-| Setting | Old Value | New Value |
-|---|---|---|
-| `renderer` (netplan) | `NetworkManager` | `networkd` |
-
-**Affected files:**
-- `/etc/netplan/01-network-manager-all.yaml`
-- `/etc/netplan/50-cloud-init.yaml`
+| File path | Key setting |
+|---|---|
+| `/etc/netplan/01-network-manager-all.yaml` | `renderer: networkd` |
+| `/etc/netplan/50-cloud-init.yaml` | `renderer: networkd` |
 
 ## Gotchas
-- `sudo netplan apply` may produce warnings — these are **safe to ignore**
-- The issue recurs on sleep/wake if switching networks — workaround must be applied persistently
-- Fresh Ubuntu 24.04 installs can also exhibit this issue, not only upgrades
-- If neither netplan file exists, manually create `01-network-manager-all.yaml`
+- This is a **workaround**, not an upstream fix — switching renderers may affect other NetworkManager-dependent tooling on the system
+- Sleep/wake cycle across different networks can re-trigger the issue even after initial setup
+- `sudo netplan apply` may emit warnings; these do not indicate failure
+- If neither standard netplan file exists, you must **create** `01-network-manager-all.yaml` manually
+
+## Prerequisites
+- Ubuntu 24.04 with Twingate Linux Client installed
+- `sudo` access to edit netplan configuration
 
 ## Related Docs
 - Twingate Linux Client documentation
-- Ubuntu netplan renderer configuration
+- Ubuntu netplan documentation: `man netplan`

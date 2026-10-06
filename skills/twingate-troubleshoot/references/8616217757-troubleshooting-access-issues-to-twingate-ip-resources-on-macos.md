@@ -1,52 +1,49 @@
 ---
 source: https://help.twingate.com/articles/8616217757-troubleshooting-access-issues-to-twingate-ip-resources-on-macos
 type: help
-fetched: 2026-09-06
-source_version: 993362ef31a33853341f4179fa448c7d229c6f17f3ac8f7ea51c62c7db988dd4
+fetched: 2026-10-04
+source_version: 64178c612f473c09300f02faac3107facbd3c62403ad5f4d4b76e24efe7231a2
+trust: official
 ---
 
 # Troubleshooting Access Issues to Twingate IP Resources on macOS
 
 ## Summary
-On macOS, overlapping subnets between local network and Twingate IP resources can cause routing conflicts where traffic bypasses the Twingate tunnel. macOS incorrectly prioritizes local network routes over Twingate routes, unlike other operating systems. This affects IP-only resources exclusively.
+On macOS, overlapping subnets between local networks and Twingate IP resources can cause routing conflicts where traffic bypasses the Twingate tunnel and routes locally instead. This is a macOS-specific limitation in route priority handling. The issue only affects IP-only resources (not FQDN resources).
 
 ## Key Information
-- **Root cause**: macOS routing table conflicts when local subnet overlaps with Twingate IP resource subnet
-- **Symptom**: Traffic routes over local network instead of through Twingate tunnel
-- **Scope**: IP-only resources on macOS only; not a Twingate bug but a macOS limitation
-- **Impact**: Resources fail to load or function as expected
+- macOS may incorrectly prioritize local network routes over Twingate tunnel routes when subnets overlap
+- Other operating systems handle route priorities correctly; this is macOS-specific
+- Affects IP-based Twingate resources only, not FQDN-based resources
+- Symptom: IP resources fail to load or connect despite Twingate being active
 
 ## Prerequisites
 - Twingate Client installed on macOS
-- Access to Terminal (for advanced routing fix)
-- Understanding of your local network subnet ranges
+- Access to Twingate Admin Console (to modify resource definitions)
+- Terminal access (for advanced route removal option)
 
 ## Resolution Options
 
 ### Option 1: Use More Specific IP Resources (Recommended)
-1. Identify the specific IP addresses needed rather than entire subnets
-2. In Twingate Admin Console, redefine the resource using a more specific IP (e.g., single host `/32`) instead of a broad subnet
-3. macOS will correctly prioritize the more specific route through Twingate
+1. Identify the conflicting IP resource (broad subnet) in the Twingate Admin Console
+2. Replace the broad subnet resource with more specific IP addresses or narrower CIDR ranges
+3. This ensures macOS correctly prioritizes the Twingate tunnel route over the local network route
 
-### Option 2: Remove Conflicting Local Routes (Advanced)
-1. Open Terminal
-2. Identify conflicting route: `netstat -rn`
-3. Remove the conflicting local route manually using `route delete <subnet>`
-4. Test connectivity to the Twingate resource
-
-> ⚠️ Removing local routes may break communication with other devices on your local network. Use with caution.
+### Option 2: Remove Conflicting Local Route (Advanced)
+1. Open Terminal on macOS
+2. Identify the conflicting route using `netstat -rn` or `route -n get <IP>`
+3. Manually delete the conflicting local route using `sudo route delete <subnet>`
+4. **Caution:** Removing local routes may break communication with other devices on the local network; this is a temporary fix (routes may restore on reconnect)
 
 ## Configuration Values
-| Parameter | Notes |
-|-----------|-------|
-| Resource IP specificity | Prefer `/32` single-host or narrower CIDR over broad subnets |
+- No specific env vars or CLI flags; resolution is handled via Admin Console resource configuration or macOS `route` commands
 
 ## Gotchas
-- This is a **macOS-specific limitation**; Windows and Linux handle route priorities correctly
-- Manually deleted routes may be restored after network reconnection or reboot
-- Removing local routes can disrupt LAN device communication (printers, NAS, etc.)
-- Broad subnet resources (e.g., `10.0.0.0/8`) are most prone to conflicts
+- Removing local routes can disrupt LAN connectivity — use with caution and understand the impact before proceeding
+- Manually removed routes may be re-added automatically by macOS when network changes occur (e.g., reconnecting Wi-Fi)
+- This is a **macOS OS-level limitation**, not a Twingate bug; no client update will fully resolve it
+- Broad subnet resources (e.g., `/16`, `/8`) are most likely to trigger conflicts with common local network ranges (e.g., `192.168.x.x`, `10.x.x.x`)
 
 ## Related Docs
 - Twingate resource configuration (Admin Console)
-- macOS routing table management (`man route`)
+- macOS networking: `man route`, `man netstat`

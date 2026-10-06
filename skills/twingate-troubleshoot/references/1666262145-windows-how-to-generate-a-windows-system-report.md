@@ -1,38 +1,36 @@
 ---
 source: https://help.twingate.com/articles/1666262145-windows-how-to-generate-a-windows-system-report
 type: help
-fetched: 2026-09-06
-source_version: d3c91127f0c4b0086aad9a437472b96edab7e6cc33b45b17558078df0ca4bbfd
+fetched: 2026-10-04
+source_version: 9fface5dd9f2e815fff5d8c9930fcc0f4eed9238f4a2823dcd679e66c8331c09
+trust: official
 ---
 
 # [Windows] How To Generate a Windows System Report
 
 ## Summary
-Instructions for generating a Windows System Information report file using the built-in `msinfo32` tool. This report is typically requested by Twingate support alongside other diagnostic logs.
+Instructions for capturing a Windows System Information report using the built-in `msinfo32` tool. Used to provide system diagnostics when troubleshooting Twingate issues on Windows.
 
 ## Key Information
-- Uses the native Windows System Information (`msinfo32`) utility
-- Output is a `.nfo` file containing hardware, software, and system configuration details
-- File can be compressed with other requested logs before submission
+- Uses the native Windows System Information utility (`msinfo32`)
+- Produces a `.nfo` file containing detailed hardware/software/OS info
+- Typically requested alongside other Twingate logs by support
 
 ## Prerequisites
 - Windows OS
-- Access to Start menu
+- No admin rights required
 
 ## Step-by-Step
 
 1. Press the **Windows key** and type `sys`
 2. Click **System Information** from the search results
-3. Click **File** → **Save**
-4. In the **Save As** dialog, choose a name and location (desktop recommended)
-5. Compress the output file with any other requested logs and send to support
-
-## Configuration Values
-None — no CLI flags, environment variables, or API parameters involved.
+3. Click **File → Save** to open the Save As dialog
+4. Choose a filename and location (desktop recommended)
+5. Compress the `.nfo` file with any other requested logs before sending
 
 ## Gotchas
-- The tool may take a moment to fully load before saving; saving too early may produce an incomplete report
-- Default save format is `.nfo` — no need to change the file type
+- The file can be large; compress it before attaching to a support ticket
+- Ensure you save (not export) — "Save" produces a single `.nfo` file; "Export" produces a `.txt` file with less detail
 
 ## Related Docs
-- Twingate Windows client troubleshooting logs (typically requested alongside this report)
+- Twingate Windows client logs (check Twingate Help Center for companion log collection steps)

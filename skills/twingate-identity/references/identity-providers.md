@@ -1,65 +1,67 @@
 ---
 source: https://www.twingate.com/docs/identity-providers
 type: docs
-fetched: 2026-08-14
-source_version: 3ab0a265393d5cd3e9007e012445f47ed066dbbc4e55640f4420b1c5f4f7a58a
+fetched: 2026-10-04
+source_version: c594517f13ab67cb309b5279f68d549d89f06e2a63ce7fe18fedd6ce48207e91
+trust: official
 ---
 
 # Identity Providers
 
+## Page Title
+Identity Providers
+
 ## Summary
-Twingate supports multiple identity providers (IdPs) for user authentication and directory sync. Google Workspace is available on all plans; Entra ID, Okta, OneLogin, JumpCloud, and Keycloak require Business or Enterprise plans. Multiple IdP instances can be configured simultaneously.
+Twingate supports multiple identity providers (IdPs) for user authentication and directory sync. Google Workspace is available on all plans; Entra ID, Okta, OneLogin, JumpCloud, and Keycloak require Business or Enterprise plans. Multiple IdP instances can run simultaneously to support migration, contractors, or subsidiaries.
 
 ## Key Information
-- **Supported IdPs**: Entra ID (Azure AD), Google Workspace, Okta, OneLogin, JumpCloud, Keycloak
-- **Google Workspace** is the only IdP available on all plans; others require Business/Enterprise
-- Users can be auto-synced from IdP directories or manually added via social logins (Google, LinkedIn)
-- Multiple IdP instances supported simultaneously (e.g., two Okta instances + Entra ID)
-- IdPs can be renamed for easier management
-- View user source via Teams page → filter by **Source**
+- **Supported IdPs:** Entra ID (Azure AD), Google Workspace, Okta, OneLogin, JumpCloud, Keycloak
+- **Social logins:** Google, Microsoft, GitHub, LinkedIn (manually added by admin; useful for contractors without managed accounts)
+- **Multiple IdPs:** Supported — can mix different providers or run multiple instances of the same provider (e.g., two Okta instances)
+- **User source visibility:** Teams page → filter by "Source" to identify which IdP each user originates from
+- **IdP renaming:** Supported for easier management of multi-IdP setups
+- **Offboarding:** Managed within the IdP; changes must sync to Twingate
 
 ## Prerequisites
 - Business or Enterprise plan for non-Google IdPs
 - Admin access to Twingate Admin Console
-- Admin access to the target IdP
+- At least one admin user must remain after any IdP removal
 
-## Changing/Disconnecting an IdP
+## Configuration Steps
+
+### Connect an IdP
+1. Navigate to **Settings → Identity Provider** in Admin Console
+2. Select desired IdP and follow provider-specific setup guide
+3. If social login users exist, choose to keep or remove them (removal recommended for clean transition)
+
+### Disconnect/Change an IdP
+1. Go to **Settings → Identity Provider**
+2. Open options for the configured IdP → Disconnect
+3. If disconnection would remove all admins, provide an email for a new admin (must use a supported social login)
+4. Re-authenticate via the provided email
+5. Configure new IdP from the Identity Provider page
+
+### Add Multiple IdPs
 1. Navigate to **Settings → Identity Provider**
-2. Select options on configured IdP → Disconnect
-3. **Warning**: Disconnecting removes ALL synced users and groups
-4. If disconnect would remove all admins, provide an email for a new admin who can log in via social login (Google, Microsoft, GitHub, or LinkedIn)
-5. Re-authenticate via Admin Console using the provided email
-6. Configure new IdP from Identity Provider page
-
-## Adding First IdP (When Social Login Exists)
-- Twingate prompts to keep or remove existing social login users
-- **Recommendation**: Remove social login users for smoother transition
-
-## Multiple Identity Providers
-- Use cases: tool migration, contractors, subsidiaries
-- No limit specified on number of IdP connections
-- Requirement when removing an IdP: at least one admin must remain on the account
-- Can rename individual IdP configurations for tracking
-
-## Offboarding Users
-- Enterprise IdP: manage offboarding within the IdP; changes sync to Twingate
-- See separate Offboarding Users documentation for details
+2. Add additional providers alongside existing ones
+3. Optionally rename each IdP for tracking purposes
 
 ## Gotchas
-- Disconnecting an IdP **immediately removes all associated users and groups** — no soft delete
-- If last admin would be removed, a fallback admin email is required before disconnection can proceed
-- Social login users (contractors, etc.) are managed manually by admins, not synced
-- When first connecting an IdP alongside social login, prompt to remove social users appears — skipping this may cause conflicts
+- **Disconnecting an IdP removes all associated users and synced groups** — no partial removal
+- If no admins would remain after IdP removal, a social-login-capable admin email is required before proceeding
+- Social login users must be manually added; they are not directory-synced
+- When first connecting an IdP alongside existing social login users, removing social login users is recommended for a smoother transition
 
-## Security Recommendation
-- Use **Twingate Universal 2FA** (native) regardless of IdP — applies 2FA to any network resource without per-application configuration
+## Configuration Values
+- No environment variables or API params documented on this page
+- Provider-specific config values are in individual IdP setup pages
 
 ## Related Docs
-- Entra ID setup
-- Google Workspace setup
-- Okta setup
-- OneLogin setup
-- JumpCloud setup
-- Keycloak setup
-- Offboarding Users
-- Twingate Native 2FA setup
+- [Entra ID Setup](#)
+- [Google Workspace Setup](#)
+- [Okta Setup](#)
+- [OneLogin Setup](#)
+- [JumpCloud Setup](#)
+- [Keycloak Setup](#)
+- [Offboarding Users](https://www.twingate.com/docs/offboarding-users)
+- [Twingate Universal 2FA](https://www.twingate.com/docs/two-factor-authentication)

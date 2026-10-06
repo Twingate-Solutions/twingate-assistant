@@ -1,8 +1,9 @@
 ---
 source: https://help.twingate.com/articles/9287595551-self-serve-troubleshooting-guide
 type: help
-fetched: 2026-09-06
-source_version: 51710f279dc0b49e4e344d1b28d1681cb8a0fe2c0af1c483c7e37ac4a0ab3755
+fetched: 2026-10-04
+source_version: 789d5338b8421e479c0ad274cdf77e0a7a656f4005fb17b32ac7ddb0fc65ef49
+trust: official
 ---
 
 # Self-Serve Troubleshooting Guide
@@ -11,54 +12,51 @@ source_version: 51710f279dc0b49e4e344d1b28d1681cb8a0fe2c0af1c483c7e37ac4a0ab3755
 Self-Serve Troubleshooting Guide
 
 ## Summary
-Structured troubleshooting guide for common Twingate issues. Covers two primary failure scenarios: Client unable to join the Twingate network, and Client unable to connect to a specific Resource.
+High-level troubleshooting reference for common Twingate issues. Covers two primary failure modes: Client unable to join the Twingate network, and Client unable to connect to a specific Resource. Points to log collection and KB articles for escalation.
 
 ## Key Information
 
 ### Client Cannot Join Twingate Network
-- Verify Twingate Network Interface exists on the device
-- **(Windows)** Confirm Network Interface is enabled
-- **(Windows)** Confirm Twingate Service is running
-- Verify outbound ports are not blocked by local network
-- Check for incompatible clients/agents running alongside Twingate Client
-- Check if device region is geo-blocking Twingate access
+- Verify Twingate network interface exists on the device
+- **(Windows only)** Confirm the network interface is enabled
+- **(Windows only)** Confirm the Twingate Service is running
+- Check that outbound ports are not blocked by the local network
+- Check for incompatible clients or agents running concurrently
+- Check if the device's region blocks Twingate access
 
 ### Client Cannot Connect to a Resource
-- Validate Resource definition is correctly configured
-- Verify user has permissions for the Resource
-- **(Windows)** Ensure Domain Controllers are declared as Resources
-- Review Network Events for the specific Resource
-- Check for Resource ambiguity (overlapping definitions)
+- Validate the Resource definition is correctly configured
+- Verify the user has permission to access the Resource
+- **(Windows only)** Ensure Domain Controllers are declared as Resources
+- Review Network Events for the specific Resource in the Admin Console
+- Check for Resource ambiguity (overlapping CIDR ranges or hostnames)
 
-## Prerequisites
-- Twingate Client installed on affected device
-- Admin access to Twingate Admin Console (for checking permissions, Resource definitions, Network Events)
-
-## Step-by-Step
-1. Identify which failure scenario applies (network join vs. resource access)
-2. Work through the relevant checklist above
-3. If unresolved, collect logs and escalate
+## Escalation Steps
+**For network join failures:** Collect Client logs from affected devices.  
+**For Resource connection failures:** Collect both Client logs and Connector logs.
 
 ## Configuration Values
-- No specific env vars or CLI flags documented on this page
-- Outbound port requirements referenced but not listed inline (check linked Knowledge Base)
+- Outbound ports must be open (specific ports not listed on this page — see Connector/firewall docs)
 
 ## Gotchas
-- Windows has additional requirements not applicable to other platforms: Service must be running AND Network Interface must be explicitly enabled
-- Domain Controllers must be explicitly declared as Resources on Windows — omitting this is a common Windows-specific failure
-- Resource ambiguity (multiple Resources with overlapping address ranges) can silently break connectivity
-- Regional network blocks can prevent Client from reaching Twingate infrastructure entirely
+- Windows requires both the network interface to be enabled **and** the Twingate Service to be running — two separate checks
+- Domain Controllers must be explicitly declared as Resources on Windows environments
+- Resource ambiguity (overlapping definitions) can silently cause connection failures
+- Regional network blocks may prevent Client from joining the network entirely
 
-## Log Collection (for escalation)
-- **Client logs**: Collect from affected end-user devices
-- **Connector logs**: Collect when troubleshooting Resource access failures
-- Share both with Twingate support if issue persists
+## Additional Self-Serve Resources
+| Resource | Purpose |
+|----------|---------|
+| [Twingate Docs](https://docs.twingate.com) | Full product documentation |
+| [Twingate Help Center](https://help.twingate.com) | Knowledge base & KB articles |
+| Known Incompatibilities KB | Check for conflicting software |
+| [Twingate Forum](https://forum.twingate.com) | Community discussion |
+| [Subscription Management](https://help.twingate.com) | Billing |
+| [Service Status](https://status.twingate.com) | Twingate uptime/incidents |
+| [Twingate Changelog](https://www.twingate.com/changelog) | New features and fixes |
 
 ## Related Docs
-- [Twingate Docs](https://www.twingate.com/docs)
-- [Twingate Help Center / Knowledge Base](https://help.twingate.com)
-- [Known Incompatibilities](https://help.twingate.com) — check before running alongside other VPN/agent software
-- [Twingate Forum](https://forum.twingate.com)
-- [Service Status](https://status.twingate.com)
-- [Twingate Changelog](https://www.twingate.com/changelog)
-- Subscription Management (billing)
+- Twingate Client Knowledge Base
+- Client log collection guide
+- Connector log collection guide
+- Connector firewall/port requirements

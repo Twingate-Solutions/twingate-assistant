@@ -1,41 +1,47 @@
 ---
 source: https://help.twingate.com/articles/6965244612-azure-container-docker-hub-rate-limits-block-connector-deployment-or-restart
 type: help
-fetched: 2026-09-06
-source_version: 7b7e52820063d79f72e9e3e6743ac92a62930a764b131e348a069148e311f881
+fetched: 2026-10-04
+source_version: 14c5227e03b22e346a35a69037caf3d0d8405cb4944b975be654638785e43684
+trust: official
 ---
 
 # Azure Container: Docker Hub Rate Limits Block Connector Deployment
 
-## Page Title
-Azure Container Docker Hub Rate Limits Block Connector Deployment or Restart
-
 ## Summary
-Docker Hub rate limiting can block Twingate Connector deployments or restarts on Azure Container Instances, returning a `RegistryErrorResponse` error from `index.docker.io`. The fix is to authenticate image pull requests with Docker Hub credentials.
+Docker Hub rate limiting causes failures when deploying or restarting Twingate Connectors via Azure Container Instances. Authenticated Docker Hub requests receive higher rate limit thresholds, resolving the issue.
 
 ## Key Information
-- Affects: Connector deployments and restarts via Azure Container Services
-- Root cause: Docker Hub rate limits unauthenticated pulls more aggressively than authenticated/paid accounts
-- Error appears during initial deployment or container group restarts
+- Error occurs during Connector deployment or update/restart via Azure Container Services
+- Root cause: Docker Hub rate limiting on unauthenticated pulls from `index.docker.io`
+- Fix: Add Docker Hub credentials to the `az container` deployment command
 
 ## Error Messages
 - Deployment: `(RegistryErrorResponse) An error response is received from the docker registry 'index.docker.io'. Please retry later.`
-- Restart: `Failed to restart the container group ''. Error: An error response is received from the docker registry 'index.docker.io'. Please retry later.`
+- Restart: `Failed to restart the container group ''. Error: An error response is received from the docker registry 'index.docker.io'.`
 
 ## Prerequisites
-- Docker Hub account (free or paid; paid accounts have higher thresholds)
-- Azure Container Instances deployment via `az container` CLI
+- Docker Hub account (paid account provides highest rate limit thresholds)
+- Azure CLI with `az container` access
+- Existing Twingate Connector deployment on Azure Container Instances
 
-## Resolution: CLI Parameters
+## Resolution
 
-Add Docker Hub authentication flags to the `az container` deployment command:
+Add Docker Hub authentication parameters to the `az container` deployment command:
 
+```
+--registry-username [dockerhub username] \
+--registry-password [dockerhub password] \
+--registry-login-server index.docker.io
+```
+
+**Example (appended to existing deploy command):**
 ```bash
 az container create \
-  ... \
+  ... [existing parameters] ... \
   --registry-login-server index.docker.io \
-  --registry-username [dockerhub_username] \
-  --registry-password [dockerhub_password]
+  --registry-username YOUR_DOCKERHUB_USERNAME \
+  --registry-password YOUR_DOCKERHUB_PASSWORD
 ```
 
 ## Configuration Values
@@ -44,12 +50,12 @@ az container create \
 |---|---|
 | `--registry-login-server` | `index.docker.io` |
 | `--registry-username` | Your Docker Hub username |
-| `--registry-password` | Your Docker Hub password |
+| `--registry-password` | Your Docker Hub password or access token |
 
 ## Gotchas
-- Authenticated free-tier Docker Hub accounts still have rate limits, just higher than unauthenticated — paid Docker Hub accounts get the highest thresholds
-- Error message says "Please retry later" which may suggest a transient issue, but repeated failures indicate rate limiting
-- Applies to both new deployments and container group restarts/updates
+- Free Docker Hub accounts still have rate limits; a paid account provides the highest thresholds
+- Retry without credentials will continue to fail if rate limit is hit — credentials must be added to the command
+- Use a Docker Hub access token instead of password where possible for better security
 
 ## Related Docs
 - [Docker Hub Rate Limiting Documentation](https://docs.docker.com/docker-hub/download-rate-limit/)

@@ -1,56 +1,64 @@
 ---
 source: https://help.twingate.com/articles/4104282255-connector-offline-status-flapping-offline-online-or-goes-offline-some-time-after-restart
 type: help
-fetched: 2026-09-06
-source_version: 9df691f73b5eecca70b875f5a25c895e7de3eb3a5b3de692b7336d679fe57e54
+fetched: 2026-10-04
+source_version: 4c84e4a7c8b4f1186d9491682f0d24a1916eb31b3f1c8b5aa56e0165932f08c4
+trust: official
 ---
 
-# Connector Offline: Clock Drift / Status Flapping
+# Connector Offline: Status Flapping or Goes Offline After Restart
 
 ## Summary
-Twingate Connector goes offline, flaps online/offline, or fails with "Invalid token" errors when system clock drifts more than 5 seconds from the Twingate Controller. This can manifest immediately or days after a restart as drift accumulates.
+The Twingate Connector requires system clock to be within 5 seconds of the Twingate Controller's clock. Clock drift beyond this threshold causes token verification failures, resulting in the Connector going offline or flapping online/offline. This often surfaces days after a restart as drift accumulates.
 
 ## Key Information
-- **Clock drift threshold**: 5 seconds from Twingate Controller
-- Affects containers and bare-metal deployments equally
-- Container clock issues must be fixed at the **host level**, not inside the container
-- Cloud-managed hosts require engaging the cloud provider's support
+- Clock drift tolerance: **±5 seconds** from Twingate Controller
+- Root cause: NTP sync absent or insufficient (ntpd alone may not correct drift fast enough)
+- Affects bare-metal, VM, and containerized deployments
+- Container issues must be resolved on the **container host**, not the container itself
 
 ## Symptoms
 - Email alerts for Connector flapping offline/online
-- Connector goes offline days after restart or container deployment
-- Log errors: `failed to get an access token: Invalid token` / `failed to get SD: Invalid token`
-- Debug logs show: `token verification failed: token expired`
+- Connector goes unavailable days after restart/deployment
+- Log errors: `failed to get an access token: Invalid token` / `token verification failed: token expired`
 
 ## Troubleshooting Steps
 
-1. **Check Time Offset in Admin Console**: Navigate to Connector Details → check "Time Offset" field. If ≥ 5s, clock drift is the cause.
+1. **Check Time Offset in Admin Console**
+   - Navigate to Connector Details → inspect the **Time Offset** field
+   - If ≥ 5 seconds, clock drift is the issue
+   - Monitor over time to detect variable/flapping drift
 
-2. **Verify via logs** (requires debug-level logging enabled):
-   - Find log line containing `verify_token: {"typ":"DAT"`
-   - Extract system timestamp (e.g., `Jun 26 21:39:49`) and `iat` field value (e.g., `1656279597`)
+2. **Confirm via logs**
+   - Enable debug-level logging per [Twingate Connector Logs docs](https://help.twingate.com)
+   - Find a line containing `verify_token: {"typ":"DAT"`
+   - Extract the system timestamp (e.g., `Jun 26 21:39:49`) and the `iat` field value (e.g., `1656279597`)
    - Convert `iat` epoch to human-readable time
-   - Compare: if difference > 5 seconds → clock drift confirmed
+   - Compare: if difference > 5 seconds, clock drift is confirmed
 
-3. **Check for variable drift**: Monitor Time Offset over time to determine if drift is intermittent vs. consistent.
-
-## Configuration Notes
-- Enable debug logs per [Twingate Connector Logs](https://help.twingate.com/articles/connector-logs) documentation
-- Docker users: ensure `-t` / `--timestamps` flag is set or log lines won't include timestamps
+3. **Example calculation**
+   - System timestamp: `Jun 26 21:39:49`
+   - `iat` decoded: `Jun 26 21:39:57`
+   - Difference: **8 seconds** → drift confirmed
 
 ## Resolution
 
-| Scenario | Fix |
-|----------|-----|
-| Bare-metal / VM | Ensure NTP is synced; install and run `chronyd` alongside `ntpd` |
+| Environment | Action |
+|---|---|
+| Bare-metal / VM | Install and run `chronyd` alongside or instead of `ntpd` |
 | Container | Fix clock sync on the **container host** |
-| Cloud-managed host | Contact cloud provider support to resolve host clock drift |
+| Cloud-managed host | Contact cloud provider support to address host clock drift |
+
+## Configuration Values
+- No env vars or CLI flags specific to this issue
+- Docker log timestamps: use `-t` / `--timestamps` flag to include system timestamps in container logs
 
 ## Gotchas
-- `ntpd` alone may be insufficient—running `chronyd` in tandem is recommended
-- Clock drift can be intermittent (flapping), making it harder to diagnose; monitor Time Offset over time
-- Tokens expire based on `iat` (issued-at) time from Controller; if Connector clock is behind, token appears expired before it actually is
+- `ntpd` alone may not correct drift sufficiently—`chronyd` is recommended in tandem
+- Container clock is inherited from host; fixing inside the container has no effect
+- Time Offset may be variable/intermittent—monitor over time rather than a single check
+- Log lines without timestamps make diagnosis difficult; ensure timestamps are enabled in Docker
 
 ## Related Docs
-- [Connector Metadata](https://help.twingate.com/articles/connector-metadata)
-- [Twingate Connector Logs](https://help.twingate.com/articles/connector-logs)
+- [Connector Metadata](https://help.twingate.com) (Time Offset field details)
+- [Twingate Connector Logs](https://help.twingate.com) (enabling debug logging)

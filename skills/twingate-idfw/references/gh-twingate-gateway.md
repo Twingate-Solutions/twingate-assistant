@@ -1,8 +1,9 @@
 ---
 source: https://github.com/Twingate/gateway
 type: github
-fetched: 2026-09-27
-source_version: a98ea64b8f6532004d552d71db6b1d3beaea4ee0
+fetched: 2026-10-04
+source_version: 5ed8e12fc806474700abd9988cc3a85861aa83ad
+trust: official
 ---
 
 # Twingate Gateway
@@ -13,7 +14,7 @@ A Layer 7 reverse proxy deployed within your infrastructure as part of Twingate 
 ## Key Information
 - **Protocols supported:** Kubernetes, SSH, Web App (TLS upstream/downstream as of v1.1.0)
 - **Deployment:** Self-hosted within your environment; Docker image available on DockerHub (`twingate/gateway`)
-- **SSH CA options:** Vault-backed CA or manual CA
+- **SSH CA options:** Local (file) CA or Vault-backed CA
 - **Session recording:** Supported for Kubernetes (`kubectl`) and SSH sessions
 - **Audit logging:** All activity attributed to specific user identities; SSH channel request outcomes logged
 - **Free tier:** Up to 5 Kubernetes, SSH, or Web App resources
@@ -41,18 +42,34 @@ A Layer 7 reverse proxy deployed within your infrastructure as part of Twingate 
 
 Refer to the [wiki](https://github.com/Twingate/gateway/wiki) for full configuration reference.
 
-## Gotchas
-- **v1.1.0 breaking change (Vault-backed SSH CA):** SSH host certificates now include resource addresses and aliases as principals. The Vault role for the gateway host CA must permit these via `allowed_domains=*` (or explicitly listed hostnames with `allow_bare_domains=true`).
-- **Zero-downtime migration path for Vault CA:** Add `allowed_domains=*` before upgrading; remove `allow_empty_principals=true` only after confirming no rollback needed.
-- **Manual CA deployments:** No migration steps required for v1.1.0.
-- GAT token type is now validated from the payload claim — ensure tokens are of the correct type.
-- Web App TLS support (upstream and downstream) is new in v1.1.0 and may require additional configuration.
+## Internal Architecture
 
-## Related Docs
-- [Wiki (main)](https://github.com/Twingate/gateway/wiki)
-- [How It Works](https://github.com/Twingate/gateway/wiki/How-It-Works)
-- [Kubernetes Overview](https://github.com/Twingate/gateway/wiki/Kubernetes-Overview)
-- [SSH Overview](https://github.com/Twingate/gateway/wiki/SSH-Overview)
-- [Developer Guide](https://github.com/Twingate/gateway/wiki/Developers)
-- [DockerHub](https://hub.docker.com/r/twingate/gateway)
-- [Twingate Forum](https://forum.twingate.com/)
+```
+main.go → cmd/start.go → proxy.NewProxy() → proxy.Start()
+  ├─> frontend.NewListener() (TLS + CONNECT auth, dispatch by GAT resource type)
+  ├─> one frontend.ProtocolListener per enabled backend
+  │     e.g. kubernetes.NewHandler(), webapp handler, ssh.NewProxy()
+  └─> metrics.Start() (Prometheus)
+```
+
+### Key Packages
+| Area | Path |
+|---|---|
+| Orchestrator | `internal/proxy/proxy.go` |
+| Auth / CONNECT | `internal/frontend/connect.go` |
+| Listener / dispatch | `internal/frontend/listener.go` |
+| Server cert sourcing | `internal/frontend/cert/` |
+| GAT JWT parsing | `internal/token/parser.go` |
+| Shared HTTP proxy core | `internal/backend/httpproxy/proxy.go` |
+| Kubernetes proxy | `internal/backend/kubernetes/handler.go` |
+| Web app proxy | `internal/backend/webapp/handler.go` |
+| SSH proxy | `internal/backend/ssh/proxy.go` |
+| Session recording | `internal/sessionrecorder/` |
+| Vault client | `internal/vault/` |
+| Shared helpers | `internal/util/` (imports nothing else under `internal/`) |
+| Helm chart | `deploy/gateway/` |
+
+### Security Model
+- **Frontend:** Every connection goes through TLS termination → CONNECT validation → JWT verification → Proof-of-Possession (client signs TLS EKM with private key matching the public key in the GAT).
+- **K8s:** Gateway adds `Impersonate-User`/`Impersonate-Group` headers; RBAC enforced at the API server. Gateway service account needs only impersonation permission.
+- **Web App:** Request headers rewritten from templates with GAT variables (JWT, username, groups, client geo); client identity headers (`X-Real-IP`, `X-Forwarded-*`) stripped to prevent

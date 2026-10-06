@@ -1,80 +1,88 @@
 ---
 source: https://www.twingate.com/docs/pulumi-aws
 type: docs
-fetched: 2026-09-20
-source_version: da532dd13baa8daba7484157db78e9887d4103d7fafa2c3cb82147631e952ae0
+fetched: 2026-10-04
+source_version: b44cce13d9a4101f54215d3e049e9325194bb124c8e474e5243a6bd52507fe2b
+trust: official
 ---
 
 # Pulumi with AWS and Twingate
 
+## Page Title
+How to Use Pulumi with AWS and Twingate
+
 ## Summary
-Step-by-step guide for automating Twingate deployments on AWS using Pulumi with TypeScript. Creates a VPC with a demo server (no public IP) and a Twingate Connector EC2 instance, wiring them together via Twingate resources and groups.
+Automates Twingate deployment on AWS using Pulumi (TypeScript). Creates a VPC, subnets, two EC2 instances (one demo server, one Twingate Connector), and the corresponding Twingate Remote Network, Connector, Group, and Resource objects.
 
 ## Key Information
-- Uses TypeScript/Node.js Pulumi program
-- Deploys two EC2 instances: a private demo server and a public-facing Twingate Connector
-- Connector configured via userdata script writing to `/etc/twingate/connector.conf`
-- Twingate AMI used for both instances (owner ID: `617935088040`)
-- Instance type: `t2.micro`
-- Additional examples available at Twingate's GitHub repository
+- Language: TypeScript/Node.js
+- NPM packages: `@pulumi/aws`, `@twingate/pulumi-twingate`
+- Connector VM uses a Twingate-published AMI (owner ID `617935088040`, pattern `twingate/images/hvm-ssd/twingate-amd64-*`)
+- Connector configured via `/etc/twingate/connector.conf` written by user-data script
+- Demo server has no public IP; Connector VM has a public IP
+- Instance size: `t2.micro`
+- VPC CIDR: `10.0.0.0/16`, Subnet: `10.0.1.0/24`
 
 ## Prerequisites
-- AWS account with permissions to create/delete resources
-- Pulumi CLI installed and configured
+- AWS account with permissions to create EC2, VPC, Subnet, IGW, RouteTable resources
+- Pulumi CLI installed and authenticated
 - Node.js installed (`node -v` to verify)
 - Twingate API key and tenant name
-- Bash-compatible OS
-- Existing Pulumi account/stack prerequisites met
+- SSH key pair generated locally
 
 ## Step-by-Step
 
-1. `mkdir twingate_pulumi_aws_demo && cd twingate_pulumi_aws_demo`
-2. `pulumi new typescript` — initialize project
-3. Set AWS credentials as env vars
-4. `pulumi config set twingate:apiToken YOUR_TOKEN --secret`
-5. `pulumi config set twingate:network <tenant-name>`
-6. Generate SSH keypair: `ssh-keygen` → save to `~/.ssh/aws_id_rsa`
-7. `cat ~/.ssh/aws_id_rsa.pub | pulumi config set publicKey`
-8. `npm install @pulumi/aws @twingate/pulumi-twingate`
-9. Write `index.ts` with full configuration (see below)
-10. `pulumi preview` → `pulumi up`
-11. Assign Twingate user to the created group in Twingate admin
-12. Test: `ssh -i ~/.ssh/aws_id_rsa ubuntu@<private-ip>`
-13. Cleanup: `pulumi down`
+```bash
+# 1. Project setup
+mkdir twingate_pulumi_aws_demo && cd twingate_pulumi_aws_demo
+pulumi new typescript
+
+# 2. AWS auth (env vars)
+export AWS_ACCESS_KEY_ID=<YOUR_ACCESS_KEY_ID>
+export AWS_SECRET_ACCESS_KEY=<YOUR_SECRET_ACCESS_KEY>
+export AWS_REGION=<YOUR_AWS_REGION>
+
+# 3. Twingate config
+pulumi config set twingate:apiToken YOUR_TOKEN --secret
+pulumi config set twingate:network <tenant-name>
+
+# 4. SSH key
+ssh-keygen -f ~/.ssh/aws_id_rsa
+cat ~/.ssh/aws_id_rsa.pub | pulumi config set publicKey
+
+# 5. Install packages
+npm install @pulumi/aws @twingate/pulumi-twingate
+
+# 6. Write index.ts (see Configuration Values / full example in source)
+
+# 7. Preview and deploy
+pulumi preview
+pulumi up
+
+# 8. Tear down
+pulumi down
+```
 
 ## Configuration Values
 
-| Config Key | Command | Notes |
+| Config Key | Set Via | Notes |
 |---|---|---|
-| `twingate:apiToken` | `pulumi config set twingate:apiToken TOKEN --secret` | Mark as secret |
-| `twingate:network` | `pulumi config set twingate:network TENANT` | Tenant prefix only |
-| `publicKey` | `cat key.pub \| pulumi config set publicKey` | SSH public key |
+| `twingate:apiToken` | `pulumi config set --secret` | Encrypted in `Pulumi.<stack>.yaml` |
+| `twingate:network` | `pulumi config set` | Tenant prefix only (e.g., `mycorp`) |
+| `publicKey` | `pulumi config set` | SSH public key content |
+| `AWS_ACCESS_KEY_ID` | env var | |
+| `AWS_SECRET_ACCESS_KEY` | env var | |
+| `AWS_REGION` | env var | |
 
-**AWS env vars:**
-```
-AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION
-```
-
-**Connector env vars (written to `/etc/twingate/connector.conf`):**
-```
-TWINGATE_URL, TWINGATE_ACCESS_TOKEN, TWINGATE_REFRESH_TOKEN,
-TWINGATE_LOG_ANALYTICS=v3, TWINGATE_LABEL_HOSTNAME,
-TWINGATE_LABEL_EGRESSIP, TWINGATE_LABEL_DEPLOYEDBY=tg-pulumi-aws-ec2
-```
-
-**Resource protocol config:** TCP ports `22`, `80` (RESTRICTED); UDP `ALLOW_ALL`; ICMP enabled.
-
-**Twingate AMI filter:** `twingate/images/hvm-ssd/twingate-amd64-*`, owner `617935088040`
+### Connector `/etc/twingate/connector.conf` variables
+- `TWINGATE_URL`, `TWINGATE_ACCESS_TOKEN`, `TWINGATE_REFRESH_TOKEN`, `TWINGATE_LOG_ANALYTICS=v3`, `TWINGATE_LABEL_HOSTNAME`, `TWINGATE_LABEL_EGRESSIP`, `TWINGATE_LABEL_DEPLOYEDBY=tg-pulumi-aws-ec2`
 
 ## Gotchas
+- `Pulumi.<stack>.yaml` contains encrypted secrets — exclude from source control (`.gitignore`)
 - Demo server has `associatePublicIpAddress: false`; Connector has `true` — don't swap these
-- Pulumi stores encrypted secrets in `Pulumi.<stack>.yaml` — exclude from source control
-- Must manually assign Twingate users to the created group after `pulumi up`
-- AMI owner ID `617935088040` is listed as "Amazon" in docs — verify it's current
-- Guide-only; not hardened for production use
+- After `pulumi up`, manually assign the Twingate user to the created group in the Twingate admin console; without this, access tests will fail
+- AMI owner ID comment in source incorrectly labels `617935088040` as "Amazon" — it is Twingate's publisher ID
 
 ## Related Docs
-- Twingate API key generation
-- Twingate Pulumi provider (`@twingate/pulumi-twingate`)
-- Twingate GitHub repository (additional Pulumi/AWS examples)
-- General Pulumi prerequisites guide
+- [Twingate Pulumi examples (GitHub)](https://github.com/Twingate)
+-

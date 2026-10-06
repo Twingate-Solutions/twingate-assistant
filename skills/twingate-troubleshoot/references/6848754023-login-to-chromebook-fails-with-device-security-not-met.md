@@ -1,39 +1,30 @@
 ---
 source: https://help.twingate.com/articles/6848754023-login-to-chromebook-fails-with-device-security-not-met
 type: help
-fetched: 2026-09-06
-source_version: 9109bc44dc315952bb6ec3524ed8e2be54e9d739d28ddf01135a12b6209ec686
+fetched: 2026-10-04
+source_version: 982b083c0405ff6fbb44578eb17dd3e69923bc40f730e4b34f31d9bbb083eb76
+trust: official
 ---
 
 # Login to Chromebook Fails with "Device Security not met"
 
-## Page Title
-Login to Chromebook Fails with "Device Security not met"
-
 ## Summary
-When Biometric configuration is included as a criteria in Device Security Posture Checks, ChromeOS devices will always fail with "Device Security not met." This is a platform limitation with ChromeOS APIs, not a Twingate bug.
+When Biometric configuration is included as a criterion in Device Security Posture Checks, ChromeOS devices will always fail with "Device Security not met." This is a platform limitation with no workaround.
 
 ## Key Information
-- **Affected component:** Twingate Client on Google Chromebook (all models, all ChromeOS versions)
-- **Root cause:** ChromeOS APIs do not reliably report biometric configuration data to Twingate
-- **Result:** Biometric posture checks always fail on ChromeOS regardless of actual device configuration
-- **No workaround exists** for using biometric configuration posture checks on ChromeOS
-
-## Prerequisites
-- N/A (informational/diagnostic page)
-
-## Step-by-Step Resolution
-1. Identify if affected policies include **Biometric configuration** as a Device Security Posture Check criterion
-2. Remove or exclude the Biometric configuration criterion from posture check policies applied to ChromeOS devices
-3. Use alternative posture check criteria that are supported on ChromeOS
-
-## Configuration Values
-- No specific env vars, CLI flags, or API params applicable
+- **Affected component:** Twingate Client
+- **Affected platform:** Google Chromebook (all models), ChromeOS (all versions)
+- **Root cause:** ChromeOS APIs do not reliably expose biometric configuration data to third-party applications
+- Twingate cannot validate biometrics posture on ChromeOS regardless of the device's actual biometric settings
 
 ## Gotchas
-- This limitation applies to **all ChromeOS versions and all Chromebook models** — no OS update will resolve it
-- There is **no supported workaround** — biometric posture checks cannot be made to work on ChromeOS
-- Admins creating Device Security Posture policies must explicitly account for ChromeOS exclusions when using biometric criteria; applying a universal policy including biometrics will block all ChromeOS users
+- There is **no supported workaround** — biometric posture checks simply cannot function on ChromeOS
+- The failure message "Device Security not met" may be misleading; the device isn't necessarily insecure, it's a reporting limitation
+- This affects all ChromeOS versions and all Chromebook hardware models
+
+## Resolution
+- **Remove biometric configuration** as a criterion from Device Security Posture Checks for any policies that apply to ChromeOS/Chromebook users
+- If biometric enforcement is required for other platforms, create a **separate posture check policy** that excludes ChromeOS devices
 
 ## Related Docs
 - Twingate Device Security Posture Checks (general configuration)

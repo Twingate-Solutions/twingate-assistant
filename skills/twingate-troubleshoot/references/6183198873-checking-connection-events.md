@@ -1,8 +1,9 @@
 ---
 source: https://help.twingate.com/articles/6183198873-checking-connection-events
 type: help
-fetched: 2026-09-06
-source_version: 28d3f3ef5a370e5b9a0700fb341794e807a43350a4f2b7fb1c0a71c8fdd21e50
+fetched: 2026-10-04
+source_version: e559b687fc7c944d906a05ade82569d73c1ea8e1513827c8f015776e18374f6b
+trust: official
 ---
 
 # Checking Connection Events
@@ -11,41 +12,47 @@ source_version: 28d3f3ef5a370e5b9a0700fb341794e807a43350a4f2b7fb1c0a71c8fdd21e50
 Checking Connection Events (Twingate Troubleshooting)
 
 ## Summary
-Connection attempts through Twingate are logged when they reach a Connector, viewable via traffic activity reports in the Admin Console. This guide explains how to isolate and diagnose connection failures using those logs. Three distinct failure scenarios are covered based on what the event log shows.
+Twingate logs all connection attempts through Connectors, viewable via traffic activity reports in the Admin Console. This guide covers how to use connection events to diagnose why an end user cannot reach a Resource they have access to.
 
 ## Key Information
-- Only connections that **reach a Connector** are logged; no event = traffic never reached the Connector
+- All connection attempts transit through Connectors and are logged
+- Events are only created when traffic **reaches the Connector** — no event means the Client never got traffic out
 - DNS resolution for hostnames/FQDNs is performed by the **Connector**, not the client device
-- Activity logs are accessible: Admin Console → **Network** tab → Resource → **Activity** section
-- Each event record has a **Show details** option on hover
+- Activity reports are per-Resource, found under **Network → [Resource] → Activity**
 
 ## Prerequisites
-- Access to Twingate Admin Console
-- Ability to SSH (or equivalent) into Connector host machine for DNS debugging
+- Admin Console access
+- Ability to SSH (or equivalent) into Connector host machines
 - `dig` or `nslookup` available on Connector host
 
 ## Step-by-Step
 
+### Setup
 1. Identify the Remote Network the problematic Resource belongs to
-2. Shut down all but **one Connector** in that Remote Network
-3. Reproduce the connection failure from the end user's device
-4. Navigate to Admin Console → Network → Resource → **Activity**
-5. Review event records; hover to access **Show details**
+2. Shut down all but **one Connector** in that Remote Network (isolates variables)
 
-## Failure Scenarios & Resolution
+### Gathering Events
+1. Reproduce the failure from the end user's device
+2. In Admin Console: **Network** tab → locate Resource → click it → view **Activity** section
+3. Hover over records to reveal **Show details** button for each event
 
-| Symptom | Cause | Action |
+## Diagnosing by Event Outcome
+
+| Scenario | Likely Cause | Action |
 |---|---|---|
-| No events logged | Client not intercepting traffic OR traffic not leaving Twingate network interface | Check connectivity from Client's perspective |
-| DNS lookup errors in events | Connector cannot resolve the hostname/FQDN | SSH into Connector host; run `dig` or `nslookup` to test resolution |
-| Successful events, no errors | Problem between Connector and the Resource/service | Check firewalls between Connector and app; verify FQDN DNS config |
+| **No events logged** | Client not intercepting traffic, or traffic not leaving Twingate network interface | Investigate Client-side connectivity |
+| **DNS lookup errors** | Connector cannot resolve the hostname/FQDN | SSH into Connector host; run `dig <hostname>` or `nslookup <hostname>` to verify resolution |
+| **Successful events, no errors** | Problem between Connector and the Resource/service | Check firewalls between Connector and app; verify DNS/FQDN config on that path |
 
 ## Gotchas
-- **All Connectors in a Remote Network must resolve all Resources** in that network — configs may differ between Connectors, making single-Connector isolation critical for DNS debugging
-- No Admin Console events does **not** mean the connection worked — it means traffic never reached the Connector
-- DNS errors point to the **Connector's** resolver, not the client's DNS
+- **Only run one Connector during troubleshooting** — Connectors in the same Remote Network may not be identically configured, making DNS issues hard to isolate across multiple Connectors
+- No Admin Console event ≠ connection was blocked by Twingate — it means traffic never reached the Connector at all
+- DNS errors are Connector-side, not client-side; fix must be applied to the Connector host's DNS configuration
+
+## Configuration Values
+None specific (no env vars or API params referenced)
 
 ## Related Docs
-- [Traffic Activity Reports](https://help.twingate.com) (referenced inline)
-- Twingate Client-side connectivity troubleshooting
-- Main troubleshooting guide (linked as "Back to troubleshooting guide")
+- [Twingate Traffic Activity Reports](https://help.twingate.com)
+- [Client-side connectivity troubleshooting](https://help.twingate.com)
+- Twingate Troubleshooting Guide (linked as "Back to troubleshooting guide" on source page)
