@@ -1,41 +1,39 @@
 ---
 source: https://help.twingate.com/articles/9450787885-macos-client-twingate-menu-bar-icon-not-visible
 type: help
-fetched: 2026-10-04
-source_version: fd778f23f9f7379294a2e9eb3b888c8912c5ec9a059a2c492e5c11244526e1eb
+fetched: 2026-10-11
+source_version: 4dd559f9b40657e8b9e10a5fde0ee8ca053393e2cedfa9a0f2afa89411d66b76
 trust: official
 ---
 
-# [macOS Client] Twingate Icon Not Visible in Menu Bar
+# [macOS Client] Twingate Menu Bar Icon Not Visible
 
 ## Summary
-On MacBook devices with a camera notch, menu bar icons are truncated when too many apps occupy the menu bar. The Twingate client may be running (visible in Activity Monitor) but its icon is hidden behind or beyond the notch area.
+On MacBooks with a camera notch, the menu bar truncates icons when too many apps occupy the menu bar area, causing the Twingate icon to disappear. The Twingate client is still running (verifiable via Activity Monitor) — this is purely a display issue.
 
 ## Key Information
-- **Affected devices:** MacBook models with camera notch in the top menu bar (e.g., MacBook Pro M1 Pro and later)
-- **Root cause:** macOS truncates menu bar icons as they approach the camera notch
-- **Confirmation:** Twingate process visible in Activity Monitor despite icon not appearing in menu bar
-- **macOS 27+:** Includes native menu bar expansion to handle the notch natively (no workaround needed)
+- **Affected devices:** MacBooks with camera notch (e.g., MacBook Pro M1 Pro and similar)
+- **Symptom:** Twingate icon missing from menu bar, but `Activity Monitor` shows Twingate process is running
+- **Root cause:** macOS truncates menu bar icons that would overlap the notch area
+- **macOS 26+:** Native menu bar expansion handles the notch — no workaround needed
 
 ## Prerequisites
 - Twingate macOS client installed and launched
-- MacBook with camera notch in menu bar
-- Multiple other menu bar icons present
+- Affected only on notched MacBook displays running macOS versions prior to macOS 26
 
-## Workarounds (Pre-macOS 27)
+## Workarounds (pre-macOS 26)
 
-1. **External monitor** — Connect a monitor without a notch; all menu bar icons including Twingate will display
-2. **Third-party menu bar managers** — Use apps that collapse/expand menu bar icons to free up space (use at own discretion; Twingate does not endorse specific apps)
-3. **Quit other menu bar apps** — Close other menu bar applications until the Twingate icon becomes visible
+1. **Use an external monitor** — Connect a display without a notch; all menu bar icons become visible including Twingate
+2. **Use a third-party menu bar manager** — Apps that collapse/expand menu bar icons can surface hidden icons (use at your own discretion; Twingate does not endorse specific tools)
+3. **Quit other menu bar apps** — Close non-essential menu bar applications until the Twingate icon appears
 
 ## Icon Reordering (Once Visible)
-- Hold **Command (⌘)** + click and drag menu bar icons to reorder them
-- Reorder to position Twingate icon away from the notch area to prevent future truncation
+- Hold **Command (⌘)** + click and drag menu bar icons to reorder them, bringing Twingate closer to the visible area
 
 ## Gotchas
-- The Twingate client **is running** even when the icon is not visible — do not reinstall assuming a broken installation
-- macOS 27 resolves this natively; no workaround needed on that version or later
-- Third-party menu bar management apps are unsupported by Twingate
+- Twingate is **functional even when the icon is hidden** — absence from menu bar does not mean the client is disconnected or broken
+- Reordering icons persists after the fix, so moving Twingate leftward reduces future truncation risk
+- Third-party menu bar managers are not officially supported or endorsed by Twingate
 
 ## Related Docs
 - Twingate macOS Client documentation

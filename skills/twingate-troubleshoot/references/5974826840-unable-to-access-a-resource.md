@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/5974826840-unable-to-access-a-resource
 type: help
-fetched: 2026-10-04
-source_version: 8a7b884f7a56fe029d59e9a052f7a83ac0b0640fedd1dbac3d687b00c285e655
+fetched: 2026-10-11
+source_version: 74184f09f8862e1903f9f7c1de23d7d7614dc809e5d1c80642fc76d7edcbfbe0
 trust: official
 ---
 
@@ -12,50 +12,50 @@ trust: official
 Unable to access a Resource
 
 ## Summary
-Troubleshooting guide for diagnosing why a user cannot access a Twingate Resource. Covers authorization, DNS, software conflicts, network restrictions, and Connector-side issues in order of most to least common cause.
+Troubleshooting guide for when a Twingate Client cannot access an expected Resource. Covers authorization, DNS, software conflicts, network connectivity, and Connector-side issues in order of most-to-least common.
 
 ## Key Information (Ordered by Frequency)
 
-1. **Authorization** – User must belong to a Group that has the Resource assigned. If Resource doesn't appear in the Client tray menu, access will fail.
-2. **DNS interception** – Run `nslookup` or `dig` against the Resource; result should be a CGNAT IP, not the real IP. If real IP is returned, Twingate isn't intercepting DNS.
+1. **Authorization** – User must belong to a Group that includes the Resource; if the Resource doesn't appear in the tray menu, access will not work
+2. **DNS interception** – `nslookup`/`dig` against the Resource should return a CGNAT IP; if it returns the real IP, Twingate is not intercepting DNS
 3. **Local hosts file override** – Remove conflicting entries:
-   - Windows: `C:\Windows\System32\drivers\etc\hosts`
+   - Windows: `C:\windows\system32\drivers\etc\hosts`
    - macOS/Linux: `/etc/hosts`
-4. **Third-party software conflicts** – Endpoint security, VPN, or DNS software may interfere. See Known Incompatibilities docs.
-5. **Outbound firewall blocking** – Allow outbound access to `*.twingate.com` and all Google Cloud Provider external IPs (list maintained by Google).
-6. **Network Traffic in Admin Console** – Check if flows reach the Connector. No flow = Client-side issue; flow present = investigate Connector-to-Resource path.
-7. **Destination service unavailable** – SSH to Connector and test port: `curl -v telnet://<host>:<port>`
-8. **DNS Resources** – Connector must resolve the DNS Resource to the correct IP. Run `dig`/`nslookup` from the Connector directly.
-9. **Geo-blocking** – Google Cloud Platform blocks some regions; affects Twingate Controller/Relay even if `*.twingate.com` loads in browser. See Unsupported Regions.
-10. **DNS Rebind Protection** – Consumer routers/ISPs may block DNS lookups returning private IPs. `dig`/`nslookup` returns empty response.
+4. **Incompatible software** – Endpoint security, DNS tools, VPNs, or VPN-like software may block access (see Known Incompatibilities)
+5. **Outbound Internet access** – Devices must be able to reach `*.twingate.com` and all Google Cloud Platform external IPs
+6. **Network Traffic in Admin Console** – Check if flows reach the Connector; no flow = Client-side issue; flow present = investigate Connector-side
+7. **Destination availability** – Verify the target service is running; test from Connector (not Client):
+   ```
+   curl -v telnet://<host>:<port>
+   ```
+8. **DNS Resource resolution from Connector** – Run `dig`/`nslookup` from the Connector to confirm correct IP resolution
+9. **Geo-blocking** – Google Cloud Platform blocks some regions; check Unsupported Regions docs
+10. **DNS Rebind Protection** – Consumer routers/ISPs may block private IP DNS lookups; `dig`/`nslookup` returns empty response
+
+## Prerequisites
+- Twingate Client installed and signed in
+- Remote Network status is green (Connector reachable)
+- SSH access to Connector for port/DNS tests (systemd or AWS AMI deployments)
 
 ## Configuration Values
 
 | Item | Value |
 |------|-------|
-| Allowed domain | `*.twingate.com` |
-| Required IP ranges | Full GCP external IP list (Google-maintained) |
-| Expected DNS result | CGNAT IP (not real Resource IP) |
+| Allowed outbound domain | `*.twingate.com` |
+| Also required | Full GCP external IP range (updated by Google) |
+| Expected DNS response for Resource | CGNAT IP (not the real IP) |
 
 ## Gotchas
-
-- Port tests from the **Client side** to a Twingate Resource return **false positives** — always test from the Connector.
-- DNS Resources are first matched client-side against ACL, then resolved via the Connector — both sides must work.
-- GCP geo-blocks may allow browser access to `*.twingate.com` but still block Relay/Controller traffic.
-- DNS rebind protection produces empty DNS responses (not NXDOMAIN), which can be mistaken for a Twingate issue.
-
-## Prerequisites
-
-- Admin Console access (to check Groups, Resources, Network Traffic)
-- SSH access to Connector host (for port/DNS testing)
-- Technical Support Entitlement (for opening support requests)
+- **Port tests from the Client side produce false positives** – always test connectivity from the Connector, not the Client
+- DNS Resources resolve first at the Client (ACL match), then a second lookup is made from the Connector — both must succeed
+- GCP geo-blocking may allow `*.twingate.com` in a browser but still block Controller or Relay services
 
 ## Related Docs
-
 - How DNS Works with Twingate
 - Known Incompatibilities
-- Network Traffic in the Admin Console
-- TCP/IP port tests or scans produce inaccurate results
+- Network Traffic in Admin Console
 - Address Resolution of Resources
 - Unsupported Regions
-- Detailed client logs (collection guide)
+- TCP/IP port tests or scans produce inaccurate results
+- Detailed client logs (for support escalation)
+- Technical Support Entitlement

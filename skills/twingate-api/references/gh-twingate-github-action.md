@@ -1,25 +1,25 @@
 ---
 source: https://github.com/Twingate/github-action
 type: github
-fetched: 2026-10-04
-source_version: 358e205bb31e636fef1dfb706228ab60eb90c181
+fetched: 2026-10-11
+source_version: a9e9c65e9cd623c644e237e08862c3328e130b16
 trust: official
 ---
 
 # Twingate GitHub Action
 
-GitHub Action that installs and starts the Twingate client on a runner to allow workflow steps to access private resources protected by Twingate. Supports Linux (x64/ARM) and Windows runners.
+A GitHub Action that connects a workflow runner to Twingate using a Service Key, enabling access to private resources and IP-restricted services without granting broad network access.
 
 ## Key Information
 
-- Uses Twingate [Services](https://docs.twingate.com/docs/services) (service keys) for authentication, not user credentials
-- Supports two use cases: direct access to private resources (e.g., VPC databases), and routing traffic through a Connector for IP-allowlisted SaaS apps
-- Packages are cached by default; caching reduces install time by 30–45%
-- Latest release (v1.11): fixes a setup abort caused by a trailing newline in service keys on Linux
+- Supports Linux (x64/ARM) and Windows runners
+- Uses Twingate [Services](https://docs.twingate.com/docs/services) for zero-trust automated access
+- Packages are cached by default, reducing installation time by 30–45%
+- Latest release: `v1.11` — fixes setup abort when service key ends with a newline
 
 ## Prerequisites
 
-- A Twingate account with a configured Service and a generated Service Key
+- A Twingate account with a configured Service and Service Key
 - Service Key stored as a GitHub Actions secret
 
 ## Usage
@@ -34,19 +34,19 @@ GitHub Action that installs and starts the Twingate client on a runner to allow 
 
 | Input | Required | Default | Description |
 |---|---|---|---|
-| `service-key` | Yes | — | Twingate Service Key for authentication |
-| `cache` | No | `true` | Cache downloaded packages between runs |
-| `cache-version` | No | `3` | Increment to invalidate the package cache |
-| `debug` | No | `false` | Enable verbose logging for troubleshooting |
+| `service-key` | Yes | — | Twingate Service Key |
+| `cache` | No | `true` | Cache downloaded packages |
+| `cache-version` | No | `3` | Increment to invalidate cached packages |
+| `debug` | No | `false` | Enable verbose debug logging |
 
 ## Gotchas
 
-- **Docker steps on Azure-hosted runners**: Docker containers inherit `168.63.129.16` (Azure internal nameserver) in `/etc/resolv.conf`, which can override Twingate's DNS. Fix by running inside the container before DNS-dependent steps:
-  ```bash
+- **Docker steps requiring Twingate resources**: Containers on Azure-hosted runners inherit `168.63.129.16` as a nameserver in `/etc/resolv.conf`, which can override Twingate's DNS. Remove it inside the container:
+  ```sh
   sed '/^nameserver 168.63.129.16$/d; /^search/d' /etc/resolv.conf > /tmp/resolv.conf && cat /tmp/resolv.conf > /etc/resolv.conf
   ```
-- Service keys with trailing newlines previously caused setup to abort on Linux (fixed in v1.11).
-- `cache-version` must be manually incremented to force a fresh package download; there is no automatic invalidation on Twingate version changes.
+- Service keys with trailing newlines are handled correctly as of `v1.11`; earlier versions may fail on Linux.
+- To force a fresh package download, increment `cache-version` rather than disabling `cache` entirely.
 
 ## Related Docs
 
