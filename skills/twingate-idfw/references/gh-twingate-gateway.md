@@ -1,75 +1,52 @@
 ---
 source: https://github.com/Twingate/gateway
 type: github
-fetched: 2026-10-04
-source_version: 5ed8e12fc806474700abd9988cc3a85861aa83ad
+fetched: 2026-10-11
+source_version: 3407973bbfe357e1671cf2e34848c733ace803aa
 trust: official
 ---
 
 # Twingate Gateway
 
 ## Summary
-A Layer 7 reverse proxy deployed within your infrastructure as part of Twingate Identity Firewall. It propagates user identity to upstream services and provides auditing for Kubernetes API servers, SSH servers, and web applications. Acts as a reverse proxy that intercepts connections and injects identity context without requiring credentials on end-user machines.
+The Twingate Gateway is a Layer 7 reverse proxy deployed within your own environment as part of Twingate Identity Firewall. It propagates user identity to upstream services and provides auditing for Kubernetes API servers, SSH servers, and web applications. Session recording, RBAC integration, and certificate-based auth are supported.
 
 ## Key Information
-- **Protocols supported:** Kubernetes, SSH, Web App (TLS upstream/downstream as of v1.1.0)
-- **Deployment:** Self-hosted within your environment; Docker image available on DockerHub (`twingate/gateway`)
-- **SSH CA options:** Local (file) CA or Vault-backed CA
-- **Session recording:** Supported for Kubernetes (`kubectl`) and SSH sessions
-- **Audit logging:** All activity attributed to specific user identities; SSH channel request outcomes logged
-- **Free tier:** Up to 5 Kubernetes, SSH, or Web App resources
+- Distributed as a Docker image: `twingate/gateway` on Docker Hub
+- Supports Kubernetes, SSH, and Web App (TLS upstream/downstream as of v1.1.0) protocols
+- SSH: certificate-based auth, CA management (manual or Vault-backed), full channel support (shell, exec, SFTP, port forwarding)
+- Kubernetes: identity propagation, RBAC integration, `kubectl` session recording
+- Free tier: up to 5 Kubernetes, SSH, or Web App resources
 
 ## Prerequisites
 - A Twingate account with Identity Firewall enabled
-- GAT (Gateway Access Token) for authenticating the gateway to Twingate
-- For Kubernetes: access to a private Kubernetes cluster
-- For SSH with Vault CA: a configured Vault SSH secrets engine role
-- Docker or compatible container runtime
+- Docker or Kubernetes environment to run the Gateway container
+- For Vault-backed SSH CA: a configured Vault SSH secrets engine role
+- For SSH host certificates via Vault (v1.1.0+): the Gateway host CA role must permit resource addresses/aliases (e.g., `allowed_domains=*`)
 
 ## Usage / Step-by-Step
-1. Pull the Docker image: `docker pull twingate/gateway`
-2. Configure the gateway via config file or environment variables (see wiki Quick Start guides)
-3. For Kubernetes: follow [Kubernetes Quick Start Guide](https://github.com/Twingate/gateway/wiki/Kubernetes-Quick-Start-Guide)
-4. For SSH: follow [SSH Quick Start Guide](https://github.com/Twingate/gateway/wiki/SSH-Quick-Start-Guide)
-5. Point Twingate resources at the gateway's address
+
+See the wiki for full guides:
+- Kubernetes: [Quick Start Guide](https://github.com/Twingate/gateway/wiki/Kubernetes-Quick-Start-Guide)
+- SSH: [Quick Start Guide](https://github.com/Twingate/gateway/wiki/SSH-Quick-Start-Guide)
+
+**v1.1.0 Vault SSH CA migration (zero-downtime):**
+1. Add `allowed_domains=*` to the Vault role while keeping `allow_empty_principals=true`
+2. Upgrade the Gateway
+3. Remove `allow_empty_principals=true` once rollback is no longer needed
 
 ## Configuration Values
-| Key | Description |
-|---|---|
-| `ssh.ca.vault.role` | Default Vault SSH CA role |
-| `ssh.ca.vault.gatewayHostCA.role` | Override role specifically for gateway host CA |
-| GAT token | Required; validated via payload `type` claim (v1.1.0+) |
+- `ssh.ca.vault.role` — Vault SSH CA role (top-level fallback)
+- `ssh.ca.vault.gatewayHostCA.role` — Vault role specifically for Gateway host CA signing
+- Vault role options relevant to v1.1.0: `allowed_domains`, `allow_bare_domains`, `allow_subdomains`, `allow_empty_principals`
 
-Refer to the [wiki](https://github.com/Twingate/gateway/wiki) for full configuration reference.
+## Gotchas
+- **v1.1.0 breaking change:** SSH host certificates now include resource addresses and aliases as principals. Vault-backed CA roles must explicitly allow those hostnames or use `allowed_domains=*`; deployments using a manual CA are unaffected.
+- Skipping the migration steps before upgrading to v1.1.0 with Vault CA will cause host certificate signing to fail.
 
-## Internal Architecture
-
-```
-main.go → cmd/start.go → proxy.NewProxy() → proxy.Start()
-  ├─> frontend.NewListener() (TLS + CONNECT auth, dispatch by GAT resource type)
-  ├─> one frontend.ProtocolListener per enabled backend
-  │     e.g. kubernetes.NewHandler(), webapp handler, ssh.NewProxy()
-  └─> metrics.Start() (Prometheus)
-```
-
-### Key Packages
-| Area | Path |
-|---|---|
-| Orchestrator | `internal/proxy/proxy.go` |
-| Auth / CONNECT | `internal/frontend/connect.go` |
-| Listener / dispatch | `internal/frontend/listener.go` |
-| Server cert sourcing | `internal/frontend/cert/` |
-| GAT JWT parsing | `internal/token/parser.go` |
-| Shared HTTP proxy core | `internal/backend/httpproxy/proxy.go` |
-| Kubernetes proxy | `internal/backend/kubernetes/handler.go` |
-| Web app proxy | `internal/backend/webapp/handler.go` |
-| SSH proxy | `internal/backend/ssh/proxy.go` |
-| Session recording | `internal/sessionrecorder/` |
-| Vault client | `internal/vault/` |
-| Shared helpers | `internal/util/` (imports nothing else under `internal/`) |
-| Helm chart | `deploy/gateway/` |
-
-### Security Model
-- **Frontend:** Every connection goes through TLS termination → CONNECT validation → JWT verification → Proof-of-Possession (client signs TLS EKM with private key matching the public key in the GAT).
-- **K8s:** Gateway adds `Impersonate-User`/`Impersonate-Group` headers; RBAC enforced at the API server. Gateway service account needs only impersonation permission.
-- **Web App:** Request headers rewritten from templates with GAT variables (JWT, username, groups, client geo); client identity headers (`X-Real-IP`, `X-Forwarded-*`) stripped to prevent
+## Related Docs
+- [Wiki home](https://github.com/Twingate/gateway/wiki)
+- [How It Works](https://github.com/Twingate/gateway/wiki/How-It-Works)
+- [Developer Guide](https://github.com/Twingate/gateway/wiki/Developers)
+- [Twingate Forum](https://forum.twingate.com/)
+- [Support](https://help.twingate.com/)

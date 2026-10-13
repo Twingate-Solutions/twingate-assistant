@@ -1,50 +1,47 @@
 ---
 source: https://help.twingate.com/articles/4988248176-windows-client-antivirus-posture-check-fails-while-microsoft-defender-is-enabled
 type: help
-fetched: 2026-10-04
-source_version: af09bd3c88efbe8507eb279f10a1c45361f9c6f73ba801ac2d453724b86be958
+fetched: 2026-10-11
+source_version: c9fcf805db657a855b831b1a44918fbdf456928309655022c265fcdb3898c11a
 trust: official
 ---
 
 # [Windows Client] Antivirus Posture Check Fails While Microsoft Defender Is Enabled
 
 ## Summary
-Twingate's Antivirus device posture check falsely reports antivirus as disabled on Windows devices where Microsoft Defender is running normally. The root cause is a confirmed Microsoft bug where Windows Security Center (WSC) misreports antivirus state at service startup. No Microsoft fix date has been published (issue active as of August–September 2026).
+A confirmed Microsoft bug causes Windows Security Center (WSC) to misreport Microsoft Defender's antivirus status, causing Twingate's Antivirus posture check to fail even when Defender is fully operational. The issue originated from Defender antivirus updates in August–September 2026 and persists until WSC re-evaluates. No Microsoft fix date has been published.
 
 ## Key Information
-- Twingate reads antivirus state from WSC, not from `Get-MpComputerStatus`, `root\SecurityCenter2` WMI, or the Windows Security app — those sources may show Defender as healthy while Twingate still fails the check
-- The incorrect WSC value persists across sign-outs and Client reinstalls; updating the Twingate Client does not help
-- Microsoft Defender continues protecting the device throughout; this is purely a reporting/state issue
-- The discrepancy between WMI/PowerShell tools and Twingate is expected on affected devices — not a Client bug
-
-## Affected Platforms
-- Windows 10 (all supported versions), Windows 11, Windows Server
-- Not tied to a specific Windows build; triggered by Defender antivirus definition updates
+- **Root cause**: WSC misreports antivirus state at service start and retains the incorrect value until restarted or manually forced to re-evaluate
+- **Twingate behavior**: Client reads WSC's published value — if WSC is wrong, the check fails regardless of actual Defender state
+- **Scope**: Windows 10, Windows 11 (all supported versions), Windows Server; not tied to a specific Windows build
+- **Not caused by**: Twingate Client version, Windows security updates, or actual Defender configuration issues
+- **Misleading tools**: `Get-MpComputerStatus`, `root\SecurityCenter2` WMI, and the Windows Security app read a *different* source than the posture check — they may show Defender healthy while the posture check still fails; this discrepancy is expected
 
 ## Symptoms
 - Antivirus posture check fails in Client or Admin Console
-- Users blocked with `Device security not met`
-- Resource access events show `Block reason: Verified device`
-- Windows may display "Microsoft Defender Antivirus is turned off" notifications
-- Failure persists after reboot (may or may not clear)
+- Users see `Device security not met` or `Block reason: Verified device` in Resource access events
+- Defender is enabled with real-time protection on and signatures current
+- Failure persists across sign-outs, Client reinstalls, and Client version updates
 
 ## Per-Device Workaround
 1. Open **Windows Security → Virus & threat protection → Manage settings**
-2. Toggle **Real-time protection** OFF, then back ON
-3. This forces WSC to re-evaluate its reported state immediately
+2. Toggle **Real-time protection** off, then back on
+3. WSC re-evaluates immediately; posture check should pass
 
-**Caveat:** The fix does not survive a reboot. A Security Center service restart (e.g., on reboot) may reapply the incorrect value. Repeat the toggle as needed.
+**Caveat**: The fix does not survive a reboot. The Security Center service restart on reboot may reapply the incorrect value — repeat the toggle if the check fails again after rebooting.
 
 ## Fleet-Scale Mitigation
-Per-device toggling does not scale. For large numbers of affected devices:
-- Temporarily **remove the Antivirus requirement** from the affected Device Security Policy in the Admin Console
-- Re-enable the requirement once Microsoft ships a Defender fix
+- Per-device toggle does not scale
+- If many devices are blocked: **temporarily remove the Antivirus requirement from the affected Device Security Policy** until Microsoft ships the fix, then re-enable it
+- This restores access without modifying endpoints
 
 ## Gotchas
-- Rebooting is **not** a reliable fix — it restarts the Security Center service but may re-apply the bad state
-- Updating Microsoft Defender does **not** resolve the issue; Microsoft's advisory notes the behavior appears *after* recent Defender updates
-- `Get-MpComputerStatus` showing healthy does **not** confirm the posture check will pass
+- Updating Microsoft Defender does **not** resolve the issue; Microsoft's advisory indicates the behavior appears *after* the latest Defender updates are installed
+- A reboot is **not** a reliable fix — it may or may not clear the incorrect value
+- Reinstalling the Twingate Client has no effect
+- A disagreement between `Get-MpComputerStatus`/WMI and Twingate's posture check is **expected** on affected devices
 
 ## Related Docs
-- Microsoft Windows release health advisory: *"Incorrect notifications that Microsoft Defender Antivirus is turned off"*
+- Microsoft Windows release health: *"Incorrect notifications that Microsoft Defender Antivirus is turned off"*
 - Twingate Device Security Policy configuration (Admin Console)

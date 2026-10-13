@@ -1,42 +1,42 @@
 ---
 source: https://help.twingate.com/articles/6581096205-signing-into-the-twingate-help-center
 type: help
-fetched: 2026-09-13
-source_version: b34b11e6b157d9e8c9d3099d1752c166b62a87cdee71e26f27cc25b036a1bfa5
+fetched: 2026-10-11
+source_version: e9772fb4ae72c61060b1e505d125eb65f5afabdfa0a67ce56a75aebd40fa0958
+trust: official
 ---
 
 # Accessing the Twingate Customer Portal
 
 ## Summary
-Twingate Admins with Technical Support Entitlement can access the Customer Portal via SSO from the admin console. First-time access requires a one-time email verification step. Accounts without entitlement are redirected to Reddit community support instead.
+Twingate Admins with Technical Support Entitlement can access the Customer Portal via SSO from the admin console. First-time access requires a one-time email verification step. Accounts without Technical Support Entitlement are redirected to Reddit community support instead.
 
 ## Key Information
-- Authentication is SSO-based from the Twingate admin console
-- One-time email verification required on first login or after email address change
-- Only accounts with **Technical Support Entitlement** receive email technical support
-- Portal used to create and view existing support requests
+- Access is SSO-based, initiated from the Twingate admin console
+- Email verification is required once (or when email changes)
+- Only accounts with **Technical Support Entitlement** receive email technical support responses
+- Accounts without entitlement see **Community** instead of **Support** in the Help menu
 
 ## Prerequisites
 - Twingate Admin role
-- Technical Support Entitlement on account
-- Access to the email inbox associated with your admin account
+- Technical Support Entitlement on the account
+- Access to the email inbox associated with the admin account
 
 ## Step-by-Step: First-Time Login
 
 1. In the Twingate admin console, click **Help** → **Support**
-   - If you see **Community** instead of **Support**, you lack Technical Support Entitlement
-2. Click **Send Email** when prompted for email verification
-3. Check inbox for verification email from Twingate
+   - If you see **Community** instead of **Support**, your account lacks Technical Support Entitlement
+2. Click **Send Email** when prompted to verify your email address
+3. Check your inbox for a verification email from Twingate
 4. Click **Verify email** in the email
-5. Browser confirms successful verification; click **Go to Twingate Help Center**
-6. Subsequent logins via **Help** → **Support** will log you in directly
+5. Browser confirms successful verification — click **Go to Twingate Help Center**
+6. Future logins: click **Help** → **Support** in the admin console to log in directly (no re-verification needed)
 
 ## Gotchas
-- Seeing **Community** instead of **Support** in the Help menu means no Technical Support Entitlement — you'll be redirected to Reddit
-- Email verification must be repeated if your admin email address changes
-- You may be able to create a portal account without entitlement, but support responses will not be provided
-- Verification email must be acted on before portal access is granted
+- Email re-verification is required if your email address changes
+- Creating a Customer Portal account does not guarantee email support responses — Technical Support Entitlement is required
+- No direct URL login; portal access must be initiated through the admin console SSO flow
 
 ## Related Docs
-- Technical Support Entitlement (referenced but not linked)
-- Twingate Reddit community (fallback for non-entitled accounts)
+- [Twingate Technical Support Entitlement](https://help.twingate.com) (see plan/pricing details)
+- [Twingate Reddit Community](https://www.reddit.com/r/Twingate/) (for non-entitled accounts)

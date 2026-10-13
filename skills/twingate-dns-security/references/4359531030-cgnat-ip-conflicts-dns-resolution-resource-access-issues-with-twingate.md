@@ -1,59 +1,64 @@
 ---
 source: https://help.twingate.com/articles/4359531030-cgnat-ip-conflicts-dns-resolution-resource-access-issues-with-twingate
 type: help
-fetched: 2026-10-04
-source_version: aa5ec802bf5a6df232efd54876f51e2e9bd955503c34ccfbdf68c51917ddb736
+fetched: 2026-10-11
+source_version: e08f357e3adf502b3d2a6027fde16249e9b6704b5b6e860d2191db796a64f588
 trust: official
 ---
 
 # CGNAT IP Conflicts: DNS Resolution & Resource Access Issues with Twingate
 
 ## Summary
-The Twingate Client claims all traffic in the `100.96/12` CGNAT range for its encrypted tunneling. Any DNS servers or non-Twingate resources using IPs in this range will be blocked or misrouted by the Twingate Client.
+The Twingate Client reserves the `100.96/12` CGNAT range exclusively for its encrypted tunnels, causing traffic to unrelated services using those IPs to be blocked or misrouted. This affects two scenarios: DNS servers assigned IPs in that range, and non-Twingate services that also use CGNAT addressing.
 
 ## Key Information
-- Twingate uses `100.96/12` CGNAT range exclusively for Client ↔ Connector ↔ Resource communication
-- Two failure modes: DNS resolution failures and connectivity drops to non-Twingate CGNAT resources
-- Issue affects all Twingate Client operating systems
+- Twingate claims all traffic in the `100.96/12` CGNAT range for its own connections
+- Affected scenarios: (1) DNS resolution failures, (2) connectivity to non-Twingate CGNAT resources
+- Conflict is confirmed if a resource is accessible with Twingate disabled but not with it enabled
 
 ## Prerequisites
-- Twingate Client installed
-- Access to system terminal/command prompt
+- Twingate Client installed on any OS
+- Access to system network/DNS settings
 
-## Diagnosis Steps
+## Identifying the Issue
 
-**Check for conflicting DNS servers:**
-
+### Check DNS Configuration
 | OS | Command |
 |----|---------|
-| Windows | `ipconfig` |
-| Linux | `ifconfig` |
-| macOS | `scutil --dns` |
+| Windows | `ipconfig` (Command Prompt) |
+| Linux | `ifconfig` (Terminal) |
+| macOS | `scutil --dns` (Terminal) |
 
-Look for DNS server IPs in the `100.96.0.0/12` range (covers `100.96.0.0` – `100.111.255.255`).
+Check output for DNS server IPs falling within `100.96.0.0/12`.
 
-**Check for non-Twingate CGNAT resource conflicts:**
-1. Disable Twingate Client → test resource access
-2. Re-enable Twingate Client → test resource access again
-3. If resource is only inaccessible with Twingate active → CGNAT conflict confirmed
+### Check Non-Twingate CGNAT Resource Access
+1. Disable Twingate Client
+2. Attempt to access the resource → succeeds
+3. Re-enable Twingate Client
+4. Attempt access again → fails = CGNAT conflict confirmed
+
+## Resolution
+
+### DNS Conflict Fix
+Change system DNS servers to addresses **outside** the `100.96/12` range:
+
+| Provider | Primary | Secondary |
+|----------|---------|-----------|
+| Google DNS | `8.8.8.8` | `8.8.4.4` |
+| Quad9 | `9.9.9.9` | `149.112.112.112` |
+
+### Non-Twingate CGNAT Resource Conflict
+- **If you control the resource:** Re-IP it to an address outside `100.96/12`
+- **If you cannot re-IP:** Contact Twingate Support for additional troubleshooting options
 
 ## Configuration Values
-- **Conflicting range:** `100.96.0.0/12`
-
-## Resolutions
-
-**DNS conflict fix** — change DNS to addresses outside `100.96/12`:
-- Google DNS: `8.8.8.8`, `8.8.4.4`
-- Quad9 DNS: `9.9.9.9`, `149.112.112.112`
-
-**Non-Twingate CGNAT resource conflict:**
-- If you control the resource: reassign it an IP outside `100.96/12`
-- If you cannot change the resource IP: contact Twingate Support
+- **Conflicting IP range:** `100.96.0.0/12` (entire range claimed by Twingate Client)
 
 ## Gotchas
-- The CGNAT conflict is silent — Twingate drops traffic without explicit error, making it hard to distinguish from other connectivity issues
-- DNS failures caused by this conflict can appear as general internet outages, not obviously Twingate-related
-- The disable/re-enable toggle test is the quickest way to confirm Twingate is the culprit
+- The `100.96/12` block is a subset of the broader RFC 6598 CGNAT range (`100.64.0.0/10`); only the `/12` sub-range is used by Twingate
+- No in-app setting exists to exclude specific CGNAT IPs from Twingate's capture; re-IPing is the primary self-service fix
+- ISPs using CGNAT for customer routing can trigger this issue without any local misconfiguration
 
 ## Related Docs
-- Twingate Support (for unresolvable CGNAT IP conflicts): contact via Twingate Help Center
+- Twingate Client documentation (all operating systems)
+- Twingate Support contact for unresolvable CGNAT conflicts

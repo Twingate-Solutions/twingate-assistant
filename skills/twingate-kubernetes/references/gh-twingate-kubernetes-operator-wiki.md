@@ -1,8 +1,9 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator/wiki
 type: github
-fetched: 2026-09-06
-source_version: 9703051c8d00007e758dec09dc1f5635dedb535d
+fetched: 2026-10-11
+source_version: 1996515ced9f761b25841ed482d9a1c6f5f6904f
+trust: official
 ---
 
 # Twingate Kubernetes Operator
@@ -63,5 +64,4 @@ A Kubernetes operator (OSS) that manages Twingate network resources as Kubernete
 - `requestHeaderRewrites` only applies to `WebApp` resources
 - `TwingateGateway` and `TwingateResource` of type `Kubernetes`/`WebApp` require `gatewayRef`; `Network` resources do not allow it
 - `TwingateGateway.spec.remoteNetworkId` is immutable once set (overrides operator-wide default)
-- For HA, run multiple connectors with staggered `imagePolicy` schedules and pod anti-affinity rules
-- `principalExternalRef` name uniqueness is not enforced; if multiple
+- `spec.protocols` is only accepted on `Network` resources (v3+); setting it on `Kubernetes` or `WebApp` resources causes the API server to reject creates/updates and the operator to

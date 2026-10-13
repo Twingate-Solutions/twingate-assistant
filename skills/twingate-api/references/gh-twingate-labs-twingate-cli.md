@@ -1,16 +1,15 @@
 ---
 source: https://github.com/Twingate-Labs/Twingate-CLI
 type: github
-fetched: 2026-09-20
-source_version: a564930ffba44f241d72c6879c0d6849b0d9e02d
+fetched: 2026-10-11
+source_version: 1e55a8b63a9d5e654c6c98909828e7ed71cae834
+trust: official
 ---
-
-<!-- triage: unassigned -->
 
 # Twingate Admin CLI
 
 ## Summary
-A Python command-line tool for the Twingate Admin GraphQL API. Covers CRUD operations on remote networks, resources, connectors, groups, users, service accounts, policies, and DNS security settings. Supports multiple tenant sessions, three output formats, and bulk operations like synced-group migration.
+A Python command-line tool for the Twingate Admin GraphQL API. Covers CRUD operations on remote networks, resources, connectors, groups, users, service accounts, policies, access requests, gateways, certificate authorities, and DNS security settings. Supports multiple tenant sessions, three output formats, and bulk operations like synced-group migration.
 
 ## Key Information
 - MIT licensed; Python 3.9+
@@ -78,11 +77,15 @@ tgcli group migrate --execute --name-suffix " (Manual)" --report out.csv
 ### Environment Variable
 - `PYTHON_KEYRING_BACKEND` — override keyring backend (headless Linux)
 
-## Gotchas
-- All entity IDs are base64-encoded GraphQL node IDs (e.g. `UmVzb3VyY2U6MQ==`), not human-readable names
-- `resource access_set` is **destructive** — replaces all existing group/service-account access
-- `group migrate` skips inactive Synced Groups; reuses existing Manual Groups with matching names
-- Rate limits vary by account (typically 60 reads/min, 20 writes/min); the CLI handles retries automatically but long bulk operations may be slow
-- `mappings resource-connectivity` joins resources and connectors client-side — no direct API link exists between them
-- `key create` with `-e 0` creates a non-expiring key
-- `key rotate` prints the new key's secret token — save it immediately, it cannot be retrieved again. There is no native rotate mutation in the Twingate API; this
+## Command Reference
+
+### device
+- `list` — supports server-side filters: `--untrusted`, `--trusted`, `--state ACTIVE|ARCHIVED|BLOCKED` (repeatable), `--serial-number`, `--user-id` (repeatable)
+- `list --idsonly` / `list --fileofids <file>` — ID-only output or diff against a saved list of IDs
+- `show`, `updateTrust`, `block`, `unblock`, `archive`, `unarchive`
+- Serial-number allowlist: `snumber list/add/remove`
+
+### resource
+- `list` — basic listing; add `-d`/`--detail` for access policy, approval mode, approver groups, and gateway-specific columns (slightly slower on large tenants)
+- `show` — always includes the detail columns
+- Both commands include a `type` column: `NETWORK`, `SSH`, `WEB

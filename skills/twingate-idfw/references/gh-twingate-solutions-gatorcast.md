@@ -1,85 +1,80 @@
 ---
 source: https://github.com/Twingate-Solutions/gatorcast
 type: github
-fetched: 2026-08-06
-source_version: 1cbe50f5ccaba9c572ac4714eb0d90bfe11d4aa7
+fetched: 2026-10-11
+source_version: 30df94830c947225d395897052a661157468cc7c
+trust: official
 ---
 
 # Gatorcast
 
-## Summary
-Self-hosted single-container service that receives Twingate Identity Firewall Gateway session recordings (asciicast v2 fragments), reassembles them by `conn_id`, and serves a web UI for browsing and replaying sessions. Includes live detection rules for dangerous commands and secret exposure, with jump-to-timestamp links. All data remains on your infrastructure.
+Self-hosted, single-container service for reassembling and replaying Twingate Identity Firewall Gateway session recordings. The Gateway emits asciicast v2 fragments, kubectl API audit lines, and web-app request lines via structured JSON logs; Gatorcast receives them by HTTP POST or syslog TCP, demultiplexes by `conn_id`, and serves a web UI for browse/replay. All data stays on your infrastructure.
 
-**Status:** Example/reference project. No support or warranty. Apache 2.0, AS IS.
+**Unsupported example project. Review and test before any production use. Apache 2.0 licensed, no warranty.**
 
 ---
 
 ## Key Information
-- Ingests via HTTP POST (`/ingest`) or syslog TCP; outputs a browse/replay UI
-- Groups recordings by target system (`resource_address`); sessions are playable while still in progress
-- Built-in detection: dangerous-command and secret-exposure rules run on every append and at seal
-- Fully offline — all frontend assets (asciinema-player, htmx, Alpine.js) are vendored locally
-- Single SQLite database + `.cast` files stored in a named Docker volume
+
+- Stores SSH/kubectl exec recordings as asciicast v2, kubectl API request metadata, and web-app request metadata
+- 21 built-in detection rules (dangerous commands, secret exposure, 6 kubectl API rules); findings include jump-to-timestamp links
+- Unified search across all event kinds with CSV export
+- Encryption at rest optional (AES-256-GCM); SQLite metadata DB is never encrypted
+- Retention by age (`RETENTION_DAYS`) and recording size (`RETENTION_MAX_GB`)
+- Schema migrations run automatically on startup; no manual migration steps
 
 ---
 
 ## Prerequisites
+
 - Docker and Docker Compose
-- Twingate Gateway emitting structured JSON audit logs with `asciicast` fields
+- A Twingate Gateway forwarding structured JSON audit logs
 
 ---
 
 ## Usage
 
 ```bash
-# 1. Clone repo
-git clone https://github.com/Twingate-Solutions/gatorcast && cd gatorcast
-
-# 2. Configure secrets
+git clone https://github.com/Twingate-Solutions/gatorcast.git
+cd gatorcast
 cp .env.example .env
 # Edit .env: set INGEST_TOKEN, UI_AUTH_USERNAME, UI_AUTH_PASSWORD
-
-# 3. Start
 docker compose pull
 docker compose up -d
-
-# 4. Open UI
-# http://<host>:8080  (HTTP Basic auth)
-
-# Update
-docker compose pull && docker compose up -d
 ```
+
+Open `http://<host>:8080`. See [INGESTION_RECIPES.md](https://github.com/Twingate-Solutions/gatorcast/blob/main/INGESTION_RECIPES.md) to forward Gateway logs.
 
 ---
 
-## Configuration Values (Environment Variables)
+## Configuration Values
+
+Nine variables are set in `docker-compose.yml` and take precedence over `.env`; change them there. All others go in `.env`.
 
 | Variable | Default | Notes |
 |---|---|---|
-| `HTTP_PORT` | `8080` | UI + `/ingest` endpoint |
-| `SYSLOG_TCP_PORT` | `6514` | `0` disables |
-| `DATA_DIR` | `/data` | SQLite + `.cast` storage root |
-| `IDLE_TIMEOUT_SECONDS` | `120` | Sweep cadence |
-| `SESSION_MAX_IDLE_SECONDS` | `3600` | Idle backstop seal; must exceed Gateway flush interval |
-| `RETENTION_DAYS` | `90` | `0` = keep forever |
-| `RETENTION_MAX_GB` | `0` | `0` = no size cap |
+| `HTTP_PORT` | `8080` | UI + `/ingest` port |
+| `SYSLOG_TCP_PORT` | `6514` | TCP syslog listener; `0` disables |
+| `DATA_DIR` | `/data` | SQLite DB, `.cast` files, search sidecars |
+| `IDLE_TIMEOUT_SECONDS` | `120` | Backstop sweep interval |
+| `SESSION_MAX_IDLE_SECONDS` | `3600` | Seal recording after this silence; must exceed Gateway flush interval |
+| `RETENTION_DAYS` | `90` | Age-based purge; `0` = keep forever |
+| `RETENTION_MAX_GB` | `0` | Size cap on recordings; `0` = disabled |
 | `LOG_LEVEL` | `info` | `debug`/`info`/`warning`/`error` |
-| `INGEST_TOKEN` | *(required)* | Bearer token for `/ingest` |
-| `UI_AUTH_USERNAME` | `admin` | HTTP Basic username |
-| `UI_AUTH_PASSWORD` | *(required)* | HTTP Basic password |
-| `ENCRYPTION_ENABLED` | `false` | AES-256-GCM at rest |
-| `GATORCAST_MASTER_KEY` | *(unset)* | Required if encryption enabled; base64 32-byte key |
-| `DETECTION_ENABLED` | `true` | Live detection on every append |
-| `BACKFILL_ON_STARTUP` | `true` | Index/detect existing recordings missing search sidecars |
-| `SEARCH_PAGE_SIZE` | `50` | Results per page |
-| `SEARCH_REGEX_MAX_CANDIDATES` | `2000` | Max sidecars scanned per content search |
+| `ENCRYPTION_ENABLED` | `false` | Set in `docker-compose.yml`, not `.env` |
+| `INGEST_TOKEN` | *(placeholder)* | Bearer token for `POST /ingest` |
+| `UI_AUTH_USERNAME` | `admin` | HTTP Basic auth username |
+| `UI_AUTH_PASSWORD` | *(placeholder)* | HTTP Basic auth password |
+| `GATORCAST_MASTER_KEY` | *(unset)* | Required when encryption enabled; `openssl rand -base64 32` |
+| `DETECTION_ENABLED` | `true` | Master switch for all detection rules |
+| `KUBECTL_ACTIVITY_GAP_SECONDS` | `900` | Inactivity gap to split activity sessions |
+| `KUBECTL_ACTIVITY_MAX_SECONDS` | `14400` | Hard cap on one activity session span |
 
 ---
 
 ## Gotchas
-- Service starts with placeholder `.env` values but logs a warning — do not expose to a network with defaults
-- Only processes lines where `logger == "gateway.audit"` AND `asciicast` field is non-null; API-audit lines are dropped by design
-- **journald `LineMax` (default 48 KB)** truncates large asciicast chunks → recordings never assemble; raise to `4M` or use file-tail transport for TUI-heavy sessions
-- UDP syslog truncates multi-KB lines — always use TCP or HTTP
-- Syslog TCP port binds to `127.0.0.1` by default; change to internal interface IP for remote shippers, never `0.0.0.0`
-- Reverse proxy `client_max_body_size` should be `64m`
+
+- **Default secrets trigger a warning at startup** (`config.insecure_default`); service starts but do not expose it with defaults in place
+- **`ENCRYPTION_ENABLED` must be set in `docker-compose.yml`**; the same key in `.env` is ignored
+- **In-progress recordings are plaintext on disk** until sealed, even with encryption enabled
+- **Losing `GATORCAST_MASTER_KEY` loses all encrypted recordings**; no key
