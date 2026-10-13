@@ -165,6 +165,8 @@ repos:
   # --- twingate-terraform ---
   - full_name: Twingate-Solutions/terraform-scripts
     skill: twingate-terraform
+  - full_name: Twingate-Solutions/twingate-client-userspace-terraform-cloud
+    skill: twingate-terraform
   # --- twingate-troubleshoot ---
   - full_name: Twingate-Solutions/network-utilities
     skill: twingate-troubleshoot
@@ -1183,6 +1185,10 @@ docs:
   - url: https://www.twingate.com/docs/admins
     skill: twingate-identity
     keywords: [admin roles, permissions, DevOps, Access Reviewer, Admin Console]
+
+  - url: https://www.twingate.com/docs/2026-10-admin-role-changes
+    skill: twingate-identity
+    keywords: [admin roles, Support, Viewer, DevOps, Internet Security role, Helpdesk, Billing]
 
   - url: https://www.twingate.com/docs/offboarding-users
     skill: twingate-identity

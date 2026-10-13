@@ -287,7 +287,7 @@ protocols {
 |---|---|
 | `ADMIN` | Full admin access |
 | `DEVOPS` | Connector management, limited admin |
-| `SUPPORT` | Read-only admin console access |
+| `SUPPORT` | Read-only admin console access. Shown as **Viewer** in the Admin Console from the week of Oct 19 2026; the enum value is unchanged. See `skills/twingate-identity/references/2026-10-admin-role-changes.md` |
 | `MEMBER` | End user — no admin console access |
 
 ### UserState

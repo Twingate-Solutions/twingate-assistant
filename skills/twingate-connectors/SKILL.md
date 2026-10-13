@@ -175,6 +175,7 @@ recommending one, and flag community/Labs/SE-example status per the guideline ab
 | **GitHub Codespaces** | `.devcontainer` Dockerfile + two `devcontainer.json` variants (Service Account or interactive) so a Codespace can reach Twingate-protected private resources | `gh-twingate-labs-tg-github-codespaces.md` |
 | **render.com** | One-click "Deploy to Render" button that stands up a Connector as a render.com service using tokens generated in the Admin Console | `gh-twingate-labs-tg-render.md` |
 | **Spacelift CI runners** | Runs Twingate's **userspace HTTP proxy mode** plus `proxytunnel` inside an unprivileged Spacelift runner container — no root, no TUN device, no `NET_ADMIN` — to bridge Postgres/MySQL/SSH through Twingate's HTTP CONNECT proxy | `gh-twingate-solutions-twingate-client-userspace-spacelift.md` |
+| **HCP Terraform / Terraform Cloud workers** | Same userspace-client pattern packaged as a custom Terraform provider (`twingatetunnel`) whose ephemeral resources open TCP tunnels or an HTTP CONNECT proxy during plan/apply — owned by twingate-terraform | `skills/twingate-terraform/references/gh-twingate-solutions-twingate-client-userspace-terraform-cloud.md` |
 
 **Observability, ops, and fleet automation:**
 

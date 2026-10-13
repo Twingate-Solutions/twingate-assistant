@@ -6,8 +6,6 @@ source_version: 6935a731e2319ba1542823b49003cf96b719203b3b69b7940d1fe785ff9ce3c9
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Admin Role Changes (October 2026)
 
 ## Page Title
@@ -43,7 +41,7 @@ Twingate is updating the Support and DevOps admin roles to restrict access to se
 | Context | Value | Notes |
 |---|---|---|
 | API / Terraform | `SUPPORT` | Identifier retained for the renamed Viewer role |
-| New role identifier | `INTERNET_SECURITY` | Assumed; check API docs for exact enum |
+| Internet Security role identifier | Unconfirmed | The source page does not state the API enum; verify against the live GraphQL schema before scripting it |
 
 ## Gotchas
 
@@ -51,9 +49,10 @@ Twingate is updating the Support and DevOps admin roles to restrict access to se
 - **Support tasks** (MFA reset, device verification) should use the **Helpdesk** role, not Viewer
 - **Existing API/Terraform configs referencing `SUPPORT` do not need updating** after the rename
 - Changes are automatic during the week of October 19, 2026 — no migration action required for the rename itself
+- Users who relied on Support/DevOps to view DNS filtering logs or Billing lose that access — audit assignments before the change
 
 ## Related Docs
-- [Admin Roles overview](https://www.twingate.com/docs/admin-roles)
+- [Admin Roles overview](https://www.twingate.com/docs/admin-roles) — summarized in `admins.md`
 - Helpdesk role documentation
 - Internet Security role documentation
 - Twingate Support: contact for questions about these changes

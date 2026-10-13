@@ -8,7 +8,9 @@ description: >
   Twingate. Also trigger when existing AWS, Azure, GCP, or Kubernetes Terraform stacks
   need to add Twingate. Also trigger for provider source/schema questions (`internal/provider/`),
   `group_ids` / `access` block migration errors, provider release version and changelog
-  questions, or requests for SE reference quick-start Terraform modules per cloud.
+  questions, or requests for SE reference quick-start Terraform modules per cloud. Also
+  trigger when HCP Terraform / Terraform Cloud runs must reach private resources (the
+  userspace `twingatetunnel` provider, ephemeral tunnel resources).
 ---
 
 ## Role
@@ -61,6 +63,11 @@ leaking credentials.
 - **`references/gh-twingate-solutions-terraform-scripts.md` is SE demo/reference material,
   not a hardened production module** — point users to it for quick-start patterns per
   cloud, but flag that it isn't security-reviewed for production use.
+- **For HCP Terraform runs that must reach private endpoints, point to the userspace tunnel
+  provider before suggesting self-hosted agents** —
+  `references/gh-twingate-solutions-twingate-client-userspace-terraform-cloud.md`. Flag that it
+  is an unsupported, LLM-assisted reference example the user must build, host, and review
+  themselves, and that its Service Account needs access to the exact Resource address/port.
 
 ## Search References First
 
@@ -75,6 +82,7 @@ grep -ril "group_ids" references/       # -> the group_ids/access-block migratio
 grep -ril "v4.3.1" references/          # -> gh-twingate-terraform-provider-twingate.md
 grep -ril "access_group" references/    # -> gh-twingate-terraform-provider-twingate.md
                                          #    (the inconsistency-after-apply bug note)
+grep -ril "ephemeral" references/       # -> gh-twingate-solutions-twingate-client-userspace-terraform-cloud.md
 ```
 
 Never answer from training-data memory for: provider version constraints, env var names,
@@ -130,6 +138,7 @@ of file live there:
 | **Provider source, current stable release/changelog, build/test workflow, the `access_group`/`security_policy_id` bug fixed in v4.3.1** | `gh-twingate-terraform-provider-twingate.md` — note the `gh-` prefix; the old unprefixed filename no longer exists |
 | **"An argument named `group_ids` is not expected here"** — top-level `group_ids` moved into an `access { }` block in provider v1.0.0+ | `4693640683-terraform-error-an-argument-named-group-ids-is-not-expected-here.md` |
 | **SE quick-start / demo Terraform scripts per cloud** (reference only, not production-hardened) | `gh-twingate-solutions-terraform-scripts.md` |
+| **HCP Terraform / Terraform Cloud runs reaching private resources** — custom `twingatetunnel` provider runs the Twingate Client in **userspace mode** on hosted workers (no root, no self-hosted agent); `twingatetunnel_tcp` / `twingatetunnel_http_proxy` ephemeral resources feed `local_host`/`local_port`/`proxy_url` to Postgres, Kubernetes, and other providers. Unsupported reference example, self-built (no registry release) | `gh-twingate-solutions-twingate-client-userspace-terraform-cloud.md` |
 | AWS-specific Terraform patterns (ECS/EC2 + Twingate) | `terraform-aws.md` (and `skills/twingate-connectors/references/aws-connector-patterns.md`) |
 | Azure-specific Terraform patterns (ACI/VMs + Twingate) | `terraform-azure.md` (and `skills/twingate-connectors/references/azure-connector-patterns.md`) |
 | GCP-specific Terraform patterns (GCE/MIG + Twingate) | `terraform-gcp.md` (and `skills/twingate-connectors/references/gcp-connector-patterns.md`) |

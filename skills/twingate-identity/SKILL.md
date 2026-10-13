@@ -2,7 +2,7 @@
 name: twingate-identity
 description: >
   Use when the user asks about IdP integration, SCIM provisioning, security policies,
-  device trust, groups, users, or access control in Twingate. Activate for: SAML,
+  device trust, groups, users, admin roles, or access control in Twingate. Activate for: SAML,
   SCIM, Okta, Entra ID, Google Workspace, JumpCloud, OneLogin, Keycloak, device trust,
   device posture, MFA enforcement, groups, JIT access, ephemeral access, auto-lock,
   offboarding, deprovisioning, multi-IdP deployments, or security policy configuration.
@@ -42,6 +42,9 @@ what conditions, and for how long, this skill governs those decisions.
 - **Prefer the supported native integration over custom automation.** Reach for the
   community/SE tooling in `references/` only when no native path exists, and tell the user
   which repos are experimental or reference-only rather than production-ready.
+- **Assign the narrowest admin role.** Use Helpdesk for MFA resets and device verification,
+  Viewer (formerly Support) for read-only, and Internet Security only for users who must edit
+  DNS filtering — it has no read-only mode. Check `references/` for current role scopes.
 
 ## Search References First
 
@@ -53,6 +56,7 @@ details live in the file bodies, so a filename scan alone will miss them:
 grep -ril "fleetdm" references/        # -> gh-twingate-solutions-twingate-mdm-connector.md
 grep -ril "no matching user" references/
 grep -ril "assignment required" references/
+grep -ril "internet security role" references/   # -> 2026-10-admin-role-changes.md
 ```
 
 Never answer from training-data memory for: per-IdP SAML/SCIM configuration steps,
@@ -118,6 +122,7 @@ of file live there:
 | **SAML SP reference implementation** (Django + pysaml2, JumpCloud IdP) | `gh-twingate-labs-saml_service_provider.md` |
 | JIT / ephemeral access, contractor patterns | `jit-access-requests.md`, `resources-reviewing-access-requests.md`, `ephemeral-access-to-resources.md`, `vendor-and-contractor-access-management.md`, `usage-based-auto-lock.md` |
 | Groups, users, admins, offboarding | `groups.md`, `users.md`, `admins.md`, `offboarding-users.md` |
+| **Admin role changes, week of Oct 19 2026** — Support renamed **Viewer** (loses Secure DNS, Client Configuration, Billing); DevOps loses Billing; **Internet Security** and **Helpdesk** roles as replacements; API/Terraform keep `SUPPORT` | `2026-10-admin-role-changes.md` (with `admins.md`) |
 | Authentication, sessions, social logins | `authentication.md`, `how-sessions-work.md`, `social-logins.md` |
 | Service accounts | `service-accounts-guide.md` |
 | SaaS app gating | `saas-app-gating.md`, `saas-app-gating-best-practices.md` |

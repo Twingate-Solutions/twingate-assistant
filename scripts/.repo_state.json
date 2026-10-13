@@ -218,7 +218,7 @@
     "pushed_at": "2026-05-11T20:18:46Z"
   },
   "Twingate-Solutions/twingate-client-userspace-terraform-cloud": {
-    "doc_path": "skills/_triage/gh-twingate-solutions-twingate-client-userspace-terraform-cloud.md",
+    "doc_path": "skills/twingate-terraform/references/gh-twingate-solutions-twingate-client-userspace-terraform-cloud.md",
     "last_sha": "4f66a1b1d35f712b1a90ed409a513488f0251817",
     "pushed_at": "2026-10-07T16:52:30Z"
   },

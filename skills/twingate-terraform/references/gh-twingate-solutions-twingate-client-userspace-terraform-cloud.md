@@ -6,8 +6,6 @@ source_version: 4f66a1b1d35f712b1a90ed409a513488f0251817
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Tunnel Provider for HCP Terraform
 
 ## Summary
@@ -60,6 +58,8 @@ provider "postgresql" {
 }
 ```
 
+For HTTP-speaking providers (e.g. Kubernetes), use `twingatetunnel_http_proxy` and pass its `proxy_url` output as the provider's proxy setting.
+
 ## Configuration Values
 
 **Provider (`twingatetunnel`):**
@@ -69,7 +69,7 @@ provider "postgresql" {
 | `client_version` | latest | Pin apt package version |
 | `client_path` | — | Path to preinstalled `twingated` |
 | `client_url` / `client_sha256` | — | Custom `.deb` mirror |
-| `fetch_missing_libraries` | `true` | Fetch missing shared libs |
+| `fetch_missing_libraries` | `true` | Fetch missing shared libs from the Ubuntu 20.04 archive (SHA-256 verified) |
 | `log_dir` | `/tmp/twingatetunnel/logs` | |
 | `cache_dir` | `/tmp/twingatetunnel/cache` | |
 
@@ -81,4 +81,19 @@ provider "postgresql" {
 - `local_port` defaults to a random free port; don't hardcode it
 - Service key must match the exact Resource address/port configured in Twingate
 - If `fetch_missing_libraries = false` and the worker lacks required shared libraries, the client will fail to start
-- The `client_
+- `fetch_missing_libraries` needs egress to `archive.ubuntu.com:443`
+- `probe_destination` must be reachable before the HTTP proxy is considered ready
+- The tunnel starts during each plan and apply run
+
+## Troubleshooting
+| Symptom | Cause / Fix |
+|---|---|
+| Tunnel fails to start | Error includes the last log lines; full logs in `log_dir/tunnel-*/` |
+| State stuck at Authenticating or Error | Service key invalid/expired, or worker can't reach the Twingate Controller |
+| Online but the tunnel closes | Service Account lacks access to the Resource, or `destination` doesn't match the Resource address/port |
+| Missing shared library error | Set `fetch_missing_libraries = true` or install the library on the host |
+| Unknown worker environment | Plan `examples/00-recon` in a throwaway workspace to probe the worker |
+
+## Related
+- `skills/twingate-connectors/references/gh-twingate-solutions-twingate-client-userspace-spacelift.md` — same userspace-client pattern for Spacelift runners
+- `skills/twingate-architect/references/linux-userspace-networking.md` — userspace networking mode product doc
