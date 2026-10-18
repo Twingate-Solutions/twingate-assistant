@@ -1,56 +1,65 @@
 ---
 source: https://help.twingate.com/articles/1900346829-twingate-client-system-requirements-and-supported-operating-systems
 type: help
-fetched: 2026-10-11
-source_version: f0dd1b168f67a8cd8f55804fe7722369ed9e9e65dbf2d107dbd4e56c345f1a3c
+fetched: 2026-10-18
+source_version: f5bb686b9407181ed7f9ffcf67f30dff4d1696149c55d34d7e3ca5ee587f42f8
 trust: official
 ---
 
 # Twingate Client System Requirements and Supported Operating Systems
 
 ## Summary
-Documents minimum OS versions and platforms supported by the Twingate Client across desktop, mobile, and Linux distributions. EOL OS versions are not supported; Twingate may still function temporarily but receives no updates or support on those platforms.
+Defines minimum supported OS versions for Twingate Client across desktop and mobile platforms. Twingate drops support for OS versions at their end-of-life; the client may still function temporarily but receives no further updates on unsupported versions.
+
+---
 
 ## Key Information
 
 ### Desktop Clients
-| Platform | Minimum Version | Notes |
-|----------|----------------|-------|
-| Windows | Windows 10 21H2 (LTS) | Requires .NET 8 Desktop Runtime |
-| macOS | macOS 14 (Sequoia) | Older versions may install older client builds, unsupported |
-| Linux | Varies by distro | See below |
+
+| Platform | Minimum Version |
+|----------|----------------|
+| Windows | Windows 10 21H2 (LTS) |
+| macOS | macOS 14 (Sequoia) |
+| Linux | Varies by distro (see below) |
 
 ### Supported Linux Distributions (x86/AMD64 and ARM64 unless noted)
 - **Ubuntu**: 20.04 LTS, 22.04 LTS, 24.04 LTS
-- **Debian**: 9 or later
-- **Fedora**: 40 or later
-- **CentOS**: Stream 9 or later
-- **Oracle Linux**: 8 or later
+- **Debian**: 9+
+- **Fedora**: 40+
+- **CentOS**: Stream 9+
+- **Oracle Linux**: 8+
 - **Arch Linux, ThinPro, NixOS**: x64/AMD64 only
 
 ### Mobile Clients
+
 | Platform | Minimum Version |
 |----------|----------------|
-| iOS | iOS 18 (App Store) |
-| Android | Android 14 / Upside Down Cake (Google Play) |
+| iOS | iOS 18 |
+| Android | Android 14 (Upside Down Cake) |
 
-## Prerequisites
+---
+
+## Prerequisites / Additional Requirements
+
 - **Windows**: .NET 8 Desktop Runtime (bundled with `.exe` installer)
 - **Admin rights**: Required for initial installation on Windows and macOS
-- **macOS**: System Extension framework must be available (used by network extension)
+- **macOS**: Relies on System Extension framework (not legacy kernel extensions)
+- **DNS**: Twingate installs a local DNS resolver for private resource name resolution
 
-## Additional Requirements
-- **DNS**: Twingate configures a local DNS resolver for private resource resolution — be aware this modifies system DNS settings
-- **macOS System Extension**: Must not be blocked by MDM or security policy
+---
 
 ## Gotchas
-- Windows 7 and 8 are explicitly **not supported**
-- Android custom ROMs or restricted devices may not work even if Android version meets minimum
-- Arch Linux, ThinPro, and NixOS are **x64/AMD64 only** — no ARM64 support for these distros
-- Older macOS versions (e.g., Monterey) may install an older client version silently — this is not officially supported
-- EOL OS versions: Twingate may continue functioning temporarily post-EOL but client updates will eventually stop being available
+
+- Windows 7/8 are **not supported**
+- macOS versions older than Sequoia (e.g., Monterey) may install an older Twingate client version but are **not officially supported**
+- Android custom ROMs or restricted devices may be unsupported
+- Arch Linux, ThinPro, and NixOS support is **x64/AMD64 only** — no ARM64
+- End-of-life OS versions may lose access to client updates even if the client continues to function temporarily
+
+---
 
 ## Related Docs
 - Twingate Client installation guides (Windows, macOS, Linux)
-- Twingate Connector system requirements (separate page)
-- MDM deployment documentation for managed device rollouts
+- Twingate Connector system requirements (separate from client requirements)
+- [Twingate Help Center](https://help.twingate.com)

@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/gateway/wiki
 type: github
-fetched: 2026-10-11
-source_version: d50cc06287e4f8ba0b42fcd4ee967fcebb60fc12
+fetched: 2026-10-18
+source_version: 6871768e97306a8e566b950424863664a9a6626a
 trust: official
 ---
 
@@ -15,7 +15,7 @@ The Twingate Gateway is an open-source Layer 7 reverse proxy deployed within you
 - **Supported protocols:** Kubernetes, SSH, Web App (Database coming soon)
 - **Authentication:** Gateway Access Token (GAT) issued by Twingate control plane after policy evaluation (MFA, device trust, geo-location, JIT)
 - **Identity propagation:** Forwards user identity to upstream services via impersonation headers (Kubernetes) or equivalent mechanisms
-- **Session recording:** Asciicast v2 format, emitted as structured JSON to stderr; routable via Vector, Fluentd, Fluent Bit, etc.
+- **Session recording:** Asciicast v2 format, emitted as structured JSON to stderr; each log entry has `logger: "session_recording"` (renamed from `gateway.audit` in 2.0); routable via Vector, Fluentd, Fluent Bit, etc.
 - **Metrics:** Prometheus endpoint on port 9090; supports PodMonitor, ServiceMonitor, PrometheusRule, and Grafana dashboards
 - **Deployment:** Helm chart hosted at `ghcr.io/twingate/helmcharts/gateway`; recommended as subchart of Twingate Operator
 - **Minimum client version:** 2025.175; Privileged Access available on macOS, Windows, Linux only
@@ -54,5 +54,4 @@ The Twingate Gateway is an open-source Layer 7 reverse proxy deployed within you
 | `service.type` | `ClusterIP` (default) or `LoadBalancer` (Connector outside cluster) |
 | `twingateOperator.gateway.enabled` | Render `TwingateGateway` CRD (requires Operator v2) |
 | `twingateOperator.kubernetesResource.enabled` | Render `TwingateResource` for in-cluster API server |
-| `twingateOperator.kubernetesResource.name` | Display name in Admin Console |
-| `twingateOperator.kubernetesResource.alias` | Resource alias
+| `twingateOperator.kubernetesResource.name`

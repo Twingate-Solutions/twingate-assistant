@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator
 type: github
-fetched: 2026-10-11
-source_version: bb1fe5350d1764726bb15d4947c0496e67312f07
+fetched: 2026-10-18
+source_version: fe5bde8727e6832aa79c38ff7addd685cbe927ec
 trust: official
 ---
 
@@ -17,6 +17,7 @@ A custom Kubernetes controller that manages Twingate resources (Resources, Group
 - Container image published to Docker Hub: `twingate/kubernetes-operator`
 - Helm chart published to `oci://ghcr.io/twingate/helmcharts/twingate-operator`
 - CRDs are **not** automatically updated on `helm upgrade` (Helm v3 limitation — manual update required)
+- Latest release: **v3.0.0** (breaking changes — see [v2 → v3 migration guide](https://github.com/Twingate/kubernetes-operator/wiki/Migration-v2-to-v3))
 
 ## Prerequisites
 - Kubernetes 1.16+
@@ -53,6 +54,11 @@ Key settings live under `twingateOperator` in `values.yaml`:
 - `accountName` (or equivalent) — Twingate account/network name
 - Refer to [default values file](https://github.com/Twingate/kubernetes-operator/blob/main/deploy/twingate-operator/values.yaml) for the full list
 
+## Breaking Changes in v3.0.0
+- Gateway subchart updated to 2.0.0 with a breaking TLS values schema change
+- `protocols` field is now only allowed on Network-type `TwingateResources` (not other resource types)
+- See the [v2 → v3 migration guide](https://github.com/Twingate/kubernetes-operator/wiki/Migration-v2-to-v3) before upgrading
+
 ## Gotchas
 - **CRD upgrades are manual**: Helm v3 does not upgrade CRDs automatically during `helm upgrade`; apply updated CRD manifests separately before upgrading the chart
 - Connectors must already exist in the cluster (via the Twingate Helm chart) before the operator can manage them
@@ -63,4 +69,4 @@ Key settings live under `twingateOperator` in `values.yaml`:
 - [Getting Started](https://github.com/Twingate/kubernetes-operator/wiki/Getting-Started)
 - [API Reference](https://github.com/Twingate/kubernetes-operator/wiki/API-Reference)
 - [Twingate Connector Helm Charts](https://github.com/Twingate/helm-charts)
-- [CHANGELOG](https://github.com/Twingate/kubernetes-operator/blob/main/CHANGELOG.md)
+- [CHANGELOG](https://github.com/T

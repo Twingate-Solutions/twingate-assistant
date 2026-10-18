@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Solutions/gatorcast
 type: github
-fetched: 2026-10-11
-source_version: 30df94830c947225d395897052a661157468cc7c
+fetched: 2026-10-18
+source_version: feb9790c545d13ac6cbe2bd3eece81498d22f16e
 trust: official
 ---
 
@@ -47,6 +47,22 @@ Open `http://<host>:8080`. See [INGESTION_RECIPES.md](https://github.com/Twingat
 
 ---
 
+## Supported Gateway Versions
+
+Gateway 2.0.0 renamed its loggers. Gatorcast 0.6.0 and later accept both sets of names, so a fleet mixing Gateway versions needs no extra configuration.
+
+| Line | Preview Gateway (before 2.0.0) | Gateway 2.0.0 |
+|---|---|---|
+| Recording chunk | `gateway.audit` | `session_recording` |
+| HTTP request audit (Kubernetes and web app) | `gateway.audit` | `audit` |
+| Connection start (`Authenticated connection`) | `gateway` | `system` |
+
+2.0.0 SSH recordings arrive in segments (a chunk about every 256 KB or 5 minutes, then a final `session finished` chunk) and are reassembled the same way as Kubernetes recordings. 2.0.0 SSH audit events and Gateway service/proxy-error lines are dropped.
+
+**Upgrade Gatorcast to 0.6.0 before upgrading any Gateway or gwops to 2.0.0.** A Gatorcast older than 0.6.0 drops every 2.0.0 line and still answers `2xx`; gwops treats any `2xx` as delivered, so those lines are lost with no error on either side.
+
+---
+
 ## Configuration Values
 
 Nine variables are set in `docker-compose.yml` and take precedence over `.env`; change them there. All others go in `.env`.
@@ -61,20 +77,4 @@ Nine variables are set in `docker-compose.yml` and take precedence over `.env`; 
 | `RETENTION_DAYS` | `90` | Age-based purge; `0` = keep forever |
 | `RETENTION_MAX_GB` | `0` | Size cap on recordings; `0` = disabled |
 | `LOG_LEVEL` | `info` | `debug`/`info`/`warning`/`error` |
-| `ENCRYPTION_ENABLED` | `false` | Set in `docker-compose.yml`, not `.env` |
-| `INGEST_TOKEN` | *(placeholder)* | Bearer token for `POST /ingest` |
-| `UI_AUTH_USERNAME` | `admin` | HTTP Basic auth username |
-| `UI_AUTH_PASSWORD` | *(placeholder)* | HTTP Basic auth password |
-| `GATORCAST_MASTER_KEY` | *(unset)* | Required when encryption enabled; `openssl rand -base64 32` |
-| `DETECTION_ENABLED` | `true` | Master switch for all detection rules |
-| `KUBECTL_ACTIVITY_GAP_SECONDS` | `900` | Inactivity gap to split activity sessions |
-| `KUBECTL_ACTIVITY_MAX_SECONDS` | `14400` | Hard cap on one activity session span |
-
----
-
-## Gotchas
-
-- **Default secrets trigger a warning at startup** (`config.insecure_default`); service starts but do not expose it with defaults in place
-- **`ENCRYPTION_ENABLED` must be set in `docker-compose.yml`**; the same key in `.env` is ignored
-- **In-progress recordings are plaintext on disk** until sealed, even with encryption enabled
-- **Losing `GATORCAST_MASTER_KEY` loses all encrypted recordings**; no key
+| `ENCRYPTION_ENABLED` | `false` | Set in `docker-compose.yml`, not `.env`

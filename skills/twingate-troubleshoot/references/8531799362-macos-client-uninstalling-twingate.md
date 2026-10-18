@@ -1,33 +1,47 @@
 ---
 source: https://help.twingate.com/articles/8531799362-macos-client-uninstalling-twingate
 type: help
-fetched: 2026-10-11
-source_version: 9eb5e704b2ac07a3d2f35dbf09966374b4b395d4dfb0e02a4bea87ba75ebb610
+fetched: 2026-10-18
+source_version: 3267f98d2e7d7b53867fbf29d4216f83287499527fe97428cde4f48f593123dc
 trust: official
 ---
 
 # [macOS Client] Uninstalling Twingate
 
 ## Summary
-Describes how to uninstall the Twingate macOS client. The process is a standard macOS application removal. Standalone Client users will also have the System Extension removed during uninstall.
+Describes how to remove the Twingate macOS client. The process is a standard macOS application removal with no special tooling required. Standalone Client installations (which include a System Extension) prompt for confirmation during removal.
 
 ## Key Information
-- Standard drag-to-Trash uninstall removes the application
-- Right-click → "Move to Bin" is an equivalent alternative
-- Standalone Client (with System Extension) uninstall also removes the System Extension automatically
-- A confirmation prompt ("Continue") appears when the System Extension is being removed
+- No dedicated uninstaller required
+- Two removal methods available: drag-to-Bin or right-click menu
+- System Extension is automatically removed alongside the Standalone Client
+- A confirmation prompt appears when removing the Standalone Client variant
+
+## Prerequisites
+- Twingate macOS client must be quit before removal
 
 ## Step-by-Step
 
+### Method 1: Drag to Bin
 1. Quit the Twingate application
-2. Locate Twingate in `/Applications`
-3. Drag to Trash **or** right-click → **Move to Bin**
-4. If using the Standalone Client: when prompted to remove the System Extension, click **Continue**
+2. Drag the Twingate app to the Bin
+
+### Method 2: Right-click
+1. Quit the Twingate application
+2. Right-click the Twingate app
+3. Select **Move to Bin**
+
+### Standalone Client (System Extension)
+- Follow either method above
+- When prompted to remove the System Extension, click **Continue**
+
+## Configuration Values
+None applicable.
 
 ## Gotchas
-- Must quit the app before removing it
-- Standalone Client users should expect and confirm the System Extension removal prompt — dismissing it may leave the extension installed
+- Must quit the app before attempting removal
+- Standalone Client includes a System Extension; removal triggers an OS-level confirmation prompt — do not skip it or the extension may persist
 
 ## Related Docs
-- Twingate macOS Client installation guide
-- Twingate System Extension documentation
+- macOS Client installation documentation
+- System Extension configuration (for enterprise/MDM deployments)

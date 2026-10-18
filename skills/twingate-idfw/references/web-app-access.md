@@ -1,58 +1,50 @@
 ---
 source: https://www.twingate.com/docs/web-app-access
 type: docs
-fetched: 2026-09-13
-source_version: 6e4b808f0b33de564cdc5a4f148c7d42300a77d7e7845f5896bd8e36a211e711
+fetched: 2026-10-18
+source_version: 03d4bb26570929c1504e44a6fca8512e39a10f2cbec7da2979330c41f31190ad
+trust: official
 ---
 
-# Twingate Privileged Access for Web Apps
+# Privileged Access for Web Apps Overview
 
 ## Page Title
-Privileged Access for Web Apps Overview
+Twingate Privileged Access for Web Apps (Beta)
 
 ## Summary
-Twingate Privileged Access for Web Apps acts as a Layer 7 reverse proxy, injecting a signed ES256 JWT (Gateway Access Token) into every HTTP request forwarded to internal web applications. Apps verify the JWT against Twingate's JWKS endpoint to get user identity without OIDC integration or redirect flows. Currently in beta.
+Twingate Privileged Access for Web Apps places internal web applications behind a Twingate Gateway acting as a Layer 7 reverse proxy. The Gateway injects a signed ES256 JWT (Gateway Access Token) into every HTTP request, carrying user identity, device info, and resource metadata. Apps verify the JWT against Twingate's JWKS endpoint—no OIDC integration or client secrets required.
 
 ## Key Information
-- Gateway injects signed JWT per-request with user identity, device info, and resource metadata
-- No OIDC integration, client secrets, or redirect flows required
-- JWT contains user groups for authorization decisions
-- `X-Twingate-*` convenience headers available for logging/personalization without JWT parsing
-- Headers are opt-in; no identity injected until at least one header is configured
-- Gateway-wide headers apply to all proxied apps; per-Resource rewrites override them for specific apps
+- **Feature status**: Beta — contact Twingate to request access
+- **Auth flow**: Controller issues GAT scoped to user+device+resource; Client presents token to Gateway; Gateway injects headers on each forwarded request
+- **JWKS endpoint**: `https://<your-tenant>.twingate.com/api/v1/jwk/ec` (unauthenticated, standard JWKS)
+- **JWT signing**: ES256 algorithm, `typ` header is `GAT` (not `JWT`)—some libraries reject non-`JWT` types; configure library to accept `GAT`
+- **Header sources**: Gateway-wide headers (all web apps on that Gateway) and per-Resource rewrites (single Resource); per-Resource rewrites override Gateway-wide headers of the same name
 
 ## Prerequisites
 - Twingate account with administrator privileges
 - Deployed Twingate Gateway with a Web App Resource configured
-- Kubernetes Operator (recommended deployment method)
-- Beta access (contact Twingate)
+- **For HTTPS**: CA registered with Twingate (options: self-signed, HashiCorp Vault, Google Cloud CAS) + user devices trusting that CA (manual or MDM)
 
 ## Configuration Values
 
-**JWKS Endpoint:**
-```
-https://<your-tenant>.twingate.com/api/v1/jwk/ec
-```
-
-**JWT Header fields:** `alg: ES256`, `typ: GAT` (not `JWT`), `kid: <key-id>`
-
-**Template Variables for Header Values:**
+### Template Variables for Header Injection
 | Variable | Description |
 |---|---|
 | `{{jwt}}` | Full signed ES256 JWT |
-| `{{username}}` | User email/username |
+| `{{username}}` | User's email/username |
 | `{{groups}}` | Comma-separated Twingate Group names |
 | `{{clientGeoLatLong}}` | Lat/lon |
-| `{{clientGeoCity}}` | City |
-| `{{clientGeoRegion}}` | Region/state |
-| `{{clientGeoCountry}}` | Country code |
+| `{{clientGeoCity}}` / `{{clientGeoRegion}}` / `{{clientGeoCountry}}` | Location fields |
 
-**Recommended header config:**
-- `Authorization: Bearer {{jwt}}`
-- `X-Twingate-User: {{username}}`
-- `X-Twingate-Groups: {{groups}}`
+### Recommended Header Config
+| Header Key | Value Template |
+|---|---|
+| `Authorization` | `Bearer {{jwt}}` |
+| `X-Twingate-User` | `{{username}}` |
+| `X-Twingate-Groups` | `{{groups}}` |
 
-**Helm (gateway-wide headers):**
+### Kubernetes Operator — Gateway-wide headers (Helm values)
 ```yaml
 gateway:
   webApp:
@@ -61,33 +53,34 @@ gateway:
       Authorization: "Bearer {{jwt}}"
 ```
 
-**TwingateResource (per-resource rewrites):**
+### Kubernetes Operator — Per-Resource rewrites (TwingateResource CRD)
 ```yaml
 requestHeaderRewrites:
   - name: X-Twingate-User
     value: "{{username}}"
 ```
 
-**Service annotation (per-resource rewrites):**
-```yaml
+### Service Annotation (JSON string)
+```
 resource.twingate.com/requestHeaderRewrites: '{"Authorization": "Bearer {{jwt}}"}'
 ```
 
-## Key JWT Payload Fields
-- `user.id`, `user.email`, `user.username`, `user.first_name`, `user.last_name`
-- `user.groups` — always includes `twingate:authenticated` and `Everyone`
-- `device.id`, `device.location.*`
-- `resource.id`, `resource.type` (always `WEB_APP`), `resource.address`, `resource.aliases`
-- `exp`, `aud` (tenant network name), `jti`
+## Key JWT Claims
+- **`typ`**: `GAT` (not `JWT`)
+- **`iss`**: `twingate`
+- **`aud`**: tenant slug
+- **`user.groups`**: always includes `twingate:authenticated` and `Everyone`; use for authorization
+- **`device.id`**: identifies specific device
+- **`resource.type`**: always `WEB_APP`
 
 ## Gotchas
-- **`typ: GAT` not `JWT`** — Some JWT libraries reject tokens where `typ ≠ "JWT"`. Configure library to accept `GAT` or it will fail signature verification even with a valid token.
-- Headers are **opt-in** — without configuration, requests reach your app with no identity headers
-- Per-Resource rewrites are applied **after** gateway-wide headers, overriding same-named headers
-- `user.groups` always includes built-in groups (`twingate:authenticated`, `Everyone`) plus assigned groups
+- JWT `typ` is `GAT`—libraries enforcing `typ: JWT` will reject tokens; must configure to accept `GAT`
+- No headers are injected until at least one is explicitly configured
+- SaaS apps with their own auth/redirect flows may conflict with the Gateway architecture
+- HTTPS requires a registered CA and trusted CA on all user devices
 
 ## Related Docs
-- Kubernetes Operator install guide
-- Developer guides (Express.js, Django, Next.js, Next.js + Auth.js middleware)
-- Application integration guides (Grafana, Jenkins — no-code trusted-header auth)
+- Twingate Kubernetes Operator install & user guide
+- Developer guides: Express.js, Django, Next.js, Next.js + Auth.js
+- Application integration guides: Grafana, Jenkins
 - Identity Firewall Overview
