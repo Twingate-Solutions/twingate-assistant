@@ -1,61 +1,64 @@
 ---
 source: https://help.twingate.com/articles/8595638268-active-directory-users-and-computer-aduc-is-slow-over-twingate
 type: help
-fetched: 2026-10-11
-source_version: fca4027b24af9d7abc74f914dc1f5e3266ad3793ef320b81308cd6d84e38897c
+fetched: 2026-10-18
+source_version: 01e8932b9d96f8d361d1119e216175c2b819806ce2c5c722df21d83814324fd6
 trust: official
 ---
 
 # Active Directory Users and Computers (ADUC) Slow Over Twingate
 
 ## Summary
-ADUC opens slowly (tens of seconds to minutes) when the Twingate Client is running on Windows because Windows waits for DNS timeouts (~12s each) on queries that the Client silently drops. This is expected behavior caused by how Windows handles parallel DNS resolution across multiple network adapters. The issue affects only failed DNS lookups; successful lookups return at normal speed.
+ADUC opens slowly when the Twingate Client is running because Windows queries DNS servers on all network adapters in parallel, and queries routed through Twingate's resolver time out (~12s each) for non-existent names. ADUC's domain controller discovery phase deliberately queries names expected not to exist, and each failed lookup incurs the full timeout. This is expected behavior, not a bug.
 
 ## Key Information
-- Root cause: Twingate Client handles DNS via its own resolver; queries to physical adapter DNS servers are dropped, causing Windows to wait out full ~12s timeout per failed lookup
-- ADUC location phase deliberately queries non-existent names, multiplying the delay
-- Affects domain logon and Group Policy processing too
-- Dropped queries don't appear in packet captures on the affected machine (capture showing nothing is consistent with this cause)
-- Applies to domain-joined Windows machines, on or off corporate network
+- Affects: domain-joined Windows machines with Twingate Client running
+- Slowness occurs only on lookups with **no DNS record**; successful lookups return at normal speed
+- Failed queries are dropped below packet-capture layer — empty packet captures are consistent with this cause, not evidence against it
+- Symptoms may extend to domain logon and Group Policy processing, not just ADUC
 
 ## Prerequisites
-- Twingate Client running on Windows
-- Access to PowerShell (elevated for Option 3)
-- Your Active Directory domain name
+- Twingate Client installed on Windows
+- Domain-joined machine
+- PowerShell (elevated for Option 3)
 
 ## Confirming the Cause
-Run in PowerShell while Client is running (replace domain name):
+Run while Twingate Client is active (replace domain name):
 ```powershell
 ipconfig /flushdns
 Measure-Command { Resolve-DnsName -Type SRV "_ldap._tcp.doesnotexist.example.local" -ErrorAction SilentlyContinue }
 ```
-- `TotalSeconds ≈ 12` → confirmed cause
-- `TotalSeconds << 1` → different root cause
+- **~12 seconds** → confirmed Twingate DNS timeout cause
+- **< 1 second** → different root cause
 
-## Resolution Options
+## Workarounds (Ordered by Speed to Implement)
 
-### Option 1: Connect to DC Directly (fastest, no config changes)
-```
+### Option 1: Launch ADUC with Explicit Domain Controller IP
+```cmd
 dsa.msc /server="<domain controller IP>"
 ```
-Use IP address, not hostname. May not fully resolve heavily nested or multi-domain environments.
+- Use IP address, not hostname, to avoid additional resolution
+- No machine configuration changes; may not fully resolve multi-domain environments
 
-### Option 2: Use an Administrative Jumpbox (recommended for regular AD admins)
-Run ADUC from a host on the same network as the domain. No per-machine config; aligns with Microsoft secure administrative host guidance.
+### Option 2: Use an Administrative Jumpbox (Recommended for Regular AD Admins)
+- Run ADUC from a host on the same network as the managed domain
+- Eliminates the behavior entirely; no per-machine config; aligns with Microsoft secure admin host guidance
 
-### Option 3: NRPT Rule (most effective, leaves persistent config)
-Run in elevated PowerShell — replace namespace with your AD domain:
+### Option 3: Add NRPT Rule Pointing AD Namespace to Twingate DNS Proxy
+Run in elevated PowerShell (replace namespace with your AD domain):
 ```powershell
 Add-DnsClientNrptRule `
   -Namespace ".ad.example.com" `
   -NameServers "100.95.0.251","100.95.0.252","100.95.0.253","100.95.0.254" `
   -DisplayName "Twingate AD DNS"
-
+```
+Verify and test:
+```powershell
 Get-DnsClientNrptPolicy -Effective
 ipconfig /flushdns
+Measure-Command { Resolve-DnsName -Type SRV "_ldap._tcp.doesnotexist.ad.example.com" -ErrorAction SilentlyContinue }
 ```
-
-**Remove rule when done:**
+Remove rule when done:
 ```powershell
 Get-DnsClientNrptRule | Where-Object { $_.DisplayName -eq "Twingate AD DNS" } | Remove-DnsClientNrptRule -Force
 ipconfig /flushdns
@@ -63,16 +66,16 @@ ipconfig /flushdns
 
 ## Configuration Values
 | Parameter | Value |
-|---|---|
+|-----------|-------|
 | Twingate DNS proxy IPs | `100.95.0.251`, `100.95.0.252`, `100.95.0.253`, `100.95.0.254` |
-| NRPT namespace format | `.ad.example.com` (leading dot required) |
+| Timeout per failed lookup | ~12 seconds |
 
 ## Gotchas
-- **NRPT rule has no fallback**: if Client is stopped/uninstalled, all names under the scoped namespace fail to resolve, even on corporate network
-- Never scope NRPT rule to `"."` — this breaks all DNS resolution when Client is not running
-- Remove NRPT rule before uninstalling the Client
-- Option 1 may still show some delay in multi-domain environments
+- **NRPT rules have no fallback**: if the Twingate Client is stopped or disconnected, names under the scoped namespace will **not resolve at all**, even on the corporate network
+- Never scope NRPT rule to `"."` — this applies the rule to every lookup on the machine
+- Must remove the NRPT rule if the Twingate Client is uninstalled
+- No Twingate Client setting exists to change this DNS timeout behavior
 
 ## Related Docs
-- [Using nslookup with Manually Defined Nameserver Fails on Windows with Twingate Client Running](https://help.twingate.com) (linked in source)
-- Microsoft documentation on secure administrative hosts
+- [Using nslookup with Manually Defined Nameserver Fails on Windows with Twingate Client Running](https://help.twingate.com) (referenced in article)
+- [Microsoft guidance on secure administrative hosts](https://docs.microsoft.com/en-us/windows-server/identity/securing-privileged-access/privileged-

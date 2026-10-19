@@ -1,36 +1,53 @@
 ---
 source: https://help.twingate.com/articles/1384415743-when-hard-disk-encryption-is-activated-in-device-posture-attached-usb-storage-devices-may-cause-the-check-to-fail
 type: help
-fetched: 2026-10-04
-source_version: cc139ee0644c459782b8633e7216ffce9131dbc65ff0fc99d5716054f1617c6b
+fetched: 2026-10-18
+source_version: 9d11efe1e3375105c711bde7861620fe45bb494de899fd2f5bec4e2262354833
 trust: official
 ---
 
-# When Hard Disk Encryption Device Posture Check Fails Due to USB Storage Devices
+# [Windows Client] Disk Encryption Posture Check Fails with Unencrypted External Drive
 
 ## Summary
-On Windows, enabling hard disk encryption as a device posture condition can cause false failures when USB storage devices are connected. Windows incorrectly identifies the USB device as a local disk and flags it as unencrypted, blocking Twingate access.
+When a Device Security policy requires disk encryption, the Windows Twingate Client checks BitLocker status on all drives Windows classifies as "local (non-removable)" disks. External SSDs and HDDs may be classified as local disks, causing the posture check to fail if they are unencrypted, even when the system drive is fully encrypted.
 
 ## Key Information
-- **Component:** Twingate Client, Device Security
-- **Platform:** Windows only
-- **Trigger:** USB flash drives or other USB storage devices connected while encryption posture check is active
-- **Error message:** "Device security not met" / "Device security error"
+- Only **BitLocker** encryption is recognized; third-party encryption tools do not satisfy the check
+- **External SSDs/HDDs** may be classified by Windows as local (non-removable) disks → evaluated by posture check
+- **USB flash drives** are typically classified as removable → not evaluated
+- **Locked BitLocker drives** (encrypted but not yet unlocked) reported unknown protection status in Client versions before 2026.239, causing false failures
+- Client **2026.239+** correctly passes locked-but-encrypted drives
 
-## Cause
-Windows detects attached USB storage devices as local disks. Since USB drives typically lack encryption, the posture check fails even if the actual system disk is properly encrypted.
+## Symptoms
+- Auth blocked: *"Device security not met. This device does not meet the minimum security requirements to access this Network."*
+- Troubleshoot panel shows: `Block reason: Device posture`
+- Client logs show: `"IsHardDriveEncryptionEnabled":false`
+- Failure appears on external drive connection; clears on disconnection
 
-## Resolution
-**Current workaround:** Disconnect the USB storage device. The posture check should pass once the USB device is removed.
+## Prerequisites
+- Windows Twingate Client
+- Device Security policy with disk encryption requirement enabled
 
-> **Note:** Twingate is evaluating filtering mechanisms to exclude USB drives from the encrypted disk check. No ETA provided.
+## Resolution Steps
+1. **Identify** whether an external SSD or HDD is connected when the failure occurs
+2. **Choose one**:
+   - Encrypt the external drive with BitLocker, **or**
+   - Disconnect the external drive while using Twingate
+3. If the drive is **encrypted but locked**: upgrade Client to **2026.239+**, or manually unlock the drive
+4. After resolving, **quit and relaunch** the Twingate Client, then retry connection
+5. If check still fails, contact Support with Client logs
+
+## Configuration Values
+| Item | Value |
+|------|-------|
+| Minimum Client version for locked-drive fix | `2026.239` |
+| Log field to check | `IsHardDriveEncryptionEnabled` |
+| Required encryption technology | BitLocker only |
 
 ## Gotchas
-- This is a false positive — the actual local disk may be fully encrypted
-- Any USB storage device can trigger this, not just flash drives
-- No configuration option currently exists to exclude removable media from the check
-- Users may be unexpectedly blocked from Twingate access after plugging in USB peripherals
+- Third-party full-disk encryption (e.g., VeraCrypt, hardware encryption) does **not** satisfy the check
+- The Windows drive classification (local vs. removable) is determined by Windows, not Twingate — the same physical device may behave differently across machines
+- Client versions **before 2026.239** will fail on any locked BitLocker drive, even if correctly encrypted
 
-## Related Topics
-- Device Posture checks (encryption condition)
-- Twingate Client troubleshooting on Windows
+## Related Docs
+- [Device Security Posture Checks](https://help.twingate.com/articles/device-security-posture-checks)

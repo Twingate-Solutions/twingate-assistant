@@ -1,35 +1,30 @@
 ---
 source: https://help.twingate.com/articles/3646943674-checking-for-blocked-outbound-ports
 type: help
-fetched: 2026-10-11
-source_version: e9aa0fcb11199b8b6ed5cc533ffa699c789f6f1b2b54cb0f5b42629f1d446a6d
+fetched: 2026-10-18
+source_version: 537fa8a8f3c18f9c25bce6744c7c459ae7900b629304bc975936638fcce12cf9
 trust: official
 ---
 
 # Checking for Blocked Outbound Ports
 
 ## Summary
-Diagnostic guide for testing whether a network blocks outbound ports required by the Twingate Client. Uses `portquiz.net` (a server accepting all TCP ports) as a proxy test target since Twingate Relay addresses are dynamic. Applicable when the Client works on one network but not another, or when Resources fail to connect.
+Diagnose network-level port blocking that prevents Twingate Client from connecting to Resources. Uses `nc`, PowerShell, or `nmap` against `portquiz.net` (a public server accepting all TCP ports) as a proxy for Twingate Relay reachability, since Relay IPs are dynamic.
 
 ## Key Information
-- Twingate Relay addresses are assigned dynamically — no fixed IP to test against directly
-- `portquiz.net` accepts connections on every TCP port, making it suitable as a stand-in
-- Typical blocked scenario: port 443 passes, but 30000–31000 are filtered (network only permits web traffic)
-
-## Prerequisites
-- `nc` (netcat) — native on Linux/macOS
-- `nmap` — native on Linux; install via `brew` on macOS; binary available on Windows
-- PowerShell — available on Windows natively
+- Twingate Relays only accept Twingate traffic and have no fixed IPs to test directly
+- `portquiz.net` accepts connections on every TCP port — a failure means the network is blocking that port
+- Typical failure pattern: port 443 open, relay range (30000–31000) filtered/timed out
 
 ## Required Outbound Ports
 
-| Port(s) | Protocol | Purpose |
+| Port/Range | Protocol | Purpose |
 |---|---|---|
-| 443 | TCP | Controller and Relay communication |
-| 30000–31000 | TCP | Relay fallback (when P2P unavailable) |
-| 1–65535 | UDP/QUIC (HTTP/3) | Peer-to-peer connectivity |
+| 443 | TCP | Controller + Relay basic communication |
+| 30000–31000 | TCP | Relay fallback (when peer-to-peer unavailable) |
+| 1–65535 | UDP/QUIC (HTTP/3) | Peer-to-peer optimal performance |
 
-## Step-by-Step Tests
+## Diagnostic Commands
 
 **Test port 443:**
 ```bash
@@ -40,7 +35,7 @@ nc -vz -w 5 portquiz.net 443
 Test-NetConnection portquiz.net -Port 443
 ```
 
-**Test Relay port range (sample points):**
+**Test relay port range (sample beginning, middle, end):**
 ```bash
 # macOS/Linux
 for p in 30000 30500 31000; do nc -vz -w 5 portquiz.net $p; done
@@ -49,30 +44,34 @@ for p in 30000 30500 31000; do nc -vz -w 5 portquiz.net $p; done
 30000,30500,31000 | % { Test-NetConnection portquiz.net -Port $_ } | ft RemotePort,TcpTestSucceeded
 ```
 
-**Optional nmap scan:**
+**Optional nmap:**
 ```bash
 nmap -Pn -p 443,30000,30500,31000 portquiz.net
 ```
+> Do not scan the full 30000–31000 range — may trigger security alerts.
 
-## Reading Results
+## Result Interpretation
 
-| Result | Meaning |
-|---|---|
-| `nc: succeeded` / `TcpTestSucceeded: True` / `nmap: open` | Port allowed |
-| `nc: Operation timed out` / `False` after long wait / `nmap: filtered` | Silently dropped — likely outbound firewall rule |
-| `nc: Connection refused` / `nmap: closed` | Firewall on path rejected connection — treat as blocked |
-| `nmap: Host seems down` | Discovery check blocked — re-run with `-Pn` |
+| Tool | Result | Meaning |
+|---|---|---|
+| `nc` | `succeeded` | Port allowed |
+| PowerShell | `TcpTestSucceeded: True` | Port allowed |
+| `nmap` | `open` | Port allowed |
+| `nc` | `Operation timed out` | Silently dropped — firewall rule likely |
+| PowerShell | `False` (after long wait) | Silently dropped |
+| `nmap` | `filtered` | Silently dropped |
+| `nc`/`nmap` | `Connection refused` / `closed` | Active rejection by firewall — treat as blocked |
+| `nmap` | `Host seems down` | Discovery probe blocked; re-run with `-Pn` |
 
 ## Gotchas
-- **Captive portals** (hotel/in-flight WiFi): if port 443 fails, complete the captive portal login first — not a Twingate issue
-- **nmap `SERVICE` column**: ignore it (e.g., `pago-services1`) — it's nmap's label for the port number, unrelated to Twingate
-- **Do not scan the full 30000–31000 range** with nmap — may trigger security alerts; sampling beginning/middle/end is sufficient
+- If port 443 fails, suspect a **captive portal** (hotel/in-flight WiFi) — not a Twingate issue
+- Ignore `nmap`'s `SERVICE` column (e.g., `pago-services1`) — it's nmap's label for the port number, unrelated to Twingate
+- `nmap` is native on Linux; install via `brew` on macOS or binary on Windows
 
-## Resolution if Ports Are Blocked
-1. Ask network admin to allow outbound TCP 30000–31000 (reference: [Client Endpoint Requirements](https://help.twingate.com/articles/client-endpoint-requirements))
-2. Test on a mobile hotspot to confirm Twingate functions without the restrictive network
+## Resolution
+- If relay ports are blocked: ask network admin to allow outbound TCP 30000–31000
+- Test on a mobile hotspot to confirm Twingate functions when ports are unblocked
 
 ## Related Docs
-- Client Endpoint Requirements
+- [Client Endpoint Requirements](https://help.twingate.com/articles/client-endpoint-requirements)
 - Twingate Troubleshooting Guide
-- UDP/QUIC HTTP/3 connectivity guide

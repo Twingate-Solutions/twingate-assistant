@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/terraform-provider-twingate
 type: github
-fetched: 2026-10-11
-source_version: 6c532028b7b93e01a36ae9204f8198877715dc6e
+fetched: 2026-10-18
+source_version: 7b9787e952962869d068e3ef5ffbf3038e3f8b65
 trust: official
 ---
 
@@ -102,6 +102,6 @@ All list datasources now support an `_in` filter (Set of String) that returns on
 | `twingate_groups` | `name_in` |
 | `twingate_users` | `email_in` |
 
-## `twingate_ssh_resource` – Downstream and Upstream Ports
+## User Roles
 
-The `twingate_ssh_resource` resource now
+The `role` attribute on the `twingate_user` resource and the `twingate_user` / `
