@@ -6,8 +6,6 @@ source_version: 506924d75f762eee5cd90bb39ed445b8dfe93a2f
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Partner API
 
 A GraphQL API for distributors, MSSPs, and vendors to manage Twingate customer portfolios programmatically. Supports listing networks, reading license counts, and provisioning MSP Portals.

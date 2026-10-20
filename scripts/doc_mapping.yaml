@@ -87,6 +87,8 @@ repos:
     skill: twingate-architect
   - full_name: Twingate-Solutions/twingate-assistant
     skill: twingate-architect
+  - full_name: Twingate-Solutions/twingate-partner-api
+    skill: twingate-architect
   # --- twingate-connectors ---
   - full_name: Twingate-Community/dashboards
     skill: twingate-connectors

@@ -9,7 +9,9 @@ description: >
   strategy, or deployment sequencing. Also activate for community/reference deployment
   patterns: exposing a self-hosted AI chat assistant (OpenClaw, WhatsApp/Telegram bots)
   with no public inbound ports, private Railway/PaaS app deployment with zero-ingress,
-  or "what does the twingate-assistant plugin itself do" meta-questions.
+  or "what does the twingate-assistant plugin itself do" meta-questions. Also activate
+  for the Partner API (X-PARTNER-ID, mspNetworkCreate, MSP Portal provisioning for
+  distributors/MSSPs).
 ---
 
 ## Role
@@ -137,6 +139,7 @@ of file live there:
 | **Self-hosted AI chat assistant with zero public ingress** (OpenClaw / WhatsApp / Telegram bot, localhost-bound gateway, Docker Compose or DigitalOcean Terraform) | `gh-twingate-community-openclaw-secure-access.md` |
 | **Private PaaS web app, no public domain** (Railway + Connector, Layer 4 only, proof-of-concept) | `gh-twingate-solutions-railway-private-web-app.md` |
 | **What the twingate-assistant plugin itself covers** (skill/agent inventory, install/update, forking) | `gh-twingate-solutions-twingate-assistant.md` |
+| **Partner API for distributors / MSSPs / marketplace vendors** (separate GraphQL endpoint from the admin API; `X-PARTNER-ID` + `X-API-KEY`, `mspNetworkCreate` MSP Portal provisioning, license counts, portfolio/billing/PSA sync, mock server; niche — credentials issued only by Twingate's partner team). For the per-tenant admin API, use `twingate-api` | `gh-twingate-solutions-twingate-partner-api.md` |
 
 This table is a fast path, not the whole corpus (~150 architecture-related
 summaries) — when a question doesn't match a row, grep `references/` before answering.
