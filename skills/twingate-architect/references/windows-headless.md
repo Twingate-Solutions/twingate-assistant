@@ -1,69 +1,81 @@
 ---
 source: https://www.twingate.com/docs/windows-headless
 type: docs
-fetched: 2026-08-14
-source_version: 5d50460df5f54961f9c759577621a0ff92c1031961634682333937e2126f79be
+fetched: 2026-10-25
+source_version: c72285d33c9f8a04fb46a84350b7d65ae9cdb72015af5e2a2009c0e90e7325bf
+trust: official
 ---
 
 # Windows Headless Mode
 
 ## Summary
-Twingate's Windows client can run in headless mode using a Service Key, enabling automated/unattended operation without user interaction. The client is controlled via Windows Services (start/stop) rather than a GUI.
+Twingate's Windows client can run in headless mode using a Service Key, enabling automated/unattended deployment. The client is managed via Windows Services (start/stop) rather than a GUI. A valid Service Key from the Twingate Admin console is required for installation, updates, and reinstallation.
 
 ## Key Information
-- Requires a Service account and Service Key from Twingate Admin console
-- Client logs stored at: `C:\ProgramData\Twingate\logs`
-- Config file location: `C:\Program Files\Twingate\headless.conf`
-- Service Key is securely stored by client after install; original file can be removed
-- Client does **not** start automatically by default (configurable in Windows Services)
+- Headless mode uses a **Service Account + Service Key** (not user credentials)
+- Client is managed via Windows Services → **Twingate Service**
+- Service does **not** start automatically by default (must configure in Windows Services)
+- Service Key is securely stored after install; original file can be moved/deleted
+- Logs output to `C:\ProgramData\Twingate\logs`
+- Config file: `C:\Program Files\Twingate\headless.conf`
 
 ## Prerequisites
-- Service account created in Twingate Admin console
-- Valid Service Key (`.json` file) downloaded from Admin console
-- Windows Client EXE installer (from [public changelog](https://www.twingate.com/docs/changelog))
-- Administrator permissions for key rotation/deletion commands
+- Service account and Service Key created in Twingate Admin console (see Services docs)
+- Windows Client EXE installer (download from [public changelog](https://www.twingate.com/changelog))
+- Administrator permissions for `sc` commands
 
-## Step-by-Step: Installation
+## Installation (Step-by-Step)
+
+1. Download `TwingateWindowsInstaller.exe` from the Twingate public changelog page.
+2. Run installer from an elevated command prompt:
 
 ```cmd
-# Silent install with service key
-TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json /qn
+# Basic headless install
+TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json /quiet
 
-# Silent install with debug logging
-TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json log_level=debug /qn
+# With debug logging
+TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json log_level=debug /quiet
 ```
+
+3. Configure auto-start behavior via Windows Services if needed.
+4. Start/stop via Windows Services UI or `sc start/stop twingate.service`.
 
 ## Configuration Values
 
 | Parameter | Required | Default | Notes |
 |-----------|----------|---------|-------|
-| `service_secret` | Yes | — | Path to Service Key `.json` file |
-| `log_level` | No | `info` | Available levels in `headless.conf` |
-| `/qn` | No | — | Silent install flag |
+| `service_secret` | Yes | — | Path to Service Key JSON file |
+| `log_level` | No | `info` | Set at install or in `headless.conf` |
+| `/quiet` | No | — | Silent/unattended install |
 
-## Key Rotation Commands
+Config file path: `C:\Program Files\Twingate\headless.conf`
 
+## Key Rotation & Upgrades
+
+**Update Service Key (option 1 — sc command):**
 ```cmd
-# Method 1: sc command (stop/restart with new key)
 sc stop twingate.service
 sc start twingate.service --config --service_secret C:\path\to\service\secret.json
+```
 
-# Method 2: Re-run installer
-TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json
-
-# Delete stored Service Key
-sc start twingate.service --config --reset
-
-# Upgrade client
+**Update Service Key (option 2 — reinstall):**
+```cmd
 TwingateWindowsInstaller.exe service_secret=C:\path\to\service_key.json
 ```
 
+**Delete stored Service Key:**
+```cmd
+sc start twingate.service --config --reset
+```
+
+**Upgrade client:** Re-run installer with `service_secret` switch.
+
 ## Gotchas
-- **Service restart required** after any Service Key changes to take effect
-- If previously installed **without** a Service Key, must do a fresh install with `service_secret`; cannot use `sc` command to add key for first time
-- Deleting the Service Key immediately disconnects the client; requires new key to reconnect
-- Original Service Key file not needed after install, but **is required** for updates/reinstalls
+- **Must restart the service** after any key rotation for changes to take effect.
+- If originally installed **without** a Service Key, you cannot use `sc` to add one — must do a fresh installation with `service_secret`.
+- Deleting the Service Key disconnects the client immediately; a new key is required to reconnect.
+- A valid Service Key is required when upgrading or reinstalling — keep a copy accessible.
 
 ## Related Docs
-- [Services documentation](https://www.twingate.com/docs/services) — Creating Service accounts and Keys
-- [Public changelog](https://www.twingate.com/docs/changelog) — Download latest Windows Client EXE
+- [Services / Service Keys documentation](https://www.twingate.com/docs/services)
+- [Twingate public changelog](https://www.twingate.com/changelog) (installer downloads)

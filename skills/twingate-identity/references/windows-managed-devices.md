@@ -1,58 +1,69 @@
 ---
 source: https://www.twingate.com/docs/windows-managed-devices
 type: docs
-fetched: 2026-08-14
-source_version: b31ffe6a2ba7ca8e025320c9d2e5700e5163307b85141071488a9ab80c5bcbeb
+fetched: 2026-10-25
+source_version: 1850e80182ad757d75b6903541366e42f1fc2bfd0b7846bef6742550f5a7372f
+trust: official
 ---
 
 # Windows Managed Devices
 
 ## Summary
-Twingate Windows Client supports EXE and MSI deployment formats for MDM distribution. EXE includes .NET Runtime automatically (recommended); MSI requires manual .NET 8 Desktop Runtime installation. Both support identical command-line parameters for automated deployment.
+Twingate Windows Client is available as EXE (recommended) or MSI packages for managed device deployment. EXE includes the .NET runtime automatically; MSI requires manual .NET runtime installation. Both support command-line parameters for silent/automated deployments via MDM solutions.
 
 ## Key Information
-- EXE package: includes .NET Runtime, recommended for MDM
-- MSI package: requires separate .NET Desktop Runtime 8.0 (x64) installation
+- **EXE**: Recommended — bundles required .NET Desktop Runtime, installs automatically
+- **MSI**: Requires separate .NET runtime deployment before client installation
+- Both formats support identical command-line parameters
 - Clients older than 12 months are unsupported and cannot connect
-- Chocolatey package available but not on automated release pipeline (may lag)
+
+## .NET Runtime Requirements
+| Client Version | Required Runtime |
+|---|---|
+| November 2024 – October 22, 2026 | .NET 8.0 Desktop Runtime (x64) |
+| October 22, 2026 onward | .NET 10 Desktop Runtime (x64) |
+
+## Command-Line Parameters
+
+| Parameter | Description |
+|---|---|
+| `/quiet` | Silent install; auto-accepts ToS |
+| `network=<name>` | Pre-configures Twingate network (e.g., `beamreach.twingate.com`) |
+| `auto_update=true` | Reconnects existing session after update |
+| `no_optional_updates=true` | Disables user-triggered update prompts |
+| `ncsi_global_dns=true` | Fixes false "No internet" NCSI warnings |
+| `TUN_DRIVER=Wintun` | Use Wintun driver (default: TunTap) |
+
+## Example Command
+```
+TwingateWindowsInstaller.exe /quiet network=beamreach.twingate.com no_optional_updates=true auto_update=true
+```
+Run on existing installation: performs in-place upgrade and restores session via `auto_update=true`.
 
 ## Prerequisites
-- MSI only: [.NET 8.0 Desktop Runtime x64](https://dotnet.microsoft.com/download) must be pre-installed
-- MDM solution (Intune, Endpoint Manager, or third-party)
-- Twingate Network name (e.g., `company.twingate.com`)
+- Windows device enrolled in MDM (Intune, Endpoint Manager, or third-party)
+- MSI only: install appropriate .NET Desktop Runtime (x64) **before** deploying client
 
-## Configuration Values (Command Line Parameters)
-
-| Parameter | Values | Description |
-|-----------|--------|-------------|
-| `/qn` | flag | Silent install, auto-accepts ToS |
-| `network=` | `<name>.twingate.com` | Pre-configure network name |
-| `auto_update=` | `true`/`false` | Reconnect after update without re-login |
-| `no_optional_updates=` | `true`/`false` | Disable user-triggered updates |
-| `ncsi_global_dns=` | `true`/`false` | Fix false "No internet" NCSI warnings |
-| `TUN_DRIVER=` | `TunTap` (default) / `Wintun` | Select tunnel driver |
-
-## Step-by-Step: Silent Deployment Example
-```powershell
-TwingateWindowsInstaller.exe /qn network=beamreach.twingate.com no_optional_updates=true auto_update=true
-```
-Running on existing installation performs in-place upgrade; `auto_update=true` restores existing session.
-
-## Chocolatey Install
-```powershell
-choco install twingate
-```
+## Deployment Paths
+1. **Microsoft Intune**: Follow [Intune & Endpoint Manager guide](https://www.twingate.com/docs) for dedicated instructions
+2. **Third-party MDM**: Deploy EXE/MSI with above CLI flags per your MDM's software deployment docs
+3. **Chocolatey** (Early Access — delayed releases): `choco install twingate`
 
 ## Gotchas
-- **`no_optional_updates` decision depends on local admin rights:**
-  - Users WITH local admin → leave enabled (default); users get update prompts they can act on
-  - Users WITHOUT local admin → set `no_optional_updates=true`; otherwise users see prompts they cannot fulfill
-- MSI installations require manual .NET 8 Desktop Runtime — easy to miss in MDM packaging
-- Chocolatey packages have delayed releases; not suitable for strict version management
-- Clients >12 months old stop working — critical if disabling user-triggered updates; requires MDM push process
+- **MSI + .NET 10**: Must pre-install .NET 10 runtime before rolling out October 2026+ client versions; EXE handles this automatically
+- **`no_optional_updates=true` required** when users lack local admin rights — otherwise users see update prompts they cannot act on
+- If disabling user-triggered updates, **establish an MDM push process**; clients >12 months old stop working
+- Chocolatey packages may lag behind official releases (not in automated release pipeline)
+
+## Downloads
+- EXE (latest): https://www.twingate.com/downloads/windows (latest)
+- MSI (latest): linked from Twingate downloads page
+- .NET 10 Desktop Runtime (x64): Microsoft download center
+- .NET 8.0 Desktop Runtime (x64): Microsoft download center
+- [Public changelog](https://www.twingate.com/docs/windows-changelog)
 
 ## Related Docs
-- [Microsoft Intune & Endpoint Manager guide](https://www.twingate.com/docs/microsoft-intune)
-- [Microsoft Intune custom PowerShell script guide](https://www.twingate.com/docs/microsoft-intune-custom-script)
-- [User Terms of Service](https://www.twingate.com/docs/terms)
-- [Public changelog](https://www.twingate.com/docs/changelog)
+- Microsoft Intune & Endpoint Manager guide
+- Intune custom PowerShell script guide
+- Windows Client Migration to .NET 10
+- User Terms of Service

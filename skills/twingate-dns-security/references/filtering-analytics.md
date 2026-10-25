@@ -1,53 +1,58 @@
 ---
 source: https://www.twingate.com/docs/filtering-analytics
 type: docs
-fetched: 2026-09-20
-source_version: 770d4a4b128849a2142a2149bd42f4caed361619d570967296114c043a0d7948
+fetched: 2026-10-25
+source_version: 8c7cdf1d3bc646965f976268486346c812fcfec0ea528637352fa38e0c1f9f8c
+trust: official
 ---
 
 # Filtering Analytics
 
+## Page Title
+Filtering Analytics (Twingate DNS Activity Monitoring)
+
 ## Summary
-Filtering Analytics displays DNS activity resolved by Twingate for devices, accessible under **Internet Security > Secure DNS** in the Admin Console. It provides query statistics, block reasons, top domains/devices, and a searchable event log. Configuration of what gets blocked is handled separately in DNS Filtering settings.
+Filtering Analytics displays DNS query activity resolved by Twingate across devices, accessible in the Admin Console under **Internet Security > Secure DNS**. It provides charts, ranked lists, and an event log for monitoring DNS filtering behavior. DNS filtering rules are configured separately via the DNS Filtering settings.
 
 ## Key Information
-- Time range options: 7, 30, or 90 days
-- Filter data by DNS filtering profile
-- Four main components: Queries chart, Top Block Reasons, Top Domains/Devices, Recent DNS Activity
-- Block reasons map to specific rules: security categories (e.g., Google Safe Browsing, Typosquatting), content categories, privacy protection rules
-- Top Domains toggles between **Resolved** and **Blocked** views
-- Top Devices view available via dropdown on the Top Domains component
-- Recent DNS Activity log filters: all activity (allowed + blocked) or blocked only; search by domain name
 
-## Prerequisites
-- DNS Filtering must be configured to generate data
-- Devices must have Twingate Client installed
-- For persistent DNS filtering when signed out: device must be [configured to run DNS filtering all of the time](https://www.twingate.com/docs/dns-filtering)
+- **Location**: Admin Console → Internet Security → Secure DNS → Filtering Analytics tab
+- **Time ranges**: 7, 30, or 90 days
+- **Filter scope**: All controls apply globally to the selected DNS filtering profile and time range
+- Data includes both allowed and blocked DNS events
 
-## Configuration Values
-None (analytics is read-only; no env vars or API params)
+## Components
+
+| Component | Description |
+|---|---|
+| **Queries chart** | Total queries, blocked queries, block percentage, time-series plot |
+| **Top Block Reasons** | Ranked list of block triggers (denylist entries, security/content categories, privacy rules) |
+| **Top Domains** | Ranked by attempt count; toggle Resolved/Blocked; switch to Top Devices via dropdown |
+| **Recent DNS Activity** | Event log; filterable by all/blocked; searchable by domain name |
+
+## Event Detail Fields
+When selecting a log event:
+- Device hostname and IP address
+- Filtering profile applied
+- Block reason (if blocked)
 
 ## Signed-Out Device Behavior
-| Scenario | Display Name |
-|----------|-------------|
-| Never signed into Twingate | Device hostname |
-| Single user ever on device | Twingate device name |
-| Multiple users on device | Most recently signed-in Twingate device name |
+Devices can log DNS activity even when users are signed out (requires "always-on DNS filtering" configuration). Identity shown in logs:
+- **Never signed in**: device hostname
+- **One prior user**: Twingate device name
+- **Multiple prior users**: most recently signed-in Twingate device name
+
+## Prerequisites
+- DNS Filtering must be configured (see DNS Filtering docs)
+- Devices must be configured for always-on DNS filtering to capture signed-out activity
+- Admin Console access
 
 ## Gotchas
-- **Older Client versions** (macOS before `2024.311`, Windows before `2024.351`) show generic info for signed-out devices — may display `"No hostname"` or `"No device"` instead of hostname
-- Search in Recent DNS Activity applies **within** the selected filter (all vs. blocked), not across both simultaneously
-- Analytics only reflects DNS queries Twingate resolves; queries handled by other resolvers won't appear
-- "Top Block Reasons" shows individual denylist entries or rule names, not aggregate categories
-
-## Step-by-Step: Finding Blocked Domain Details
-1. Navigate to **Internet Security > Secure DNS > Filtering Analytics**
-2. Select DNS filtering profile and time range
-3. In **Recent DNS Activity**, set filter to **Blocked**
-4. Search for domain name in search box
-5. Select an event to view: device hostname, IP address, filtering profile used, block reason
+- Signed-out multi-user devices attribute logs to the **most recent** user's device name, not the current user — can cause attribution confusion on shared/recycled hardware
+- Search in Recent DNS Activity applies **within** the currently selected filter (all vs. blocked only), not across both
+- "Show More Results" required to see domains beyond the initial top list
 
 ## Related Docs
-- [DNS Filtering](https://www.twingate.com/docs/dns-filtering) — configure block rules
-- [Security Categories](https://www.twingate.com/docs/dns-filtering) — Google Safe Browsing, Typosquatting, etc.
-- Configuring DNS filtering for always-on (signed-out devices)
+- DNS Filtering (configuration for what gets blocked)
+- DNS Filtering profiles
+- Always-on DNS filtering device configuration

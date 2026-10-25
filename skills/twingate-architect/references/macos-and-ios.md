@@ -1,58 +1,67 @@
 ---
 source: https://www.twingate.com/docs/macos-and-ios
 type: docs
-fetched: 2026-08-14
-source_version: f21b9524372ee6ba750147da325dc6890c50f93c295fd427064da7d6836e95eb
+fetched: 2026-10-25
+source_version: 4d82aceebf989d2b9d0f51094ac297b1fa256b3b4ed51d139387b870be4d933e
+trust: official
 ---
 
-# macOS & iOS Client Distribution via MDM
+# macOS & iOS Twingate Client — MDM Distribution & Configuration
+
+## Page Title
+macOS & iOS — Distribution & Configuration via MDM
 
 ## Summary
-Twingate clients for macOS and iOS can be distributed and configured via MDM solutions (Iru, Jamf, Omnissa Workspace ONE) using custom `.mobileconfig` configuration profiles. The Standalone Client is preferred over App Store version for full feature availability. Clients older than 12 months are unsupported and cannot connect.
+Covers deploying the Twingate macOS (standalone PKG) and iOS clients to managed devices via MDM solutions. Includes custom configuration profile (`.mobileconfig`) structure for silent installs and pre-configuration, plus Apple Business Manager guidance for iOS distribution.
 
 ## Key Information
-- macOS: Available as Standalone App or Mac App Store; iOS: App Store only
-- Standalone Client recommended—enables system extension auto-install, auto-update controls
-- Configuration profiles are XML `.mobileconfig` files deployed via MDM
-- Tools for building profiles: iMazing Profile Editor, ProfileCreator, or MDM-native tools
-- Apple Business Manager (ABM) required to distribute App Store version without personal Apple IDs
+- **macOS**: Standalone PKG only — Mac App Store version is **no longer supported**
+- **iOS**: Available free on the App Store; distribute via Apple Business Manager (ABM)
+- Clients older than **12 months** are unsupported and cannot connect
+- If disabling auto-updates on managed devices, establish a manual update cadence
+- MDM-specific guides exist for: **Iru (Kandji)**, **Jamf**, **Omnissa Workspace ONE**
 
 ## Prerequisites
-- MDM solution (Iru, Jamf, or Omnissa Workspace ONE)
-- For ABM distribution: company Apple Business Manager account
-- For Standalone: direct download/deployment outside App Store
+- MDM solution capable of deploying PKG (macOS) or ABM-linked apps (iOS)
+- For iOS ABM distribution: company Apple Business Manager account; "purchase" free Twingate seats before deployment
 
-## Configuration Values (Profile Key/Value Pairs)
+## Configuration Values — Profile Manifest Keys (`com.twingate.macos`)
 
-| Key | Type | Description | Standalone Only |
-|-----|------|-------------|-----------------|
-| `network` | String | Pre-populates Twingate network name (e.g., `acme`) | No |
-| `PresentedDataPrivacy` | Boolean | `true` = bypass Privacy screen on first launch | No |
-| `PresentedEducation` | Boolean | `true` = bypass education screen on first launch | No |
-| `automaticallyInstallSystemExtension` | Boolean | `true` = auto-install system extension | Yes |
-| `LaunchApp` | Boolean | `true` = launch on login | No |
-| `SUEnableAutomaticChecks` | Boolean | `true` = auto-check for updates | Yes |
-| `SUAutomaticallyUpdate` | Boolean | `true` = auto-download updates, prompt to install | Yes |
+| Key | Type | Description |
+|-----|------|-------------|
+| `PresentedDataPrivacy` | Boolean | `true` = bypass Privacy screen on first launch |
+| `PresentedEducation` | Boolean | `true` = bypass Education screen on first launch |
+| `automaticallyInstallSystemExtension` | Boolean | `true` = auto-install system extension (standalone only) |
+| `network` | String | Pre-populates Twingate network name (e.g., `acme`) |
+| `LaunchApp` | Boolean | `true` = launch on login; set `false` if using keep-alive launch daemon |
+| `SUEnableAutomaticChecks` | Boolean | `true` = auto-check for updates (standalone only) |
+| `SUAutomaticallyUpdate` | Boolean | `true` = auto-download updates and prompt to install (standalone only) |
 
 **Key identifiers:**
-- App Bundle ID: `com.twingate.macos`
-- Tunnel Provider: `com.twingate.macos.tunnelprovider`
+- App bundle ID: `com.twingate.macos`
+- Tunnel provider bundle ID: `com.twingate.macos.tunnelprovider`
 - Team ID: `6GX8KVTR9H`
+- VPN subtype: `com.twingate.macos`
 
-## Apple Business Manager Distribution Steps
-1. Sign in to Apple Business Manager with company Apple ID
-2. Search "Twingate" and provision required seats (free)
-3. Allocated seats appear in MDM for device deployment—no personal Apple ID required from users
+## Step-by-Step: Silent Install via Configuration Profile
+1. Create a `.mobileconfig` XML file with payloads for: VPN config, app settings, notifications, background items, and system extension policy (see full example in source docs)
+2. Set `automaticallyInstallSystemExtension: true`, `PresentedDataPrivacy: true`, `PresentedEducation: true`
+3. Set `network` to your Twingate network subdomain
+4. Upload and deploy via MDM alongside the standalone PKG
+
+## Step-by-Step: iOS via Apple Business Manager
+1. Sign in to [Apple Business Manager](https://business.apple.com)
+2. Search "Twingate" and provision desired number of seats (free)
+3. Seats appear in your MDM — push app to managed devices without requiring personal Apple IDs
 
 ## Gotchas
-- **`LaunchApp` conflict**: Set to `false` if using a keep-alive launch daemon to avoid conflicts
-- **`SUEnableAutomaticChecks`/`SUAutomaticallyUpdate`**: Standalone only—not available for App Store version
-- **`automaticallyInstallSystemExtension`**: Standalone only
-- **Client expiry**: Clients >12 months old stop working; if disabling auto-updates, establish a manual update process
-- UUIDs in example profile must be replaced with unique values per deployment (use `uuidgen`)
+- Do **not** use the Mac App Store version — it is unsupported; use the standalone PKG
+- If using a keep-alive launch daemon, set `LaunchApp: false` to avoid conflicts
+- `SUEnableAutomaticChecks` and `SUAutomaticallyUpdate` apply to standalone client only
+- Profile tools: [iMazing Profile Editor](https://imazing.com/profile-editor), [ProfileCreator](https://github.com/ProfileCreator/ProfileCreator)
 
 ## Related Docs
-- [Iru (Kandji) MDM Guide]
-- [Jamf MDM Guide]
-- [Omnissa Workspace ONE Guide]
-- [Apple Configuration Profile Tutorial](https://developer.apple.com)
+- Iru (Kandji) MDM guide
+- Jamf MDM guide
+- Omnissa Workspace ONE guide
+- Twingate download page (standalone PKG)

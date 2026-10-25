@@ -1,27 +1,27 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-assistant
 type: github
-fetched: 2026-10-18
-source_version: 3a80b52ac223e46322e5db115c5f6c1a27356ad0
+fetched: 2026-10-25
+source_version: 2ea7f646bbca84be6a308e1d6bb6050f3405dad2
 trust: official
 ---
 
 # Twingate Assistant (Claude Code Plugin)
 
-A Claude Code plugin that provides Twingate ZTNA expertise via automatically-loaded skills and explicitly-invoked agents. It covers architecture design, connector deployment, IaC generation (Terraform/Pulumi), and troubleshooting across AWS, Azure, GCP, and Kubernetes.
+A Claude Code plugin that provides Twingate ZTNA expertise via skills and agents. It covers architecture design, connector deployment, IaC generation (Terraform/Pulumi), and troubleshooting across AWS, Azure, GCP, and Kubernetes.
 
 ## Key Information
 
-- Distributed as a Claude Code plugin (`Twingate-Solutions/twingate-assistant`)
-- Two components: **Skills** (auto-activate on topic detection) and **Agents** (explicit invocation for end-to-end workflows)
-- IaC support: Terraform and Pulumi (TypeScript, Python, Go, C#)
-- Reference docs in each skill's `references/` directory; refreshed weekly via GitHub Actions from official Twingate documentation and GitHub orgs
+- Delivered as **Skills** (auto-load on topic detection) and **Agents** (explicit invocation for end-to-end workflows)
+- Skills cover: architecture, connectors, Terraform, Pulumi, Kubernetes, Identity Firewall, IdP/SCIM, GraphQL API, DNS security, troubleshooting
+- Agents cover: general SE workflows, AWS/Azure/GCP connector deployment, network design, IDFW implementation
+- Reference docs in each skill's `references/` directory are refreshed weekly via GitHub Actions from Twingate docs, help center, and public Twingate GitHub orgs
 - License: Apache 2.0
 
 ## Prerequisites
 
-- Claude Code with plugin/marketplace support
-- No Twingate API credentials required at install time (needed at deploy/generate time depending on workflow)
+- Claude Code with plugin marketplace support
+- No Twingate account credentials required at install time (credentials/tokens needed at deployment time depending on IaC used)
 
 ## Installation
 
@@ -32,11 +32,11 @@ Install via Claude Code plugin commands:
 /plugin install twingate-assistant@twingate-solutions
 ```
 
-To update, re-run the same `/plugin install` command.
+To update: re-run the same `/plugin install` command.
 
 ## Usage
 
-### Invoke an agent (explicit)
+**Invoke an agent explicitly:**
 
 ```
 Use the twingate-se agent to help me deploy Twingate to my AWS environment.
@@ -45,57 +45,39 @@ Use the azure-deployer agent to deploy connectors as Azure Container Instances w
 Use the network-designer agent to plan our resource structure for three environments.
 ```
 
-### Document an existing deployment (one-time setup)
-
-```
-Use the twingate-se agent to document my current Twingate deployment as twingate-context.md.
-```
-
-Commit the resulting file; future sessions pick it up automatically. Template: `docs/twingate-context-template.md`.
-
-### Invoke a skill (explicit)
+**Invoke a skill explicitly:**
 
 ```
 Use the twingate-troubleshoot skill. My users can't reach a resource that was working yesterday.
 ```
 
-Skills also activate automatically when relevant topics are mentioned.
+**Document an existing deployment (run once, commit the output):**
 
-## Available Skills
+```
+Use the twingate-se agent to document my current Twingate deployment as twingate-context.md.
+```
 
-| Skill | Coverage |
+A context template is available at `docs/twingate-context-template.md`. Committing the generated file allows future sessions to skip re-assessment.
+
+## Agents
+
+| Agent | Purpose |
 |---|---|
-| `twingate-architect` | ZTNA architecture, Remote Networks, design patterns |
-| `twingate-connectors` | Connector deployment, HA, upgrades, metrics |
-| `twingate-terraform` | Terraform provider, resource definitions |
-| `twingate-pulumi` | Pulumi provider (TypeScript, Python, Go, C#) |
-| `twingate-kubernetes` | Helm, operator, CRDs, traffic routing |
-| `twingate-idfw` | SSH PAM, Kubernetes gateway, session recording |
-| `twingate-identity` | IdP, SCIM, device trust, JIT |
-| `twingate-api` | GraphQL API, CLI, automation |
-| `twingate-dns-security` | DNS filtering, exit networks, DoH |
-| `twingate-troubleshoot` | Connector, access, and policy diagnostics |
-
-## Available Agents
-
-| Agent | Use case |
-|---|---|
-| `twingate-se` | Full deployment assessment and design |
-| `aws-deployer` | ECS, EC2, IAM, Secrets Manager |
-| `azure-deployer` | ACI, VMs, Key Vault, Entra ID |
-| `gcp-deployer` | Cloud Run, GCE, Secret Manager |
-| `network-designer` | Pre-IaC network and resource planning |
-| `idfw-deployer` | Certificate-based SSH PAM / kubectl proxy |
+| `twingate-se` | Environment assessment, network design, end-to-end deployment |
+| `aws-deployer` | ECS, EC2, IAM, Secrets Manager connector deployment |
+| `azure-deployer` | ACI, VMs, Key Vault, Entra ID connector deployment |
+| `gcp-deployer` | Cloud Run, GCE, Secret Manager, Google Workspace |
+| `network-designer` | Resource strategy and security tier planning before IaC |
+| `idfw-deployer` | Certificate-based SSH PAM or kubectl proxy access |
 
 ## Gotchas
 
-- Skills activate automatically by topic detection; explicit invocation is available but not always required
-- The `twingate-context.md` file is optional but prevents repeated environment re-assessment across sessions
-- Reference docs refresh weekly automatically; pull plugin updates manually with `/plugin install` to get skill/agent changes
+- Skills activate automatically on topic detection; explicit invocation (`/skill <name>`) is also supported but not required
+- The weekly doc-refresh pipeline runs in the upstream repo — forks do not inherit this automatically; see `docs/MAINTAINING.md` to run it yourself
+- Re-run `/plugin install` periodically to pull updated skill reference content into your Claude Code environment
 
 ## Related Docs
 
-- Context template: `docs/twingate-context-template.md`
-- Maintenance/forking guide: `docs/MAINTAINING.md`
-- Contribution guide: `CONTRIBUTING.md`
-- Twingate official docs: [twin
+- Customization and pipeline maintenance: [`docs/MAINTAINING.md`](docs/MAINTAINING.md)
+- Contribution guide: [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- Deployment context template: [`docs/twingate-context-template.md`](docs/twingate-context-template.md)

@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator
 type: github
-fetched: 2026-10-18
-source_version: fe5bde8727e6832aa79c38ff7addd685cbe927ec
+fetched: 2026-10-25
+source_version: 7a360ac9ae44ccb2bca369a46473bfeb8b9a3ec8
 trust: official
 ---
 
@@ -17,7 +17,7 @@ A custom Kubernetes controller that manages Twingate resources (Resources, Group
 - Container image published to Docker Hub: `twingate/kubernetes-operator`
 - Helm chart published to `oci://ghcr.io/twingate/helmcharts/twingate-operator`
 - CRDs are **not** automatically updated on `helm upgrade` (Helm v3 limitation — manual update required)
-- Latest release: **v3.0.0** (breaking changes — see [v2 → v3 migration guide](https://github.com/Twingate/kubernetes-operator/wiki/Migration-v2-to-v3))
+- Latest release: **v3.0.2** (patch releases after v3.0.0 — see [v2 → v3 migration guide](https://github.com/Twingate/kubernetes-operator/wiki/Migration-v2-to-v3))
 
 ## Prerequisites
 - Kubernetes 1.16+
@@ -69,4 +69,4 @@ Key settings live under `twingateOperator` in `values.yaml`:
 - [Getting Started](https://github.com/Twingate/kubernetes-operator/wiki/Getting-Started)
 - [API Reference](https://github.com/Twingate/kubernetes-operator/wiki/API-Reference)
 - [Twingate Connector Helm Charts](https://github.com/Twingate/helm-charts)
-- [CHANGELOG](https://github.com/T
+- [CHANGELOG](

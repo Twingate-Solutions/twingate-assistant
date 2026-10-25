@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/gateway
 type: github
-fetched: 2026-10-18
-source_version: fd88018e367f39f45e50f357a6db0f9d37df1919
+fetched: 2026-10-25
+source_version: 30dd65c78bcdce86513cf8fa5c4a822b6ccf7de8
 trust: official
 ---
 
