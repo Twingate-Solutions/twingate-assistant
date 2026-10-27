@@ -1,53 +1,58 @@
 ---
 source: https://www.twingate.com/docs/clients
 type: docs
-fetched: 2026-08-14
-source_version: 63a890a4c62dafc9c14debc36812343cb02758682ca99d81529143aa76fdf7a2
+fetched: 2026-10-25
+source_version: e762a0e34be3eead33546f0380dccd9f93cfd9733fd8722fc62ccec00a541c1d
+trust: official
 ---
 
 # Twingate Client Application
 
 ## Summary
-The Twingate Client enables users to access private network resources and is available across major platforms. Users authenticate via their organization's subdomain, and the client creates a local VPN connection to intercept resource traffic. Clients older than 12 months lose connectivity to the Twingate service.
+The Twingate Client enables users to access private network resources and threat protection across macOS, Windows, Linux, iOS, and Android/ChromeOS. Installation requires only an organization subdomain (e.g., `autoco` for `autoco.twingate.com`). The client creates a local VPN connection to `127.0.0.1` to intercept traffic to private resources.
 
 ## Key Information
-- **Supported platforms:** macOS, Windows, Linux, iOS, Android, ChromeOS
-- **Setup:** Users enter organization subdomain (e.g., `autoco` for `autoco.twingate.com`) — one-time configuration
-- **Local VPN:** Client binds to `127.0.0.1` to intercept private resource traffic; no special permissions required
-- **End-user install URL:** `get.twingate.com` (auto-detects platform)
+- No special OS permissions required, but a local VPN connection to `127.0.0.1` is established
+- Clients older than 12 months are unsupported and cannot connect to the service
+- Mac App Store version is deprecated; use PKG installer instead
+- Auto-updates available when local users have elevated permissions
 
-## Download Endpoints
+## Download URLs
 
 | Platform | URL |
 |----------|-----|
 | macOS (PKG) | `https://api.twingate.com/download/darwin?installer=pkg` |
 | Windows (EXE) | `https://api.twingate.com/download/windows` |
 | Windows (MSI) | `https://api.twingate.com/download/windows?installer=msi` |
-| Linux | Convenience script + public repos |
 | iOS | `https://api.twingate.com/download/ios` |
 | Android/ChromeOS | `https://api.twingate.com/download/android` |
+| End-user self-install | `https://get.twingate.com` (auto-detects platform) |
 
-## Minimum Supported Versions (12-month limit)
-Clients below these versions **cannot connect**:
-- macOS: `2024.57`
-- Windows: `2024.51`
-- Linux: `2024.63`
-- iOS: `2024.57`
-- Android: `2024.85`
+- Linux: Published to public repositories; see Linux client docs for repo sources. A convenience script is available — refer to the [Linux client documentation](https://www.twingate.com/docs/linux) rather than running an unverified pipe-to-shell command.
 
 ## Prerequisites
-- Organization subdomain on `twingate.com`
-- For managed deployments: software distribution tooling (see managed devices docs)
+- Organization subdomain (entered once on first launch)
+- For managed deployments: refer to managed devices documentation
+- Elevated local permissions required for automatic client updates
+
+## Configuration Values
+- **Organization name field**: subdomain only (e.g., `autoco`, not `autoco.twingate.com`)
+- **Local VPN binding**: `127.0.0.1`
+
+## Update Management
+- Historical versions (macOS PKG, Windows MSI): available via [public changelog](https://www.twingate.com/docs/client-changelog)
+- iOS/Android: distributed via App Store / Google Play Store (no manual URL needed)
+- Managed deployment guides exist for macOS/iOS and Windows
 
 ## Gotchas
-- Clients older than 12 months are hard-blocked from connecting — enforce update policies proactively
-- Historical versions (macOS PKG, Windows MSI) available via public changelog only — direct links always serve latest
-- Linux updates come from public repos, not Twingate-hosted binaries; use convenience script or configure source repos directly
+- macOS App Store version is **no longer supported** — must migrate to PKG installer
+- Clients >12 months old will be **blocked from connecting** entirely
+- Linux updates come from public repos, not Twingate-hosted binaries
 
 ## Related Docs
-- Endpoint Requirements (local VPN/network details)
-- Managed Devices documentation (MDM/enterprise deployment)
-- Linux client source repositories
-- Client public changelog (historical versions + release notes)
-- macOS & iOS deployment guide
-- Windows deployment guide
+- [Endpoint Requirements](https://www.twingate.com/docs/endpoint-requirements)
+- [Managed Devices](https://www.twingate.com/docs/managed-devices)
+- [Linux Client / Source Repositories](https://www.twingate.com/docs/linux)
+- [Client Changelog](https://www.twingate.com/docs/client-changelog)
+- [macOS Managed Deployment](https://www.twingate.com/docs/macos)
+- [Windows Managed Deployment](https://www.twingate.com/docs/windows)

@@ -1,57 +1,55 @@
 ---
 source: https://www.twingate.com/docs/network-overview
 type: docs
-fetched: 2026-08-14
-source_version: 895668983e8236b627510419cfee2a99d3d8a7f7225f6d34d81e82a4f037aa2b
+fetched: 2026-10-25
+source_version: 5f456799f34d1124d2ace4615d458b65040a993ddf3e53ad3b908f4c66099fbe
+trust: official
 ---
 
 # Network Overview
 
 ## Page Title
-Network Overview
+Network Overview (Twingate Admin Console)
 
 ## Summary
-The Network Overview tab is an admin dashboard providing a high-level snapshot of Twingate network health, including device status, resource availability, user role distribution, and connection history. It enables admins to monitor usage and drill into specific events for detailed traffic analysis.
+The Network Overview tab is an admin dashboard providing a high-level snapshot of network health, usage, and activity. It aggregates key metrics across devices, resources, remote networks, users, and connection history in one view.
 
 ## Key Information
 
 ### Network Insights Metrics
 - **Active Devices**: Devices with `Active` status
 - **Online Devices**: Devices with a user logged into the Twingate Client
-- **Trusted Devices**: Devices meeting Trusted Profile requirements
+- **Trusted Devices**: Devices meeting a Trusted Profile's requirements
 - **Resources**: Total Resources added to Twingate
-- **Online/Disconnected Resources**: Based on Remote Network connector status
-- **Online Remote Networks**: Has ≥1 online Connector
-- **Offline Remote Networks**: Has 0 online Connectors
-
-### Users and Services Metrics
-Counts users by role: Admin, DevOps, Helpdesk, Support, Reviewer (Access Reviewer), Billing, Member
+- **Online Resources**: Resources in Online Remote Networks
+- **Disconnected Resources**: Resources in Offline Remote Networks
+- **Remote Networks**: Total Remote Networks created
+- **Online Remote Networks**: Remote Networks with ≥1 online Connector
+- **Offline Remote Networks**: Remote Networks with no online Connectors
+- **Users**: Count per role (Admin, Viewer, DevOps, etc.) plus non-admin Members
 - **Services**: Total Service Accounts created
 
-### Connection History
-- Time ranges: 7, 30, or 90 days
-- **7-day graph**: Each bar = connections per **hour**
-- **30/90-day graphs**: Each bar = connections per **day**
-- Displays successful vs. failed connections
+### Connection History Graph
+- Time ranges: **7 days**, **30 days**, **90 days**
+- 7-day view: each bar = connections per **hour**
+- 30/90-day view: each bar = connections per **day**
+- Tracks both **successful** and **failed** connections
 
 ### Recent Activity
-- Shows network traffic across all Remote Networks
+- Displays network traffic across all Remote Networks
 - Clicking an event reveals: Resource IP address, protocol, connection type, duration
 
 ## Prerequisites
-- Admin role required to access Network Overview tab
+- Admin access to the Twingate admin console
+- Remote Networks and Connectors configured to see meaningful data
 
 ## Gotchas
-- A Remote Network is **Online** only if it has **at least one** online Connector — a single offline Connector does not make the network offline if others are online
-- Resource online/offline status is derived from its Remote Network's Connector status, not the Resource itself
-- The 7-day graph granularity is hourly (not daily), which differs from the 30/90-day views — important when interpreting spike patterns
-
-## Configuration Values
-None — this is a read-only dashboard with no configurable parameters or API fields documented on this page.
+- A Remote Network is "Offline" if it has **zero** online Connectors — even one online Connector makes it "Online"
+- Disconnected Resources reflect Remote Network status, not individual Resource health
+- Connection History granularity changes based on selected time range (hourly vs. daily bars)
 
 ## Related Docs
-- Trusted Profiles (for Trusted Devices criteria)
-- Remote Networks & Connectors (for online/offline status behavior)
-- Service Accounts (for Services count)
-- User Roles (Admin, DevOps, Helpdesk, Support, Reviewer, Billing, Member)
-- Connection Logs / Activity reporting
+- Device status and Trusted Profiles
+- Remote Networks and Connectors setup
+- User roles and Service Accounts
+- Resource configuration

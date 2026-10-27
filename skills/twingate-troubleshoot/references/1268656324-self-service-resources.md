@@ -1,8 +1,9 @@
 ---
 source: https://help.twingate.com/articles/1268656324-self-service-resources
 type: help
-fetched: 2026-09-27
-source_version: 89112c05163a6632a0cc530f241b0deec05b76d0d67417d37f0a1c78ec704f34
+fetched: 2026-10-25
+source_version: 6956fd1bd5161dc2485b3aaedaab2e83f04cd84d6a5ad1cff80ae86cfe7aebc5
+trust: official
 ---
 
 # Self-Service Resources
@@ -11,26 +12,36 @@ source_version: 89112c05163a6632a0cc530f241b0deec05b76d0d67417d37f0a1c78ec704f34
 Self-Service Resources
 
 ## Summary
-A quick-reference index of Twingate's self-service support resources. Provides direct pointers to documentation, troubleshooting guides, community support, billing, status, and changelog destinations.
+A reference page listing Twingate's self-service support resources organized by category. Provides quick links to documentation, troubleshooting, community, billing, status, and changelog resources.
 
 ## Key Information
-- **Documentation (configuration):** Twingate Docs
-- **Knowledge Base (troubleshooting):** Twingate Help Center
-- **Self-Service Troubleshooting Guide:** Dedicated troubleshooting walkthrough
-- **Known Incompatibilities:** List of documented compatibility issues
-- **Community Support:** Twingate Subreddit
-- **Billing:** Subscription Management portal
-- **Service Status:** Twingate Status page
-- **New Features/Fixes:** Twingate Changelog
+- **Documentation:** [Twingate Docs](https://docs.twingate.com) — official configuration and setup documentation
+- **Troubleshooting:** Twingate Help Center — knowledge base for issue resolution
+- **Self-Service Troubleshooting Guide** — structured guide for diagnosing common problems
+- **Known Incompatibilities** — list of software/environments with known conflicts
+- **Community Support:** Twingate Subreddit — peer community support
+- **Billing:** Subscription Management portal — manage plans and billing
+- **Service Status:** Twingate Status page — check for outages or incidents
+- **Release Notes:** Twingate Changelog — track new features and bug fixes
 
-## Prerequisites
-None — public-facing reference page.
+## Resource Index
+
+| Category | Resource |
+|---|---|
+| Configuration | Twingate Docs |
+| Troubleshooting | Help Center / Troubleshooting Guide |
+| Compatibility | Known Incompatibilities list |
+| Community | Twingate Subreddit |
+| Billing | Subscription Management |
+| Uptime | Service Status page |
+| Updates | Twingate Changelog |
 
 ## Gotchas
-- No direct links are preserved in this summary; navigate via the Twingate Help Center search or main docs index to locate each resource.
-- For billing issues, use the Subscription Management portal rather than support tickets where possible.
+- This page is a directory, not a how-to guide; no configuration steps or code are provided
+- Check **Known Incompatibilities** before deploying in environments with third-party VPNs, firewalls, or security software
+- Check **Service Status** before escalating support tickets to rule out platform-wide incidents
 
 ## Related Docs
 - Twingate Docs (primary configuration reference)
 - Twingate Help Center (troubleshooting KB)
-- Twingate Changelog (release notes)
+- Twingate Changelog (feature/fix tracking)

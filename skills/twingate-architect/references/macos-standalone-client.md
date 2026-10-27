@@ -1,64 +1,68 @@
 ---
 source: https://www.twingate.com/docs/macos-standalone-client
 type: docs
-fetched: 2026-08-14
-source_version: a013788ea8b13edd9645cced9b3931b2cf912e379ea330aaae61193f83d356fe
+fetched: 2026-10-25
+source_version: 1ea362846ac83d670439a2379905f92c38cef671fcd601986a9344f8d2b674ac
+trust: official
 ---
 
 # macOS Standalone Client
 
 ## Summary
-Twingate offers a PKG-based macOS client installable without the App Store or Apple ID. It requires a system extension to be enabled for VPN functionality. Supports MDM distribution and pre-configuration via mobile config profiles.
+The standalone macOS Client is installed via PKG installer (not the Mac App Store, which is no longer supported). It requires a system extension to be enabled for VPN functionality. Supports automatic updates when the user has local administrator permissions.
 
 ## Key Information
-- Download from [Twingate download page](https://www.twingate.com/docs/download) or specific versions from Client changelog
-- Requires system extension approval on first connection
-- Clients older than 12 months cannot connect to Twingate service
-- Automatic updates supported if user has local administrator permissions
-- Pre-configuration options (including disabling auto-updates) work with standalone app
+- PKG installer available from the [Twingate download page](https://www.twingate.com/docs/download)
+- Specific versions available in the Client changelog
+- Clients older than 12 months cannot connect to the Twingate service
+- Automatic updates require local administrator permissions on the device
+- App must be installed at `/Applications/Twingate.app` — system extensions will not work from other directories
 
 ## Prerequisites
-- macOS device with local admin rights (for auto-updates)
-- App must be installed at `/Applications/Twingate.app` (system extension requirement)
-- For MDM distribution: appropriate MDM platform access
+- macOS device
+- No Apple ID required
+- Local admin permissions (for automatic updates)
 
-## Step-by-Step
+## Step-by-Step: Installation
 
-### Manual Installation
-1. Download PKG from Twingate download page
-2. Double-click PKG and complete onboarding
-3. On first network connection, click **Open System Settings** when prompted
-4. Navigate to **System Settings → Privacy & Security → Security**
-5. Find "System software from application 'Twingate.app' was blocked from loading"
-6. Click **Allow**
+1. Download PKG from the Twingate download page
+2. Double-click PKG file and complete onboarding
+3. Follow the general macOS onboarding guide
+4. On first network connection, enable the system extension when prompted
 
-### Verify System Extension
-- Bottom of Privacy & Security page under **Extensions**
-- If no message: scroll to **Others → Extensions** → confirm Twingate enabled under **Added Extensions → Networking**
+## Step-by-Step: Enabling System Extension
+
+1. Click **"Open System Settings"** when prompted on first connect
+2. Navigate to **Privacy & Security** in sidebar
+3. Scroll to **Security** section
+4. Click **Allow** next to "System software from application 'Twingate.app' was blocked from loading"
+5. Verify extension status at bottom of Privacy & Security page under **Extensions**
 
 ## MDM Distribution
 
-| Platform | Method |
-|----------|--------|
-| Intune | Custom App (PKG) |
+| MDM Platform | Method |
+|---|---|
+| Intune | Custom App |
 | Jamf | Distribute as package |
 | Omnissa Workspace ONE | Non-App Store app |
 | Hexnode UEM | Enterprise app |
 
-**Pre-enable system extension via MDM:** Deploy the provided [example `.mobileconfig`](https://www.twingate.com/docs/macos-standalone-client) to automatically approve the system extension without user interaction.
-
-## Configuration Values
-- Install path (required): `/Applications/Twingate.app`
-- System extension profile: `.mobileconfig` (available from Twingate docs)
+- Existing pre-configuration (e.g., network pre-configuration, disabling auto-updates) remains compatible
+- Use the provided `.mobileconfig` example to **pre-enable the system extension** via MDM profile before deployment
 
 ## Gotchas
-- System extension **will not work** if app runs from any directory other than `/Applications/Twingate.app`
-- Clients >12 months old are blocked from connecting — maintain an update process for managed devices
-- Users without local admin cannot auto-update; manual or MDM-based updates required
-- Must explicitly click **Allow** in Privacy & Security; dismissing the initial prompt requires navigating manually to Settings
+- App must be at exactly `/Applications/Twingate.app` — system extension fails from any other path
+- System extension must be explicitly enabled; Twingate cannot connect without it
+- Mac App Store version is deprecated and unsupported
+- Clients >12 months old are blocked from connecting; ensure update cadence is managed for fully managed devices
+
+## Troubleshooting: Won't Connect
+1. Verify system extension is enabled via Privacy & Security → Extensions
+2. If no prompt appeared, check **Extensions → Others → Networking** section for Twingate toggle
+3. Confirm app location is `/Applications/Twingate.app`
 
 ## Related Docs
+- Twingate download page
 - General macOS onboarding guide
-- Client changelog (version-specific downloads)
-- Twingate pre-configuration guide (network pre-config + disabling auto-updates)
-- Example `.mobileconfig` for system extension pre-approval
+- Client changelog (version-specific PKGs)
+- Example `.mobileconfig` for MDM system extension pre-enablement

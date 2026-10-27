@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate-Solutions/gatorcast
 type: github
-fetched: 2026-10-18
-source_version: feb9790c545d13ac6cbe2bd3eece81498d22f16e
+fetched: 2026-10-25
+source_version: 60b3e643b824de5a2867e8f426466ecd163cc711
 trust: official
 ---
 
