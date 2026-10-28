@@ -87,6 +87,11 @@ are authoritative for it; confirm Beta/GA status against `web-app-access.md` rat
 asserting from memory. `skills/twingate-idfw/references/gh-twingate-solutions-gatorcast.md`
 is a self-hosted browse/replay UI for gateway session recordings — a community example
 project, not a supported Twingate product; label it as such if you recommend it.
+`skills/twingate-idfw/references/gh-twingate-solutions-gwops.md` covers gwops, an
+unsupported example container that wraps the Gateway binary. Its repo has detailed recipes and
+Gateway 2.0 behaviour docs. For custom or non-standard Gateway designs (BYO/Vault CA files,
+public certs via ACME, multiple networks, restricted egress, recording to a SIEM), use the
+reference's documentation map to find the right page, then read that page in the repo.
 
 ---
 
@@ -355,6 +360,7 @@ source file in your response.**
 | Gateway feature/protocol overview, GAT auth, session recording format, metrics | `skills/twingate-idfw/references/gh-twingate-gateway.md`, `skills/twingate-idfw/references/gh-twingate-gateway-wiki.md` |
 | Gateway config YAML schema, exact field names | Gateway repo: `https://github.com/Twingate/gateway` (`deploy/` directory) |
 | Self-hosted session-recording browse/replay UI (community example, unsupported) | `skills/twingate-idfw/references/gh-twingate-solutions-gatorcast.md` |
+| Self-managed Gateway container, deployment recipes, Gateway 2.0 binary limits (gwops, example, unsupported) | `skills/twingate-idfw/references/gh-twingate-solutions-gwops.md`, then the repo pages it maps |
 | Kubernetes Operator (CRD-based Twingate resource automation, complements kubectl proxy mode) | `skills/twingate-kubernetes/references/gh-twingate-kubernetes-operator.md`, `skills/twingate-kubernetes/references/gh-twingate-kubernetes-operator-wiki.md` |
 
 **Default to checking** — do not write YAML schemas, UI labels, Vault paths,

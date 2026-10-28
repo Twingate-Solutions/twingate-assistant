@@ -149,6 +149,8 @@ repos:
   # --- twingate-idfw ---
   - full_name: Twingate-Solutions/gatorcast
     skill: twingate-idfw
+  - full_name: Twingate-Solutions/gwops
+    skill: twingate-idfw
   - full_name: Twingate/gateway
     skill: twingate-idfw
     track_releases: true

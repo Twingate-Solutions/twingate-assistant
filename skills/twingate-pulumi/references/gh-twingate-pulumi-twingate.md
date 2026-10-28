@@ -1,68 +1,62 @@
 ---
 source: https://github.com/Twingate/pulumi-twingate
 type: github
-fetched: 2026-10-25
-source_version: f13f111e8fb8660694651ba929e2ff5d063cc95f
+fetched: 2026-10-28
+source_version: 724466a948059d200c3cb09c293fb05deefce30e
 trust: official
 ---
 
 # Twingate Pulumi Provider
 
-A Pulumi resource provider for managing Twingate infrastructure. Supports Python, TypeScript/JavaScript, Go, and .NET.
+Pulumi provider for managing Twingate infrastructure as code. Supports Python, TypeScript/JavaScript, Go, and .NET. Wraps the Twingate API to manage resources such as networks, connectors, and access policies.
 
 ## Key Information
 
-- Wraps the Twingate API to enable infrastructure-as-code management of Twingate resources
-- Available via standard package registries for all supported languages
-- Full API reference hosted on the [Pulumi registry](https://www.pulumi.com/registry/packages/twingate/api-docs/)
+- Package name varies by language: `@twingate/pulumi-twingate` (Node.js), `pulumi-twingate` (Python), `Twingate.Twingate` (.NET)
+- Go module path: `github.com/pulumi/pulumi-twingate/sdk/go/...`
+- Full API reference available at the [Pulumi Registry](https://www.pulumi.com/registry/packages/twingate/api-docs/)
 
 ## Prerequisites
 
-- A Twingate account with API access (API token from the Admin Console)
-- Pulumi CLI installed
-- Language runtime for your chosen SDK (Node.js 22+, Python, Go 1.24+, or .NET)
-
-## Installation
-
-| Language | Command |
-|---|---|
-| Node.js | `npm install @twingate/pulumi-twingate` or `yarn add @twingate/pulumi-twingate` |
-| Python | `pip install pulumi-twingate` |
-| Go | `go get github.com/pulumi/pulumi-twingate/sdk/go/...` |
-| .NET | `dotnet add package Twingate.Twingate` |
+- Pulumi CLI
+- Twingate API token (from the Twingate Admin Console)
+- Twingate network ID (visible in the Admin Console URL, e.g., `autoco` from `autoco.twingate.com`)
+- For local development: Go 1.24+, Node.js 22+
 
 ## Configuration Values
 
-| Key | Env Var | Required | Description |
+| Config Key | Env Var | Required | Description |
 |---|---|---|---|
-| `twingate:apiToken` | `TWINGATE_API_TOKEN` | Yes | API token from the Twingate Admin Console |
-| `twingate:network` | `TWINGATE_NETWORK` | Yes | Network ID (the subdomain portion of your Admin Console URL, e.g. `autoco` from `autoco.twingate.com`) |
-| `twingate:url` | — | No | Defaults to `twingate.com`; do not change under normal circumstances |
+| `twingate:apiToken` | `TWINGATE_API_TOKEN` | Yes | API token from Twingate Admin Console |
+| `twingate:network` | `TWINGATE_NETWORK` | Yes | Network ID (subdomain portion of Admin Console URL) |
+| `twingate:url` | — | No | Defaults to `twingate.com`; do not change unless instructed |
 
-## Building Locally
+## Usage / Step-by-Step (Local Development Build)
 
 1. Build the provider and SDKs:
    ```bash
-   make development        # all SDKs
-   make provider build_nodejs  # provider + Node.js only
+   make development
    ```
 2. Install the locally built plugin:
    ```bash
    pulumi plugin install resource twingate <version> --file bin/pulumi-resource-twingate
    ```
-3. Verify:
+   Replace `<version>` with the version string from your build output.
+3. Verify installation:
    ```bash
    pulumi plugin ls | grep twingate
    ```
 
 ## Gotchas
 
-- Local development builds include a version suffix such as `+dirty` for uncommitted changes. Pulumi will attempt to fetch this version from GitHub releases and fail with a 404. Always install the local binary manually using `--file` after building.
-- The exact version string to use in `pulumi plugin install` appears in the 404 error message Pulumi produces—copy it from there.
-- `twingate:url` should not be changed in normal use; modifying it is intended only for internal or testing environments.
+- Local development builds include a `+dirty` suffix in the version string if there are uncommitted changes. Pulumi cannot auto-download this version and will return a 404; you must install the plugin manually with `--file`.
+- The exact version string required for `pulumi plugin install` appears in the 404 error message—copy it from there.
+- `twingate:url` should not be changed under normal circumstances.
+- The `act` install script for Linux pipes from a GitHub raw URL into bash; visit the [act installation guide](https://github.com/nektos/act#installation) to review before running.
 
 ## Related Docs
 
-- [Twingate API overview](https://docs.twingate.com/docs/api-overview)
-- [Pulumi registry – Twingate](https://www.pulumi.com/registry/packages/twingate/api-docs/)
-- [Pulumi CLI installation](https://www.pulumi.com/docs/install/)
+- [Twingate API Overview](https://docs.twingate.com/docs/api-overview)
+- [Pulumi Registry – Twingate](https://www.pulumi.com/registry/packages/twingate/api-docs/)
+- [Pulumi CLI Installation](https://www.pulumi.com/docs/install/)
+- [act (local GitHub Actions runner)](https://github.com/nektos/act)
