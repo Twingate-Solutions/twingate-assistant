@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/gateway/wiki
 type: github
-fetched: 2026-10-25
-source_version: cf54f609917be8d18fa8f331339781f1f77f263b
+fetched: 2026-10-28
+source_version: 53fd307734a59f53d8c3a97ae390fe621fdc3650
 trust: official
 ---
 
@@ -43,21 +43,9 @@ The Twingate Gateway is an open-source Layer 7 reverse proxy deployed within you
 A natural-language specification (`Web-App-Integration-Spec.md`) is provided for admins to share with developers or AI coding agents building internal web apps behind the Gateway. Admins fill in the "Settings from your admins" table before distributing it.
 
 ### Token verification rules
-- The Gateway adds an `Authorization: Bearer <token>` header (a JWT signed by Twingate, type `GAT`) to every inbound request server-side; browsers never see it.
-- Verify on every request in a single app-wide layer before routing; no per-route checks, no bypass flags or dev modes.
-- Only exemption: `GET /healthz` (exact match), returns `ok`.
-- Never log, store, display, or forward the token or `Authorization` header.
-- Never trust `X-Twingate-*` headers for anything but display.
-
-### Required configuration (read from environment, never hard-coded)
-
-| Variable | Description |
-|---|---|
-| `TWINGATE_JWKS_URL` | `https://<twingate-address>/api/v1/jwk/ec` |
-| `TWINGATE_AUDIENCE` | Network name (e.g. `acme`) |
-| `TWINGATE_RESOURCE_ADDRESS` | This app's Twingate resource address(es), comma-separated |
-
-Refuse to start if any value is unset, blank, or contains `<` or `>`.
-
-### Verification requirements
-- **Algorithm:** `ES256`
+- The Gateway adds an `Authorization: Bearer <token>` header (a JWT signed by Twingate, type `GAT`) to every inbound request server-side; browsers never see it. The app needs only this header; request any additional Gateway-set headers from admins.
+- Verify on every request in a single app-wide layer before routing; per-route or per-action group checks may follow. Covers every path and method, including static files, framework built-ins, non-existent paths (return `401`, not `404`), WebSocket and SSE upgrade requests; close WebSocket with code `1008` when token `exp` passes.
+- Default exemption: `GET /healthz` (exact match), returns `ok`. Additional exempt endpoints (e.g. readiness checks) must be explicitly approved by admins, matched exactly, and must never return user data or sensitive content.
+- Never log, store, or display the token or `Authorization` header.
+- **Never trust any request header for identity or decisions** regardless of name (`X-Twingate-User` included). Only the verified token counts. The Gateway overwrites only the headers admins configure it to set; any other header comes from the browser.
+- Only forward the token to backend services that are deployed

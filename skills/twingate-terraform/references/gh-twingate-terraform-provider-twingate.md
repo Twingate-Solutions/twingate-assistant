@@ -1,38 +1,34 @@
 ---
 source: https://github.com/Twingate/terraform-provider-twingate
 type: github
-fetched: 2026-10-25
-source_version: 0ccdcfe7743a176fa8ad0dc4b18ca2ddc24206fc
+fetched: 2026-10-28
+source_version: e073772365f795a6d96437a217c6b11cbd8f52a2
 trust: official
 ---
 
 # Twingate Terraform Provider
 
-## Summary
-Terraform provider for managing Twingate resources (networks, connectors, remote networks, resources, groups, users, service accounts). Enables infrastructure-as-code workflows for Twingate access policy and network configuration via the Twingate API.
+Terraform provider for managing Twingate network resources including Remote Networks, Resources, Connectors, and Groups. Supports GitOps-driven access policy and network configuration via standard Terraform workflows.
 
 ## Key Information
-- Written in Go; built on the Terraform Plugin Framework
-- Supports resources and data sources for groups, remote networks, connectors, resources, users, and service accounts
-- Documentation in `docs/` is auto-generated from `templates/`; edit only the templates
+
+- Written in Go; provider source lives in this repo and is published to the Terraform Registry
 - Acceptance tests require a live Twingate network and API token
+- Documentation in `docs/` is auto-generated from `templates/` — do not edit `docs/` directly
+- Latest release (v5.2.0) adds `tls_mode` to web app resource `upstream` and `downstream` fields
 
 ## Prerequisites
+
 - Bash
 - Go 1.26+
-- Terraform 1.14.x
-- Twingate account with an API token (Read, Write & Provision permissions) for acceptance tests
+- Terraform 1.14.x+
+- Twingate account with an API token scoped to Read, Write & Provision permissions (for acceptance tests)
 
 ## Usage / Step-by-Step
 
 **Build**
 ```shell
 make build
-```
-
-**Install locally**
-```shell
-make install
 ```
 
 **Run unit tests**
@@ -48,60 +44,34 @@ export TWINGATE_API_TOKEN=<token>
 make testacc
 ```
 
+**Install locally for testing**
+```shell
+make install
+```
+
 **Regenerate docs**
 ```shell
+# Edit files in templates/ first, then:
 make docs
 ```
 
 ## Configuration Values
 
-| Variable | Description |
-|---|---|
-| `TWINGATE_URL` | Base Twingate URL (e.g., `twingate.com`) |
-| `TWINGATE_NETWORK` | Network slug (`<slug>.twingate.com`) |
-| `TWINGATE_API_TOKEN` | API token with Read, Write & Provision permissions |
+| Name | Type | Description |
+|---|---|---|
+| `TWINGATE_URL` | env var | Base Twingate URL (e.g. `twingate.com`) |
+| `TWINGATE_NETWORK` | env var | Network slug (`<slug>.twingate.com`) |
+| `TWINGATE_API_TOKEN` | env var | API token with Read, Write & Provision permissions |
 
 ## Gotchas
-- Files under `docs/` are auto-generated; manual edits will be overwritten by `make docs`
-- Acceptance tests (`make testacc`) run against a real Twingate network and will create/modify live resources
-- The repo description references a Kubernetes controller/CRD pattern, but the actual repo is a standard Terraform provider
-- `twingate_kubernetes_resource`, `twingate_ssh_resource`, and `twingate_web_app_resource` each expose a read-only `tags_all` attribute (Map of String) that includes both resource-level tags and default tags from the provider configuration
 
-## Provider Caching and Datasource Filter Scoping
+- `docs/` is auto-generated; manual edits will be overwritten on the next `make docs` run
+- Acceptance tests hit a real Twingate network and will create/modify live resources
+- The repo description references a Kubernetes controller, but the actual content is a Terraform provider — ignore the description
 
-The provider can cache Resources and Groups to reduce API calls. When a cache filter (`resources_filter` / `groups_filter`) is configured, it also scopes what the corresponding datasources (`twingate_resources`, `twingate_groups`) can return:
+## Related Docs
 
-- If at least one cached object matches a datasource lookup, the result is answered entirely from the cache — objects outside the cache filter are not returned.
-- If nothing in the cache matches, the provider falls back to querying the API and returns the full result.
-- To have datasources always search all objects, omit the cache filter or disable caching for that type (`resource_enabled = false` / `groups_enabled = false`).
-
-```hcl
-provider "twingate" {
-  cache = {
-    resource_enabled = true
-    resources_filter = {
-      remote_network_name = "production"
-    }
-  }
-}
-```
-
-The `twingate_groups` and `twingate_resources` datasource docs note this scoping behavior inline.
-
-## `name_in` / `email_in` Filters on List Datasources
-
-All list datasources now support an `_in` filter (Set of String) that returns only objects whose name (or email, for users) exactly matches one of the values in the list:
-
-| Datasource | Filter attribute |
-|---|---|
-| `twingate_connectors` | `name_in` |
-| `twingate_remote_networks` | `name_in` |
-| `twingate_resources` | `name_in` |
-| `twingate_security_policies` | `name_in` |
-| `twingate_service_accounts` | `name_in` |
-| `twingate_groups` | `name_in` |
-| `twingate_users` | `email_in` |
-
-## `twingate_web_app_resource` — `downstream` and `upstream` TLS Mode
-
-The `downstream` and `upstream
+- [Terraform Registry – Twingate Provider](https://registry.terraform.io/providers/Twingate/twingate/latest/docs)
+- [Twingate API documentation](https://docs.twingate.com/docs/api-overview)
+- [Go installation](https://golang.org/doc/install)
+- [Terraform downloads](https://www.terraform.io/downloads.html)
