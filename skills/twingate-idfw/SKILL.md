@@ -98,6 +98,13 @@ capabilities. You need a gateway.
   example/reference project with no warranty — recommend it for self-hosted review of
   existing recordings, but tell the user it is not a supported Twingate product before they
   put it in a compliance-critical path.
+- **For a self-built or customised Gateway deployment, read the gwops repo docs.** gwops
+  (`gh-twingate-solutions-gwops.md`) is an unsupported example wrapper, but its repo carries
+  ~70 pages of recipes, guides and limitations describing how the Gateway 2.0 binary behaves
+  (certificate modes, recording output, web-app upstream TLS, limits). The reference holds
+  only a summary and a map — clone or browse `https://github.com/Twingate-Solutions/gwops`
+  and read the matching `recipes/`, `guides/` or `reference/limitations.md` page before
+  designing a non-standard setup.
 
 ## Search References First
 
@@ -186,6 +193,7 @@ of file live there, plus one hand-authored field guide:
 | Web App SSO — **Jenkins** (reverse-proxy-auth-plugin, role-strategy, JCasC, `X-Forwarded-User`/`-Groups`) | `web-app-jenkins.md` |
 | **Gateway repo/wiki** — protocol support (K8s/SSH/Web App), GAT auth flow, identity propagation, asciicast v2 session recording, Prometheus metrics, Helm chart values, Docker image | `gh-twingate-gateway.md`, `gh-twingate-gateway-wiki.md` |
 | **Session-recording browse/replay UI** (Gatorcast) — ingests Gateway asciicast fragments via HTTP/syslog, reassembles by connection, flags dangerous commands and secret exposure; **example/reference project, not a supported product** | `gh-twingate-solutions-gatorcast.md` |
+| **Self-managed Gateway container** (gwops) — Gateway 2.0 binary wrapped by a Python control plane: generated/BYO CAs, ACME via Cloudflare, declarative seed that syncs resources to the tenant, recording to an NDJSON receiver/SIEM; gateway-binary limits; a map of 19 deployment recipes (cloud VM, homelab, multi-network, GitOps, restricted egress, third-party access, in-cluster). **Example project, not supported.** Open the repo docs it maps for detail | `gh-twingate-solutions-gwops.md`, then `https://github.com/Twingate-Solutions/gwops` |
 | Remote development with SSH (VS Code, JetBrains Gateway, Cursor) | `ssh-remote-development.md` |
 | Smallstep CA integration | `ssh-smallstep.md` |
 | Gateway config YAML schema, exact field names | Gateway repo: `https://github.com/Twingate/gateway` (`deploy/` directory) |
