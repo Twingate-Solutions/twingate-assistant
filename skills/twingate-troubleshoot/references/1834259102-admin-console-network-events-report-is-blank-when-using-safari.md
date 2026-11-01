@@ -1,34 +1,33 @@
 ---
 source: https://help.twingate.com/articles/1834259102-admin-console-network-events-report-is-blank-when-using-safari
 type: help
-fetched: 2026-10-28
-source_version: 9eb8b861f2dd560f61ca71e34c6d2a8d7922917c124a7b55fe8ae0abc7c43035
+fetched: 2026-11-01
+source_version: b00c7ab7ffade4cd2ead5c7ccca766ce67495539d6ea9f3fe26cdf53a8ebd958
 trust: official
 ---
 
 # Admin Console: Network Events Report is Blank
 
 ## Summary
-When downloading a Network Events report in Safari on macOS, the file downloads without an extension, is uncompressed, and contains only CSV column headers with no data. All other browsers download the report correctly as a `.gzip` file with full event data.
+When downloading a Network Events report from the Twingate Admin Console using Safari on macOS, the downloaded file contains only CSV column headers with no data. This is a known Safari-specific bug with no current fix; using an alternative browser is the recommended workaround.
 
 ## Key Information
 - **Affected component:** Admin Console – Network Events Report
-- **Affected platform:** macOS / Safari browser only
-- **Symptom:** Downloaded file has no extension, contains only CSV header row, no event data
-- **Expected behavior:** `.gzip` compressed file with complete event data
-
-## Prerequisites
-- Access to Twingate Admin Console
-- Ability to use an alternative browser (Chrome, Firefox, Edge, etc.)
+- **Affected platform:** macOS / Safari browser
+- **Symptom:** Downloaded file has no extension and contains only the CSV header row
+- **Expected behavior:** File downloads as `.gzip` format containing full event data
+- **Other browsers:** Return a properly compressed `.gzip` file with data
 
 ## Gotchas
-- If a `.gzip` file downloaded from a **non-Safari** browser is also blank, the issue is unrelated to Safari — the report itself may not have finished generating; wait a few minutes and retry
-- Safari silently strips the `.gzip` extension and decompresses the file incorrectly, resulting in a truncated output
-- This is a **known, unresolved bug** — no fix currently exists on Twingate's side
+- If a `.gzip` file downloaded via a non-Safari browser is also blank, the report may not have finished generating — this is a separate issue from the Safari bug
+- Do not confuse "headers-only" Safari output with a generation failure; the two have different causes
 
-## Resolution / Workarounds
-1. **Use a non-Safari browser** (Chrome, Firefox, Edge) to download the Network Events report
-2. If the report is blank in any browser, wait several minutes for report generation to complete, then retry the download
+## Resolution / Workaround
+1. **Switch browsers** — use Chrome, Firefox, or any non-Safari browser to download the Network Events report
+2. **If non-Safari download is also blank** — wait several minutes and retry; the report may still be generating
+
+## Current Status
+No fix available as of last update. Safari workaround is the only resolution.
 
 ## Related Docs
 - Twingate Admin Console – Network Analytics / Events reporting
