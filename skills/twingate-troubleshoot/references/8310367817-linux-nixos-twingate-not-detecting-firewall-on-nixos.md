@@ -1,72 +1,57 @@
 ---
 source: https://help.twingate.com/articles/8310367817-linux-nixos-twingate-not-detecting-firewall-on-nixos
 type: help
-fetched: 2026-10-04
-source_version: 30c27d9ea82354b2d67ca9ff95fb14f39253c2e5285a3850b1284565ac08d28d
+fetched: 2026-11-01
+source_version: 230bba40b3d80fad95fffb3d9f012059a2c4c06c511a3200676bb10bb9416208
 trust: official
 ---
 
 # [Linux - NixOS] Twingate Not Detecting Firewall on NixOS
 
 ## Summary
-The Twingate Client cannot detect a firewall configured via NixOS's `networking.firewall` module, even though it uses `iptables` under the hood. To satisfy Twingate's device posture firewall check on NixOS, the native NixOS firewall must be disabled and `iptables` configured directly.
+The Twingate Client cannot detect a firewall configured via NixOS's `networking.firewall`, even though it uses `iptables` as its backend. To satisfy Twingate's device posture firewall check on NixOS, you must disable `networking.firewall` and configure `iptables` directly.
 
 ## Key Information
 - **Affected component:** Twingate Client
 - **Platform:** Linux (NixOS)
-- **Root cause:** Twingate detects `iptables` directly; it does not recognize NixOS's `networking.firewall` abstraction layer, even though that abstraction uses `iptables` internally.
+- **Root cause:** Twingate detects `iptables` usage directly; it does not recognize NixOS's `networking.firewall` abstraction, even though that abstraction calls `iptables` internally
+- **Impact:** Device posture firewall check fails when `networking.firewall` is the only firewall configured
 
 ## Prerequisites
-- Administrative/root access to the NixOS system
-- Understanding of your organization's security policies before changing firewall rules
-- `iptables` available on the system
+- Access to NixOS system configuration
+- Understanding of your organization's security policies
+- Ability to test in a controlled/non-production environment before applying changes
 
-## Firewall Requirements for Twingate Detection
+## Firewall Requirements (for Twingate Detection)
 
-All three conditions must be met:
+Three conditions must all be met:
 
-| Requirement | Detail |
-|---|---|
-| `networking.firewall` disabled | NixOS native firewall module must be off |
-| `iptables` installed | Must be explicitly present |
-| `INPUT` chain default policy = `DROP` | Must be set at the `iptables` level |
+1. `networking.firewall` must be **disabled**
+2. `iptables` must be **installed**
+3. The `INPUT` chain's default policy must be set to **`DROP`**
 
-## Step-by-Step
+## Configuration Steps
 
-1. **Disable NixOS native firewall** in your NixOS configuration:
+1. **Disable NixOS firewall abstraction** in your NixOS configuration:
    ```nix
    networking.firewall.enable = false;
    ```
 
-2. **Install `iptables`** (ensure it is present in your NixOS configuration):
-   ```nix
-   networking.nftables.enable = false;  # if applicable
-   # ensure iptables package is available
-   ```
+2. **Ensure `iptables` is installed** (add to your NixOS packages or environment).
 
-3. **Set `INPUT` chain default policy to `DROP`** via `iptables`:
+3. **Set the INPUT chain default policy to DROP** using `iptables` directly:
    ```bash
    iptables -P INPUT DROP
    ```
-   Ensure all essential traffic (SSH, DNS, etc.) is explicitly **allowed** before applying this policy.
-
-4. Rebuild and switch NixOS configuration:
-   ```bash
-   nixos-rebuild switch
-   ```
+   Refer to `man iptables` or [linux.die.net/man/8/iptables](https://linux.die.net/man/8/iptables) for full policy configuration details.
 
 ## ⚠️ Gotchas
 
-- **SSH lockout risk:** Setting `INPUT` policy to `DROP` without explicitly allowing SSH will cut off remote access. Add an `ACCEPT` rule for port 22 before applying.
-- **DNS breakage:** DNS traffic must also be explicitly permitted.
-- **Not a drop-in replacement:** Disabling `networking.firewall` removes NixOS-managed rules; you are fully responsible for recreating all needed rules in `iptables`.
-- **NixOS rebuilds may reset rules:** Manage `iptables` rules persistently (e.g., via `networking.firewall = false` + a custom systemd service or `iptables-restore`).
-
-## Configuration Values
-- NixOS option to disable: `networking.firewall.enable = false`
-- Required `iptables` policy: `INPUT` chain → `DROP`
+- **SSH lockout risk:** Setting `INPUT` policy to `DROP` without explicitly allowing SSH traffic (`port 22`) will block SSH access. Ensure SSH is explicitly permitted before applying the DROP policy.
+- **DNS traffic:** DNS traffic may also be blocked. Explicitly allow required DNS ports.
+- **Test first:** Always validate changes in a controlled environment before applying to production.
+- **Not a drop-in replacement:** Disabling `networking.firewall` removes NixOS-managed rules; you must manually recreate all previously managed rules using `iptables`.
 
 ## Related Docs
-- [`iptables` man page (online)](https://linux.die.net/man/8/iptables)
-- Local: `man iptables`
-- Twingate Device Posture (firewall check) documentation — consult your Twingate admin portal
+- [iptables manual](https://linux.die.net/man/8/iptables)
+- Twingate Device Posture documentation (Twingate Help Center)

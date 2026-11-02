@@ -1,78 +1,73 @@
 ---
 source: https://help.twingate.com/articles/9261433921-installation-of-the-windows-twingate-client-fails-with-setup-wizard-ended-prematurely
 type: help
-fetched: 2026-10-04
-source_version: e72eec01a8126b5b9cbe28ef91867e60e0557befa0ba8283427d8b4ca3848a1e
+fetched: 2026-11-01
+source_version: 7d4134631ed480d14f4071fe54ba39fc55d596a5e7a977cb39284927d3ce9c74
 trust: official
 ---
 
-# Installation of Windows Twingate Client Fails: "Setup Wizard Ended Prematurely"
+# Windows Twingate Client: "Setup Wizard Ended Prematurely" Error
+
+## Page Title
+Installation of the Windows Twingate Client fails with: "Setup wizard ended prematurely."
 
 ## Summary
-The Twingate Windows Client installation may fail and roll back with a "Setup wizard ended prematurely" error. Multiple root causes exist, addressed through a progressive troubleshooting sequence. Log generation and CLI-based installation help narrow the cause.
+The Windows Twingate Client installer may fail and roll back with a "Setup wizard ended prematurely" error, caused by several possible issues including missing .NET runtime, WMI corruption, MSI rollback interference, or OS corruption. Reviewing install logs narrows down the root cause. Solutions escalate from runtime checks to registry cleanup.
 
 ## Key Information
-- Affects: All supported Windows OS versions
-- Component: Twingate Windows Client
-- EXE installer auto-installs required .NET runtime; MSI does not
-- Silent install requires specific argument order (see Configuration Values)
+- Affects: All supported Windows OS versions, Twingate Windows Client component
+- EXE installer auto-installs the required .NET Desktop Runtime; MSI does not
+- Silent installs require a specific argument order (see Configuration Values)
 
 ## Prerequisites
-- Administrator access (CMD as Administrator required for most fixes)
-- Correct .NET Desktop Runtime version for MSI installs:
-  - **v2024.311+** → .NET 8.x Desktop Runtime
-  - **v2024.297 and older** → .NET 6.x Desktop Runtime
+- Administrative (elevated CMD) access for most repair steps
+- Correct .NET Desktop Runtime for MSI installs:
+  - Version **2024.311+** → **.NET 8.x Desktop Runtime**
+  - Version **2024.297 and older** → **.NET 6.x Desktop Runtime**
 
-## Step-by-Step Troubleshooting
+## Step-by-Step Troubleshooting (in order)
 
-**Step 1: Generate verbose install log**
-```
-'[path]\TwingateWindowsInstaller.exe' /L*V "TGinstall.log"
-```
-Review `TGinstall.log` to identify specific failure point.
+1. **Generate verbose install log** to identify root cause:
+   ```
+   '[path]\TwingateWindowsInstaller.exe' /L*V "TGinstall.log"
+   ```
 
-**Step 2: Verify .NET Desktop Runtime (MSI only)**
-Confirm correct version is installed per the version table above. EXE handles this automatically.
+2. **Verify .NET Desktop Runtime** version matches client version (MSI installs only).
 
-**Step 3: Repair WMI**
-Open CMD as Administrator:
-```
-mofcomp %windir%\system32\wbem\cimwin32.mof
-```
-Retry installation.
+3. **Repair WMI** — open CMD as Administrator:
+   ```
+   mofcomp %windir%\system32\wbem\cimwin32.mof
+   ```
+   Retry installation after.
 
-**Step 4: Disable MSI Rollback**
-Follow Microsoft guidance at: https://learn.microsoft.com/en-us/windows/win32/msi/disablerollback  
-Restart, then reinstall.
+4. **Disable MSI rollback** — follow Microsoft docs at `https://learn.microsoft.com/en-us/windows/win32/msi/disablerollback`, then restart and reinstall.
 
-**Step 5: Remove errant Twingate registry entries**
-1. Open `regedit`
-2. Navigate to: `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles`
-3. Inspect each GUID key for `ProfileName` = `Twingate`
-4. Delete all matching GUID keys
-5. Restart and reinstall
+5. **Remove errant registry NetworkProfile entries:**
+   - Open `regedit`
+   - Navigate to: `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles`
+   - Click each GUID key; delete any where `ProfileName` = `Twingate`
+   - Restart and reinstall
 
-**Step 6: Check for OS corruption**
-Open CMD as Administrator:
-```
-sfc /scannow
-```
-Restart and retry. CCleaner recommended for suspected severe OS corruption.
+6. **Check for OS corruption** — open CMD as Administrator:
+   ```
+   sfc /scannow
+   ```
+   Restart and retry. Use CCleaner for severe corruption cases.
 
 ## Configuration Values
 
-**Silent install with prerequisites (EXE only — argument order is mandatory):**
-```
-TwingateWindowsInstaller.exe preq_share=true /quiet
-```
+| Scenario | Command/Value |
+|---|---|
+| Verbose install log | `TwingateWindowsInstaller.exe /L*V "TGinstall.log"` |
+| Silent install with prerequisites | `TwingateWindowsInstaller.exe preq_share=true /quiet` |
 
-**Verbose log generation flag:** `/L*V`
+> **Note:** For silent installs, `preq_share=true` **must precede** `/quiet` — argument order matters.
 
 ## Gotchas
-- MSI installer does **not** auto-install .NET; EXE does — wrong installer type is a common failure cause
-- Silent install args must be in the exact order shown (`preq_share=true` before `/quiet`); wrong order causes failure
-- Registry cleanup must be done **after** uninstalling Twingate, not before
+- MSI installer does **not** auto-install .NET; EXE installer does
+- Argument order for silent EXE install is mandatory; reversing order will cause issues
+- Registry cleanup requires prior Twingate uninstall before reinstalling
 
 ## Related Docs
 - [Microsoft: DisableRollback](https://learn.microsoft.com/en-us/windows/win32/msi/disablerollback)
-- [Microsoft: System File Checker](https://support.microsoft.com/en-us/topic/use-the-system-file-checker-tool-to-repair-missing-or-corrupted-system-files-79aa86cb-ca52-166a-92a3-966e85d4094e)
+- [Microsoft: System File Checker (sfc /scannow)](https://support.microsoft.com/en-us/topic/use-the-system-file-checker-tool-to-repair-missing-or-corrupted-system-files)

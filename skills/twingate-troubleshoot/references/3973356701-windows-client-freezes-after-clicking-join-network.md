@@ -1,55 +1,53 @@
 ---
 source: https://help.twingate.com/articles/3973356701-windows-client-freezes-after-clicking-join-network
 type: help
-fetched: 2026-10-04
-source_version: 362895118673ce6c4d15bed15b25f7d5c7940a7e8ecc793a5684eab33f19693c
+fetched: 2026-11-01
+source_version: 0c9829f7b73668e74982f8c82089f3b9f1c015810d62ebffd81131c0ba9e2d91
 trust: official
 ---
 
 # [Windows Client] Freezes After Clicking Join Network
 
 ## Summary
-The Twingate Windows client freezes at the "Join Network" step due to a corrupted WMI win32 repository preventing device posture checks from completing. The fix is to recompile the WMI MOF file from an administrative command prompt.
+The Twingate Windows client freezes at "Join Network" when the WMI (Windows Management Instrumentation) win32 repository is corrupt, preventing device posture checks from completing. The fix is to recompile the corrupted MOF file from an administrative command prompt.
 
 ## Key Information
-- Affected component: Windows Twingate Client during initial network join
-- Root cause: Corrupt WMI (Windows Management Instrumentation) win32 repository
-- WMI corruption sources: improper shutdowns, BSODs, application crashes
-- The Twingate service uses the WMI win32 repository to collect device posture data required before authentication
+- **Affected component**: Twingate Windows Client
+- **Log file location**: `%LOCALAPPDATA%\Twingate\logs\Twingate.Service.log`
+- **Root cause**: Corrupt WMI win32 repository blocks device posture data collection
+- **Error indicator in logs**: `CommunicationObjectFaultedException` during `RunPreconnectionChecks`
+- **WMI corruption causes**: Improper shutdowns, BSODs, application crashes
 
 ## Symptoms
 - Client UI freezes after clicking "Join Network"
-- Log file at `%LOCALAPPDATA%\Twingate\logs\Twingate.Service.log` shows:
-  - `DevicePostureDataProvider.GenerateClientData Start client posture data collection.`
-  - `ServiceCommunication.RunPreconnectionChecks Communication faulted. System.ServiceModel.CommunicationObjectFaultedException`
-  - State stuck at `Authenticating`
-- Errors visible in Windows Event Viewer → Application log
-- PowerShell WMI queries fail to return data (e.g., `gwmi Win32_DISKDRIVE | select *` returns nothing)
+- Log shows state reaching `Authenticating` then faulting at `RunPreconnectionChecks`
+- Twingate errors appear in **Windows Event Viewer → Application**
+- PowerShell WMI queries return no data:
+  ```powershell
+  gwmi Win32_DISKDRIVE | select *
+  ```
 
 ## Prerequisites
-- Administrative command prompt (run as Administrator)
+- Administrative command prompt on the affected Windows machine
 
-## Resolution Steps
+## Resolution
 
-1. Open Command Prompt as Administrator
-2. Run the following command to recompile the WMI win32 MOF:
-   ```cmd
-   mofcomp %windir%\system32\wbem\cimwin32.mof
-   ```
-3. After completion, retry joining the Twingate network
+Run the following from an **elevated (Administrator) command prompt** to recompile the WMI win32 MOF file:
 
-## Verification
-Before attempting the fix, confirm WMI is the issue by running this in PowerShell:
-```powershell
-gwmi Win32_DISKDRIVE | select *
+```cmd
+mofcomp %windir%\system32\wbem\cimwin32.mof
 ```
-If this returns no data or errors, WMI corruption is confirmed.
+
+## Diagnostic Steps
+1. Check log file at `%LOCALAPPDATA%\Twingate\logs\Twingate.Service.log` for `CommunicationObjectFaultedException`
+2. Verify WMI is broken by running `gwmi Win32_DISKDRIVE | select *` in PowerShell — no output confirms corruption
+3. Check Windows Event Viewer → Application for Twingate errors
+4. Run `mofcomp` fix above if WMI is confirmed broken
 
 ## Gotchas
-- Must run from an **administrative** command prompt — standard user prompt will not work
-- WMI corruption can recur if the underlying instability (e.g., hardware issues causing BSODs) is not addressed
-- This affects only the Windows client; no Twingate network-side changes are needed
+- This issue is **OS-level**, not Twingate-specific — the WMI repository must be repaired before the client can function
+- Reinstalling Twingate will **not** fix this; WMI must be repaired directly
+- If `mofcomp` does not resolve the issue, a full WMI repository rebuild may be required (outside scope of this article)
 
 ## Related Docs
-- [WMI Overview (Microsoft)](https://docs.microsoft.com/en-us/windows/win32/wmisdk/wmi-start-page)
-- Twingate Windows client logs: `%LOCALAPPDATA%\Twingate\logs\Twingate.Service.log`
+- [WMI (Windows Management Instrumentation) — Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/wmisdk/wmi-start-page)

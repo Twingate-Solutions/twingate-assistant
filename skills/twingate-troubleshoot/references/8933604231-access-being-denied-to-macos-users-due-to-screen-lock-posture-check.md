@@ -1,49 +1,49 @@
 ---
 source: https://help.twingate.com/articles/8933604231-access-being-denied-to-macos-users-due-to-screen-lock-posture-check
 type: help
-fetched: 2026-10-28
-source_version: 2b2112c6497de467e4e214b95fdcc59891c3d808683ce97cf53555848876e176
+fetched: 2026-11-01
+source_version: 60f9cf52e5e09adaeb15349af9ebf0c3bb74066208c67bdc507c8b49a83c1225
 trust: official
 ---
 
-# [MacOS Client] Biometric Posture Check Fails in Clamshell Mode
+# macOS Biometric Posture Check Fails in Clamshell Mode
 
 ## Summary
-When a Device Security policy requires biometric configuration, MacBooks in clamshell mode (lid closed) may fail posture checks because macOS disables Touch ID when the lid is closed. The Twingate Client caches the last successful biometric check during a session, but this cache clears on quit or restart, causing failures when Twingate starts while already in clamshell mode.
+When a Device Security policy requires biometric configuration, MacBooks running Twingate in clamshell mode (lid closed) can fail posture checks because macOS disables Touch ID when the lid is closed. The Twingate client caches a successful biometric check during a session, but this cache clears on quit or restart.
 
 ## Key Information
 - **Affected component:** Twingate Client / Device Security posture checks
 - **Platform:** macOS only
-- **Trigger condition:** Twingate starts (fresh launch or after restart) while MacBook lid is already closed
-- **Cache behavior:** Successful biometric result is retained in-session (lid can be closed after connecting), but is cleared on Twingate quit or system restart
-
-## Prerequisites
-- Device Security policy configured with biometric requirement
-- MacBook used in clamshell mode (external display, lid closed)
+- **Trigger:** Twingate starts or restarts while MacBook lid is already closed (clamshell mode)
+- **Cache behavior:** Client remembers last successful biometric check while running — closing the lid *after* a successful check does not trigger failure; only startup-in-clamshell does
 
 ## Symptoms
-- Sign-in or Resource access fails with `"Device security not met"` or `"Device requirements not met"`
-- Touch ID is properly configured on the device
-- Failure occurs after restart or Twingate relaunch while lid is closed
-- Client logs contain: `Unable to evaluate DeviceOwnerAuthenticationWithBiometrics policy, error - systemCancel, will return cached value`
+- Error: `"Device security not met"` or `"Device requirements not met"` on sign-in or Resource access
+- Occurs after Mac restart or Twingate quit/reopen with lid closed
+- Client log entry:
+  ```
+  Unable to evaluate DeviceOwnerAuthenticationWithBiometrics policy, error - systemCancel, will return cached value
+  ```
+
+## Prerequisites
+- Device Security policy with biometric configuration required
+- MacBook used in clamshell mode (external display, lid closed)
+- No Touch ID keyboard connected
 
 ## Resolution Options
 
-1. **Open lid before starting Twingate**
-   - After restart or relaunch, open the MacBook lid, connect to Twingate, then close lid — clamshell use continues without issue for that session.
+1. **Open the lid before starting Twingate**
+   - After a restart or reopen, open the MacBook lid, connect to Twingate, then close the lid to resume clamshell mode
 
-2. **Use a Touch ID keyboard**
-   - Pair an Apple Magic Keyboard with Touch ID to the Mac; biometrics remain available regardless of lid state.
+2. **Use an Apple Magic Keyboard with Touch ID**
+   - Pair a Touch ID-capable Apple Magic Keyboard to keep biometrics available regardless of lid state
 
-3. **If check fails with lid open:** Contact Twingate Support with Client logs.
+3. **If check fails with lid open** — collect Client logs and contact Twingate Support
 
 ## Gotchas
-- The cached biometric result is **session-scoped only** — closing/reopening the app or rebooting clears it
-- macOS behavior is the root cause; Twingate cannot override the OS-level Touch ID restriction in clamshell mode
-- A non-Apple external keyboard will **not** resolve this; Touch ID requires Apple's Magic Keyboard with Touch ID specifically
-
-## Configuration Values
-- No specific env vars or CLI flags apply; behavior is governed by the Device Security policy biometric requirement setting in the Twingate admin console
+- The biometric check cache is **session-scoped** — cleared on quit or system restart; there is no persistent cache across restarts
+- macOS fully disables Touch ID in clamshell mode unless a compatible external Touch ID keyboard is connected — this is an OS-level restriction, not a Twingate bug
+- Simply having Touch ID configured on the device is not sufficient; it must be *evaluable* at the time Twingate initializes
 
 ## Related Docs
 - Twingate Device Security policies

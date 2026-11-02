@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/6965244612-azure-container-docker-hub-rate-limits-block-connector-deployment-or-restart
 type: help
-fetched: 2026-10-04
-source_version: 14c5227e03b22e346a35a69037caf3d0d8405cb4944b975be654638785e43684
+fetched: 2026-11-01
+source_version: 84096097ea0d46b11e97d6618f49295f7f5318ccd462ba534abfc6d9528a7676
 trust: official
 ---
 
@@ -12,22 +12,21 @@ trust: official
 Docker Hub rate limiting causes failures when deploying or restarting Twingate Connectors via Azure Container Instances. Authenticated Docker Hub requests receive higher rate limit thresholds, resolving the issue.
 
 ## Key Information
-- Error occurs during Connector deployment or update/restart via Azure Container Services
-- Root cause: Docker Hub rate limiting on unauthenticated pulls from `index.docker.io`
-- Fix: Add Docker Hub credentials to the `az container` deployment command
+- Affects Connector deployments and restarts on Azure Container Instances (ACI)
+- Error originates from `index.docker.io` (Docker Hub)
+- Authenticated and paid Docker Hub users receive higher pull rate limits
 
-## Error Messages
-- Deployment: `(RegistryErrorResponse) An error response is received from the docker registry 'index.docker.io'. Please retry later.`
-- Restart: `Failed to restart the container group ''. Error: An error response is received from the docker registry 'index.docker.io'.`
+## Error Signatures
+```
+(RegistryErrorResponse) An error response is received from the docker registry 'index.docker.io'. Please retry later.
+```
+```
+Failed to restart the container group ''. Error: An error response is received from the docker registry 'index.docker.io'. Please retry later.
+```
 
-## Prerequisites
-- Docker Hub account (paid account provides highest rate limit thresholds)
-- Azure CLI with `az container` access
-- Existing Twingate Connector deployment on Azure Container Instances
+## Resolution: Add Docker Hub Credentials to Deployment Command
 
-## Resolution
-
-Add Docker Hub authentication parameters to the `az container` deployment command:
+Append the following flags to your `az container` deployment command:
 
 ```
 --registry-username [dockerhub username] \
@@ -35,27 +34,22 @@ Add Docker Hub authentication parameters to the `az container` deployment comman
 --registry-login-server index.docker.io
 ```
 
-**Example (appended to existing deploy command):**
-```bash
-az container create \
-  ... [existing parameters] ... \
-  --registry-login-server index.docker.io \
-  --registry-username YOUR_DOCKERHUB_USERNAME \
-  --registry-password YOUR_DOCKERHUB_PASSWORD
-```
-
 ## Configuration Values
 
-| Parameter | Value |
+| CLI Flag | Value |
 |---|---|
-| `--registry-login-server` | `index.docker.io` |
 | `--registry-username` | Your Docker Hub username |
-| `--registry-password` | Your Docker Hub password or access token |
+| `--registry-password` | Your Docker Hub password |
+| `--registry-login-server` | `index.docker.io` (literal) |
+
+## Prerequisites
+- An authenticated Docker Hub account (free tier gets higher limits than unauthenticated; paid tier gets highest)
+- Azure CLI with `az container` command access
 
 ## Gotchas
-- Free Docker Hub accounts still have rate limits; a paid account provides the highest thresholds
-- Retry without credentials will continue to fail if rate limit is hit — credentials must be added to the command
-- Use a Docker Hub access token instead of password where possible for better security
+- Unauthenticated pulls share rate limits by source IP — shared Azure egress IPs exhaust limits quickly
+- This affects both initial deployments and container group restarts/updates
+- Free Docker Hub accounts still benefit over unauthenticated pulls
 
 ## Related Docs
 - [Docker Hub Rate Limiting Documentation](https://docs.docker.com/docker-hub/download-rate-limit/)

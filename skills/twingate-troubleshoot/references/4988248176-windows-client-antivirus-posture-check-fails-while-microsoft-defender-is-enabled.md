@@ -1,57 +1,62 @@
 ---
 source: https://help.twingate.com/articles/4988248176-windows-client-antivirus-posture-check-fails-while-microsoft-defender-is-enabled
 type: help
-fetched: 2026-10-25
-source_version: 77f1bdec6946d8f2fd43e91cec01c015cd58a06b4fa5cb47f6344442aa10c29c
+fetched: 2026-11-01
+source_version: 0507e8009cb7ffd59c7fef516d4cdb171588f227ab4860577a9c538efbe22392
 trust: official
 ---
 
 # [Windows Client] Antivirus Posture Check Fails While Microsoft Defender Is Enabled
 
 ## Summary
-A confirmed Microsoft bug causes Windows Security Center (WSC) to misreport antivirus status, causing Twingate's Antivirus posture check to fail even when Microsoft Defender is fully operational. The Twingate Client reads WSC's published value, not Defender's actual state, so the failure persists until WSC re-evaluates. No Microsoft fix date has been published (issue active as of August–September 2026).
+The Twingate Antivirus device posture check reports antivirus as disabled even when Microsoft Defender is running normally. This is a confirmed Microsoft bug in Defender platform versions 4.18.26070.9–4.18.26080.3, where Windows Security Center (WSC) misreports antivirus state. The fix is included in Defender platform version 4.18.26080.4 (released September 17, 2026).
 
 ## Key Information
-- **Root cause**: WSC misreports antivirus state at service startup and retains the incorrect value indefinitely until restarted or manually triggered
-- **Twingate behavior is correct**: The Client reads exactly what WSC publishes; the bug is entirely in WSC/Defender
-- **Tools that show Defender as healthy** (`Get-MpComputerStatus`, `root\SecurityCenter2` WMI, Windows Security app) read a **different source** than WSC — disagreement between these and Twingate is expected on affected devices
-- **Not related to**: Twingate Client version, Windows build version, or any Windows security update
-- **Updating the Twingate Client does not help**
+- **Root cause**: WSC misreports antivirus status at service start; Twingate reads from WSC, not from `Get-MpComputerStatus` or `root\SecurityCenter2` WMI
+- **Affected Defender versions**: 4.18.26070.9 through below 4.18.26080.4
+- **Fix version**: 4.18.26080.4 or later
+- **Twingate Client version is irrelevant** — updating the Client does not fix this
+- Affected device set can change daily (intermittent per reboot); Defender continues to protect the device throughout
 
 ## Symptoms
 - Antivirus posture check fails in Client or Admin Console
-- Users see `Device security not met` or `Block reason: Verified device` in Resource access events
-- Defender is enabled with real-time protection on and signatures current
-- Failure persists across sign-outs and Client reinstalls
-- Windows may show its own false notifications that Defender is turned off
+- Users blocked with `Device security not met` or `Block reason: Verified device` in Resource access events
+- Failure persists through sign-outs and Client reinstalls
+- `Get-MpComputerStatus` and Windows Security app show Defender as healthy (expected disagreement — not a Twingate bug)
 
-## Workaround (Per-Device)
+## Resolution
 
-### Toggle Real-Time Protection
-1. Open **Windows Security → Virus & threat protection → Manage settings**
-2. Switch **Real-time protection** off, then immediately back on
-3. This forces WSC to re-evaluate and publish the correct state
+### Step 1: Check current Defender platform version
+```powershell
+Get-MpComputerStatus | Select-Object AMProductVersion, AMEngineVersion
+```
+Compare `AMProductVersion` against `4.18.26080.4`. Below that version = potentially affected.
 
-**Caveats:**
-- Real-time protection is briefly disabled during the toggle
-- Fix does **not survive a reboot** — WSC service restart may re-apply the incorrect value
-- Repeat toggle after each reboot if needed
+### Step 2: Update Microsoft Defender
+- Devices receive the update through their normal Defender update channel
+- No Twingate changes or Client upgrade required
+- Reference: [Microsoft Defender for Endpoint release notes](https://learn.microsoft.com/en-us/defender-endpoint/msda-updates-previous-versions-technical-upgrade-support)
 
-## Fleet-Scale Recommendation
-The per-device toggle does not scale. For environments with many affected devices:
-- **Temporarily remove the Antivirus requirement** from the affected Device Security Policy in the Admin Console
-- Re-enable the requirement once Microsoft ships the Defender fix
-- This restores access without modifying endpoints
+## Temporary Workarounds (per-device only, not persistent)
+
+**Toggle Real-time protection** (clears until next WSC service restart):
+1. Open **Windows Security > Virus & threat protection > Manage settings**
+2. Toggle **Real-time protection** off, then back on
+- ⚠️ Briefly disables protection; does not survive reboot
+
+**Fleet last resort**: Remove the Antivirus requirement from the Device Security Policy to restore access immediately — re-enable once devices reach 4.18.26080.4+.
 
 ## Gotchas
-- Rebooting is **not a reliable fix** — it restarts WSC but may re-apply the wrong value immediately
-- Updating Microsoft Defender does **not** resolve this; Microsoft's advisory notes the issue appears *after* recent Defender updates install
-- The posture check will not self-correct without manual intervention or a Microsoft fix
+- `Get-MpComputerStatus`, WMI (`root\SecurityCenter2`), and the Windows Security app read a **different source** than the posture check — disagreement between these tools and Twingate is expected and normal on affected devices
+- The toggle workaround does not scale and is not persistent across reboots
+- Problem appears intermittent because WSC samples state only at service start
 
-## Prerequisites
-- Affected platforms: Windows 10 (all supported versions), Windows 11, Windows Server
-- Twingate component: Client (any version)
+## Configuration Values
+| Item | Value |
+|------|-------|
+| Fixed Defender platform version | `4.18.26080.4` |
+| PowerShell property to check | `AMProductVersion` |
 
 ## Related Docs
-- Microsoft Windows release health advisory: *"Incorrect notifications that Microsoft Defender Antivirus is turned off"*
-- Twingate Device Security Policy configuration (Admin Console)
+- Microsoft advisory: *Incorrect notifications that "Microsoft Defender Antivirus is turned off"*
+- [Twingate Device Posture Checks documentation](https://help.twingate.com)

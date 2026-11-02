@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/5098803549-checking-for-resource-ambiguity
 type: help
-fetched: 2026-10-04
-source_version: cce133f54b0096d2353eaea966898046561019ca314cb2f3449ae283d9fe3152
+fetched: 2026-11-01
+source_version: c02a3c7c2fc85ebe41a2c542d3b0b06f6366b79e52b795979f19e5a921113231
 trust: official
 ---
 
@@ -12,29 +12,25 @@ trust: official
 Checking For Resource Ambiguity
 
 ## Summary
-Twingate allows identical Resources (same IP, CIDR range, hostname, or FQDN) to be declared across multiple Remote Networks, which is useful for environments with overlapping subnets. However, this can create ambiguity in Resource resolution, causing connectivity issues when Twingate cannot determine the correct network path.
+Twingate allows identical Resources (same IP, CIDR, hostname, or FQDN) to be assigned to different Remote Networks, which is useful for environments with overlapping subnets. However, this can create ambiguity in Resource resolution, causing connectivity issues when Twingate cannot determine the correct network path.
 
 ## Key Information
 - Each Resource is attached to exactly one Remote Network
-- Identical Resources can exist across different Remote Networks (by design)
-- Ambiguity occurs at resolution time when Twingate cannot determine which network path to use
-- Ambiguity affects: IP addresses, CIDR ranges, hostnames, and FQDNs
+- Duplicate Resources across Remote Networks are permitted by design
+- Ambiguity occurs at resolution time when Twingate cannot identify the correct network path for a given IP, hostname, or FQDN
 
 ## Conditions That Trigger Ambiguity
-- Identical Resources are mapped to different Remote Networks **AND** at least one Group grants access to those identical Resources
-- Users belong to Groups that contain identical Resources across different Remote Networks
-
-## Symptoms
-- Connectivity issues when accessing Resources
-- Inconsistent or failed Resource resolution
-
-## Resolution
-Follow the **Best Practices guide on overlapping IP addresses** (linked from the Twingate help center) for detailed remediation steps.
+- Identical Resources are mapped to different Remote Networks **and** at least one Group grants access to those identical Resources
+- Users belong to Groups that contain identical (overlapping) Resources
 
 ## Gotchas
-- Ambiguity only becomes a problem when access permissions overlap — having identical Resources in different Remote Networks is not inherently problematic until Group access policies create conflicting resolution paths
-- This is a configuration/policy issue, not a network infrastructure issue
+- Ambiguity is not a configuration error by itself — it only causes issues when Group access policies expose conflicting Resources to the same user
+- Symptoms manifest as connectivity issues, not necessarily explicit error messages
+- Overlapping CIDR ranges can cause the same ambiguity as identical exact-match Resources
+
+## Resolution
+Follow the **Best Practices guide on overlapping IP addresses** (linked from the original page) for detailed remediation steps.
 
 ## Related Docs
-- Twingate Best Practices: Overlapping IP Addresses
-- Twingate Troubleshooting Guide
+- Best Practices guide on overlapping IP addresses (referenced in-page)
+- Twingate troubleshooting guide (parent document)

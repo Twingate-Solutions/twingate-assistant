@@ -1,39 +1,40 @@
 ---
 source: https://help.twingate.com/articles/4982245028-using-nslookup-with-manually-defined-nameserver-fails-on-windows-with-twingate-client-running
 type: help
-fetched: 2026-10-04
-source_version: e2648660dd5f751b35d5bca70eec48c83fe14ea3078e163f24b38f4a5bffba25
+fetched: 2026-11-01
+source_version: 4caf46e766051cd5bd1cb9fc7e2a4e27f985a6f2c97d659ea622262cdb306582
 trust: official
 ---
 
-# Using nslookup with Manually Defined Nameserver Fails on Windows with Twingate Client
+# Using nslookup with Manually Defined Nameserver Fails on Windows with Twingate Client Running
 
 ## Summary
-When the Twingate Client is active on Windows, it intercepts all DNS queries via a transparent DNS proxy on a virtual interface. Manually specifying a DNS server in `nslookup` (or similar tools) bypasses this proxy and is blocked by design.
+When the Twingate Client is active on Windows, it routes all DNS through an internal transparent DNS proxy, blocking any attempt to manually specify an alternate DNS server (e.g., `nslookup google.com 8.8.8.8`). This is intentional behavior to enforce access control and prevent DNS leakage outside the Twingate-controlled path.
 
 ## Key Information
-- Twingate routes all DNS through an internal proxy on a virtual NIC (typically `100.95.0.x`)
-- Manual nameserver specification (e.g., `nslookup <domain> 8.8.8.8`) is **intentionally blocked**
-- Standard `nslookup` without a custom resolver works correctly
-- Blocking prevents DNS leakage and maintains secure private resource resolution
+- Twingate installs a transparent DNS proxy on a virtual network interface, typically at `100.95.0.x`
+- All DNS queries are intercepted by this proxy — manually specifying resolvers bypasses it and gets blocked
+- Standard `nslookup` without a custom resolver works correctly (routes through Twingate proxy)
+- This behavior applies on Windows with the Twingate Client running
 
 ## Behavior Reference
 
 | Command | Result |
 |---|---|
-| `nslookup google.com 8.8.8.8` | ❌ Times out |
-| `nslookup google.com` | ✅ Resolves via `100.95.0.x` |
+| `nslookup google.com` | ✅ Succeeds — uses Twingate proxy at `100.95.0.x` |
+| `nslookup google.com 8.8.8.8` | ❌ Fails — request blocked, times out |
 
-## Why It's Blocked
-- DNS request bypasses Twingate-controlled path
-- Private resources may not resolve via public DNS
-- Enforced to prevent information leakage
+## Why Requests Are Blocked
+- Manually specifying a resolver routes DNS outside Twingate's controlled path
+- Private resources may not be resolvable via public DNS (e.g., `8.8.8.8`)
+- Twingate blocks this to prevent DNS information leakage
 
 ## Gotchas
-- This is **expected behavior**, not a bug or misconfiguration
-- Applies to any tool that allows manual DNS server specification (not just `nslookup`)
-- The proxy IP (`100.95.0.x`) is Twingate's virtual interface, not a misconfigured resolver
+- The timeout failure when specifying a custom DNS server is **expected and by design** — not a bug or misconfiguration
+- Tools that hardcode a DNS resolver (not just `nslookup`) will similarly fail while Twingate is active
+- Diagnostic tools relying on alternate nameservers for DNS testing will not work while the client is running
+- No workaround exists by design; use standard system DNS resolution instead
 
 ## Related Docs
-- Twingate DNS proxy behavior
-- Private resource name resolution
+- Twingate DNS proxy and private resource resolution documentation
+- Twingate Client network interface configuration

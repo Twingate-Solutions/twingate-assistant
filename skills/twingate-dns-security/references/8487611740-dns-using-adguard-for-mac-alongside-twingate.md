@@ -1,52 +1,47 @@
 ---
 source: https://help.twingate.com/articles/8487611740-dns-using-adguard-for-mac-alongside-twingate
 type: help
-fetched: 2026-10-04
-source_version: 1d0fc9401b2759880a9dd2038ac56a5db3a5c639356ba4ad5575f0e539be1bfe
+fetched: 2026-11-01
+source_version: 90cdc6ac338d2e0fb52b317645878b6c84c3b3426fd37527df5279f4ea9251ff
 trust: official
 ---
 
 # DNS: Using AdGuard for Mac alongside Twingate
 
 ## Summary
-AdGuard for Mac can conflict with Twingate's transparent DNS proxy functionality, preventing Twingate DNS Resources from resolving. Switching AdGuard's filtering mode to "Automatic Proxy" resolves the conflict.
+AdGuard for Mac can conflict with Twingate's transparent DNS proxy functionality, preventing Twingate DNS Resources from resolving. Changing AdGuard's filtering mode to "Automatic Proxy" resolves the conflict.
 
 ## Key Information
-- Conflict occurs because both AdGuard (app) and Twingate compete for system-level DNS proxy functionality
-- Only affects **AdGuard for Mac** (OS-installed application)
-- **Not affected**: AdGuard DNS, AdGuard Home (non-OS-installed products) — no incompatibility with those
-- Full interoperability has not been fully verified; fix is partially tested
-- Other platforms (Windows, etc.) untested
+- Conflict occurs because both applications attempt to use the same system-level DNS/proxy functionality
+- Only affects **AdGuard for Mac** (the installed OS application)
+- AdGuard DNS and AdGuard Home (non-OS-installed) are **not** affected
+- Full interoperability has not been fully verified — only briefly tested
 
 ## Prerequisites
 - Twingate Client installed on macOS
 - AdGuard for Mac installed
-- Admin access to AdGuard preferences
+- Platform: macOS only (other platforms untested)
 
-## Symptom
-Twingate DNS Resources fail to resolve while AdGuard client is active.
-
-## Step-by-Step Fix
+## Step-by-Step: Configure AdGuard to Allow Twingate DNS Proxy
 
 1. Open the **AdGuard** application
 2. Click the **Gear** icon
 3. Click **Preferences**
-4. Click the **Network** icon at the top of the preferences window
+4. Click the **Network** icon at the top of the Preferences window
 5. Next to **Filtering Mode**, click **Change Mode**
 6. Select **Automatic Proxy**
 7. Click **Apply**
 
 ## Configuration Values
-
-| Setting | Location | Required Value |
-|---|---|---|
-| Filtering Mode | AdGuard → Preferences → Network | `Automatic Proxy` |
+| Setting | Value |
+|---|---|
+| AdGuard Filtering Mode | `Automatic Proxy` |
 
 ## Gotchas
-- Default AdGuard filtering mode blocks Twingate's DNS proxy operation — must be changed manually after AdGuard installation
-- Non-app AdGuard products (AdGuard DNS servers, AdGuard Home) do **not** have this issue
-- Only macOS tested; other OS variants of AdGuard app are untested and may behave differently
-- This is a workaround, not a fully verified interoperability solution
+- Default AdGuard filtering mode blocks Twingate from acting as a transparent DNS proxy
+- Symptom is silent — Twingate DNS Resources simply fail to resolve with no obvious error
+- Other AdGuard products (AdGuard Home, AdGuard DNS) do not have this incompatibility
+- Other OS platforms (Windows, Linux) are untested with this fix
 
 ## Related Docs
 - Twingate DNS Resources configuration
