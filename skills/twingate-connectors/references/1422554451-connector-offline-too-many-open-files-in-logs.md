@@ -1,60 +1,55 @@
 ---
 source: https://help.twingate.com/articles/1422554451-connector-offline-too-many-open-files-in-logs
 type: help
-fetched: 2026-10-04
-source_version: c61f9667f7f7311c917b9166c4a977c12395f615d5a3abe37aeb3c7c738a3e5e
+fetched: 2026-11-01
+source_version: c6b17c8756a6beed9c3757ee0b4e3e70f4ef5d5f5f06ae8562ec5e465ffe89c1
 trust: official
 ---
 
 # Connector Offline—"too many open files" in Logs
 
 ## Summary
-When a Twingate Connector's underlying Linux host hits its `ulimit` file descriptor limit (default 1024), the Connector goes offline. Each connected Client consumes 8 file descriptors, capping support at ~128 active clients with default settings.
+When a Twingate Connector's host exceeds the default Linux `ulimit` of 1024 file descriptors, the Connector goes offline. Each Client tunnel consumes 8 file descriptors, capping active clients at ~128 under default settings.
 
 ## Key Information
 - Default Linux `ulimit` value: **1024** file descriptors
-- Each Client tunnel uses **8 file descriptors** (8 transports)
-- Max active clients at default limit: **~128**
-- Limit applies to open sockets to Twingate Resources
-- AWS ECS Fargate has special behavior (see Gotchas)
+- Each client tunnel uses **8 file descriptors** (8 transports)
+- Maximum active clients at default limit: **~128**
+- Affects open sockets to Twingate Resources
+- Twingate Component: **Connector**
 
 ## Symptoms
-- Connector stops sending `/heartbeat` metrics
-- Connector goes offline with log entries containing:
+- Connector fails to send `/heartbeat` metrics
+- Connector goes offline with log errors:
 ```
-[ERROR] [connector] Failed to submit analytics events: Unexpected error: error sending request for url (https://analytics.twingate.com/v1/track): error trying to connect: dns error: Too many open files (os error 24)
+[ERROR] [connector] Failed to submit analytics events: Unexpected error: error sending request for url 
+(https://analytics.twingate.com/v1/track): error trying to connect: dns error: Too many open files (os error 24)
 ```
 
 ## Resolution
 
 ### Option 1: Increase ulimit on the Host
-Increase the file descriptor limit on the Connector's underlying host:
+Increase the file descriptor limit on the underlying host:
 ```bash
 ulimit -n 2048
 ```
-- Adjust the target value based on expected concurrent client load
-- Formula: `(max_clients × 8) + headroom`
+Scale the value based on expected concurrent client connections (clients × 8 = minimum file descriptors needed).
 
 ### Option 2: Add More Connectors
-- Add additional Connectors to the Remote Network to distribute load
-- Twingate load balances across multiple Connectors automatically
-- Recommended if all existing Connectors are hitting the limit simultaneously
+Deploy additional Connectors to distribute load. Twingate load-balances across multiple Connectors, reducing per-Connector connection count.
 
 ## Configuration Values
 | Parameter | Default | Notes |
 |-----------|---------|-------|
-| `ulimit -n` (nofile) | 1024 | File descriptors per process |
-| File descriptors per client | 8 | Fixed per Twingate architecture |
-| Max clients at default | ~128 | Calculate: `floor(1024 / 8)` |
+| `nofile` (ulimit) | 1024 | Linux default; increase as needed |
+| File descriptors per client | 8 | Fixed per tunnel |
+| Max clients at default limit | ~128 | Calculated: 1024 ÷ 8 |
 
 ## Gotchas
-- **AWS ECS Fargate**: Cannot modify the `nofile` `ulimit` parameter on the underlying host. Fargate enforces:
-  - Soft limit: **1024** (cannot override)
-  - Hard limit: **65535**
-  - See [AWS ECS Ulimit API docs](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_Ulimit.html)
-- `ulimit -n` changes may not persist across reboots—use `/etc/security/limits.conf` or systemd unit `LimitNOFILE` for permanent changes (not covered in this article)
-- Increasing `ulimit` on one Connector doesn't help if multiple Connectors are all saturated
+- **AWS ECS Fargate**: You **cannot** modify the `nofile` ulimit parameter on Fargate-hosted tasks. AWS Fargate overrides this value with soft limit **1024** and hard limit **65535** — the hard limit effectively becomes your ceiling, and the soft limit cannot be raised via task definition per [AWS documentation](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_Ulimit.html).
+- A `ulimit` change via CLI is session-scoped; persist it in `/etc/security/limits.conf` or via systemd `LimitNOFILE` for permanent effect (not documented on this page — verify against your Linux distro's configuration).
+- If multiple Connectors are all hitting the limit simultaneously, adding Connectors is preferable to simply raising the limit on each.
 
 ## Related Docs
-- [AWS ECS Fargate Ulimit API Reference](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_Ulimit.html)
+- [AWS ECS Ulimit API Reference](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_Ulimit.html)
 - Twingate Connector deployment documentation

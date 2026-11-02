@@ -1,71 +1,71 @@
 ---
 source: https://help.twingate.com/articles/5745151855-dns-using-dnsfilter-alongside-twingate
 type: help
-fetched: 2026-10-04
-source_version: ace33ab218b86ca810dffcf2643b0b3c70f0422dce9aa4cb9f11176ceb582add
+fetched: 2026-11-01
+source_version: 9c1a01c51dfb9320b20bd0f0c85351ec0b154bded2ef8b5d5a16889ecd2b4909
 trust: official
 ---
 
 # DNS: Using DNSFilter Alongside Twingate
 
+## Page Title
+DNS: Using DNSFilter alongside Twingate
+
 ## Summary
-DNSFilter and Twingate can coexist, but configuration requirements depend on the DNSFilter deployment method. Network deployments require no changes; the Roaming Client requires DNS-over-TLS to be enabled to avoid connectivity failures caused by Twingate blocking DNSFilter's startup DNS test requests.
+DNSFilter and Twingate can coexist, but the DNSFilter Roaming Client requires additional configuration to work properly. Network-level and Relay deployments require no changes. The Roaming Client must be configured to use DNS-over-TLS to avoid connectivity issues caused by Twingate blocking standard TCP/UDP DNS test requests.
 
 ## Key Information
-- Twingate intercepts DNS requests by default; this conflicts with the DNSFilter Roaming Client's TCP/UDP startup checks
-- Network-level and Relay deployments work transparently — non-Twingate resources pass through to DNSFilter servers automatically
-- Roaming Client failure mode: device ends up with limited/no internet connectivity because DNSFilter misreads blocked test requests as "no internet"
-- Fix: configure Roaming Client to use DNS-over-TLS (not blocked by Twingate by default)
+- **Network Deployment / DNSFilter Relay**: No extra configuration needed. Non-Twingate traffic is forwarded to DNSFilter servers automatically.
+- **Roaming Client (default)**: Conflicts with Twingate. The client's startup DNS test requests (TCP/UDP) are blocked by Twingate, causing the Roaming Client to report no internet connectivity.
+- **Fix**: Configure Roaming Client to use DNS-over-TLS (`tcp-tls`), which Twingate does not block by default.
 
 ## Prerequisites
-- DNSFilter Roaming Client installed on target devices
-- Admin/sudo access to modify registry (Windows) or config files (macOS)
+- DNSFilter Roaming Client installed on target device
+- Admin/sudo access on the device
+- Twingate client installed
 
-## Deployment Method Matrix
+## Configuration Values
 
-| DNSFilter Method | Extra Config Needed |
-|---|---|
-| Network Deployment | None |
-| DNSFilter Relay | None |
-| Roaming Client | Enable DNS-over-TLS (see below) |
-
-## Step-by-Step: Enable DNS-over-TLS for Roaming Client
-
-### Windows — Retail Edition
+### Windows — Registry Key
+**Retail version:**
 ```
 reg add "HKLM\Software\DNSFilter\Agent" /v UpstreamOrder /d "tcp-tls" /f
 ```
-
-### Windows — MSP/Whitelabel Edition
+**MSP/Whitelabel version:**
 ```
 reg add "HKLM\Software\DNSAgent\Agent" /v UpstreamOrder /d "tcp-tls" /f
 ```
 
-### macOS — Both Editions
-1. Open config file:
-   - Retail: `sudo nano /Library/Application\ Support/DNSFilter\ Agent/daemon.conf`
-   - MSP/Whitelabel: same path as retail (identical for both editions)
-2. Add at the **top** of the file:
-   ```
-   upstream_order = [ "tcp-tls"]
-   ```
-3. Restart the DNSFilter Roaming Client
+### macOS — Config File
+**File path (both retail and MSP/whitelabel):**
+```
+/Library/Application Support/DNSFilter Agent/daemon.conf
+```
+**Setting to add at the top of the file:**
+```
+upstream_order = [ "tcp-tls"]
+```
 
-## Configuration Values
+## Step-by-Step (Roaming Client Fix)
 
-| Platform | Key/Setting | Value |
-|---|---|---|
-| Windows (Retail) | `HKLM\Software\DNSFilter\Agent\UpstreamOrder` | `tcp-tls` |
-| Windows (MSP) | `HKLM\Software\DNSAgent\Agent\UpstreamOrder` | `tcp-tls` |
-| macOS | `upstream_order` in `daemon.conf` | `[ "tcp-tls"]` |
+**Windows:**
+1. Install the DNSFilter Roaming Client.
+2. Run the appropriate `reg add` command above (retail vs. MSP) in an elevated terminal.
+3. Restart the DNSFilter Roaming Client.
+
+**macOS:**
+1. Open `daemon.conf` using `sudo nano` with the path above.
+2. Add `upstream_order = [ "tcp-tls"]` at the **top** of the file.
+3. Save and restart the DNSFilter Roaming Client.
 
 ## Gotchas
-- Setting must be added at the **top** of `daemon.conf` on macOS — placement matters
-- Client restart may be required after making changes
-- DNS-over-TLS is not blocked by Twingate by default; plain TCP/UDP DNS startup probes are blocked
-- MSP/whitelabel registry path differs from retail (`DNSAgent` vs `DNSFilter`)
+- The `upstream_order` / `UpstreamOrder` setting must target the correct registry path or config file depending on whether you have the **retail** or **MSP/whitelabel** edition — paths differ.
+- The setting must be placed at the **top** of `daemon.conf` on macOS.
+- A client restart is required for changes to take effect.
+- Default TCP/UDP DNS requests from the Roaming Client startup are blocked by Twingate by design — this is expected behavior, not a bug.
 
 ## Related Docs
-- [DNSFilter Network Deployment](https://help.dnsfilter.com)
-- [DNSFilter Roaming Client documentation](https://help.dnsfilter.com)
-- Twingate DNS handling documentation
+- [DNSFilter Network Deployment](https://www.dnsfilter.com)
+- [DNSFilter Relay documentation](https://www.dnsfilter.com)
+- [DNSFilter Roaming Client documentation](https://www.dnsfilter.com)
+- Twingate DNS configuration documentation

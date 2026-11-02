@@ -1,31 +1,24 @@
 ---
 source: https://help.twingate.com/articles/4097879304-browser-local-network-access-lna-blocking-twingate-resources
 type: help
-fetched: 2026-10-04
-source_version: ded64aa92f10038b682b01e8b7f566255e28714160c836fb0aaab3ac6f87f919
+fetched: 2026-11-01
+source_version: d78c9671c67395f3a50f90bd32ff5f411a78c6a9d556016165fb4d1ff16b6222
 trust: official
 ---
 
 # Browser Local Network Access (LNA) Blocking Twingate Resources
 
 ## Summary
-Chrome 142+ and Firefox (Beta/Nightly/Strict ETP) apply Local Network Access restrictions that block Twingate Resources in the browser. Twingate routes traffic via CGNAT over loopback, causing browsers to treat Resources as local network addresses and trigger permission prompts or blocks. Denying these prompts breaks Resource access.
+Chrome 142+ and Firefox (Beta/Nightly/ETP Strict) include Local Network Access restrictions that block Twingate Resources in the browser. Twingate routes traffic via CGNAT over loopback, causing browsers to treat Resources as local network endpoints and trigger LNA permission prompts or blocks.
 
-## Affected Platforms
-- Chrome/Chromium 142+ (LNA enabled by default)
-- Firefox Beta, Nightly, and standard releases with ETP set to Strict
-- OS: Mac, Windows, Linux
+## Key Information
+- **Chrome**: LNA enabled by default in Chrome/Chromium 142+
+- **Firefox**: LNA in Beta/Nightly by default; standard Firefox users with ETP set to Strict are progressively affected
+- Symptoms: resource inaccessibility, elevated CORS errors, blocked images, "Not Secure" warnings
+- Root cause: Twingate's CGNAT/loopback routing causes browsers to classify Resources as local
 
-## Symptoms
-- Resources inaccessible after clicking "Block" on permission prompt
-- Elevated CORS errors
-- Blocked images
-- Chrome: Resources show "Not Secure"
-
-## Workarounds
-
-### Admin-Side: Narrow Resource Scope
-Exclude public CDN endpoints from Resource definitions if not explicitly required:
+## Workaround (All Browsers)
+Narrow Resource definitions to exclude public CDN endpoints not explicitly needed privately:
 - `*.amazonaws.com`
 - `*.microsoftonline.com`, `azureedge.net`, `*.azure.com`
 
@@ -33,18 +26,18 @@ Exclude public CDN endpoints from Resource definitions if not explicitly require
 
 ## Chrome Fixes
 
-### End User (Unmanaged)
-1. Click **Not Secure** in address bar
-2. Toggle **Local Network Access** → **Allow**  
-   OR: **Site settings** → **Local network access** → **Allow**
+### Unmanaged (End User Self-Service)
+1. Click **Not Secure** in the address bar
+2. Toggle **Local Network Access** to Allow, OR navigate to **Site Settings > Local Network Access > Allow**
 
 ### Advanced (chrome://flags)
-- Flag: `chrome://flags/#local-network-access-check` — set to Disabled  
-- ⚠️ Advanced users only; affects stability/security
+- Flag: `chrome://flags/#local-network-access-check` — set to Disabled
+- ⚠️ Warning: affects browser stability/security
 
-### Enterprise: Google Workspace
-Policy: `LocalNetworkAccessAllowedForUrls`
-
+### Enterprise — Google Workspace
+1. Set up Managed Profiles ([docs](https://support.google.com/chrome/a/answer/7349337))
+2. In Google Admin Console: **Chrome Browser > Custom Configurations**
+3. Select target OU, add JSON:
 ```json
 {
   "LocalNetworkAccessAllowedForUrls": [
@@ -52,18 +45,15 @@ Policy: `LocalNetworkAccessAllowedForUrls`
   ]
 }
 ```
-**Path:** Admin Console → Chrome Browser → Custom Configurations → select OU → add JSON → Save  
-**Verify:** `chrome://policy` → Reload policies
+4. Save and verify at `chrome://policy` → **Reload policies**
 
-### Enterprise: MDM
-Deploy `LocalNetworkAccessAllowedForUrls` via:
-- **Windows (Intune):** OMA-URI / Windows registry
-- **macOS:** `.mobileconfig` plist
-- **Android:** Managed app configuration
+### Enterprise — MDM
+Deploy `LocalNetworkAccessAllowedForUrls` policy per platform:
+- **Windows (Intune)**: OMA-URI using Windows registry path from [Chrome Enterprise policy reference](https://chromeenterprise.google/policies/#LocalNetworkAccessAllowedForUrls)
+- **macOS**: `.mobileconfig` plist format
+- **Android**: Managed app configuration
 
-See [Chrome Enterprise policy reference](https://chromeenterprise.google/policies/#LocalNetworkAccessAllowedForUrls) for format details.
-
-### Disable LNA Entirely (deprecated as of Chrome 144)
+### Disable LNA Entirely (Deprecated as of Chrome 144)
 - `LocalNetworkAccessRestrictionsEnabled`
 - `LocalNetworkAccessRestrictionsTemporaryOptOut`
 
@@ -71,34 +61,33 @@ See [Chrome Enterprise policy reference](https://chromeenterprise.google/policie
 
 ## Firefox Fixes
 
-### End User (Unmanaged)
-1. Click permissions icon (rightmost icon before address bar)
-2. Find **Access local network devices** → click **X** next to **Blocked**
-3. Refresh page → click **Allow** on prompt
+### Unmanaged (End User Self-Service)
+1. Click the permissions icon in the address bar (rightmost icon)
+2. Find **Access local network devices** → click **X** next to Blocked
+3. Refresh the page → click **Allow** when prompted
 4. Optionally check **Remember my choice for this site**
 
-**To manage saved permissions:** Settings → Privacy & Security → Permissions → **Device apps and services** / **Local network devices** → Settings
+To manage saved permissions: **Settings > Privacy & Security > Permissions > Device apps and services / Local network devices**
 
 ### Advanced (about:config)
-⚠️ Experienced users only.
+Navigate to `about:config` and modify:
 
-| Preference | Type | Default | Action |
+| Preference | Type | Default | Effect |
 |---|---|---|---|
-| `network.lna.enabled` | boolean | `true` | Set `false` to disable all LNA |
+| `network.lna.enabled` | boolean | `true` | Set `false` to disable all LNA restrictions |
 | `network.lna.blocking` | boolean | `true` | Set `false` to allow without prompts |
-| `network.lna.skip-domains` | string | empty | Comma-separated domains/wildcards, e.g. `intranet.company.com,.devices.local` |
+| `network.lna.skip-domains` | string | empty | Comma-separated domains/wildcards to exempt (e.g., `intranet.company.com,.devices.local`) |
 
 ### Enterprise
-Use the `LocalNetworkAccess` Firefox Enterprise Policy. See [Firefox Enterprise Policy Documentation](https://mozilla.github.io/policy-templates/).
+Use the Firefox `LocalNetworkAccess` policy — see [Firefox Enterprise Policy Documentation](https://mozilla.github.io/policy-templates/).
 
 ---
 
 ## Gotchas
-- Clicking **Block** once may persist; users must manually reset permissions
-- Chrome LNA disable flags deprecated after v144
-- Firefox LNA rollout is progressive; Strict ETP users affected before general release
+- Clicking **Block** on the LNA prompt causes persistent loss of browser access to Twingate Resources until manually reversed
+- Chrome LNA disable flags are deprecated as of v144 — enterprise policy is the preferred long-term solution
+- `about:config` and `chrome://flags` changes affect stability and security
 
 ## Related Docs
-- [Chrome Enterprise Policy Reference](https://chromeenterprise.google/policies/#LocalNetworkAccessAllowedForUrls)
-- [Manage Chrome user profiles](https://support.google.com/chrome/a/answer/7349337)
-- [Firefox Enterprise Policy Documentation](https://mozilla.github.io/policy-templates/)
+- [Chrome Enterprise Policy Reference — LocalNetworkAccessAllowedForUrls](https://chromeenterprise.google/policies/#LocalNetworkAccessAllowedForUrls)
+- [

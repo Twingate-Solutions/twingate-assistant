@@ -1,58 +1,48 @@
 ---
 source: https://github.com/Twingate/gateway
 type: github
-fetched: 2026-10-28
-source_version: 02278747114351db1c960c6a59c0970962a95922
+fetched: 2026-11-01
+source_version: d9ac90a34029c7d9c935087125539edc22f3fa48
 trust: official
 ---
 
 # Twingate Gateway
 
 ## Summary
-The Twingate Gateway is a Layer 7 reverse proxy deployed within your own environment as part of Twingate Identity Firewall. It propagates user identity to upstream services and provides auditing for Kubernetes API servers, SSH servers, and web applications. Session recording, RBAC integration, and certificate-based auth are supported.
+The Twingate Gateway is an open-source Layer 7 reverse proxy that runs inside your environment as part of Twingate Identity Firewall. It propagates user identity to upstream services and provides auditing for Kubernetes API servers, SSH servers, and web applications. It eliminates the need for plaintext credentials on end-user machines by handling authentication at the proxy layer.
 
 ## Key Information
-- Distributed as a Docker image: `twingate/gateway` on Docker Hub
-- Supports Kubernetes, SSH, and Web App protocols
-- SSH: certificate-based auth, CA management (local or Vault-backed), full channel support (shell, exec, SFTP, port forwarding)
-- Kubernetes: identity propagation, RBAC integration, `kubectl` session recording
-- Web App: identity propagation via injected request headers, HTTP request auditing
-- Databases: coming soon
-- Free tier: up to 5 Kubernetes, SSH, or Web App resources
+- Written in Go; distributed as a Docker image (`twingate/gateway` on Docker Hub)
+- Supports three protocols: Kubernetes (kubectl/RBAC), SSH (certificate-based auth, shell/exec/SFTP/port forwarding), and Web App (header injection + HTTP auditing)
+- Database support is listed as coming soon
+- Free tier covers up to five Kubernetes, SSH, or Web App resources
+- Latest release fixed auditing of redirected requests from the HTTP mux router
 
 ## Prerequisites
 - A Twingate account with Identity Firewall enabled
-- Docker or Kubernetes environment to run the Gateway container
-- For Vault-backed SSH CA: a configured Vault SSH secrets engine role
-- For SSH host certificates via Vault: the Gateway host CA role must permit resource addresses/aliases (e.g., `allowed_domains=*`)
+- Docker or a Kubernetes environment to run the gateway container
+- Network access between the gateway and your upstream services (Kubernetes API server, SSH host, or internal web app)
 
 ## Usage / Step-by-Step
+Protocol-specific quick start guides are maintained in the project wiki:
+- **Kubernetes:** github.com/Twingate/gateway/wiki/Kubernetes-Quick-Start-Guide
+- **SSH:** github.com/Twingate/gateway/wiki/SSH-Quick-Start-Guide
+- **Web App:** github.com/Twingate/gateway/wiki/Web-App-Quick-Start-Guide
 
-See the wiki for full guides:
-- Kubernetes: [Quick Start Guide](https://github.com/Twingate/gateway/wiki/Kubernetes-Quick-Start-Guide)
-- SSH: [Quick Start Guide](https://github.com/Twingate/gateway/wiki/SSH-Quick-Start-Guide)
-- Web App: [Quick Start Guide](https://github.com/Twingate/gateway/wiki/Web-App-Quick-Start-Guide)
+For local development and release process details, see the Developer Guide: github.com/Twingate/gateway/wiki/Developers
 
-## Configuration Values (v2.x)
-- `ssh.ca.local` — local/manual SSH CA config (renamed from `ssh.ca.manual`)
-- `ssh.ca.vault.role` — Vault SSH CA role (top-level fallback)
-- `ssh.ca.vault.gatewayHostCA.role` — Vault role specifically for Gateway host CA signing
-- `log.sessionRecording` — session recording config (renamed from `auditLog`)
-- `upstreamTrustedCABundles` — upstream CA bundles (renamed from `cas` / `upstreamCABundles`)
-- TLS `tls_mode` enum replaces former boolean `tls` fields
-- Multiple static downstream TLS certificates supported
-- Automated downstream certificate issuance supported (cert-manager with ACME, Vault, local, and GCP Private CA issuers)
+## Configuration Values
+Configuration details are protocol-specific and documented in the wiki. No environment variables or CLI flags are documented in the README itself; refer to the relevant quick start guide for your protocol.
 
 ## Gotchas
-- **v2.0.0 introduces breaking changes.** See the [v1 → v2 migration guide](https://github.com/Twingate/gateway/wiki/Migration-1.0-to-2.0) before upgrading.
-- `ssh.ca.manual` renamed to `ssh.ca.local`; `auditLog` renamed to `log.sessionRecording`; `certificateConfigMapName` replaced by `certificateSecretName`; `--debug` flag removed.
-- Vault token auth method for Vault SSH CA has been removed.
-- Dev release tags now include a UTC build timestamp: `v1.2.3-dev-abc1234-20260101120000`.
+- The gateway must be deployed **inside** your environment (not externally); it is a self-hosted component
+- Identity propagation only works when traffic reaches the gateway through Twingate's network; direct access bypasses identity attribution
+- Redirected HTTP requests were not being audited prior to the latest release (now fixed)
 
 ## Related Docs
-- [Wiki home](https://github.com/Twingate/gateway/wiki)
+- [Wiki (all topics)](https://github.com/Twingate/gateway/wiki)
 - [How It Works](https://github.com/Twingate/gateway/wiki/How-It-Works)
-- [Web App Overview](https://github.com/Twingate/gateway/wiki/Web-App-Overview)
-- [Developer Guide](https://github.com/Twingate/gateway/wiki/Developers)
-- [Twingate Forum](https://forum.twingate.com/)
-- [Support](https://help.twingate.com/)
+- [Twingate Identity Firewall docs](https://www.twingate.com/docs/identity-firewall)
+- [Demo video](https://youtu.be/kLE9txLo8Kg?si=iUrjzFuILMwnWCVI&t=1038)
+- [Support forum](https://forum.twingate.com/)
+- [Docker Hub image](https://hub.docker.com/r/twingate/gateway)

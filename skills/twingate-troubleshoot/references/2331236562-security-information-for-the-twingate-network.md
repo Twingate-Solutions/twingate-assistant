@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/2331236562-security-information-for-the-twingate-network
 type: help
-fetched: 2026-10-28
-source_version: bdbd450174eccc90a884b614993af8476377bdba5e2596b25e68724a652644f9
+fetched: 2026-11-01
+source_version: 3d89e103abf66f9fa568f54c1d54edd9ddc725830a5584731dddb48a86d65bdf
 trust: official
 ---
 
@@ -12,34 +12,32 @@ trust: official
 Security Information for the Twingate Network
 
 ## Summary
-Documents Twingate's encryption configuration for compliance and regulatory audit purposes. Covers supported TLS versions and cipher suites in use on the Twingate network. Directs users to the Trust Center for broader security posture documentation.
+Twingate documents its security posture and encryption configuration for customers undergoing regulatory audits. The page specifies supported TLS versions and cipher suites used on the Twingate network. Full security details (people security, data protection, vendor management, infrastructure/product security) are available via Twingate's Trust Center.
 
 ## Key Information
 
-- **Trust Center** covers: People Security, Data Protection & Access Control, Vendor Management, Infrastructure Security, Product Security, and Product Architecture
-- Supported TLS versions: **TLS 1.2** and **TLS 1.3**
-- Cipher list may change in alignment with NIST Guidelines
-
-## Supported Cipher Suites
-
-| Cipher | Auth | Key Exchange | Encryption | Hash |
-|--------|------|--------------|------------|------|
-| `TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256` | ECDSA | ECDHE | ChaCha20-Poly1305 | SHA-256 |
-| `TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256` | RSA | ECDHE | ChaCha20-Poly1305 | SHA-256 |
-| `TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256` | ECDSA | ECDHE | AES-128-GCM | SHA-256 |
-| `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256` | RSA | ECDHE | AES-128-GCM | SHA-256 |
-| `TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384` | ECDSA | ECDHE | AES-256-GCM | SHA-384 |
-| `TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384` | RSA | ECDHE | AES-256-GCM | SHA-384 |
-
-## Gotchas
-
-- Cipher list is **not static** — it evolves with NIST guidance; verify current state before submitting to auditors
-- This page does not cover full security architecture details; Trust Center is the authoritative source for broader compliance evidence
-- For unanswered audit questions, contact your **Twingate Customer Success Manager** directly
+- **TLS Versions Supported:** TLS 1.2 and TLS 1.3
+- **Supported Cipher Suites:**
+  - `TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256`
+  - `TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256`
+  - `TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256`
+  - `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256`
+  - `TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384`
+  - `TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384`
+- All ciphers use **ECDHE** for forward secrecy
+- Cipher list subject to change in line with **NIST Guidelines**
 
 ## Prerequisites
-None — informational reference page only.
+- None for reference purposes
+- Contact your **Twingate Customer Success Manager** for questions not covered here or in the Trust Center
+
+## Configuration Values
+No user-configurable parameters. These ciphers are enforced at the Twingate network level and are not selectable by end users or administrators.
+
+## Gotchas
+- The cipher/TLS list **will change over time** as NIST guidelines evolve; verify current values with Twingate support for time-sensitive compliance audits
+- This page covers network-level encryption only; broader security topics (access control, vendor management, infrastructure) require visiting the Trust Center separately
 
 ## Related Docs
-- [Twingate Trust Center](https://trust.twingate.com) — full security posture documentation
-- Contact: Twingate Customer Success Manager for gap questions
+- [Twingate Trust Center](https://www.twingate.com/trust) – covers People Security, Data Protection & Access Control, Vendor Management, Infrastructure Security, Product Security, Product Architecture
+- Contact your Twingate Customer Success Manager for audit-specific questions

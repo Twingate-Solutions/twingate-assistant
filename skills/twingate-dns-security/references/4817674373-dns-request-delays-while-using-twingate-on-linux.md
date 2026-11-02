@@ -1,52 +1,53 @@
 ---
 source: https://help.twingate.com/articles/4817674373-dns-request-delays-while-using-twingate-on-linux
 type: help
-fetched: 2026-10-04
-source_version: 481a28a428928b99915784a92cb6f10a1b688e15b30151cf71810214c6fab957
+fetched: 2026-11-01
+source_version: caf382dc22f70696943e4087853590c8f18dc4840856327f68d57c089bc1fe30
 trust: official
 ---
 
 # DNS Request Delays While Using Twingate on Linux
 
+## Page Title
+DNS Request Delays While Using Twingate on Linux
+
 ## Summary
-Some Linux users (notably Arch Linux) experience sporadic 5-second DNS timeouts when Twingate is active. The cause is glibc's parallel IPv4/IPv6 DNS query behavior where out-of-order server responses trigger a timeout before sequential retry.
+Some Linux users (notably Arch Linux) experience sporadic 5-second DNS resolution timeouts when Twingate is active. The root cause is glibc's parallel IPv4/IPv6 DNS query behavior where out-of-order server responses trigger a timeout before sequential retry. Setting `single-request` in `/etc/resolv.conf` resolves the issue.
 
 ## Key Information
-- **Affected component:** Twingate Client
-- **Platform:** Linux (particularly Arch Linux)
-- **Root cause:** glibc `libresolv` sends parallel IPv4 (A) and IPv6 (AAAA) DNS queries; if responses arrive out of order, a 5-second timeout occurs before sequential retry begins
-- **Symptom:** Sporadic 5-second network request delays while Twingate is running
+- Affects Linux clients, particularly Arch Linux
+- Symptom: sporadic 5-second timeouts on network requests
+- Cause: glibc (`libresolv`) sends parallel A (IPv4) and AAAA (IPv6) DNS queries; out-of-order responses cause a 5-second timeout before falling back to sequential queries
 
 ## Prerequisites
-- Linux system using glibc (libresolv)
+- Linux system with glibc
 - Twingate Client installed and active
+- Write access to `/etc/resolv.conf`
 
-## Resolution
+## Step-by-Step Fix
 
-Add the `single-request` option to `/etc/resolv.conf`:
+1. Open `/etc/resolv.conf` in a text editor with root privileges:
+   ```
+   sudo nano /etc/resolv.conf
+   ```
 
-```
-options single-request
-```
+2. Add the `single-request` option:
+   ```
+   options single-request
+   ```
 
-This forces glibc to send IPv4 and IPv6 DNS requests **sequentially** instead of in parallel, eliminating the out-of-order response timeout.
-
-**Example `/etc/resolv.conf` entry:**
-```
-# existing nameserver lines...
-nameserver 127.0.0.1
-options single-request
-```
-
-## Gotchas
-- `/etc/resolv.conf` may be overwritten by `systemd-resolved`, `NetworkManager`, or `resolvconf` on system restart or network changes — changes may need to be made in the managing service's configuration instead
-- `single-request` trades timeout elimination for slightly increased sequential DNS lookup latency; this is generally preferable to 5-second sporadic delays
-- This is a system-level workaround, not a Twingate configuration change
+3. Save the file. No restart required for new DNS queries to use the setting.
 
 ## Configuration Values
-| Option | File | Effect |
-|--------|------|--------|
-| `single-request` | `/etc/resolv.conf` | Disables parallel A/AAAA queries in glibc |
+
+| File | Option | Effect |
+|------|--------|--------|
+| `/etc/resolv.conf` | `options single-request` | Forces sequential IPv4/IPv6 DNS lookups instead of parallel |
+
+## Gotchas
+- **resolv.conf may be overwritten**: Many Linux systems manage `/etc/resolv.conf` automatically via `systemd-resolved`, `NetworkManager`, or `resolvconf`. Changes may be lost on network restart or reboot. Persist the option through your network manager's configuration instead.
+- `single-request` trades parallelism for reliability — DNS lookups may be marginally slower in the happy path, but eliminates the 5-second penalty on out-of-order responses.
+- This is a system-wide change affecting all DNS resolution, not just Twingate traffic.
 
 ## Related Docs
 - [`resolv.conf` man page](https://man7.org/linux/man-pages/man5/resolv.conf.5.html)

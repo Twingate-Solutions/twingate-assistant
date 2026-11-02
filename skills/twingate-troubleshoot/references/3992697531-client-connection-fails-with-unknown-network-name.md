@@ -1,63 +1,58 @@
 ---
 source: https://help.twingate.com/articles/3992697531-client-connection-fails-with-unknown-network-name
 type: help
-fetched: 2026-10-04
-source_version: 1c68b64dc0acc6cc2bb7b61deda6b2f4b7f636738e165336239b87ca66c69a6d
+fetched: 2026-11-01
+source_version: c5a19d8f1e865a0e5ac897cccdf915d1533259904cbfea73e2df6a6a42c3f276
 trust: official
 ---
 
 # Client Connection Fails with "Unknown Network Name"
 
 ## Page Title
-Client connection fails with "Unknown network name"
+Client Connection Fails with "Unknown Network Name"
 
 ## Summary
-Windows Twingate clients may fail to connect and report "Unknown network name" when antivirus or security software (e.g., Elastic AV) interferes with the TLS connection to the Twingate controller. The root cause is SSL/TLS session interruption by a third-party security tool. Whitelisting the Twingate service in the AV solution resolves the issue.
-
-## Applicable To
-- **Component:** Twingate Client
-- **Platform:** Windows
-- **Related software:** Antivirus solutions (documented case: Elastic AV)
+The Twingate Windows client fails to connect and reports "Unknown network name" when antivirus or security software blocks or interferes with the TLS connection. The fix involves whitelisting the Twingate service in the AV solution and rebooting.
 
 ## Key Information
-- Error code `602` with message `open_url timeout` appears in `Twingate.Service.log`
-- `twingate.log` shows `Could not create SSL/TLS secure channel` on controller URL validation
-- Twingate Windows Client uses **.NET Framework** for HTTP connections
-- No relevant errors typically appear in Windows Event Logs
+- **Component:** Twingate Client
+- **Platform:** Windows only
+- **Root Cause:** AV/security software (e.g., Elastic AV) intercepts and breaks TLS handshake to Twingate controller
+- **Error codes:** `errorCode: 602`, `open_url timeout`
 
 ## Symptoms
-- Client fails to connect with "Unknown network name"
-- `Twingate.Service.log`: `[ERROR] ConnectionManager Auth failed. errorCode: 602, errorMessage: open_url timeout`
-- `twingate.log`: `HttpRequestException` → `Could not create SSL/TLS secure channel`
+- Client UI shows "Unknown network name"
+- `Twingate.Service.log`: `failed to get an access token: open_url timeout` / `Auth failed errorCode: 602`
+- `twingate.log`: `Could not create SSL/TLS secure channel` when validating `https://<tenant>.twingate.com/`
 
-## Troubleshooting Steps
+## Step-by-Step Diagnosis
 
-1. **Verify Twingate service is running** on the Windows host.
-
-2. **Test TLS connectivity via PowerShell** (uses .NET Framework, same as Twingate client):
+1. **Verify Twingate service is running** via Windows Services or Task Manager
+2. **Check Windows Event Logs** for relevant errors (often none present)
+3. **Test TLS connectivity** using PowerShell (.NET Framework, same stack as Twingate client):
    ```powershell
-   invoke-webrequest -UseBasicParsing -uri "https://<network>.twingate.com" | Select-Object StatusCode
+   invoke-webrequest -UseBasicParsing -uri "https://<tenant>.twingate.com" | Select-Object StatusCode
    ```
-   - **Expected:** HTTP status code (e.g., `200`)
-   - **Failure indicator:** `Could not create SSL/TLS secure channel` — confirms TLS is being blocked
+   - **Success:** Returns `200`
+   - **Failure indicator:** `Could not create SSL/TLS secure channel` → TLS is being blocked by local software
 
-3. **Check for known incompatible software** (AV, DNS, remote access tools) — see Related Docs.
+4. **Check for conflicting software** (DNS, VPN, remote access, AV) against Twingate's Known Incompatibility list
 
 ## Resolution
-- **Whitelist the Twingate service** in your antivirus solution (e.g., Elastic AV)
-- **Disable Windows Defender** (if applicable) and **reboot** the system
-- Confirm connectivity with the PowerShell test command above after changes
+- **Whitelist** the Twingate service executable in the antivirus solution (e.g., Elastic AV)
+- **Disable** Windows Defender if it is conflicting
+- **Reboot** the system after making changes
 
 ## Gotchas
-- Windows Event Logs will appear clean — do not rely on them for diagnosis
-- The PowerShell `invoke-webrequest` test is critical because it uses the same .NET Framework stack as the Twingate client, making it an accurate proxy test
-- Disabling AV temporarily to confirm the cause before whitelisting is a useful diagnostic step
+- No errors may appear in Windows Event Logs despite the connection failing — don't rely on Event Viewer to confirm or deny the issue
+- The PowerShell `invoke-webrequest` test is specifically useful because it uses .NET Framework, the same stack Twingate's Windows client uses
+- Issue is Windows-specific; this TLS interference pattern does not apply to other platforms
 
 ## Log File Locations
-| Log | Relevant Error |
+| Log | Path (typical) |
 |-----|---------------|
-| `Twingate.Service.log` | `errorCode: 602, open_url timeout` |
-| `twingate.log` | `Could not create SSL/TLS secure channel` |
+| `Twingate.Service.log` | Windows service log |
+| `twingate.log` | Client application log |
 
 ## Related Docs
-- [Known Incompatibility Overview](https://help.twingate.com) — check for full list of conflicting security/DNS/remote access software
+- [Known Incompatibility Overview](https://help.twingate.com) — full list of software known to conflict with Twingate

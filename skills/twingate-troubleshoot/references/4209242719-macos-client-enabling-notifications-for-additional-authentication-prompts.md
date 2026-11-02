@@ -1,46 +1,40 @@
 ---
 source: https://help.twingate.com/articles/4209242719-macos-client-enabling-notifications-for-additional-authentication-prompts
 type: help
-fetched: 2026-10-04
-source_version: d795ef6253a4c0ca24fa026de74396a3abf404dfd80c50e8b84add7449ac69bf
+fetched: 2026-11-01
+source_version: 5fb13efb4845da87ce33ba9c4d57167c1c5d6e9271b82d4ed9db996feccdb666
 trust: official
 ---
 
 # macOS Client: Enabling Notifications for Additional Authentication Prompts
 
 ## Summary
-The Twingate macOS Client requires system notifications to prompt users for additional authentication (2FA) as defined by Security Policies. Without notifications enabled, users will not receive MFA prompts and may be unable to access protected resources.
+The Twingate macOS Client uses system notifications to prompt users for additional authentication (2FA) required by Security Policies. Notifications must be explicitly enabled in macOS System Preferences, and the alert style must be set to **Alerts** (not Banners) to ensure prompts appear correctly.
 
 ## Key Information
-- Notifications are required for Security Policy-triggered 2FA prompts
-- Alert style must be set to **Alerts** (not Banners) to ensure prompts are actionable
-- Focus modes (e.g., Do Not Disturb) will suppress Twingate notifications even if enabled
+- Affects: 2FA/MFA prompts triggered by Twingate Security Policies
+- Alert style must be **Alerts** (not Banners) — Banners auto-dismiss and may cause missed prompts
+- macOS Focus modes (e.g., Do Not Disturb) can suppress prompts even if notifications are enabled
 
 ## Prerequisites
 - Twingate macOS Client installed and signed in
-- macOS user account with permission to modify notification settings
+- macOS user must be logged in as the desktop user (not via remote/admin session)
 
 ## Step-by-Step
 
 1. Click the **Apple icon** (top-left of screen)
 2. Select **System Preferences** from the dropdown
 3. Click **Notifications & Focus**
-4. Scroll down and click **Twingate** in the app list
+4. Scroll down and select **Twingate** in the app list
 5. Enable the **Allow Notifications** toggle
 6. Set alert style to **Alerts**
-7. Configure any additional optional alert settings as desired
-
-## Configuration Values
-| Setting | Required Value |
-|---|---|
-| Allow Notifications | Enabled (toggle on) |
-| Alert Style | Alerts |
+7. Configure any optional notification settings as desired
 
 ## Gotchas
-- **Do Not Disturb / Focus modes** will block Twingate notifications regardless of notification settings — users must account for active Focus profiles
-- Using **Banners** instead of **Alerts** may cause prompts to disappear before the user can respond; **Alerts** persist until dismissed
-- Steps reference **System Preferences** (macOS Ventura and earlier); on macOS Ventura+ the app is renamed **System Settings** and navigation may differ slightly
+- **Do Not Disturb / Focus modes** will suppress Twingate notifications — users must ensure Focus settings allow Twingate notifications or disable Focus when authentication prompts are expected
+- Using **Banners** instead of **Alerts** as the alert style may cause prompts to disappear before the user can respond, blocking resource access
+- This must be configured per macOS user account; system-wide MDM configuration may be required in managed environments
 
 ## Related Docs
 - Twingate Security Policies (2FA configuration)
-- Twingate macOS Client setup
+- Twingate macOS Client documentation

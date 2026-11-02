@@ -1,57 +1,58 @@
 ---
 source: https://help.twingate.com/articles/3556574910-potential-dns-or-resource-access-issues-on-devices-with-multiple-network-interfaces-connected
 type: help
-fetched: 2026-10-04
-source_version: 1998910c3494ba54c02bac4e6818e733152cd5f3987d56f710e3ad6b112f4a74
+fetched: 2026-11-01
+source_version: 3305636d37e29fff6a48c72e581ee07bae5ca6d2ce11636c8d8281a4808ec3d9
 trust: official
 ---
 
 # Potential DNS or Resource Access Issues on Devices With Multiple Network Interfaces
 
+## Page Title
+Potential DNS or Resource Access Issues on Devices With Multiple Network Interfaces Connected
+
 ## Summary
-Windows and Linux clients may experience Twingate Resource access failures or system DNS resolution issues when a device has both wired and wireless network interfaces active on the same subnet simultaneously. The root cause is not fully identified but is linked to driver issues or traffic-shaping software interfering with Twingate's network routing.
+Windows and Linux Twingate clients may experience resource access or DNS resolution failures when a device is connected to both wired and wireless interfaces on the same subnet simultaneously. Root cause is not definitively identified but is linked to network driver issues or traffic-shaping software. Workarounds and driver updates resolve most cases.
 
 ## Key Information
-- **Affected components:** Windows Client, Linux Client
-- **Trigger condition:** Multiple network interfaces (wired + wireless) connected to the same subnet concurrently
-- **Symptom on Windows:** Twingate Resource inaccessible
-- **Symptom on Linux:** System DNS resolution failures
-- **Common hardware factor:** Realtek chipset NICs are frequently implicated
+- **Affected platforms:** Windows Client, Linux Client
+- **Trigger condition:** Wired + wireless interfaces active simultaneously on the **same subnet**
+- **Symptoms:**
+  - Windows: Twingate Resource inaccessible
+  - Linux: System-wide DNS resolution failures
+- **Common culprits:** Outdated Realtek NIC drivers; OEM-installed traffic shaping/network optimization software
 
 ## Prerequisites
-- Twingate client installed on Windows or Linux
-- Device connected to both wired and wireless interfaces on the same subnet
+- Identify whether device has multiple active network interfaces on the same subnet
+- Check for OEM-installed traffic shaping or network optimizer software
 
-## Resolution Steps
+## Step-by-Step Resolution
 
 ### 1. Update Network Drivers (Primary Fix)
-Most users resolve the issue this way.
-
 **Windows:**
 1. Open **Windows Update**
 2. Navigate to **View all optional updates**
-3. Install any available NIC/network driver updates (Realtek drivers especially)
+3. Install any available NIC driver updates (especially Realtek chipset drivers)
 
 **Linux:**
-- Check your distro's package manager for NIC driver updates
-- For Realtek chipsets, third-party driver sources may be required (consult your hardware vendor or distro forums)
+1. Check your NIC chipset (e.g., `lspci | grep -i network`)
+2. Source updated drivers from third-party or vendor sources for your chipset
 
-### 2. Disable Traffic Shaping / Network Optimizing Software
-- OEM system images often bundle traffic shapers or network optimizers
-- These tools can intercept traffic before it reaches the Twingate interface, breaking routing
-- Identify and **disable or uninstall** any such software (examples: Killer Network Manager, Nahimic, etc.)
+### 2. Disable Traffic Shaping / Network Optimization Software
+- Identify OEM-installed traffic shaper or network optimizer applications
+- Disable or uninstall them — they can intercept traffic before it reaches the Twingate interface, disrupting routing
 
-## Workaround (If Unresolved)
-- **Disconnect one interface** — use only a single network interface per subnet while Twingate is active
-- Either disconnect the wired or wireless adapter, not both simultaneously on the same subnet
+### 3. Workaround (If Above Steps Fail)
+- Disconnect from either the wired **or** wireless interface
+- Use **only one network interface per subnet** while Twingate is active
 
 ## Configuration Values
-None — no specific env vars, CLI flags, or API parameters involved.
+None — no CLI flags, env vars, or API parameters involved.
 
 ## Gotchas
-- Issue only manifests when **both interfaces share the same subnet**; dual interfaces on different subnets may not trigger it
-- Traffic-shaping software is often silently pre-installed on OEM (manufacturer) images and easy to overlook
-- Twingate engineering has not been able to fully reproduce this — resolution may vary by environment
+- Issue only occurs when **both interfaces are on the same subnet** — using different subnets may not trigger the problem
+- Traffic shaping software is often silently pre-installed on OEM system images and may not be obvious
+- Twingate engineering has not been able to reliably reproduce the issue; a permanent platform-level fix is not guaranteed
 
 ## Related Docs
 - Twingate Windows Client documentation

@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/9841905042-unsupported-regions
 type: help
-fetched: 2026-10-04
-source_version: 33b2719244230fb7e1860cb81f6f7e638a912c106c4f7abc96817fcf2856d354
+fetched: 2026-11-01
+source_version: 2c4694ea259c5b5b2e76bbfa02bfe93f021319c200013290739de1d20505a95a
 trust: official
 ---
 
@@ -12,34 +12,40 @@ trust: official
 Unsupported Regions
 
 ## Summary
-Twingate does not explicitly block regions, but some countries block traffic required for Twingate to function. GCP (Twingate's upstream provider) also enforces its own regional blocks. Blockages may occur at DNS, IP, or port level, even if `twingate.com` is reachable in a browser.
+Twingate does not explicitly block regions, but certain countries block traffic required for Twingate to function. GCP (Twingate's upstream provider) also enforces its own regional blocks. These restrictions can affect DNS, IP, or port-level connectivity for Connectors, Controllers, and Relays.
 
 ## Key Information
-- Twingate components affected: Client, Connector, Controller, Relays
-- `.twingate.com` browser access may work even when Connector/Relay services are blocked
-- China is the most commonly reported issue: the Great Firewall interferes with Connector-to-Relay connectivity, causing instability or full disconnection
+- Twingate access via browser to `.twingate.com` may still work in restricted regions, but Connector/Relay/Controller services may be blocked
+- Blockages can occur at DNS, IP, or port level
+- China's Great Firewall specifically causes Connector-to-Relay connectivity instability or full failure
+- GCP independently enforces sanctions-based regional blocks
 
-## Known Unsupported Regions
-| Region | Cause |
+## Affected Components
+All Twingate components: Client, Connector, Controller, Relays
+
+## Unsupported/Blocked Regions
+| Region | Notes |
 |---|---|
-| China | Great Firewall blocks Connector↔Relay traffic |
-| Crimea, Donetsk & Luhansk (Ukraine) | GCP block |
-| Cuba | GCP block |
-| Iran | GCP block |
-| North Korea | GCP block |
-| Syria | GCP block |
+| China | Great Firewall interferes with Connector↔Relay connectivity; instability or full failure |
+| Crimea, Donetsk & Luhansk (Ukraine) | GCP/sanctions-based block |
+| Cuba | GCP/sanctions-based block |
+| Iran | GCP/sanctions-based block |
+| North Korea | GCP/sanctions-based block |
+| Syria | GCP/sanctions-based block |
 
-*List is not exhaustive — other areas may restrict internet traffic.*
+> List is not exhaustive — other regions with heavy internet filtering may also be affected.
 
 ## Workarounds
-- **None provided by Twingate** — restrictions stem from legal, security, or geopolitical factors outside Twingate's control
+- **No official workarounds available** from Twingate
 - **Best practice:** Deploy Connectors outside of affected regions when possible
+- Security and legal barriers are beyond Twingate's control
 
 ## Gotchas
-- Browser access to `.twingate.com` succeeding does **not** confirm full Twingate functionality — Relay and Controller services may still be blocked
-- Blocks can occur at multiple layers (DNS, IP, port), making diagnosis inconsistent
-- China specifically tends to exhibit partial failures (Connector loses Relay connectivity) rather than complete blocks, which can be harder to diagnose
+- Browser access to `.twingate.com` succeeding does **not** mean Twingate is functional — Relay/Controller services may still be blocked
+- The most common failure mode in China is the Connector losing connectivity to Relays specifically
+- The blocked region list is not exhaustive; any country with heavy internet filtering may have partial or full Twingate failure
 
 ## Related Docs
-- [GCP blocked regions](https://cloud.google.com/terms/restricted-geographies) (referenced but external)
-- Twingate Connector deployment documentation
+- Twingate Connector documentation
+- Twingate Relay documentation
+- [GCP regional restrictions](https://cloud.google.com/terms/restricted-countries)

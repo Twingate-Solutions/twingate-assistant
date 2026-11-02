@@ -1,23 +1,23 @@
 ---
 source: https://help.twingate.com/articles/4908519978-connector-offline-gone-code-410-in-logs
 type: help
-fetched: 2026-10-04
-source_version: 6b3001ef07374c8848f7d2b34d2c61dd028a2c1c985afb756b49fa29b7564291
+fetched: 2026-11-01
+source_version: 701f7ef3391220b43ace0868fde1f017d66b21458bc8fc2ee5710a40feb1c7f1
 trust: official
 ---
 
 # Connector Offline—"Gone, code 410" in Logs
 
 ## Summary
-A Connector showing "Offline" with HTTP 410 errors indicates it was launched with expired or deleted tokens. This typically occurs after an incomplete or failed update attempt. The fix requires purging the Connector service and re-deploying with fresh credentials.
+A Connector showing as Offline with a 410 error indicates it was launched with expired or deleted tokens. This commonly occurs after an incomplete or failed update attempt. Resolution requires purging the Connector service and re-provisioning with fresh credentials.
 
 ## Key Information
-- HTTP 410 ("Gone") means the Connector's authentication tokens are invalid or have been deleted server-side
-- The Connector enters an unrecoverable error state and cannot self-heal
-- Affects any OS/package manager where Twingate Connector is installed
+- Error code 410 ("Gone") means the Connector's tokens are no longer valid on the Twingate backend
+- Connector will appear **Offline** in the Admin Console
+- Root cause: expired tokens, deleted tokens, or failed update leaving stale state
 
 ## Symptoms
-Log lines indicating this issue:
+Log lines to look for:
 ```
 [INFO] [connector] State: Error
 [DEBUG] [libsdwan] [controller] run_state_machine: Pre-unrecoverable error
@@ -26,9 +26,10 @@ Log lines indicating this issue:
 [INFO] [libsdwan] sdwan_state: Offline User
 ```
 
-## Resolution (Step-by-Step)
+## Resolution Steps
 
-1. **Purge the existing Connector installation** (removes stale tokens/config):
+1. **Purge the existing Connector installation** (choose based on distro):
+
    - Debian/Ubuntu:
      ```bash
      sudo apt purge twingate-connector
@@ -40,12 +41,13 @@ Log lines indicating this issue:
 
 2. **Generate a new install script** from the Twingate Admin Console for the target Remote Network/Connector.
 
-3. **Re-deploy** using the newly generated script from the Admin Console (do not reuse the old script).
+3. **Re-deploy** using the newly generated script from the Admin Console (do not reuse old tokens or scripts).
 
 ## Gotchas
-- Simply stopping/restarting the service will **not** resolve the 410 error — a full purge is required to clear stale token state
-- Reusing the same install script from a previous deployment will reproduce the problem if those tokens have been invalidated
-- `apt remove` (without `purge`) may leave behind config files containing the bad tokens; use `purge` to ensure full cleanup
+- Do not attempt to restart or reconfigure the existing Connector—the tokens are server-side invalidated and cannot be recovered
+- Reusing the same machine requires a full purge (`purge`/`rm`), not just a stop/start or reinstall, to clear stale token state
+- A simple `apt remove` may not clear configuration files; use `apt purge` to ensure full cleanup on Debian-based systems
 
 ## Related Docs
-- Twingate Connector deployment documentation (Admin Console → Remote Networks → Connectors)
+- Twingate Connector installation (Admin Console deploy scripts)
+- Connector update procedures
