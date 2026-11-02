@@ -2,7 +2,7 @@
 
 ## What This Project Is
 
-A public Claude Code plugin that turns Claude Code into a Twingate implementation specialist. Customers install the plugin and their sessions gain deep ZTNA domain expertise — architecture knowledge, deployment playbooks, IaC generation, troubleshooting, and current documentation awareness. The plugin contains 10 skills (domain expertise modules), 6 agents (orchestrating subagents), reference files (auto-updated doc summaries), and Python scripts for a GitHub Action that refreshes doc summaries weekly via the Claude API. Hosted at `Twingate-Solutions` org, Apache 2.0 license.
+A public Claude Code plugin that turns Claude Code into a Twingate implementation specialist. Customers install the plugin and their sessions gain deep ZTNA domain expertise — architecture knowledge, deployment playbooks, IaC generation, troubleshooting, and current documentation awareness. The plugin contains 11 skills (10 domain expertise modules plus the `twingate-onboarding` process skill that runs guided end-to-end deployments), 7 agents (orchestrating subagents), reference files (auto-updated doc summaries), and Python scripts for a GitHub Action that refreshes doc summaries weekly via the Claude API. Hosted at `Twingate-Solutions` org, Apache 2.0 license.
 
 ## Architecture
 
@@ -10,7 +10,13 @@ A public Claude Code plugin that turns Claude Code into a Twingate implementatio
 twingate-assistant/
 ├── .claude-plugin/
 │   └── plugin.json                     # Plugin manifest
-├── skills/                             # 10 domain expertise skills
+├── skills/                             # 10 domain skills + 1 process skill
+│   ├── twingate-onboarding/            # Guided end-to-end deployment (process skill)
+│   │   ├── SKILL.md
+│   │   ├── guides/                     # Hand-authored process guides + phases/ playbooks (never pipeline-written)
+│   │   ├── assets/                     # deployment.template.yaml
+│   │   ├── examples/                   # Example state files (also test fixtures)
+│   │   └── scripts/status.py           # Read-only phase-gate report (PEP 723, pinned PyYAML)
 │   ├── twingate-architect/             # Core ZTNA architecture & design
 │   │   ├── SKILL.md                    # Evergreen knowledge + instructions
 │   │   └── references/                 # Auto-generated doc summaries
@@ -23,8 +29,9 @@ twingate-assistant/
 │   ├── twingate-api/                   # GraphQL API & automation
 │   ├── twingate-dns-security/          # DNS filtering, exit networks
 │   └── twingate-troubleshoot/          # Diagnostics decision tree
-├── agents/                             # 6 orchestrating subagents
+├── agents/                             # 7 orchestrating subagents
 │   ├── twingate-se.md                  # Senior SE — primary orchestrator
+│   ├── deployment-reviewer.md          # Read-only pre-build review of a deployment plan
 │   ├── aws-deployer.md                 # AWS-specific guidance
 │   ├── azure-deployer.md               # Azure-specific guidance
 │   ├── gcp-deployer.md                 # GCP-specific guidance
@@ -54,6 +61,7 @@ twingate-assistant/
 
 **Key architecture notes:**
 - Skills contain evergreen knowledge (SKILL.md, hand-authored, never auto-updated) + dynamic references (references/, auto-generated weekly)
+- **Process skills** (currently `twingate-onboarding`) own a workflow, not a product domain. Their hand-authored material lives in `guides/`, which the pipeline never writes; they hold no product facts and route every fact to the domain skills' `references/`
 - Agents are lightweight subagent .md files that orchestrate skills for specific deployment scenarios
 - The auto-update pipeline crawls two sitemaps (`www.twingate.com/docs`, `help.twingate.com`) plus GitHub repos/wikis across four Twingate orgs, summarizes via Claude API (Sonnet), and writes to references/ with source provenance frontmatter
 - GitHub repos (Terraform provider, Helm charts, K8s operator, gateway) are referenced at runtime, not bundled — and also discovered/summarized directly by the pipeline (see `github_repos.py`)
@@ -84,6 +92,14 @@ twingate-assistant/
 ├── .claude-plugin/
 │   └── plugin.json
 ├── skills/
+│   ├── twingate-onboarding/
+│   │   ├── SKILL.md
+│   │   ├── guides/
+│   │   │   └── phases/
+│   │   ├── assets/
+│   │   ├── examples/
+│   │   └── scripts/
+│   │       └── status.py
 │   ├── twingate-architect/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -108,7 +124,9 @@ twingate-assistant/
 │   ├── twingate-api/
 │   │   ├── SKILL.md
 │   │   └── references/
-│   │       └── graphql-schema-reference.md
+│   │       ├── graphql-schema.graphql        # hand-placed SDL snapshot (authoritative)
+│   │       ├── graphql-schema-reference.md   # curated guide to the SDL
+│   │       └── graphql-recipes.md            # copy-and-adapt query/mutation snippets
 │   ├── twingate-dns-security/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -117,6 +135,7 @@ twingate-assistant/
 │       └── references/
 ├── agents/
 │   ├── twingate-se.md
+│   ├── deployment-reviewer.md
 │   ├── aws-deployer.md
 │   ├── azure-deployer.md
 │   ├── gcp-deployer.md
@@ -143,6 +162,7 @@ twingate-assistant/
 │       ├── test_backfill_frontmatter.py
 │       ├── test_github_repos.py
 │       ├── test_github_summarize.py
+│       ├── test_onboarding_status.py
 │       └── test_pipeline_metrics.py
 ├── .github/
 │   └── workflows/
@@ -260,11 +280,18 @@ Then a `| If the user asks about… | Read first |` routing table covering EVERY
 
 ### Agent .md Files
 - YAML frontmatter with `name`, `description`, `tools`, and `skills` fields
-- **Frontmatter limits:** `name` uses lowercase letters and hyphens only and must not contain `:` (reserved for plugin-scoped ids). Claude Code subagents do **not** enforce the 1024-char skill cap on `description`, but there is a cumulative ceiling: when the combined descriptions of all custom subagents exceed **15,000 tokens**, Claude Code warns at startup. Keep each agent description tight for that reason — all six current agents sit well under 800 chars; do not let them balloon.
+- **Frontmatter limits:** `name` uses lowercase letters and hyphens only and must not contain `:` (reserved for plugin-scoped ids). Claude Code subagents do **not** enforce the 1024-char skill cap on `description`, but there is a cumulative ceiling: when the combined descriptions of all custom subagents exceed **15,000 tokens**, Claude Code warns at startup. Keep each agent description tight for that reason — all seven current agents sit well under 800 chars; do not let them balloon.
 - Body contains the system prompt — role definition, workflow, guardrails
 - Agents orchestrate; skills hold the authoritative detail. Illustrative examples (a sample task definition, an NSG/firewall rule, an IdP setup outline, a config snippet) are acceptable in an agent body to make guidance concrete — provided the agent still forces a reference check (`## When to Verify` / `## Search References First`) and cites the owning skill's reference for exact values. Do not turn an agent into a second copy of a skill's reference corpus.
+- Agents never write a `twingate-onboarding` state file (`deployment.yaml`); they return proposals to the main conversation, which is its only writer.
 
-### Python Scripts (auto-update pipeline)
+### Process Skills (`twingate-onboarding`)
+- Same frontmatter limits and section intent as domain skills, but the file table points at `guides/` (hand-authored process material) instead of `references/`. Every guide carries the `<!-- manual-reference: do-not-overwrite -->` marker.
+- Guides contain **no Twingate product facts** (ports, console paths, API shapes, provider arguments). They point to the owning domain skill and the grep keywords to use — never to a specific reference filename, because generated filenames change.
+- `## Source of Truth — Search References First` replaces the domain skills' `## Search References First`, with grep examples verified against the sibling references.
+- Ship only scripts that are identical for every customer (currently `status.py`: read-only, offline, PEP 723 with pinned deps). Deployment scripts, API calls and IaC are generated per engagement, never stored in the plugin.
+
+### Python Scripts (auto-update pipeline and skill scripts)
 - Python 3.12+ — modern type hints (`str | None`), match statements
 - Minimal dependencies: requests, beautifulsoup4, anthropic, pyyaml, lxml
 - Type hints on every function signature
@@ -282,11 +309,12 @@ Then a `| If the user asks about… | Read first |` routing table covering EVERY
 3. **Descriptions must be pushy — but a skill `description` is hard-capped at 1024 characters and a `name` at 64.** Aggressively claim trigger conditions per Anthropic guidance, within those caps. The 1024-char limit is enforced by the Agent Skills spec and spec-conformant loaders (a skill over the cap warns or fails to load); it is not negotiable and is not ~1064. See **Frontmatter Hard Limits** under Code Style & Conventions. When pushiness collides with the cap, the cap wins — trim keywords, never exceed 1024.
 4. **GitHub repos are referenced, not bundled.** Skills instruct CC to clone/inspect at runtime.
 5. **Two sitemaps plus the GitHub API are the sources of truth for discovery.** `doc_mapping.yaml`'s `sources:` list declares both sitemaps (`www.twingate.com/docs`, `help.twingate.com`); sitemap diff catches new pages on either. GitHub repos are discovered independently — live, on every run — across the four Twingate orgs via the GitHub API (`github_repos.discover_org_repos`), not via a static list; `doc_mapping.yaml`'s `repos:` section only routes a discovered repo to a skill.
-6. **GraphQL SDL ships statically.** Hand-maintained in `twingate-api`.
-7. **No MCP server, no live API calls.** Plugin provides expertise and generates code only.
+6. **GraphQL SDL ships statically.** Hand-placed snapshot at `skills/twingate-api/references/graphql-schema.graphql`, with the curated `graphql-schema-reference.md` and `graphql-recipes.md` derived from it. Refresh all three together when the schema changes.
+7. **No MCP server. Live API calls only with the admin's approval.** Claude may run Twingate API calls in the admin's environment (Claude Code, local Cowork) only after showing the exact plan and getting an explicit yes; reads use the narrowest token available; the token comes from an env var and never appears in chat, state files, or generated code. The plugin ships no complete deployment scripts.
 8. **twingate-se agent always starts with environment assessment.**
 9. **Identity Firewall skill is expansion-ready.** SSH PAM + K8s gateway today, structured for future protocols.
 10. **Auto-update pipeline is idempotent.** No commits when nothing changes.
+11. **One deployment order, plugin-wide:** tenant → IdP connected and groups provisioned (SCIM) → Remote Networks → Connectors → Resources → group/resource access → pilot → rollout and hardening. Skills and agents that describe sequencing must agree with it.
 
 ## Plugin Manifest Quick Reference
 
@@ -305,6 +333,7 @@ Then a `| If the user asks about… | Read first |` routing table covering EVERY
 
 | Skill | Docs Owned | Key Topics |
 |---|---|---|
+| twingate-onboarding | none (process; `guides/`) | Guided end-to-end deployment: intake, Q&A, state file, phase gates, admin tasks, agent delegation |
 | twingate-architect | ~15 | Architecture, how it works, DNS, P2P, encryption, use cases |
 | twingate-connectors | ~20 | Deployment (all platforms), upgrades, metrics, logging, HA |
 | twingate-terraform | ~3+repo | Provider resources, SE reference modules |
@@ -321,11 +350,12 @@ Then a `| If the user asks about… | Read first |` routing table covering EVERY
 | Agent | Role | Skills Preloaded |
 |---|---|---|
 | twingate-se | Senior SE orchestrator, environment assessment | all |
-| aws-deployer | AWS deployment specialist | architect, connectors, terraform |
-| azure-deployer | Azure deployment specialist | architect, connectors, terraform |
-| gcp-deployer | GCP deployment specialist | architect, connectors, terraform |
-| network-designer | Remote network topology planner | architect, connectors, identity |
-| idfw-deployer | Identity Firewall implementation | idfw, kubernetes, terraform |
+| deployment-reviewer | Read-only pre-build review of a deployment plan | onboarding, architect, connectors, identity, api, idfw |
+| aws-deployer | AWS deployment specialist | all |
+| azure-deployer | Azure deployment specialist | all |
+| gcp-deployer | GCP deployment specialist | all |
+| network-designer | Remote network topology planner | all |
+| idfw-deployer | Identity Firewall implementation | all |
 
 ## Toolchain (Local Only)
 
@@ -334,7 +364,8 @@ ruff, mypy, and pytest are local development tools — **they are not published 
 To run locally during development:
 
 ```bash
-.venv/Scripts/ruff check scripts/
+.venv/Scripts/ruff check scripts/ skills/twingate-onboarding/scripts/
 .venv/Scripts/mypy scripts/ --ignore-missing-imports
+.venv/Scripts/mypy skills/twingate-onboarding/scripts/ --ignore-missing-imports
 .venv/Scripts/pytest scripts/tests/
 ```

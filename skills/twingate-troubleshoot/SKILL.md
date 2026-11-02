@@ -157,6 +157,9 @@ failures → **idfw**.
   any Twingate Gateway failure (TLS handshake errors, CONNECT 401/407, kubectl through
   the gateway, session recording) — that skill has a hand-authored field guide at
   `skills/twingate-idfw/references/gateway-troubleshooting.md`
+- **→ twingate-onboarding**: when the failure happens mid-rollout (connectors not coming up,
+  pilot users failing) and a `deployment.yaml` exists — record the outcome back into the
+  deployment plan once diagnosed.
 
 ## References
 

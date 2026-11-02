@@ -1,0 +1,87 @@
+# Worked example (fictional org): resuming mid Phase 6. Gates 0-5 pass and both Remote Networks
+# exist (twingate_id set). "Plant North" has two ALIVE connectors; "Plant South" has one ALIVE and
+# one DEAD_NO_HEARTBEAT. Resources are not created yet.
+# Expected status.py outcome: gates 0-5 pass; gate 6 fails naming "Plant South" (1/2 ALIVE);
+# resources_build_allowed false. Setting the dead connector to ALIVE flips gate 6 to OK and
+# resources_build_allowed to true.
+# Everything here is invented: example.com FQDNs, RFC1918 addresses, fake IDs.
+meta:
+  customer: "Ironwood Manufacturing"
+  tenant: "ironwood-demo"
+  path: guided
+  assist_level: checklist
+  scripting: powershell
+  existing_iac: ""
+  phase: 6
+  goals:
+    - "Give engineers remote access to plant MES and historian servers without a VPN"
+  success_criteria:
+    - text: "Process engineers reach mes.north.example.com over HTTPS from home"
+      status: open
+      note: ""
+    - text: "Controls team reaches historian.south.example.com:4840 from a managed laptop"
+      status: open
+      note: ""
+  in_scope: ["Plant North", "Plant South"]
+  out_of_scope: ["PLC and safety networks"]
+sources:
+  - {id: src-1, kind: diagram, description: "Plant network diagram (PNG)", received: 2026-10-26, notes: ""}
+  - {id: src-2, kind: api, description: "Remote Networks and connectors read from the Twingate API", received: 2026-11-02, notes: ""}
+  - {id: src-3, kind: api, description: "Groups listed from the Twingate API", received: 2026-10-28, notes: ""}
+environment:
+  idp: entra
+  idp_connected: true
+  scim: "yes"
+  mdm_edr: [intune]
+  os_mix: "mostly Windows, managed"
+  windows_only: "yes"
+  existing_vpn: "Site-to-site VPN plus client VPN"
+  conflicting_software: []
+  egress: {ssl_inspection: "no", proxy_required: "no", notes: ""}
+remote_networks:
+  - name: "Plant North"
+    location: ON_PREMISE
+    subnets: ["10.60.10.0/24"]
+    boundary: "Plant North firewall"
+    connector_platform: hyperv
+    connector_count: 2
+    connector_hosts: ["hv-north-01 / VLAN 110"]
+    connectors:
+      - {name: "north-connector-1", id: "Q29ubmVjdG9yOjUwMDE=", state: ALIVE}
+      - {name: "north-connector-2", id: "Q29ubmVjdG9yOjUwMDI=", state: ALIVE}
+    firewall_change: done
+    twingate_id: "UmVtb3RlTmV0d29yazo0MDAx"
+    provenance: confirmed
+    source_ref: src-2
+  - name: "Plant South"
+    location: ON_PREMISE
+    subnets: ["10.60.20.0/24"]
+    boundary: "Plant South firewall"
+    connector_platform: hyperv
+    connector_count: 2
+    connector_hosts: ["hv-south-01 / VLAN 120"]
+    connectors:
+      - {name: "south-connector-1", id: "Q29ubmVjdG9yOjUwMDM=", state: ALIVE}
+      - {name: "south-connector-2", id: "Q29ubmVjdG9yOjUwMDQ=", state: DEAD_NO_HEARTBEAT}
+    firewall_change: requested
+    twingate_id: "UmVtb3RlTmV0d29yazo0MDAy"
+    provenance: confirmed
+    source_ref: src-2
+resources:
+  - {id: res-mes, name: "MES server", address: mes.north.example.com, ip_hint: 10.60.10.30, remote_network: "Plant North", service_type: web-prod, description: "Manufacturing execution system", environment: prod, sensitivity: high, owner: "Plant manager", ports: {tcp: ["443"], udp: [], icmp: false}, personas: [process-eng], in_scope: true, provenance: confirmed, source_ref: src-1, twingate_id: null}
+  - {id: res-hist-n, name: "Historian North", address: historian.north.example.com, ip_hint: 10.60.10.31, remote_network: "Plant North", service_type: historian, description: "Process data historian", environment: prod, sensitivity: high, owner: "Controls lead", ports: {tcp: ["4840", "443"], udp: [], icmp: false}, personas: [controls], in_scope: true, provenance: stated, source_ref: src-1, twingate_id: null}
+  - {id: res-hist-s, name: "Historian South", address: historian.south.example.com, ip_hint: 10.60.20.31, remote_network: "Plant South", service_type: historian, description: "Process data historian", environment: prod, sensitivity: high, owner: "Controls lead", ports: {tcp: ["4840", "443"], udp: [], icmp: false}, personas: [controls], in_scope: true, provenance: stated, source_ref: src-1, twingate_id: null}
+personas:
+  - {id: process-eng, name: "Process Engineers", description: "Tune plant processes", idp_search_hint: "process, engineering", policy_tier: standard, groups: ["Process-Engineering"], provenance: confirmed}
+  - {id: controls, name: "Controls Team", description: "Maintain control systems", idp_search_hint: "controls, automation", policy_tier: elevated, groups: ["Controls-Team"], provenance: confirmed}
+groups:
+  - {name: "Process-Engineering", twingate_id: "R3JvdXA6ODEwMQ==", type: SYNCED, member_count: 22, provenance: sourced, source_ref: src-3}
+  - {name: "Controls-Team", twingate_id: "R3JvdXA6ODEwMg==", type: SYNCED, member_count: 9, provenance: sourced, source_ref: src-3}
+decisions:
+  - {date: 2026-10-29, phase: 4, decision: "Approved access matrix v1", approved_by: "Admin"}
+  - {date: 2026-10-30, phase: 5, decision: "Approved creation of two Remote Networks", approved_by: "Admin"}
+open_questions:
+  - {id: q-1, phase: 6, question: "Is outbound UDP allowed from the Plant South connector VLAN?", owner: networking, status: open}
+tasks:
+  - {id: t-1, phase: 6, owner: admin, description: "Fix the Plant South connector that reports DEAD_NO_HEARTBEAT: confirm the egress rule is applied", evidence_needed: "Screenshot of the connector page showing ALIVE", status: blocked}
+  - {id: t-2, phase: 7, owner: claude, description: "Create the three resources and attach groups once gate 6 passes", evidence_needed: "", status: todo}

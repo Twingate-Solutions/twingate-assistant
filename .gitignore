@@ -32,6 +32,9 @@ run_logs.txt
 # Ad-hoc master docs list generated for cowork chats — temporary, not shipped.
 docs/twingate-docs-map.md
 
+# Onboarding-skill handoff inputs (draft zip, SDL drop) — local only, never shipped.
+docs/Deployment Skill/
+
 # Python
 __pycache__/
 *.py[cod]

@@ -2,11 +2,12 @@
 name: twingate-architect
 description: >
   Use when the user asks how Twingate works, wants to design or evaluate a Twingate
-  deployment, needs to understand components (Controller, Client, Connector, Relay),
-  or is planning a ZTNA rollout. Activate for: zero trust, ZTNA, remote access
-  architecture, network design with Twingate, VPN replacement, microsegmentation,
-  split DNS, NAT traversal, P2P vs Relay, Remote Network topology, Resource definition
-  strategy, or deployment sequencing. Also activate for community/reference deployment
+  deployment, or needs to understand components (Controller, Client, Connector, Relay).
+  Activate for: zero trust, ZTNA, remote access architecture, network design with
+  Twingate, VPN replacement design, microsegmentation, split DNS, NAT traversal, P2P vs
+  Relay, Remote Network topology, Resource definition strategy, or deployment sequencing
+  concepts. To be walked through an actual rollout, use twingate-onboarding with this
+  skill. Also activate for community/reference deployment
   patterns: exposing a self-hosted AI chat assistant (OpenClaw, WhatsApp/Telegram bots)
   with no public inbound ports, private Railway/PaaS app deployment with zero-ingress,
   or "what does the twingate-assistant plugin itself do" meta-questions. Also activate
@@ -35,9 +36,11 @@ evaluating, or asking architecture-level questions, this skill answers them.
   access-controlled or audited for traffic — never use it to "allowlist" a sensitive
   destination. FQDN/IP only (no wildcards or CIDR), and it cannot cover Identity Firewall
   Resources. See `references/resource-exclusion.md`.
-- **Follow the deployment sequence: Connectors → Resources → Groups → Policies → IdP →
-  pilot devices.** Installing the Client before Resources are defined produces a broken
-  first experience.
+- **Follow the deployment sequence: tenant → IdP connected and groups provisioned (SCIM) →
+  Remote Networks → Connectors → Resources → group/resource access → pilot devices.**
+  Provisioning groups first means access is granted to IdP-managed groups from day one;
+  installing the Client before Resources are defined produces a broken first experience.
+  For a guided, tracked rollout, load `twingate-onboarding`.
 - **Relay vs. P2P is a latency question, not a security question.** Both paths are encrypted
   end-to-end between Client and Connector. Never frame Relay fallback as a security risk.
 - **Security policy lives at the Group level, not the Remote Network.** Remote Networks
@@ -99,6 +102,10 @@ access → **idfw + identity**.
   recording. Connectors give network reach; the IDFW Gateway adds the Layer 7 identity layer.
 - **→ twingate-troubleshoot**: when the user reports a symptom rather than a design question
 - **→ twingate-terraform / twingate-pulumi**: user wants to automate the deployment as IaC
+- **→ twingate-onboarding**: when the user wants to be walked through an end-to-end
+  deployment or a new tenant ("help me deploy Twingate", "here's our diagram", a deployment
+  plan or checklist), or a `twingate-deployment/deployment.yaml` exists. This skill explains
+  *how* to design; onboarding runs the guided process, tracks state, and hands out tasks.
 
 ## References
 

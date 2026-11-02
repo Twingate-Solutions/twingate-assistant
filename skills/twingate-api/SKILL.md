@@ -19,7 +19,8 @@ This skill owns Twingate's GraphQL API, service account key management, CLI tool
 
 ## Decisions & Guidelines
 
-- **Always check `ok` before reading `entity` in a mutation response.** A mutation can return HTTP 200 with `ok: false` and `entity: null`. Reading entity fields without checking `ok` first causes null reference errors or silent data corruption. Check `error.errorCode` and `error.message` on failure.
+- **Always check `ok` before reading `entity` in a mutation response.** A mutation can return HTTP 200 with `ok: false` and `entity: null`. Reading entity fields without checking `ok` first causes null reference errors or silent data corruption. On failure, `error` is a plain String — surface it verbatim (there is no `errorCode`). Also check the top-level GraphQL `errors` array.
+- **Mutations take flat arguments, not `input:` objects.** `resourceCreate(name:, address:, remoteNetworkId:, ...)`, not `resourceCreate(input: {...})`. Grant access with `resourceAccessAdd(resourceId:, access: [AccessInput!]!)`; `resourceAccessSet` replaces all existing access and is destructive.
 - **Always paginate — never assume all results fit in one page.** Scripts that omit pagination silently miss records with no error. You may get 50 of 500 resources. Loop on `pageInfo.hasNextPage` until `false`, passing `pageInfo.endCursor` as the `after` argument on each request.
 - **Never parse, decode, or construct IDs.** Twingate IDs are opaque base64-encoded NodeIDs. Use them only as returned by the API. Never infer numeric components from base64 decoding.
 - **Issue the least-privileged token for the task.** Read for monitoring/reporting. Write for provisioning. Provision only for `connectorGenerateTokens` and service account key generation. Never issue Provision-level tokens to read-only scripts.
@@ -42,8 +43,10 @@ grep -ril "jupyter" references/        # -> gh-twingate-labs-twingate-api-intro-
 ```
 
 **Before writing any API code or answering questions involving any of the following,
-read `references/graphql-schema-reference.md` first** — this is the authoritative type
-and field reference and must be consulted for every non-trivial query or mutation:
+grep `references/graphql-schema.graphql` for the exact signature** (it is the verbatim SDL and
+authoritative — e.g. `grep -n "resourceAccessAdd(" -A 4 references/graphql-schema.graphql`),
+and read `references/graphql-schema-reference.md` for the curated guide (semantics, null-vs-omitted
+rules, deprecations). For ready-made snippets, start from `references/graphql-recipes.md`:
 
 - Exact query/mutation names, argument names, or argument types
 - Field names on response objects (including nested fields and pagination structures)
@@ -73,21 +76,29 @@ persistent lifecycle management → **terraform**/**pulumi**.
 - **→ twingate-terraform / twingate-pulumi**: when the user wants persistent IaC management rather than API scripting — IaC provides drift detection, audit trail, and lifecycle management that raw API scripts do not
 - **→ twingate-architect**: for understanding what resources, remote networks, groups, and connectors are before writing API automation against them
 - **→ twingate-connectors**: for `connectorGenerateTokens` context — token provisioning is an API operation, but the Connector deployment specifics (runtime env vars, restart behavior) live in twingate-connectors
+- **→ twingate-onboarding**: when the API work is part of a guided new-tenant deployment driven by a deployment plan (deployment.yaml) — the onboarding skill owns sequencing, approvals and state; this skill owns the API detail
 
 ## References
 
 See [`references/`](./references/) for the current corpus, refreshed weekly. Two kinds
-of file live there, plus one hand-maintained authoritative reference:
+of file live there, plus three hand-maintained files (marked `manual-reference: do-not-overwrite`,
+never auto-regenerated):
 
-- **`graphql-schema-reference.md`** — the static GraphQL SDL, hand-maintained and
-  authoritative. Never auto-regenerated.
+- **`graphql-schema.graphql`** — the verbatim Admin API GraphQL SDL (2026-11 snapshot).
+  Authoritative for exact signatures; grep it.
+- **`graphql-schema-reference.md`** — curated guide to the SDL: types, enums, queries,
+  mutations, input semantics, deprecations.
+- **`graphql-recipes.md`** — copy-and-adapt snippets (stdlib Python helper, curl pattern,
+  list/create queries and mutations).
 - **`{slug}.md`** — summaries of `twingate.com/docs` pages (product documentation).
 - **`gh-{org}-{repo}.md`** — summaries of public Twingate GitHub repos: official
   tooling, SE automation, and community integrations.
 
 | If the user asks about… | Read first |
 |---|---|
-| Query/mutation signatures, field names, enum values, input types | `graphql-schema-reference.md` (authoritative) |
+| Exact query/mutation signature, argument or field name, enum value, input type | `graphql-schema.graphql` (exact SDL, authoritative — grep it) |
+| What a field/argument means, null-vs-omitted semantics, deprecations, payload shape | `graphql-schema-reference.md` (curated guide) |
+| Copy-and-adapt snippets for listing/creating networks, resources, groups, access; Python/curl helpers | `graphql-recipes.md` |
 | API overview, authentication, getting started | `api-overview.md`, `api.md`, `getting-started-with-the-api.md` |
 | Exploring the API, sample queries | `exploring-the-apis.md` |
 | Python CLI docs page (`tg-cli`) | `introduction-to-the-python-cli.md` |

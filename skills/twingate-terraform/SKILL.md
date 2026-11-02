@@ -120,6 +120,9 @@ infra → **idfw**; K8s Helm token passing → **kubernetes**; field missing fro
   direct GraphQL call is required
 - **→ twingate-troubleshoot**: when the user reports a terraform apply error or unexpected
   provider behavior
+- **→ twingate-onboarding**: when the Terraform is the build step of a guided deployment
+  plan (`deployment.yaml`) — onboarding owns the confirmed catalog and approvals; this skill
+  writes the HCL, adding Twingate to the user's existing code where it exists.
 
 ## References
 

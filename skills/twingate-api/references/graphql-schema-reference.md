@@ -1,624 +1,529 @@
+<!-- manual-reference: do-not-overwrite -->
 # Twingate GraphQL Schema Reference
 
-Hand-authored static reference. Not auto-generated. Last reviewed: 2026-04.
+Hand-authored curated guide. Not auto-generated. Last reviewed against the SDL: **2026-11**.
 
-> **Note:** No pipeline-generated API reference files exist for this skill — the weekly update pipeline has not produced any `references/*.md` files from Twingate's API documentation pages. This schema file has not been cross-validated against current live documentation. Claims reflect hand-authored knowledge as of April 2026. When using this file, verify against the current Twingate API docs at `https://www.twingate.com/docs/api` if accuracy is critical.
+> **For exact signatures, grep `graphql-schema.graphql` in this directory; this file is a curated summary.**
+> The `.graphql` file is the verbatim Admin API SDL and wins any disagreement with this page.
+> Copy-and-adapt snippets for common operations live in `graphql-recipes.md`.
+
+**Contents:** 1. Endpoint and Auth · 2. Scalars, IDs, interfaces · 3. Pagination · 4. Mutation
+payload pattern · 5. Key object types · 6. Enums · 7. Queries · 8. Mutations (flat arguments) ·
+9. Input types
+
+Grep examples:
+
+```
+grep -n "resourceCreate(" -A 16 graphql-schema.graphql
+grep -n "^input AccessInput" -A 26 graphql-schema.graphql
+grep -n "^enum UserRole" -A 40 graphql-schema.graphql
+```
 
 ---
 
 ## 1. Endpoint and Auth
 
-**Endpoint:** `https://{network}.twingate.com/api/graphql`
+**Endpoint:** `https://{network}.twingate.com/api/graphql/` (HTTP POST, trailing slash as in the docs).
+`{network}` is the tenant subdomain (same as the Admin Console URL).
 
-All requests are HTTP POST. `{network}` is the tenant subdomain (same as the admin console).
-
-**Required headers:**
+**Headers:**
 ```
 X-API-KEY: <token>
 Content-Type: application/json
 ```
 
-**Token permission levels:**
+Root types: `query: QueriesRoot`, `mutation: MutationsRoot`. No subscriptions.
+
+**Token permission levels** (set when the token is created; not expressed in the SDL):
 
 | Level | Scope |
 |---|---|
-| Read | All queries (list and get) |
-| Write | Queries + create/update/delete for resources, networks, groups, users, devices |
-| Provision | Write + `connectorGenerateTokens`, `serviceAccountKeyCreate`, `serviceAccountKeyRevoke`, `serviceAccountKeyDelete` |
+| Read | All queries |
+| Read & Write | Queries + create/update/delete on resources, networks, groups, users, devices, etc. |
+| Read, Write & Provision | Write + `connectorGenerateTokens` and service account key operations |
 
-Generate tokens from **Admin Console → Settings → API**. Store in environment variables — never in source code.
+Generate tokens from **Admin Console → Settings → API**. Store in environment variables — never in
+source code. Rate limits and 429 handling: see `api-overview.md` (not part of the SDL).
 
 ---
 
-## 2. Pagination Pattern
+## 2. Scalars, IDs, interfaces
 
-All list fields use Relay cursor pagination.
+- **`ID`** — opaque Relay NodeID. Never decode or construct; use as returned.
+- **`DateTime`** — ISO 8601 string (all timestamps: `createdAt`, `updatedAt`, `expiresAt`, …).
+- **`Node`** interface — everything with an `id`.
+- **`Resource` is an interface**, implemented by `NetworkResource`, `KubernetesResource`,
+  `SSHResource`, `WebAppResource`. `resources` / `resource(id)` return the interface — use inline
+  fragments (`... on NetworkResource { routingMode }`) for type-specific fields. `routingMode` is
+  **only** on `NetworkResource`, not on the interface.
+- **`Taggable`** interface — `tags: [Tag!]!` where `Tag { key value }`.
+- **`Principal` union** = `Group | ServiceAccount` (the node type of a resource's `access` edges).
+- **`CertificateAuthority` union** = `X509CertificateAuthority | SSHCertificateAuthority`.
 
-**Arguments:**
-- `first: Int` — page size (forward pagination)
-- `after: String` — cursor from previous page's `pageInfo.endCursor`
-- `last: Int` — page size (backward pagination)
-- `before: String` — cursor from previous page's `pageInfo.startCursor`
+---
 
-**Loop until `pageInfo.hasNextPage` is false.**
+## 3. Pagination Pattern
+
+Every list is a Relay connection. Arguments: `first: Int`, `after: String`, `last: Int`,
+`before: String`, plus an optional `filter`. Every `*Connection` has:
+
+```graphql
+pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
+edges { cursor node { ... } }
+totalCount   # Int! — present on every connection
+```
+
+Loop until `pageInfo.hasNextPage` is false, passing `endCursor` as `after`. **Nested
+connections** (e.g. a resource's `access`, a group's `users`) are paginated independently — if a
+nested `pageInfo.hasNextPage` is true, follow up with a per-object query.
 
 ```graphql
 query ListResources($after: String) {
   resources(first: 50, after: $after) {
-    edges {
-      node {
-        id
-        name
-        address { value }
-      }
-    }
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
+    pageInfo { hasNextPage endCursor }
+    edges { node { id name address { type value } } }
   }
 }
 ```
 
-Pseudocode:
-```
-after = null
-loop:
-  result = query(after=after)
-  collect result.edges[].node
-  if result.pageInfo.hasNextPage == false: break
-  after = result.pageInfo.endCursor
-```
+### Filters
+
+`StringFilterOperatorInput`: `eq`, `ieq` (case-insensitive eq), `ne`, `startsWith`, `endsWith`,
+`regexp`, `contains`, `in: [String!]`. Multiple operators are ANDed.
+
+| Query | Filter input | Fields |
+|---|---|---|
+| `resources` | `ResourceFilterInput` | `name`, `remoteNetworkId { in, eq }`, `tags { and: [{ key, value { in, notIn, eq } }] }` |
+| `remoteNetworks` | `RemoteNetworkFilterInput` | `name`, `networkType { in }` |
+| `connectors` | `ConnectorFilterInput` | `name`, `state { in: [ConnectorState!] }` |
+| `groups` | `GroupFilterInput` | `name`, `type { in }`, `isActive { eq }`, `originId` |
+| `users` | `UserFilterInput` | `role { in }`, `firstName`, `lastName`, `email` |
+| `devices` | `DeviceFilterInput` | `isTrusted { eq }`, `serialNumber`, `activeState { in }`, `userId { in }` |
+| `serviceAccounts` | `ServiceAccountFilterInput` | `name` |
+| `securityPolicies` | `SecurityPolicyFilterField` | `policyType { in }`, `name` |
+| `accessRequests` | `AccessRequestFilterInput` | `userId { in }`, `resourceId { in }`, `status { in }` |
+| `serialNumbers` | `SerialNumberFilterInput` | `serialNumber`, `hasMatchedDevices { eq }` |
+| `Resource.access` | `AccessFilterInput` | `principalType { in: [GROUP, SERVICE_ACCOUNT] }` |
 
 ---
 
-## 3. Mutation Payload Pattern
+## 4. Mutation Payload Pattern
 
-Every mutation returns a payload of this shape:
+**All mutations take flat arguments — there are no `input:` wrapper objects.** Each returns a
+`<Name>Mutation` payload:
 
 ```graphql
-{
-  ok: Boolean!
-  error: {
-    errorCode: String!
-    message: String!
-  }
-  entity: <ObjectType>   # null when ok is false
-}
+ok: Boolean!
+error: String        # plain human-readable string; there is NO errorCode / message object
+entity: <Type>       # nullable; absent on delete/approve/reject payloads
 ```
 
-**Always check `ok` before reading `entity`.** When `ok` is false, `entity` is null; read `error.errorCode` and `error.message` for the failure reason.
+Exceptions: `connectorGenerateTokens` returns `connectorTokens { accessToken refreshToken }`
+instead of `entity`; `serviceAccountKeyCreate` returns `entity` **and** `token: String`;
+`serialNumbersCreate` returns `entities: [SerialNumber!]`.
 
-Common `errorCode` values: `NOT_FOUND`, `ALREADY_EXISTS`, `INVALID_INPUT`, `PERMISSION_DENIED`, `RATE_LIMIT_EXCEEDED`.
+**Always check `ok` before reading `entity`.** HTTP 200 with `ok: false` is a normal failure;
+surface `error` verbatim. GraphQL-level failures (bad field/argument names, type errors) come back
+as a top-level `errors` array instead — check both.
 
 ---
 
-## 4. Key Object Types
+## 5. Key Object Types
 
-### Resource
+### NetworkResource (implements Resource)
 
-| Field | Type | Description |
+| Field | Type | Notes |
 |---|---|---|
-| id | ID! | Opaque NodeID |
-| name | String! | Display name |
-| address | Address! | `{ value: String! }` — FQDN, CIDR, wildcard, or IP |
-| remoteNetwork | RemoteNetwork! | Parent remote network |
-| groups | GroupConnection! | Groups that have access (paginated) |
-| protocols | Protocols | Port/protocol restrictions |
-| isActive | Boolean! | Whether the resource is enabled |
-| isBrowserShortcutEnabled | Boolean! | Browser shortcut feature flag |
-| alias | String | Optional alias hostname |
-| securityPolicy | SecurityPolicy | Assigned security policy (nullable) |
+| id, name | ID!, String! | |
+| createdAt, updatedAt | DateTime! | |
+| address | ResourceAddress! | `{ type: AddressType! (IP \| DNS), value: String! }` |
+| alias | String | |
+| protocols | ResourceProtocols! | see below |
+| isActive | Boolean! | |
+| isVisible | Boolean! | shown in the Client's main list |
+| isBrowserShortcutEnabled | Boolean! | |
+| remoteNetwork | RemoteNetwork! | |
+| access(filter, first, after…) | AccessConnection! | **current way** to read who has access |
+| groups(…) / serviceAccounts(…) | connections | **deprecated** — use `access` |
+| securityPolicy | SecurityPolicy | nullable |
+| accessPolicy | AccessPolicy! | `{ mode: AccessMode!, durationSeconds: Int }` |
+| approvalMode | AccessApprovalMode! | |
+| approverGroups(…) | GroupConnection! | groups that can approve access requests |
+| usageBasedAutolockDurationDays | Int | **deprecated** — use `accessPolicy` |
+| routingMode | RoutingMode! | NetworkResource only |
+| tags | [Tag!]! | |
 
-**Protocols shape:**
-```
-protocols {
-  allowIcmp: Boolean!
-  tcp { policy: PortRestrictionPolicy!, ports { start: Int!, end: Int! } }
-  udp { policy: PortRestrictionPolicy!, ports { start: Int!, end: Int! } }
-}
-```
+**ResourceProtocols:** `allowIcmp: Boolean!`, `tcp: ResourceProtocol!`, `udp: ResourceProtocol!`;
+`ResourceProtocol { policy: ProtocolPolicy!, ports: [PortRange!]! }`; `PortRange { start end }`
+(inclusive, 1–65535). Ignore `ports` when `policy` is `ALLOW_ALL`.
 
----
+**AccessEdge** (edges of `access`): `node: Principal!` (Group or ServiceAccount — use fragments),
+`cursor`, `securityPolicy: SecurityPolicy`, `expiresAt: DateTime`, `accessPolicy: AccessPolicy`,
+`approvalMode: AccessApprovalMode`, `usageBasedAutolockDurationDays` (deprecated).
+
+**Gateway-backed resources** (`KubernetesResource`, `SSHResource`, `WebAppResource`) share the
+Resource fields and add `gateway: Gateway!`, `downstream { port }`, `upstream { port }`.
+WebApp adds `tlsMode` on both sides (`TLSServerMode` / `TLSClientMode`) and
+`requestHeaderRewrites: [KeyValuePair!]!`. Kubernetes adds `clusterRef: String` (null = in-cluster
+credentials); its `proxyAddress` / `certificateAuthorityCert` are deprecated.
 
 ### RemoteNetwork
 
-| Field | Type | Description |
+| Field | Type | Notes |
 |---|---|---|
-| id | ID! | Opaque NodeID |
-| name | String! | Display name |
-| isActive | Boolean! | Whether the network is enabled |
-| location | NetworkLocation! | Enum — deployment location |
-| type | String | Network type string |
-| connectors | ConnectorConnection! | Connectors in this network (paginated) |
-| resources | ResourceConnection! | Resources in this network (paginated) |
-
----
+| id, name | ID!, String! | |
+| createdAt, updatedAt | DateTime! | |
+| networkType | RemoteNetworkType! | `REGULAR` or `EXIT` (field is `networkType`, not `type`) |
+| location | RemoteNetworkLocation! | |
+| isActive | Boolean! | |
+| resources(…), connectors(…), gateways(…) | connections | |
 
 ### Connector
 
-| Field | Type | Description |
+| Field | Type | Notes |
 |---|---|---|
-| id | ID! | Opaque NodeID |
-| name | String! | Display name |
-| remoteNetwork | RemoteNetwork! | Parent remote network |
-| state | ConnectorState! | Health state enum |
-| statusUpdatedAt | String | ISO 8601 timestamp of last state change |
-| hasStatusNotificationsEnabled | Boolean! | Whether status alerts are on |
-| hostname | String | Connector host's hostname (if reported) |
-| privateIps | [String!] | Private IP addresses |
-| publicIps | [String!] | Public IP addresses |
-| version | String | Client version string |
+| id, name | ID!, String! | |
+| createdAt, updatedAt | DateTime! | |
+| lastHeartbeatAt | DateTime | |
+| hostname | String | |
+| remoteNetwork | RemoteNetwork! | |
+| state | ConnectorState! | |
+| hasStatusNotificationsEnabled | Boolean! | |
+| version | String | |
+| publicIP | String | singular, capital `IP` |
+| privateIPs | [String!]! | capital `IPs` |
 
----
+### Gateway / Certificate Authorities
+
+`Gateway { id address remoteNetwork x509CA: X509CertificateAuthority! sshCA: SSHCertificateAuthority }`.
+`X509CertificateAuthority` / `SSHCertificateAuthority`: `{ id name fingerprint }`.
 
 ### Group
 
-| Field | Type | Description |
+| Field | Type | Notes |
 |---|---|---|
-| id | ID! | Opaque NodeID |
-| name | String! | Display name |
-| type | GroupType! | MANUAL, SYNCED, or SYSTEM |
-| isActive | Boolean! | Whether the group is enabled |
-| createdAt | String! | ISO 8601 creation timestamp |
-| resources | ResourceConnection! | Resources this group can access (paginated) |
-| users | UserConnection! | Users in this group (paginated) |
-| securityPolicy | SecurityPolicy | Assigned security policy (nullable) |
-
----
+| id, name | ID!, String! | |
+| createdAt, updatedAt | DateTime! | |
+| originId | String | IdP origin identifier (synced groups) |
+| isActive | Boolean! | |
+| type | GroupType! | |
+| users(…) | UserConnection! | `users { totalCount }` gives member count |
+| resources(…) | ResourceConnection! | |
+| securityPolicy | SecurityPolicy! | non-null |
 
 ### User
 
-| Field | Type | Description |
+| Field | Type | Notes |
 |---|---|---|
-| id | ID! | Opaque NodeID |
-| firstName | String | First name |
-| lastName | String | Last name |
-| email | String! | Email address (unique identifier) |
-| state | UserState! | ACTIVE or DISABLED |
-| role | UserRole! | ADMIN, DEVOPS, SUPPORT, or MEMBER |
-| createdAt | String! | ISO 8601 creation timestamp |
-| avatarUrl | String | Profile image URL |
-| type | String | User type string |
-| groups | GroupConnection! | Groups the user belongs to (paginated) |
-
----
+| id | ID! | |
+| createdAt, updatedAt | DateTime! | |
+| firstName, lastName | String! | |
+| email | String | nullable |
+| avatarUrl | String | |
+| state | UserState! | |
+| role | UserRole! | |
+| type | UserType! | `MANUAL` (email invite) or `SYNCED` (IdP) |
+| isAdmin | Boolean! | **deprecated** — use `role` |
+| groups(…), devices(…) | connections | |
 
 ### Device
 
-| Field | Type | Description |
+| Field | Type | Notes |
 |---|---|---|
-| id | ID! | Opaque NodeID |
-| name | String! | Device display name |
-| udid | String | Unique device identifier |
-| serialNumber | String | Hardware serial number |
-| userAgent | String | OS/client user agent string |
-| osVersion | String | Operating system version |
-| clientVersion | String | Twingate client version |
-| lastConnectedAt | String | ISO 8601 timestamp of last connection |
-| isTrusted | Boolean! | Device trust status |
-| isActive | Boolean! | Whether the device is active |
-| user | User | Owning user (nullable) |
-| deviceType | String | Platform type string |
+| id | ID! | |
+| name, osVersion, hardwareModel, hostname, username, serialNumber, clientVersion, manufacturerName | String | all nullable |
+| user | User! | |
+| osName | DeviceOsName | |
+| deviceType | DeviceType! | |
+| activeState | DeviceActiveState! | |
+| isTrusted | Boolean! | |
+| lastSuccessfulLoginAt, lastFailedLoginAt | DateTime | |
+| lastConnectedAt | DateTime | **deprecated** — no longer populated |
+| internetSecurityConfiguration | String! | |
 
----
+Posture detail is a separate query: `devicePosture(id: ID!): DevicePosture!` — per-check
+`isSatisfied: PostureStatus` (hardDriveEncryption, screenLockPasscode, firewall, biometric,
+antivirus, osVersion) and per-provider `TrustProviderVerification` (crowdstrike, jamf, iru,
+inTune, sentinelOne, onePassword; `kandji` deprecated → `iru`), plus `manualVerification`.
 
-### ServiceAccount
+### ServiceAccount / ServiceAccountKey
 
-| Field | Type | Description |
-|---|---|---|
-| id | ID! | Opaque NodeID |
-| name | String! | Display name |
-| createdAt | String! | ISO 8601 creation timestamp |
-| resources | ResourceConnection! | Resources accessible to this service account (paginated) |
-| keys | ServiceAccountKeyConnection! | Keys for this account (paginated) |
-
----
-
-### ServiceAccountKey
-
-| Field | Type | Description |
-|---|---|---|
-| id | ID! | Opaque NodeID |
-| name | String! | Key display name |
-| createdAt | String! | ISO 8601 creation timestamp |
-| expiresAt | String | ISO 8601 expiry timestamp (null = no expiry) |
-| status | ServiceAccountKeyStatus! | ACTIVE, REVOKED, or EXPIRED |
-| revokedAt | String | ISO 8601 revocation timestamp (null if not revoked) |
-
----
+`ServiceAccount { id name createdAt updatedAt resources(…) keys(…) }`.
+`ServiceAccountKey { id name createdAt updatedAt expiresAt revokedAt status serviceAccount }`.
 
 ### SecurityPolicy
 
-| Field | Type | Description |
-|---|---|---|
-| id | ID! | Opaque NodeID |
-| name | String! | Policy display name |
-
----
+`SecurityPolicy { id name createdAt updatedAt policyType: SecurityPolicyType! groups(…) }`.
 
 ### AccessRequest
 
-| Field | Type | Description |
+`AccessRequest { id reason: String requestedAt: DateTime! user: User! resource: Resource! status }`.
+(No `expiresAt` / `approvedAt` / `rejectedAt` fields.)
+
+### Other types
+
+`SerialNumber { id serialNumber createdAt matchedDevices: [Device!]! }`;
+`DnsFilteringProfile { id name priority: Float! fallbackMethod groups(…) allowedDomains deniedDomains contentCategoryConfig securityCategoryConfig privacyCategoryConfig }`
+(category configs are flat Boolean flags — grep `ContentCategoryConfig` for names).
+
+---
+
+## 6. Enums
+
+| Enum | Values |
+|---|---|
+| `AddressType` | `IP`, `DNS` |
+| `ProtocolPolicy` | `ALLOW_ALL`, `RESTRICTED` |
+| `RemoteNetworkType` | `REGULAR`, `EXIT` |
+| `RemoteNetworkLocation` | `AWS`, `AZURE`, `GOOGLE_CLOUD`, `ON_PREMISE`, `OTHER` |
+| `ConnectorState` | `ALIVE`, `DEAD_NO_HEARTBEAT`, `DEAD_HEARTBEAT_TOO_OLD`, `DEAD_NO_RELAYS` |
+| `GroupType` | `MANUAL`, `SYNCED`, `SYSTEM` |
+| `UserState` | `PENDING`, `ACTIVE`, `DISABLED` |
+| `UserStateUpdateInput` | `ACTIVE`, `DISABLED` (what `userDetailsUpdate` accepts) |
+| `UserType` | `MANUAL`, `SYNCED` |
+| `UserRole` | `ADMIN`, `SUPPORT`, `DEVOPS`, `INTERNET_SECURITY`, `HELPDESK`, `ACCESS_REVIEWER`, `BILLING`, `MEMBER` |
+| `DeviceOsName` | `IPADOS`, `IOS`, `MAC_OS`, `ANDROID`, `CHROME_OS`, `WINDOWS`, `LINUX` |
+| `DeviceType` | `GENERIC`, `DESKTOP`, `LAPTOP`, `TABLET`, `MOBILE` |
+| `DeviceActiveState` | `ACTIVE`, `ARCHIVED`, `BLOCKED` |
+| `SecurityPolicyType` | `RESOURCE`, `DEFAULT_RESOURCE` |
+| `ServiceAccountKeyStatus` | `ACTIVE`, `REVOKED`, `EXPIRED` |
+| `AccessMode` | `MANUAL`, `AUTO_LOCK`, `ACCESS_REQUEST` |
+| `AccessApprovalMode` | `MANUAL`, `AUTOMATIC` |
+| `PrincipalType` | `GROUP`, `SERVICE_ACCOUNT` |
+| `RoutingMode` | `THROUGH_TWINGATE`, `BYPASS_TWINGATE` |
+| `AccessRequestStatus` | `PENDING`, `APPROVED`, `REJECTED` |
+| `TLSServerMode` | `TLS13`, `NONE` |
+| `TLSClientMode` | `VERIFY_FULL`, `VERIFY_CA`, `INSECURE`, `NONE` |
+| `DohFallbackMethod` | `AUTO`, `STRICT` |
+| `PostureStatus` | `YES`, `NO`, `NOT_REQUIRED` |
+
+**UserRole meanings (from SDL descriptions):** `ADMIN` full read-write; `SUPPORT` read-only
+excluding Billing and Internet Security (shown as **Viewer** in the Admin Console from the week of
+Oct 19 2026 — see `skills/twingate-identity/references/2026-10-admin-role-changes.md`); `DEVOPS`
+Viewer + Network tab write; `INTERNET_SECURITY` Viewer + Internet Security write; `HELPDESK` Viewer +
+MFA reset and device verification; `ACCESS_REVIEWER` resource requests only; `BILLING` billing only;
+`MEMBER` no Admin Console access.
+
+---
+
+## 7. Queries (`QueriesRoot`)
+
+All list queries take `before, after, first, last` plus the filter shown in §3.
+
+| Query | Returns | Notes |
 |---|---|---|
-| id | ID! | Opaque NodeID |
-| user | User! | Requesting user |
-| resource | Resource! | Requested resource |
-| requestedAt | String! | ISO 8601 request timestamp |
-| status | AccessRequestStatus! | PENDING, APPROVED, or REJECTED |
-| expiresAt | String | Requested expiry (nullable) |
-| approvedAt | String | ISO 8601 approval timestamp (nullable) |
-| rejectedAt | String | ISO 8601 rejection timestamp (nullable) |
+| `resources(filter: ResourceFilterInput)` | ResourceConnection! | nodes are the `Resource` interface |
+| `resource(id: ID!)` | Resource | |
+| `remoteNetworks(filter: RemoteNetworkFilterInput)` | RemoteNetworkConnection! | |
+| `remoteNetwork(id: ID, name: String)` | RemoteNetwork | **lookup by ID or by name** |
+| `connectors(filter: ConnectorFilterInput)` | ConnectorConnection! | |
+| `connector(id: ID!)` | Connector | |
+| `gateways` / `gateway(id: ID!)` | GatewayConnection! / Gateway | no filter |
+| `certificateAuthorities` / `certificateAuthority(id: ID!)` | CertificateAuthorityConnection! / CertificateAuthority (union) | |
+| `groups(filter: GroupFilterInput)` | GroupConnection! | |
+| `group(id: ID!)` | Group | |
+| `users(filter: UserFilterInput)` | UserConnection! | |
+| `user(id: ID!)` | User | |
+| `devices(filter: DeviceFilterInput)` | DeviceConnection! | |
+| `device(id: ID!)` | Device | |
+| `devicePosture(id: ID!)` | DevicePosture! | |
+| `serviceAccounts(filter: ServiceAccountFilterInput)` | ServiceAccountConnection! | |
+| `serviceAccount(id: ID!)` | ServiceAccount | |
+| `serviceAccountKey(id: ID, name: String)` | ServiceAccountKey | by ID or name |
+| `securityPolicies(filter: SecurityPolicyFilterField)` | SecurityPolicyConnection! | |
+| `securityPolicy(id: ID, name: String)` | SecurityPolicy | by ID or name |
+| `accessRequests(filter: AccessRequestFilterInput)` | AccessRequestConnection! | |
+| `accessRequest(id: ID!)` | AccessRequest | |
+| `serialNumbers(filter: SerialNumberFilterInput)` | SerialNumberConnection! | |
+| `dnsFilteringProfiles` | [DnsFilteringProfileMetadata!] | `{ id name priority }`; null when DNS filtering is off; **not paginated** |
+| `dnsFilteringProfile(id: ID!)` | DnsFilteringProfile | |
+| `eventsSyncOidcProviderUrl` | String! | OIDC provider URL to register in a cloud provider for event sync |
 
 ---
 
-### PageInfo
+## 8. Mutations (`MutationsRoot`) — flat arguments
 
-| Field | Type | Description |
-|---|---|---|
-| hasNextPage | Boolean! | True if more pages exist after this one |
-| hasPreviousPage | Boolean! | True if more pages exist before this one |
-| startCursor | String | Cursor for the first edge in this page |
-| endCursor | String | Cursor for the last edge — use as `after` on next call |
+`= x` shows the SDL default. `[ID]` lists without `!` are as written in the SDL.
 
----
+### Remote networks
 
-## 5. Enums
+```graphql
+remoteNetworkCreate(name: String!, location: RemoteNetworkLocation = OTHER,
+                    networkType: RemoteNetworkType = REGULAR, isActive: Boolean = true)
+remoteNetworkUpdate(id: ID!, name: String, location: RemoteNetworkLocation, isActive: Boolean)
+remoteNetworkDelete(id: ID!)                       # payload: ok, error
+```
+`networkType` is set at create time only — `remoteNetworkUpdate` has no `networkType` argument.
 
-### ConnectorState
-| Value | Meaning |
+### Connectors
+
+```graphql
+connectorCreate(remoteNetworkId: ID!, name: String, hasStatusNotificationsEnabled: Boolean = true)
+connectorUpdate(id: ID!, name: String, hasStatusNotificationsEnabled: Boolean)
+connectorDelete(id: ID!)
+connectorGenerateTokens(connectorId: ID!)          # → connectorTokens { accessToken refreshToken }
+```
+`connectorCreate` does not return credentials; call `connectorGenerateTokens` next (Provision
+token). Calling it on a deployed Connector rotates its credentials.
+
+### Resources (network)
+
+```graphql
+resourceCreate(
+  name: String!, address: String!, remoteNetworkId: ID!,
+  alias: String, protocols: ProtocolsInput,          # null/omitted = all protocols & ports allowed
+  groupIds: [ID] = [], securityPolicyId: ID,
+  accessPolicy: AccessPolicyInput, approvalMode: AccessApprovalMode = MANUAL,
+  approverGroupIds: [ID!] = [], isVisible: Boolean, isBrowserShortcutEnabled: Boolean,
+  routingMode: RoutingMode, tags: [TagInput!]
+)                                                    # entity: NetworkResource
+
+resourceUpdate(
+  id: ID!, name, address, remoteNetworkId, alias, protocols, isActive, isVisible,
+  isBrowserShortcutEnabled, routingMode, securityPolicyId, accessPolicy, approvalMode, tags,
+  groupIds: [ID],  addedGroupIds: [ID],  removedGroupIds: [ID],
+  approverGroupIds: [ID!], addedApproverGroupIds: [ID!], removedApproverGroupIds: [ID!]
+)                                                    # entity: NetworkResource
+resourceDelete(id: ID!)
+```
+
+`address` is a plain `String` (IP, CIDR, FQDN or wildcard) — **not** `{ value }`.
+`resourceUpdate` null-vs-omitted semantics (from SDL descriptions): `alias` omitted = unchanged,
+null = cleared; `securityPolicyId` omitted = unchanged, null = reset to Default Policy; `tags`
+omitted = unchanged, null = all removed; `accessPolicy`/`approvalMode` omitted or null = unchanged.
+`groupIds` **replaces** the full group set; prefer `addedGroupIds` / `removedGroupIds`.
+
+### Resource access (groups and service accounts)
+
+```graphql
+resourceAccessAdd(resourceId: ID!, access: [AccessInput!]!)     # add or reconfigure edges
+resourceAccessSet(resourceId: ID!, access: [AccessInput!]!)     # REPLACES all existing access
+resourceAccessRemove(resourceId: ID!, principalIds: [ID!]!)     # entity: Resource
+```
+
+- `resourceAccessAdd`: if an edge for that principal already exists, its properties are
+  reconfigured — this is also how you change or remove an edge's security policy.
+- `resourceAccessSet`: existing accesses not in the list **are removed**. Destructive; confirm first.
+- `principalId` is a Group ID or Service Account ID. For service accounts, leave
+  `securityPolicyId`, `expiresAt`, `accessPolicy`, `approvalMode` null.
+
+### Groups
+
+```graphql
+groupCreate(name: String!, userIds: [ID] = [], resourceIds: [ID] = [], securityPolicyId: ID)
+groupUpdate(id: ID!, name: String, isActive: Boolean, securityPolicyId: ID,
+            userIds: [ID],     addedUserIds: [ID],     removedUserIds: [ID],
+            resourceIds: [ID], addedResourceIds: [ID], removedResourceIds: [ID])
+groupDelete(id: ID!)
+```
+`userIds` / `resourceIds` on update **replace** the full set; `added*` / `removed*` are
+incremental. `groupCreate` with no `securityPolicyId` uses the default Resource Policy.
+
+### Users
+
+```graphql
+userCreate(email: String!, firstName: String, lastName: String, role: UserRole = MEMBER)
+userDetailsUpdate(id: ID!, firstName: String, lastName: String, state: UserStateUpdateInput)
+userRoleUpdate(id: ID!, role: UserRole)
+userResetMfa(id: ID!)
+userDelete(id: ID!)
+```
+There is no single `userUpdate` — state/name and role are separate mutations.
+
+### Devices
+
+```graphql
+deviceUpdate(id: ID!, isTrusted: Boolean!)
+deviceArchive(id: ID!)   deviceUnarchive(id: ID!)
+deviceBlock(id: ID!)     deviceUnblock(id: ID!)
+```
+
+### Service accounts and keys
+
+```graphql
+serviceAccountCreate(name: String!, resourceIds: [ID] = [])
+serviceAccountUpdate(id: ID!, name: String, resourceIds: [ID],
+                     addedResourceIds: [ID], removedResourceIds: [ID])
+serviceAccountDelete(id: ID!)
+serviceAccountKeyCreate(serviceAccountId: ID!, expirationTime: Int!, name: String)
+                                                    # → entity + token (shown once)
+serviceAccountKeyUpdate(id: ID!, name: String!)
+serviceAccountKeyRevoke(id: ID!)                    # entity: ServiceAccountKey
+serviceAccountKeyDelete(id: ID!)
+```
+`expirationTime` is **required**: days until expiry, 0–365 inclusive. Store `token` immediately —
+it cannot be read back. Key mutations take `id`, not `keyId`.
+
+### Security policies
+
+```graphql
+securityPolicyUpdate(id: ID!, groupIds: [ID], addedGroupIds: [ID], removedGroupIds: [ID])
+```
+Only group assignment is editable via the API — there is no create/delete, and policy rules
+(MFA, device posture) are not exposed. Groups removed fall back to the default resource policy;
+`groupIds` replaces the full set.
+
+### Access requests
+
+```graphql
+accessRequestApprove(id: ID!)      # payload: ok, error (no entity)
+accessRequestReject(id: ID!)
+```
+No expiry or comment arguments.
+
+### Other mutation families (grep the `.graphql` for full signatures)
+
+| Family | Mutations |
 |---|---|
-| `ALIVE` | Connector is connected and healthy |
-| `DEAD_NO_HEARTBEAT` | No heartbeat received — connector may be starting or stopped |
-| `DEAD_HEARTBEAT_TOO_OLD` | Last heartbeat is beyond the stale threshold |
-| `DEAD_NO_RELAYS` | Connector cannot reach any relay |
+| Gateways | `gatewayCreate(address!, remoteNetworkId!, x509CAId!, sshCAId)`, `gatewayUpdate`, `gatewayDelete` |
+| Certificate authorities | `x509CertificateAuthorityCreate(name!, certificate!)`, `x509CertificateAuthorityDelete`, `sshCertificateAuthorityCreate(name!, publicKey!)`, `sshCertificateAuthorityDelete` |
+| Kubernetes resources | `kubernetesResourceCreate` / `Update` — resource args + `gatewayId` (optional), `clusterRef`, `downstream { port }`, `upstream { port }` |
+| SSH resources | `sshResourceCreate` / `Update` — resource args (no `protocols`) + `gatewayId!`, `downstream`, `upstream` |
+| Web app resources | `webAppResourceCreate` / `Update` — `gatewayId!`, `downstream: WebAppDownstreamInput!`, `upstream: WebAppUpstreamInput!`, `requestHeaderRewrites: [KeyValueInputObject!]` |
+| DNS filtering | `dnsFilteringProfileCreate(name!)`, `dnsFilteringProfileUpdate(id!, name, priority: Float, fallbackMethod, allowedDomains, deniedDomains, groups: [String!], content/security/privacyCategoryConfig)`, `dnsFilteringProfileDelete` |
+| Serial numbers | `serialNumbersCreate(serialNumbers: [String!]!)` → `entities`, `serialNumbersDelete(serialNumbers: [String!]!)` |
 
-### NetworkLocation
-| Value | Meaning |
-|---|---|
-| `AWS` | Amazon Web Services |
-| `AZURE` | Microsoft Azure |
-| `GOOGLE_CLOUD` | Google Cloud Platform |
-| `ON_PREMISE` | On-premises data center |
-| `OTHER` | Any other location |
-
-### UserRole
-| Value | Meaning |
-|---|---|
-| `ADMIN` | Full admin access |
-| `DEVOPS` | Connector management, limited admin |
-| `SUPPORT` | Read-only admin console access. Shown as **Viewer** in the Admin Console from the week of Oct 19 2026; the enum value is unchanged. See `skills/twingate-identity/references/2026-10-admin-role-changes.md` |
-| `MEMBER` | End user — no admin console access |
-
-### UserState
-| Value | Meaning |
-|---|---|
-| `ACTIVE` | User is active and can authenticate |
-| `DISABLED` | User is disabled — cannot authenticate |
-
-### GroupType
-| Value | Meaning |
-|---|---|
-| `MANUAL` | Manually managed group |
-| `SYNCED` | SCIM-synchronized group from IdP |
-| `SYSTEM` | System-managed group (e.g., Everyone) |
-
-### PortRestrictionPolicy
-| Value | Meaning |
-|---|---|
-| `ALLOW_ALL` | No port restriction — all ports allowed |
-| `RESTRICTED` | Only the specified port ranges are allowed |
-
-### ServiceAccountKeyStatus
-| Value | Meaning |
-|---|---|
-| `ACTIVE` | Key is valid and usable |
-| `REVOKED` | Key has been explicitly revoked |
-| `EXPIRED` | Key passed its expiry date |
-
-### AccessRequestStatus
-| Value | Meaning |
-|---|---|
-| `PENDING` | Awaiting approval or rejection |
-| `APPROVED` | Access was granted |
-| `REJECTED` | Access was denied |
+Note the gateway-resource mutations reuse the access-related args (`groupIds`, `securityPolicyId`,
+`accessPolicy`, `approvalMode`, approver groups, `tags`), and `resourceAccessAdd/Set/Remove` work
+on them too (they take any `Resource` ID).
 
 ---
 
-## 6. Queries
+## 9. Input Types
 
 ```graphql
-resources(first: Int, after: String, filter: ResourceFilterInput): ResourceConnection!
-```
-List all resources. Paginate with `first`/`after`. Filter by name or remote network.
-
-```graphql
-resource(id: ID!): Resource
-```
-Get a single resource by ID. Returns null if not found.
-
-```graphql
-remoteNetworks(first: Int, after: String): RemoteNetworkConnection!
-```
-List all remote networks.
-
-```graphql
-remoteNetwork(id: ID!): RemoteNetwork
-```
-Get a single remote network by ID.
-
-```graphql
-connectors(first: Int, after: String): ConnectorConnection!
-```
-List all connectors across all remote networks.
-
-```graphql
-connector(id: ID!): Connector
-```
-Get a single connector by ID including current state.
-
-```graphql
-groups(first: Int, after: String, filter: GroupFilterInput): GroupConnection!
-```
-List all groups. Supports name filter.
-
-```graphql
-group(id: ID!): Group
-```
-Get a single group by ID including its users and resources.
-
-```graphql
-users(first: Int, after: String, filter: UserFilterInput): UserConnection!
-```
-List all users. Filter by email, role, or state.
-
-```graphql
-user(id: ID!): User
-```
-Get a single user by ID.
-
-```graphql
-devices(first: Int, after: String): DeviceConnection!
-```
-List all enrolled devices.
-
-```graphql
-device(id: ID!): Device
-```
-Get a single device by ID.
-
-```graphql
-serviceAccounts(first: Int, after: String): ServiceAccountConnection!
-```
-List all service accounts.
-
-```graphql
-serviceAccount(id: ID!): ServiceAccount
-```
-Get a single service account by ID including its keys.
-
-```graphql
-securityPolicies(first: Int, after: String): SecurityPolicyConnection!
-```
-List all security policies.
-
-```graphql
-securityPolicy(id: ID!): SecurityPolicy
-```
-Get a single security policy by ID.
-
-```graphql
-accessRequests(first: Int, after: String, filter: AccessRequestFilterInput): AccessRequestConnection!
-```
-List access requests. Filter by status (`PENDING`, `APPROVED`, `REJECTED`).
-
----
-
-## 7. Mutations
-
-### Resource
-
-```graphql
-resourceCreate(input: ResourceCreateInput!): ResourcePayload!
-```
-Create a new resource. Required input fields: `name`, `address { value }`, `remoteNetworkId`.
-
-```graphql
-resourceUpdate(id: ID!, input: ResourceUpdateInput!): ResourcePayload!
-```
-Update a resource. All input fields are optional — only provided fields are changed.
-
-```graphql
-resourceDelete(id: ID!): OkErrorPayload!
-```
-Delete a resource. Returns `{ ok, error }` only (no entity).
-
-```graphql
-resourceAccessAdd(resourceId: ID!, principalIds: [ID!]!): ResourcePayload!
-```
-Grant access to a resource for one or more groups or service accounts (by ID).
-
-```graphql
-resourceAccessRemove(resourceId: ID!, principalIds: [ID!]!): ResourcePayload!
-```
-Revoke access to a resource from one or more groups or service accounts.
-
----
-
-### Network
-
-```graphql
-remoteNetworkCreate(input: RemoteNetworkCreateInput!): RemoteNetworkPayload!
-```
-Create a remote network. Required: `name`, `location` (NetworkLocation enum).
-
-```graphql
-remoteNetworkUpdate(id: ID!, input: RemoteNetworkUpdateInput!): RemoteNetworkPayload!
-```
-Update a remote network's name or location.
-
-```graphql
-remoteNetworkDelete(id: ID!): OkErrorPayload!
-```
-Delete a remote network. Will fail if the network still has connectors or resources.
-
----
-
-### Connector
-
-```graphql
-connectorCreate(input: ConnectorCreateInput!): ConnectorPayload!
-```
-Register a new connector. Required: `remoteNetworkId`. Optional: `name`, `hasStatusNotificationsEnabled`. Does not produce credentials — call `connectorGenerateTokens` next.
-
-```graphql
-connectorUpdate(id: ID!, input: ConnectorUpdateInput!): ConnectorPayload!
-```
-Update connector metadata (name, notifications flag).
-
-```graphql
-connectorDelete(id: ID!): OkErrorPayload!
-```
-Delete a connector registration. The running connector process will stop authenticating.
-
-```graphql
-connectorGenerateTokens(connectorId: ID!): ConnectorTokensPayload!
-```
-Generate a new access token and refresh token for a connector. **Requires Provision-level token.** Rotates credentials — the existing connector must be restarted with the new tokens. Returns `{ ok, error, connectorTokens { accessToken, refreshToken } }`.
-
----
-
-### Group
-
-```graphql
-groupCreate(input: GroupCreateInput!): GroupPayload!
-```
-Create a group. Required: `name`. Optional: `userIds`, `resourceIds`, `securityPolicyId`.
-
-```graphql
-groupUpdate(id: ID!, input: GroupUpdateInput!): GroupPayload!
-```
-Update a group. Can add/remove users (`addedUserIds`, `removedUserIds`), add/remove resources, change security policy.
-
-```graphql
-groupDelete(id: ID!): OkErrorPayload!
-```
-Delete a group. SYNCED groups managed by SCIM cannot be deleted via API.
-
----
-
-### User
-
-```graphql
-userUpdate(id: ID!, input: UserUpdateInput!): UserPayload!
-```
-Update a user's role or state. Input fields: `role` (UserRole), `state` (UserState).
-
-```graphql
-userDelete(id: ID!): OkErrorPayload!
-```
-Delete a user from the tenant.
-
----
-
-### Device
-
-```graphql
-deviceUpdate(id: ID!, input: DeviceUpdateInput!): DevicePayload!
-```
-Update device trust status. Primary use: set `isTrusted: true` or `isTrusted: false`.
-
----
-
-### Service Account
-
-```graphql
-serviceAccountCreate(input: ServiceAccountCreateInput!): ServiceAccountPayload!
-```
-Create a service account. Required: `name`. Optional: `resourceIds`.
-
-```graphql
-serviceAccountUpdate(id: ID!, input: ServiceAccountUpdateInput!): ServiceAccountPayload!
-```
-Update a service account (name, add/remove resources).
-
-```graphql
-serviceAccountDelete(id: ID!): OkErrorPayload!
-```
-Delete a service account and revoke all its keys.
-
-```graphql
-serviceAccountKeyCreate(serviceAccountId: ID!, input: ServiceAccountKeyCreateInput!): ServiceAccountKeyPayload!
-```
-Create a new key for a service account. **Requires Provision-level token.** Input: `name` (String!), `expirationTime` (Int — days until expiry; omit for no expiry). Returns the key value once — store it immediately, it cannot be retrieved again.
-
-```graphql
-serviceAccountKeyRevoke(keyId: ID!): OkErrorPayload!
-```
-Revoke a key immediately. The key can no longer be used but the record is retained. **Requires Provision-level token.**
-
-```graphql
-serviceAccountKeyDelete(keyId: ID!): OkErrorPayload!
-```
-Delete a revoked key record. The key must be in REVOKED state first. **Requires Provision-level token.**
-
----
-
-### Access
-
-```graphql
-accessRequestApprove(id: ID!, input: AccessRequestApproveInput): AccessRequestPayload!
-```
-Approve a pending access request. Optional input: `expiresAt` (ISO 8601 — grant time-limited access).
-
-```graphql
-accessRequestReject(id: ID!, input: AccessRequestRejectInput): AccessRequestPayload!
-```
-Reject a pending access request. Optional input: `comment` (String).
-
----
-
-## 8. Input Types
-
-### ProtocolsInput
-```graphql
-input ProtocolsInput {
-  allowIcmp: Boolean
-  tcp: ProtocolInput
-  udp: ProtocolInput
+input ProtocolsInput {           # ALL THREE fields are required when you pass protocols
+  allowIcmp: Boolean!
+  tcp: ProtocolInput!
+  udp: ProtocolInput!
 }
-```
-Omit a field to leave that protocol at its current setting.
-
-### ProtocolInput
-```graphql
 input ProtocolInput {
-  policy: PortRestrictionPolicy!
-  ports: [PortRangeInput!]
+  policy: ProtocolPolicy!        # ALLOW_ALL | RESTRICTED
+  ports: [PortRangeInput!]! = [] # used only when RESTRICTED; RESTRICTED + [] = NO ports allowed
 }
-```
-Use `policy: ALLOW_ALL` with an empty `ports` array to allow all ports. Use `policy: RESTRICTED` with explicit ranges to restrict.
+input PortRangeInput { start: Int!  end: Int! }   # inclusive, 1–65535; start == end for one port
 
-### PortRangeInput
-```graphql
-input PortRangeInput {
-  start: Int!
-  end: Int!
+input AccessInput {
+  principalId: ID!               # Group or Service Account
+  securityPolicyId: ID           # omitted = unchanged; null = removed
+  expiresAt: DateTime            # omitted = unchanged; null = removed
+  accessPolicy: AccessPolicyInput
+  approvalMode: AccessApprovalMode
 }
+input AccessPolicyInput { mode: AccessMode!  durationSeconds: Int }
+input TagInput { key: String!  value: String! }
+input KeyValueInputObject { key: String!  value: String! }
+input KubernetesDownstreamInput { port: Int! }   # same shape: KubernetesUpstreamInput, SSH*Input
+input WebAppDownstreamInput { port: Int!  tlsMode: TLSServerMode }
+input WebAppUpstreamInput   { port: Int!  tlsMode: TLSClientMode }
 ```
-Both `start` and `end` are inclusive. Single-port restriction: `{ start: 443, end: 443 }`.
 
-**Example — restrict resource to HTTPS only:**
+**Example — HTTPS only, no UDP, no ICMP:**
 ```graphql
 protocols: {
   allowIcmp: false
-  tcp: {
-    policy: RESTRICTED
-    ports: [{ start: 443, end: 443 }]
-  }
-  udp: {
-    policy: ALLOW_ALL
-    ports: []
-  }
+  tcp: { policy: RESTRICTED, ports: [{ start: 443, end: 443 }] }
+  udp: { policy: RESTRICTED, ports: [] }
 }
 ```
+To allow everything, omit `protocols` entirely (or pass `ALLOW_ALL` for both with `allowIcmp: true`).

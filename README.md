@@ -26,7 +26,15 @@ The plugin adds two things to Claude Code:
 - **Skills** — domain expertise that loads automatically when relevant topics come up (e.g. mention "connector" and `twingate-connectors` activates).
 - **Agents** — orchestrators you invoke explicitly by name for end-to-end workflows.
 
-### Plan a new deployment
+### Get walked through a new deployment
+
+```text
+Help me deploy Twingate. Here's our network diagram.
+```
+
+The `twingate-onboarding` skill runs a guided, multi-session rollout. Give it whatever you have — a diagram (image, draw.io or Visio), screenshots, a transcript of a walkthrough, firewall or VPN exports, cloud inventory, or your IdP group list. It asks a few questions at a time, proposes a design, and gets your approval before anything is built. Then it either hands you a step-by-step task list or does the work for you through the API, Python, or Terraform, depending on how much help you want. Progress is saved to `twingate-deployment/deployment.yaml`, so you can pick it up again in a later session. That file holds internal network details, so keep it out of public repos.
+
+### Plan a deployment with the SE agent
 
 ```text
 Use the twingate-se agent to help me deploy Twingate to my AWS environment.
@@ -68,6 +76,7 @@ Skills load automatically when Twingate topics are detected, or you can invoke e
 
 | Skill | What it covers |
 | --- | --- |
+| `twingate-onboarding` | Guided end-to-end deployment: intake of diagrams and transcripts, Q&A, a saved deployment plan, approvals, admin task lists, and an optional automated build |
 | `twingate-architect` | Core ZTNA architecture, Remote Networks, Resources, design patterns |
 | `twingate-connectors` | Connector deployment, HA, upgrades, metrics, logging |
 | `twingate-terraform` | Terraform provider, resource definitions, secrets management |
@@ -91,6 +100,7 @@ Agents orchestrate multiple skills for end-to-end workflows. Invoke them by name
 | `aws-deployer` | Deploying connectors on AWS (ECS, EC2, IAM, Secrets Manager) |
 | `azure-deployer` | Deploying connectors on Azure (ACI, VMs, Key Vault, Entra ID) |
 | `gcp-deployer` | Deploying connectors on GCP (Cloud Run, GCE, Secret Manager, Google Workspace) |
+| `deployment-reviewer` | Read-only review of a deployment plan before Remote Networks or Resources are built: unconfirmed items, broad access, missing connector HA |
 | `network-designer` | Planning a new Twingate network before writing IaC — resource strategy, security tiers, output tables |
 | `idfw-deployer` | Implementing certificate-based SSH PAM or kubectl proxy access |
 

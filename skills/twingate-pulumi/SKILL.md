@@ -87,6 +87,8 @@ underlying API is identical); provisioning identity → **identity**; K8s secret
 - **→ twingate-kubernetes**: for passing connector tokens to a K8s Secret via Pulumi
 - **→ twingate-troubleshoot**: when the user reports provider errors or unexpected resource
   state
+- **→ twingate-onboarding**: when the Pulumi program is the build step of a guided
+  deployment plan (`deployment.yaml`) — onboarding owns the confirmed catalog and approvals.
 
 ## References
 

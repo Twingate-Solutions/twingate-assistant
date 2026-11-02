@@ -25,12 +25,15 @@ The plugin is just files — no server, no MCP component, no live API calls at r
 twingate-assistant/
 ├── .claude-plugin/
 │   └── plugin.json               # Plugin manifest
-├── skills/                       # 10 domain expertise skills
-│   └── twingate-{domain}/
-│       ├── SKILL.md              # Evergreen identity + guidelines (hand-authored)
-│       └── references/           # Auto-generated doc summaries (pipeline-managed)
-├── agents/                       # 6 orchestrating subagents
+├── skills/                       # 10 domain expertise skills + twingate-onboarding (process skill)
+│   ├── twingate-{domain}/
+│   │   ├── SKILL.md              # Evergreen identity + guidelines (hand-authored)
+│   │   └── references/           # Auto-generated doc summaries (pipeline-managed)
+│   └── twingate-onboarding/
+│       └── guides/               # Hand-authored process guides — the pipeline never writes here
+├── agents/                       # 7 orchestrating subagents
 │   ├── twingate-se.md
+│   ├── deployment-reviewer.md
 │   ├── aws-deployer.md
 │   ├── azure-deployer.md
 │   ├── gcp-deployer.md

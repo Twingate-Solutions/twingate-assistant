@@ -1,0 +1,94 @@
+# Worked example (fictional org): guided path, two on-prem zones, end of Phase 1 / during Phase 3.
+# The admin shared a network diagram. Most resources have been read back and confirmed;
+# exactly two in-scope resources (res-hr01, res-fs) are still `inferred`. Personas are proposed
+# but not approved. Entra is chosen as the IdP but not yet connected, and no groups exist yet.
+# Expected status.py outcome: gates 0 and 1 pass; gates 2, 3 and 4 fail (3 names res-hr01 and
+# res-fs); networks_build_allowed true (networks are confirmed); resources_build_allowed false.
+# Everything here is invented: example.com FQDNs, RFC1918 addresses.
+meta:
+  customer: "Larkspur Logistics"
+  tenant: "larkspur-demo"
+  path: guided
+  assist_level: handhold
+  scripting: terraform
+  existing_iac: ""
+  phase: 3
+  goals:
+    - "Replace the remote-access VPN for HQ datacenter and warehouse systems"
+  success_criteria:
+    - text: "DBAs reach db1.hq.example.com:1433 from home without VPN"
+      status: open
+      note: ""
+    - text: "Warehouse supervisors reach wms.wh.example.com over HTTPS from a managed laptop"
+      status: open
+      note: ""
+  in_scope: ["HQ Datacenter", "Warehouse"]
+  out_of_scope:
+    - "Partner EDI gateway (run by the carrier)"
+    - "Branch-office printers"
+sources:
+  - id: src-1
+    kind: diagram
+    description: "Network diagram, two firewalled zones (PNG)"
+    received: 2026-11-02
+    notes: ""
+environment:
+  idp: entra
+  idp_connected: false
+  scim: unknown
+  mdm_edr: [intune]
+  os_mix: "mostly Windows, managed"
+  windows_only: unknown
+  existing_vpn: "unknown"
+  conflicting_software: []
+  egress: {ssl_inspection: unknown, proxy_required: unknown, notes: ""}
+remote_networks:
+  - name: "HQ Datacenter"
+    location: ON_PREMISE
+    subnets: ["10.20.0.0/24"]
+    boundary: "HQ perimeter firewall"
+    connector_platform: vmware
+    connector_count: 2
+    connector_hosts: []
+    connectors: []
+    firewall_change: pending
+    twingate_id: null
+    provenance: confirmed
+    source_ref: src-1
+  - name: "Warehouse"
+    location: ON_PREMISE
+    subnets: ["10.30.4.0/26"]
+    boundary: "Warehouse edge firewall"
+    connector_platform: docker
+    connector_count: 2
+    connector_hosts: []
+    connectors: []
+    firewall_change: pending
+    twingate_id: null
+    provenance: confirmed
+    source_ref: src-1
+resources:
+  - {id: res-db1, name: "db1 (Prod DB)", address: db1.hq.example.com, ip_hint: 10.20.0.70, remote_network: "HQ Datacenter", service_type: mssql, description: "Production SQL Server", environment: prod, sensitivity: high, owner: "", ports: {tcp: ["1433", "3389"], udp: [], icmp: true}, personas: [dba, server-admin], in_scope: true, provenance: confirmed, source_ref: src-1, twingate_id: null}
+  - {id: res-web1, name: "web1 (Prod Web)", address: web1.hq.example.com, ip_hint: 10.20.0.100, remote_network: "HQ Datacenter", service_type: web-prod, description: "Customer portal", environment: prod, sensitivity: medium, owner: "", ports: {tcp: ["80", "443"], udp: [], icmp: true}, personas: [web-dev, server-admin], in_scope: true, provenance: stated, source_ref: src-1, twingate_id: null}
+  - {id: res-hr01, name: "hr01 (HR Server)", address: hr01.hq.example.com, ip_hint: 10.20.0.110, remote_network: "HQ Datacenter", service_type: hr-system, description: "HR application, inferred from the diagram label", environment: prod, sensitivity: restricted, owner: "", ports: {tcp: ["22"], udp: [], icmp: true}, personas: [hr-admins], in_scope: true, provenance: inferred, source_ref: src-1, twingate_id: null}
+  - {id: res-fs, name: "fs (File Server)", address: fs.hq.example.com, ip_hint: 10.20.0.73, remote_network: "HQ Datacenter", service_type: file-server, description: "File shares, audience unknown", environment: prod, sensitivity: medium, owner: "", ports: {tcp: ["445"], udp: [], icmp: true}, personas: [all-staff], in_scope: true, provenance: inferred, source_ref: src-1, twingate_id: null}
+  - {id: res-wms, name: "wms (Warehouse Mgmt)", address: wms.wh.example.com, ip_hint: 10.30.4.20, remote_network: "Warehouse", service_type: web-prod, description: "Warehouse management web app", environment: prod, sensitivity: medium, owner: "", ports: {tcp: ["443"], udp: [], icmp: false}, personas: [warehouse-supervisors], in_scope: true, provenance: confirmed, source_ref: src-1, twingate_id: null}
+  - {id: res-label, name: "label printer gateway", address: label.wh.example.com, ip_hint: 10.30.4.40, remote_network: "Warehouse", service_type: unknown, description: "Out of scope per admin", environment: prod, sensitivity: low, owner: "", ports: {tcp: [], udp: [], icmp: false}, personas: [], in_scope: false, provenance: inferred, source_ref: src-1, twingate_id: null}
+personas:
+  - {id: dba, name: "Database Administrators", description: "Manage prod SQL Server", idp_search_hint: "DBA, database, SQL", policy_tier: elevated, groups: [], provenance: confirmed}
+  - {id: server-admin, name: "Server Admins", description: "Windows server administration", idp_search_hint: "server, sysadmin, windows admins", policy_tier: elevated, groups: [], provenance: confirmed}
+  - {id: web-dev, name: "Web Developers", description: "Maintain the customer portal", idp_search_hint: "developers, web, engineering", policy_tier: standard, groups: [], provenance: inferred}
+  - {id: hr-admins, name: "HR App Admins", description: "Administer the HR system", idp_search_hint: "HR, people ops, payroll", policy_tier: restricted, groups: [], provenance: inferred}
+  - {id: all-staff, name: "All Staff", description: "Everyone who needs file shares", idp_search_hint: "all staff, employees", policy_tier: standard, groups: [], provenance: inferred}
+  - {id: warehouse-supervisors, name: "Warehouse Supervisors", description: "Run the warehouse floor", idp_search_hint: "warehouse, supervisors, operations", policy_tier: standard, groups: [], provenance: inferred}
+groups: []
+decisions:
+  - {date: 2026-11-02, phase: 1, decision: "One Remote Network per firewalled zone (HQ Datacenter, Warehouse)", approved_by: "Admin"}
+open_questions:
+  - {id: q-1, phase: 3, question: "What does hr01 run besides SSH (HR application ports)?", owner: admin, status: open}
+  - {id: q-2, phase: 3, question: "Is the file server for all staff or specific departments?", owner: admin, status: open}
+  - {id: q-3, phase: 1, question: "The diagram shows an unsupported server OS. Is the diagram current?", owner: admin, status: answered}
+tasks:
+  - {id: t-1, phase: 2, owner: admin, description: "Confirm whether Entra is connected to the tenant and whether SCIM is on", evidence_needed: "Screenshot of the Twingate identity provider settings", status: todo}
+  - {id: t-2, phase: 6, owner: admin, description: "Identify the VMware host and VLAN for the HQ connector VMs", evidence_needed: "Host name and VLAN ID", status: todo}
+  - {id: t-3, phase: 6, owner: admin, description: "Request outbound firewall rule for connector hosts in both zones", evidence_needed: "Change ticket number", status: todo}

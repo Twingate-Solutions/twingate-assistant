@@ -88,6 +88,9 @@ per-group internet filtering → **dns-security**; scripting the admin API → *
   internet filtering — separate from access security policies
 - **→ twingate-api**: when the real task is scripting the Admin GraphQL API rather than
   designing the identity model
+- **→ twingate-onboarding**: when IdP setup is part of a new-tenant rollout, or the user
+  needs help working out which groups to provision — onboarding proposes personas from the
+  network and team structure, maps them to synced groups, and tracks the mapping.
 
 ## References
 

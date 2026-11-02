@@ -1,0 +1,33 @@
+# Twingate deployment state. Managed by the twingate-onboarding skill.
+# Schema: guides/state-schema.md. Never store tokens, keys or passwords here.
+# Contains internal hostnames and IPs: keep this file out of public repositories.
+meta:
+  customer: ""
+  tenant: ""
+  path: ""            # guided | expert
+  assist_level: ""    # handhold | checklist | automate
+  scripting: ""       # python | powershell | terraform | pulumi | console | none
+  existing_iac: ""
+  phase: 0
+  goals: []
+  success_criteria: []
+  in_scope: []
+  out_of_scope: []
+sources: []
+environment:
+  idp: ""
+  idp_connected: false
+  scim: unknown
+  mdm_edr: []
+  os_mix: ""
+  windows_only: unknown
+  existing_vpn: ""
+  conflicting_software: []
+  egress: {ssl_inspection: unknown, proxy_required: unknown, notes: ""}
+remote_networks: []
+resources: []
+personas: []
+groups: []
+decisions: []
+open_questions: []
+tasks: []

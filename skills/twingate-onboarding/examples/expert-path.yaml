@@ -1,0 +1,80 @@
+# Worked example (fictional org): expert path. The admin dictated groups and resources directly
+# (provenance stated) and the groups were read from the Twingate API (sourced). Okta is connected
+# with SCIM on. Access matrix approved in Phase 4. No Remote Networks exist in the tenant yet
+# (twingate_id null), so the next step is the Phase 5 build.
+# Expected status.py outcome: gates 0-4 pass; gate 5 fails (not created, no phase-5 decision);
+# networks_build_allowed true; resources_build_allowed false.
+# Everything here is invented: example.com FQDNs, RFC1918 addresses, fake IDs.
+meta:
+  customer: "Bluefin Analytics"
+  tenant: "bluefin-demo"
+  path: expert
+  assist_level: automate
+  scripting: terraform
+  existing_iac: "Terraform in infra/ (AWS modules); Twingate gets added there"
+  phase: 5
+  goals:
+    - "Private access to the AWS VPC and the office lab without a VPN"
+  success_criteria:
+    - text: "Data engineers reach warehouse.aws.example.com:5439 from home"
+      status: open
+      note: ""
+    - text: "Platform team reaches bastion.aws.example.com over SSH without a VPN"
+      status: open
+      note: ""
+  in_scope: ["AWS prod VPC", "Office lab"]
+  out_of_scope: ["Corporate SaaS apps"]
+sources:
+  - {id: src-1, kind: transcript, description: "Admin dictated resources and groups in the kickoff call", received: 2026-11-02, notes: ""}
+  - {id: src-2, kind: api, description: "Groups listed from the Twingate API", received: 2026-11-02, notes: ""}
+environment:
+  idp: okta
+  idp_connected: true
+  scim: "yes"
+  mdm_edr: [jamf, crowdstrike]
+  os_mix: "70% macOS, 30% Linux, managed"
+  windows_only: "no"
+  existing_vpn: "OpenVPN on a single EC2 host"
+  conflicting_software: []
+  egress: {ssl_inspection: "no", proxy_required: "no", notes: ""}
+remote_networks:
+  - name: "AWS Prod VPC"
+    location: AWS
+    subnets: ["10.50.0.0/16"]
+    boundary: "VPC vpc-prod"
+    connector_platform: aws-ecs
+    connector_count: 2
+    connector_hosts: []
+    connectors: []
+    firewall_change: not_needed
+    twingate_id: null
+    provenance: stated
+    source_ref: src-1
+  - name: "Office Lab"
+    location: ON_PREMISE
+    subnets: ["192.168.40.0/24"]
+    boundary: "Office lab firewall"
+    connector_platform: docker
+    connector_count: 2
+    connector_hosts: []
+    connectors: []
+    firewall_change: pending
+    twingate_id: null
+    provenance: stated
+    source_ref: src-1
+resources:
+  - {id: res-warehouse, name: "Redshift warehouse", address: warehouse.aws.example.com, ip_hint: "", remote_network: "AWS Prod VPC", service_type: postgres, description: "Analytics warehouse", environment: prod, sensitivity: high, owner: "Data platform lead", ports: {tcp: ["5439"], udp: [], icmp: false}, personas: [data-eng], in_scope: true, provenance: stated, source_ref: src-1, twingate_id: null}
+  - {id: res-bastion, name: "Bastion", address: bastion.aws.example.com, ip_hint: 10.50.1.10, remote_network: "AWS Prod VPC", service_type: ssh, description: "SSH jump host", environment: prod, sensitivity: high, owner: "Platform lead", ports: {tcp: ["22"], udp: [], icmp: true}, personas: [platform], in_scope: true, provenance: stated, source_ref: src-1, twingate_id: null}
+  - {id: res-lab, name: "Lab network", address: "192.168.40.0/24", ip_hint: "", remote_network: "Office Lab", service_type: unknown, description: "Whole lab subnet", environment: dev, sensitivity: low, owner: "", ports: {tcp: ["*"], udp: [], icmp: true}, personas: [platform, data-eng], in_scope: true, provenance: stated, source_ref: src-1, twingate_id: null}
+personas:
+  - {id: data-eng, name: "Data Engineers", description: "Build and query pipelines", idp_search_hint: "data, analytics", policy_tier: elevated, groups: ["Data-Engineering"], provenance: stated}
+  - {id: platform, name: "Platform Team", description: "Run infrastructure", idp_search_hint: "platform, sre, infra", policy_tier: elevated, groups: ["Platform-SRE"], provenance: stated}
+groups:
+  - {name: "Data-Engineering", twingate_id: "R3JvdXA6OTAwMQ==", type: SYNCED, member_count: 14, provenance: sourced, source_ref: src-2}
+  - {name: "Platform-SRE", twingate_id: "R3JvdXA6OTAwMg==", type: SYNCED, member_count: 6, provenance: sourced, source_ref: src-2}
+decisions:
+  - {date: 2026-11-02, phase: 4, decision: "Approved access matrix v1", approved_by: "Admin"}
+open_questions: []
+tasks:
+  - {id: t-1, phase: 6, owner: admin, description: "Request outbound firewall rule for the office lab connector host", evidence_needed: "Change ticket number", status: todo}
+  - {id: t-2, phase: 5, owner: claude, description: "Generate Terraform for the two Remote Networks", evidence_needed: "", status: in_progress}

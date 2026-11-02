@@ -1,0 +1,5165 @@
+# manual-reference: do-not-overwrite
+# Twingate Admin API GraphQL SDL. Hand-placed snapshot (2026-11). Authoritative for exact
+# signatures — grep this file before writing any query or mutation.
+schema {
+  query: QueriesRoot
+  mutation: MutationsRoot
+}
+
+"""
+Indicates an Input Object is a OneOf Input Object.
+"""
+directive @oneOf on INPUT_OBJECT
+
+type NetworkResource implements Node & Resource & Taggable {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+
+  """
+  Tags associated with this entity
+  """
+  tags: [Tag!]!
+
+  """
+  The Resource's address.
+  """
+  address: ResourceAddress!
+
+  """
+  The address of the Resource's alias.
+  """
+  alias: String
+
+  """
+  How a Resource's ports are configured.
+  """
+  protocols: ResourceProtocols!
+
+  """
+  Indicates whether the Resource is active.
+  """
+  isActive: Boolean!
+
+  """
+  Which Remote Network this Resource belongs to.
+  """
+  remoteNetwork: RemoteNetwork!
+
+  """
+  Which Groups have access to this Resource.
+  """
+  groups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection! @deprecated(reason: "Use `access` connection instead.")
+
+  """
+  Which Service Accounts have access to this Resource.
+  """
+  serviceAccounts(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: ServiceAccountFilterInput
+  ): ServiceAccountConnection!
+    @deprecated(reason: "Use `access` connection instead.")
+
+  """
+  Which principals have access to this Resource.
+  """
+  access(
+    filter: AccessFilterInput = null
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): AccessConnection!
+
+  """
+  Indicates whether this Resource will be in the main Resource list in the Client.
+  """
+  isVisible: Boolean!
+
+  """
+  Indicates whether this Resource will display a browser shortcut in the Client.
+  """
+  isBrowserShortcutEnabled: Boolean!
+
+  """
+  Which Security Policy required to access the Resource.
+  """
+  securityPolicy: SecurityPolicy
+
+  """
+  The usage-based auto-lock duration configured on the Resource (in days).
+  """
+  usageBasedAutolockDurationDays: Int
+    @deprecated(reason: "Use `accessPolicy` instead.")
+
+  """
+  The access policy configured on the Resource.
+  """
+  accessPolicy: AccessPolicy!
+
+  """
+  The approval mode configured on the Resource.
+  """
+  approvalMode: AccessApprovalMode!
+
+  """
+  List of groups that can approve access requests for this resource.
+  """
+  approverGroups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection!
+
+  """
+  The routing mode of the Resource.
+  """
+  routingMode: RoutingMode!
+}
+
+"""
+An object with an ID
+"""
+interface Node {
+  """
+  The ID of the object
+  """
+  id: ID!
+}
+
+interface Resource implements Node & Taggable {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+
+  """
+  Tags associated with this entity
+  """
+  tags: [Tag!]!
+
+  """
+  The Resource's address.
+  """
+  address: ResourceAddress!
+
+  """
+  The address of the Resource's alias.
+  """
+  alias: String
+
+  """
+  How a Resource's ports are configured.
+  """
+  protocols: ResourceProtocols!
+
+  """
+  Indicates whether the Resource is active.
+  """
+  isActive: Boolean!
+
+  """
+  Which Remote Network this Resource belongs to.
+  """
+  remoteNetwork: RemoteNetwork!
+
+  """
+  Which Groups have access to this Resource.
+  """
+  groups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection! @deprecated(reason: "Use `access` connection instead.")
+
+  """
+  Which Service Accounts have access to this Resource.
+  """
+  serviceAccounts(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: ServiceAccountFilterInput
+  ): ServiceAccountConnection!
+    @deprecated(reason: "Use `access` connection instead.")
+
+  """
+  Which principals have access to this Resource.
+  """
+  access(
+    filter: AccessFilterInput = null
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): AccessConnection!
+
+  """
+  Indicates whether this Resource will be in the main Resource list in the Client.
+  """
+  isVisible: Boolean!
+
+  """
+  Indicates whether this Resource will display a browser shortcut in the Client.
+  """
+  isBrowserShortcutEnabled: Boolean!
+
+  """
+  Which Security Policy required to access the Resource.
+  """
+  securityPolicy: SecurityPolicy
+
+  """
+  The usage-based auto-lock duration configured on the Resource (in days).
+  """
+  usageBasedAutolockDurationDays: Int
+    @deprecated(reason: "Use `accessPolicy` instead.")
+
+  """
+  The access policy configured on the Resource.
+  """
+  accessPolicy: AccessPolicy!
+
+  """
+  The approval mode configured on the Resource.
+  """
+  approvalMode: AccessApprovalMode!
+
+  """
+  List of groups that can approve access requests for this resource.
+  """
+  approverGroups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection!
+}
+
+interface Taggable {
+  """
+  Tags associated with this entity
+  """
+  tags: [Tag!]!
+}
+
+type Tag {
+  value: String!
+  key: String!
+}
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
+
+type ResourceAddress {
+  """
+  IP or DNS resource.
+  """
+  type: AddressType!
+  value: String!
+}
+
+enum AddressType {
+  IP
+  DNS
+}
+
+type ResourceProtocols {
+  """
+  True if ICMP is allowed. Otherwise, false.
+  """
+  allowIcmp: Boolean!
+
+  """
+  Protocol policy for TCP.
+  """
+  tcp: ResourceProtocol!
+
+  """
+  Protocol policy for UDP.
+  """
+  udp: ResourceProtocol!
+}
+
+type ResourceProtocol {
+  """
+  Whether the protocol is allowed on all ports or restricted to certain ranges
+  """
+  policy: ProtocolPolicy!
+
+  """
+  List of port ranges to allow access. This value should be ignored when `policy` is `ALLOW_ALL`.
+  """
+  ports: [PortRange!]!
+}
+
+enum ProtocolPolicy {
+  ALLOW_ALL
+  RESTRICTED
+}
+
+type PortRange {
+  """
+  The start value of the port range (inclusive). The value must be between 1 and 65535 inclusive.
+  """
+  start: Int!
+
+  """
+  The end value of the port range (inclusive). The value must be between 1 and 65535 inclusive. This `end` value can be the same as the `start` value, which means only a single port is allowed.
+  """
+  end: Int!
+}
+
+type RemoteNetwork implements Node {
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+
+  """
+  The ID of the object
+  """
+  id: ID!
+
+  """
+  The Remote Network's network type.
+  """
+  networkType: RemoteNetworkType!
+
+  """
+  The Remote Network's location.
+  """
+  location: RemoteNetworkLocation!
+
+  """
+  Indicates whether the Remote Network is active.
+  """
+  isActive: Boolean!
+
+  """
+  Which Resources are assigned to this Remote Network.
+  """
+  resources(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: ResourceFilterInput
+  ): ResourceConnection!
+
+  """
+  Which Connectors are part of this Remote Network.
+  """
+  connectors(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: ConnectorFilterInput
+  ): ConnectorConnection!
+
+  """
+  Which Gateways are part of this Remote Network.
+  """
+  gateways(
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): GatewayConnection!
+}
+
+enum RemoteNetworkType {
+  REGULAR
+  EXIT
+}
+
+enum RemoteNetworkLocation {
+  AWS
+  AZURE
+  GOOGLE_CLOUD
+  ON_PREMISE
+  OTHER
+}
+
+type ResourceConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [ResourceEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+"""
+type PageInfo {
+  """
+  When paginating forwards, are there more items?
+  """
+  hasNextPage: Boolean!
+
+  """
+  When paginating backwards, are there more items?
+  """
+  hasPreviousPage: Boolean!
+
+  """
+  When paginating backwards, the cursor to continue.
+  """
+  startCursor: String
+
+  """
+  When paginating forwards, the cursor to continue.
+  """
+  endCursor: String
+}
+
+"""
+A Relay edge containing a `Resource` and its cursor.
+"""
+type ResourceEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: Resource!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+}
+
+input ResourceFilterInput {
+  name: StringFilterOperatorInput
+  remoteNetworkId: RemoteNetworkIdFilterOperationInput
+  tags: TagsFilterOperatorInput
+}
+
+"""
+Filter input object for a string field. Each field of this input object represents a filtering operation. When multiple fields are specified, they are combined with an `AND` operation.
+"""
+input StringFilterOperatorInput {
+  eq: String
+
+  """
+  Case-insensitive version of `eq`.
+  """
+  ieq: String
+  ne: String
+  startsWith: String
+  endsWith: String
+  regexp: String
+  contains: String
+  in: [String!]
+}
+
+"""
+Filter input object for a RemoteNetwork ID field. Each field of this input object represents a filtering operation. When multiple fields are specified, they are combined with an `AND` operation.
+"""
+input RemoteNetworkIdFilterOperationInput {
+  in: [ID!]
+  eq: ID
+}
+
+input TagsFilterOperatorInput {
+  and: [TagKeyValueFilterInput!]
+}
+
+input TagKeyValueFilterInput {
+  key: String
+  value: TagValueFilterInput
+}
+
+input TagValueFilterInput {
+  in: [String!]
+  notIn: [String!]
+  eq: String
+}
+
+type ConnectorConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [ConnectorEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A Relay edge containing a `Connector` and its cursor.
+"""
+type ConnectorEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: Connector!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+}
+
+type Connector implements Node {
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastHeartbeatAt: DateTime
+  hostname: String
+
+  """
+  The ID of the object
+  """
+  id: ID!
+
+  """
+  The Connector's name.
+  """
+  name: String!
+
+  """
+  The Remote Network this Connector belongs to.
+  """
+  remoteNetwork: RemoteNetwork!
+  state: ConnectorState!
+
+  """
+  Indicates whether status notifications are enabled for the connector.
+  """
+  hasStatusNotificationsEnabled: Boolean!
+
+  """
+  The Connector's version.
+  """
+  version: String
+
+  """
+  The Connector's public IP address.
+  """
+  publicIP: String
+
+  """
+  The Connector's private IP address.
+  """
+  privateIPs: [String!]!
+}
+
+enum ConnectorState {
+  ALIVE
+  DEAD_NO_HEARTBEAT
+  DEAD_HEARTBEAT_TOO_OLD
+  DEAD_NO_RELAYS
+}
+
+input ConnectorFilterInput {
+  name: StringFilterOperatorInput
+  state: ConnectorStateFilterOperatorInput
+}
+
+"""
+Filter input object for a ConnectorState enum field. Each field of this input object represents a filtering operation. When multiple fields are specified, they are combined with an `AND` operation.
+"""
+input ConnectorStateFilterOperatorInput {
+  in: [ConnectorState!]
+}
+
+type GatewayConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [GatewayEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A Relay edge containing a `Gateway` and its cursor.
+"""
+type GatewayEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: Gateway!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+}
+
+type Gateway implements Node {
+  address: String!
+
+  """
+  The ID of the object
+  """
+  id: ID!
+
+  """
+  The Remote Network this Gateway belongs to.
+  """
+  remoteNetwork: RemoteNetwork!
+
+  """
+  The X509 Certificate Authority for this Gateway.
+  """
+  x509CA: X509CertificateAuthority!
+
+  """
+  The SSH Certificate Authority for this Gateway.
+  """
+  sshCA: SSHCertificateAuthority
+}
+
+type X509CertificateAuthority implements Node {
+  """
+  The ID of the object
+  """
+  id: ID!
+
+  """
+  The name of the X509 Certificate Authority.
+  """
+  name: String!
+
+  """
+  The fingerprint of the X.509 Certificate Authority.
+  """
+  fingerprint: String!
+}
+
+type SSHCertificateAuthority implements Node {
+  """
+  The ID of the object
+  """
+  id: ID!
+
+  """
+  The fingerprint of the SSH Certificate Authority public key.
+  """
+  name: String!
+
+  """
+  The fingerprint of the SSH Certificate Authority public key.
+  """
+  fingerprint: String!
+}
+
+type GroupConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [GroupEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A Relay edge containing a `Group` and its cursor.
+"""
+type GroupEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: Group!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+}
+
+type Group implements Node {
+  """
+  The ID of the object
+  """
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  originId: String
+
+  """
+  Indicates whether the Group is active.
+  """
+  isActive: Boolean!
+
+  """
+  The Groups type, e.g. manual or synced.
+  """
+  type: GroupType!
+
+  """
+  Which Users are members of this Group.
+  """
+  users(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: UserFilterInput
+  ): UserConnection!
+
+  """
+  Which Resources this Group contains.
+  """
+  resources(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: ResourceFilterInput
+  ): ResourceConnection!
+
+  """
+  The Security Policy assigned to the Group.
+  """
+  securityPolicy: SecurityPolicy!
+}
+
+enum GroupType {
+  MANUAL
+  SYNCED
+  SYSTEM
+}
+
+type UserConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [UserEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A Relay edge containing a `User` and its cursor.
+"""
+type UserEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: User!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+}
+
+type User implements Node {
+  """
+  The ID of the object
+  """
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  firstName: String!
+  lastName: String!
+  email: String
+  avatarUrl: String
+
+  """
+  The User's state.
+  """
+  state: UserState!
+
+  """
+  True when the User has an admin role.
+  """
+  isAdmin: Boolean! @deprecated(reason: "Use `role` instead.")
+
+  """
+  Indicates the User's role.
+  """
+  role: UserRole!
+
+  """
+  Indicates the User's type.
+  """
+  type: UserType!
+
+  """
+  Groups this User is a member of.
+  """
+  groups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection!
+
+  """
+  Devices belonging to this User.
+  """
+  devices(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: DeviceFilterInput
+  ): DeviceConnection!
+}
+
+enum UserState {
+  PENDING
+  ACTIVE
+  DISABLED
+}
+
+enum UserRole {
+  """
+  Full Read-Write permissions to the Admin Console
+  """
+  ADMIN
+
+  """
+  Read-Only permissions to the Admin Console excluding Billing and Internet Security
+  """
+  SUPPORT
+
+  """
+  Viewer plus Write permissions to the Network tab
+  """
+  DEVOPS
+
+  """
+  Viewer plus Internet Security tab Write permissions
+  """
+  INTERNET_SECURITY
+
+  """
+  Viewer plus MFA reset and device verification Write permissions
+  """
+  HELPDESK
+
+  """
+  Write permissions to Resource requests only
+  """
+  ACCESS_REVIEWER
+
+  """
+  Write permissions to Billing functions only
+  """
+  BILLING
+
+  """
+  No permissions inside the Admin Console
+  """
+  MEMBER
+}
+
+enum UserType {
+  """
+  Users manually invited to Twingate through email
+  """
+  MANUAL
+
+  """
+  Users synced to Twingate through an IdP
+  """
+  SYNCED
+}
+
+input GroupFilterInput {
+  name: StringFilterOperatorInput
+  type: GroupTypeFilterOperatorInput
+  isActive: BooleanFilterOperatorInput
+  originId: StringFilterOperatorInput
+}
+
+"""
+Filter input object for a GroupType enum field. Each field of this input object represents a filtering operation. When multiple fields are specified, they are combined with an `AND` operation.
+"""
+input GroupTypeFilterOperatorInput {
+  in: [GroupType!]
+}
+
+"""
+Filter input object for a boolean field. Each field of this input object represents a filtering operation. When multiple fields are specified, they are combined with an `AND` operation.
+"""
+input BooleanFilterOperatorInput {
+  eq: Boolean
+}
+
+type DeviceConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [DeviceEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A Relay edge containing a `Device` and its cursor.
+"""
+type DeviceEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: Device!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+}
+
+type Device implements Node {
+  """
+  The ID of the object
+  """
+  id: ID!
+  name: String
+  lastFailedLoginAt: DateTime
+  osVersion: String
+  hardwareModel: String
+  hostname: String
+  username: String
+  serialNumber: String
+
+  """
+  The User this Device belongs to.
+  """
+  user: User!
+  lastConnectedAt: DateTime
+    @deprecated(reason: "The last connected timestamp is no longer available.")
+
+  """
+  The name of this Device's operating system.
+  """
+  osName: DeviceOsName
+
+  """
+  The Device's type, e.g. LAPTOP, DESKTOP, or MOBILE.
+  """
+  deviceType: DeviceType!
+
+  """
+  The Device's active state.
+  """
+  activeState: DeviceActiveState!
+
+  """
+  Timestamp of the most recent successful Network Sign In from a client device. Updated only on sign-in from a fully logged-out state; resource policy authentication events do not affect this value.
+  """
+  lastSuccessfulLoginAt: DateTime
+  isTrusted: Boolean!
+  clientVersion: String
+  manufacturerName: String
+
+  """
+  The Device's internet security configuration.
+  """
+  internetSecurityConfiguration: String!
+}
+
+"""
+The name of the Device's operating system.
+"""
+enum DeviceOsName {
+  IPADOS
+  IOS
+  MAC_OS
+  ANDROID
+  CHROME_OS
+  WINDOWS
+  LINUX
+}
+
+"""
+The Device's type, e.g. LAPTOP, DESKTOP, or MOBILE.
+"""
+enum DeviceType {
+  GENERIC
+  DESKTOP
+  LAPTOP
+  TABLET
+  MOBILE
+}
+
+"""
+The Device's active state.
+"""
+enum DeviceActiveState {
+  ACTIVE
+  ARCHIVED
+  BLOCKED
+}
+
+input DeviceFilterInput {
+  isTrusted: BooleanFilterOperatorInput
+  serialNumber: StringFilterOperatorInput
+  activeState: DeviceActiveStateFilterOperatorInput
+  userId: UserIdFilterOperationInput
+}
+
+"""
+Filter input object for a DeviceActiveState enum field. Each field of this input object represents a filtering operation. When multiple fields are specified, they are combined with an `AND` operation.
+"""
+input DeviceActiveStateFilterOperatorInput {
+  in: [DeviceActiveState!]
+}
+
+"""
+Filter input object for a User ID field. Each field of this input object represents a filtering operation. When multiple fields are specified, they are combined with an `AND` operation.
+"""
+input UserIdFilterOperationInput {
+  in: [ID!]
+}
+
+input UserFilterInput {
+  role: UserRoleFilterOperatorInput
+  firstName: StringFilterOperatorInput
+  lastName: StringFilterOperatorInput
+  email: StringFilterOperatorInput
+}
+
+"""
+Filter input object for a UserRole enum field. Each field of this input object represents a filtering operation. When multiple fields are specified, they are combined with an `AND` operation.
+"""
+input UserRoleFilterOperatorInput {
+  in: [UserRole!]
+}
+
+type SecurityPolicy implements Node {
+  """
+  The ID of the object
+  """
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+
+  """
+  The type of Security Policy.
+  """
+  policyType: SecurityPolicyType!
+
+  """
+  Groups assigned to this Security Policy.
+  """
+  groups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection!
+}
+
+enum SecurityPolicyType {
+  RESOURCE
+  DEFAULT_RESOURCE
+}
+
+type ServiceAccountConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [ServiceAccountEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A Relay edge containing a `ServiceAccount` and its cursor.
+"""
+type ServiceAccountEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: ServiceAccount!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+}
+
+type ServiceAccount implements Node {
+  """
+  The ID of the object
+  """
+  id: ID!
+  name: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  """
+  List of Resources that this Service Account has access to.
+  """
+  resources(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: ResourceFilterInput
+  ): ResourceConnection!
+
+  """
+  List of Service Keys that belong to this Service Account.
+  """
+  keys(
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): ServiceAccountKeyConnection!
+}
+
+type ServiceAccountKeyConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [ServiceAccountKeyEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A Relay edge containing a `ServiceAccountKey` and its cursor.
+"""
+type ServiceAccountKeyEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: ServiceAccountKey!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+}
+
+type ServiceAccountKey implements Node {
+  createdAt: DateTime!
+
+  """
+  The ID of the object
+  """
+  id: ID!
+  name: String!
+  expiresAt: DateTime
+  revokedAt: DateTime
+  updatedAt: DateTime!
+
+  """
+  Indicates the status of the Service Account Key.
+  """
+  status: ServiceAccountKeyStatus!
+
+  """
+  The Service Account.
+  """
+  serviceAccount: ServiceAccount!
+}
+
+enum ServiceAccountKeyStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+input ServiceAccountFilterInput {
+  name: StringFilterOperatorInput
+}
+
+type AccessConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [AccessEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A Relay edge containing a `Access` and its cursor.
+"""
+type AccessEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: Principal!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+
+  """
+  The Security Policy directly assigned to this access edge.
+  """
+  securityPolicy: SecurityPolicy
+
+  """
+  The timestamp at which the access edge expires.
+  """
+  expiresAt: DateTime
+
+  """
+  The usage-based auto-lock duration configured on the edge (in days).
+  """
+  usageBasedAutolockDurationDays: Int
+    @deprecated(reason: "Use `accessPolicy` instead.")
+
+  """
+  The access policy configured on the edge.
+  """
+  accessPolicy: AccessPolicy
+
+  """
+  The approval mode configured on the edge.
+  """
+  approvalMode: AccessApprovalMode
+}
+
+union Principal = Group | ServiceAccount
+
+type AccessPolicy {
+  """
+  The access mode configured on the Resource.
+  """
+  mode: AccessMode!
+
+  """
+  The access duration configured on the Resource (in seconds).
+  """
+  durationSeconds: Int
+}
+
+enum AccessMode {
+  MANUAL
+  AUTO_LOCK
+  ACCESS_REQUEST
+}
+
+enum AccessApprovalMode {
+  MANUAL
+  AUTOMATIC
+}
+
+input AccessFilterInput {
+  principalType: PrincipleTypeFilterOperatorInput
+}
+
+"""
+Filter input object for a PrincipalType enum field. Each field of this input object represents a filtering operation. When multiple fields are specified, they are combined with an `AND` operation.
+"""
+input PrincipleTypeFilterOperatorInput {
+  in: [PrincipalType!]
+}
+
+enum PrincipalType {
+  GROUP
+  SERVICE_ACCOUNT
+}
+
+enum RoutingMode {
+  THROUGH_TWINGATE
+  BYPASS_TWINGATE
+}
+
+type KubernetesResource implements Node & Resource & Taggable {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+
+  """
+  Tags associated with this entity
+  """
+  tags: [Tag!]!
+
+  """
+  The Resource's address.
+  """
+  address: ResourceAddress!
+
+  """
+  The address of the Resource's alias.
+  """
+  alias: String
+
+  """
+  How a Resource's ports are configured.
+  """
+  protocols: ResourceProtocols!
+
+  """
+  Indicates whether the Resource is active.
+  """
+  isActive: Boolean!
+
+  """
+  Which Remote Network this Resource belongs to.
+  """
+  remoteNetwork: RemoteNetwork!
+
+  """
+  Which Groups have access to this Resource.
+  """
+  groups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection! @deprecated(reason: "Use `access` connection instead.")
+
+  """
+  Which Service Accounts have access to this Resource.
+  """
+  serviceAccounts(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: ServiceAccountFilterInput
+  ): ServiceAccountConnection!
+    @deprecated(reason: "Use `access` connection instead.")
+
+  """
+  Which principals have access to this Resource.
+  """
+  access(
+    filter: AccessFilterInput = null
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): AccessConnection!
+
+  """
+  Indicates whether this Resource will be in the main Resource list in the Client.
+  """
+  isVisible: Boolean!
+
+  """
+  Indicates whether this Resource will display a browser shortcut in the Client.
+  """
+  isBrowserShortcutEnabled: Boolean!
+
+  """
+  Which Security Policy required to access the Resource.
+  """
+  securityPolicy: SecurityPolicy
+
+  """
+  The usage-based auto-lock duration configured on the Resource (in days).
+  """
+  usageBasedAutolockDurationDays: Int
+    @deprecated(reason: "Use `accessPolicy` instead.")
+
+  """
+  The access policy configured on the Resource.
+  """
+  accessPolicy: AccessPolicy!
+
+  """
+  The approval mode configured on the Resource.
+  """
+  approvalMode: AccessApprovalMode!
+
+  """
+  List of groups that can approve access requests for this resource.
+  """
+  approverGroups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection!
+
+  """
+  The proxy address of the Kubernetes Resource.
+  """
+  proxyAddress: String! @deprecated(reason: "Use `gateway.address` instead.")
+
+  """
+  The certificate authority certificate of the Kubernetes Resource.
+  """
+  certificateAuthorityCert: String!
+    @deprecated(reason: "Use `gateway.x509_ca.certificate` instead.")
+
+  """
+  Which Gateway this Resource belongs to.
+  """
+  gateway: Gateway!
+
+  """
+  The cluster configuration name to reference. When null, the Gateway uses in-cluster credentials.
+  """
+  clusterRef: String
+
+  """
+  The downstream configuration.
+  """
+  downstream: KubernetesResourceDownstream!
+
+  """
+  The upstream configuration.
+  """
+  upstream: KubernetesResourceUpstream!
+}
+
+type KubernetesResourceDownstream {
+  """
+  The downstream port.
+  """
+  port: Int!
+}
+
+type KubernetesResourceUpstream {
+  """
+  The upstream port.
+  """
+  port: Int!
+}
+
+type SSHResource implements Node & Resource & Taggable {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+
+  """
+  Tags associated with this entity
+  """
+  tags: [Tag!]!
+
+  """
+  The Resource's address.
+  """
+  address: ResourceAddress!
+
+  """
+  The address of the Resource's alias.
+  """
+  alias: String
+
+  """
+  How a Resource's ports are configured.
+  """
+  protocols: ResourceProtocols!
+
+  """
+  Indicates whether the Resource is active.
+  """
+  isActive: Boolean!
+
+  """
+  Which Remote Network this Resource belongs to.
+  """
+  remoteNetwork: RemoteNetwork!
+
+  """
+  Which Groups have access to this Resource.
+  """
+  groups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection! @deprecated(reason: "Use `access` connection instead.")
+
+  """
+  Which Service Accounts have access to this Resource.
+  """
+  serviceAccounts(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: ServiceAccountFilterInput
+  ): ServiceAccountConnection!
+    @deprecated(reason: "Use `access` connection instead.")
+
+  """
+  Which principals have access to this Resource.
+  """
+  access(
+    filter: AccessFilterInput = null
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): AccessConnection!
+
+  """
+  Indicates whether this Resource will be in the main Resource list in the Client.
+  """
+  isVisible: Boolean!
+
+  """
+  Indicates whether this Resource will display a browser shortcut in the Client.
+  """
+  isBrowserShortcutEnabled: Boolean!
+
+  """
+  Which Security Policy required to access the Resource.
+  """
+  securityPolicy: SecurityPolicy
+
+  """
+  The usage-based auto-lock duration configured on the Resource (in days).
+  """
+  usageBasedAutolockDurationDays: Int
+    @deprecated(reason: "Use `accessPolicy` instead.")
+
+  """
+  The access policy configured on the Resource.
+  """
+  accessPolicy: AccessPolicy!
+
+  """
+  The approval mode configured on the Resource.
+  """
+  approvalMode: AccessApprovalMode!
+
+  """
+  List of groups that can approve access requests for this resource.
+  """
+  approverGroups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection!
+
+  """
+  The Gateway for this SSH Resource.
+  """
+  gateway: Gateway!
+
+  """
+  The downstream configuration.
+  """
+  downstream: SSHResourceDownstream!
+
+  """
+  The upstream configuration.
+  """
+  upstream: SSHResourceUpstream!
+}
+
+type SSHResourceDownstream {
+  """
+  The downstream port.
+  """
+  port: Int!
+}
+
+type SSHResourceUpstream {
+  """
+  The upstream port.
+  """
+  port: Int!
+}
+
+type WebAppResource implements Node & Resource & Taggable {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+
+  """
+  Tags associated with this entity
+  """
+  tags: [Tag!]!
+
+  """
+  The Resource's address.
+  """
+  address: ResourceAddress!
+
+  """
+  The address of the Resource's alias.
+  """
+  alias: String
+
+  """
+  How a Resource's ports are configured.
+  """
+  protocols: ResourceProtocols!
+
+  """
+  Indicates whether the Resource is active.
+  """
+  isActive: Boolean!
+
+  """
+  Which Remote Network this Resource belongs to.
+  """
+  remoteNetwork: RemoteNetwork!
+
+  """
+  Which Groups have access to this Resource.
+  """
+  groups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection! @deprecated(reason: "Use `access` connection instead.")
+
+  """
+  Which Service Accounts have access to this Resource.
+  """
+  serviceAccounts(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: ServiceAccountFilterInput
+  ): ServiceAccountConnection!
+    @deprecated(reason: "Use `access` connection instead.")
+
+  """
+  Which principals have access to this Resource.
+  """
+  access(
+    filter: AccessFilterInput = null
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): AccessConnection!
+
+  """
+  Indicates whether this Resource will be in the main Resource list in the Client.
+  """
+  isVisible: Boolean!
+
+  """
+  Indicates whether this Resource will display a browser shortcut in the Client.
+  """
+  isBrowserShortcutEnabled: Boolean!
+
+  """
+  Which Security Policy required to access the Resource.
+  """
+  securityPolicy: SecurityPolicy
+
+  """
+  The usage-based auto-lock duration configured on the Resource (in days).
+  """
+  usageBasedAutolockDurationDays: Int
+    @deprecated(reason: "Use `accessPolicy` instead.")
+
+  """
+  The access policy configured on the Resource.
+  """
+  accessPolicy: AccessPolicy!
+
+  """
+  The approval mode configured on the Resource.
+  """
+  approvalMode: AccessApprovalMode!
+
+  """
+  List of groups that can approve access requests for this resource.
+  """
+  approverGroups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection!
+
+  """
+  The Gateway for this Web App Resource.
+  """
+  gateway: Gateway!
+
+  """
+  The downstream configuration.
+  """
+  downstream: WebAppResourceDownstream!
+
+  """
+  The upstream configuration.
+  """
+  upstream: WebAppResourceUpstream!
+
+  """
+  HTTP headers to rewrite on requests to the upstream.
+  """
+  requestHeaderRewrites: [KeyValuePair!]!
+}
+
+type WebAppResourceDownstream {
+  """
+  The downstream port.
+  """
+  port: Int!
+
+  """
+  The TLS mode of the downstream connection.
+  """
+  tlsMode: TLSServerMode!
+}
+
+enum TLSServerMode {
+  TLS13
+  NONE
+}
+
+type WebAppResourceUpstream {
+  """
+  The upstream port.
+  """
+  port: Int!
+
+  """
+  The TLS mode of the upstream connection.
+  """
+  tlsMode: TLSClientMode!
+}
+
+enum TLSClientMode {
+  VERIFY_FULL
+  VERIFY_CA
+  INSECURE
+  NONE
+}
+
+type KeyValuePair {
+  key: String!
+  value: String!
+}
+
+type QueriesRoot {
+  """
+  The OIDC Identity Provider URL to register in Cloud provider for the current tenant.
+  """
+  eventsSyncOidcProviderUrl: String!
+
+  """
+  Fetches a list of Gateways.
+  """
+  gateways(
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): GatewayConnection!
+
+  """
+  Fetches a Gateway by its ID.
+  """
+  gateway(
+    """
+    The Gateway's ID.
+    """
+    id: ID!
+  ): Gateway
+
+  """
+  Fetches a list of Certificate Authorities.
+  """
+  certificateAuthorities(
+    before: String
+    after: String
+    first: Int
+    last: Int
+  ): CertificateAuthorityConnection!
+
+  """
+  Fetches a Certificate Authority by its ID.
+  """
+  certificateAuthority(
+    """
+    The Certificate Authority's ID.
+    """
+    id: ID!
+  ): CertificateAuthority
+
+  """
+  Fetches a list of Access Requests.
+  """
+  accessRequests(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: AccessRequestFilterInput
+  ): AccessRequestConnection!
+
+  """
+  Fetches a single Access Request by its ID.
+  """
+  accessRequest(
+    """
+    The Access Request's ID.
+    """
+    id: ID!
+  ): AccessRequest
+
+  """
+  List of serial numbers
+  """
+  serialNumbers(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: SerialNumberFilterInput
+  ): SerialNumberConnection!
+
+  """
+  Return a DNS filtering profile. `None` is returned when DNS filtering is not enabled.
+  """
+  dnsFilteringProfile(
+    """
+    The ID of the DNS filtering profile.
+    """
+    id: ID!
+  ): DnsFilteringProfile
+
+  """
+  Return a list of DNS filtering profiles Metadata. `None` is returned when DNS filtering is not enabled.
+  """
+  dnsFilteringProfiles: [DnsFilteringProfileMetadata!]
+
+  """
+  Fetches a single Service Account Key by its ID.
+  """
+  serviceAccountKey(
+    """
+    The Service Account Key's ID.
+    """
+    id: ID = null
+
+    """
+    The Service Account Key's name.
+    """
+    name: String = null
+  ): ServiceAccountKey
+
+  """
+  Fetches a single Service Account by its ID.
+  """
+  serviceAccount(
+    """
+    The Service Account's ID.
+    """
+    id: ID!
+  ): ServiceAccount
+
+  """
+  Fetches a list of Service Accounts.
+  """
+  serviceAccounts(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: ServiceAccountFilterInput
+  ): ServiceAccountConnection!
+
+  """
+  Fetches a list of Security Policies.
+  """
+  securityPolicies(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: SecurityPolicyFilterField
+  ): SecurityPolicyConnection!
+
+  """
+  Fetches a single Security Policy by its ID or name.
+  """
+  securityPolicy(
+    """
+    The Security Policy's ID.
+    """
+    id: ID = null
+
+    """
+    The Security Policy's name.
+    """
+    name: String = null
+  ): SecurityPolicy
+
+  """
+  Fetches a list of Connectors.
+  """
+  connectors(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: ConnectorFilterInput
+  ): ConnectorConnection!
+
+  """
+  Fetches a single Connector by its ID.
+  """
+  connector(
+    """
+    The Connector's ID.
+    """
+    id: ID!
+  ): Connector
+
+  """
+  Fetches the posture status of a Device by its ID.
+  """
+  devicePosture(
+    """
+    The Device's ID.
+    """
+    id: ID!
+  ): DevicePosture!
+
+  """
+  Fetches a list of Devices.
+  """
+  devices(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: DeviceFilterInput
+  ): DeviceConnection!
+
+  """
+  Look up a Device by its ID.
+  """
+  device(
+    """
+    The ID of the Device.
+    """
+    id: ID!
+  ): Device
+
+  """
+  Fetches a list of Users.
+  """
+  users(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: UserFilterInput
+  ): UserConnection!
+
+  """
+  Fetches a single User by its ID.
+  """
+  user(
+    """
+    The User's ID.
+    """
+    id: ID!
+  ): User
+
+  """
+  Fetches a list of Resources.
+  """
+  resources(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: ResourceFilterInput
+  ): ResourceConnection!
+
+  """
+  Fetch a single Resource by its ID.
+  """
+  resource(
+    """
+    The Resource's ID.
+    """
+    id: ID!
+  ): Resource
+
+  """
+  Fetches a list of Remote Networks.
+  """
+  remoteNetworks(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: RemoteNetworkFilterInput
+  ): RemoteNetworkConnection!
+
+  """
+  Fetches a single Remote Network by ID or name.
+  """
+  remoteNetwork(
+    """
+    The Remote Network's ID.
+    """
+    id: ID = null
+
+    """
+    The Remote Network's name.
+    """
+    name: String = null
+  ): RemoteNetwork
+
+  """
+  Fetches a list of Groups.
+  """
+  groups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection!
+
+  """
+  Fetches a Group by its ID.
+  """
+  group(
+    """
+    The Group's ID.
+    """
+    id: ID!
+  ): Group
+}
+
+type CertificateAuthorityConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [CertificateAuthorityEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A Relay edge containing a `CertificateAuthority` and its cursor.
+"""
+type CertificateAuthorityEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: CertificateAuthority!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+}
+
+union CertificateAuthority = X509CertificateAuthority | SSHCertificateAuthority
+
+type AccessRequestConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [AccessRequestEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A Relay edge containing a `AccessRequest` and its cursor.
+"""
+type AccessRequestEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: AccessRequest!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+}
+
+type AccessRequest implements Node {
+  reason: String
+  requestedAt: DateTime!
+
+  """
+  The ID of the object
+  """
+  id: ID!
+
+  """
+  The User who makes this Access Request.
+  """
+  user: User!
+
+  """
+  The Resource to which the user is requesting access.
+  """
+  resource: Resource!
+
+  """
+  The status of the Access Request.
+  """
+  status: AccessRequestStatus!
+}
+
+enum AccessRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+input AccessRequestFilterInput {
+  userId: UserIdFilterOperationInput
+  resourceId: ResourceIdFilterOperationInput
+  status: AccessRequestStatusFilterOperatorInput
+}
+
+"""
+Filter input object for a Resource ID field. Each field of this input object represents a filtering operation. When multiple fields are specified, they are combined with an `AND` operation.
+"""
+input ResourceIdFilterOperationInput {
+  in: [ID!]
+}
+
+"""
+Filter input object for a AccessRequestStatus enum field. Each field of this input object represents a filtering operation. When multiple fields are specified, they are combined with an `AND` operation.
+"""
+input AccessRequestStatusFilterOperatorInput {
+  in: [AccessRequestStatus!]
+}
+
+type SerialNumberConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [SerialNumberEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A Relay edge containing a `SerialNumber` and its cursor.
+"""
+type SerialNumberEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: SerialNumber!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+}
+
+type SerialNumber implements Node {
+  createdAt: DateTime!
+  serialNumber: String!
+
+  """
+  The ID of the object
+  """
+  id: ID!
+
+  """
+  List of Devices that are serial number verified and match this serial number.
+  """
+  matchedDevices: [Device!]!
+}
+
+input SerialNumberFilterInput {
+  serialNumber: StringFilterOperatorInput
+  hasMatchedDevices: BooleanFilterOperatorInput
+}
+
+type DnsFilteringProfile {
+  name: String!
+
+  """
+  The ID of the DNS filtering profile
+  """
+  id: ID!
+
+  """
+  The priority of the profile, the lower the value the higher the priority, priority (1) will be higher than priority (2)
+  """
+  priority: Float!
+
+  """
+  The fallback method of the profile
+  """
+  fallbackMethod: DohFallbackMethod!
+
+  """
+  The list of groups assigned to this DNS filtering profile.
+  """
+  groups(
+    before: String
+    after: String
+    first: Int
+    last: Int
+    filter: GroupFilterInput
+  ): GroupConnection!
+
+  """
+  List of allowed domains
+  """
+  allowedDomains: [String!]!
+
+  """
+  List of denied domains
+  """
+  deniedDomains: [String!]!
+
+  """
+  The content categories configuration
+  """
+  contentCategoryConfig: ContentCategoryConfig!
+
+  """
+  The security categories configuration
+  """
+  securityCategoryConfig: SecurityCategoryConfig!
+
+  """
+  The blocked privacy categories configuration
+  """
+  privacyCategoryConfig: PrivacyCategoryConfig!
+}
+
+enum DohFallbackMethod {
+  AUTO
+  STRICT
+}
+
+type ContentCategoryConfig {
+  """
+  Whether gambling related sites are blocked
+  """
+  blockGambling: Boolean!
+
+  """
+  Whether dating related sites are blocked
+  """
+  blockDating: Boolean!
+
+  """
+  Whether all sexually explicit and adult content are blocked
+  """
+  blockAdultContent: Boolean!
+
+  """
+  Whether all social networks are blocked (omits messaging apps)
+  """
+  blockSocialMedia: Boolean!
+
+  """
+  Whether online gaming websites, online gaming apps and online gaming networks are blocked
+  """
+  blockGames: Boolean!
+
+  """
+  Whether video streaming services like YouTube, Netflix, Disney+ and more are blocked
+  """
+  blockStreaming: Boolean!
+
+  """
+  Whether P2P websites, protocols, and copyright-infringing streaming websites are blocked
+  """
+  blockPiracy: Boolean!
+
+  """
+  Whether filtering mature videos on YouTube, block embedded mature videos, and hiding all comments are enabled
+  """
+  enableYoutubeRestrictedMode: Boolean!
+
+  """
+  Whether filtering explicit results on all major search engines and blocking search engines without safe search is enabled
+  """
+  enableSafeSearch: Boolean!
+}
+
+type SecurityCategoryConfig {
+  """
+  Whether protection against malware, phishing, and command-and-control servers is enabled
+  """
+  enableThreatIntelligenceFeeds: Boolean!
+
+  """
+  Whether Google Safe Browsing is enabled
+  """
+  enableGoogleSafeBrowsing: Boolean!
+
+  """
+  Whether cryptocurrency mining on network devices is blocked
+  """
+  blockCryptojacking: Boolean!
+
+  """
+  Whether domain impersonation via character substitution (e.g., Cyrillic 'e' for Latin 'e') is blocked
+  """
+  blockIdnHomographs: Boolean!
+
+  """
+  Whether malicious domains targeting mistyped addresses (e.g., 'gooogle.com') are blocked
+  """
+  blockTyposquatting: Boolean!
+
+  """
+  Whether DNS responses that contain private IP addresses are blocked
+  """
+  blockDnsRebinding: Boolean!
+
+  """
+  Whether domains registered within that last 30 days are blocked
+  """
+  blockNewlyRegisteredDomains: Boolean!
+
+  """
+  Whether malware-generated domains used as command and control rendezvous points are blocked
+  """
+  blockDomainGenerationAlgorithms: Boolean!
+
+  """
+  Whether parked domains are blocked
+  """
+  blockParkedDomains: Boolean!
+}
+
+type PrivacyCategoryConfig {
+  """
+  Whether affiliate & tracking domains are blocked
+  """
+  blockAffiliate: Boolean!
+
+  """
+  Whether third-party trackers disguising themselves as first-party are detected and blocked
+  """
+  blockDisguisedTrackers: Boolean!
+
+  """
+  Whether ads & trackers are blocked using regularly updated lists
+  """
+  blockAdsAndTrackers: Boolean!
+}
+
+type DnsFilteringProfileMetadata {
+  name: String!
+
+  """
+  The ID of the DNS filtering profile
+  """
+  id: ID!
+
+  """
+  The priority of the profile, the lower the value the higher the priority, priority (1) will be higher than priority (2)
+  """
+  priority: Float!
+}
+
+type SecurityPolicyConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [SecurityPolicyEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A Relay edge containing a `SecurityPolicy` and its cursor.
+"""
+type SecurityPolicyEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: SecurityPolicy!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+}
+
+input SecurityPolicyFilterField {
+  policyType: SecurityPolicyTypeFilterOperatorInput
+  name: StringFilterOperatorInput
+}
+
+"""
+Filter input object for a SecurityPolicyType enum field. Each field of this input object represents a filtering operation. When multiple fields are specified, they are combined with an `AND` operation.
+"""
+input SecurityPolicyTypeFilterOperatorInput {
+  in: [SecurityPolicyType!]
+}
+
+type DevicePosture {
+  """
+  Hard drive encryption posture check.
+  """
+  hardDriveEncryption: DevicePropertyPostureCheck
+
+  """
+  Screen lock passcode posture check.
+  """
+  screenLockPasscode: DevicePropertyPostureCheck
+
+  """
+  Firewall posture check.
+  """
+  firewall: DevicePropertyPostureCheck
+
+  """
+  Biometric posture check.
+  """
+  biometric: DevicePropertyPostureCheck
+
+  """
+  Antivirus posture check.
+  """
+  antivirus: DevicePropertyPostureCheck
+
+  """
+  OS version posture check.
+  """
+  osVersion: OsVersionPostureCheck
+
+  """
+  CrowdStrike integration verification. Null if the platform doesn't support this verification method or if the integration isn't configured.
+  """
+  crowdstrike: TrustProviderVerification
+
+  """
+  Jamf integration verification. Null if the platform doesn't support this verification method or if the integration isn't configured.
+  """
+  jamf: TrustProviderVerification
+
+  """
+  Kandji integration verification. Null if the platform doesn't support this verification method or if the integration isn't configured.
+  """
+  kandji: TrustProviderVerification
+    @deprecated(reason: "Kandji is now Iru, please use `iru` instead.")
+
+  """
+  Iru (previously Kandji) integration verification. Null if the platform doesn't support this verification method or if the integration isn't configured.
+  """
+  iru: TrustProviderVerification
+
+  """
+  Intune integration verification. Null if the platform doesn't support this verification method or if the integration isn't configured.
+  """
+  inTune: TrustProviderVerification
+
+  """
+  SentinelOne integration verification. Null if the platform doesn't support this verification method or if the integration isn't configured.
+  """
+  sentinelOne: TrustProviderVerification
+
+  """
+  1Password integration verification. Null if the platform doesn't support this verification method or if the integration isn't configured.
+  """
+  onePassword: TrustProviderVerification
+
+  """
+  Manual verification status of the device. Null if the device isn't verified manually.
+  """
+  manualVerification: ManualVerification
+}
+
+type DevicePropertyPostureCheck implements BasePostureCheck {
+  """
+  Whether the device satisfies this posture check.
+  """
+  isSatisfied: PostureStatus!
+
+  """
+  Whether this property was detected as enabled on the device.
+  """
+  detected: Boolean
+}
+
+interface BasePostureCheck {
+  """
+  Whether the device satisfies this posture check.
+  """
+  isSatisfied: PostureStatus!
+}
+
+enum PostureStatus {
+  YES
+  NO
+  NOT_REQUIRED
+}
+
+type OsVersionPostureCheck implements BasePostureCheck {
+  """
+  Whether the device satisfies this posture check.
+  """
+  isSatisfied: PostureStatus!
+
+  """
+  The OS version reported by the device.
+  """
+  version: String
+}
+
+type TrustProviderVerification implements BaseVerification {
+  """
+  Whether the device is verified by this trust provider.
+  """
+  isVerified: Boolean!
+
+  """
+  The reason for verification failure. Null if the device is verified.
+  """
+  failureReason: TrustProviderVerificationFailureReason
+
+  """
+  When the verification data expired. Only has a value when failureReason is VERIFICATION_EXPIRED.
+  """
+  expiredAt: DateTime
+
+  """
+  Additional details about the verification failure. Sometimes has a value when failureReason is VERIFICATION_FAILED.
+  """
+  failureDetails: String
+}
+
+interface BaseVerification {
+  """
+  Whether the device is verified by this trust provider.
+  """
+  isVerified: Boolean!
+}
+
+enum TrustProviderVerificationFailureReason {
+  VERIFICATION_FAILED
+  VERIFICATION_EXPIRED
+  NO_SERIAL_NUMBER
+  NOT_DETECTED
+  MISSING_DATA
+}
+
+type ManualVerification implements BaseVerification {
+  """
+  Whether the device is verified by this trust provider.
+  """
+  isVerified: Boolean!
+
+  """
+  The type of manual verification. Has a value if the device is manually verified.
+  """
+  value: ManualVerificationValue
+}
+
+enum ManualVerificationValue {
+  """
+  The device's serial number has been manually verified.
+  """
+  SERIAL_NUMBER_VERIFIED
+
+  """
+  The device instance has been manually verified.
+  """
+  DEVICE_INSTANCE_VERIFIED
+}
+
+type RemoteNetworkConnection {
+  """
+  Pagination data for this connection.
+  """
+  pageInfo: PageInfo!
+
+  """
+  Contains the nodes in this connection.
+  """
+  edges: [RemoteNetworkEdge!]!
+
+  """
+  A total count of items in the connection.
+  """
+  totalCount: Int!
+}
+
+"""
+A Relay edge containing a `RemoteNetwork` and its cursor.
+"""
+type RemoteNetworkEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: RemoteNetwork!
+
+  """
+  A cursor for use in pagination
+  """
+  cursor: String!
+}
+
+input RemoteNetworkFilterInput {
+  name: StringFilterOperatorInput
+  networkType: RemoteNetworkTypeFilterOperatorInput
+}
+
+"""
+Filter input object for a RemoteNetworkType enum field. Each field of this input object represents a filtering operation. When multiple fields are specified, they are combined with an `AND` operation.
+"""
+input RemoteNetworkTypeFilterOperatorInput {
+  in: [RemoteNetworkType!]
+}
+
+type MutationsRoot {
+  gatewayCreate(
+    """
+    The Gateway's address.
+    """
+    address: String!
+
+    """
+    The Remote Network ID to assign to the Gateway.
+    """
+    remoteNetworkId: ID!
+
+    """
+    The SSH Certificate Authority ID to assign to the Gateway.
+    """
+    sshCAId: ID = null
+
+    """
+    The X509 Certificate Authority ID to assign to the Gateway.
+    """
+    x509CAId: ID!
+  ): GatewayCreateMutation!
+  gatewayUpdate(
+    """
+    The Gateway's address.
+    """
+    address: String
+
+    """
+    The Gateway's ID.
+    """
+    id: ID!
+
+    """
+    The Remote Network ID to assign to the Gateway.
+    """
+    remoteNetworkId: ID
+
+    """
+    The SSH Certificate Authority ID to assign to the Gateway. If null, the Gateway's SSH Certificate Authority is unassigned from the Gateway.
+    """
+    sshCAId: ID
+
+    """
+    The X509 Certificate Authority ID to assign to the Gateway.
+    """
+    x509CAId: ID
+  ): GatewayUpdateMutation!
+  gatewayDelete(
+    """
+    The ID of the entity to delete.
+    """
+    id: ID!
+  ): GatewayDeleteMutation!
+  x509CertificateAuthorityCreate(
+    """
+    The X509 certificate in PEM format.
+    """
+    certificate: String!
+
+    """
+    The name of the Certificate Authority.
+    """
+    name: String!
+  ): X509CertificateAuthorityCreateMutation!
+  x509CertificateAuthorityDelete(
+    """
+    The ID of the entity to delete.
+    """
+    id: ID!
+  ): X509CertificateAuthorityDeleteMutation!
+  sshCertificateAuthorityCreate(
+    """
+    The name of the Certificate Authority.
+    """
+    name: String!
+
+    """
+    The SSH public key.
+    """
+    publicKey: String!
+  ): SSHCertificateAuthorityCreateMutation!
+  sshCertificateAuthorityDelete(
+    """
+    The ID of the entity to delete.
+    """
+    id: ID!
+  ): SSHCertificateAuthorityDeleteMutation!
+  accessRequestApprove(
+    """
+    The Access Request's ID.
+    """
+    id: ID!
+  ): AccessRequestApproveMutation!
+  accessRequestReject(
+    """
+    The Access Request's ID.
+    """
+    id: ID!
+  ): AccessRequestRejectMutation!
+  serialNumbersCreate(
+    """
+    List of serial numbers
+    """
+    serialNumbers: [String!]!
+  ): SerialNumbersCreateMutation!
+  serialNumbersDelete(
+    """
+    List of serial numbers
+    """
+    serialNumbers: [String!]!
+  ): SerialNumbersDeleteMutation!
+  dnsFilteringProfileCreate(
+    """
+    The name of the profile
+    """
+    name: String!
+  ): DnsFilteringProfileCreateMutation!
+  dnsFilteringProfileDelete(
+    """
+    The ID of the entity to delete.
+    """
+    id: ID!
+  ): DnsFilteringProfileDeleteMutation!
+  dnsFilteringProfileUpdate(
+    """
+    List of allowed domains
+    """
+    allowedDomains: [String!]
+    contentCategoryConfig: ContentCategoryConfigInput
+
+    """
+    List of denied domains
+    """
+    deniedDomains: [String!]
+
+    """
+    The fallback method for the profile
+    """
+    fallbackMethod: DohFallbackMethod
+
+    """
+    The list of groups assigned to this profile
+    """
+    groups: [String!]
+
+    """
+    The ID of the profile
+    """
+    id: ID!
+
+    """
+    The name of the profile
+    """
+    name: String
+
+    """
+    The priority of the profile
+    """
+    priority: Float
+    privacyCategoryConfig: PrivacyCategoryConfigInput
+    securityCategoryConfig: SecurityCategoryConfigInput
+  ): DnsFilteringProfileUpdateMutation!
+  serviceAccountKeyCreate(
+    """
+    Number of days key will expire in, a value from 0-365 (inclusive) is required.
+    """
+    expirationTime: Int!
+
+    """
+    The Service Account Key's name.
+    """
+    name: String = null
+
+    """
+    The Service Account's ID.
+    """
+    serviceAccountId: ID!
+  ): ServiceAccountKeyCreateMutation!
+  serviceAccountKeyUpdate(
+    """
+    The Service Account Key's ID.
+    """
+    id: ID!
+
+    """
+    The Service Account Key's name.
+    """
+    name: String!
+  ): ServiceAccountKeyUpdateMutation!
+  serviceAccountKeyRevoke(
+    """
+    The Service Account Key's ID.
+    """
+    id: ID!
+  ): ServiceAccountKeyRevokeMutation!
+  serviceAccountKeyDelete(
+    """
+    The ID of the entity to delete.
+    """
+    id: ID!
+  ): ServiceAccountKeyDeleteMutation!
+  serviceAccountCreate(
+    """
+    The Service Account's name.
+    """
+    name: String!
+
+    """
+    List of Resource IDs to add to the Service Account.
+    """
+    resourceIds: [ID] = []
+  ): ServiceAccountCreateMutation!
+  serviceAccountUpdate(
+    """
+    List of Resource IDs added to the Service Account.
+    """
+    addedResourceIds: [ID] = []
+
+    """
+    The Service Account's ID.
+    """
+    id: ID!
+
+    """
+    The Service Account's name.
+    """
+    name: String = null
+
+    """
+    List of Resource IDs removed from the Service Account.
+    """
+    removedResourceIds: [ID] = []
+
+    """
+    List of Resource IDs to be assigned to the Service Account.
+    """
+    resourceIds: [ID] = []
+  ): ServiceAccountUpdateMutation!
+  serviceAccountDelete(
+    """
+    The ID of the entity to delete.
+    """
+    id: ID!
+  ): ServiceAccountDeleteMutation!
+  securityPolicyUpdate(
+    """
+    List of Group IDs to add.
+    """
+    addedGroupIds: [ID] = null
+
+    """
+    List of Group IDs to be assigned the Security Policy. Groups currently assigned the policy that are not included will have the policy removed and enforce the default resource policy.
+    """
+    groupIds: [ID] = null
+
+    """
+    The Security Policy's ID.
+    """
+    id: ID!
+
+    """
+    List of Group IDs to remove. Groups removed from this policy will enforce the default resource policy.
+    """
+    removedGroupIds: [ID] = null
+  ): SecurityPolicyUpdateMutation!
+  deviceUpdate(
+    """
+    The Device's ID.
+    """
+    id: ID!
+
+    """
+    Whether the Device is trusted.
+    """
+    isTrusted: Boolean!
+  ): DeviceUpdateMutation!
+  deviceArchive(
+    """
+    The Device's ID.
+    """
+    id: ID!
+  ): DeviceArchiveMutation!
+  deviceUnarchive(
+    """
+    The Device's ID.
+    """
+    id: ID!
+  ): DeviceUnarchiveMutation!
+  deviceBlock(
+    """
+    The Device's ID.
+    """
+    id: ID!
+  ): DeviceBlockMutation!
+  deviceUnblock(
+    """
+    The Device's ID.
+    """
+    id: ID!
+  ): DeviceUnblockMutation!
+  remoteNetworkCreate(
+    """
+    Indicates whether the Remote Network is active. The default is 'true'.
+    """
+    isActive: Boolean = true
+
+    """
+    The Remote Network's location.
+    """
+    location: RemoteNetworkLocation = OTHER
+
+    """
+    The Remote Network's name.
+    """
+    name: String!
+
+    """
+    The Remote Network's network type.
+    """
+    networkType: RemoteNetworkType = REGULAR
+  ): RemoteNetworkCreateMutation!
+  remoteNetworkUpdate(
+    """
+    The Remote Network's ID.
+    """
+    id: ID!
+
+    """
+    Indicates whether the Remote Network is active.
+    """
+    isActive: Boolean = null
+
+    """
+    The Remote Network's location.
+    """
+    location: RemoteNetworkLocation = null
+
+    """
+    The Remote Network's name.
+    """
+    name: String = null
+  ): RemoteNetworkUpdateMutation!
+  remoteNetworkDelete(
+    """
+    The ID of the entity to delete.
+    """
+    id: ID!
+  ): RemoteNetworkDeleteMutation!
+  connectorCreate(
+    """
+    Whether status notifications should be enabled for the Connector.
+    """
+    hasStatusNotificationsEnabled: Boolean = true
+
+    """
+    The Connector's name.
+    """
+    name: String = null
+
+    """
+    The ID of the Connector's Remote Network.
+    """
+    remoteNetworkId: ID!
+  ): ConnectorCreateMutation!
+  connectorUpdate(
+    """
+    Whether status notifications should be enabled for the Connector.
+    """
+    hasStatusNotificationsEnabled: Boolean = null
+
+    """
+    The Connector's ID.
+    """
+    id: ID!
+
+    """
+    The Connector's name.
+    """
+    name: String = null
+  ): ConnectorUpdateMutation!
+  connectorDelete(
+    """
+    The ID of the entity to delete.
+    """
+    id: ID!
+  ): ConnectorDeleteMutation!
+  connectorGenerateTokens(
+    """
+    The ID of the Connector to generate tokens for.
+    """
+    connectorId: ID!
+  ): ConnectorGenerateTokensMutation!
+  userCreate(
+    """
+    The User's email.
+    """
+    email: String!
+
+    """
+    The User's first name.
+    """
+    firstName: String = null
+
+    """
+    The User's last name.
+    """
+    lastName: String = null
+
+    """
+    The User's role.
+    """
+    role: UserRole = MEMBER
+  ): UserCreateMutation!
+  userDetailsUpdate(
+    """
+    The User's first name.
+    """
+    firstName: String = null
+
+    """
+    The User's ID.
+    """
+    id: ID!
+
+    """
+    The User's last name.
+    """
+    lastName: String = null
+
+    """
+    The User's state.
+    """
+    state: UserStateUpdateInput = null
+  ): UserDetailsUpdateMutation!
+  userRoleUpdate(
+    """
+    The User's ID.
+    """
+    id: ID!
+
+    """
+    The User's role.
+    """
+    role: UserRole
+  ): UserRoleUpdateMutation!
+  userDelete(
+    """
+    The ID of the entity to delete.
+    """
+    id: ID!
+  ): UserDeleteMutation!
+  userResetMfa(
+    """
+    The user ID
+    """
+    id: ID!
+  ): UserResetMFAMutation!
+  resourceCreate(
+    """
+    The access policy configured on the resource.
+    """
+    accessPolicy: AccessPolicyInput = null
+
+    """
+    The Resource's IP/FQDN.
+    """
+    address: String!
+
+    """
+    The Resource's alias address.
+    """
+    alias: String = null
+
+    """
+    The approval mode configured on the Resource.
+    """
+    approvalMode: AccessApprovalMode = MANUAL
+
+    """
+    List of Group IDs that can approve access requests for the Resource.
+    """
+    approverGroupIds: [ID!] = []
+
+    """
+    List of Group IDs added to the Resource.
+    """
+    groupIds: [ID] = []
+
+    """
+    Indicates whether this Resource will display a browser shortcut in the Client.
+    """
+    isBrowserShortcutEnabled: Boolean = null
+
+    """
+    Indicates whether this Resource will be in the main Resource list in the Client.
+    """
+    isVisible: Boolean = null
+
+    """
+    The Resource's name.
+    """
+    name: String!
+
+    """
+    Restrict access to certain protocols and ports. By default or when this argument is null, there is no restriction i.e. all protocols and ports are allowed.
+    """
+    protocols: ProtocolsInput = null
+
+    """
+    Remote Network ID to assign to the Resource.
+    """
+    remoteNetworkId: ID!
+
+    """
+    The routing mode of the Resource.
+    """
+    routingMode: RoutingMode = null
+
+    """
+    Security Policy ID required to access the Resource.
+    """
+    securityPolicyId: ID = null
+
+    """
+    A list of tags to associate with the Resource.
+    """
+    tags: [TagInput!]
+  ): ResourceCreateMutation!
+  resourceUpdate(
+    """
+    The access policy configured on the resource. If unspecified or null, the resource's existing access policy remains unchanged.
+    """
+    accessPolicy: AccessPolicyInput
+
+    """
+    List of Group IDs to add as approvers.
+    """
+    addedApproverGroupIds: [ID!] = null
+
+    """
+    List of Group IDs to add.
+    """
+    addedGroupIds: [ID] = null
+
+    """
+    The Resource's IP/FQDN.
+    """
+    address: String = null
+
+    """
+    The Resource's alias. If unspecified, alias remains unchanged. If null, the alias will be cleared.
+    """
+    alias: String
+
+    """
+    The approval mode configured on the Resource. If unspecified or null, the resource's existing approval mode remains unchanged.
+    """
+    approvalMode: AccessApprovalMode
+
+    """
+    List of Group IDs to be assigned as approvers for the Resource.
+    """
+    approverGroupIds: [ID!] = null
+
+    """
+    List of Group IDs to be assigned to the Resource.
+    """
+    groupIds: [ID] = null
+
+    """
+    The Resource's ID.
+    """
+    id: ID!
+
+    """
+    Indicates if the Resource is active.
+    """
+    isActive: Boolean = null
+
+    """
+    Indicates whether this Resource will display a browser shortcut in the Client.
+    """
+    isBrowserShortcutEnabled: Boolean = null
+
+    """
+    Indicates whether this Resource will be in the main Resource list in the Client.
+    """
+    isVisible: Boolean = null
+
+    """
+    The Resource's name.
+    """
+    name: String = null
+
+    """
+    Restrict access to certain protocols and ports.
+    """
+    protocols: ProtocolsInput = null
+
+    """
+    Remote Network ID to assign to the Resource.
+    """
+    remoteNetworkId: ID = null
+
+    """
+    List of Group IDs to remove as approvers.
+    """
+    removedApproverGroupIds: [ID!] = null
+
+    """
+    List of Group IDs to remove.
+    """
+    removedGroupIds: [ID] = null
+
+    """
+    The routing mode of the Resource.
+    """
+    routingMode: RoutingMode
+
+    """
+    Security Policy ID required to access the Resource. If unspecified, policy remains unchanged. If null, the policy is reset to the Default Policy.
+    """
+    securityPolicyId: ID
+
+    """
+    A list of tags to associate with the Resource. If unspecified, the resource's existing tags remain unchanged. If null, the resource's existing tags are removed.
+    """
+    tags: [TagInput!]
+  ): ResourceUpdateMutation!
+  resourceDelete(
+    """
+    The ID of the entity to delete.
+    """
+    id: ID!
+  ): ResourceDeleteMutation!
+  resourceAccessAdd(
+    """
+    List of accesses to be added to the Resource. If an access between the Resource and principal already exists, the access' properties would be reconfigured. Hence, this mutation can be used to change or remove the Security Policy of an access edge.
+    """
+    access: [AccessInput!]!
+
+    """
+    The Resource's ID.
+    """
+    resourceId: ID!
+  ): ResourceAccessAddMutation!
+  resourceAccessSet(
+    """
+    List of accesses to the Resource. Existing accesses to the Resource will be removed.
+    """
+    access: [AccessInput!]!
+
+    """
+    The Resource's ID.
+    """
+    resourceId: ID!
+  ): ResourceAccessSetMutation!
+  resourceAccessRemove(
+    """
+    List of principals being removed from accessing the Resource.
+    """
+    principalIds: [ID!]!
+
+    """
+    The Resource's ID.
+    """
+    resourceId: ID!
+  ): ResourceAccessRemoveMutation!
+  kubernetesResourceCreate(
+    """
+    The access policy configured on the resource.
+    """
+    accessPolicy: AccessPolicyInput = null
+
+    """
+    The Resource's IP/FQDN.
+    """
+    address: String!
+
+    """
+    The Resource's alias address.
+    """
+    alias: String = null
+
+    """
+    The approval mode configured on the Resource.
+    """
+    approvalMode: AccessApprovalMode = MANUAL
+
+    """
+    List of Group IDs that can approve access requests for the Resource.
+    """
+    approverGroupIds: [ID!] = []
+
+    """
+    The cluster configuration name to reference. When null, the Gateway uses in-cluster credentials.
+    """
+    clusterRef: String = null
+
+    """
+    The downstream configuration.
+    """
+    downstream: KubernetesDownstreamInput = null
+
+    """
+    The Gateway ID for the Kubernetes Resource.
+    """
+    gatewayId: ID
+
+    """
+    List of Group IDs added to the Resource.
+    """
+    groupIds: [ID] = []
+
+    """
+    Indicates whether this Resource will be in the main Resource list in the Client.
+    """
+    isVisible: Boolean = null
+
+    """
+    The Resource's name.
+    """
+    name: String!
+
+    """
+    Restrict access to certain protocols and ports. By default or when this argument is null, there is no restriction i.e. all protocols and ports are allowed.
+    """
+    protocols: ProtocolsInput = null
+
+    """
+    Remote Network ID to assign to the Resource.
+    """
+    remoteNetworkId: ID!
+
+    """
+    Security Policy ID required to access the Resource.
+    """
+    securityPolicyId: ID = null
+
+    """
+    A list of tags to associate with the Resource.
+    """
+    tags: [TagInput!]
+
+    """
+    The upstream configuration.
+    """
+    upstream: KubernetesUpstreamInput = null
+  ): KubernetesResourceCreateMutation!
+  kubernetesResourceUpdate(
+    """
+    The access policy configured on the resource. If unspecified or null, the resource's existing access policy remains unchanged.
+    """
+    accessPolicy: AccessPolicyInput
+
+    """
+    List of Group IDs to add as approvers.
+    """
+    addedApproverGroupIds: [ID!] = null
+
+    """
+    List of Group IDs to add.
+    """
+    addedGroupIds: [ID] = null
+
+    """
+    The Resource's IP/FQDN.
+    """
+    address: String = null
+
+    """
+    The Resource's alias. If unspecified, alias remains unchanged. If null, the alias will be cleared.
+    """
+    alias: String
+
+    """
+    The approval mode configured on the Resource. If unspecified or null, the resource's existing approval mode remains unchanged.
+    """
+    approvalMode: AccessApprovalMode
+
+    """
+    List of Group IDs to be assigned as approvers for the Resource.
+    """
+    approverGroupIds: [ID!] = null
+
+    """
+    The cluster configuration name to reference.If null, the reference is removed.
+    """
+    clusterRef: String
+
+    """
+    The downstream configuration.
+    """
+    downstream: KubernetesDownstreamInput = null
+
+    """
+    The Gateway ID for the Kubernetes Resource.
+    """
+    gatewayId: ID = null
+
+    """
+    List of Group IDs to be assigned to the Resource.
+    """
+    groupIds: [ID] = null
+
+    """
+    The Resource's ID.
+    """
+    id: ID!
+
+    """
+    Indicates if the Resource is active.
+    """
+    isActive: Boolean = null
+
+    """
+    Indicates whether this Resource will be in the main Resource list in the Client.
+    """
+    isVisible: Boolean = null
+
+    """
+    The Resource's name.
+    """
+    name: String = null
+
+    """
+    Restrict access to certain protocols and ports.
+    """
+    protocols: ProtocolsInput = null
+
+    """
+    Remote Network ID to assign to the Resource.
+    """
+    remoteNetworkId: ID = null
+
+    """
+    List of Group IDs to remove as approvers.
+    """
+    removedApproverGroupIds: [ID!] = null
+
+    """
+    List of Group IDs to remove.
+    """
+    removedGroupIds: [ID] = null
+
+    """
+    Security Policy ID required to access the Resource. If unspecified, policy remains unchanged. If null, the policy is reset to the Default Policy.
+    """
+    securityPolicyId: ID
+
+    """
+    A list of tags to associate with the Resource. If unspecified, the resource's existing tags remain unchanged. If null, the resource's existing tags are removed.
+    """
+    tags: [TagInput!]
+
+    """
+    The upstream configuration.
+    """
+    upstream: KubernetesUpstreamInput = null
+  ): KubernetesResourceUpdateMutation!
+  sshResourceCreate(
+    """
+    The access policy configured on the resource.
+    """
+    accessPolicy: AccessPolicyInput = null
+
+    """
+    The Resource's IP/FQDN.
+    """
+    address: String!
+
+    """
+    The Resource's alias address.
+    """
+    alias: String = null
+
+    """
+    The approval mode configured on the Resource.
+    """
+    approvalMode: AccessApprovalMode = MANUAL
+
+    """
+    List of Group IDs that can approve access requests for the Resource.
+    """
+    approverGroupIds: [ID!] = []
+
+    """
+    The downstream configuration.
+    """
+    downstream: SSHDownstreamInput = null
+
+    """
+    The Gateway ID for the SSH Resource.
+    """
+    gatewayId: ID!
+
+    """
+    List of Group IDs added to the Resource.
+    """
+    groupIds: [ID] = []
+
+    """
+    Indicates whether this Resource will be in the main Resource list in the Client.
+    """
+    isVisible: Boolean = null
+
+    """
+    The Resource's name.
+    """
+    name: String!
+
+    """
+    Remote Network ID to assign to the Resource.
+    """
+    remoteNetworkId: ID!
+
+    """
+    Security Policy ID required to access the Resource.
+    """
+    securityPolicyId: ID = null
+
+    """
+    A list of tags to associate with the Resource.
+    """
+    tags: [TagInput!]
+
+    """
+    The upstream configuration.
+    """
+    upstream: SSHUpstreamInput = null
+  ): SSHResourceCreateMutation!
+  sshResourceUpdate(
+    """
+    The access policy configured on the resource. If unspecified or null, the resource's existing access policy remains unchanged.
+    """
+    accessPolicy: AccessPolicyInput
+
+    """
+    List of Group IDs to add as approvers.
+    """
+    addedApproverGroupIds: [ID!] = null
+
+    """
+    List of Group IDs to add.
+    """
+    addedGroupIds: [ID] = null
+
+    """
+    The Resource's IP/FQDN.
+    """
+    address: String = null
+
+    """
+    The Resource's alias. If unspecified, alias remains unchanged. If null, the alias will be cleared.
+    """
+    alias: String
+
+    """
+    The approval mode configured on the Resource. If unspecified or null, the resource's existing approval mode remains unchanged.
+    """
+    approvalMode: AccessApprovalMode
+
+    """
+    List of Group IDs to be assigned as approvers for the Resource.
+    """
+    approverGroupIds: [ID!] = null
+
+    """
+    The downstream configuration.
+    """
+    downstream: SSHDownstreamInput = null
+
+    """
+    The Gateway ID for the SSH Resource.
+    """
+    gatewayId: ID = null
+
+    """
+    List of Group IDs to be assigned to the Resource.
+    """
+    groupIds: [ID] = null
+
+    """
+    The Resource's ID.
+    """
+    id: ID!
+
+    """
+    Indicates if the Resource is active.
+    """
+    isActive: Boolean = null
+
+    """
+    Indicates whether this Resource will be in the main Resource list in the Client.
+    """
+    isVisible: Boolean = null
+
+    """
+    The Resource's name.
+    """
+    name: String = null
+
+    """
+    Remote Network ID to assign to the Resource.
+    """
+    remoteNetworkId: ID = null
+
+    """
+    List of Group IDs to remove as approvers.
+    """
+    removedApproverGroupIds: [ID!] = null
+
+    """
+    List of Group IDs to remove.
+    """
+    removedGroupIds: [ID] = null
+
+    """
+    Security Policy ID required to access the Resource. If unspecified, policy remains unchanged. If null, the policy is reset to the Default Policy.
+    """
+    securityPolicyId: ID
+
+    """
+    A list of tags to associate with the Resource. If unspecified, the resource's existing tags remain unchanged. If null, the resource's existing tags are removed.
+    """
+    tags: [TagInput!]
+
+    """
+    The upstream configuration.
+    """
+    upstream: SSHUpstreamInput = null
+  ): SSHResourceUpdateMutation!
+  webAppResourceCreate(
+    """
+    The access policy configured on the resource.
+    """
+    accessPolicy: AccessPolicyInput = null
+
+    """
+    The Resource's IP/FQDN.
+    """
+    address: String!
+
+    """
+    The Resource's alias address.
+    """
+    alias: String = null
+
+    """
+    The approval mode configured on the Resource.
+    """
+    approvalMode: AccessApprovalMode = MANUAL
+
+    """
+    List of Group IDs that can approve access requests for the Resource.
+    """
+    approverGroupIds: [ID!] = []
+
+    """
+    The downstream configuration.
+    """
+    downstream: WebAppDownstreamInput!
+
+    """
+    The Gateway ID for the Web App Resource.
+    """
+    gatewayId: ID!
+
+    """
+    List of Group IDs added to the Resource.
+    """
+    groupIds: [ID] = []
+
+    """
+    Indicates whether this Resource will be in the main Resource list in the Client.
+    """
+    isVisible: Boolean = null
+
+    """
+    The Resource's name.
+    """
+    name: String!
+
+    """
+    Remote Network ID to assign to the Resource.
+    """
+    remoteNetworkId: ID!
+
+    """
+    HTTP headers to rewrite on requests to the upstream.
+    """
+    requestHeaderRewrites: [KeyValueInputObject!] = []
+
+    """
+    Security Policy ID required to access the Resource.
+    """
+    securityPolicyId: ID = null
+
+    """
+    A list of tags to associate with the Resource.
+    """
+    tags: [TagInput!]
+
+    """
+    The upstream configuration.
+    """
+    upstream: WebAppUpstreamInput!
+  ): WebAppResourceCreateMutation!
+  webAppResourceUpdate(
+    """
+    The access policy configured on the resource. If unspecified or null, the resource's existing access policy remains unchanged.
+    """
+    accessPolicy: AccessPolicyInput
+
+    """
+    List of Group IDs to add as approvers.
+    """
+    addedApproverGroupIds: [ID!] = null
+
+    """
+    List of Group IDs to add.
+    """
+    addedGroupIds: [ID] = null
+
+    """
+    The Resource's IP/FQDN.
+    """
+    address: String = null
+
+    """
+    The Resource's alias. If unspecified, alias remains unchanged. If null, the alias will be cleared.
+    """
+    alias: String
+
+    """
+    The approval mode configured on the Resource. If unspecified or null, the resource's existing approval mode remains unchanged.
+    """
+    approvalMode: AccessApprovalMode
+
+    """
+    List of Group IDs to be assigned as approvers for the Resource.
+    """
+    approverGroupIds: [ID!] = null
+
+    """
+    The downstream configuration.
+    """
+    downstream: WebAppDownstreamInput = null
+
+    """
+    The Gateway ID for the Web App Resource.
+    """
+    gatewayId: ID = null
+
+    """
+    List of Group IDs to be assigned to the Resource.
+    """
+    groupIds: [ID] = null
+
+    """
+    The Resource's ID.
+    """
+    id: ID!
+
+    """
+    Indicates if the Resource is active.
+    """
+    isActive: Boolean = null
+
+    """
+    Indicates whether this Resource will be in the main Resource list in the Client.
+    """
+    isVisible: Boolean = null
+
+    """
+    The Resource's name.
+    """
+    name: String = null
+
+    """
+    Remote Network ID to assign to the Resource.
+    """
+    remoteNetworkId: ID = null
+
+    """
+    List of Group IDs to remove as approvers.
+    """
+    removedApproverGroupIds: [ID!] = null
+
+    """
+    List of Group IDs to remove.
+    """
+    removedGroupIds: [ID] = null
+
+    """
+    HTTP headers to rewrite on requests to the upstream. If unspecified, the existing headers remain unchanged. If null, the existing headers are removed.
+    """
+    requestHeaderRewrites: [KeyValueInputObject!]
+
+    """
+    Security Policy ID required to access the Resource. If unspecified, policy remains unchanged. If null, the policy is reset to the Default Policy.
+    """
+    securityPolicyId: ID
+
+    """
+    A list of tags to associate with the Resource. If unspecified, the resource's existing tags remain unchanged. If null, the resource's existing tags are removed.
+    """
+    tags: [TagInput!]
+
+    """
+    The upstream configuration.
+    """
+    upstream: WebAppUpstreamInput = null
+  ): WebAppResourceUpdateMutation!
+  groupCreate(
+    """
+    The Group's name.
+    """
+    name: String!
+
+    """
+    List of Resource IDs to add to the group.
+    """
+    resourceIds: [ID] = []
+
+    """
+    The ID of the Security Policy to be assigned to the Group. The default Resource Policy is used if empty.
+    """
+    securityPolicyId: ID = null
+
+    """
+    List of User IDs to add to the Group.
+    """
+    userIds: [ID] = []
+  ): GroupCreateMutation!
+  groupUpdate(
+    """
+    List of Resource IDs to add to the group.
+    """
+    addedResourceIds: [ID] = null
+
+    """
+    List of User IDs to add to the group.
+    """
+    addedUserIds: [ID] = null
+
+    """
+    The Group's ID.
+    """
+    id: ID!
+
+    """
+    Whether the Group is active.
+    """
+    isActive: Boolean = null
+
+    """
+    The Group's name.
+    """
+    name: String = null
+
+    """
+    List of Resource IDs to remove from the group.
+    """
+    removedResourceIds: [ID] = null
+
+    """
+    List of User IDs to remove from the group.
+    """
+    removedUserIds: [ID] = null
+
+    """
+    List of Resource IDs to be assigned to the group.
+    """
+    resourceIds: [ID] = null
+
+    """
+    The ID of the Security Policy to be assigned to this Group.
+    """
+    securityPolicyId: ID = null
+
+    """
+    List of User IDs to be assigned to the Group.
+    """
+    userIds: [ID] = null
+  ): GroupUpdateMutation!
+  groupDelete(
+    """
+    The ID of the entity to delete.
+    """
+    id: ID!
+  ): GroupDeleteMutation!
+}
+
+type GatewayCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Gateway that was created.
+  """
+  entity: Gateway
+}
+
+type GatewayUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Gateway being updated.
+  """
+  entity: Gateway
+}
+
+type GatewayDeleteMutation {
+  """
+  Records whether the delete mutation was successfully completed
+  """
+  ok: Boolean!
+
+  """
+  Any error was encountered causing the delete mutation to fail.
+  """
+  error: String
+}
+
+type X509CertificateAuthorityCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The X509 Certificate Authority that was created.
+  """
+  entity: X509CertificateAuthority
+}
+
+type X509CertificateAuthorityDeleteMutation {
+  """
+  Records whether the delete mutation was successfully completed
+  """
+  ok: Boolean!
+
+  """
+  Any error was encountered causing the delete mutation to fail.
+  """
+  error: String
+}
+
+type SSHCertificateAuthorityCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The SSH Certificate Authority that was created.
+  """
+  entity: SSHCertificateAuthority
+}
+
+type SSHCertificateAuthorityDeleteMutation {
+  """
+  Records whether the delete mutation was successfully completed
+  """
+  ok: Boolean!
+
+  """
+  Any error was encountered causing the delete mutation to fail.
+  """
+  error: String
+}
+
+type AccessRequestApproveMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+}
+
+type AccessRequestRejectMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+}
+
+type SerialNumbersCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  A list of created serial numbers.
+  """
+  entities: [SerialNumber!]
+}
+
+type SerialNumbersDeleteMutation {
+  """
+  Records whether the delete mutation was successfully completed.
+  """
+  ok: Boolean!
+
+  """
+  Any error was encountered causing the delete mutation to fail.
+  """
+  error: String
+}
+
+type DnsFilteringProfileCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The created DNS filtering profile.
+  """
+  entity: DnsFilteringProfile
+}
+
+type DnsFilteringProfileDeleteMutation {
+  """
+  Records whether the delete mutation was successfully completed
+  """
+  ok: Boolean!
+
+  """
+  Any error was encountered causing the delete mutation to fail.
+  """
+  error: String
+}
+
+type DnsFilteringProfileUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The updated DNS filtering profile.
+  """
+  entity: DnsFilteringProfile
+}
+
+input ContentCategoryConfigInput {
+  """
+  Whether gambling related sites are blocked
+  """
+  blockGambling: Boolean
+
+  """
+  Whether dating related sites are blocked
+  """
+  blockDating: Boolean
+
+  """
+  Whether all sexually explicit and adult content are blocked
+  """
+  blockAdultContent: Boolean
+
+  """
+  Whether all social networks are blocked (omits messaging apps)
+  """
+  blockSocialMedia: Boolean
+
+  """
+  Whether online gaming websites, online gaming apps and online gaming networks are blocked
+  """
+  blockGames: Boolean
+
+  """
+  Whether video streaming services like YouTube, Netflix, Disney+ and more are blocked
+  """
+  blockStreaming: Boolean
+
+  """
+  Whether P2P websites, protocols, and copyright-infringing streaming websites are blocked
+  """
+  blockPiracy: Boolean
+
+  """
+  Whether filtering mature videos on YouTube, block embedded mature videos, and hiding all comments are enabled
+  """
+  enableYoutubeRestrictedMode: Boolean
+
+  """
+  Whether filtering explicit results on all major search engines and blocking search engines without safe search is enabled
+  """
+  enableSafeSearch: Boolean
+}
+
+input PrivacyCategoryConfigInput {
+  """
+  Whether affiliate & tracking domains are blocked
+  """
+  blockAffiliate: Boolean
+
+  """
+  Whether third-party trackers disguising themselves as first-party are detected and blocked
+  """
+  blockDisguisedTrackers: Boolean
+
+  """
+  Whether ads & trackers are blocked using regularly updated lists
+  """
+  blockAdsAndTrackers: Boolean
+}
+
+input SecurityCategoryConfigInput {
+  """
+  Whether protection against malware, phishing, and command-and-control servers is enabled
+  """
+  enableThreatIntelligenceFeeds: Boolean
+
+  """
+  Whether Google Safe Browsing is enabled
+  """
+  enableGoogleSafeBrowsing: Boolean
+
+  """
+  Whether cryptocurrency mining on network devices is blocked
+  """
+  blockCryptojacking: Boolean
+
+  """
+  Whether domain impersonation via character substitution (e.g., Cyrillic 'e' for Latin 'e') is blocked
+  """
+  blockIdnHomographs: Boolean
+
+  """
+  Whether malicious domains targeting mistyped addresses (e.g., 'gooogle.com') are blocked
+  """
+  blockTyposquatting: Boolean
+
+  """
+  Whether DNS responses that contain private IP addresses are blocked
+  """
+  blockDnsRebinding: Boolean
+
+  """
+  Whether domains registered within that last 30 days are blocked
+  """
+  blockNewlyRegisteredDomains: Boolean
+
+  """
+  Whether malware-generated domains used as command and control rendezvous points are blocked
+  """
+  blockDomainGenerationAlgorithms: Boolean
+
+  """
+  Whether parked domains are blocked
+  """
+  blockParkedDomains: Boolean
+}
+
+type ServiceAccountKeyCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Service Account Key that was created.
+  """
+  entity: ServiceAccountKey
+
+  """
+  The Service Account Key token.
+  """
+  token: String
+}
+
+type ServiceAccountKeyUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Service Account Key being updated.
+  """
+  entity: ServiceAccountKey
+}
+
+type ServiceAccountKeyRevokeMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Service Account Key being revoked.
+  """
+  entity: ServiceAccountKey
+}
+
+type ServiceAccountKeyDeleteMutation {
+  """
+  Records whether the delete mutation was successfully completed
+  """
+  ok: Boolean!
+
+  """
+  Any error was encountered causing the delete mutation to fail.
+  """
+  error: String
+}
+
+type ServiceAccountCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Service Account that was created.
+  """
+  entity: ServiceAccount
+}
+
+type ServiceAccountUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Service Account being updated.
+  """
+  entity: ServiceAccount
+}
+
+type ServiceAccountDeleteMutation {
+  """
+  Records whether the delete mutation was successfully completed
+  """
+  ok: Boolean!
+
+  """
+  Any error was encountered causing the delete mutation to fail.
+  """
+  error: String
+}
+
+type SecurityPolicyUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Security Policy being updated.
+  """
+  entity: SecurityPolicy
+}
+
+type DeviceUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Device being updated.
+  """
+  entity: Device
+}
+
+type DeviceArchiveMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Device being archived.
+  """
+  entity: Device
+}
+
+type DeviceUnarchiveMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Device being unarchived.
+  """
+  entity: Device
+}
+
+type DeviceBlockMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Device being blocked.
+  """
+  entity: Device
+}
+
+type DeviceUnblockMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Device being unblocked.
+  """
+  entity: Device
+}
+
+type RemoteNetworkCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Remote Network that was created.
+  """
+  entity: RemoteNetwork
+}
+
+type RemoteNetworkUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Remote Network being updated.
+  """
+  entity: RemoteNetwork
+}
+
+type RemoteNetworkDeleteMutation {
+  """
+  Records whether the delete mutation was successfully completed
+  """
+  ok: Boolean!
+
+  """
+  Any error was encountered causing the delete mutation to fail.
+  """
+  error: String
+}
+
+type ConnectorCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Connector that was created.
+  """
+  entity: Connector
+}
+
+type ConnectorUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Connector being updated.
+  """
+  entity: Connector
+}
+
+type ConnectorDeleteMutation {
+  """
+  Records whether the delete mutation was successfully completed
+  """
+  ok: Boolean!
+
+  """
+  Any error was encountered causing the delete mutation to fail.
+  """
+  error: String
+}
+
+type ConnectorGenerateTokensMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  Generated tokens to use for this Connector.
+  """
+  connectorTokens: ConnectorTokens
+}
+
+type ConnectorTokens {
+  """
+  Access token to use for this Connector.
+  """
+  accessToken: String!
+
+  """
+  Refresh token to use for this Connector.
+  """
+  refreshToken: String!
+}
+
+type UserCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The User that was created.
+  """
+  entity: User
+}
+
+type UserDetailsUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The User being updated.
+  """
+  entity: User
+}
+
+enum UserStateUpdateInput {
+  ACTIVE
+  DISABLED
+}
+
+type UserRoleUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The User being updated.
+  """
+  entity: User
+}
+
+type UserDeleteMutation {
+  """
+  Records whether the delete mutation was successfully completed
+  """
+  ok: Boolean!
+
+  """
+  Any error was encountered causing the delete mutation to fail.
+  """
+  error: String
+}
+
+type UserResetMFAMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The user being updated.
+  """
+  entity: User
+}
+
+type ResourceCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Resource that was created.
+  """
+  entity: NetworkResource
+}
+
+input AccessPolicyInput {
+  """
+  The mode for the access policy.
+  """
+  mode: AccessMode!
+
+  """
+  The duration for the access policy (in seconds).
+  """
+  durationSeconds: Int
+}
+
+input ProtocolsInput {
+  """
+  Whether to allow or deny ICMP
+  """
+  allowIcmp: Boolean!
+
+  """
+  Specified to allow or restrict TCP access within certain port ranges.
+  """
+  tcp: ProtocolInput!
+
+  """
+  Specified to allow or restrict UDP access within certain port ranges.
+  """
+  udp: ProtocolInput!
+}
+
+input ProtocolInput {
+  """
+  Whether to allow all ports or restrict protocol access within certain port ranges.
+  """
+  policy: ProtocolPolicy!
+
+  """
+  List of port ranges to allow access. This input is only used when the `policy` is `RESTRICTED`. If the value is empty, no port is allowed to access
+  """
+  ports: [PortRangeInput!]! = []
+}
+
+input PortRangeInput {
+  """
+  The start value of the port range (inclusive). The value must be between 1 and 65535 inclusive.
+  """
+  start: Int!
+
+  """
+  The end value of the port range (inclusive). The value must be between 1 and 65535 inclusive. This `end` value can be the same as the `start` value, which means only a single port is allowed.
+  """
+  end: Int!
+}
+
+input TagInput {
+  key: String!
+  value: String!
+}
+
+type ResourceUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Resource being updated.
+  """
+  entity: NetworkResource
+}
+
+type ResourceDeleteMutation {
+  """
+  Records whether the delete mutation was successfully completed
+  """
+  ok: Boolean!
+
+  """
+  Any error was encountered causing the delete mutation to fail.
+  """
+  error: String
+}
+
+type ResourceAccessAddMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Resource associated with the access being updated.
+  """
+  entity: Resource
+}
+
+input AccessInput {
+  """
+  The ID of the principal (Group or Service Account) whose access is being configured.
+  """
+  principalId: ID!
+
+  """
+  The ID of the Security Policy that must be used by this access edge. If unspecified, the access edge's existing policy remains unchanged. If null, the access edge' existing policy is removed. This value should be null when the principal is a Service Account.
+  """
+  securityPolicyId: ID
+
+  """
+  The timestamp at which the access edge expires. If unspecified, the access edge's existing expiration remains unchanged. If null, the access edge's existing expiration is removed. This value should be null when the principal is a Service Account.
+  """
+  expiresAt: DateTime
+
+  """
+  The access policy configured on the edge. If unspecified, the access edge's existing access policy remains unchanged. If null, the access edge's existing access policy is removed. This value should be null when the principal is a Service Account.
+  """
+  accessPolicy: AccessPolicyInput
+
+  """
+  The approval mode configured on the edge. If unspecified or null, the access edge's existing approval mode remains unchanged. This value should be null when the principal is a Service Account.
+  """
+  approvalMode: AccessApprovalMode
+}
+
+type ResourceAccessSetMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Resource associated with the access being updated.
+  """
+  entity: Resource
+}
+
+type ResourceAccessRemoveMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Resource associated with the access being updated.
+  """
+  entity: Resource
+}
+
+type KubernetesResourceCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Kubernetes Resource that was created.
+  """
+  entity: KubernetesResource
+}
+
+input KubernetesDownstreamInput {
+  """
+  The downstream port. The value must be between 1 and 65535 inclusive.
+  """
+  port: Int!
+}
+
+input KubernetesUpstreamInput {
+  """
+  The upstream port. The value must be between 1 and 65535 inclusive.
+  """
+  port: Int!
+}
+
+type KubernetesResourceUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Kubernetes Resource being updated.
+  """
+  entity: KubernetesResource
+}
+
+type SSHResourceCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The SSH Resource that was created.
+  """
+  entity: SSHResource
+}
+
+input SSHDownstreamInput {
+  """
+  The downstream port. The value must be between 1 and 65535 inclusive.
+  """
+  port: Int!
+}
+
+input SSHUpstreamInput {
+  """
+  The upstream port. The value must be between 1 and 65535 inclusive.
+  """
+  port: Int!
+}
+
+type SSHResourceUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The SSH Resource being updated.
+  """
+  entity: SSHResource
+}
+
+type WebAppResourceCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Web App Resource that was created.
+  """
+  entity: WebAppResource
+}
+
+input WebAppDownstreamInput {
+  """
+  The downstream port. The value must be between 1 and 65535 inclusive.
+  """
+  port: Int!
+
+  """
+  The TLS mode of the downstream connection. If unspecified or null, the value defaults to NONE when the Resource is created and remains unchanged when the Resource is updated.
+  """
+  tlsMode: TLSServerMode
+}
+
+input KeyValueInputObject {
+  """
+  The key
+  """
+  key: String!
+
+  """
+  The value
+  """
+  value: String!
+}
+
+input WebAppUpstreamInput {
+  """
+  The upstream port. The value must be between 1 and 65535 inclusive.
+  """
+  port: Int!
+
+  """
+  The TLS mode of the upstream connection. If unspecified or null, the value defaults to NONE when the Resource is created and remains unchanged when the Resource is updated.
+  """
+  tlsMode: TLSClientMode
+}
+
+type WebAppResourceUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Web App Resource being updated.
+  """
+  entity: WebAppResource
+}
+
+type GroupCreateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Group that was created.
+  """
+  entity: Group
+}
+
+type GroupUpdateMutation {
+  """
+  Whether the mutation was successful.
+  """
+  ok: Boolean!
+
+  """
+  Any error encountered causing the mutation to fail.
+  """
+  error: String
+
+  """
+  The Group being updated.
+  """
+  entity: Group
+}
+
+type GroupDeleteMutation {
+  """
+  Records whether the delete mutation was successfully completed
+  """
+  ok: Boolean!
+
+  """
+  Any error was encountered causing the delete mutation to fail.
+  """
+  error: String
+}

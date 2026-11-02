@@ -100,6 +100,9 @@ so err toward consulting more, not fewer. Common cross-cutting clusters here: DE
 - **→ twingate-kubernetes**: for any Connector inside a Kubernetes cluster — the Twingate operator (default) or the standalone Helm chart
 - **→ twingate-terraform / twingate-pulumi**: for IaC-automated token generation
 - **→ twingate-troubleshoot**: when a Connector is DEAD or a user cannot reach a resource
+- **→ twingate-onboarding**: when connector deployment is one step of a larger new-tenant
+  rollout — onboarding sequences it after the IdP and Remote Networks and tracks connector
+  state in the deployment plan; this skill supplies the platform detail.
 
 ## References
 
