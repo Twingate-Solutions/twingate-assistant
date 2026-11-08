@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/pulumi-twingate
 type: github
-fetched: 2026-10-28
-source_version: 724466a948059d200c3cb09c293fb05deefce30e
+fetched: 2026-11-08
+source_version: 275271aff59870dc2d1cabdb8474f8d841db82bd
 trust: official
 ---
 
@@ -53,6 +53,12 @@ Pulumi provider for managing Twingate infrastructure as code. Supports Python, T
 - The exact version string required for `pulumi plugin install` appears in the 404 error message—copy it from there.
 - `twingate:url` should not be changed under normal circumstances.
 - The `act` install script for Linux pipes from a GitHub raw URL into bash; visit the [act installation guide](https://github.com/nektos/act#installation) to review before running.
+
+## Recent Changes (Unreleased / HEAD)
+
+- **Added**: `tlsMode` field on `upstream` and `downstream` blocks of `TwingateWebAppResource`. This was present in the upstream provider since v5.2.0 but was missing from the SDKs due to a schema regeneration oversight.
+- **Fixed**: HCL examples in Registry docs previously opened with a `pulumi {}` block (rejected by the Pulumi HCL language plugin); they now use `terraform {}`.
+- **Fixed**: Identifiers such as `VERIFY_FULL`, `VERIFY_CA`, `GOOGLE_CLOUD`, `ON_PREMISE`, and `twingate_service_account_key` were rendered with `*` in place of `_` in generated descriptions; underscores are now preserved correctly.
 
 ## Related Docs
 

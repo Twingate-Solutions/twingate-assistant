@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/2331236562-security-information-for-the-twingate-network
 type: help
-fetched: 2026-11-01
-source_version: 3d89e103abf66f9fa568f54c1d54edd9ddc725830a5584731dddb48a86d65bdf
+fetched: 2026-11-08
+source_version: ffadb15cd30b1982368d22feff4b3d5f7f4ba346d22ec72a9474514485b091c5
 trust: official
 ---
 
@@ -12,32 +12,29 @@ trust: official
 Security Information for the Twingate Network
 
 ## Summary
-Twingate documents its security posture and encryption configuration for customers undergoing regulatory audits. The page specifies supported TLS versions and cipher suites used on the Twingate network. Full security details (people security, data protection, vendor management, infrastructure/product security) are available via Twingate's Trust Center.
+Twingate's security posture documentation covers encryption configuration and cipher suites used on the Twingate network. It directs detailed security inquiries to the Twingate Trust Center or a Customer Success Manager.
 
 ## Key Information
 
-- **TLS Versions Supported:** TLS 1.2 and TLS 1.3
-- **Supported Cipher Suites:**
+- **TLS versions supported:** TLS 1.2 and TLS 1.3
+- **Supported cipher suites:**
   - `TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256`
   - `TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256`
   - `TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256`
   - `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256`
   - `TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384`
   - `TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384`
-- All ciphers use **ECDHE** for forward secrecy
-- Cipher list subject to change in line with **NIST Guidelines**
+- Cipher list follows **NIST Guidelines** and may change over time
+- Full security posture documentation (People Security, Data Protection & Access Control, Vendor Management, Infrastructure Security, Product Security, Product Architecture) is available at the **Twingate Trust Center**
 
 ## Prerequisites
 - None for reference purposes
-- Contact your **Twingate Customer Success Manager** for questions not covered here or in the Trust Center
-
-## Configuration Values
-No user-configurable parameters. These ciphers are enforced at the Twingate network level and are not selectable by end users or administrators.
+- Contact a Twingate Customer Success Manager for questions not covered here or in the Trust Center
 
 ## Gotchas
-- The cipher/TLS list **will change over time** as NIST guidelines evolve; verify current values with Twingate support for time-sensitive compliance audits
-- This page covers network-level encryption only; broader security topics (access control, vendor management, infrastructure) require visiting the Trust Center separately
+- Cipher list is subject to change in alignment with NIST Guidelines; always verify current state with Twingate directly for compliance audits
+- This page is primarily intended to satisfy regulatory audit requests from customers
 
 ## Related Docs
-- [Twingate Trust Center](https://www.twingate.com/trust) – covers People Security, Data Protection & Access Control, Vendor Management, Infrastructure Security, Product Security, Product Architecture
-- Contact your Twingate Customer Success Manager for audit-specific questions
+- [Twingate Trust Center](https://www.twingate.com/trust) – covers People Security, Data Protection, Vendor Management, Infrastructure Security, Product Security, and Product Architecture
+- Contact your Twingate Customer Success Manager for additional security questions

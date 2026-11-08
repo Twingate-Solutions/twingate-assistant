@@ -1,53 +1,47 @@
 ---
 source: https://help.twingate.com/articles/7737674798-twingate-client-resources-stop-responding-while-the-client-shows-connected
 type: help
-fetched: 2026-11-01
-source_version: f584c548c9db0a82351b3b9490412fabc3e63923830ea44e9aa67cd21383817d
+fetched: 2026-11-08
+source_version: 14839e5971162c24595ec6d6e659239e64b3f0dc7801805f350d6425ea698be7
 trust: official
 ---
 
 # [Twingate Client] Resources Stop Responding While Client Shows Connected
 
 ## Summary
-A known bug causes Twingate Resources to become unresponsive while the Client displays "Connected," with no error shown. The issue occurs after brief network interruptions (sleep/Wi-Fi switching) that leave the Client-Connector connection in a degraded state. Only Relay-based connections are affected; peer-to-peer connections are not.
+Twingate Resources become unresponsive while the Client displays a Connected status, with no error messages shown. The issue affects connections routed through Twingate Relays and is currently under active investigation. Access is immediately restored by disconnecting and reconnecting the Client.
 
 ## Key Information
-- **Status:** Known issue; fix in progress
-- **Affected component:** Twingate Client with Connector version **1.93.0 or later**
-- **Reported platform:** macOS
-- **Connection type affected:** Relay-based only (not peer-to-peer)
-- **Trigger:** Brief network loss (device sleep, Wi-Fi network switch)
-- **Scope:** Intermittent; typically affects individual users, not all users simultaneously
+- **Components affected:** Client and Connector
+- **Platform:** Reported on macOS
+- **Status:** Under active investigation; article will be updated
+- **Connections involved:** Affected connections pass through a Twingate Relay
 
 ## Symptoms
-- Resources hang, time out, or fail to load with no Client error
-- Client displays "Connected" throughout the incident
-- Non-Twingate traffic (regular internet) continues working normally
-- Issue does not self-resolve; persists until Client reconnect or device restart
-- Immediate resolution upon disconnect/reconnect confirms this bug as cause
+- Resources fail to load, hang, or time out with no Client error
+- Affects web apps, git operations, and internal services
+- Client continues to show **Connected** throughout
+- Non-Twingate traffic (regular internet) works normally
+- Issue does **not** self-resolve; persists until Client reconnect or device restart
+- Intermittent; typically affects individual users, not all users simultaneously
 
 ## Workaround (Step-by-Step)
-1. Click the Twingate Client and select **Disconnect**
-2. Select **Connect** to reconnect — a full application quit is not required
+1. Click the Twingate Client and **Disconnect** (full application quit is not required)
+2. **Reconnect** the Client
 3. Verify Resources are accessible again
 
-> **Note:** The issue can recur after subsequent network interruptions.
-
-## Prerequisites / Conditions to Confirm This Issue
-- Connector version ≥ 1.93.0
-- Connection routes through a Twingate Relay (not peer-to-peer)
-- Disconnect/reconnect restores access immediately
+> ⚠️ The issue can recur after reconnecting.
 
 ## Gotchas
-- The Client shows no error, making this easy to misdiagnose as a Resource-side problem
-- Full application quit is **not** required — a simple disconnect/reconnect suffices
-- Peer-to-peer connections are **not** affected by this bug
-- Restarting the device also resolves the issue but is unnecessary
+- No error is displayed in the Client UI — the Connected status is misleading during the failure state
+- The fix is temporary; the issue may recur and requires another disconnect/reconnect cycle
+- If disconnecting and reconnecting does **not** restore access, this issue is likely not the cause
 
-## Escalation
-If the issue recurs frequently or affects multiple users, contact **Twingate Support** with:
-- A **Client log upload**
-- The **approximate time** the issue started
+## Escalation / Support
+If the issue occurs frequently or affects multiple users:
+- Contact Twingate Support
+- Include a **Client log upload**
+- Include the **approximate time** the issue started
 
 ## Related Docs
-- [Client log upload instructions](https://help.twingate.com) *(refer to Twingate Support documentation)*
+- Client log upload (referenced in Twingate Help Center)

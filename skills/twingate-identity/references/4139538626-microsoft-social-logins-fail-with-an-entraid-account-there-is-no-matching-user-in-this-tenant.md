@@ -1,25 +1,29 @@
 ---
 source: https://help.twingate.com/articles/4139538626-microsoft-social-logins-fail-with-an-entraid-account-there-is-no-matching-user-in-this-tenant
 type: help
-fetched: 2026-11-01
-source_version: 6a1b61c9bab6093490e2ccfaf1254c237a1b8a62d770366ce6f03352c2a48951
+fetched: 2026-11-08
+source_version: 291232bd4e277aadce9868253e58a7fcf4bb998e5820c221567a583705d9b672
 trust: official
 ---
 
 # Microsoft Social Logins Fail: "There is no matching user in this tenant"
 
 ## Summary
-Entra ID accounts can exist without a populated `Mail` attribute, but Twingate requires an email address for all Microsoft social logins. When the `Mail` attribute is missing in Entra ID, login fails with "There is no matching user in this tenant."
+Microsoft social logins via Entra ID fail when the user's `Mail` attribute is not populated in Entra ID. Twingate requires an email address for all social logins, but Entra ID permits accounts without an associated email. This does not affect logins through a configured Entra ID IdP.
 
 ## Key Information
-- Entra ID supports accounts (admin/service accounts) without an associated email address
+- **Affected component:** Identity Provider — Microsoft (social login) via Entra ID account
+- Entra ID allows accounts (admin/service accounts) with a UPN-format username but no `Mail` attribute set
 - Twingate **requires** the `Mail` attribute for Microsoft social logins
-- This issue does **not** affect logins via a configured Entra ID IdP — only social login path
-- The error message "There is no matching user in this tenant" is the symptom
+- Logging in via a tenant's configured Entra ID IdP does **not** require the `Mail` attribute
+
+## Symptoms
+- User attempts Microsoft social login from an Entra ID account
+- Error returned: `There is no matching user in this tenant`
 
 ## Prerequisites
-- Affects: Microsoft (social) login via an Entra ID account
-- Does **not** affect: Entra ID configured as a tenant IdP
+- User must be invited to the Twingate network before login can succeed
+- Login URL must be the correct network: `https://<network-name>.twingate.com`
 
 ## Troubleshooting Steps
 
@@ -27,27 +31,20 @@ Entra ID accounts can exist without a populated `Mail` attribute, but Twingate r
 1. Confirm the user has been invited to the Twingate network
 
 **For Twingate Users:**
-1. Verify you are signing into the correct Twingate network (`https://<network>.twingate.com`)
-2. Confirm the email used for login matches the one registered in Twingate
+1. Confirm you are logging into the correct Twingate network URL
+2. Confirm the email used for login matches the one registered with Twingate
 
 ## Resolution
-An Entra ID administrator must populate the `Mail` attribute on the user's account in Entra ID:
-
-1. Open **Entra ID (Azure AD) admin portal**
-2. Navigate to the affected user's profile
-3. Set/update the **Mail** attribute with a valid email address
-4. Ensure this email matches the address invited in Twingate
-
-## Configuration Values
-| Attribute | Location | Required For |
-|-----------|----------|-------------|
-| `Mail` | Entra ID user profile | Microsoft social login |
+1. In Entra ID, locate the user account
+2. Set the **`Mail`** attribute to a valid email address
+3. Ensure this email matches the address the user was invited with in Twingate
+4. Retry Microsoft social login
 
 ## Gotchas
-- The UPN (`user@domain.tld`) format does **not** substitute for the `Mail` attribute — they are separate fields
-- An account can visually appear to have an email in Entra ID while the `Mail` attribute remains unpopulated
-- Social login and IdP-based login have different attribute requirements; this issue is specific to social login
+- An account may appear to have an email (via UPN format) but the `Mail` attribute can still be empty — these are distinct fields in Entra ID
+- This issue only affects **social logins**; Entra ID IdP-based logins are unaffected
+- Service/admin accounts without email inboxes are common sources of this issue
 
 ## Related Docs
-- Twingate Identity Provider configuration (Entra ID)
-- Twingate user invitation workflow
+- Twingate Identity Provider configuration (Entra ID / Azure AD)
+- Microsoft social login setup
