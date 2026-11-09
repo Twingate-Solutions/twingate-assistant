@@ -1,44 +1,52 @@
 ---
 source: https://help.twingate.com/articles/9784439823-windows-checking-the-client-service
 type: help
-fetched: 2026-11-01
-source_version: dbe7230bb71cbc671fd779646b6bfb4679b59bf613ae1877e25b130a928d592d
+fetched: 2026-11-08
+source_version: 63c71a99bb5c70cf13073c5b75d23a5f3f07eb790707ab427569754795e762e2
 trust: official
 ---
 
 # [Windows] Checking the Client Service
 
 ## Summary
-The Twingate Windows Client relies on a local Windows service ("Twingate Service") to function, including for Start Before Logon support. If this service is not running, the client will not work. This page covers how to verify and start the service.
+The Twingate Windows Client depends on a local Windows service ("Twingate Service") to function, including supporting Start Before Logon. If the service is not running, the client will not work. This guide covers how to verify and start the service.
 
 ## Key Information
-- The Twingate Windows Client requires a background Windows service named **Twingate Service**
-- The service enables **Start Before Logon** functionality
+- The Twingate Client on Windows runs as a background Windows service
+- Service enables **Start Before Logon** functionality
 - Service must be in **Running** status for the client to operate
 
 ## Prerequisites
 - Twingate Client installed on Windows
-- Access to Windows Services console or CMD
+- Access to run `services.msc` (may require admin privileges to start services)
 
 ## Step-by-Step
 
-1. Open the Services console — run the following in a CMD window:
+1. Open a CMD window and run:
    ```
    services.msc
    ```
-2. Scroll the list to find **Twingate Service**
-3. Check that its status is **Running**
-4. If not running, right-click → **Start**
-5. If **Twingate Service** is not listed at all, reinstall the Twingate Client
+2. Scroll the services list to find **Twingate Service**
+3. Check the **Status** column:
+   - If **Running** → service is healthy, look elsewhere for issues
+   - If not running → right-click and select **Start**
+4. If **Twingate Service** is not listed at all → reinstall the Twingate Client
 
-## Gotchas
-- If the service is missing entirely (not just stopped), reinstallation is required — starting or restarting will not help
-- After confirming service state, check **Event Viewer** and **Twingate Client logs** for deeper troubleshooting if issues persist
-- A stopped service will silently prevent all Twingate connectivity without obvious UI errors
+## Troubleshooting / Gotchas
+- **Service missing entirely**: Indicates a broken installation; reinstall the client
+- **Cannot start the service**: Check two additional sources for root cause:
+  - **Event Viewer** (Windows built-in) for system-level errors
+  - **Twingate Client logs** for application-level errors
+- Starting a service may require local administrator rights
+
+## Configuration Values
+| Item | Value |
+|------|-------|
+| Service name | `Twingate Service` |
+| Management command | `services.msc` |
 
 ## Related Docs
-- Twingate Windows Client installation guide
-- Twingate Client logs (Windows)
-- Windows Event Viewer
-- Start Before Logon documentation
-- [Twingate Windows troubleshooting guide](https://help.twingate.com)
+- Twingate Client logs (referenced in troubleshooting path)
+- Start Before Logon feature documentation
+- Twingate Windows Client reinstall guide
+- Main Windows troubleshooting guide

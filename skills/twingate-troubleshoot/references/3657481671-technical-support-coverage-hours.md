@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/3657481671-technical-support-coverage-hours
 type: help
-fetched: 2026-10-11
-source_version: b8db55ea40284fe89cf3349243e9f2d7068a693e28df711ad3f5d08f80207d6b
+fetched: 2026-11-08
+source_version: 885f156d5fd35acc9d5bfb09411014d7dfdac19791b1abf00bc7b088283ecebc
 trust: official
 ---
 
@@ -12,43 +12,44 @@ trust: official
 Technical Support Coverage Hours
 
 ## Summary
-Twingate offers two tiers of technical support with different coverage windows. Both tiers exclude U.S. company holidays. Actual hours may differ if specified in your Support Services Agreement.
+Twingate Technical Support operates on two tiers with different coverage windows. Support is not available on U.S. company holidays. Actual hours may differ if your Support Services Agreement specifies otherwise.
 
 ## Key Information
 
 - **Priority Support:** Monday–Friday, 8:00am–5:00pm Pacific Time
-- **Premier Support:** Sunday 2:00pm PT through Friday 6:00pm PT (nearly continuous weekday + Sunday afternoon coverage)
-- No support provided on U.S. company holidays regardless of tier
-- Coverage terms can be overridden by a Support Services Agreement
+- **Premier Support:** Sunday 2:00pm PT through Friday 6:00pm PT (continuous window)
+- Both tiers exclude U.S. company holidays
+- Hours can be overridden by individual Support Services Agreements
 
-## U.S. Company Holidays (No Coverage)
+## U.S. Company Holidays (No Coverage) — 2026
 
-**2026**
-- Jan 1 – New Year's Day
-- Jan 19 – MLK Day
-- Feb 16 – President's Day
-- May 25 – Memorial Day
-- Jun 19 – Juneteenth
-- Jul 3 – Independence Day (observed)
-- Sep 7 – Labor Day
-- Oct 12 – Indigenous Peoples Day
-- Nov 11 – Veterans Day
-- Nov 26 – Thanksgiving Day
-- Nov 27 – Day after Thanksgiving
-- Dec 24 – Christmas Eve
-- Dec 25 – Christmas Day
-- Dec 31 – New Year's Eve
+| Date | Holiday |
+|------|---------|
+| Jan 1 (Thu) | New Year's Day |
+| Jan 19 (Mon) | Martin Luther King, Jr. Day |
+| Feb 16 (Mon) | President's Day |
+| May 25 (Mon) | Memorial Day |
+| Jun 19 (Fri) | Juneteenth |
+| Jul 3 (Fri) | Independence Day Observed |
+| Sep 7 (Mon) | Labor Day |
+| Oct 12 (Mon) | Indigenous Peoples Day |
+| Nov 11 (Wed) | Veterans Day |
+| Nov 26 (Thu) | Thanksgiving Day |
+| Nov 27 (Fri) | Day after Thanksgiving |
+| Dec 24 (Thu) | Christmas Eve |
+| Dec 25 (Fri) | Christmas Day |
+| Dec 31 (Thu) | New Year's Eve |
 
-**2027**
-- Jan 1 – New Year's Day
+**2027:** January 1 (Fri) — New Year's Day *(holiday list currently ends here)*
 
 ## Gotchas
 
-- **Priority Support does not cover weekends at all;** Premier Support covers Sunday afternoon onward, but not Saturday.
-- Holiday schedule is only published through January 1, 2027.
-- Your actual SLA may differ — check your **Support Services Agreement** if you have negotiated custom terms.
-- "Excluding company holidays" applies to **both** tiers; even Premier Support customers lose coverage on listed holidays.
+- Premier Support does **not** cover weekends fully — coverage starts Sunday at 2:00pm PT, not midnight
+- Friday coverage for Premier Support ends at **6:00pm PT**, not end of business day
+- Saturday is not covered under either tier
+- Holiday list is only published through January 1, 2027; check back for future updates
+- Your Support Services Agreement may specify different hours — that document takes precedence
 
 ## Related Docs
-- Twingate Support tiers/plans (check Twingate pricing or account pages)
-- Support Services Agreement (contract-specific)
+- Twingate Support portal (for submitting tickets)
+- Support Services Agreement (customer-specific contract terms)

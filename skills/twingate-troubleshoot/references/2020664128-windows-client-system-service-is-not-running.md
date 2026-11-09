@@ -1,51 +1,51 @@
 ---
 source: https://help.twingate.com/articles/2020664128-windows-client-system-service-is-not-running
 type: help
-fetched: 2026-11-01
-source_version: 7a98300f96210914b6b1d529b4d2f35954cfe1ac44d539500d79d9157c55a047
+fetched: 2026-11-08
+source_version: 963d9e0987e5b6c0e905222cd644cc8cd88ce484834d58a2784a25b9062230ce
 trust: official
 ---
 
 # [Windows Client] System Service Is Not Running
 
 ## Summary
-The Twingate Windows Client requires the **Twingate Windows Service** to be running to establish connectivity. If the service is stopped or missing, the client will display an error and fail to connect. This article covers diagnosis and resolution steps via Windows Services Manager.
+The Twingate Windows Client requires the **Twingate Windows Service** to be running to establish connectivity. If the service is stopped or missing, the client will display an error and fail to connect. Resolution involves starting the service and setting it to automatic startup.
 
 ## Key Information
-- Affected component: Twingate Windows Client
-- Platform: Windows only
-- Root cause: Twingate Windows Service (`Twingate Service rc`) is not running or not set to automatic startup
+- Error message: *"The Twingate system service is not running. To connect, restart the Twingate system service or contact your admin."*
+- Affects: Windows platform, Twingate Client component
+- Root cause: `Twingate Service rc` Windows service is stopped or not set to automatic
 
-## Symptoms
-- Client fails to connect
-- Popup error: *"The Twingate system service is not running. To connect, restart the Twingate system service or contact your admin."*
+## Prerequisites
+- Windows OS with Twingate Client installed
+- Access to `services.msc` (may require local admin privileges to start services)
 
-## Troubleshooting Steps
+## Step-by-Step
 
-1. Open Run dialog: `Win + R` → type `services.msc` → press Enter
-2. Scroll to **Twingate Service** in the list
-3. Check status:
-   - **If null/not running** → proceed to Resolution below
-   - **If running + set to Automatic** → restart the service, restart the Twingate client app, then retry connection
-   - **If service fails to start** → check TAP adapter (see Gotchas), collect detailed logs, contact Twingate Support
+### Diagnose
+1. Press `Win + R`, type `services.msc`, press Enter
+2. Scroll to **Twingate Service**
+3. Check status — if null/not running, proceed to resolution
 
-## Resolution (Start + Set to Automatic)
-
-1. `Win + R` → `services.msc` → Enter
+### Resolve
+1. Press `Win + R`, type `services.msc`, press Enter
 2. Scroll to **Twingate Service rc**
 3. Right-click → **Start**
 4. Right-click → **Properties** → set **Startup Type** to `Automatic`
+5. Restart the Twingate Client application and attempt reconnection
 
 ## Gotchas
-- The service name in the list is **Twingate Service rc** (not just "Twingate Service")
-- If the service fails to start, check that the **Twingate TAP network adapter** is present and not disabled in Device Manager
-- Service failing to start despite the TAP adapter being present requires log collection and a support ticket — not self-resolvable
+- If the service is already running but connection still fails: restart the service, restart the client app, then retry
+- If the service **fails to start**: check that the **Twingate TAP network adapter** is present and not disabled in Device Manager
+- If TAP adapter check doesn't resolve the issue: collect detailed logs and open a support ticket — do not attempt further self-service
 
 ## Configuration Values
-| Setting | Required Value |
+| Setting | Value |
 |---|---|
-| Service Startup Type | `Automatic` |
+| Service name | `Twingate Service rc` |
+| Startup Type | `Automatic` |
+| Services console | `services.msc` |
 
 ## Related Docs
-- Twingate detailed logs collection (linked in source as "detailed logs")
+- Twingate detailed logs collection (referenced in source, link not provided)
 - Twingate Support ticket submission

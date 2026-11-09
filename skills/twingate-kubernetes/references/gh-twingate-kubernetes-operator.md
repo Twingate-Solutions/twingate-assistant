@@ -1,31 +1,31 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator
 type: github
-fetched: 2026-11-01
-source_version: 8b5565516874ac54960ebd5c313142d2c5906b4e
+fetched: 2026-11-08
+source_version: 9acf3a353e1fd56e956dd225998d07c7a61047b5
 trust: official
 ---
 
 # Twingate Kubernetes Operator
 
 ## Summary
-A custom Kubernetes controller that automates management of Twingate resources within a Kubernetes cluster. It integrates Kubernetes with the Twingate Zero Trust Network by reconciling custom resources against the Twingate API.
+A custom Kubernetes controller that manages Twingate resources (Resources, Resource Access policies, etc.) via Kubernetes CRDs. It bridges Kubernetes-native workflows with the Twingate Zero Trust Network using the Twingate API.
 
 ## Key Information
-- Container images published to [Docker Hub](https://hub.docker.com/r/twingate/kubernetes-operator)
+- Published Docker image: `twingate/kubernetes-operator` on Docker Hub
 - Helm chart published to OCI registry: `oci://ghcr.io/twingate/helmcharts/twingate-operator`
-- CRDs are **not** automatically updated on `helm upgrade` (Helm v3 behavior)
+- CRDs are **not** automatically updated on `helm upgrade` (Helm v3 limitation — must be updated manually)
 - Full API reference and getting-started guide available on the [repo wiki](https://github.com/Twingate/kubernetes-operator/wiki)
 
 ## Prerequisites
 - Kubernetes 1.16+
-- Twingate account with a Remote Network configured for the cluster
-- Twingate connectors deployed (available via the [Twingate Helm charts repo](https://github.com/Twingate/helm-charts))
-- Twingate API token with **Read/Write/Provision** permissions (generated in the Admin Console)
+- Twingate account with a configured Remote Network and deployed connectors (see [Twingate Helm charts](https://github.com/Twingate/helm-charts))
+- Twingate API token with **Read/Write/Provision** permissions (generated in the Twingate Admin Console)
+- Helm v3
 
 ## Installation (Helm via OCI — recommended)
 
-1. Download and copy the [default `values.yaml`](https://github.com/Twingate/kubernetes-operator/blob/main/deploy/twingate-operator/values.yaml) as a starting point.
+1. Copy the [default `values.yaml`](https://github.com/Twingate/kubernetes-operator/blob/main/deploy/twingate-operator/values.yaml) to a local file.
 2. Edit the `twingateOperator` section with your account details and API token.
 3. Install or upgrade:
 
@@ -39,21 +39,25 @@ Add `-n <namespace>` to target a specific namespace.
 ## Installation (Helm from cloned repo)
 
 ```bash
-git clone https://github.com/Twingate/kubernetes-operator
+git clone https://github.com/Twingate/kubernetes-operator.git
 cp ./deploy/twingate-operator/values.yaml ./deploy/twingate-operator/values.local.yaml
-# Edit values.local.yaml
+# Edit values.local.yaml, then:
 helm upgrade twop ./deploy/twingate-operator \
   --install --wait -f ./deploy/twingate-operator/values.local.yaml
 ```
 
 ## Configuration Values
-Primary configuration lives in `values.yaml` under the `twingateOperator` key. Refer to the default values file for all available fields. Minimum required settings include:
-- Twingate account/network name
-- API token (Read/Write/Provision)
+Key settings live under the `twingateOperator` key in `values.yaml`. Refer to the default values file for the full list; at minimum configure:
+
+| Field | Description |
+|---|---|
+| `twingateOperator.apiToken` | Twingate API token (Read/Write/Provision) |
+| `twingateOperator.network` | Twingate account/network name |
+| `twingateOperator.remoteNetwork` | Name of the Remote Network representing the cluster |
 
 ## Gotchas
-- **CRDs are not auto-upgraded by Helm v3.** After a chart version bump, manually apply updated CRD manifests before running `helm upgrade`.
-- Connectors must already be deployed into the target Remote Network before the operator can manage resources against it.
+- **CRD upgrades are manual.** Helm v3 does not upgrade CRDs automatically on `helm upgrade`. Apply updated CRD manifests manually before upgrading the chart.
+- Connectors must be deployed to the Remote Network before the operator can route traffic; the operator does not deploy connectors itself.
 
 ## Related Docs
 - [Wiki](https://github.com/Twingate/kubernetes-operator/wiki)

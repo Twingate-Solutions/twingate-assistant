@@ -1,27 +1,28 @@
 ---
 source: https://github.com/Twingate-Solutions/twingate-assistant
 type: github
-fetched: 2026-11-01
-source_version: c8f5b735594515fff6ef5aff27018dadd7af0995
+fetched: 2026-11-08
+source_version: 5721351e61e74625d63fe0792c77aa9795a4d373
 trust: official
 ---
 
 # Twingate Assistant (Claude Code Plugin)
 
-A Claude Code plugin that provides Twingate ZTNA domain expertise via skills and agents. It covers architecture design, connector deployment, IaC generation (Terraform/Pulumi), troubleshooting, and cloud-specific deployment workflows across AWS, Azure, GCP, and Kubernetes.
+A Claude Code plugin that provides Twingate ZTNA domain expertise via skills and agents. It covers architecture design, connector deployment, IaC generation (Terraform/Pulumi), IdP integration, troubleshooting, and cloud-specific deployers for AWS, Azure, and GCP.
 
 ## Key Information
 
-- Delivers expertise through two mechanisms: **Skills** (auto-load on topic detection) and **Agents** (explicit invocation for end-to-end workflows)
-- Skills cover: architecture, connectors, Terraform, Pulumi, Kubernetes, Identity Firewall, IdP/SCIM, GraphQL API, DNS security, troubleshooting
-- Agents cover: SE assessment, AWS/Azure/GCP deployer, network designer, IDFW deployer
-- Reference docs are refreshed weekly via GitHub Action from Twingate docs, help center, and public Twingate GitHub orgs
-- Licensed under Apache 2.0
+- Adds **Skills** (auto-activate on topic detection) and **Agents** (explicitly invoked by name) to Claude Code sessions
+- Supports IaC output via Terraform and Pulumi; cloud targets include AWS, Azure, GCP, and Kubernetes
+- Deployment progress persists to `twingate-deployment/deployment.yaml` — contains internal network details, keep out of public repos
+- A weekly GitHub Action refreshes skill reference docs from Twingate docs, help center, and public Twingate GitHub orgs
+- License: Apache 2.0
 
 ## Prerequisites
 
-- Claude Code with plugin marketplace access
-- A Twingate account and relevant cloud credentials (varies by deployment target)
+- Claude Code with plugin marketplace support
+- A Twingate account (for actual deployments)
+- Cloud credentials if using cloud-deployer agents
 
 ## Installation
 
@@ -32,54 +33,69 @@ Install via Claude Code plugin commands:
 /plugin install twingate-assistant@twingate-solutions
 ```
 
-To update: re-run the same `/plugin install` command.
+Re-run `/plugin install` to update to the latest version.
 
 ## Usage
 
-### Invoke an agent
-
-```text
-Use the twingate-se agent to help me deploy Twingate to my AWS environment.
-Use the aws-deployer agent to generate Terraform for two HA connectors in us-east-1.
-Use the azure-deployer agent to deploy connectors as Azure Container Instances with Entra ID auth.
-Use the network-designer agent to plan our resource structure for three environments.
+**New deployment walkthrough:**
+```
+Help me deploy Twingate. Here's our network diagram.
 ```
 
-### Document an existing deployment
+**SE agent assessment and design:**
+```
+Use the twingate-se agent to help me deploy Twingate to my AWS environment.
+```
 
-```text
+**Document an existing deployment (run once, commit result):**
+```
 Use the twingate-se agent to document my current Twingate deployment as twingate-context.md.
 ```
+Template: `docs/twingate-context-template.md`
 
-Commit the resulting file; future sessions load it automatically. Template: `docs/twingate-context-template.md`.
-
-### Invoke a skill explicitly
-
-```text
+**Troubleshoot:**
+```
 Use the twingate-troubleshoot skill. My users can't reach a resource that was working yesterday.
 ```
 
-Skills also activate automatically when relevant topics are mentioned (e.g., mentioning "connector" activates `twingate-connectors`).
+**Cloud-specific IaC:**
+```
+Use the aws-deployer agent to generate Terraform for two HA connectors in us-east-1.
+Use the azure-deployer agent to deploy connectors as Azure Container Instances with Entra ID auth.
+```
 
-## Agents Reference
+## Available Skills
+
+| Skill | Coverage |
+|---|---|
+| `twingate-onboarding` | End-to-end guided deployment |
+| `twingate-architect` | ZTNA architecture, Remote Networks, design patterns |
+| `twingate-connectors` | Connector deployment, HA, upgrades, metrics |
+| `twingate-terraform` | Terraform provider and resource definitions |
+| `twingate-pulumi` | Pulumi provider (TypeScript, Python, Go, C#) |
+| `twingate-kubernetes` | Helm chart, operator, CRDs |
+| `twingate-idfw` | SSH PAM, Kubernetes gateway, session recording |
+| `twingate-identity` | IdP, SCIM, device trust, JIT |
+| `twingate-api` | GraphQL API, CLI, automation |
+| `twingate-dns-security` | DNS filtering, exit networks, DoH |
+| `twingate-troubleshoot` | Connector/access/policy diagnostics |
+
+## Available Agents
 
 | Agent | Purpose |
 |---|---|
-| `twingate-se` | Full deployment assessment, network design, IaC generation |
-| `aws-deployer` | ECS, EC2, IAM, Secrets Manager connector deployment |
-| `azure-deployer` | ACI, VMs, Key Vault, Entra ID connector deployment |
-| `gcp-deployer` | Cloud Run, GCE, Secret Manager, Google Workspace deployment |
-| `network-designer` | Pre-IaC network planning, resource strategy, security tiers |
-| `idfw-deployer` | Certificate-based SSH PAM or kubectl proxy access |
+| `twingate-se` | Full deployment or major change orchestration |
+| `aws-deployer` | AWS connector deployment (ECS, EC2, IAM, Secrets Manager) |
+| `azure-deployer` | Azure connector deployment (ACI, VMs, Key Vault, Entra ID) |
+| `gcp-deployer` | GCP connector deployment (Cloud Run, GCE, Secret Manager) |
+| `deployment-reviewer` | Read-only plan review before building |
+| `network-designer` | Network planning before writing IaC |
+| `idfw-deployer` | Certificate-based SSH PAM or kubectl proxy |
 
 ## Gotchas
 
-- Skills load automatically but can also be called explicitly with `/skill <name>` if not triggering on their own
-- Reference knowledge is updated weekly server-side; pull plugin updates periodically with `/plugin install` to get the latest summaries
-- The `twingate-context.md` file (if created) must be committed to the repo to persist across sessions
+- `twingate-deployment/deployment.yaml` stores internal network details — do not commit to public repositories
+- Skills auto-activate based on topic detection; explicit invocation uses `/skill <name>`
+- The onboarding skill is multi-session; progress is saved to the YAML file and resumed automatically
 
 ## Related Docs
-
-- Context file template: [`docs/twingate-context-template.md`](docs/twingate-context-template.md)
-- Forking/customizing: [`docs/MAINTAINING.md`](docs/MAINTAINING.md)
-- Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)

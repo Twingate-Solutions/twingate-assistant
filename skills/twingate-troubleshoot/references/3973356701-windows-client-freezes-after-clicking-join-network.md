@@ -1,53 +1,60 @@
 ---
 source: https://help.twingate.com/articles/3973356701-windows-client-freezes-after-clicking-join-network
 type: help
-fetched: 2026-11-01
-source_version: 0c9829f7b73668e74982f8c82089f3b9f1c015810d62ebffd81131c0ba9e2d91
+fetched: 2026-11-08
+source_version: 6b3871992cc704e1740e38796ce703bceea8ec6721b69842bbc59a76da17076c
 trust: official
 ---
 
 # [Windows Client] Freezes After Clicking Join Network
 
 ## Summary
-The Twingate Windows client freezes at "Join Network" when the WMI (Windows Management Instrumentation) win32 repository is corrupt, preventing device posture checks from completing. The fix is to recompile the corrupted MOF file from an administrative command prompt.
+The Twingate Windows client freezes at the "Join Network" step when the WMI (Windows Management Instrumentation) win32 repository is corrupt. The service cannot complete device posture checks required before authentication. Recompiling the WMI MOF file resolves the issue.
 
 ## Key Information
-- **Affected component**: Twingate Windows Client
+- **Affected component**: Twingate Windows Client — device posture check during network join
+- **Root cause**: Corrupt WMI win32 repository (caused by improper shutdowns, BSODs, or application crashes)
 - **Log file location**: `%LOCALAPPDATA%\Twingate\logs\Twingate.Service.log`
-- **Root cause**: Corrupt WMI win32 repository blocks device posture data collection
 - **Error indicator in logs**: `CommunicationObjectFaultedException` during `RunPreconnectionChecks`
-- **WMI corruption causes**: Improper shutdowns, BSODs, application crashes
+- **WMI failure stage**: `DevicePostureDataProvider.GenerateClientData`
 
 ## Symptoms
 - Client UI freezes after clicking "Join Network"
-- Log shows state reaching `Authenticating` then faulting at `RunPreconnectionChecks`
-- Twingate errors appear in **Windows Event Viewer → Application**
-- PowerShell WMI queries return no data:
+- Errors appear in **Windows Event Viewer → Application**
+- PowerShell WMI queries hang or return no data:
   ```powershell
   gwmi Win32_DISKDRIVE | select *
   ```
 
-## Prerequisites
-- Administrative command prompt on the affected Windows machine
+## Diagnostic Log Signature
+Look for this sequence in `Twingate.Service.log`:
+```
+[DEBUG] DevicePostureDataProvider.GenerateClientData Start client posture data collection.
+[ERROR] ServiceCommunication.RunPreconnectionChecks Communication faulted. System.ServiceModel.CommunicationObjectFaultedException
+```
 
 ## Resolution
 
-Run the following from an **elevated (Administrator) command prompt** to recompile the WMI win32 MOF file:
+**Prerequisite**: Administrative command prompt (run as Administrator)
 
+**Step 1** — Recompile the WMI win32 MOF file:
 ```cmd
 mofcomp %windir%\system32\wbem\cimwin32.mof
 ```
 
-## Diagnostic Steps
-1. Check log file at `%LOCALAPPDATA%\Twingate\logs\Twingate.Service.log` for `CommunicationObjectFaultedException`
-2. Verify WMI is broken by running `gwmi Win32_DISKDRIVE | select *` in PowerShell — no output confirms corruption
-3. Check Windows Event Viewer → Application for Twingate errors
-4. Run `mofcomp` fix above if WMI is confirmed broken
+**Step 2** — Verify WMI is working by running in PowerShell:
+```powershell
+gwmi Win32_DISKDRIVE | select *
+```
+If data returns, WMI is healthy.
+
+**Step 3** — Retry joining the Twingate network.
 
 ## Gotchas
-- This issue is **OS-level**, not Twingate-specific — the WMI repository must be repaired before the client can function
-- Reinstalling Twingate will **not** fix this; WMI must be repaired directly
-- If `mofcomp` does not resolve the issue, a full WMI repository rebuild may be required (outside scope of this article)
+- Must run `mofcomp` from an **elevated** (Administrator) command prompt — it will silently fail or have no effect otherwise.
+- WMI corruption can recur if underlying system stability issues (frequent BSODs, forced shutdowns) are not addressed.
+- Errors in Windows Event Viewer → Application may point to WMI issues even if the Twingate log alone is ambiguous.
 
 ## Related Docs
-- [WMI (Windows Management Instrumentation) — Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/wmisdk/wmi-start-page)
+- [Twingate Windows Client documentation](https://help.twingate.com)
+- Microsoft: [WMI Troubleshooting](https://learn.microsoft.com/en-us/windows/win32/wmisdk/wmi-troubleshooting)

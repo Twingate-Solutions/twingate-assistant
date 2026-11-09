@@ -1,57 +1,50 @@
 ---
 source: https://help.twingate.com/articles/5202917932-connector-upgrade-produces-gpg-error-in-apt
 type: help
-fetched: 2026-10-25
-source_version: 34d2c7062a20372cf84c8831145b7c325c082a419114a2f39b0e8bc2a39ee3c7
+fetched: 2026-11-08
+source_version: bb2d5fa2c0d476f01e965d9d447b24ad00ce2f595ffea4f280de212fbf9dcf04
 trust: official
 ---
 
 # Connector Upgrade Produces GPG Error in APT
 
 ## Summary
-When updating a Twingate Connector on Ubuntu/Debian via APT, you may see a `NO_PUBKEY` GPG error. This occurs because older installations lack the current signing key or use an outdated repo configuration. The fix involves installing the current GPG key into a dedicated keyring and updating the repo config to use `signed-by`.
+When upgrading a Twingate Connector on Ubuntu/Debian via APT, a `NO_PUBKEY` GPG error may appear during `sudo apt update`. This occurs because older installations lack the current Twingate signing key or use an outdated repo configuration without the `signed-by` option.
 
 ## Key Information
-- Affected platforms: Ubuntu, Debian (APT-based systems)
-- Error signature: `NO_PUBKEY 5C363F09A9174A9E`
-- Twingate's current config uses a dedicated GPG keyring + `signed-by` APT option
-- Old workaround (`trusted=true`) is deprecated and should not be used
+- Affected error: `NO_PUBKEY 5C363F09A9174A9E` from `https://packages.twingate.com/apt`
+- Root cause: Old repo configs may use `trusted=true` workaround instead of proper GPG keyring
+- Fix: Install current Twingate GPG key into a dedicated keyring and update the repo source entry
 
 ## Prerequisites
+- Ubuntu or Debian system
 - `curl`, `gpg`, `ca-certificates` installed
-- `sudo` access
+- Sudo access
 
 ## Step-by-Step Resolution
 
-**1. Install required utilities**
-```bash
-sudo apt install -y curl gpg ca-certificates
-```
+1. **Install required utilities:**
+   ```bash
+   sudo apt install -y curl gpg ca-certificates
+   ```
 
-**2. Install the Twingate GPG signing key**
+2. **Install the Twingate GPG signing key** (source: `packages.twingate.com`):
+   ```bash
+   curl -fsSL https://packages.twingate.com/apt/gpg.key \
+     | sudo gpg --dearmor -o /usr/share/keyrings/twingate-client-keyring.gpg
+   ```
+   Confirm replacement if prompted.
 
-Download from `packages.twingate.com` (Twingate's official package host) and install into the dedicated keyring:
-```bash
-curl -fsSL https://packages.twingate.com/apt/gpg.key \
-  | sudo gpg --dearmor -o /usr/share/keyrings/twingate-client-keyring.gpg
-```
-Confirm replacement if prompted.
+3. **Update the APT repository configuration:**
+   ```bash
+   echo "deb [signed-by=/usr/share/keyrings/twingate-client-keyring.gpg] https://packages.twingate.com/apt/ * *" \
+     | sudo tee /etc/apt/sources.list.d/twingate.list
+   ```
 
-**3. Update the repository configuration**
-```bash
-echo "deb [signed-by=/usr/share/keyrings/twingate-client-keyring.gpg] https://packages.twingate.com/apt/ * *" \
-  | sudo tee /etc/apt/sources.list.d/twingate.list
-```
-
-**4. Verify config (optional)**
-```bash
-cat /etc/apt/sources.list.d/twingate.list
-```
-
-**5. Refresh APT**
-```bash
-sudo apt update
-```
+4. **Refresh APT:**
+   ```bash
+   sudo apt update
+   ```
 
 ## Configuration Values
 | Item | Value |
@@ -62,12 +55,13 @@ sudo apt update
 | Repo URL | `https://packages.twingate.com/apt/` |
 
 ## Gotchas
-- **Do not use `trusted=true`** in the repo config — this was an older workaround and bypasses signature verification
-- **Duplicate repo entries** can cause conflicts; check with:
+- **Do not use `trusted=true`** in the repo config — older guidance recommended this as a workaround; it is unnecessary and less secure with the current signed repo setup
+- Duplicate or conflicting repo entries can persist the error — check with:
   ```bash
   grep -R "packages.twingate.com" /etc/apt/sources.list /etc/apt/sources.list.d/ 2>/dev/null
   ```
-  Remove or reconcile any duplicate/conflicting entries found
+  Remove or consolidate any duplicate entries found.
 
 ## Related Docs
-- Twingate Linux Connector installation documentation (see help.twingate.com for current installer guidance)
+- Twingate Linux Connector installation documentation
+- Official APT repository: `https://packages.twingate.com/apt`
