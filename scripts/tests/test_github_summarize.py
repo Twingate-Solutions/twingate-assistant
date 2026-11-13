@@ -18,9 +18,8 @@ from summarize_docs import MAX_TEXT_LENGTH
 
 def _mock_message(text: str = "## Summary", input_tokens: int = 100, output_tokens: int = 50):
     """Build a mock anthropic Message with a text content block and usage."""
-    block = MagicMock()
-    block.text = text
-    message = MagicMock()
+    block = MagicMock(type="text", text=text)
+    message = MagicMock(stop_reason="end_turn", model=github_summarize.CLAUDE_MODEL)
     message.content = [block]
     message.usage = MagicMock(input_tokens=input_tokens, output_tokens=output_tokens)
     return message
@@ -59,7 +58,7 @@ def test_summarize_repo_delta_sends_prior_doc_diff_and_metadata(mock_anthropic_c
     """The user message sent to messages.create carries the prior doc text,
     the filtered diff text, and the repo metadata (full_name)."""
     mock_client = mock_anthropic_cls.return_value
-    mock_client.messages.create.return_value = _mock_message(
+    mock_client.beta.messages.create.return_value = _mock_message(
         text="## Updated Summary", input_tokens=250, output_tokens=90
     )
     metadata = {
@@ -78,8 +77,8 @@ def test_summarize_repo_delta_sends_prior_doc_diff_and_metadata(mock_anthropic_c
     assert result.output_tokens == 90
     assert result.model == github_summarize.CLAUDE_MODEL
 
-    mock_client.messages.create.assert_called_once()
-    sent_kwargs = mock_client.messages.create.call_args.kwargs
+    mock_client.beta.messages.create.assert_called_once()
+    sent_kwargs = mock_client.beta.messages.create.call_args.kwargs
     user_message = sent_kwargs["messages"][0]["content"]
     assert "This is the prior summary body." in user_message
     assert "This is the filtered diff patch text." in user_message
@@ -89,17 +88,17 @@ def test_summarize_repo_delta_sends_prior_doc_diff_and_metadata(mock_anthropic_c
 @patch("github_summarize.anthropic.Anthropic")
 def test_summarize_repo_delta_makes_exactly_one_api_call(mock_anthropic_cls) -> None:
     mock_client = mock_anthropic_cls.return_value
-    mock_client.messages.create.return_value = _mock_message()
+    mock_client.beta.messages.create.return_value = _mock_message()
 
     summarize_repo_delta("prior", "diff", {"full_name": "Twingate/r"})
 
-    assert mock_client.messages.create.call_count == 1
+    assert mock_client.beta.messages.create.call_count == 1
 
 
 @patch("github_summarize.anthropic.Anthropic")
 def test_summarize_repo_delta_token_usage_comes_from_message_usage(mock_anthropic_cls) -> None:
     mock_client = mock_anthropic_cls.return_value
-    mock_client.messages.create.return_value = _mock_message(input_tokens=777, output_tokens=333)
+    mock_client.beta.messages.create.return_value = _mock_message(input_tokens=777, output_tokens=333)
 
     result = summarize_repo_delta("prior", "diff", {"full_name": "Twingate/r"})
 
@@ -111,7 +110,7 @@ def test_summarize_repo_delta_token_usage_comes_from_message_usage(mock_anthropi
 def test_summarize_repo_delta_no_change_sentinel_returns_prior_doc(mock_anthropic_cls) -> None:
     """A NO_CHANGE reply keeps the prior summary text verbatim."""
     mock_client = mock_anthropic_cls.return_value
-    mock_client.messages.create.return_value = _mock_message(
+    mock_client.beta.messages.create.return_value = _mock_message(
         text=f"  {github_summarize.NO_CHANGE_SENTINEL}\n"
     )
 
@@ -124,7 +123,7 @@ def test_summarize_repo_delta_no_change_sentinel_returns_prior_doc(mock_anthropi
 def test_summarize_repo_delta_strips_commentary_before_heading(mock_anthropic_cls) -> None:
     """Commentary the model puts before the summary heading is not written."""
     mock_client = mock_anthropic_cls.return_value
-    mock_client.messages.create.return_value = _mock_message(
+    mock_client.beta.messages.create.return_value = _mock_message(
         text=(
             "The changes are minor CI workflow pin updates. The summary remains "
             "accurate as-is.\n\n---\n\n# Repo\n\n## Summary\nBody."
@@ -140,7 +139,7 @@ def test_summarize_repo_delta_strips_commentary_before_heading(mock_anthropic_cl
 def test_summarize_repo_delta_rejects_output_without_heading(mock_anthropic_cls) -> None:
     """Pure commentary with no heading raises rather than overwriting the doc."""
     mock_client = mock_anthropic_cls.return_value
-    mock_client.messages.create.return_value = _mock_message(
+    mock_client.beta.messages.create.return_value = _mock_message(
         text="The summary remains accurate as-is."
     )
 
@@ -170,11 +169,11 @@ def test_summarize_repo_delta_wraps_content_in_untrusted_source_delimiters(
     mock_anthropic_cls,
 ) -> None:
     mock_client = mock_anthropic_cls.return_value
-    mock_client.messages.create.return_value = _mock_message(text="## Updated Summary")
+    mock_client.beta.messages.create.return_value = _mock_message(text="## Updated Summary")
 
     summarize_repo_delta("prior body", "diff text", {"full_name": "Twingate/r"})
 
-    user_message = mock_client.messages.create.call_args.kwargs["messages"][0]["content"]
+    user_message = mock_client.beta.messages.create.call_args.kwargs["messages"][0]["content"]
     assert "<untrusted_source>" in user_message
     assert "</untrusted_source>" in user_message
     assert user_message.index("<untrusted_source>") < user_message.index("prior body")
@@ -186,11 +185,11 @@ def test_summarize_repo_full_wraps_corpus_in_untrusted_source_delimiters(
     mock_anthropic_cls,
 ) -> None:
     mock_client = mock_anthropic_cls.return_value
-    mock_client.messages.create.return_value = _mock_message(text="## Fresh Summary")
+    mock_client.beta.messages.create.return_value = _mock_message(text="## Fresh Summary")
 
     summarize_repo_full("README body", [], {"full_name": "Twingate/r"})
 
-    user_message = mock_client.messages.create.call_args.kwargs["messages"][0]["content"]
+    user_message = mock_client.beta.messages.create.call_args.kwargs["messages"][0]["content"]
     assert "<untrusted_source>" in user_message
     assert "</untrusted_source>" in user_message
     assert user_message.index("<untrusted_source>") < user_message.index("README body")
@@ -203,7 +202,7 @@ def test_summarize_repo_full_wraps_corpus_in_untrusted_source_delimiters(
 @patch("github_summarize.anthropic.Anthropic")
 def test_summarize_repo_full_sends_readme_in_corpus(mock_anthropic_cls) -> None:
     mock_client = mock_anthropic_cls.return_value
-    mock_client.messages.create.return_value = _mock_message(
+    mock_client.beta.messages.create.return_value = _mock_message(
         text="## Fresh Summary", input_tokens=300, output_tokens=120
     )
     metadata = {"full_name": "Twingate/example-repo"}
@@ -214,7 +213,7 @@ def test_summarize_repo_full_sends_readme_in_corpus(mock_anthropic_cls) -> None:
     assert result.input_tokens == 300
     assert result.output_tokens == 120
 
-    sent_kwargs = mock_client.messages.create.call_args.kwargs
+    sent_kwargs = mock_client.beta.messages.create.call_args.kwargs
     user_message = sent_kwargs["messages"][0]["content"]
     assert "This is the README content." in user_message
     assert "Twingate/example-repo" in user_message
@@ -223,11 +222,11 @@ def test_summarize_repo_full_sends_readme_in_corpus(mock_anthropic_cls) -> None:
 @patch("github_summarize.anthropic.Anthropic")
 def test_summarize_repo_full_includes_key_docs(mock_anthropic_cls) -> None:
     mock_client = mock_anthropic_cls.return_value
-    mock_client.messages.create.return_value = _mock_message()
+    mock_client.beta.messages.create.return_value = _mock_message()
 
     summarize_repo_full("README body", ["Extra doc file content"], {"full_name": "Twingate/r"})
 
-    sent_kwargs = mock_client.messages.create.call_args.kwargs
+    sent_kwargs = mock_client.beta.messages.create.call_args.kwargs
     user_message = sent_kwargs["messages"][0]["content"]
     assert "Extra doc file content" in user_message
 
@@ -236,12 +235,12 @@ def test_summarize_repo_full_includes_key_docs(mock_anthropic_cls) -> None:
 def test_summarize_repo_full_truncates_oversized_corpus(mock_anthropic_cls) -> None:
     """A corpus over MAX_TEXT_LENGTH is truncated with a marker."""
     mock_client = mock_anthropic_cls.return_value
-    mock_client.messages.create.return_value = _mock_message()
+    mock_client.beta.messages.create.return_value = _mock_message()
     huge_readme = "x" * (MAX_TEXT_LENGTH + 5000)
 
     summarize_repo_full(huge_readme, [], {"full_name": "Twingate/big-repo"})
 
-    sent_kwargs = mock_client.messages.create.call_args.kwargs
+    sent_kwargs = mock_client.beta.messages.create.call_args.kwargs
     user_message = sent_kwargs["messages"][0]["content"]
     assert "[Content truncated for length]" in user_message
     assert len(user_message) < len(huge_readme)
@@ -250,11 +249,11 @@ def test_summarize_repo_full_truncates_oversized_corpus(mock_anthropic_cls) -> N
 @patch("github_summarize.anthropic.Anthropic")
 def test_summarize_repo_full_makes_exactly_one_api_call(mock_anthropic_cls) -> None:
     mock_client = mock_anthropic_cls.return_value
-    mock_client.messages.create.return_value = _mock_message()
+    mock_client.beta.messages.create.return_value = _mock_message()
 
     summarize_repo_full("readme", [], {"full_name": "Twingate/r"})
 
-    assert mock_client.messages.create.call_count == 1
+    assert mock_client.beta.messages.create.call_count == 1
 
 
 # ── build_metrics_record ─────────────────────────────────────────────────────
@@ -305,7 +304,7 @@ def test_build_metrics_record_accepts_every_known_mode(mode: str) -> None:
 @patch("github_summarize.anthropic.Anthropic")
 def test_summarize_repo_full_strips_commentary_before_heading(mock_anthropic_cls) -> None:
     mock_client = mock_anthropic_cls.return_value
-    mock_client.messages.create.return_value = _mock_message(
+    mock_client.beta.messages.create.return_value = _mock_message(
         text="Here is the summary:\n\n# Repo\n\nBody."
     )
 

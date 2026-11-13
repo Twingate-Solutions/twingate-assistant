@@ -4,11 +4,16 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, cast
+from typing import Any
 
 import anthropic
 
-from summarize_docs import CLAUDE_MAX_TOKENS, CLAUDE_MODEL, MAX_TEXT_LENGTH
+from summarize_docs import (
+    CLAUDE_MODEL,
+    MAX_TEXT_LENGTH,
+    create_summary_message,
+    extract_summary_text,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -70,26 +75,6 @@ class SummaryResult:
     input_tokens: int
     output_tokens: int
     model: str
-
-
-def _extract_text(message: Any) -> str:
-    """Extract the first content block's text.
-
-    Args:
-        message: The ``anthropic`` ``Message`` returned by ``messages.create()``.
-
-    Returns:
-        The text of the first content block.
-
-    Raises:
-        ValueError: If the first content block has no ``text`` attribute.
-    """
-    first_block = message.content[0]
-    if not hasattr(first_block, "text") or first_block.text is None:
-        raise ValueError(
-            f"Unexpected content block type from Claude API: {type(first_block)}"
-        )
-    return cast(str, first_block.text)
 
 
 def _clean_summary(text: str, *, label: str) -> str:
@@ -206,14 +191,9 @@ def summarize_repo_delta(prior_doc: str, filtered_diff: str, metadata: dict[str,
         len(filtered_diff),
     )
     client = anthropic.Anthropic()
-    message = client.messages.create(
-        model=CLAUDE_MODEL,
-        max_tokens=CLAUDE_MAX_TOKENS,
-        system=_DELTA_SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_message}],
-    )
+    message = create_summary_message(client, system=_DELTA_SYSTEM_PROMPT, user_message=user_message)
     label = str(metadata.get("full_name", "unknown"))
-    text = _extract_text(message)
+    text = extract_summary_text(message, label=label)
     if text.strip() == NO_CHANGE_SENTINEL:
         logger.info("%s: delta does not affect the summary, keeping prior text", label)
         text = prior_doc
@@ -223,7 +203,7 @@ def summarize_repo_delta(prior_doc: str, filtered_diff: str, metadata: dict[str,
         text=text,
         input_tokens=message.usage.input_tokens,
         output_tokens=message.usage.output_tokens,
-        model=CLAUDE_MODEL,
+        model=str(message.model or CLAUDE_MODEL),
     )
 
 
@@ -251,18 +231,13 @@ def summarize_repo_full(readme: str, key_docs: list[str], metadata: dict[str, An
 
     logger.info("Calling Claude API for full summary of %s (corpus length=%d)", label, len(corpus))
     client = anthropic.Anthropic()
-    message = client.messages.create(
-        model=CLAUDE_MODEL,
-        max_tokens=CLAUDE_MAX_TOKENS,
-        system=_FULL_SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_message}],
-    )
-    text = _clean_summary(_extract_text(message), label=label)
+    message = create_summary_message(client, system=_FULL_SYSTEM_PROMPT, user_message=user_message)
+    text = _clean_summary(extract_summary_text(message, label=label), label=label)
     return SummaryResult(
         text=text,
         input_tokens=message.usage.input_tokens,
         output_tokens=message.usage.output_tokens,
-        model=CLAUDE_MODEL,
+        model=str(message.model or CLAUDE_MODEL),
     )
 
 

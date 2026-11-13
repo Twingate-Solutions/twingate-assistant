@@ -543,6 +543,10 @@ docs:
     skill: twingate-architect
     keywords: [resource exclusion, bypass Twingate, routing mode, BYPASS_TWINGATE, split tunnel exception]
 
+  - url: https://www.twingate.com/docs/resource-policies
+    skill: twingate-architect
+    keywords: [Resource Policy, security policy, authentication, device requirements, location, group override]
+
   - url: https://www.twingate.com/docs/location-requirements
     skill: twingate-architect
     keywords: [geoblocking, location requirements, country restrictions, Enterprise, compliance]
@@ -610,6 +614,10 @@ docs:
   - url: https://www.twingate.com/docs/windows-client-dotnet-8
     skill: twingate-architect
     keywords: [Windows, .NET 8, migration, MSI, managed deployment, runtime]
+
+  - url: https://www.twingate.com/docs/windows-client-dotnet-10
+    skill: twingate-architect
+    keywords: [Windows, .NET 10, migration, MSI, EXE, Desktop Runtime, managed deployment]
 
   - url: https://www.twingate.com/docs/macos-and-ios
     skill: twingate-architect
@@ -694,6 +702,10 @@ docs:
   - url: https://www.twingate.com/docs/msp
     skill: twingate-architect
     keywords: [MSP, managed service provider, "multi-tenant", customer networks, portal, billing]
+
+  - url: https://www.twingate.com/docs/msp-api
+    skill: twingate-architect
+    keywords: [MSP Partner API, GraphQL, MSP Portal, Customer Networks, license counts, PSA, reseller]
 
   - url: https://www.twingate.com/docs/subscription-cancellation
     skill: twingate-architect
@@ -1011,6 +1023,14 @@ docs:
     skill: twingate-kubernetes
     keywords: [Kubernetes, public services, external access, Connector, access control]
 
+  - url: https://www.twingate.com/docs/kubernetes-kubeconfig-sync
+    skill: twingate-kubernetes
+    keywords: [kubeconfig, sync, kubectl, Client, Privileged Access, cluster contexts]
+
+  - url: https://www.twingate.com/docs/kubernetes-agent-access
+    skill: twingate-kubernetes
+    keywords: [AI agents, Kubernetes, Gateway, Headless Client, Service Account, RBAC, sandbox]
+
 
   # ── twingate-idfw ───────────────────────────────────────────────────────────
 
@@ -1081,10 +1101,6 @@ docs:
   - url: https://www.twingate.com/docs/jamf-mdm
     skill: twingate-identity
     keywords: [Jamf, MDM, macOS, iOS, Client deployment, Apple Business Manager, package, mobile device management]
-
-  - url: https://www.twingate.com/docs/kandji-mdm
-    skill: twingate-identity
-    keywords: [Kandji, MDM, macOS, iOS, Client deployment, Auto App, Apple Business Manager, mobile device management]
 
   - url: https://www.twingate.com/docs/omnissa-workspace-one-mdm
     skill: twingate-identity
@@ -1285,10 +1301,6 @@ docs:
   - url: https://www.twingate.com/docs/jamf-configuration
     skill: twingate-identity
     keywords: [Jamf, MDM, device trust, Trusted Profile, macOS, Business Enterprise]
-
-  - url: https://www.twingate.com/docs/kandji-configuration
-    skill: twingate-identity
-    keywords: [Kandji, MDM, device trust, Trusted Profile, macOS, serial number, Business Enterprise]
 
   - url: https://www.twingate.com/docs/manually-verified-devices
     skill: twingate-identity

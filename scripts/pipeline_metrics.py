@@ -23,9 +23,9 @@ COUNTER_FIELDS: tuple[str, ...] = (
     "manual_skipped",
 )
 
-# Approximate Claude Sonnet pricing (USD per million tokens).
-SONNET_INPUT_USD_PER_MTOK = 3.0
-SONNET_OUTPUT_USD_PER_MTOK = 15.0
+# Approximate Claude Sonnet 5.5 pricing (USD per million tokens).
+SONNET_INPUT_USD_PER_MTOK = 2.0
+SONNET_OUTPUT_USD_PER_MTOK = 10.0
 
 GITHUB_MODES: tuple[str, ...] = ("delta", "full", "stub", "wiki")
 

@@ -3,6 +3,7 @@
 import hashlib
 import logging
 import re
+from typing import Any, Final
 
 import anthropic
 import requests
@@ -19,8 +20,15 @@ from url_safety import (
 logger = logging.getLogger(__name__)
 
 REQUEST_TIMEOUT_SECONDS = 30
-CLAUDE_MODEL = "claude-sonnet-4-6"
-CLAUDE_MAX_TOKENS = 1024
+CLAUDE_MODEL = "claude-sonnet-5-5"
+# Thinking is on by default on this model and its tokens count toward
+# max_tokens, so the cap covers thinking plus a ~500-word summary.
+CLAUDE_MAX_TOKENS = 16000
+CLAUDE_EFFORT: Final = "low"
+# On a policy decline, the API retries the request on a fallback model it picks
+# by refusal category. The pinned SDK has no typed ``fallbacks`` parameter, so
+# it is sent via ``extra_body``.
+SERVER_SIDE_FALLBACK_BETA = "server-side-fallback-2026-07-01"
 MAX_TEXT_LENGTH = 60000
 
 # Size cap for a single fetched documentation page (decompressed bytes).
@@ -226,6 +234,67 @@ def build_frontmatter(
     )
 
 
+def create_summary_message(client: anthropic.Anthropic, *, system: str, user_message: str) -> Any:
+    """Send one summarization request to the Claude API.
+
+    Shared by the docs and GitHub summarizers so every call uses the same
+    model, effort, output cap, and refusal fallback.
+
+    Args:
+        client: An ``anthropic.Anthropic`` client.
+        system: The system prompt.
+        user_message: The single user-turn content.
+
+    Returns:
+        The ``BetaMessage`` returned by the API.
+
+    Raises:
+        anthropic.APIError: If the API call fails.
+    """
+    return client.beta.messages.create(
+        model=CLAUDE_MODEL,
+        max_tokens=CLAUDE_MAX_TOKENS,
+        system=system,
+        messages=[{"role": "user", "content": user_message}],
+        output_config={"effort": CLAUDE_EFFORT},
+        betas=[SERVER_SIDE_FALLBACK_BETA],
+        extra_body={"fallbacks": "default"},
+    )
+
+
+def extract_summary_text(message: Any, *, label: str) -> str:
+    """Return the text of a summarization response, rejecting unusable ones.
+
+    Reads blocks by ``type``: a response can open with ``thinking`` or
+    ``fallback`` blocks before the text.
+
+    Args:
+        message: The message returned by :func:`create_summary_message`.
+        label: Identifier (URL or repo name) for error messages.
+
+    Returns:
+        The concatenated text blocks.
+
+    Raises:
+        ValueError: If the model declined (``stop_reason == "refusal"``), the
+            output hit ``max_tokens``, or the response has no text.
+    """
+    if message.stop_reason == "refusal":
+        details = getattr(message, "stop_details", None)
+        category = getattr(details, "category", None) if details is not None else None
+        raise ValueError(f"Claude declined to summarize {label} (category={category})")
+    if message.stop_reason == "max_tokens":
+        raise ValueError(f"Summary for {label} hit max_tokens={CLAUDE_MAX_TOKENS}; not writing a truncated summary")
+    texts = [
+        block.text
+        for block in message.content
+        if getattr(block, "type", None) == "text" and getattr(block, "text", None)
+    ]
+    if not texts:
+        raise ValueError(f"Claude API response for {label} contained no text block")
+    return "".join(texts)
+
+
 def summarize_doc(url: str, html_content: str) -> str:
     """Call the Claude API to summarize a doc page.
 
@@ -240,7 +309,8 @@ def summarize_doc(url: str, html_content: str) -> str:
 
     Raises:
         anthropic.APIError: If the Claude API call fails.
-        ValueError: If the API response does not contain a text block.
+        ValueError: If the model declined, the output was truncated, or the
+            response has no text (see :func:`extract_summary_text`).
     """
     page_text = extract_text_from_html(html_content)
 
@@ -259,20 +329,9 @@ def summarize_doc(url: str, html_content: str) -> str:
 
     logger.info("Calling Claude API for %s (text length=%d)", url, len(page_text))
     client = anthropic.Anthropic()
-    message = client.messages.create(
-        model=CLAUDE_MODEL,
-        max_tokens=CLAUDE_MAX_TOKENS,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_message}],
-    )
-
-    first_block = message.content[0]
-    if not hasattr(first_block, "text") or first_block.text is None:
-        raise ValueError(
-            f"Unexpected content block type from Claude API: {type(first_block)}"
-        )
-    summary: str = first_block.text
-    logger.info("Summary generated for %s (%d chars)", url, len(summary))
+    message = create_summary_message(client, system=SYSTEM_PROMPT, user_message=user_message)
+    summary = extract_summary_text(message, label=url)
+    logger.info("Summary generated for %s by %s (%d chars)", url, message.model, len(summary))
     return summary
 
 

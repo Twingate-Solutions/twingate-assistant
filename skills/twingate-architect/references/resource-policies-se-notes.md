@@ -4,15 +4,12 @@
   ranges, plan requirements, per-requirement tables). It carries no `source:`
   frontmatter, so the auto-update pipeline does not own it.
 
-  NOTE: a public doc page now exists at
-  https://www.twingate.com/docs/resource-policies, and its slug resolves to
-  THIS path. Without the marker above, the pipeline would silently overwrite
-  this file the next time that page's content hash changes. The marker makes
-  the pipeline skip it (see is_manual_reference in scripts/update_references.py).
-
-  Trade-off: protected means never auto-refreshed. If you would rather have
-  pipeline-maintained content here, delete this marker block and let the next
-  run regenerate the file — but expect to lose the hand-written detail below.
+  The pipeline-maintained summary of https://www.twingate.com/docs/resource-policies
+  lives alongside this file as `resource-policies.md`. This file is named
+  `-se-notes` so it does not occupy that page's slug: a hand-authored file at
+  the slug path blocks the pipeline from ever ingesting the page. Where the two
+  disagree on a current value, `resource-policies.md` is fresher; this file is
+  never auto-refreshed.
 -->
 # Resource Policies
 

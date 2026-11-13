@@ -35,7 +35,7 @@ evaluating, or asking architecture-level questions, this skill answers them.
   Connectors, Relay, and Security Policies and generates no network events, so it is not
   access-controlled or audited for traffic — never use it to "allowlist" a sensitive
   destination. FQDN/IP only (no wildcards or CIDR), and it cannot cover Identity Firewall
-  Resources. See `references/resource-exclusion.md`.
+  Resources. See `references/exclusion.md`.
 - **Follow the deployment sequence: tenant → IdP connected and groups provisioned (SCIM) →
   Remote Networks → Connectors → Resources → group/resource access → pilot devices.**
   Provisioning groups first means access is granted to IdP-managed groups from day one;
@@ -119,7 +119,7 @@ of file live there:
 | If the user asks about… | Read first |
 |---|---|
 | Core architecture, components, connection flow, Relays | `architecture.md`, `how-twingate-works.md`, `client-connection-flow.md`, `detailed-client-connection-flow.md`, `understanding-relays.md` |
-| Network model, Remote Networks, Resources, aliases, exclusions, tags | `network-overview.md`, `remote-networks.md`, `remote-network-best-practices.md`, `resources.md`, `resource-aliases.md`, `resource-exclusion.md`, `exclusion.md` (older slug, same topic), `resource-policies.md`, `policy-on-resource-migration.md`, `tags.md`, `location-requirements.md`, `ip-overlap.md`, `customer-networks.md` |
+| Network model, Remote Networks, Resources, aliases, exclusions, tags | `network-overview.md`, `remote-networks.md`, `remote-network-best-practices.md`, `resources.md`, `resource-aliases.md`, `exclusion.md`, `resource-policies.md` (product doc; fresher for current values), `resource-policies-se-notes.md` (hand-authored setting ranges, plan requirements, per-requirement tables), `policy-on-resource-migration.md`, `tags.md`, `location-requirements.md`, `ip-overlap.md`, `customer-networks.md` |
 | DNS model, split DNS, DNS forwarding | `how-dns-works-with-twingate.md`, `how-twingate-forwards-dns.md`, `introduction-to-dns.md`, `private-dns-best-practices.md`, `supporting-unqualified-domain-names.md` |
 | P2P / NAT traversal | `peer-to-peer-communication-in-twingate.md`, `how-nat-traversal-works.md`, `local-peer-to-peer-best-practices.md` |
 | Encryption, cryptography | `how-encryption-works-in-twingate.md` |
@@ -135,7 +135,7 @@ of file live there:
 | Use-case overviews (infra access, internet security, device controls, IP-based) | `use-cases.md`, `guides.md`, `infra-access-use-case.md`, `internet-security-use-case.md`, `device-controls-use-case.md`, `ip-based-access-use-case.md`, `compliance-use-case.md` |
 | Service accounts / headless services | `services.md` |
 | Audit logs, network events, analytics, reporting | `audit-logs.md`, `audit-logs-schema.md`, `admin-console-export.md`, `network-events-ac-export.md`, `detailed-network-event-schema.md`, `network-summary-export.md`, `analytics.md`, `generating-insights-reports.md`, `exporting-network-traffic.md`, `user-activity.md`, `device-report.md`, `syncing-data-to-s3.md` |
-| Client platform details (macOS, Windows, Linux, mobile, ChromeOS, MDM) | `clients.md`, `using-twingate.md`, `endpoint-requirements.md`, `macos.md`, `macos-and-ios.md`, `macos-standalone-client.md`, `linux.md`, `linux-headless.md`, `linux-userspace-networking.md`, `linux-device-id-migration.md`, `ios.md`, `android.md`, `chromeos.md`, `windows.md`, `windows-client-dotnet-8.md`, `windows-headless.md`, `deploy-twingate-client-with-microsoft-endpoint-manager.md` |
+| Client platform details (macOS, Windows, Linux, mobile, ChromeOS, MDM) | `clients.md`, `using-twingate.md`, `endpoint-requirements.md`, `macos.md`, `macos-and-ios.md`, `macos-standalone-client.md`, `linux.md`, `linux-headless.md`, `linux-userspace-networking.md`, `linux-device-id-migration.md`, `ios.md`, `android.md`, `chromeos.md`, `windows.md`, `windows-client-dotnet-10.md` (current .NET 10 runtime migration; MSI deployments need the Desktop Runtime), `windows-client-dotnet-8.md` (previous migration), `windows-headless.md`, `deploy-twingate-client-with-microsoft-endpoint-manager.md` |
 | Compliance frameworks & attestations (HIPAA, PCI, SOC 2, GDPR, DORA, FIPS) | `compliance-use-case.md`, `hipaa-compliance.md`, `twingate-hipaa.md`, `pci-compliance.md`, `twingate-pci.md`, `gdpr-compliance.md`, `soc-2.md`, `dora-compliance.md`, `dora-locations.md`, `twingate-fips140.md` |
 | Security posture, trust center, disclosure, advisories | `twingate-security.md`, `trust-center.md`, `twingate-customer-data.md`, `service-reliability.md`, `responsible-disclosure-policy.md`, `vulnerability-reporting-acknowledgements.md`, `log4j-vulnerabilities-log4shell-cve-2021-44228-and-cve-2021-45046.md` |
 | Open-source attributions & source | `open-source-software.md`, `open-source-attributions.md`, `oss-windows-client-application.md`, `oss-macos-and-ios-client-applications.md`, `oss-linux-client-application.md`, `oss-android-and-chromeos-client-applications.md` |
@@ -146,7 +146,7 @@ of file live there:
 | **Self-hosted AI chat assistant with zero public ingress** (OpenClaw / WhatsApp / Telegram bot, localhost-bound gateway, Docker Compose or DigitalOcean Terraform) | `gh-twingate-community-openclaw-secure-access.md` |
 | **Private PaaS web app, no public domain** (Railway + Connector, Layer 4 only, proof-of-concept) | `gh-twingate-solutions-railway-private-web-app.md` |
 | **What the twingate-assistant plugin itself covers** (skill/agent inventory, install/update, forking) | `gh-twingate-solutions-twingate-assistant.md` |
-| **Partner API for distributors / MSSPs / marketplace vendors** (separate GraphQL endpoint from the admin API; `X-PARTNER-ID` + `X-API-KEY`, `mspNetworkCreate` MSP Portal provisioning, license counts, portfolio/billing/PSA sync, mock server; niche — credentials issued only by Twingate's partner team). For the per-tenant admin API, use `twingate-api` | `gh-twingate-solutions-twingate-partner-api.md` |
+| **Partner API for distributors / MSSPs / marketplace vendors** (separate GraphQL endpoint from the admin API; `X-PARTNER-ID` + `X-API-KEY`, `mspNetworkCreate` MSP Portal provisioning, license counts, portfolio/billing/PSA sync, mock server; niche — credentials issued only by Twingate's partner team). For the per-tenant admin API, use `twingate-api` | `msp-api.md` (product doc: MSP Partner API — three queries, one mutation, read-only apart from MSP Portal creation), `gh-twingate-solutions-twingate-partner-api.md` |
 
 This table is a fast path, not the whole corpus (~150 architecture-related
 summaries) — when a question doesn't match a row, grep `references/` before answering.

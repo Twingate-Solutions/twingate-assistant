@@ -9,6 +9,7 @@ from summarize_docs import (
     REQUEST_HEADERS,
     _is_safe_url,
     content_hash,
+    extract_summary_text,
     extract_text_from_html,
     fetch_doc_html,
     normalize_for_hash,
@@ -82,9 +83,8 @@ def _mock_response(text: str, status_code: int = 200) -> MagicMock:
 
 def _mock_claude_message(summary_text: str) -> MagicMock:
     """Build a mock anthropic Message with a single text content block."""
-    content_block = MagicMock()
-    content_block.text = summary_text
-    message = MagicMock()
+    content_block = MagicMock(type="text", text=summary_text)
+    message = MagicMock(stop_reason="end_turn", model="claude-sonnet-5-5")
     message.content = [content_block]
     return message
 
@@ -204,7 +204,7 @@ def test_summarize_doc_calls_api_with_correct_params(
     """summarize_doc calls Claude API with the right model, system prompt, and message."""
     mock_client = MagicMock()
     mock_anthropic_cls.return_value = mock_client
-    mock_client.messages.create.return_value = _mock_claude_message(
+    mock_client.beta.messages.create.return_value = _mock_claude_message(
         "# Summary\nTest summary."
     )
 
@@ -215,9 +215,13 @@ def test_summarize_doc_calls_api_with_correct_params(
 
     assert result == "# Summary\nTest summary."
 
-    call_kwargs = mock_client.messages.create.call_args.kwargs
-    assert call_kwargs["model"] == "claude-sonnet-4-6"
-    assert call_kwargs["max_tokens"] == 1024
+    call_kwargs = mock_client.beta.messages.create.call_args.kwargs
+    assert call_kwargs["model"] == "claude-sonnet-5-5"
+    assert call_kwargs["max_tokens"] == 16000
+    assert call_kwargs["output_config"] == {"effort": "low"}
+    assert call_kwargs["betas"] == ["server-side-fallback-2026-07-01"]
+    assert call_kwargs["extra_body"] == {"fallbacks": "default"}
+    assert "thinking" not in call_kwargs
     assert "summarizing a Twingate documentation page" in call_kwargs["system"]
     assert call_kwargs["messages"][0]["role"] == "user"
     assert call_kwargs["messages"][0]["content"].startswith(
@@ -232,7 +236,7 @@ def test_summarize_doc_truncates_long_text(
     """Text exceeding 60000 chars is truncated with a notice appended."""
     mock_client = MagicMock()
     mock_anthropic_cls.return_value = mock_client
-    mock_client.messages.create.return_value = _mock_claude_message(
+    mock_client.beta.messages.create.return_value = _mock_claude_message(
         "# Truncated Summary"
     )
 
@@ -241,7 +245,7 @@ def test_summarize_doc_truncates_long_text(
 
     summarize_doc("https://www.twingate.com/docs/long", long_html)
 
-    user_content = mock_client.messages.create.call_args.kwargs["messages"][0][
+    user_content = mock_client.beta.messages.create.call_args.kwargs["messages"][0][
         "content"
     ]
     assert "[Content truncated for length]" in user_content
@@ -254,7 +258,7 @@ def test_summarize_doc_long_html_still_calls_api(
     """Even with very long HTML, the API is still called (truncation doesn't prevent it)."""
     mock_client = MagicMock()
     mock_anthropic_cls.return_value = mock_client
-    mock_client.messages.create.return_value = _mock_claude_message(
+    mock_client.beta.messages.create.return_value = _mock_claude_message(
         "# Long Page Summary"
     )
 
@@ -266,13 +270,47 @@ def test_summarize_doc_long_html_still_calls_api(
     result = summarize_doc("https://www.twingate.com/docs/big", long_html)
 
     assert result == "# Long Page Summary"
-    mock_client.messages.create.assert_called_once()
+    mock_client.beta.messages.create.assert_called_once()
 
-    user_content = mock_client.messages.create.call_args.kwargs["messages"][0][
+    user_content = mock_client.beta.messages.create.call_args.kwargs["messages"][0][
         "content"
     ]
     assert "Big Doc" in user_content
     assert "[Content truncated for length]" in user_content
+
+
+# ── extract_summary_text tests ──────────────────────────────────────────────
+
+
+def _message(stop_reason: str, *blocks: MagicMock) -> MagicMock:
+    message = MagicMock(stop_reason=stop_reason)
+    message.content = list(blocks)
+    return message
+
+
+def test_extract_summary_text_skips_thinking_and_fallback_blocks() -> None:
+    """Text is read by block type, not position: thinking/fallback blocks come first."""
+    message = _message(
+        "end_turn",
+        MagicMock(type="fallback", text=None),
+        MagicMock(type="thinking", text=None),
+        MagicMock(type="text", text="# Summary"),
+    )
+    assert extract_summary_text(message, label="u") == "# Summary"
+
+
+@pytest.mark.parametrize(
+    ("stop_reason", "blocks", "match"),
+    [
+        ("refusal", (), "declined"),
+        ("max_tokens", (MagicMock(type="text", text="# Partial"),), "max_tokens"),
+        ("end_turn", (MagicMock(type="thinking", text=None),), "no text"),
+    ],
+)
+def test_extract_summary_text_rejects_unusable_responses(stop_reason, blocks, match) -> None:
+    """Refusals, truncated output, and text-less responses raise rather than write."""
+    with pytest.raises(ValueError, match=match):
+        extract_summary_text(_message(stop_reason, *blocks), label="u")
 
 
 # ── prompt-injection hardening ──────────────────────────────────────────────
@@ -303,11 +341,11 @@ def test_summarize_doc_wraps_page_text_in_untrusted_source_delimiters(
     the surrounding instructions."""
     mock_client = MagicMock()
     mock_anthropic_cls.return_value = mock_client
-    mock_client.messages.create.return_value = _mock_claude_message("# Summary")
+    mock_client.beta.messages.create.return_value = _mock_claude_message("# Summary")
 
     summarize_doc("https://www.twingate.com/docs/test", MINIMAL_HTML)
 
-    user_content = mock_client.messages.create.call_args.kwargs["messages"][0]["content"]
+    user_content = mock_client.beta.messages.create.call_args.kwargs["messages"][0]["content"]
     assert "<untrusted_source>" in user_content
     assert "</untrusted_source>" in user_content
     assert user_content.index("<untrusted_source>") < user_content.index("Hello world")
