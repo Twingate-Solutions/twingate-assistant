@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/github-action
 type: github
-fetched: 2026-10-11
-source_version: a9e9c65e9cd623c644e237e08862c3328e130b16
+fetched: 2026-11-13
+source_version: 05376965f4960039e9bd8823171315c574bfef31
 trust: official
 ---
 
@@ -41,10 +41,15 @@ A GitHub Action that connects a workflow runner to Twingate using a Service Key,
 
 ## Gotchas
 
-- **Docker steps requiring Twingate resources**: Containers on Azure-hosted runners inherit `168.63.129.16` as a nameserver in `/etc/resolv.conf`, which can override Twingate's DNS. Remove it inside the container:
+- **Docker steps requiring Twingate resources**: Containers on Azure-hosted runners inherit `168.63.129.16` as a nameserver in `/etc/resolv.conf`, which can override Twingate's DNS. Remove it inside the container, and add back the host's systemd-resolved stub (`127.0.0.53`) if no nameserver remains:
   ```sh
-  sed '/^nameserver 168.63.129.16$/d; /^search/d' /etc/resolv.conf > /tmp/resolv.conf && cat /tmp/resolv.conf > /etc/resolv.conf
+  sed '/^nameserver 168.63.129.16$/d; /^search/d' /etc/resolv.conf > /tmp/resolv.conf &&
+  { grep -q '^nameserver' /tmp/resolv.conf || echo 'nameserver 127.0.0.53' >> /tmp/resolv.conf; } &&
+  cat /tmp/resolv.conf > /etc/resolv.conf
   ```
+  - `127.0.0.53` is only reachable when the container shares the host's network (`docker run --network host`), which is what this repository's CI tests.
+  - On most GitHub-hosted runners `/etc/resolv.conf` is the systemd-resolved stub, so a `--network host` container gets `nameserver 127.0.0.53` and the `sed` removes nothing.
+  - Some runners (seen in Azure `westus2`) have `/etc/resolv.conf` as a regular file (`resolv.conf mode: foreign`) listing `127.0.0.100`, `127.0.0.53` and `168.63.129.16`. Docker drops the loopback entries, leaving only `168.63.129.16`; removing it leaves no nameserver and all DNS lookups fail. Re-adding `127.0.0.53` routes lookups through the host's systemd-resolved and on to the Twingate Client.
 - Service keys with trailing newlines are handled correctly as of `v1.11`; earlier versions may fail on Linux.
 - To force a fresh package download, increment `cache-version` rather than disabling `cache` entirely.
 

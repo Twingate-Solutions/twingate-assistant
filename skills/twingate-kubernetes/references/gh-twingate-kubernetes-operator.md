@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator
 type: github
-fetched: 2026-11-08
-source_version: 9acf3a353e1fd56e956dd225998d07c7a61047b5
+fetched: 2026-11-13
+source_version: c14f66b177ec23ad4582fa9445e322495cf0af7b
 trust: official
 ---
 

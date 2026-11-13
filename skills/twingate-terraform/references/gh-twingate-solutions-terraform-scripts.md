@@ -1,66 +1,59 @@
 ---
 source: https://github.com/Twingate-Solutions/terraform-scripts
 type: github
-fetched: 2026-08-06
-source_version: 92cc225a6753f6906ec6cf9b2c7f6869586e669e
+fetched: 2026-11-13
+source_version: 4422725637c974130f2016a2d2b399a8eff00f5f
+trust: official
 ---
 
-<!-- triage: unassigned -->
-
-# terraform-scripts
+# terraform-scripts (Twingate-Solutions)
 
 ## Summary
-A collection of Terraform quick-start scripts and sandbox demos maintained by the Twingate SE team. Scripts are organized by deployment environment to simplify standing up Twingate infrastructure for testing or reference deployments.
+Terraform quickstarts that deploy Twingate Connectors and a private demo resource on AWS, GCP, and Azure. Each folder is a standalone root module, organized by cloud and deployment type (VM, container, Kubernetes). The project is an example provided as-is, with no support or warranty, and was developed with help from an LLM-based coding assistant.
 
 ## Key Information
-- Maintained by Twingate Solutions Engineers as example/reference material
-- Organized by target environment (e.g., AWS, GCP, Azure, etc.)
-- Intended for demos, testing, and guided deployments — not hardened production configs
-- Uses the [Twingate Terraform provider](https://registry.terraform.io/providers/Twingate/twingate/latest)
+- Licensed under Apache 2.0, including its "AS IS" and limitation-of-liability terms.
+- Intended as a reference to build from, not a supported product. Review and test before any critical or production use.
+- Modules:
+  - AWS: `aws/ec2`, `aws/ecs`, `aws/eks`
+  - GCP: `gcp/gce`, `gcp/gce-container`, `gcp/gke`
+  - Azure: `azure/vm`, `azure/aci`, `azure/aks`
+  - Twingate-only: `twingate-specific-examples/groups`
+- Each module has its own README with per-module prerequisites.
+- Validation is credential-free: `terraform fmt`, `validate`, `tflint`, and `terraform test` with mocked providers, run in Docker.
+- CI runs the same validation image on push and pull request (`.github/workflows/validate.yml`).
 
 ## Prerequisites
-- Terraform installed (version requirements vary by module)
-- A Twingate account with API access
-- Twingate API key (generated from the Admin Console)
-- Cloud provider credentials appropriate to the target environment (e.g., AWS credentials, GCP service account)
+- Terraform >= 1.9
+- Cloud CLI credentials for the target cloud (AWS, GCP, or Azure)
+- A Twingate API token with Read, Write & Provision permissions
+- Docker (only for running the validation suite)
 
 ## Usage / Step-by-Step
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Twingate-Solutions/terraform-scripts.git
-   ```
-2. Navigate to the desired environment directory.
-3. Copy or rename `terraform.tfvars.example` to `terraform.tfvars` (if provided) and populate values.
-4. Initialize Terraform:
-   ```bash
-   terraform init
-   ```
-5. Review the plan:
-   ```bash
-   terraform plan
-   ```
-6. Apply:
-   ```bash
-   terraform apply
-   ```
+1. Change into a module: `cd <cloud>/<deployment>`
+2. Copy the example variables file: `cp terraform.tfvars.example terraform.tfvars`
+3. Set `tg_network` in `terraform.tfvars` (plus `gcp_project_id` for `gcp/*` modules).
+4. Export the token: `export TWINGATE_API_TOKEN="<token>"`
+5. Run `terraform init`, then `terraform apply`.
+6. Clean up with `terraform destroy`.
+
+Validation:
+- All modules: `docker compose -f ci/compose.yaml run --rm validate`
+- One module: `docker compose -f ci/compose.yaml run --rm validate aws/ec2`
 
 ## Configuration Values
-| Variable | Description |
-|---|---|
-| `twingate_api_key` | API key from Twingate Admin Console |
-| `twingate_network` | Your Twingate network/tenant name |
-| Cloud-specific vars | Varies by environment (region, VPC ID, credentials, etc.) |
-
-Values are typically set via `terraform.tfvars` or environment variables (e.g., `TF_VAR_twingate_api_key`).
+- `TWINGATE_API_TOKEN` (env var): Twingate API token with Read, Write & Provision.
+- `tg_network` (tfvars): Twingate network name to deploy into.
+- `gcp_project_id` (tfvars): required for GCP modules only.
 
 ## Gotchas
-- Scripts are examples/demos — review before using in production; security hardening is not guaranteed
-- Each environment subdirectory may have its own provider version pins and variable requirements; check the local `README` or `variables.tf` before running
-- Twingate API keys should not be committed to version control; use environment variables or a secrets manager
-- Connector deployments in cloud environments will incur cloud costs
+- No support or warranty; the code is not guaranteed.
+- Mocked tests check configuration, schema, and logic only. They do not exercise cloud APIs, so apply in a sandbox account before relying on a module.
+- Each folder is a separate root module with its own state; run Terraform from within the specific module directory.
+- Per-module prerequisites differ, so check each module's README.
 
 ## Related Docs
-- [Twingate Terraform Provider – Registry](https://registry.terraform.io/providers/Twingate/twingate/latest/docs)
-- [Twingate API Documentation](https://docs.twingate.com/docs/api-overview)
-- [Twingate Connector Deployment](https://docs.twingate.com/docs/connectors)
-- [Terraform Documentation](https://developer.hashicorp.com/terraform/docs)
+- Module READMEs, e.g. `aws/ec2/README.md`, `gcp/gke/README.md`, `azure/aks/README.md`
+- `twingate-specific-examples/groups/README.md`
+- `LICENSE` (Apache 2.0)
+- `.github/workflows/validate.yml`

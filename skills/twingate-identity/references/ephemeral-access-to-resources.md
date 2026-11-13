@@ -1,68 +1,56 @@
 ---
 source: https://www.twingate.com/docs/ephemeral-access-to-resources
 type: docs
-fetched: 2026-08-14
-source_version: 16e87e095a9530fd580b64b44798910f7e60eebf253fa9bab2d76eb0323aad3d
+fetched: 2026-11-13
+source_version: 2931ad2b657b8c27aad23098bcb12cde592cc564e8bdcee0b03d3d29f099afac
+trust: official
 ---
 
-# Ephemeral Access to Resources
-
-## Page Title
-Ephemeral Access to Resources
+# Ephemeral Access
 
 ## Summary
-Ephemeral Access grants time-bounded access to Resources for specific Groups, with automatic revocation at expiration. Configured via the Admin Console, it sets an expiration on a Group's access to a Resource within a window of 1 hour to 1 year. When the expiration is reached, the Group is automatically removed from the Resource.
+Ephemeral Access grants a Group temporary access to a Resource until an expiration time you set. When the time is reached, the Group is automatically removed from the Resource and its users lose access. It is configured in the Admin Console via the **Set Expiration** option.
 
 ## Key Information
-- Access expiration is set **per Group per Resource** (not globally)
-- Expiration range: **1 hour to 1 year** from current date
-- Expired Groups are **automatically removed** from the Resource — no manual cleanup needed
-- Active expirations display as an **`Expires [date]` pill** in the Admin Console
-- All expiration changes are logged in **audit logs** under the Access category
-- Expiration can be **removed without revoking access** using the "Remove Expiration" link in the date picker
+- Expiration applies to a specific Group's access to a specific Resource.
+- Expiration can be set from one hour to one year from the current date.
+- Can be configured from either a Resource page or a Group detail page.
+- Groups or Resources with an active expiration display an **Expires [date]** pill.
+- At expiration, the Group is removed from the Resource automatically.
+- Changes to expiration times are recorded in the **Access** category of the Admin Console audit logs.
+- Typical uses: projects with a defined end date, fixed-duration contractor engagements, and "break glass" access to sensitive Resources.
 
 ## Prerequisites
-- Admin Console access with permissions to manage Resources and Groups
-- Groups must exist before granting ephemeral access
+- Admin Console access with permission to manage Resource access (the page does not state specific roles).
+- An existing Group and Resource.
 
 ## Step-by-Step
 
-### From a Resource Page (new Group)
-1. Navigate to the Resource page
-2. Begin granting access to a new Group
-3. Click **Set Expiration** in the access configuration
-4. Select date and time in the date picker
-5. Click **Set Expiration Time**
-6. Click **Grant Access** to finalize
+**From a Resource page (new Group):**
+1. Add a Group to the Resource.
+2. Click **Set Expiration** in the access configuration to open the date picker.
+3. Choose a date and time, then click **Set Expiration Time**.
+4. Click **Grant Access**.
 
-### From a Resource Page (existing Group)
-1. Navigate to the Resource page
-2. Click the **options menu** on the Group's row
-3. Select **Set Expiration**
-4. Modify date/time or click **Remove Expiration** to clear it
+**From a Resource page (existing Group):**
+1. Open the options menu on the Group's row.
+2. Select **Set Expiration**.
+3. Choose a date/time and apply. To clear it, use **Remove Expiration** in the date picker (access is kept).
 
-### From a Group Page
-- Same patterns apply — use **Set Expiration** when adding a new Resource, or use the **options menu** on existing Resources
+**From a Group page:**
+- Adding a new Resource: click **Set Expiration** in the access configuration.
+- Existing Resource: use the options menu on the Resource row and select **Set Expiration**.
 
 ## Configuration Values
-| Parameter | Value |
-|-----------|-------|
-| Minimum expiration | 1 hour from current time |
-| Maximum expiration | 1 year from current date |
-| Scope | Per Group, per Resource |
+- No env vars, CLI flags, or API parameters are documented on this page. Configuration is through the Admin Console UI only.
+- Expiration range: minimum 1 hour, maximum 1 year from now.
 
 ## Gotchas
-- Expiration applies to the **Group's access**, not individual users — all users in the Group lose access simultaneously
-- Removing an expiration ≠ removing access; the Group retains access indefinitely until manually removed
-- No notification system mentioned — plan for user communication before expiration independently
-- Cannot set expiration on a per-user basis, only per Group
-
-## Common Use Cases
-- Projects with a defined end date
-- Contractor engagements with fixed duration
-- "Break glass" scenarios for temporary sensitive Resource access
+- **Remove Expiration** clears the expiration only; it does not remove the Group's access.
+- Expiration is per Group-Resource pairing, not global to the Group.
+- Users lose access via that Group when it expires. The page does not say how other Group memberships or overlapping access are affected, so verify if users have access through multiple Groups.
+- The page does not describe API or Terraform support for expiration; check the API/provider docs before automating.
 
 ## Related Docs
-- Twingate Groups documentation
-- Twingate Resources documentation
-- Audit Logs (Access category)
+- Admin Console audit logs (Access category)
+- Groups and Resource access management documentation

@@ -1,48 +1,61 @@
 ---
 source: https://www.twingate.com/docs/llms
 type: docs
-fetched: 2026-08-05
-source_version: 6d5f66bd11a2c7bb2d47f27058e472d43083694cdebb4105c1baf9e13983368a
+fetched: 2026-11-13
+source_version: 24db6d29d5c541bc0da472eaa5cc89c028ccb92f12caff42a70d9beac7f24763
+trust: official
 ---
 
 # AI and LLM Access with Twingate
 
 ## Summary
-Twingate enables secure Zero Trust access to private AI infrastructure including LLM servers, GPU instances, and MCP servers without public IP exposure. It supports AI coding assistants (Continue.dev, Cursor, Cody) and distributed team access to shared AI resources.
+This landing page describes how to use Twingate to securely reach private AI infrastructure, including remote LLM servers (Ollama, vLLM) and MCP servers, without exposing them publicly. It outlines the general setup flow and links to two detailed guides: Remote LLM Access and Remote MCP Access.
 
 ## Key Information
-- Supports remote LLM servers: Ollama, vLLM, other inference engines
-- Supports Model Context Protocol (MCP) servers
-- No public IP required for AI infrastructure
-- Split tunneling: only AI traffic routes through Twingate
-- Peer-to-peer connections optimize latency for interactive AI use
+- **Use cases:**
+  - Remote LLM servers on private GPU hosts (Ollama, vLLM, other inference engines).
+  - AI coding assistants (Continue.dev, Cursor, Cody) pointed at private LLM endpoints.
+  - MCP servers exposing internal tools, data sources, and APIs to AI assistants.
+  - Shared AI resources for distributed teams.
+  - Centralized GPU infrastructure for cost optimization.
+- **Security model:**
+  - Zero Trust access for authorized users and devices only.
+  - No public IPs required for LLM or MCP servers.
+  - Access control through Groups and Security Policies.
+  - Connection auditing via Twingate Analytics.
+- **Performance:**
+  - Peer-to-peer connections where possible.
+  - Split tunneling: only traffic to defined Resources goes through Twingate.
+- **Guides:**
+  - *Remote LLM Access*: configure LLM servers (e.g., Ollama) for network access, create Resources for GPU servers, connect coding assistants, troubleshoot connectivity.
+  - *Remote MCP Access*: MCP basics, deploying MCP servers on private networks, configuring assistants to connect via Twingate, security best practices.
 
 ## Prerequisites
-- Twingate account with Admin Console access
-- Connector deployable on same network as AI servers
-- AI servers configured for network access (not just localhost)
+- A Twingate account and Admin Console access.
+- An AI/LLM/MCP server on a private network.
+- A host on that network able to run a Twingate Connector.
+- Twingate Client installed on user devices (implied).
 
-## Step-by-Step Setup
-1. **Deploy Connector** on the network hosting AI/LLM servers
-2. **Create Resources** for LLM or MCP server endpoints
-3. **Grant Access** to users or groups via Admin Console
-4. **Configure AI tools** to point to Twingate-proxied endpoints
-5. **Monitor usage** via Twingate Analytics
+## Step-by-Step (General Flow)
+1. Deploy a Connector on the same network as the AI servers.
+2. Create Resources for the LLM or MCP server endpoints.
+3. Grant access to appropriate users or groups.
+4. Configure AI tools to connect to the endpoints through Twingate.
+5. Monitor usage in the Admin Console.
 
 ## Configuration Values
-- No specific env vars/CLI flags on this page
-- Access control via: Groups, Security Policies
-- Monitoring: Twingate Analytics / Admin Console
+None specified on this page. Ports, addresses, and server bind settings are covered in the detailed guides (e.g., Ollama must be configured to listen for network access).
 
 ## Gotchas
-- LLM servers must be configured for network access (not bound to localhost only)
-- Use Service Accounts for headless/automated AI workloads
-- Identity Firewall required for protocol-aware MCP security
+- The page is an overview only; the actual configuration details (server bind addresses, ports, Resource definitions) are in the linked guides.
+- The Connector must have network reachability to the AI server.
+- LLM servers like Ollama typically listen on localhost by default, so they need network-access configuration (per the LLM guide's scope).
+- The page was last updated about 6 months before the scrape, so verify details against current docs.
 
 ## Related Docs
-- [Remote LLM Access Guide](https://www.twingate.com/docs/remote-llm-access)
-- [Remote MCP Access Guide](https://www.twingate.com/docs/remote-mcp-access)
-- [Twingate Architecture](https://www.twingate.com/docs/architecture)
-- [Security Policies](https://www.twingate.com/docs/security-policies)
-- [Identity Firewall](https://www.twingate.com/docs/identity-firewall)
-- [Service Accounts](https://www.twingate.com/docs/service-accounts)
+- Remote LLM Access Guide
+- Remote MCP Access Guide
+- Twingate Architecture
+- Security Policies
+- Identity Firewall (protocol-aware security for MCP and other services)
+- Service Accounts (headless access for automated AI workloads)

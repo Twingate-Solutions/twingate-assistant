@@ -1,84 +1,88 @@
 ---
 source: https://www.twingate.com/docs/web-app-jenkins
 type: docs
-fetched: 2026-08-23
-source_version: 650a7821393109f5e2dbb6fe5c6814b177c0782aaa1dd85e725ad4191f468ba2
+fetched: 2026-11-13
+source_version: fa9d96788d6deb8e25374e743b8b1ec8679f779eaf9b8c009396526716b41ef0
+trust: official
 ---
 
 # Jenkins SSO with Reverse Proxy Auth
 
 ## Summary
-Integrate Twingate Identity Firewall with Jenkins using the Reverse Proxy Auth plugin for authentication and Role-Based Strategy for authorization. The Gateway injects identity headers on every request; Jenkins reads them to authenticate users and assign permissions based on Twingate Groups. No code changes required.
+Twingate Gateway can drive both authentication and authorization in Jenkins using trusted headers. The Reverse Proxy Auth plugin reads the username and Groups from headers the Gateway injects, and the Role-Based Strategy plugin maps those Groups to Jenkins permissions. No code changes are needed, only three plugins and a JCasC file.
 
 ## Key Information
-- Three plugins required: `configuration-as-code`, `reverse-proxy-auth-plugin`, `role-strategy`
-- Users auto-provision on first request—no pre-created accounts needed
-- Group membership changes take effect on the next request
-- Gateway overwrites any client-supplied headers, preventing header forgery
-- Built-in groups `twingate:authenticated` and `Everyone` are always included in `{{groups}}`—they grant no permissions unless explicitly mapped
+- Gateway injects `X-Forwarded-User` and `X-Forwarded-Groups` on every request.
+- Users are provisioned on first request, so there is no need to pre-create accounts.
+- Moving a user between Twingate Groups changes their Jenkins access on the next request.
+- Verified against `jenkins/jenkins:lts-jdk17`.
+- The Gateway overwrites client-supplied copies of these headers, so forged headers never reach Jenkins (provided Jenkins is reachable only through the Gateway).
 
 ## Prerequisites
-- Jenkins instance with admin access (verified against `jenkins/jenkins:lts-jdk17`)
-- Twingate Web App Resource configured for Jenkins, network-isolated so only the Gateway can reach it
+- Jenkins instance with admin access (to install plugins and apply config).
+- A Twingate Web App Resource for Jenkins, network-isolated so the Gateway is the only path to it.
 
 ## Step-by-Step
-
-1. **Install plugins** via Manage Jenkins → Plugins:
+1. Install plugins (Manage Jenkins → Plugins, or bake into image):
    - `configuration-as-code`
-   - `reverse-proxy-auth-plugin` (not `reverse-proxy-auth`—shorter name returns 404)
+   - `reverse-proxy-auth-plugin`
    - `role-strategy`
-
-2. **Apply JCasC configuration file**
-
-3. **Configure Gateway request headers** on the Jenkins Web App Resource
-
-4. **Name Twingate Groups** to match `entries` values in JCasC
+2. Apply this JCasC config:
+   ```yaml
+   jenkins:
+     securityRealm:
+       reverseProxy:
+         forwardedUser: "X-Forwarded-User"
+         headerGroups: "X-Forwarded-Groups"
+         headerGroupsDelimiter: ","
+         disableLdapEmailResolver: true
+     authorizationStrategy:
+       roleBased:
+         roles:
+           global:
+             - name: "admin"
+               description: "Full administrative access (mapped from the 'jenkins-admin' group)."
+               permissions:
+                 - "Overall/Administer"
+               entries:
+                 - group: "jenkins-admin"
+             - name: "viewer"
+               description: "Read-only access (mapped from the 'jenkins-viewer' group)."
+               permissions:
+                 - "Overall/Read"
+                 - "Job/Read"
+                 - "View/Read"
+               entries:
+                 - group: "jenkins-viewer"
+   ```
+3. On the Jenkins Web App Resource, add request headers in Twingate:
+   - `X-Forwarded-User` = `{{username}}`
+   - `X-Forwarded-Groups` = `{{groups}}`
+4. Create Twingate Groups named `jenkins-admin` and `jenkins-viewer` (or edit `entries` to match existing names).
+5. To add a tier, add another role block with its own permissions and `entries`.
 
 ## Configuration Values
-
-### JCasC File
-```yaml
-jenkins:
-  securityRealm:
-    reverseProxy:
-      forwardedUser: "X-Forwarded-User"
-      headerGroups: "X-Forwarded-Groups"
-      headerGroupsDelimiter: ","
-      disableLdapEmailResolver: true
-  authorizationStrategy:
-    roleBased:
-      roles:
-        global:
-          - name: "admin"
-            permissions: ["Overall/Administer"]
-            entries:
-              - group: "jenkins-admin"
-          - name: "viewer"
-            permissions: ["Overall/Read", "Job/Read", "View/Read"]
-            entries:
-              - group: "jenkins-viewer"
-```
-
-### Gateway Request Headers
-| Header Key | Value Template |
+| Field | Purpose |
 |---|---|
-| `X-Forwarded-User` | `{{username}}` |
-| `X-Forwarded-Groups` | `{{groups}}` |
+| `forwardedUser` | Header holding the username |
+| `headerGroups` | Header holding the Group list |
+| `headerGroupsDelimiter` | Must be `","` to match the Gateway |
+| `entries` | Assigns a Group to a role |
 
-### Group-to-Role Mapping
 | Twingate Group | Jenkins Role | Permissions |
 |---|---|---|
-| `jenkins-admin` | admin | `Overall/Administer` |
-| `jenkins-viewer` | viewer | `Overall/Read`, `Job/Read`, `View/Read` |
+| `jenkins-admin` | admin | Overall/Administer |
+| `jenkins-viewer` | viewer | Overall/Read, Job/Read, View/Read |
 
 ## Gotchas
-- Use `reverse-proxy-auth-plugin` (full artifact ID)—`reverse-proxy-auth` returns 404
-- Use `headerGroups` field, not `forwardedGroups` (that's for display name/email)
-- Use `entries` in JCasC, not `assignments` (deprecated, rejected)
-- Set `headerGroupsDelimiter: ","` — plugin default is `|`, which would treat the entire comma-separated group list as one group name
-- Avoid naming role entries `twingate:authenticated` or `Everyone`—use app-specific names like `jenkins-admin`
+- Plugin ID is `reverse-proxy-auth-plugin`, not `reverse-proxy-auth` (the short name returns 404 in the update center).
+- Use `headerGroups`, not `forwardedGroups`; the `forwarded*` attributes are for display name and email.
+- Use `entries`; the older `assignments` form is rejected as deprecated.
+- The plugin's default delimiter is `|`. Without `headerGroupsDelimiter: ","`, the whole comma-separated list is read as one Group name.
+- `{{groups}}` always includes built-in `twingate:authenticated` and `Everyone`. They match no role `entries` and grant nothing, so don't name role entries after them.
+- Jenkins must be network-isolated behind the Gateway, or the header trust model is unsafe.
 
 ## Related Docs
-- [Identity Firewall for Web Apps overview](https://www.twingate.com/docs/identity-firewall-web-apps) — all header template variables
-- [Web App Integrations](https://www.twingate.com/docs/web-app-integrations) — trusted-header security model
-- Grafana integration guide — similar trusted-header pattern
+- Privileged Access for Web Apps overview (architecture, all header template variables)
+- Web App Integrations (shared trusted-header security model)
+- Grafana integration guide (another trusted-header app)

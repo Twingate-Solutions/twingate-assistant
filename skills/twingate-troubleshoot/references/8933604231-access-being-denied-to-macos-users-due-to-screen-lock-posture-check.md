@@ -1,46 +1,52 @@
 ---
 source: https://help.twingate.com/articles/8933604231-access-being-denied-to-macos-users-due-to-screen-lock-posture-check
 type: help
-fetched: 2026-11-08
-source_version: 6596899c537e255b522040764405fd7a53770ea1759fc9169d438fbed0368365
+fetched: 2026-11-13
+source_version: 6bb025dc038d02f07af73ebe72ad4c0568865a7601bc1f404f058d4dc2b9d6a4
 trust: official
 ---
 
-# [MacOS Client] Biometric Posture Check Fails in Clamshell Mode
+# Page Title
+[MacOS Client] Biometric posture check fails when Twingate starts in clamshell mode
 
-## Summary
-When a Device Security policy requires biometric configuration, MacBooks running Twingate in clamshell mode (lid closed) may fail posture checks because macOS disables Touch ID when the lid is closed. The Twingate client caches a successful biometric check during a session, but this cache clears on quit or restart, causing failures if Twingate starts while already in clamshell mode.
+# Summary
+When a Device Security policy requires biometric configuration, a MacBook in clamshell mode (lid closed, external display) can fail the posture check because macOS disables Touch ID while the lid is closed. The Twingate Client caches the last successful biometric result, but the cache is cleared on quit or restart, so starting Twingate with the lid closed causes a failure.
 
-## Key Information
-- **Affected component:** Twingate Client, Device Security posture checks
-- **Platform:** macOS only
-- **Trigger condition:** Twingate starts (fresh launch or after restart) while MacBook lid is already closed
-- **Cache behavior:** Successful biometric result is remembered during an active session but is wiped on client quit or system restart
-- **macOS limitation:** Touch ID is unavailable in clamshell mode unless a Touch ID-capable external keyboard is connected
+# Key Information
+- **Applies to:** Twingate Client and Device Security on macOS.
+- **Error messages shown to the user:** "Device security not met" or "Device requirements not met", even though Touch ID is set up.
+- **Typical trigger:** the Mac is restarted, or Twingate is quit and reopened, while the lid is closed.
+- **Log signature:** `Unable to evaluate DeviceOwnerAuthenticationWithBiometrics policy, error - systemCancel, will return cached value`
+- **Cause:**
+  - macOS disables Touch ID in clamshell mode unless a Touch ID keyboard is connected.
+  - The Client remembers the last successful biometric check only while it is running.
+  - If the Client confirmed biometrics with the lid open, closing the lid afterward does not fail the check.
+  - Quitting Twingate or restarting the Mac clears the cached result. If Twingate then starts in clamshell mode, there is no prior result and biometrics are reported as unavailable.
 
-## Prerequisites
-- Device Security policy with biometric configuration requirement enabled
-- macOS MacBook used with external display in clamshell mode
+# Prerequisites
+- A Device Security policy that requires biometric configuration.
+- A MacBook with Touch ID configured.
 
-## Symptoms
-- Login or Resource access fails with `"Device security not met"` or `"Device requirements not met"`
-- Touch ID is confirmed configured on the device
-- Failure occurs after restart or Twingate relaunch while lid is closed
-- Client logs contain: `Unable to evaluate DeviceOwnerAuthenticationWithBiometrics policy, error - systemCancel, will return cached value`
+# Step-by-Step (Resolution)
+Use one of the following options:
+1. **Open the lid when starting Twingate**
+   - After a restart or reopening Twingate, open the lid and connect.
+   - Once connected, you can close the lid and continue in clamshell mode.
+2. **Use a keyboard with Touch ID**
+   - Pair an Apple Magic Keyboard with Touch ID with the Mac.
+   - Biometrics stay available while the lid is closed.
 
-## Resolution Options
+# Configuration Values
+- None. This is a behavior and hardware limitation, with no env vars, CLI flags, or API parameters.
+- Relevant policy setting: the biometric configuration requirement in a Device Security policy.
 
-1. **Open the lid at startup** — After restart or reopening Twingate, open the MacBook lid before connecting. Once Twingate connects successfully, the lid can be closed and clamshell mode resumes normally.
+# Gotchas
+- Users with Touch ID properly set up can still be denied, so the failure can be mistaken for a misconfiguration.
+- The failure recurs after every restart or Twingate relaunch in clamshell mode, because the cached result is not persisted.
+- Closing the lid after a successful connection is fine, as long as Twingate keeps running.
+- If the check still fails with the lid open, contact Support and include the Client logs.
 
-2. **Use a Touch ID keyboard** — An Apple Magic Keyboard with Touch ID, paired to the Mac, keeps biometrics available regardless of lid state.
-
-3. **Escalate if issue persists with lid open** — If posture check still fails with lid open, contact Twingate Support with Client logs attached.
-
-## Gotchas
-- The biometric result cache is **session-scoped only** — it does not persist across restarts or client relaunches
-- Closing the lid *after* a successful connection does **not** trigger a failure; only startup-while-closed is problematic
-- Third-party external keyboards with fingerprint sensors are not mentioned as a workaround — only Apple Magic Keyboard with Touch ID is confirmed
-
-## Related Docs
-- Twingate Device Security policies
-- Twingate Client logs (for Support escalation)
+# Related Docs
+- Twingate Device Security (posture check) policy documentation
+- Twingate macOS Client documentation
+- Twingate Support (for log submission)

@@ -1,63 +1,67 @@
 ---
 source: https://www.twingate.com/docs/k8s-helm-chart
 type: docs
-fetched: 2026-08-14
-source_version: 10bb4db15d3e8390d73fe234517fde4ed9968fff1fa0f899bb67cf6a088d1c0d
+fetched: 2026-11-13
+source_version: 41d97579d83289a1aa31f24679161afe7e630649c5159ca8f416bde780dc45e1
+trust: official
 ---
 
-# Deploy Twingate Connector with K8s Helm Chart
+# How to Deploy a Connector with the K8s Helm Chart
 
 ## Summary
-Deploys Twingate Connectors to Kubernetes clusters (GKE, EKS, MicroK8s, etc.) using the official Twingate Helm Chart. The chart bootstraps a Connector pod within your K8s cluster. Updating the Helm chart does not automatically update Connector images.
+The Twingate Helm Chart deploys a Twingate Connector into a Kubernetes cluster (GKE, EKS, MicroK8s, or any cluster supporting Helm). It bootstraps the Connector using tokens generated for a Connector in your Twingate network. The official chart is hosted on GitHub.
 
 ## Key Information
-- Official chart hosted at: `https://twingate.github.io/helm-charts`
-- GitHub repo: `https://github.com/twingate/helm-charts`
-- Supports any Kubernetes distribution with Helm support
-- Peer-to-peer connections recommended for bandwidth Fair Use Policy compliance
+- Chart repo: `https://twingate.github.io/helm-charts`
+- Chart name: `twingate/connector`; suggested release name: `twingate-connector`
+- Default install uses the chart's default configuration; additional parameters are listed in the chart's Parameters section on GitHub.
+- Peer-to-peer connections are recommended for better user experience and to stay within the Fair Use Policy on bandwidth.
+- Updating the Helm chart does **not** update the Connector images used by pods.
 
 ## Prerequisites
+- A Kubernetes cluster and `kubectl` access
 - Helm installed
-- Kubernetes cluster access (kubectl configured)
-- Twingate Connector tokens: `accessToken` and `refreshToken`
-- Twingate network name
+- A Twingate network name
+- Connector access token and refresh token (generated when you add a Connector in the Twingate Admin Console)
+- A target namespace
 
 ## Step-by-Step
 
-### Install
-```bash
-# Add Twingate Helm repo
+**Install**
+```
 helm repo add twingate https://twingate.github.io/helm-charts
-
-# Deploy connector
 helm upgrade --install twingate-connector twingate/connector -n [namespace] \
   --set connector.network=[network] \
   --set connector.accessToken=[accessToken] \
   --set connector.refreshToken=[refreshToken]
 ```
 
-### Uninstall
-```bash
+**Uninstall**
+```
 helm del twingate-connector -n [namespace]
 ```
+This removes all Kubernetes components associated with the chart and deletes the release.
+
+**Update**
+Follow the Helm Chart updating guide to update both the chart and the Connectors.
 
 ## Configuration Values
-
-| Parameter | Description |
-|-----------|-------------|
-| `connector.network` | Twingate network name |
+| Parameter | Purpose |
+|---|---|
+| `connector.network` | Your Twingate network name |
 | `connector.accessToken` | Connector access token |
 | `connector.refreshToken` | Connector refresh token |
+| `-n [namespace]` | Kubernetes namespace for the release |
 
-Additional parameters listed in the [chart's Parameters section](https://github.com/twingate/helm-charts).
+Further parameters are documented in the chart's GitHub Parameters section.
 
 ## Gotchas
-- **Helm chart updates ≠ Connector image updates** — updating the chart does not update the Connector Docker images; follow the separate [Helm Chart updating guide](https://www.twingate.com/docs/helm-chart-updating-guide)
-- Namespace must exist or be created before install; specify with `-n [namespace]`
-- Tokens (`accessToken`, `refreshToken`) should ideally be passed via Kubernetes Secrets rather than plain `--set` flags to avoid exposure in shell history
+- Chart updates and Connector image updates are separate; follow the updating guide to update both.
+- Passing tokens via `--set` can leave them in shell history; consider a values file or secrets management.
+- Ensure network settings allow peer-to-peer connectivity to avoid relayed traffic and bandwidth concerns.
 
 ## Related Docs
-- [Helm Chart GitHub Repository](https://github.com/twingate/helm-charts)
-- [Helm Chart Updating Guide](https://www.twingate.com/docs/helm-chart-updating-guide)
-- [Supporting Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
-- [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)
+- Twingate Helm Chart on GitHub (official chart and Parameters section)
+- Helm Chart updating guide
+- Peer-to-peer connections / supporting peer-to-peer
+- Twingate Fair Use Policy

@@ -1,63 +1,52 @@
 ---
 source: https://www.twingate.com/docs/web-app-integrations
 type: docs
-fetched: 2026-08-23
-source_version: 5c38a49e663f0d948540eac1f94d7cd79b48abb340646a270e40d640d98e9453
+fetched: 2026-11-13
+source_version: e41a409912a656d5db36e8315e7decdc4b6506abdf4537bd3ecd59f2f0800b8e
+trust: official
 ---
 
 # Web App Integrations for Identity Firewall
 
 ## Summary
-Configures self-hosted web applications to authenticate users via Twingate Identity Firewall headers without code changes. The Gateway injects user identity into HTTP headers or JWTs that the target app already reads natively. Supports apps like Grafana and Jenkins through their built-in proxy/header auth mechanisms.
+Twingate Identity Firewall (the Gateway) can inject a signed JWT or individual identity fields into HTTP headers for self-hosted web apps that already support header-based or JWT authentication. This lets you integrate apps you can't modify, with no code changes and no OIDC setup. The app handles authentication and authorization itself, using Twingate Groups as input.
 
 ## Key Information
-- Works with apps that support header-based or JWT-based authentication natively
-- No OIDC integration or code modifications required
-- Gateway injects identity data using template variables into request headers
-- Users auto-provision on first request — no pre-created accounts needed
-- Group membership changes take effect on the user's next request
+- Applies to apps you run but cannot modify. If you own the code, use the Web App Developer Guides to verify the Gateway's signed JWT directly.
+- Publish the app as a **Web App Resource**, then configure the Gateway to write headers the app already reads.
+- Available guides:
+  - **Grafana**: uses built-in `auth.jwt` or `auth.proxy`; no plugins or code.
+  - **Jenkins**: uses the Reverse Proxy Auth plugin plus Role-Based Strategy; reads user from `X-Forwarded-User` and maps Twingate Groups to Jenkins roles.
+- Users are provisioned on first request, so there's no need to pre-create accounts.
+- Changing a user's Twingate Group membership changes their app permissions on their next request.
 
 ## Prerequisites
-- Twingate Identity Firewall enabled
-- App published as a **Web App Resource** on the Gateway
-- App must support header/JWT authentication natively (e.g., Grafana `auth.jwt`/`auth.proxy`, Jenkins Reverse Proxy Auth plugin)
+- A self-hosted app that supports JWT or trusted-header authentication.
+- The app published as a Web App Resource behind the Twingate Gateway.
 
-## Common Pattern (3 Steps)
-
-1. **Configure the app** — Enable header or JWT-based auth in the app's config
-2. **Configure the Gateway** — Set headers using template variables
-3. **Map Groups to permissions** — Use Twingate Group names as role inputs in the app
+## Step-by-Step (Common Pattern)
+1. **Configure the app** to read identity (and Groups, if supported) from named headers or a signed JWT.
+2. **Configure the Gateway** to inject headers using template variables.
+3. **Map Groups to permissions** in the app, using Twingate Group names as the input.
 
 ## Configuration Values
+Gateway header template variables:
+- `{{jwt}}`: the signed token
+- `{{username}}`: user identity
+- `{{groups}}`: Twingate Groups
 
-### Gateway Template Variables
-| Variable | Description |
-|----------|-------------|
-| `{{jwt}}` | Signed JWT containing user identity |
-| `{{username}}` | Plaintext username |
-| `{{groups}}` | Twingate Group memberships |
-
-### Headers
-| Header | Usage |
-|--------|-------|
-| `Authorization: Bearer <token>` | Gateway Access Token for JWT validation |
-| `X-Forwarded-User` | Plaintext username (Jenkins pattern) |
-
-## Security Model
-- **Preferred**: Validate the Gateway Access Token (Bearer JWT in `Authorization` header) — cryptographically verifiable
-- **Fallback**: Trusted-header auth (plaintext) — only accept if traffic originates from the Gateway; do not expose the app directly to the internet
+Header/config references:
+- `Authorization: Bearer <token>`: Gateway Access Token (preferred)
+- `X-Forwarded-User`: used by the Jenkins integration
+- Grafana: `auth.jwt`, `auth.proxy`
 
 ## Gotchas
-- Plaintext header auth is only safe if the app cannot be reached except through the Gateway
-- JWT validation is the more secure option but requires app support for token verification
-- Guides here are for **apps you cannot modify** — if you own the code, use the Web App Developer Guides instead
-
-## Available Integration Guides
-- **Grafana** — `auth.jwt` or `auth.proxy` configuration
-- **Jenkins** — Reverse Proxy Auth plugin + Role-Based Strategy, reads `X-Forwarded-User`
+- **Prefer JWT validation** (Bearer token in the `Authorization` header) because the app can cryptographically verify identity.
+- Trusted-header authentication is a fallback only. Header values are plaintext, so ensure the app accepts these headers **only from traffic originating at the Gateway**. Otherwise they can be spoofed.
+- Group-to-role mapping uses Twingate Group names, so names must match what the app expects.
 
 ## Related Docs
-- [Identity Firewall for Web Apps overview](#) — header reference and JWT payload schema
-- [Web App Developer Guides](#) — verifying JWT in custom application code
-- [Grafana integration guide](#)
-- [Jenkins integration guide](#)
+- Grafana integration guide
+- Jenkins integration guide
+- Privileged Access for Web Apps overview (full header reference and JWT payload)
+- Web App Developer Guides (verifying the JWT in your own code)

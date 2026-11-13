@@ -1,66 +1,59 @@
 ---
 source: https://www.twingate.com/docs/usage-based-auto-lock
 type: docs
-fetched: 2026-10-25
-source_version: 7d24dea806e2417d11f72d986532913f684b78611e6b6c11b3d2d2e3b5d94b6f
+fetched: 2026-11-13
+source_version: c9a026aee155eff0e0adfbfb0cae946211e3d5faaf33359f472b164b19c45ff1
 trust: official
 ---
 
 # Usage-based Auto-lock
 
-## Page Title
-Usage-based Auto-lock
-
 ## Summary
-Auto-lock automatically revokes Resource access for users who haven't accessed it within a configured duration, enforcing least-privilege. Access can be restored via manual admin approval or automatic approval (user provides a reason). Configuration is available at both the Resource and Group level.
+Usage-based auto-lock removes a user's access to a Twingate Resource if they haven't accessed it within a configured duration, helping enforce least privilege. Locked users regain access through manual approval by an approver or by giving a reason under automatic approval. It can be configured from Resource or Group pages in the Admin Console.
 
 ## Key Information
-- Auto-lock is evaluated **per user**, even when configured at the Group level
-- Locking triggers when a user hasn't accessed the Resource within the configured duration
-- Audit log entries appear under the **Access** category in the Admin Console
-- Access summary reports (CSV/download) are available from Resource, Group, or User pages
-- Webhook payload `request_type` field will be `"AutoLock"` for auto-lock-triggered requests
+- Admin Console durations: 1, 7, 30, 60, or 90 days. Other durations are available via the API.
+- Locking is evaluated **per user**, even when the duration is set on a Group.
+- Groups inherit the Resource-level auto-lock configuration by default, but can override it.
+- Changes to auto-lock settings are logged in the **Access** category of the audit logs.
+- Regaining access depends on the approval method:
+  - **Manual:** an approver must approve the user's request (see Reviewing Access Requests).
+  - **Automatic:** the user gives a reason and access is restored immediately. The reason is still recorded in analytics and on the resolved requests page.
+- Locked-out users see a block page where they submit a request with a reason.
+- Users receive an email when a request is approved or denied.
+- Admins can manually unlock a Resource for a user on the user's detail page.
 
 ## Prerequisites
-- Admin Console access
-- Resources and Groups already configured in Twingate
-- Notification settings configured at **Settings > Notifications** if webhook/email alerts are needed
-
-## Configuration Values
-
-| Setting | Admin Console Options | API |
-|---|---|---|
-| Auto-lock duration | 1, 7, 30, 60, 90 days | Additional durations available |
-| Approval method | Manual, Automatic | — |
-
-**Webhook payload fields (relevant to auto-lock):**
-- `type`: `"ACCESS_REQUEST"`
-- `request_type`: `"AutoLock"`
-- `approval_mode`: `"MANUAL"` or `"AUTOMATIC"`
-- `request_duration_seconds`: duration in seconds (e.g., `2592000` = 30 days)
+- Admin Console access.
+- For notifications: Admin, Viewer, DevOps, Helpdesk, or Access Reviewer role (email toggles apply to these roles).
+- Approvers designated for manual approval.
 
 ## Step-by-Step
+**From a Resource page**
+1. Set the auto-lock duration on the Resource (applies to all users with access).
+2. When adding a Group to the Resource, optionally specify a Group-specific duration.
+3. To change an existing Group, click its options button and set the duration and approval method.
 
-**Configure from Resource page:**
-1. Navigate to the Resource in Admin Console
-2. Set auto-lock duration at the Resource level (applies to all users)
-3. Optionally override per Group when adding or editing Group access (set duration + approval method via Group options button)
+**From a Group page**
+1. Open the Group's detail page.
+2. Set the auto-lock duration and approval method for specific Resources.
 
-**Configure from Group page:**
-1. Navigate to the Group detail page
-2. Set auto-lock duration and approval method per Resource
+**Unlock a user:** open the user's detail page and unlock the Resource.
 
-**Unlock a locked user:**
-1. Navigate to the user's detail page in Admin Console
-2. Unlock the specific Resource
+**Track access:** download an access summary from the Resource, Group, or User page.
+
+## Configuration Values
+- **Notifications:** Settings > Notifications (email toggles per user, plus webhooks).
+- **Access summary report contents:** Groups with access and the policy used, expiration dates, auto-lock duration, and per-user lock status and last admin unlock.
+- **Webhook payload fields:** `timestamp`, `tenant`, `version` ("1"), `type` ("ACCESS_REQUEST"), `request_id`, `request_url`, `user_name`, `user_url`, `resource_name`, `resource_url`, `requested_at`, `reason`, `approval_mode` ("MANUAL"), `request_type` ("AutoLock"), `request_duration_seconds` (e.g., 2592000 = 30 days).
 
 ## Gotchas
-- Group-level configuration **inherits** Resource-level settings by default; must be explicitly overridden per Group
-- Manual approval requires admin action; automatic approval restores access immediately but still logs reason in analytics
-- Only Admin Console exposes 5 duration options; use the API for other durations
-- Notifications (email/webhook) must be configured per admin user under Settings > Notifications; roles eligible: Admin, Viewer, DevOps, Helpdesk, Access Reviewer
+- Non-standard durations can only be set through the API, not the Admin Console.
+- A Group-level duration does not lock everyone at once; each user's last access is evaluated individually.
+- Group settings override inherited Resource-level settings, so check both when debugging unexpected locks.
+- Under automatic approval, users still must supply a reason.
 
 ## Related Docs
-- [Reviewing Access Requests](https://www.twingate.com/docs/) (referenced inline)
-- Settings > Notifications (Admin Console)
-- Twingate API (for custom auto-lock durations)
+- Reviewing Access Requests
+- Settings > Notifications (webhooks and email)
+- Audit logs (Access category)

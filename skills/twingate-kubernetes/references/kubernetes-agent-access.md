@@ -1,85 +1,75 @@
 ---
 source: https://www.twingate.com/docs/kubernetes-agent-access
 type: docs
-fetched: 2026-10-18
-source_version: 921f6bb57c7699740262a0259e698cda9ced98f68751b8ea52541c1cc485b839
+fetched: 2026-11-13
+source_version: 43ebe139339ed244278d6b5b63debec5e77abc59a679b16220e059168ef06a30
 trust: official
 ---
 
-# Secure Kubernetes Sandbox Access for AI Agents
-
-## Page Title
-Secure Kubernetes Sandbox Access for AI Agents
+# AI Agent Access for Kubernetes
 
 ## Summary
-Provides a pattern for giving AI agents access to Kubernetes clusters through Twingate's Privileged Access Gateway instead of storing credentials on agent hosts. The agent host runs a Twingate Headless Client; the Gateway injects a cluster identity tied to the Service Account, and Kubernetes RBAC enforces permissions. This prevents agents from holding credentials, escalating privileges, or reaching the API server through alternate network paths.
+Describes how to sandbox AI agents so they reach a private Kubernetes API server only through the Twingate Gateway, with no cluster credential on the agent host. Access is authorized outside the agent's environment via Twingate Service Accounts and Kubernetes RBAC. The guide sets up two agents: one read-only, one that can delete pods, scale deployments, and `kubectl exec`.
 
 ## Key Information
-- Gateway injects identity into every request: `Username` = Service Key ID, `Group` = Service Account name (e.g., `agent-readonly`)
-- RBAC bindings should target **Service Account name** (Group), not Service Key ID — survives key rotation
-- Renaming a Service Account changes which RBAC binding applies; update subjects accordingly
-- **Never grant** `rbac.authorization.k8s.io` verbs (`bind`, `escalate`) — prevents privilege escalation
-- Gateway logs every API call and records `kubectl exec` sessions outside the agent's reach
-- Revocation options: revoke a single Service Key (one host) or remove Service Account's Resource access (all keys)
+- Agent host runs a Twingate Headless Client with a Service Key. The Gateway injects the identity tied to the key's Service Account.
+- Injected identity: Username = Service Key ID. Groups = Service Account name (e.g. `agent-readonly`), Service Account ID, `twingate:service-accounts`, `twingate:authenticated`. Kubernetes also adds `system:authenticated`.
+- Bind RBAC to the Service Account name (Group subject), not the Service Key, so key rotation doesn't break access.
+- The Gateway logs every request (stderr by default, or a file) and records `kubectl exec` sessions.
+- Revocation happens before RBAC evaluation.
 
 ## Prerequisites
-- Kubernetes Identity Firewall deployment: Kubernetes Operator, Gateway, ≥1 Connector, Kubernetes Resource configured
-- Kubernetes API server with **no public endpoint**; Connector is the only network path
-- Connector version **1.82.0+**
-- Twingate Client version **2025.175+** installed in headless mode on each agent host
-- `kubectl` **1.26+** on each agent host
-- Admin access to the cluster for RBAC object creation
-- Agent host must have no alternate routes to API server (no shared VPC, VPC peering, VPN, cloud IAM roles, or leftover kubeconfig/credentials)
+- Privileged Access for Kubernetes deployment: Operator, Gateway, at least one Connector, and a Kubernetes Resource.
+- API server with no public endpoint. The Connector is the only network path from agent hosts.
+- Connector 1.82.0+; Twingate Client 2025.175+ in headless mode; kubectl 1.26+ on agent hosts.
+- Cluster admin access to create RBAC objects.
+- Isolated agent host: no other route to the API server (shared VPC, peering, VPN), no cloud identity with cluster permissions, no leftover kubeconfigs or cloud CLI credentials.
 
 ## Step-by-Step
-
-### 1. Create Service Accounts and Keys (Terraform)
-```hcl
-locals {
-  agents = {
-    readonly = "agent-readonly"
-    platform = "agent-platform"
-  }
-}
-resource "twingate_service_account" "agent" { for_each = local.agents; name = each.value }
-resource "twingate_service_account_key" "agent" {
-  for_each = local.agents
-  service_account_id = twingate_service_account.agent[each.key].id
-  name = "${each.value} Headless Client"
-}
-```
-
-### 2. Grant Service Accounts Access to Kubernetes Resource
-Create a `TwingateResourceAccess` CR per Service Account referencing the `TwingateResource` and `principalId` (Service Account ID).
-
-### 3. Configure Kubernetes RBAC
-- `ClusterRole: agent-reader` — get/list/watch pods, logs, services, namespaces, deployments, replicasets
-- `ClusterRole: agent-operator` — above + delete pods, scale deployments, exec into pods
-- `ClusterRoleBinding` → `agent-readonly` group → `agent-reader`
-- `RoleBinding` (namespace-scoped) → `agent-platform` group → `agent-operator`
-
-### 4. Configure Agent Hosts
-```bash
-sudo twingate setup --headless /path/to/service_key.json
-sudo twingate start
-mkdir -p ~/.kube
-twingate kube config sync
-kubectl config use-context <context>
-```
-
-### 5. Verify
-```bash
-kubectl auth whoami                                          # confirm Group injection
-kubectl auth can-i create clusterrolebindings               # should return "no"
-kubectl create clusterrolebinding self-admin --clusterrole=cluster-admin --group=agent-platform --dry-run=server  # should fail
-```
+1. **Create Service Accounts and keys** (Terraform `twingate_service_account` and `twingate_service_account_key`, or the Admin Console): `agent-readonly`, `agent-platform`. The key's `token` is the Service Key JSON.
+2. **Grant resource access**: create one `TwingateResourceAccess` CR (`twingate.com/v1beta`) per Service Account. Set `spec.resourceRef.name` to the cluster's `TwingateResource` and `spec.principalId` to the Service Account ID.
+3. **Apply RBAC**:
+   - ClusterRole `agent-reader`: get/list/watch on pods, pods/log, services, namespaces, deployments, replicasets.
+   - ClusterRole `agent-operator`: the read verbs plus delete pods, get/patch/update `deployments/scale`, create/get `pods/exec`.
+   - `agent-readonly`: ClusterRoleBinding to `agent-reader`, Group subject.
+   - `agent-platform`: RoleBinding (one per namespace) to `agent-operator`, Group subject.
+4. **Configure each host**:
+   ```
+   sudo twingate setup --headless /path/to/service_key.json
+   sudo twingate start
+   twingate status
+   ```
+   Then, as the agent's user:
+   ```
+   mkdir -p ~/.kube
+   twingate kube config sync
+   kubectl config get-contexts
+   kubectl config use-context <context>
+   ```
+5. **Verify**: `kubectl auth whoami` shows the expected group. Read-only: `get pods` succeeds, `delete pod --dry-run=server` is Forbidden. Elevated: delete succeeds in the workload namespace, is Forbidden elsewhere, and creating a clusterrolebinding is Forbidden (`kubectl auth can-i create clusterrolebindings` returns `no`).
 
 ## Configuration Values
-| Parameter | Value/Notes |
-|---|---|
-| Service Key token field | Service Key JSON; pass to `twingate setup --headless` |
-| kubeconfig token placeholder | `void` (literal) — authentication is via Twingate, not kubeconfig credential |
-| `principalId` in TwingateResourceAccess | Use Service Account **ID**, not name |
-| Group name in RBAC subjects | Must match Service Account name exactly |
+- `twingate setup --headless <key.json>`, `twingate start`, `twingate status`, `twingate kube config sync`
+- `TwingateResourceAccess`: `spec.resourceRef.name`, `spec.principalId`
+- Placeholders: `<operator-namespace>`, `<workload-namespace>`, `<kubernetes-cluster-twingateresource-name>`
 
 ## Gotchas
+- Never grant `bind` or `escalate` verbs on `rbac.authorization.k8s.io`. Omitting them prevents privilege escalation.
+- Renaming a Service Account changes which RBAC binding applies, so update the subjects.
+- Existing bindings using the same group name also apply. Pick unique Service Account names.
+- `kube config sync` doesn't set the current context. Without `use-context`, kubectl falls back to `localhost:8080`.
+- The synced kubeconfig token is the placeholder `void`, which is expected.
+- Use `principalId`, not a name reference, because the ID survives renames.
+- Twingate can't close other network or IAM paths from the host. You must do that yourself.
+- Protect Service Keys (secrets manager, file permissions, rotation). A key grants network access, not cluster access.
+- A revoked key can't be reactivated. Issue a new one.
+
+## Revocation
+- **Revoke Service Key**: cuts off Clients using that key across all Resources of the account. The account, access, and RBAC remain.
+- **Remove Service Account access to the Kubernetes Resource**: cuts off every key on the account from the cluster only.
+
+## Related Docs
+- Privileged Access for Kubernetes
+- Kubernetes Kubeconfig Sync
+- How Service Accounts Work
+- Linux Headless Client
