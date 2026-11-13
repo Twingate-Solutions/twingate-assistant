@@ -139,7 +139,7 @@ of file live there:
 |---|---|
 | Provider config, version pinning, env var name, getting started (product doc) | `terraform-provider-overview.md`, `terraform-getting-started.md` |
 | **Provider source, current stable release/changelog, build/test workflow, the `access_group`/`security_policy_id` bug fixed in v4.3.1** | `gh-twingate-terraform-provider-twingate.md` — note the `gh-` prefix; the old unprefixed filename no longer exists |
-| **"An argument named `group_ids` is not expected here"** — top-level `group_ids` moved into an `access { }` block in provider v1.0.0+ | `4693640683-terraform-error-an-argument-named-group-ids-is-not-expected-here.md` |
+| **"An argument named `group_ids` is not expected here"** — top-level `group_ids` moved into an `access { }` block in provider v1.0.0+ | `4693640683-terraform-error-an-argument-named-group-ids-is-not-expected-here.md` (retired) |
 | **SE quick-start / demo Terraform scripts per cloud** (reference only, not production-hardened) | `gh-twingate-solutions-terraform-scripts.md` |
 | **HCP Terraform / Terraform Cloud runs reaching private resources** — custom `twingatetunnel` provider runs the Twingate Client in **userspace mode** on hosted workers (no root, no self-hosted agent); `twingatetunnel_tcp` / `twingatetunnel_http_proxy` ephemeral resources feed `local_host`/`local_port`/`proxy_url` to Postgres, Kubernetes, and other providers. Unsupported reference example, self-built (no registry release) | `gh-twingate-solutions-twingate-client-userspace-terraform-cloud.md` |
 | AWS-specific Terraform patterns (ECS/EC2 + Twingate) | `terraform-aws.md` (and `skills/twingate-connectors/references/aws-connector-patterns.md`) |

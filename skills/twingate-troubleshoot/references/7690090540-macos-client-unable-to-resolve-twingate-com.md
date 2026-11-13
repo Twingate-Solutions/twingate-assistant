@@ -5,6 +5,8 @@ fetched: 2026-09-06
 source_version: 3041f0431dc076de0a7984ca9d77f0f96e593009d4b3618ea74f798d20eebffa
 ---
 
+> **Retired source:** this help-center article was unpublished (2026-11-13: 404, no replacement). Kept for error-string search and historical context; it is no longer refreshed. It may describe an issue Twingate has since fixed — verify against current Client behavior and newer references before relying on it.
+
 # [macOS Client] Unable to Resolve .twingate.com
 
 ## Summary

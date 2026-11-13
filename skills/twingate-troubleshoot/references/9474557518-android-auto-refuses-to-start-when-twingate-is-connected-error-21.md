@@ -5,6 +5,8 @@ fetched: 2026-08-06
 source_version: d4acd0cde0e8d3dd261925d28f221d4a55af44ca576f46c0c715323245f00e9e
 ---
 
+> **Retired source:** this help-center article was unpublished (2026-11-13: 404, no replacement). Kept for error-string search and historical context; it is no longer refreshed. It may describe an issue Twingate has since fixed — verify against current Client behavior and newer references before relying on it.
+
 # Android Auto Error 21 with Twingate Connected
 
 ## Page Title

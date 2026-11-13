@@ -6,6 +6,8 @@ source_version: eafef6048ca0b15408a026665fc474cd22b96148f55dfefbc1fcb52ce74df4be
 trust: official
 ---
 
+> **Retired source:** this help-center article was unpublished (2026-11-13: 404, no replacement). Kept for error-string search and historical context; it is no longer refreshed. It may describe an issue Twingate has since fixed — verify against current Client behavior and newer references before relying on it.
+
 # Checking Resource Definitions
 
 ## Page Title

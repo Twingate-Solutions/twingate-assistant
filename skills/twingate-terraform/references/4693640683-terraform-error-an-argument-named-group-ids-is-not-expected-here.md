@@ -5,6 +5,8 @@ fetched: 2026-09-06
 source_version: 11340d66d89ecffe51e11cf42486079197a8ada3088186596c9a803fcc67856d
 ---
 
+> **Retired source:** this help-center article was unpublished (2026-11-13: 404, no replacement). Kept for error-string search and historical context; it is no longer refreshed. It may describe an issue Twingate has since fixed — verify against current Client behavior and newer references before relying on it.
+
 # Terraform Error: "An argument named 'group_ids' is not expected here"
 
 ## Summary
