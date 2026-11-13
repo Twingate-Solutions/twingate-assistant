@@ -1,55 +1,57 @@
 ---
 source: https://www.twingate.com/docs/upgrading-connectors
 type: docs
-fetched: 2026-08-14
-source_version: ec2a2343e09ce3cd68a22aa4e13b279be2a382e4c96a527531b0c968d64d2947
+fetched: 2026-11-13
+source_version: f3c5fc3565ab1578269a758a3c0676f9e6f8201ac4fc57f61c71da1190597848
+trust: official
 ---
 
-# Updating Connectors
+# Page Title
+Updating Connectors (Twingate Docs)
 
 ## Summary
-Twingate releases Connector updates monthly covering CVE patches, performance improvements, and new features. The Twingate Controller enforces a minimum supported version and will reject Connectors running below that threshold. Update procedures vary by deployment type (Docker, systemd, Helm/Kubernetes).
+Twingate releases Connector updates roughly monthly, covering CVE fixes, reliability and performance improvements, and new features. The page covers update cadence, the Controller's minimum supported version, best practices, and notification channels. Per-platform update steps (Docker, systemd, Helm) are on linked sub-pages.
 
 ## Key Information
-- Monthly release cadence; stay on latest version for best security/compliance posture
-- Controller enforces minimum version — Connectors below threshold cannot broker connections
-- Admin Console shows upgrade indicators for outdated Connectors
-- Kubernetes Operator automates updates; Docker/systemd require manual updates
-- Current minimum supported version listed in the [Connector changelog](https://twingate.com/changelog/connector)
+- Release cadence: about monthly. Each release is validated against multiple vulnerability scanners.
+- Twingate can't always disclose which specific CVEs a release patches. The recommended approach is to stay on the latest version.
+- There is no formal end-of-life policy per version. However, the **Controller enforces a minimum supported version**. Connectors below it are rejected and can't broker connections.
+- The current minimum version is listed in the Connector changelog.
+- Deployment types: Docker container, Kubernetes via Helm chart (GKE, EKS, MicroK8s), Linux systemd service.
+- Kubernetes users can use the **Twingate Kubernetes Operator**, which periodically checks for new Connector image versions and applies them automatically.
+- Docker and systemd updates are manual.
 
 ## Prerequisites
-- At least **two Connectors per Remote network** (required for zero-downtime updates)
-- Access to original Connector tokens (access + refresh tokens)
-- Platform-specific access: Docker host, systemd host, or Kubernetes cluster
+- At least two Connectors per Remote Network, for redundancy during updates.
+- Access to the original access and refresh tokens for each Connector.
 
-## Update Best Practices
-1. **Update one Connector at a time** in a redundant pair to avoid downtime
-2. **Retain the same access and refresh tokens** — tokens uniquely identify each Connector; new tokens require reprovisioning
-3. **Don't skip multiple releases** — increases CVE exposure window; treat as routine maintenance
+## Step-by-Step (general principles)
+1. Check the Admin Console for the upgrade indicator, or check the changelog for the latest version.
+2. Pick one Connector in a redundant pair and update it using the platform-specific instructions (Docker, systemd, or Helm).
+3. Keep the same access and refresh tokens during the update.
+4. Verify the Connector reconnects and shows online.
+5. Repeat for the next Connector.
 
-## Deployment-Specific Instructions
-- **Docker**: See Docker-deployed Connectors docs
-- **systemd**: See Systemd-deployed Connectors docs
-- **Helm/Kubernetes**: See Helm-deployed Connectors docs
-- **Kubernetes Operator**: Automates version checks and applies updates on a schedule (recommended for K8s)
+(Platform-specific commands are not on this page. Follow the linked Docker, systemd, and Helm guides.)
 
-## Update Notifications
-| Method | Details |
-|--------|---------|
-| Admin email | Weekly at 00:00 UTC Mondays; lists all updatable Connectors |
-| Admin Console | Upgrade indicator shown per outdated Connector |
-| Changelog | `twingate.com/changelog/connector` |
-| RSS feed | `https://twingate.com/changelog-connectors.rss.xml` |
+## Configuration Values
+- Access token and refresh token: unique per Connector, must be retained across upgrades. Otherwise new tokens must be provisioned.
+- No env vars or CLI flags are listed on this page.
 
 ## Gotchas
-- Connectors running below minimum supported version are **blocked from brokering connections** (not just warned)
-- New tokens must be provisioned if original tokens are lost during upgrade — losing token continuity creates a new Connector identity
-- No formal EOL policy published, but minimum version is enforced dynamically by the Controller
-- Specific CVEs patched are **not disclosed** in release notes
+- Updating a Connector means briefly disconnecting it. With only one Connector in a Remote Network, users will lose access.
+- Don't update all Connectors in a Remote Network at once.
+- Losing the tokens means provisioning new ones.
+- Falling several releases behind makes the upgrade larger and leaves known CVEs unpatched longer.
+- Connectors below the minimum supported version stop working until upgraded.
+
+## Update Notifications
+- **Admin email:** weekly, Mondays at 00:00 UTC, sent to all admins and listing Connectors with available updates.
+- **Admin Console:** upgrade indicator on each outdated Connector.
+- **Changelog:** twingate.com/changelog/connector
+- **RSS:** https://twingate.com/changelog-connectors.rss.xml
 
 ## Related Docs
-- Twingate Kubernetes Operator (GitHub)
-- Docker-deployed Connectors update guide
-- Systemd-deployed Connectors update guide
-- Helm-deployed Connectors update guide
-- Connector changelog
+- Connector changelog (minimum supported version)
+- Docker, systemd, and Helm Connector update guides
+- Twingate Kubernetes Operator (GitHub repository)

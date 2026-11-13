@@ -1,61 +1,59 @@
 ---
 source: https://www.twingate.com/docs/services
 type: docs
-fetched: 2026-08-14
-source_version: 6554f3bc53b81ebe347dca34c278faba08d6283b22d1549b8829b175e6bbd3e7
+fetched: 2026-11-13
+source_version: b97761489d9997da77cc34d80b2ed2a67c5a733dea5d34a854afabd7cca47a17
+trust: official
 ---
 
-# Twingate Services
+# Services
 
 ## Summary
-Services provide programmatic access control for automated processes (CI/CD pipelines, custom applications) to Twingate Resources. Access is granted via Service Keys rather than Security Policies. Clients run in headless mode to enable automated Resource access.
+Twingate Services provide programmatic, centrally controlled access for automated processes such as CI/CD pipelines and custom applications. Resources are assigned to a Service, and access is authorized by a valid Service Key rather than Security Policies. The Linux or Windows client runs in headless mode to connect.
 
 ## Key Information
-- Any Resource can be assigned to a Service, User, or both
-- Security Policies do **not** apply to Services — access controlled by valid Service Keys
-- Service Keys authorize access to **all** Resources assigned to a Service
-- Service Keys expire after **365 days** by default; unlimited expiration available at creation time only
-- Expiry can only be configured at creation time — cannot be changed afterward
-- Each Service Key is individually API rate-limited
+- Any Twingate Resource can be assigned to a Service, a User, or both.
+- Security Policies do not apply to Services. Access is granted by a valid Service Key.
+- Services are found in the Admin Console under Team > Services.
+- Components:
+  - **Service**: the container object holding configuration.
+  - **Service Keys**: one or more keys; any non-revoked, non-expired key authorizes access to all Resources assigned to the Service.
+  - **Resources**: one or more assigned Resources.
+- Each Service Key is individually API rate-limited.
 
 ## Prerequisites
-- Admin console access (Team tab)
-- Linux or Windows Twingate client (for headless mode execution)
-- Resources already defined in Twingate
+- Admin Console access to create Services.
+- Existing Resources to assign.
+- Twingate Linux or Windows client installed for headless use (see the headless mode guides).
 
-## Step-by-Step: Create a New Service
-
-1. Navigate to **Team > Services** → click **"Create Service Account"**
-2. Click **"Generate Key"** to create a Service Key
-3. **Copy and save the Service Key immediately** — only viewable once at creation
-4. Click **"Add Resource"** to assign Resources to the Service
-5. Configure headless mode on Linux or Windows client to use the Service Key
+## Step-by-Step: Create a Service
+1. Go to Team > Services and select "Create Service Account".
+2. Select "Generate Key" to create a Service Key.
+3. Save the key immediately. It can only be viewed and copied once.
+4. Select "Add Resource" to assign Resources to the Service.
+5. Configure the Windows or Linux client in headless mode using the Service Key.
 
 ## Configuration Values
-| Parameter | Value/Notes |
-|---|---|
-| Default key expiration | 365 days |
-| Expiration options | Configurable at creation only; unlimited allowed |
-| Key scope | Authorizes all Resources on the Service |
+- **Service Key expiration**: set at creation only; default is 365 days; unlimited expiration is allowed.
+- **Service Key name**: editable while the key is Active.
 
-## Service Key Lifecycle States
-
-| State | Valid? | Notes |
+### Service Key lifecycle
+| State | Allowed actions | Valid |
 |---|---|---|
-| **Active** | Yes | Default state; name editable |
-| **Revoked** | No | Must revoke before delete; cannot reactivate |
-| **Expired** | No | Auto-expires unless set to unlimited |
-| **Deleted** | No | Permanent, unrecoverable |
+| Active | Revoke, edit name | Yes |
+| Revoked | Delete | No |
+| Expired | Delete | No |
+| Deleted | None | No |
 
 ## Gotchas
-- **Service Key is only shown once** — save it immediately at creation
-- **Expiry is immutable** after creation — plan accordingly
-- **Overprovisioning Service Keys** on one Service causes rate-limiting; use one unique Service Key per high-traffic system
-- Revoking a key is irreversible — cannot return to Active state
-- Deleted keys are permanently gone
+- The Service Key is shown only once at creation. If lost, generate a new one.
+- Any valid key grants access to all Resources on the Service, so scope Resources carefully.
+- Avoid overprovisioning keys: since each key is rate-limited individually, use a unique key per high-traffic system to prevent throttling.
+- Expiry cannot be changed after creation.
+- Keys must be revoked before deletion. Revoked keys cannot be reactivated, and deleted keys cannot be recovered.
+- Default 365-day expiry means keys will stop working unless rotated or created with unlimited expiration.
 
 ## Related Docs
-- Linux headless mode configuration guide
-- Windows headless mode configuration guide
-- Twingate Resources documentation
-- Team/Admin console documentation
+- Headless mode configuration guide for Linux
+- Headless mode configuration guide for Windows
+- Twingate Resources and Admin Console documentation

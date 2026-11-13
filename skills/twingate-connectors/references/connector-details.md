@@ -1,50 +1,49 @@
 ---
 source: https://www.twingate.com/docs/connector-details
 type: docs
-fetched: 2026-08-14
-source_version: af1193c7a09156f57f0913d4b73cc5ff71f4e7f1af5fa28d5128594fac41e422
+fetched: 2026-11-13
+source_version: 45d95cd0f5494b02966b529f72c97c38493f170ca58ff0b777a11bcd914acadf
+trust: official
 ---
 
 # Connector Details
 
-## Page Title
-Connector Details
-
 ## Summary
-Twingate Connectors report metadata back to the Controller including uptime, time synchronization, STUN discovery status, and network information. This data is viewable in the admin console and is primarily useful for monitoring Connector health and troubleshooting connectivity issues.
+Twingate Connectors report metadata to the Controller, covering Connector status and the host machine it runs on. This data is shown in the Admin Console and helps troubleshoot connectivity, time sync, and networking issues.
 
 ## Key Information
-- **Uptime/Downtime**: Reflects Controller's view of Connector state, not the host machine's actual uptime
-- **Time Offset**: Difference between Connector and Controller clocks; max tolerance is **±5 seconds**
-- **STUN Discovery**: Required for peer-to-peer connections; failure means P2P is unavailable, falling back to relay
-- **Hostname**: Reports the process/container hostname, not necessarily the physical host
-- **Public IP**: Most recent IP seen by Controller; may change in multi-path routing setups
-- **Private IP**: All private IPs visible to the Connector process; Docker containers report container subnet (e.g., `172.0.0.0/16`), not host IPs
+- **Uptime/Downtime**: Shows how long the Connector has been online or offline *as seen by the Controller*. It does not necessarily reflect whether the host machine is up.
+- **Time offset**: Difference between Connector and Controller clocks.
+  - Negative = Connector is "in the past"; positive = "in the future".
+  - Controller tolerates a maximum of **+/- 5 seconds**.
+  - Offsets near the limit can cause intermittent connection issues.
+- **STUN discovery**: Connectors must complete STUN discovery to establish peer-to-peer connections with Clients. Twingate uses STUN to learn the Connector's public IP and port when it is behind one or more NAT layers. If STUN is unavailable, peer-to-peer connections fail.
+- **Hostname**: Hostname of the machine running the Connector. In Docker this is the container's hostname, not the physical host's.
+- **Public IP**: Most recent public IP the Controller saw the Connector on. It can change, especially if traffic is routed through multiple egress IPs.
+- **Private IP**: All private IPs visible to the Connector's machine. In Docker, expect addresses in `172.17.0.0/16`. The physical host's IPs are not visible from the container.
 
 ## Prerequisites
-- A deployed and registered Twingate Connector
-- Access to Twingate admin console to view Connector details
+- A deployed Twingate Connector reporting to a Controller.
+- Network access that allows STUN discovery (for peer-to-peer).
+- Accurate system clock on the Connector host (e.g., via NTP).
+
+## Step-by-Step (Troubleshooting Flow)
+1. If the Connector shows downtime while the host is running, review Twingate's Connector best practices.
+2. If connections are intermittent, check the time offset and sync the host clock if it is near +/- 5 seconds.
+3. If peer-to-peer connections fail, verify the Connector can complete STUN discovery (check egress/firewall rules).
+4. Use the hostname and IP data to confirm which machine or container the Connector is running on.
 
 ## Configuration Values
-| Parameter | Value/Limit |
-|-----------|-------------|
-| Max time offset tolerance | ±5 seconds |
-| Docker container subnet example | `172.0.0.0/16` |
+None. This page describes reported metadata only, with no env vars, CLI flags, or API parameters. The one numeric threshold is the +/- 5 second time offset tolerance.
 
 ## Gotchas
-- **Downtime ≠ host offline**: Connector can show downtime while the host machine is running — check best practices for misconfiguration
-- **Time offset issues**: Offsets near ±5s cause *intermittent* (not total) connection failures — harder to diagnose
-- **Docker hostname/IP mismatch**: Connector reports container hostname and container network IPs, not the physical host's values; don't use these to identify the underlying host
-- **Public IP instability**: In multi-path or load-balanced setups, reported public IP may not be consistent
-- **STUN unavailability**: If STUN fails (e.g., firewall blocking UDP), P2P connections fail entirely — all traffic routes through relay, increasing latency
-
-## Troubleshooting Steps
-1. **Connector offline but host running** → Review Twingate Connector best practices
-2. **Time offset issues** → Ensure NTP is configured and syncing on the Connector host; check Twingate KB article on time synchronization
-3. **STUN discovery unavailable** → Verify outbound UDP is not blocked to Twingate STUN servers; check firewall/NAT rules
+- Downtime reflects Controller visibility, not host state.
+- Time offsets within the tolerance but close to the limit can still cause intermittent issues.
+- Containerized Connectors report container hostnames and Docker-internal private IPs, not the host's.
+- The public IP may change between observations.
+- Blocked STUN silently prevents peer-to-peer connectivity.
 
 ## Related Docs
-- Twingate Connector Best Practices
-- STUN protocol documentation
-- NAT traversal documentation
-- Twingate Knowledge Base: Time synchronization troubleshooting
+- Connector best practices
+- Twingate Knowledge Base article on time synchronization troubleshooting
+- Twingate documentation on STUN and NAT/peer-to-peer connectivity

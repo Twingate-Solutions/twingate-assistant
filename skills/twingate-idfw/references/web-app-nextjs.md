@@ -1,73 +1,58 @@
 ---
 source: https://www.twingate.com/docs/web-app-nextjs
 type: docs
-fetched: 2026-08-23
-source_version: eef083df9394190c06e95df23f975975fc8734e3b492572fe8f30feee93c645a
+fetched: 2026-11-13
+source_version: 2d99d2c5c0ebbe1acaaf29d81c7577ac98d7bdbc397e435d696b36d34d504a5f
+trust: official
 ---
 
-# Next.js JWT Middleware for Twingate Identity Firewall
+# Next.js JWT Middleware for Identity Firewall
 
 ## Summary
-Verifies Twingate Identity Firewall JWTs in Next.js 14+ using Edge Middleware and the `jose` library. A reusable helper (`verifyTwingateJWT`) validates JWT signatures against cached JWKS keys and returns typed identity data for use in middleware, route handlers, and Server Components.
+Shows how to verify Twingate Identity Firewall JWTs in a Next.js app using the `jose` library. A thin Edge Middleware gates chosen routes (returns 401 on failure), and a shared helper verifies the JWT wherever user identity is needed (route handlers, Server Components).
 
 ## Key Information
-- JWT injected by Gateway via request header (not by default — must configure)
-- `jose` runs in Edge Runtime (required for Next.js middleware)
-- JWKS keys are cached after first fetch; re-verification in handlers is cheap
-- Middleware gates routes with 401; identity is re-verified in handlers (no forwarded headers)
-- JWT is the single source of truth — verify at each consumption point
+- The Gateway injects **no headers by default**. You must configure a request header on the Web App Resource.
+- Recommended convention: `Authorization: Bearer {{jwt}}`. The header name and format are configurable. If you change them, update the helper.
+- `jose` runs in the Edge Runtime, as Next.js middleware requires.
+- Middleware only gates (401 or `NextResponse.next()`). It does **not** forward identity downstream. Handlers and Server Components re-verify with the same helper. This is cheap because `createRemoteJWKSet` caches the JWKS.
+- Verification settings: algorithm `ES256`, issuer `twingate`, audience = `TWINGATE_AUDIENCE`, required claims `exp` and `iat`, clock tolerance `30s`. The helper returns the identity or `null` on any failure.
+- Identity shape: `user {id, username, email?, groups[]}`, `device? {id}`, `resource? {id, type, address, aliases[]}`.
 
 ## Prerequisites
 - Next.js 14+ with App Router
-- Twingate Gateway configured to inject JWT header on Web App Resource
+- A Twingate Web App Resource with the request header configured
 - `npm install jose`
 
-## Configuration Values
-
-| Variable | Value |
-|---|---|
-| `TWINGATE_JWKS_URL` | `https://<your-tenant>.twingate.com/api/v1/jwk/ec` |
-
-Add to `.env.local`. Configure Gateway header:
-- **Header Key:** `Authorization`
-- **Value Template:** `Bearer {{jwt}}`
-
 ## Step-by-Step
+1. On the Web App Resource, add a header: key `Authorization`, value `Bearer {{jwt}}`.
+2. Run `npm install jose`.
+3. Create `src/twingate.ts` exporting `verifyTwingateJWT(authHeader)`. It parses the Bearer header, then calls `jwtVerify` with `createRemoteJWKSet(new URL(process.env.TWINGATE_JWKS_URL!))`.
+4. Create `src/middleware.ts` (or `middleware.ts` at the project root). It calls the helper with `request.headers.get("authorization")` and returns `NextResponse.json({error:"Unauthorized"},{status:401})` if the result is null.
+5. Set `config.matcher` (default example: `["/api/:path*"]`).
+6. In route handlers, call the helper with the `authorization` header. In Server Components, use `await headers()` from `next/headers`.
+7. For group authorization, check `identity.user.groups.includes("engineering")` and return 403 if absent.
 
-1. **Configure Gateway** — Add `Authorization: Bearer {{jwt}}` request header on the Web App Resource
-2. **Install dependency** — `npm install jose`
-3. **Create `src/twingate.ts`** — JWKS setup + `verifyTwingateJWT()` helper; uses `ES256`, requires `exp`/`iat` claims, 30s clock tolerance
-4. **Create `src/middleware.ts`** — Calls helper, returns 401 if null; set `config.matcher` for protected routes
-5. **Use in handlers/components** — Call `verifyTwingateJWT(request.headers.get("authorization"))` directly
+## Configuration Values
+Add to `.env.local`:
+- `TWINGATE_JWKS_URL`: `https://<your-tenant>.twingate.com/api/v1/jwk/ec`
+- `TWINGATE_AUDIENCE`: Twingate network name, which must match the `aud` claim (e.g. `autoco` for `https://autoco.twingate.com`)
 
-## JWT Verification Parameters
-```typescript
-jwtVerify(token, jwks, {
-  algorithms: ["ES256"],
-  requiredClaims: ["exp", "iat"],
-  clockTolerance: "30s",
-})
-```
-
-## Identity Type Shape
-```typescript
-TwingateIdentity {
-  user: { id, username, email?, groups[] }
-  device?: { id }
-  resource?: { id, type, address, aliases[] }
-}
-```
+Matcher options:
+- Allowlist: `["/api/:path*", "/dashboard/:path*"]`
+- Gate everything except public paths: `["/((?!health|_next/static|_next/image|favicon.ico).*)"]`
+- Or branch on `request.nextUrl.pathname` inside the middleware and return early for public routes.
 
 ## Gotchas
-- Gateway injects **no headers by default** — must explicitly configure the header on the resource
-- Do **not** forward identity from middleware as a custom header; re-verify with helper in each handler
-- `config.matcher` only controls middleware gating — any route can still call `verifyTwingateJWT` independently
-- Server Components use `next/headers` → `headers()` to access the Authorization header
-- Group authorization is manual: check `identity.user.groups.includes("group-name")`
+- If you use a header other than `Authorization`/Bearer, the helper and the `headers.get(...)` calls must be changed to match.
+- Routes outside `config.matcher` are not gated, but you can still verify the JWT in any handler.
+- `TWINGATE_AUDIENCE` is the network name, not the full URL.
+- Don't rely on middleware to pass identity along. Re-verify in each place.
+- This approach is not session-based. For `useSession()`/`auth()` or session persistence, use the Auth.js guide.
 
 ## Related Docs
-- [Identity Firewall for Web Apps overview](#) — architecture and JWT reference
-- [Next.js + Auth.js guide](#) — for `useSession()` / `auth()` session-based integration
-- [Request Headers](#) — Gateway header injection options and template variables
-- [JWT Payload Reference](#) — full token structure
-- Express.js and Django guides for other frameworks
+- Identity Firewall for Web Apps overview
+- Next.js + Auth.js guide
+- JWT Payload Reference
+- Request Headers
+- Express.js and Django guides

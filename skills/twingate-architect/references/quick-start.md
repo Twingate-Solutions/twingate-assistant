@@ -1,67 +1,57 @@
 ---
 source: https://www.twingate.com/docs/quick-start
 type: docs
-fetched: 2026-08-14
-source_version: 08841fcb183fe3c0268d001f87c2829d3b3d2b0e0c89d50cba1716403668cc04
+fetched: 2026-11-13
+source_version: 12283b46c885bcef5b858151d3ec89cea831b77e15aa0f350166704f0cfc407a
+trust: official
 ---
 
-# Twingate Quick Start
+# Quick Start
 
 ## Summary
-Configure a Twingate network by defining a Remote Network, deploying a Connector behind your firewall, adding Resources, and installing the Client app. The setup enables encrypted access to private resources regardless of user network location.
+Walks through the minimum setup for a Twingate network: create a Remote Network, define a Resource, deploy a Connector, and connect with the Twingate Client. After completion, authorized users can reach private Resources from any network.
 
 ## Key Information
-- Four core components: Remote Networks, Connectors, Resources, and Groups
-- Resources must be assigned to at least one Group to be accessible
-- Connectors must be deployed on a host that can reach the target Resources
-- Connector status updates automatically in the admin UI once deployed
-- Peer-to-peer connections recommended to improve performance and comply with Fair Use Policy
+- Three phases: define Remote Network (with Resources), deploy and provision a Connector, install the Client.
+- Connectors provide encrypted connectivity into a Remote Network and are deployed behind your firewall.
+- A Resource is only accessible once it is added to at least one Group. The default option is "Everyone"; create a custom Group to limit access.
+- The Connector host must be able to reach the Resources you want to expose.
+- The "Connection Status" sidebar updates automatically once the Connector connects to both the Twingate Controller and Relay. At that point the Connector is ready to serve requests.
+- Peer-to-peer connections improve user experience and help stay within the Fair Use Policy for bandwidth.
 
 ## Prerequisites
-- Twingate account (free tier available)
-- Permissions to deploy Docker container or native Linux service on the target Remote Network host
+- A Twingate account (a free account is available).
+- Permissions to deploy a Docker container or native Linux service on the Remote Network being configured.
 
 ## Step-by-Step
-
-### 1. Define a Remote Network
-1. Click **Network** in navigation bar
-2. Click **Add** next to Remote Networks
-3. Select location (e.g., AWS)
-4. Enter name (e.g., "AWS Production VPC") → click **Add Remote Network**
-
-### 2. Define a Resource
-1. Click **Network** → **Add Resource**
-2. Enter Resource address details → click **Add Resource**
-3. Assign to a Group (e.g., "Everyone") → click **Add 1 Group**
-
-> ⚠️ Resource must be added to a Group or it will not be accessible to any users.
-
-### 3. Deploy a Connector
-1. Navigate to the Remote Network
-2. Click **Deploy Connector**
-3. Select deployment method (Docker, Linux service, etc.)
-4. Run generated deployment command on target host
-5. Monitor **Connection Status** sidebar — ready when connected to both Controller and Relay
-
-### 4. Install the Client
-1. Visit [get.twingate.com](https://get.twingate.com)
-2. Install and authenticate
-3. Access configured Resources directly from device
+1. **Create a Remote Network** (skip if one already exists from signup):
+   - Network → Remote Networks → Add.
+   - Select a location (e.g., AWS).
+   - Name it (e.g., "AWS Production VPC") → Add Remote Network.
+2. **Define a Resource**:
+   - Network → Add Resource.
+   - Enter Resource details → Add Resource.
+   - Select the Group(s) to authorize (e.g., Everyone) → "Add 1 Group".
+3. **Deploy a Connector**:
+   - Open the new Remote Network, then click an existing Connector or "Deploy Connector".
+   - Choose a deployment option for your environment. The displayed steps change per option.
+   - Run the deployment on the remote host and watch the Connection Status sidebar.
+4. **Install the Client**:
+   - Install from get.twingate.com, authenticate, and access the Resource.
 
 ## Configuration Values
-- Connector deployment options: Docker container, native Linux service, and others (environment-dependent)
-- Resource address formats: See [Resource Definition docs](https://www.twingate.com/docs/resource-definition)
+No environment variables, CLI flags, or API parameters are given on this page. Connector deployment values are generated in the Admin Console for the option you choose.
 
 ## Gotchas
-- Connector host **must** have network access to the Resources it will serve — placement matters
-- Skipping Group assignment on a Resource means zero users can access it
-- Existing Remote Networks from signup may be reused — no need to create duplicates
-- Peer-to-peer connections require additional configuration; not enabled by default
+- Not adding a Resource to a Group makes it inaccessible to users.
+- Only the "Everyone" Group is available until you create custom Groups.
+- A Connector on a host that cannot reach the target Resources will not work for them.
+- Peer-to-peer support needs separate setup (see the peer-to-peer connections doc).
 
 ## Related Docs
-- [Resource Definition](https://www.twingate.com/docs/resource-definition)
-- [Deploying Connectors](https://www.twingate.com/docs/deploying-connectors)
-- [Twingate Client](https://www.twingate.com/docs/client)
-- [Support peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer)
-- [Services (CI/CD)](https://www.twingate.com/docs/services)
-- [Security Policies](https://www.twingate.com/docs/security-policies)
+- Resource Definition (allowed address formats)
+- Deploying Connectors
+- Supporting peer-to-peer connections
+- Fair Use Policy
+- Twingate Client installation (get.twingate.com)
+- Next steps: managing your team, Security Policies, Services (CI/CD automation), Use Cases

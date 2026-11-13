@@ -1,75 +1,61 @@
 ---
 source: https://www.twingate.com/docs/syncing-data-to-s3
 type: docs
-fetched: 2026-08-05
-source_version: 770be174a1a2f504e65fc57b7f72edec1e7d124350e3e61e5dc70d765d7c3814
+fetched: 2026-11-13
+source_version: 0d30389efaa0ffafbae40383bb524661cc06c0b2fde1041b9c4f27ae6d0dba12
+trust: official
 ---
 
-# Syncing Data to AWS S3
-
-## Page Title
-Syncing Data to AWS S3 (Twingate → AWS S3)
+# Page Title
+Syncing Data to AWS S3 (Twingate)
 
 ## Summary
-Twingate (Business/Enterprise) can sync audit logs, network events, DNS filtering logs, and DLP events to an AWS S3 bucket in JSON format every 5 minutes. Two auth methods are supported: OIDC IAM Role (recommended) and static IAM User credentials. Setup is available via Admin Console UI or Terraform.
+Twingate can push audit logs, network events, DNS filtering logs, and DLP events to an AWS S3 bucket as JSON every ~5 minutes. Authentication is either an OIDC IAM role (recommended) or static IAM user credentials. Setup is done in the Admin Console or via Terraform. Business and Enterprise plans only.
 
 ## Key Information
-- **Plans**: Business & Enterprise only
-- **Sync interval**: Every 5 minutes; up to 10 minutes for first appearance
-- **File format**: JSON, filename format `2025-07-25T18:20:00+00:00.json`
-- **Event types**: `network_access`, `dns_filtering`, `audit_log`, `data_loss_prevention`
-- No file written if no events occurred in interval
+- Each sync writes one JSON file named like `2025-07-25T18:20:00+00:00.json`, with separate objects per event.
+- Event types: `network_access`, `dns_filtering`, `audit_log`, `data_loss_prevention`.
+- Each event has `event_type` and `event` (with `version` and `time`).
+- No events means no file is written.
+- First logs appear within about 10 minutes. Events can lag up to 10 minutes.
+- OIDC role: short-lived credentials, no long-lived keys, recommended for production.
+- IAM user: static keys that must be rotated manually. Not recommended for production or regulated environments.
+- Sync status is shown at Settings → Reports (upper right).
 
 ## Prerequisites
-- Business or Enterprise Twingate plan
-- AWS S3 bucket (existing or new)
-- IAM permissions to create roles/policies/users in AWS
+- Business or Enterprise plan.
+- An S3 bucket.
+- An AWS admin with IAM permissions to create roles, policies, OIDC providers, users, and access keys.
+- Terraform (optional): tested with v1.12.2 and AWS provider ~> 6.0.0.
 
 ## Step-by-Step
-
-### Option 1: OIDC (Recommended)
-1. In Twingate Admin Console → Settings → Reports → Sync to S3 Bucket → OIDC Role → copy IAM Identity Provider URL
-2. In AWS: IAM → Identity Providers → Add Provider → OpenID Connect
-   - Provider URL: copied from Twingate
-   - Audience: `<your-network-slug>` (e.g., `acme`)
-3. Create IAM Policy granting `s3:PutObject` on bucket
-4. Create IAM Role: Trusted entity = Web Identity; add condition:
-   - Key: `<network>.twingate.com/oidc:sub` = `events_sync`
-   - Audience: network slug
-5. In Twingate Console: enter bucket name + IAM Role ARN
-
-### Option 2: IAM User Credentials
-1. Create IAM User in AWS
-2. Create policy granting `s3:PutObject` and attach to user
-3. Generate Access Key + Secret Access Key
-4. In Twingate Console: enter bucket name, Access Key, Secret Key
+1. Create or identify an S3 bucket.
+2. Create an IAM policy granting `s3:PutObject` on `arn:aws:s3:::<S3BucketName>/*`. For SSE-KMS, also add `kms:GenerateDataKey*` and `kms:Decrypt`.
+3. **OIDC path:**
+   - In the Admin Console, go to Settings → Reports → Sync to S3 Bucket → OIDC Role and copy the IAM Identity Provider URL.
+   - In AWS, go to IAM → Identity Providers → Add provider → OpenID Connect. Use that URL as the provider URL and your network slug as the audience.
+   - Create a role with Web identity as the trusted entity, using that provider and audience. Add the condition `<network>.twingate.com/oidc:sub` StringEquals `events_sync`. Attach the policy.
+4. **IAM user path:** create a user, attach the policy, generate an access key and secret, and optionally add a bucket policy restricting `PutObject` to that user.
+5. In Settings → Reports → Sync to S3 Bucket, enter the bucket name plus the Role ARN (OIDC) or the access key and secret (IAM).
 
 ## Configuration Values
-
-| Field | OIDC | IAM User |
-|-------|------|----------|
-| Bucket name | Required (no `arn:aws:s3:::` prefix) | Required |
-| IAM Role ARN | Required | — |
-| Access Key | — | Required |
-| Secret Access Key | — | Required |
-
-**Required IAM permissions (s3:PutObject):**
-```json
-{"Action": "s3:PutObject", "Resource": "arn:aws:s3:::<bucket>/*"}
-```
-**Additional for SSE-KMS:** `kms:GenerateDataKey*`, `kms:Decrypt`
-
-**Terraform versions tested:** Terraform `v1.12.2`, AWS Provider `~> 6.0.0`
+- OIDC provider URL: `https://<slug>.twingate.com/oidc`
+- Audience / `client_id_list`: network slug (e.g. `acme`)
+- Trust condition: `<slug>.twingate.com/oidc:sub` = `events_sync`, and `:aud` = slug (Terraform)
+- Assume action: `sts:AssumeRoleWithWebIdentity`
+- Console inputs: OIDC needs bucket name and IAM Role ARN. IAM needs bucket name, access key, and secret.
+- Terraform variables: `tenant_slug`, `bucket_name`. Output: `twingate_s3_sync_role_arn`.
 
 ## Gotchas
-- **Do NOT include** `arn:aws:s3:::` prefix when entering bucket name in UI
-- **AWS opt-in regions** (Jakarta `ap-southeast-3`, Hong Kong `ap-east-1`, Bahrain `me-south-1`) require STS V2 tokens — change Global endpoint to V2 in IAM Account Settings
-- Static IAM credentials require manual rotation; not recommended for production
-- First sync can take up to 10 minutes after configuration
+- Do NOT include the `arn:aws:s3:::` prefix in the bucket name field.
+- Opt-in regions (ap-southeast-3, ap-east-1, me-south-1) require V2 STS session tokens. Fix at IAM → Account Settings → STS Global endpoint → set Session Tokens to V2, then retry.
+- An immediate failure usually means a wrong bucket name, wrong keys, or a missing `s3:PutObject`.
+- SSE-KMS needs the extra KMS permissions.
+- The Terraform IAM user example outputs the secret key (marked sensitive). Store it securely.
 
 ## Related Docs
-- [Network Events Schema](https://www.twingate.com/docs/network-events-schema)
-- [DNS Filtering Logs Schema](https://www.twingate.com/docs/dns-filtering-logs-schema)
-- [Audit Logs Schema](https://www.twingate.com/docs/audit-logs-schema)
-- [Terraform Examples](https://www.twingate.com/docs/terraform)
-- [AWS S3 User Guide](https://docs.aws.amazon.com/s3/)
+- Network Events Schema
+- DNS Filtering Logs Schema
+- Audit Logs Schema
+- Twingate Terraform Examples
+- AWS S3 User Guide

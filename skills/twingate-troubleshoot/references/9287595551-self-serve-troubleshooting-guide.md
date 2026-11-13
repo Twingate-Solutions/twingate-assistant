@@ -6,6 +6,8 @@ source_version: 789d5338b8421e479c0ad274cdf77e0a7a656f4005fb17b32ac7ddb0fc65ef49
 trust: official
 ---
 
+> **Retired source:** this help-center article was unpublished (2026-11-13: 404, no replacement). Kept for error-string search and historical context; it is no longer refreshed. It may describe an issue Twingate has since fixed — verify against current Client behavior and newer references before relying on it.
+
 # Self-Serve Troubleshooting Guide
 
 ## Page Title

@@ -1,76 +1,67 @@
 ---
 source: https://www.twingate.com/docs/dns-filtering
 type: docs
-fetched: 2026-09-20
-source_version: 2794e856b31a7a4b5074bfce10eecc8aadd3ef99970ef06970d474d3be05fe0a
+fetched: 2026-11-13
+source_version: 5383e71cd0c8097e533bbd3246a0239928414710a657118667f5824b3529b2b7
+trust: official
 ---
 
-# DNS Filtering
+# DNS Filtering Overview
 
 ## Summary
-Twingate DNS filtering intercepts and filters all DNS traffic using DNS-over-HTTPS (DoH) for macOS, Windows, and Linux clients. It blocks security threats and content categories via configurable profiles assigned to user Groups. Available as a Business/Enterprise add-on.
+Twingate DNS filtering is a native add-on (Business and Enterprise plans) that filters DNS traffic over DNS-over-HTTPS for users running the macOS, Windows, or Linux Client. It blocks security threats and restricted content categories by refusing to resolve blocked domains. Rules are managed through ranked profiles assigned to Groups.
 
 ## Key Information
-- Operates at DNS layer — blocks all traffic types (HTTPS, SSH, etc.) to blocked domains
-- Mobile platforms **not supported**; macOS, Windows, Linux only
-- No client-side configuration required beyond running Twingate Client
-- Block pages show by default for HTTP; requires **Twingate Browser Extension** for HTTPS block pages
-- Limit of **10 DNS filtering profiles**
-- Logs exportable to AWS S3 as JSON (one event per line)
+- Platforms: macOS, Windows, Linux only. Mobile is not supported.
+- Works at the DNS layer, so all traffic types (HTTPS, SSH, etc.) to blocked domains fail.
+- No config changes are needed beyond running the Twingate Client.
+- Block pages appear only for HTTP. HTTPS blocked domains behave as nonexistent (site can't be reached). HTTPS block pages need the Twingate Browser Extension (early access; contact your account manager).
+- Security categories: threat intelligence feeds, Google Safe Browsing, DNS rebinding, IDN homograph, typosquatting, DGA, newly registered domains (<30 days), parked domains. All are on by default except newly registered domains.
+- Content categories: gambling, dating, adult, piracy, social media (excludes messaging apps), games, streaming, Force Safe Search, YouTube safe mode.
+- Privacy options: block disguised third-party trackers, affiliate and tracking links, ads and trackers.
+- The allowlist overrides all other rules. TLDs can be denylisted (e.g., `.zip`).
 
 ## Prerequisites
-- Business or Enterprise plan with DNS Filtering add-on
-- Secure DNS enabled in Admin Console (Internet Security tab)
-- Twingate Client running on endpoints
+- Business or Enterprise plan with the DNS filtering add-on.
+- Admin Console access.
+- Twingate Client on macOS, Windows, or Linux.
 
-## Step-by-Step: Enable DNS Filtering
-1. Navigate to **Admin Console → Internet Security tab**
-2. If Secure DNS disabled: enable it, select **"Twingate DNS Filtering"**
-3. If Secure DNS already enabled: change DoH resolver to **"Twingate DNS Filtering"**
-4. Configure profiles via profile name → **Manage → Edit Filtering Rules**
+## Step-by-Step: Enable
+1. Admin Console → **Internet Security** → **Secure DNS**.
+2. If Secure DNS is disabled, enable it and choose **Twingate DNS Filtering**.
+3. If it's already enabled, change the DoH resolver to **Twingate DNS Filtering**.
+4. Click a profile name (or **Manage** → **Edit Filtering Rules**) to configure rules. Use **Security Categories**, **Content Restrictions**, and **Privacy Protection** for the category modals.
 
-## Configuration Values
+## Profile Behavior
+- Default: one profile with the Everyone Group assigned.
+- Profiles are ranked; higher rank wins when a user is in multiple Groups.
+- A Group can be assigned to only one profile.
+- Users in no assigned Group are not filtered.
+- Exception Groups override profile assignment (the user gets no filtering). A Group can't be both assigned and an exception.
+- Recommended: a lowest-ranked default profile with Everyone assigned.
+- Maximum of 10 profiles.
+- Signed-out devices set to always run Internet Security use the lowest-ranked profile.
 
-### Profile Rules
-| Rule Type | Options |
-|-----------|---------|
-| Allowlist | Specific domains (overrides all other rules) |
-| Denylist | Specific domains or TLDs (e.g., `.zip`) |
-| Security Categories | Threat feeds, Google Safe Browsing, DNS rebinding, IDN homograph, typosquatting, DGA, newly registered domains, parked domains |
-| Content Categories | Gambling, Dating, Adult, Piracy, Social media, Games, Streaming, Force Safe Search, YouTube safe mode |
-| Privacy Protection | Block disguised trackers, affiliate/tracking links, ads & trackers |
-
-### S3 Log Event Schema
-```json
-{
-  "event_type": "dns_filtering",
-  "event": {
-    "version": 1,
-    "time": "<UTC datetime>",
-    "domain": "<queried domain>",
-    "root": "<root domain>",
-    "device": { "id": "<device_id>", "name": "<device_name>" },
-    "connection": { "client_ip": "<ip>", "protocol": "DNS-over-HTTPS" },
-    "status": "default|blocked|allowed",
-    "reasons": [{ "id": "category:social-networks", "name": "Social Networks" }]
-  }
-}
-```
+## Configuration Values (S3 log export)
+JSON, one event per line, with `event_type: "dns_filtering"`. Event fields:
+- `version`, `time` (UTC), `domain`, `root`
+- `device.id` (Twingate device ID if the device has ever logged in, otherwise hardware ID), `device.name`
+- `connection.client_ip`, `connection.protocol` (`DNS-over-HTTPS`)
+- `status`: `default`, `blocked`, or `allowed`
+- `reasons[]`: `id` (e.g., `category:social-networks`) and `name`
 
 ## Gotchas
-- **Profile priority**: Higher-ranked profiles take precedence; users in multiple Groups use highest-ranked profile
-- **Exception Groups override enrolled Groups**: User in both = DNS filtering disabled for that user
-- **Signed-out devices**: Use lowest-ranked DNS filtering profile (when "always run Internet Security" is configured)
-- **Newly registered domains** category is **disabled by default**
-- Groups can only be assigned to **one profile at a time**
-- Blocking tracking links may break email unsubscribe links
-- Blocking ads/trackers may break some site functionality
-- Allowlist takes precedence over **all** other rules including security categories
+- Blocking ads, trackers, and tracking links can break sites. It can also break email unsubscribe links.
+- By default, filtering runs only while a user is signed in. To keep it running when signed out, configure Internet Security Client Configuration.
+- Removing Everyone from the default profile leaves unassigned users unfiltered.
+- To unblock a domain, add it to the allowlist.
+- To exempt users, add them to an Exception Group.
+- Check blocked domains under "Recent DNS Activity" on the Secure DNS page.
 
 ## Related Docs
-- DNS-over-HTTPS (DoH) documentation
-- Internet Security Client Configuration (always-on)
-- Exception Groups
-- Twingate Browser Extension deployment
+- DNS-over-HTTPS (Secure DNS) documentation
+- Filtering Analytics
+- AI Usage Overview
 - Syncing data to S3
-- Filtering Analytics / AI Usage Overview
+- Internet Security Client Configuration
+- Exception Groups

@@ -1,48 +1,47 @@
 ---
 source: https://www.twingate.com/docs/internet-security-use-case
 type: docs
-fetched: 2026-08-14
-source_version: 27dc6eb8984b89880ca9b0429ef9671fd7a4959c83501c91f6b79b6f1d440208
+fetched: 2026-11-13
+source_version: 480d4f2cdcc0c12973b00e601987b8b83537246778506f10f42be4584d1ac537
+trust: official
 ---
 
-# Internet Security Use Case
-
-## Page Title
-Twingate Internet Security Use Case
+# Page Title
+Internet Security Use Case (Twingate Docs)
 
 ## Summary
-Twingate secures public internet traffic on employee devices using DNS filtering and DNS-over-HTTPS (DoH). It consolidates private resource access and internet security enforcement into a single client agent, eliminating the need for separate security tools.
+This overview page describes how Twingate secures public internet traffic on employee devices using DNS filtering and DNS-over-HTTPS (DoH). It lists the benefits and links to guides for enabling each capability. The page contains no setup steps itself.
 
 ## Key Information
-- **DNS filtering**: Blocks domains hosting malware, phishing sites, and C2 servers
-- **DNS-over-HTTPS**: Encrypts DNS requests, protecting browsing privacy on untrusted networks (hotels, coffee shops)
-- **Shadow IT visibility**: Provides traffic insights and ability to block non-work-appropriate content categories (adult content, gambling, etc.)
-- **Single agent**: Same Twingate client handles both private resource access and internet security enforcement — no separate agent required
-- **BYOD support**: Centrally managed DNS filtering applies to personal devices
+- **Threat blocking:** DNS filtering blocks domains known to host malware, phishing sites, and command-and-control servers.
+- **Content control:** Can block categories such as adult content and gambling. Also gives visibility into shadow IT usage and where employee traffic is going.
+- **Privacy on untrusted networks:** Encrypted DNS requests (DoH) keep browsing history private on hotel or coffee shop Wi-Fi.
+- **BYOD and travel:** DNS-level filtering is managed centrally and can apply to personal (BYOD) devices.
+- **Single client:** One Twingate Client handles both private Resource access and public internet security.
+- **Exit Networks:** Can be used to route all traffic through Twingate.
+- **Third-party integrations:** Guides exist for AnyConnect (with Umbrella) and Cloudflare (DoH and DNS filtering).
 
 ## Prerequisites
-- Twingate client deployed on employee devices
-- Appropriate Twingate plan with DNS filtering/DoH features enabled
-- Admin access to Twingate admin console
+Not stated on this page. Presumably a Twingate account and the Twingate Client installed on target devices; check the individual guides to confirm.
 
-## Configuration Guides (Step-by-Step links)
-1. **DNS Filtering**: Follow [How to enable DNS filtering in Twingate]
-2. **DNS-over-HTTPS**: Follow [How to enable DNS-over-HTTPS in Twingate]
-3. **AnyConnect + Umbrella compatibility**: Follow [How to configure AnyConnect (with Umbrella) to work with Twingate]
-4. **Cloudflare integration**: Follow [How to configure Cloudflare for DNS-over-HTTPS and DNS Filtering in Twingate]
+## Step-by-Step
+None on this page. Follow the linked guides:
+1. Enable DNS filtering in Twingate
+2. Enable DNS-over-HTTPS in Twingate
+3. Route all traffic through Twingate with Exit Networks
+4. Configure AnyConnect (with Umbrella) to work with Twingate
+5. Configure Cloudflare for DoH and DNS filtering in Twingate
 
 ## Configuration Values
-- No specific env vars or API params documented on this page
-- Configuration handled via Twingate admin console (DNS filtering policies, DoH settings)
-- Third-party integrations: Cisco Umbrella, Cloudflare
+None listed (no env vars, CLI flags, or API parameters).
 
 ## Gotchas
-- DNS filtering and DoH are separate features — enabling one does not automatically enable the other
-- BYOD deployments require device enrollment with the Twingate client; filtering only applies to enrolled devices
-- Third-party DNS security tools (e.g., Umbrella) require specific compatibility configuration to avoid conflicts with Twingate
+- This is an overview page only. Implementation details, requirements, and settings are in the linked guides.
+- If another security client is already deployed (e.g., AnyConnect/Umbrella), use the dedicated compatibility guide rather than enabling features blindly.
 
 ## Related Docs
 - How to enable DNS filtering in Twingate
 - How to enable DNS-over-HTTPS in Twingate
+- How to route all traffic through Twingate with Exit Networks
 - How to configure AnyConnect (with Umbrella) to work with Twingate
 - How to configure Cloudflare for DNS-over-HTTPS and DNS Filtering in Twingate

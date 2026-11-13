@@ -1,75 +1,66 @@
 ---
 source: https://www.twingate.com/docs/api-overview
 type: docs
-fetched: 2026-10-18
-source_version: c44aa1ae66dca17c6a6184a06d1c3a0644bf91ed9d9abb856a85709da57aecbb
+fetched: 2026-11-13
+source_version: 5b67f252203885c451f9e154be26148c19d501a98390232a4f81e47a20f6e210
 trust: official
 ---
 
 # Twingate Admin API Overview
 
-## Page Title
-API Overview — Twingate Admin GraphQL API
-
 ## Summary
-Twingate provides a GraphQL-based Admin API for programmatic network management. All requests use HTTP POST with an API token in the `X-API-KEY` header. The API covers resources, users, groups, devices, service accounts, security policies, and more.
+Twingate's Admin API is GraphQL-based and lets you manage a Twingate network programmatically. Authentication uses an API token generated in the Admin Console and sent in the `X-API-KEY` header. The schema is available via introspection and is always current.
 
 ## Key Information
-- **API type:** GraphQL (schema discoverable via introspection)
-- **Endpoint pattern:** `https://<subdomain>.twingate.com/api/graphql/`
-- **Auth header:** `X-API-KEY: <token>`
-- **Rate limits:** 60 reads/min, 20 writes/min; exceeding returns HTTP 429
-- **Pagination:** Cursor-based (`after`, `first` params; `pageInfo.hasNextPage`)
+- **Covers:** Remote Networks, Connectors, Gateways; Resources (Kubernetes, SSH, web app) and access assignments; Groups, Users, Devices, device posture; Security Policies and DNS filtering profiles; Service Accounts and Keys; access requests, SSH CAs, serial numbers.
+- **Endpoint:** `https://<subdomain>.twingate.com/api/graphql/` (method POST). Subdomain is the network name, e.g. `acme` for `acme.twingate.com`.
+- **Header:** `X-API-KEY: <your API token>`, plus `Content-Type: application/json`.
+- **Schema discovery:** GraphQL introspection. Clients like Altair have built-in support; Postman also supports GraphQL. Python users can use the `gql` library.
+- **Terraform provider** uses this API to provision Connectors, Resources, etc.
 
 ## Prerequisites
-- Active Twingate account with Admin Console access
-- API token generated at **Settings → API → Generate Token**
+- Admin Console access to generate a token.
+- Your network's subdomain.
 
-## Token Permissions (least-privilege order)
-| Level | Capabilities |
-|---|---|
-| Read only | All read operations |
-| Read & Write | Read + create/update/delete |
-| Read, Write & Provision | Above + Connector tokens + Service Keys |
+## Step-by-Step
+1. In the Admin Console, go to **Settings > API > Generate Token**.
+2. Choose a permission level (and optionally allowed ranges).
+3. Send a POST request to the endpoint with the token in `X-API-KEY`.
+
+Example:
+```
+curl -X POST "https://<subdomain>.twingate.com/api/graphql/" \
+-H "X-API-KEY: <your API token>" \
+-H "Content-Type: application/json" \
+-d '{"query": "{ remoteNetworks(first: 10) { edges { node { id name } } } }"}'
+```
+
+Example query with pagination:
+```
+{ remoteNetworks(after: null, first: 10) { edges { node { id name } } pageInfo { startCursor hasNextPage } } }
+```
 
 ## Configuration Values
-| Parameter | Value |
+**Token permission levels** (each includes the one above):
+| Level | Adds |
 |---|---|
-| Endpoint | `https://<subdomain>.twingate.com/api/graphql/` |
-| Method | `POST` |
-| Auth header | `X-API-KEY: <your API token>` |
-| Content-Type | `application/json` |
+| Read only | Read access to everything exposed |
+| Read & Write | Create, update, delete |
+| Read, Write & Provision | Generate Connector tokens, create Service Keys |
 
-## Example Request
-```bash
-curl -X POST "https://<subdomain>.twingate.com/api/graphql/" \
-  -H "X-API-KEY: <your API token>" \
-  -H "Content-Type: application/json" \
-  -d '{"query": "{ remoteNetworks(first: 10) { edges { node { id name } } } }"}'
-```
+**Allowed ranges (optional):** up to 10 entries per token, each a CIDR or single IP; IPv4 and IPv6 supported; default `0.0.0.0/0, ::/0` (any address).
 
-## Example Query (paginated)
-```graphql
-{
-  remoteNetworks(after: null, first: 10) {
-    edges { node { id name } }
-    pageInfo { startCursor hasNextPage }
-  }
-}
-```
+**Throttling (per account, per minute):** Reads 60, Writes 20.
 
 ## Gotchas
-- **Rate limiting:** 429 responses include a retry-after time; upgrade Terraform provider to latest to handle retries automatically
-- **IP allowlisting:** Tokens can be restricted to up to 10 CIDR/IP entries; default allows all (`0.0.0.0/0, ::/0`)
-- **Token scope:** Grant minimum required permission level per token
-- **Schema:** Always fetch live schema via introspection — do not rely on cached/static copies
-
-## Recommended Clients
-- **GUI:** GraphiQL (`brew install --cask graphiql`) or Altair (has built-in introspection viewer)
-- **Python:** `gql` library
-- **IaC:** Twingate Terraform Provider (see separate docs)
+- Grant each token the lowest level it needs.
+- Requests from outside a token's allowed ranges fail authentication.
+- Exceeding limits within a 1-minute window returns HTTP `429`; retry after the period given in the response.
+- Terraform runs failing with `429`: upgrade the Twingate provider to the latest version, which handles retries on throttling.
+- Tokens can be modified, disabled, or re-enabled after creation.
+- Generating Connector tokens and Service Keys requires the Read, Write & Provision level.
 
 ## Related Docs
-- Terraform Provider docs + Getting Started guide
-- Twingate API token settings (Admin Console → Settings → API)
-- GraphQL introspection (for live schema browsing)
+- Getting Started with the API (Altair and Postman walkthroughs)
+- API schema / introspection
+- Twingate Terraform provider docs and Terraform getting started guide

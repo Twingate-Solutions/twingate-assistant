@@ -1,41 +1,43 @@
 ---
 source: https://www.twingate.com/docs/security-policy-guides
 type: docs
-fetched: 2026-08-14
-source_version: 3096e46d7a0787993bb4a64e18b4fb83e4a4d77a2ca74f5a407dd0b1a201001d
+fetched: 2026-11-13
+source_version: 1f73fcf3752019d6ad6e22258a35d1e99a991e7b01deb962f60a6149daa670ec
+trust: official
 ---
 
-# Policy Guides
+# Policy Guides (Twingate Security Policies)
 
-## Page Title
-Security Policy Guides
+**Source:** https://www.twingate.com/docs/security-policy-guides
 
 ## Summary
-Twingate Security Policies support multiple rule types that control access to resources. This page serves as an index linking to individual guides for each policy rule category.
+This is an index page for Twingate's Security Policy rules. It lists the individual guides covering authentication frequency, two-factor authentication, device-only resource policies, and device profiles. The page has no procedures or configuration details itself; those are in the linked guides.
 
 ## Key Information
-- Four main Security Policy rule types are documented:
-  - **Authentication** – controls re-authentication frequency and 2FA requirements
-  - **Two-factor Authentication (2FA)** – specific settings for 2FA enforcement
-  - **Device-only Resource Policies** – policies that evaluate only device-based requirements (bypasses user auth checks)
-  - **Trusted Devices** – controls whether devices must be trusted (manually or automatically) to satisfy policy requirements
+- Twingate Security Policies support several rule types, each documented in its own guide.
+- **Authentication** settings control how often users must re-authenticate and whether 2FA is required.
+- **Two-factor authentication (2FA)** settings are applied as part of the authentication requirements.
+- **Device-only Resource Policies** can be configured so that only device requirements are evaluated (no user authentication evaluation).
+- **Device Profiles** determine whether a device must be trusted, either manually or automatically, to satisfy a Security Policy.
+- Page was last updated "2 days ago" relative to scrape time.
 
 ## Prerequisites
-- Twingate admin access to configure Security Policies
-- Policies are applied at the resource or group level
+None stated on this page. Individual guides likely require Admin Console access and an existing Twingate Network.
 
 ## Step-by-Step
-*This page is an index only; refer to individual linked guides for implementation steps.*
+Not applicable. This page is a navigation index only.
 
 ## Configuration Values
-*No direct env vars, CLI flags, or API params on this page; see individual guides.*
+None listed. No env vars, CLI flags, or API parameters appear on this page. Consult the linked guides for specifics.
 
 ## Gotchas
-- Device-only Resource Policies skip user authentication evaluation — ensure this is intentional when configuring
-- Trusted Device requirements have two modes (manual vs. automatic trust); verify which mode aligns with your security posture before applying broadly
+- The page has no implementation details; do not rely on it for settings or values.
+- Device trust requirements (via Device Profiles) interact with Security Policies. A device that doesn't meet trust criteria may fail policy evaluation, so review profiles alongside policy rules.
+- Device-only policies skip user authentication evaluation, so use them deliberately.
 
 ## Related Docs
-- Authentication Policy Guide
-- Two-factor Authentication Policy Guide
-- Device-only Resource Policies Guide
-- Trusted Devices Policy Guide
+- Authentication policy guide (re-authentication frequency, 2FA requirements)
+- Two-factor Authentication guide
+- Device-only Resource Policies guide
+- Device Profiles guide
+- Parent: Twingate Security Policies overview

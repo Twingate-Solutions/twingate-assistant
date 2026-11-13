@@ -1,70 +1,53 @@
 ---
 source: https://www.twingate.com/docs/ssh-privileged-access-overview
 type: docs
-fetched: 2026-10-25
-source_version: d313a2e079aabd07e4eb0215bec4dc229d88f63ca0cbeb3cf0182d6eb6b49e39
+fetched: 2026-11-13
+source_version: b983b431ea2aacca4df5f4a809d5332470e3061027ae01328f56db411c785dc8
 trust: official
 ---
 
 # Privileged Access for SSH Overview
 
-## Page Title
-Twingate Privileged Access for SSH Overview
-
 ## Summary
-Twingate Privileged Access for SSH is a Layer 7 reverse proxy (Gateway) deployed in your environment that adds zero trust SSH access controls without distributing SSH keys to users. It issues short-lived certificates per connection, records all sessions in asciicast v2 format on your infrastructure, and requires no workflow changes for end users.
+Privileged Access for SSH is the SSH component of Twingate Identity Firewall. It places a Twingate Gateway (a Layer 7 reverse proxy) between users and SSH servers, so each session is tied to a Twingate identity, authenticated with a short-lived certificate, and recorded. It replaces bastion hosts and SSH key distribution.
 
 ## Key Information
-- **Early Access**: Free for up to 5 Resources; contact Twingate to start trial
-- No SSH keys distributed to devices; access revocation is instant via Twingate identity
-- Session recordings stored locally (never uploaded to Twingate) in asciicast v2 format, written to Gateway `stderr`
-- Visualize recordings at `twingate.com/sessionplayer`
-- Existing `authorized_keys` entries are unaffected; migration is incremental
+- Status: Early Access; free for up to five Resources (contact Twingate for a trial).
+- Users connect with standard `ssh`; no custom CLI and no SSH keys on devices.
+- Revoking a user's Twingate access removes their SSH access.
+- Servers need no public exposure or inbound firewall rules.
+- Gateway is deployed in your environment (Kubernetes or VM) and tied to a Remote Network. One Gateway can serve multiple SSH Resources in the same Remote Network.
+- **Flow:** Twingate authenticates the user via IdP → forwards identity to Gateway → Gateway authenticates to the target using a certificate from the SSH CA.
+- **Certificate Authorities** (Admin Console: Settings > Certificate Authorities; multiple CAs allowed and reusable across Gateways):
+  - X.509 CA: secures Client↔Gateway; required for every Gateway.
+  - SSH CA: issues short-lived user certs and Gateway host certs; required for any SSH Resource.
+- **SSH CA signing modes:** Local SSH CA (Gateway holds private key; good for starting out) or HashiCorp Vault SSH secrets engine (recommended for production; keys off-disk, audit logging).
+- **Supported:** interactive shell, remote commands, `sftp`, `rsync`, TCP/IP port forwarding. **Not supported:** X11 forwarding.
+- **Session recording:** asciicast v2, written to `stderr` by default (optionally a file), stored only on your infrastructure, never uploaded to Twingate. Captures terminal I/O and command output plus events like channel open/close. File transfer and port-forwarding data is not recorded. Playback: twingate.com/sessionplayer.
+- Windows Server with OpenSSH is supported.
 
 ## Prerequisites
-- **Client minimum versions**: macOS 2026.85, Windows 2026.90, Linux 2025.342
-- **Connector minimum version**: 1.82.0 (all Connectors tied to SSH Resources)
-- Mobile clients (Android, iOS) not supported
-- Target: Linux servers or Windows Server with OpenSSH installed
+- Minimum Client versions: macOS 2026.85, Windows 2026.90, Linux 2025.342 (no Android/iOS).
+- Connectors for SSH Resources: version 1.82.0 or later.
+- A Gateway, an X.509 CA, and an SSH CA.
+- The Linux account named in `ssh.gateway.username` must exist on every target server.
 
-## Components
-
-### Gateway
-- Standalone Layer 7 reverse proxy deployed in your environment (Kubernetes or VM)
-- Associated with a Remote Network; one Gateway serves multiple SSH Resources
-- Terminates inbound SSH, authenticates to target via certificate, records session
-
-### Certificate Authorities (managed in Admin Console → Settings > Certificate Authorities)
-| Type | Purpose | Required |
-|------|---------|----------|
-| X.509 CA | Secures Client↔Gateway connection | Always |
-| SSH CA | Issues short-lived user/host certificates | For SSH Resources |
-
-### SSH CA Signing Modes
-- **Local SSH CA**: Gateway holds private key; simpler, good for getting started
-- **HashiCorp Vault**: Uses Vault SSH secrets engine; recommended for production (keys off-disk, audit logging)
-
-## Supported SSH Features
-- ✅ Interactive shell, remote command execution, `sftp`/`rsync`, TCP/IP port forwarding
-- ❌ X11 forwarding, mobile clients, file transfer/port forwarding data in recordings
+## Steps (user side)
+1. Open the Twingate Client.
+2. Under **More**, select **SSH Server Configuration Auto-Sync**. This syncs the SSH CA public key to `~/.ssh/known_hosts` and keeps it updated.
+3. Connect: `ssh admin@home.int` (Resource address or alias, using the account name the Gateway signs in as).
 
 ## Configuration Values
-- Session logs: written to Gateway `stderr`
-- Known hosts sync path: `~/.ssh/known_hosts`
-- Session format: asciicast v2
-
-## Step-by-Step: Avoid TOFU Prompts (User Setup)
-1. Open Twingate Client
-2. Navigate to **More** → **SSH Server Configuration Auto-Sync**
-3. This syncs SSH CA public key to `~/.ssh/known_hosts` and keeps it updated
+- `ssh.gateway.username`: Linux account the Gateway uses to sign in to target servers.
+- Log output: `stderr` by default; configurable to a file.
 
 ## Gotchas
-- Without SSH config auto-sync, OpenSSH shows TOFU warning on first connection
-- File transfer and port forwarding data is **not** captured in session recordings
-- You are responsible for forwarding/retaining Gateway logs (SIEM, object storage)
-- HashiCorp Vault integration is recommended for production; local CA keeps private key on disk
+- Without auto-sync, OpenSSH shows a TOFU warning on first connection.
+- You are responsible for forwarding and retaining logs (SIEM/object storage).
+- Existing `authorized_keys` entries are unaffected; the Gateway just adds the SSH CA as trusted, so you can migrate gradually.
+- Port forwarding and file transfer content is not recorded.
 
 ## Related Docs
-- [Installing Privileged Access for SSH](https://www.twingate.com/docs/) — prerequisites and deployment options
-- Remote development guide (VS Code, JetBrains, Cursor)
-- Twingate community subreddit
+- Installing Privileged Access for SSH (prerequisites and deployment)
+- Remote Development with VS Code (VS Code Remote SSH over Privileged Access)
+- Twingate Identity Firewall

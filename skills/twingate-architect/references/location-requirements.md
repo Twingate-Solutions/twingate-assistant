@@ -1,63 +1,51 @@
 ---
 source: https://www.twingate.com/docs/location-requirements
 type: docs
-fetched: 2026-08-05
-source_version: 26e02da492797bf4d13b26053ab7927a959cf7512e2d3da36b479e7a2ae72658
+fetched: 2026-11-13
+source_version: 5612b0771c6e2239ea3d684662b01553dbc1692b27da26993103ba0daf1ac839
+trust: official
 ---
 
 # Location Requirements
 
-## Page Title
-Location Requirements (Geoblocking)
-
 ## Summary
-Twingate allows admins to restrict Resource access by country-level geolocation using allowlists or denylists on Resource Policies. Location is determined via IP address geolocation using MaxMind GeoLite2 data and Google Cloud load balancers. This feature is Enterprise plan only.
+Twingate Location Requirements let admins restrict access to Resources by country using allowlists or denylists configured on individual Resource Policies. Location is determined from the device's IP address. The feature (geoblocking) is Enterprise plan only.
 
 ## Key Information
-- Configured per **Resource Policy** (not per Resource directly)
-- Two modes: **Allowlist** (whitelist specific countries) or **Denylist** (block specific countries)
-- Location determined by IP → geo-coordinates (truncated to 2 decimal places) → country mapping
-- Uses MaxMind GeoLite2 + Google Cloud load balancer data
-- Country boundary data from Natural Earth
-- Blocked users see an explicit error message about location policy
+- Applies per Resource Policy, so it controls every Resource assigned to that policy.
+- Two restriction types:
+  - **Allowlist**: only devices in the selected countries can access; all others are blocked.
+  - **Denylist**: devices in the selected countries are blocked; all others are allowed.
+- Common use cases: blocking high-risk countries for compliance, limiting access to countries with company offices, restricting contractors to known working locations.
+- Location method: IP address is mapped to geographic coordinates, truncated to two decimal places, then mapped to a country using Natural Earth boundary data.
+- Coordinate sources: MaxMind GeoLite2 data and Google Cloud load balancers.
+- Blocked devices see an error message saying their location does not meet the policy requirements.
 
 ## Prerequisites
-- **Enterprise plan** required
-- Admin access to configure Resource Policies
-- Resource Policy must exist before enabling location requirements
+- Twingate Enterprise plan.
+- Admin access to edit Resource Policies.
 
 ## Step-by-Step
-
-1. Open the target **Resource Policy**
-2. Click **Enable** next to **Location Requirements**
-3. Choose restriction type:
-   - **Allowlist**: only listed countries allowed; all others blocked
-   - **Denylist**: listed countries blocked; all others allowed
-4. Select countries for the chosen restriction type
-5. Save the policy
+1. Open the Resource Policy to configure.
+2. Click **Enable** next to **Location Requirements**.
+3. Choose **Allowlist** or **Denylist**.
+4. Select the countries for that restriction type.
+5. Save the policy.
 
 ## Configuration Values
-
-| Setting | Options |
-|---|---|
-| Restriction Type | `Allowlist` \| `Denylist` |
-| Country Selection | Any country except permanently blocked ones |
-
-## Permanently Blocked Countries (cannot be overridden)
-- Cuba
-- Iran
-- North Korea
-- Syria
-- Certain non-country regions (unspecified)
-
-These countries do not appear in the selection UI at all.
+No env vars, CLI flags, or API parameters are documented on this page. Configuration is done in the Admin Console UI:
+- Location Requirements: Enable toggle
+- Restriction type: Allowlist | Denylist
+- Country selection list
 
 ## Gotchas
-- **IP geolocation is not precise** — accuracy varies; VPNs, proxies, or unusual routing can cause misidentification
-- Geoblocking applies at the **Resource Policy level**, so multiple Resources sharing a policy are all affected
-- Permanently restricted countries are silently excluded from the country picker — no override possible
-- Coordinates are truncated to 2 decimal places before country mapping, which can cause edge-case misclassification near borders
+- IP-based geolocation accuracy varies and may be imprecise (e.g., VPNs, mobile carriers, shared egress IPs).
+- Cuba, Iran, North Korea, and Syria are always blocked due to embargoes or legal restrictions. This cannot be overridden, and these countries don't appear in the selectable list.
+- Certain non-country regions are also always blocked.
+- With an allowlist, any country not selected is blocked, so check the list carefully to avoid locking out legitimate users.
+- Settings are per policy. Resources under other policies are not affected.
 
 ## Related Docs
-- [Resource Policies](https://www.twingate.com/docs/resource-policies)
-- [Pricing Page](https://www.twingate.com/pricing)
+- Resource Policies
+- Twingate pricing page (plan availability)
+- Natural Earth (boundary data) and MaxMind GeoLite2 (geolocation data)

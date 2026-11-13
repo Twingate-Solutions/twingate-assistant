@@ -1,50 +1,59 @@
 ---
 source: https://www.twingate.com/docs/k8s-kubectl
 type: docs
-fetched: 2026-08-14
-source_version: 154e31b9bd9987d59eb4dd29576e0c24d988462b44d7c122aa65264ebb6fae45
+fetched: 2026-11-13
+source_version: d8ae8cb9bfc646d06368653c51426ce551657d667443a735831e31c53a98b7da
+trust: official
 ---
 
-# Manage Kubernetes Using kubectl via Twingate
+# Page Title
+Manage Kubernetes using kubectl (Twingate Docs)
 
 ## Summary
-Secure `kubectl` access to a Kubernetes cluster API endpoint without exposing it to the public internet. Twingate proxies traffic through a Connector deployed outside the target cluster, eliminating the need for a separate K8s proxy.
+Describes how to use Twingate to run `kubectl` against a private Kubernetes cluster without exposing the API endpoint to the public internet. A Connector deployed outside the cluster reaches the API server, a Twingate Resource represents the endpoint, and the local `kubectl` config points at that address. Twingate proxies the traffic while the client is connected.
 
 ## Key Information
-- Connector must be deployed **outside** the target K8s cluster
-- Connector only needs network access to the cluster API endpoint
-- Neither the Connector nor the API endpoint should be publicly accessible
-- No separate K8s proxy required when using Twingate
+- Use case: manage K8s services with `kubectl` without a public API endpoint and without a separate K8s proxy.
+- The Connector must be deployed **outside** the target K8s cluster.
+- Neither the Connector nor the API endpoint should be reachable from the public internet.
+- The Connector only needs network access to the API endpoint.
+- The Twingate Resource uses the cluster API endpoint address (example: `10.1.1.15`).
+- Access works only while the user is connected to Twingate and is authorized for the API endpoint Resource.
+- The endpoint address is not directly reachable from the local machine. Twingate proxies traffic to it via the Connector.
 
 ## Prerequisites
-- Twingate Connector deployed with network access to the K8s API endpoint
-- Twingate Resource configured for the cluster API endpoint IP/hostname
-- `kubectl` installed on local machine
-- User authorized to access the K8s API endpoint Resource in Twingate
-- Active Twingate connection on local machine
+- A Twingate network with a Connector that can reach the K8s API endpoint.
+- The private IP or address of the K8s API endpoint.
+- The Twingate client installed and connected on the machine running `kubectl`.
+- Authorization (via group/policy) to the new Resource.
+- `kubectl` installed locally.
 
 ## Step-by-Step
+1. Deploy one or more Connectors outside the target cluster, with network access to the API endpoint.
+2. Create a new Twingate Resource using the cluster API endpoint address (e.g., `10.1.1.15`).
+3. Grant the relevant users or groups access to the Resource.
+4. On the local machine, update the `kubectl` config to use that address as the cluster server:
 
-1. **Deploy Connector** outside the target K8s cluster, ensuring it has network access to the API endpoint
-2. **Create Twingate Resource** with the cluster's API endpoint address (e.g., `10.1.1.15`)
-3. **Configure kubectl** on your local machine to point to the private API endpoint address:
-   ```bash
-   kubectl config set-cluster example-cluster --server=https://10.1.1.15
-   ```
-4. **Connect to Twingate** — traffic to the API endpoint will be automatically proxied via the Connector
+```
+# 10.1.1.15 is an example private K8s API endpoint defined as a Resource in Twingate
+kubectl config set-cluster example-cluster --server=https://10.1.1.15
+```
+
+5. Connect to Twingate and run `kubectl` commands as usual.
 
 ## Configuration Values
-
-| Parameter | Example | Notes |
-|-----------|---------|-------|
-| `--server` | `https://10.1.1.15` | Private K8s API endpoint defined as Twingate Resource |
+- `kubectl config set-cluster <name> --server=https://<api-endpoint-address>`
+  - `<name>`: example `example-cluster`
+  - `--server`: the private API endpoint address defined as the Twingate Resource
 
 ## Gotchas
-- Connector placement is critical: must be **outside** the target cluster but still able to reach its API endpoint
-- Local machine cannot reach the API endpoint directly — Twingate must be connected for `kubectl` to function
-- Both conditions must be met simultaneously: active Twingate connection **and** authorized Resource access
+- Do not place the Connector inside the cluster it protects. The page specifies it must be outside.
+- The `--server` address in `kubectl` must match the address defined in the Twingate Resource.
+- If the Twingate client is disconnected or the user lacks Resource access, `kubectl` cannot reach the API endpoint.
+- The page does not cover TLS certificate handling. If the API server certificate does not include the address you use, verification issues may arise (not addressed in the source).
+- The page's example sets only the cluster server. You may still need to configure credentials and contexts in your kubeconfig (not covered in the source).
 
 ## Related Docs
-- [Deploy a Connector](https://www.twingate.com/docs/connectors)
-- [Create a Resource](https://www.twingate.com/docs/resources)
-- Kubernetes Connector deployment (for in-cluster Connector use cases)
+- Twingate Connector deployment docs
+- Twingate Resource creation and access policy docs
+- Twingate Client installation docs

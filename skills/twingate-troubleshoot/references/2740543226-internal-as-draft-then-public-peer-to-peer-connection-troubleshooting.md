@@ -5,6 +5,8 @@ fetched: 2026-08-06
 source_version: 84ad88efe2103724d96086fa74ab561dfe963881116a53b537b84711aff0bb43
 ---
 
+> **Retired source:** this help-center article was unpublished (2026-11-13: 404, no replacement). Kept for error-string search and historical context; it is no longer refreshed. It may describe an issue Twingate has since fixed — verify against current Client behavior and newer references before relying on it.
+
 # Peer-to-Peer Connection Troubleshooting
 
 ## Page Title

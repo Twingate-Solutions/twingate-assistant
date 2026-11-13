@@ -5,6 +5,8 @@ fetched: 2026-09-06
 source_version: a5f42c9344f5526b98fd1c8e07ecde3b4714417d0a7428d805dd5fd035a87638
 ---
 
+> **Retired source:** this help-center article was unpublished (2026-11-13: 404, no replacement). Kept for error-string search and historical context; it is no longer refreshed. It may describe an issue Twingate has since fixed — verify against current Client behavior and newer references before relying on it.
+
 # VPN Clients With Installed TAP Adapter
 
 ## Summary
