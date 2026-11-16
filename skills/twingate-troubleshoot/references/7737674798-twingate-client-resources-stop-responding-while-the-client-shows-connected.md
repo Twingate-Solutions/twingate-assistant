@@ -1,8 +1,8 @@
 ---
 source: https://help.twingate.com/articles/7737674798-twingate-client-resources-stop-responding-while-the-client-shows-connected
 type: help
-fetched: 2026-11-13
-source_version: bdbd341b54c536194f7537c5a558166f70df58f3acfb55c030f07d7f2e11170e
+fetched: 2026-11-15
+source_version: bc69570d49acad8c1e37416fe62f7a0ad0c34848156cef0470b3427da78605dd
 trust: official
 ---
 
@@ -10,40 +10,42 @@ trust: official
 [Twingate Client] Resources Stop Responding While the Client Shows Connected
 
 ## Summary
-Twingate Resources can stop responding while the Client still shows Connected, with no error displayed. Reconnecting the Client restores access immediately. Twingate is investigating the cause, and the page will be updated as more is learned.
+Twingate Resources can stop responding while the Client still shows Connected, with no error displayed. Reconnecting the Client restores access immediately. Twingate is investigating; the issue has been reported on macOS and the root cause is not yet known.
 
 ## Key Information
-- **Applies to:** Twingate Client and Connector. Reported on macOS.
+- **Applies to:** Twingate Client and Connector; reported on macOS.
 - **Symptoms:**
-  - Resources hang, time out, or fail to load. This affects web apps, git operations, and internal services.
-  - The Client shows Connected throughout, with no error.
-  - Non-Twingate traffic (sites and apps that are not Resources) works normally.
-  - The issue does not clear on its own. It persists until the Client is reconnected or the device is restarted.
-  - It is intermittent and typically affects individual users, not everyone at once.
+  - Resources hang, time out, or fail to load (web apps, git operations, internal services) with no Client error.
+  - Client displays Connected throughout.
+  - Non-Twingate traffic (public websites and apps) works normally.
+  - Does not self-resolve; persists until the Client is reconnected or the device is restarted.
+  - Intermittent, typically affects individual users rather than everyone at once.
 - **Diagnostic hint:** If disconnecting and reconnecting immediately restores access, this issue is the most likely cause.
-- **Cause:** Under investigation. In reported cases, the affected connections pass through a Twingate Relay.
+- **Cause:** Under investigation. In reported cases, affected connections pass through a Twingate Relay.
+- The article is being updated as more information becomes available.
 
 ## Prerequisites
-- Access to the affected user's Twingate Client (to disconnect and reconnect).
-- For escalation: ability to upload Client logs.
+- None specific. Access to the Twingate Client on the affected device. A Client log upload is needed if contacting Support.
 
 ## Step-by-Step (Workaround)
-1. In the Twingate Client, disconnect.
-2. Connect again. A full quit of the application is not required.
+1. Disconnect the Twingate Client.
+2. Connect it again. A full quit of the application is not required.
 3. Verify Resource access is restored.
-4. If the problem recurs frequently or affects many users, contact Twingate Support with:
+4. If the issue recurs frequently or affects many users, contact Twingate Support with:
    - A Client log upload
    - The approximate time the issue started
 
 ## Configuration Values
-None. No environment variables, CLI flags, or API parameters are documented for this issue.
+- None. No env vars, CLI flags, or API parameters are documented for this issue.
 
 ## Gotchas
-- The Client status gives no indication of the failure, so Connected does not mean Resources are reachable.
-- Because non-Resource traffic still works, the problem can look like an application or network fault rather than a Twingate one.
-- The issue can recur after reconnecting.
-- No permanent fix or root cause is published yet, so check the article for updates.
+- The Client status gives no indication of failure, so "Connected" does not confirm the tunnel is working.
+- The problem can recur after reconnecting; reconnecting is a workaround, not a fix.
+- The issue won't clear on its own, so waiting is not effective.
+- Only macOS reports are documented so far, but the component scope is listed as Client and Connector.
+- The Relay involvement is an observation from reported cases, not a confirmed cause.
 
 ## Related Docs
-- Twingate guidance on uploading Client logs (linked from the original article as "Client log upload")
-- Twingate Support, for frequent or widespread occurrences
+- Twingate Support: submit a ticket with logs for frequent or widespread occurrences.
+- Twingate documentation on uploading Client logs (linked from the original article as "Client log upload").
+- Original article: https://help.twingate.com/articles/7737674798-twingate-client-resources-stop-responding-while-the-client-shows-connected

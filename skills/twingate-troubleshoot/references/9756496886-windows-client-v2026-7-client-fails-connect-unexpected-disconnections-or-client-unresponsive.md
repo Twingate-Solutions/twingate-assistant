@@ -1,84 +1,60 @@
 ---
 source: https://help.twingate.com/articles/9756496886-windows-client-v2026-7-client-fails-connect-unexpected-disconnections-or-client-unresponsive
 type: help
-fetched: 2026-10-18
-source_version: e282bb13f6ee5fb6e8b3a26e0b79980162e9758d8a2bec6ec36a5c67f0987a3c
+fetched: 2026-11-15
+source_version: 3c72d9a9684000a2042576964990c975e1d2cefa969df8a65b14f427c4ddc6d1
 trust: official
 ---
 
-# [Windows Client] v2026.7 – Connection Failures & Unresponsive Client
+# Page Title
+[Windows Client] v2026.7 | Client Fails Connect, Unexpected Disconnections, or Client Unresponsive
 
 ## Summary
-A known bug in Twingate Windows Client v2026.7 causes connection failures, unexpected disconnections, or an unresponsive client following network change events (power-on, reboot, sleep/wake). The root cause is a failure to detect DNS servers when a default route is absent at startup. The fix is to upgrade to v2026.36.
+Twingate Windows Client version 2026.7 has a known issue where the client can become unresponsive, fail to connect, or disconnect unexpectedly after a network change event. The fix is included in Windows Client 2026.36. Upgrading may require manually terminating the stuck Twingate service.
 
----
+## Key Information
+- Applies to: Twingate Client 2026.7, Windows.
+- Triggers: device power on, reboot, or sleep/wake (network change events).
+- Symptoms:
+  - Login fails with `Could not join network`.
+  - Connection toggle spins, then returns to OFF.
+  - Client disconnects shortly after connecting, or cannot connect.
+  - Stopping the service in `services.msc` hangs at "Stopping".
+  - Reboot doesn't always recover the client or service.
+- Cause (edge case): no network right after sign-in (e.g., not set to auto-connect), DHCP hasn't yet assigned configuration, and no default route is present, so the client can't identify a bypass interface. DNS server detection fails and network initialization fails. The client can remain stuck even after connectivity returns.
+- Resolution: upgrade to Windows Client **2026.36**. EXE installer is available, and MSI is available for managed device deployments. Both are on the Twingate Downloads page.
 
-## Applicable To
-- **Component:** Twingate Windows Client
-- **Affected version:** 2026.7
-- **Fixed version:** 2026.36
+## Prerequisites
+- Permission to install software and end processes on the affected Windows device.
+- Installer (EXE or MSI) for 2026.36.
 
----
+## Step-by-Step (Upgrade)
+1. If the client has faulted, quit it: system tray > Twingate > Quit.
+2. Open Task Manager and end remaining Twingate processes (`Twingate.exe`, `Twingate.Service.exe`).
+3. Run the 2026.36 installer (EXE, or MSI for managed deployments).
 
-## Symptoms
-- Login fails with "Could not join network"
-- Connection toggle spins then returns to OFF
-- Client disconnects shortly after connecting or cannot connect at all
-- Stopping Twingate service via `services.msc` hangs in "Stopping" state
-- Reboot does not recover the client
+## Confirming the Issue (Logs)
+Open logs via Client > More > Troubleshoot > View Logs. This opens two folders:
+- `%PROGRAMDATA%\Twingate\logs\` (`C:\ProgramData\Twingate\logs`)
+- `%LOCALAPPDATA%\Twingate\logs\`
 
----
+Checks:
+- In `Twingate.Service.log`, search for `failed to initialize libhydra: code -1` after packet manager initialization. In a bad state it loops continuously.
+- In `system-events.log` (created after clicking View Logs), search for:
+  - `.NET Runtime` error for `Twingate.Service.exe` with `System.AccessViolationException` and a stack containing `PktDevice_WFPBlockTrafficOutsideTun`.
+  - `Windows Error Reporting` APPCRASH entry with `P1: Twingate.Service.exe`, `P2: 2026.7.2078.0`.
 
-## Root Cause
-Occurs when all three conditions are met:
-1. Device is not connected to a network immediately after sign-in (no auto-connect)
-2. DHCP has not yet assigned network configuration to the interface
-3. No default route is present — client cannot identify a bypass interface
-
-Client fails DNS detection → network initialization fails → service enters zombie state with no clean recovery path.
-
----
-
-## Resolution
-
-### Step 1 – Terminate stuck Twingate processes
-1. System tray → **Twingate** → **Quit**
-2. Open **Task Manager** → end all Twingate-related processes:
-   - `Twingate.exe`
-   - `Twingate.Service.exe`
-
-### Step 2 – Upgrade to v2026.36
-Download from the [Twingate Downloads page](https://www.twingate.com/download) or directly:
-- **EXE installer** – for individual installs
-- **MSI installer** – for managed/enterprise deployments
-
----
-
-## Log Verification
-
-**Log locations** (via System tray → Client → More → Troubleshoot → View Logs):
-- `%PROGRAMDATA%\Twingate\logs\` → `C:\ProgramData\Twingate\logs\`
-- `%LOCALAPPDATA%\Twingate\logs\` → `C:\Users\<user>\AppData\Local\Twingate\logs\`
-
-**Check `Twingate.Service.log`** for repeating loop:
-```
-[INFO] [client] Start packet manager initialization.
-[ERROR] [libsdwan] failed to initialize libhydra: code -1
-```
-
-**Check `system-events.log`** for:
-- `System.AccessViolationException` in `Twingate.Service.exe` (crash at `PktDevice_WFPBlockTrafficOutsideTun`)
-- Windows Error Reporting entry: `Event Name: APPCRASH`, `P2: 2026.7.2078.0`
-
----
+## Configuration Values
+- Process names: `Twingate.exe`, `Twingate.Service.exe`
+- Log paths: `%PROGRAMDATA%\Twingate\logs\Twingate.Service.log`, `%LOCALAPPDATA%\Twingate\logs\system-events.log`
+- Fixed version: 2026.36; affected: 2026.7
 
 ## Gotchas
-- Rebooting **does not** reliably recover the client — manual process termination is required before upgrading
-- The service zombie state means `services.msc` stop command may hang indefinitely
-- `system-events.log` is only created after clicking "View Logs" in the client UI
-
----
+- The service may be in a zombie state, so the upgrade can fail until Twingate processes are manually terminated.
+- Rebooting is not a reliable fix.
+- Stopping the service via `services.msc` may hang.
+- Log evidence is most meaningful on version 2026.7 alongside the symptoms.
 
 ## Related Docs
-- [Twingate Downloads Page](https://www.twingate.com/download)
-- Twingate Client troubleshooting logs path: `Client → More → Troubleshoot → View Logs`
+- Twingate Downloads page (latest Windows Client releases)
+- Twingate Client log/troubleshooting documentation (View Logs)

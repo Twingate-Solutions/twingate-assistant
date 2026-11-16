@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/terraform-provider-twingate
 type: github
-fetched: 2026-11-13
-source_version: d4427d5a241c39cee8076de09d0e758d131ab71c
+fetched: 2026-11-15
+source_version: 3a098c1132d84b76b06a86cb375ed0c68ef54614
 trust: official
 ---
 
@@ -18,6 +18,7 @@ This repo contains the Terraform provider for managing Twingate resources (netwo
 - Other v5.2.0 changes: Go module dependency bumps and documentation updates migrating Gateway config in the AWS, DigitalOcean, GCE Vault, and GCE Self Signed SSH examples.
 - Docs in `docs/` are auto-generated from `templates/`.
 - Coverage is tracked on Codecov.
+- The release workflow (`.github/workflows/release.yml`) pins GitHub Actions (checkout, setup-go, ghaction-import-gpg, goreleaser-action) to commit SHAs and runs GoReleaser with version constraint `~> v2` instead of `latest`.
 - Contributions are released under the project's open source license (see `LICENSE`).
 
 ## Prerequisites

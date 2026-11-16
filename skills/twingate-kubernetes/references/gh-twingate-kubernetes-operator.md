@@ -1,68 +1,68 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator
 type: github
-fetched: 2026-11-13
-source_version: c14f66b177ec23ad4582fa9445e322495cf0af7b
+fetched: 2026-11-15
+source_version: 40168342d7d3b3e917c0b968779926c315de042b
 trust: official
 ---
 
 # Twingate Kubernetes Operator
 
 ## Summary
-A custom Kubernetes controller that manages Twingate resources (Resources, Resource Access policies, etc.) via Kubernetes CRDs. It bridges Kubernetes-native workflows with the Twingate Zero Trust Network using the Twingate API.
+The Twingate Kubernetes Operator is a custom controller that lets you configure and manage Twingate resources using Kubernetes assets. It integrates Kubernetes clusters with the Twingate Zero Trust Network. It is open source and installed via a Helm chart.
 
 ## Key Information
-- Published Docker image: `twingate/kubernetes-operator` on Docker Hub
-- Helm chart published to OCI registry: `oci://ghcr.io/twingate/helmcharts/twingate-operator`
-- CRDs are **not** automatically updated on `helm upgrade` (Helm v3 limitation — must be updated manually)
-- Full API reference and getting-started guide available on the [repo wiki](https://github.com/Twingate/kubernetes-operator/wiki)
+- Repo: Twingate/kubernetes-operator (default branch: `main`).
+- Helm chart is published to the OCI repository `oci://ghcr.io/twingate/helmcharts/twingate-operator` (recommended install method).
+- Chart source lives in `./deploy/twingate-operator`; default values are in `deploy/twingate-operator/values.yaml`.
+- Container images are on Docker Hub: `twingate/kubernetes-operator`.
+- Documentation is in the GitHub wiki: Wiki, Getting Started, and API Reference pages.
+- Latest release is a chore release (bump of certifi from 2026.7.22 to 2026.10.19, PR #1210).
+- Changelog: `CHANGELOG.md`. Developer guide: `DEVELOPER.md`.
 
 ## Prerequisites
-- Kubernetes 1.16+
-- Twingate account with a configured Remote Network and deployed connectors (see [Twingate Helm charts](https://github.com/Twingate/helm-charts))
-- Twingate API token with **Read/Write/Provision** permissions (generated in the Twingate Admin Console)
-- Helm v3
+- Kubernetes cluster, version 1.16+.
+- Twingate account and resources (Gateways, Networks, Applications, etc.).
+- A Twingate `Remote Network` for the cluster, with connectors deployed (see the Twingate Helm charts repo: https://github.com/Twingate/helm-charts).
+- Twingate API token with `Read/Write/Provision` permissions, generated in the Twingate Admin Console.
+- Helm.
 
-## Installation (Helm via OCI — recommended)
+## Usage / Step-by-Step
 
-1. Copy the [default `values.yaml`](https://github.com/Twingate/kubernetes-operator/blob/main/deploy/twingate-operator/values.yaml) to a local file.
-2. Edit the `twingateOperator` section with your account details and API token.
-3. Install or upgrade:
-
+**Install via OCI (recommended)**
+1. Create a custom `values.yaml`, starting from the default values file.
+2. Edit the settings, specifically `twingateOperator`.
+3. Deploy (add `-n [namespace]` for a specific namespace):
 ```bash
-helm upgrade twop oci://ghcr.io/twingate/helmcharts/twingate-operator \
-  --install --wait -f ./values.yaml
+helm upgrade twop oci://ghcr.io/twingate/helmcharts/twingate-operator --install --wait -f ./values.yaml
 ```
 
-Add `-n <namespace>` to target a specific namespace.
-
-## Installation (Helm from cloned repo)
-
+**Install from a cloned repo**
+1. Clone the repository.
+2. Copy the defaults:
 ```bash
-git clone https://github.com/Twingate/kubernetes-operator.git
 cp ./deploy/twingate-operator/values.yaml ./deploy/twingate-operator/values.local.yaml
-# Edit values.local.yaml, then:
-helm upgrade twop ./deploy/twingate-operator \
-  --install --wait -f ./deploy/twingate-operator/values.local.yaml
+```
+3. Edit `twingateOperator` settings in `values.local.yaml`.
+4. Deploy:
+```bash
+helm upgrade twop ./deploy/twingate-operator --install --wait -f ./deploy/twingate-operator/values.local.yaml
 ```
 
 ## Configuration Values
-Key settings live under the `twingateOperator` key in `values.yaml`. Refer to the default values file for the full list; at minimum configure:
-
-| Field | Description |
-|---|---|
-| `twingateOperator.apiToken` | Twingate API token (Read/Write/Provision) |
-| `twingateOperator.network` | Twingate account/network name |
-| `twingateOperator.remoteNetwork` | Name of the Remote Network representing the cluster |
+- `twingateOperator` section of `values.yaml`: the main settings to edit (the README does not list individual keys; consult the default `values.yaml` for them, such as API token and network details).
+- `-n [namespace]`: optional Helm flag to install into a specific namespace.
+- Helm release name used in examples: `twop`.
 
 ## Gotchas
-- **CRD upgrades are manual.** Helm v3 does not upgrade CRDs automatically on `helm upgrade`. Apply updated CRD manifests manually before upgrading the chart.
-- Connectors must be deployed to the Remote Network before the operator can route traffic; the operator does not deploy connectors itself.
+- With Helm v3, CRDs created by this chart are not updated on upgrade by default; they must be updated manually. See the Helm documentation on CRDs and `helm upgrade`.
+- The API token must have `Read/Write/Provision` permissions, otherwise resource management will fail.
+- Connectors and a Remote Network must already exist for the cluster.
 
 ## Related Docs
-- [Wiki](https://github.com/Twingate/kubernetes-operator/wiki)
-- [Getting Started](https://github.com/Twingate/kubernetes-operator/wiki/Getting-Started)
-- [API Reference](https://github.com/Twingate/kubernetes-operator/wiki/API-Reference)
-- [Changelog](https://github.com/Twingate/kubernetes-operator/blob/main/CHANGELOG.md)
-- [Developer Guide](https://github.com/Twingate/kubernetes-operator/blob/main/DEVELOPER.md)
-- [Twingate Helm Charts](https://github.com/Twingate/helm-charts)
+- Wiki: https://github.com/Twingate/kubernetes-operator/wiki
+- Getting Started: https://github.com/Twingate/kubernetes-operator/wiki/Getting-Started
+- API Reference: https://github.com/Twingate/kubernetes-operator/wiki/API-Reference
+- Twingate Helm charts: https://github.com/Twingate/helm-charts
+- Default values: https://github.com/Twingate/kubernetes-operator/blob/main/deploy/twingate-operator/values.yaml
+- Support: GitHub issues, Twingate forum (https://forum.twingate.com/), or support tickets (https://help.twingate.com/)
