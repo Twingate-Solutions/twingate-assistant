@@ -184,6 +184,7 @@ of file live there:
 | Firewall rules, egress policy, DPI / SSL inspection issues | `firewalls-and-twingate.md`, `firewall-failures.md` |
 | P2P establishment failures, NAT traversal, Relay fallback | `troubleshooting-p2p.md` |
 | Split-tunnel routing, traffic not flowing through Twingate | `split-tunnel-failures.md` |
+| SCIM sync: users/groups created but memberships never apply, `User not found` on profile updates, IdP reports `SUCCESS` | `skills/twingate-identity/references/scim-sync-troubleshooting-se-notes.md` |
 | **Community diagnostic scripts** — shell/Python utilities for DNS lookups, connectivity checks, and traceroute-style analysis in Twingate environments (read-only, no unified CLI) | `gh-twingate-solutions-network-utilities.md` |
 
 **Help-center corpus, by symptom cluster** (72 articles — filenames listed in full so

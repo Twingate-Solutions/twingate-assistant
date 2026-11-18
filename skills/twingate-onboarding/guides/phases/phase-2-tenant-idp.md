@@ -34,5 +34,8 @@ used by an in-scope resource maps to ≥1 group with a `twingate_id`.
 
 ## Notes
 
+- A synced group with zero members while the IdP shows it populated, or an IdP reporting a
+  successful push that changed nothing: grep twingate-identity references for
+  "memberships never apply" before anything else.
 - Personas used only by out-of-scope resources don't block the gate.
 - Device trust and policy tiers are configured later (Phase 4/9), but note MDM/EDR now.

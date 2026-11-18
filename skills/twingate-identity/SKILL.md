@@ -37,6 +37,10 @@ what conditions, and for how long, this skill governs those decisions.
   exclusively.
 - **Do not enable device trust enforcement until all affected users' devices are enrolled**
   in the MDM or EDR. Enabling early locks out users whose devices aren't registered yet.
+- **Copy the SCIM endpoint host from the Admin Console, shard included.** A shard-less
+  base URL lets the IdP's reads through but drops its writes: users and groups appear,
+  memberships never apply, and Okta still reports `SUCCESS`. After the first sync, check
+  member counts, not just that groups exist.
 - **When running multiple IdPs, enforce strict email uniqueness.** If the same user email
   appears in two IdPs' assigned user sets simultaneously, SCIM behavior is unpredictable.
 - **Prefer the supported native integration over custom automation.** Reach for the
@@ -56,6 +60,7 @@ details live in the file bodies, so a filename scan alone will miss them:
 grep -ril "fleetdm" references/        # -> gh-twingate-solutions-twingate-mdm-connector.md
 grep -ril "no matching user" references/
 grep -ril "assignment required" references/
+grep -ril "user not found" references/           # -> scim-sync-troubleshooting-se-notes.md
 grep -ril "internet security role" references/   # -> 2026-10-admin-role-changes.md
 ```
 
@@ -114,6 +119,7 @@ of file live there:
 | Keycloak | `keycloak-configuration.md` |
 | Active Directory | `using-active-directory-with-twingate.md` |
 | SCIM endpoint, provisioning API, attribute mapping | `scim-provisioning-api.md` |
+| **SCIM sync failing silently** — users/groups created but memberships never apply, `User not found` on profile updates, Okta reports `SUCCESS`, `GET` with no `PATCH` in logs (SCIM URL missing the region shard) | `scim-sync-troubleshooting-se-notes.md` (hand-authored) |
 | Security policies (overview, design, migration, sign-in) | `security-policies.md`, `security-policies-best-practices.md`, `security-policy-guides.md`, `security-policies-migration-guide.md`, `sign-in-policy.md` |
 | MFA / 2FA enforcement | `two-factor-authentication.md`, `two-factor-authentication-security-policies.md` |
 | Device trust (overview, posture checks, managed devices) | `trusted-devices.md`, `device-posture-checks.md`, `managed-devices.md`, `device-security-guide.md`, `windows-managed-devices.md`, `manually-verified-devices.md`, `managing-devices.md`, `device-failures.md`, `devices.md`, `device-only-resource-policies.md` |
