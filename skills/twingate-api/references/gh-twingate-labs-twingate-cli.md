@@ -1,29 +1,32 @@
 ---
 source: https://github.com/Twingate-Labs/Twingate-CLI
 type: github
-fetched: 2026-11-08
-source_version: 66651d6e2a2b258720cdcef9c53e5cb3b32d73e1
+fetched: 2026-11-19
+source_version: 6a1573d063bfce166893a9773dc595d65b0f6ed8
 trust: official
 ---
 
 # Twingate Admin CLI
 
 ## Summary
-A Python command-line tool for the Twingate Admin GraphQL API. Covers CRUD operations on remote networks, resources, connectors, groups, users, service accounts, policies, access requests, gateways, certificate authorities, and DNS security settings. Supports multiple tenant sessions, three output formats, and bulk operations like synced-group migration, backup, restore, import, and remove.
+A Python command-line tool for the Twingate Admin GraphQL API. Covers CRUD operations on remote networks, resources, connectors, groups, users, service accounts, policies, access requests, gateways, certificate authorities, and DNS security settings. Supports multiple tenant sessions, three output formats, and bulk operations like synced-group migration, backup, restore, import, and remove. `resource bypass` converts network Resources to bypass Twingate in one step.
 
 ## Key Information
-- MIT licensed; Python 3.9+
-- Built with Typer; uses `keyring` for credential storage
+- MIT licensed; Python 3.10+ (Python 3.9 dropped in v3.2.4; on 3.9 `pip` refuses to install this version and keeps the previous release)
+- Built with Typer (requirement is `typer>=0.12.0`, no `all` extra); uses `keyring` for credential storage
 - Output formats: JSON (default), CSV, Pandas DataFrame
 - Auto-retries on HTTP 429 with `Retry-After` respect (3 retries max)
-- Multi-tenant support via named sessions (**`-s <session>` is required for every command that contacts Twingate; there is no default session**)
+- Multi-tenant support via named sessions (**`-s <session>` is required for every command that contacts Twingate; there is no default session**). After `auth login`, `tgcli` prints an example such as `tgcli -s NAME resource list` on stderr.
 - Bulk operations: group migration (Synced → Manual), device trust updates, serial-number allowlists, tenant backup, restore, import from backup or custom CSV/JSON files, bulk remove
+- `resource bypass -i <id>[,<id>...]`: removes the Security Policy, opens all TCP/UDP ports, allows ICMP and sets `BYPASS_TWINGATE` in one update. Dry run unless `--execute` is given. Output rows record the prior policy and port/ICMP settings. Non-network Resources, unknown or unreadable IDs are reported as blocked; Resources already bypassing are left alone; exit code 1 if any are blocked or refused. `resource routing -m BYPASS_TWINGATE` fails if the Resource has a Security Policy or port/ICMP restriction and now points at `resource bypass`.
+- `import --ca-files` normalizes CRLF line endings to newlines when reading certificate files (v3.2.2)
+- CI: GitHub Actions runs tests on pull requests and pushes to `main`, on Linux, macOS and Windows with Python 3.10 and 3.13 (Windows does not block merges yet)
 - Shell completion via `tgcli --install-completion` (zsh, bash 4.4+, fish, PowerShell); `-s`/`--session` and `group migrate --group` complete their values
 - Standard output carries only results; progress and advice go to standard error. Exit code `0` = success; `1` = API refused a change (printed in full on stdout, reason repeated on stderr) or any failure in a multi-item operation
-- Current release: **v3.2.1**
+- Current release: **v3.2.4**
 
 ## Prerequisites
-- Python 3.9 or later
+- Python 3.10 or later
 - Twingate account with an Admin API token (created in Admin Console under Settings > API; a long string with no fixed prefix, shown only once)
 - **Headless/CI Linux only:** `pip install keyrings.alt` + `export PYTHON_KEYRING_BACKEND=keyrings.alt.file.PlaintextKeyring`
 
@@ -39,7 +42,7 @@ pip install .
 
 To install a specific tagged release instead of latest `main`:
 ```
-pip install "git+https://github.com/Twingate-Labs/Twingate-CLI.git@v3.2.1"
+pip install "git+https://github.com/Twingate-Labs/Twingate-CLI.git@v3.2.4"
 ```
 
 **Windows (PowerShell):**

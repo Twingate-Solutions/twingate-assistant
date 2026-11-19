@@ -1,58 +1,64 @@
 ---
 source: https://www.twingate.com/docs/web-app-django
 type: docs
-fetched: 2026-11-13
-source_version: 7a3765f63ba66e376190d68497c83943939ec8efed434cd9faeaf12e339df547
+fetched: 2026-11-19
+source_version: 65a99dfbec2b877849fa0c62eb9fa2aa015ac6a60f85d03663f543647756745c
 trust: official
 ---
 
-# Django JWT Middleware for Identity Firewall
+# Django JWT Middleware (Twingate Privileged Access for Web Apps)
 
 ## Summary
-Guide to verifying Twingate Identity Firewall JWTs in a Django app using PyJWT. A custom middleware validates the signed JWT injected by the Twingate Gateway, logs the user into a Django session, and exposes claims on `request.gat`.
+Shows how to verify Twingate Privileged Access Management JWTs in a Django app using PyJWT. A custom middleware validates the Gateway-injected Bearer token, attaches claims to `request.gat`, and logs the user into Django's session.
 
 ## Key Information
-- The Gateway injects **no headers by default**. You must configure a request header on the Web App Resource.
-- Recommended header: key `Authorization`, value template `Bearer {{jwt}}`. Header name and format are configurable at the Gateway/Resource level.
-- Verification uses **ES256** with keys from the tenant JWKS endpoint.
+- The Gateway injects no headers by default. You must configure a request header on the Web App Resource.
+- Verification uses ES256 with keys fetched from the tenant JWKS endpoint (cached 24h, 5s timeout).
 - `TwingateVerifier.verify()` flow:
   1. Decode unverified to read `iss` and `aud`.
-  2. Reject if the issuer is not in the allowed list (`twingate`) or the audience is not allowed.
-  3. Read `kid` from the header and fetch the signing key via `PyJWKClient`.
-  4. Re-decode with full signature, issuer, audience, and `exp` validation.
-- `PyJWKClient` caches the JWK set for 24 hours (timeout 5s).
-- Missing, malformed, or invalid tokens pass through to the next middleware (the failure is logged as a warning), so it can coexist with other auth and public routes.
-- On a valid token: claims are attached to `request.gat`, and a Django user is created via `get_or_create` (username, email, first_name, last_name). If a different user is logged in, they are logged out first. If the same user is logged in, the request passes straight through.
-- Views read identity from `request.gat["user"]` (`username`, `groups`, etc.). Group authorization checks `gat["user"]["groups"]`.
+  2. Reject if the issuer isn't `twingate` or the audience isn't allowed.
+  3. Read `kid` from the header and fetch the signing key.
+  4. Re-decode with full signature, issuer, audience and `exp` validation.
+- Missing, malformed or invalid tokens fall through to the next middleware (the failure is logged), so it can coexist with other auth and public routes.
+- On success, the middleware:
+  - sets `request.gat` to the decoded claims;
+  - calls `get_or_create` for a Django user keyed on `gat["user"]["username"]` (defaults: email, first_name, last_name);
+  - logs out a different logged-in user first;
+  - skips login if the same user is already authenticated.
+- Group names are in `gat["user"]["groups"]`, used for authorization in views (return 401 if `request.gat` is None, 403 if the group is missing).
 
 ## Prerequisites
 - Python 3.8+
 - A Django project
-- Web App Resource with the request header configured
+- A Web App Resource with the Gateway configured to inject the JWT
 
 ## Step-by-Step
-1. On the Web App Resource, add header `Authorization` = `Bearer {{jwt}}`.
-2. Install: `pip install pyjwt[crypto]` (the `[crypto]` extra installs `cryptography`, required for signature verification).
-3. Create `twingate_middleware.py` in your Django app with `TwingateMiddleware` and `TwingateVerifier` classes (see the source page for the full code).
+1. On the Web App Resource, add the request header: key `Authorization`, value `Bearer {{jwt}}`.
+2. Install: `pip install pyjwt[crypto]` (the `crypto` extra provides `cryptography` for signature verification).
+3. Create `twingate_middleware.py` in your app directory, with a `TwingateMiddleware` class and a `TwingateVerifier` class (the full code is on the source page).
 4. Register in `settings.py` `MIDDLEWARE`, after `SessionMiddleware` and `AuthenticationMiddleware`:
    `"yourapp.twingate_middleware.TwingateMiddleware"`
-5. In views, use `getattr(request, "gat", None)`. Return 401 if `None`, and 403 if the required group is missing.
+5. In views, read `getattr(request, "gat", None)` and check `gat["user"]["groups"]` as needed.
 
 ## Configuration Values
-Constants at the top of `twingate_middleware.py`:
-- `TWINGATE_JWKS_URL` = `https://<your-tenant>.twingate.com/api/v1/jwk/ec`
-- `AUDIENCE` = your Twingate network name (tenant); must match the token's `aud` claim
-- `allowed_issuers` = `["twingate"]`
+| Setting | Value |
+|---|---|
+| `TWINGATE_JWKS_URL` | `https://<your-tenant>.twingate.com/api/v1/jwk/ec` (constant in `twingate_middleware.py`) |
+| `AUDIENCE` | Your Twingate network name; must match the token's `aud` claim |
+| `allowed_issuers` | `["twingate"]` |
+| Algorithm | `ES256` |
+| JWKS cache lifespan | 24 hours |
+| JWKS timeout | 5 seconds |
 
 ## Gotchas
-- Middleware order matters: it must come after the session and auth middleware because it uses `request.user`, `login()`, and `logout()`.
-- The middleware does not reject unauthenticated requests. Views must check `request.gat` (or use other auth enforcement) themselves.
-- Replace both `<your-tenant>` placeholders (JWKS URL and audience).
-- The auto-provisioned Django user is created with defaults only on first sight. Later changes to email or name in Twingate are not synced.
-- Group names are case-sensitive strings in `gat["user"]["groups"]`.
+- Middleware order matters. It must come after the session and auth middleware, because it uses `request.user`, `login()` and `logout()`.
+- Replace both `<your-tenant>` placeholders (JWKS URL and `AUDIENCE`).
+- The header name and format are configurable at the Gateway/Resource level. The code assumes `Authorization: Bearer`, so change the middleware if you use a different header.
+- Invalid tokens are not rejected by the middleware itself. Views must enforce access by checking `request.gat`.
+- The middleware auto-provisions Django users on first sight.
 
 ## Related Docs
-- Identity Firewall for Web Apps overview (architecture and JWT reference)
+- Privileged Access for Web Apps overview
 - JWT Payload Reference
 - Request Headers (header options and template variables)
 - Express.js, Next.js, and Next.js + Auth.js guides

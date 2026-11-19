@@ -1,63 +1,62 @@
 ---
 source: https://www.twingate.com/docs/web-app-nextjs-authjs
 type: docs
-fetched: 2026-11-13
-source_version: 1425bbc3a2d8210fa197dc71cea63e393c97c67bfbf55514a22647faf334da8e
+fetched: 2026-11-19
+source_version: 6d1be189356d64d489e0dfccce7494974d284b3300271552de46379109d98729
 trust: official
 ---
 
 # Next.js + Auth.js Session Integration
 
 ## Summary
-Combines Twingate Identity Firewall with Auth.js (NextAuth v5) in Next.js. Middleware verifies the Twingate JWT from the `Authorization` header and mints an Auth.js session cookie. This enables `auth()` in Server Components and `useSession()` in Client Components.
+Combines Twingate Privileged Access for web apps with Auth.js (NextAuth v5) in Next.js. Middleware verifies the Twingate JWT from the `Authorization` header and mints an Auth.js session cookie. This enables `auth()` in Server Components and `useSession()` in Client Components.
 
 ## Key Information
-- Use this guide if you need `useSession()` in Client Components, session persistence across navigation, or already use Auth.js. For identity only in API routes or a few Server Components, use the plain Next.js middleware guide instead.
+- Use this guide if you need `useSession()` in Client Components, session persistence across navigation, or already use Auth.js. Otherwise use the plain Next.js middleware guide.
+- Auth.js is configured with no providers (`providers: []`) and `session.strategy: "jwt"`. The middleware creates the session.
 - Middleware flow:
-  1. Check for an existing valid Auth.js session cookie. If valid, pass through without re-verifying.
-  2. Otherwise verify the Twingate JWT (ES256, issuer `twingate`, audience from env, required claims `exp`/`iat`, 30s clock tolerance) via remote JWKS using `jose`.
-  3. Encode a new Auth.js session token (1-hour `maxAge`) with `sub`, `email`, `name`, `twingateGroups`.
+  1. If a valid, unexpired Auth.js session cookie exists, pass the request through.
+  2. Otherwise verify the Twingate JWT with `jose` (`jwtVerify`) using remote JWKS.
+  3. Encode a new session token (1-hour `maxAge`).
   4. Set the cookie on both the request (so `auth()` works in the same request) and the response (so the browser persists it).
-- `auth.ts` uses no providers and `session: { strategy: "jwt" }`. The `session` callback maps `token.sub` and `twingateGroups` into the session. TypeScript module augmentation adds `twingateGroups` to `Session`.
-- Cookie name: `authjs.session-token` in dev, `__Secure-authjs.session-token` in production. It is also used as the `salt`.
-- Middleware matcher excludes `_next/static`, `_next/image`, `favicon.ico`, `api/health`.
-- Wrap the root layout in `<SessionProvider>` (from `next-auth/react`) for client-side `useSession()`.
-- Group authorization: `session.user.twingateGroups.includes("admin")`, with `redirect("/")` if it fails.
+- JWT verification: algorithm `ES256`, issuer `twingate`, audience `TWINGATE_AUDIENCE`, required claims `exp` and `iat`, clock tolerance 30s.
+- Session mapping: `sub` = `user.id`, `email` and `name` = `user.username`, `twingateGroups` = `user.groups ?? []`.
+- Missing auth header: request continues. Malformed header or invalid token/claims: 401 JSON.
+- Matcher excludes `_next/static`, `_next/image`, `favicon.ico`, `api/health`.
 
 ## Prerequisites
 - Next.js 14+ with App Router
-- Twingate Web App Resource with the Gateway configured to inject the JWT
 - Auth.js v5 (`next-auth@beta`)
+- Twingate Web App Resource configured to inject the JWT
 
 ## Step-by-Step
-1. On the Web App Resource, add request header: Key `Authorization`, Value `Bearer {{jwt}}`. (The Gateway injects no headers by default.)
+1. On the Web App Resource, add request header: key `Authorization`, value `Bearer {{jwt}}` (the Gateway injects no headers by default).
 2. Install: `npm install next-auth@beta jose`
-3. Run `npx auth secret` to generate `AUTH_SECRET` in `.env.local`.
-4. Create `src/middleware.ts` (verification and session minting as described above).
-5. Create `src/auth.ts` exporting `{ auth, handlers }` from `NextAuth(...)`.
-6. Wrap `src/app/layout.tsx` with `SessionProvider`.
-7. Use `await auth()` in Server Components or `useSession()` in Client Components.
+3. Generate the secret: `npx auth secret` (creates `.env.local` with `AUTH_SECRET`).
+4. Create `src/middleware.ts` (verify the JWT, mint the session cookie).
+5. Create `src/auth.ts` (export `auth` and `handlers`; add a `session` callback that maps `token.sub` to `session.user.id` and `token.twingateGroups` to `session.user.twingateGroups`; augment the `Session` type with `twingateGroups: string[]`).
+6. Wrap the root layout in `<SessionProvider>` from `next-auth/react`.
+7. Use `await auth()` in Server Components, `useSession()` in Client Components. For group authorization, check `session.user.twingateGroups.includes("admin")` and `redirect("/")` otherwise.
 
 ## Configuration Values
 | Variable | Description |
 |---|---|
 | `TWINGATE_JWKS_URL` | `https://<your-tenant>.twingate.com/api/v1/jwk/ec` |
-| `TWINGATE_AUDIENCE` | Twingate network name, must match the `aud` claim (e.g., `autoco` for `https://autoco.twingate.com`) |
-| `AUTH_SECRET` | Random secret that encrypts session cookies |
+| `TWINGATE_AUDIENCE` | Twingate network name, must match the `aud` claim (e.g. `autoco` for `autoco.twingate.com`) |
+| `AUTH_SECRET` | Random secret for encrypting session cookies |
 
 All go in `.env.local`.
 
 ## Gotchas
-- Auth.js v5 beta is required; v4 will not work.
-- The header name and format are configurable at the Gateway level. The middleware assumes `Authorization: Bearer`, so change the code if you use a different header.
-- A malformed `Authorization` header returns 401. A missing header passes the request through unauthenticated, so pages must check `auth()` themselves.
-- Invalid or missing `user.id`/`user.username` claims return 401.
-- The existing session is trusted until it expires (1 hour), so changes in Twingate group membership are not reflected until then.
-- The cookie `salt` must match the cookie name between `encode` and `decode`.
-- Verification errors on an existing cookie are swallowed and fall through to JWT re-verification.
+- The cookie name differs by environment: `authjs.session-token` (dev) vs `__Secure-authjs.session-token` (production). The same value is used as the encode/decode `salt`.
+- The cookie is set `secure` only when the request protocol is https.
+- Existing-session check runs first, so the Twingate JWT is not re-verified until the session expires (1 hour). Group changes are reflected only after the session expires.
+- Requests with no `Authorization` header pass through unauthenticated; check `auth()` results in pages.
+- The header name and format are configurable at the Gateway/Resource level. The code assumes `Authorization: Bearer`.
+- Stable Auth.js v4 will not work; v5 beta is required.
 
 ## Related Docs
-- Identity Firewall for Web Apps overview
+- Privileged Access for Web Apps overview (architecture, JWT reference)
 - Plain Next.js middleware guide
 - JWT Payload Reference
 - Request Headers

@@ -1,15 +1,15 @@
 ---
 source: https://github.com/Twingate/gateway/wiki
 type: github
-fetched: 2026-10-28
-source_version: 53fd307734a59f53d8c3a97ae390fe621fdc3650
+fetched: 2026-11-19
+source_version: c133fe3095e3aac7e56c1b3a15c6e47cfff6e895
 trust: official
 ---
 
 # Twingate Gateway
 
 ## Summary
-The Twingate Gateway is an open-source Layer 7 reverse proxy deployed within your environment that enables identity propagation and auditing for privileged access to infrastructure. It integrates with Twingate's Zero Trust network to provide secure access to Kubernetes clusters, SSH servers, and web applications without storing credentials on end-user machines. All audit logs and session recordings remain within your infrastructure.
+The Twingate Gateway is an open-source Layer 7 reverse proxy deployed within your environment that enables identity propagation and auditing for privileged access to infrastructure. It is part of Twingate Privileged Access Management (PAM), which extends Zero Trust controls to every user, resource, and agent in an organization. It integrates with Twingate's Zero Trust network to provide secure access to Kubernetes clusters, SSH servers, and web applications without storing credentials on end-user machines. All audit logs and session recordings remain within your infrastructure.
 
 ## Key Information
 - **Supported protocols:** Kubernetes, SSH, Web App (Database coming soon)
@@ -20,6 +20,7 @@ The Twingate Gateway is an open-source Layer 7 reverse proxy deployed within you
 - **Deployment:** Helm chart hosted at `ghcr.io/twingate/helmcharts/gateway`; recommended as subchart of Twingate Operator
 - **Minimum client version:** 2025.175; Privileged Access available on macOS, Windows, Linux only
 - **Releases:** Semantic versioning via `make cut-release` (dev) or `make cut-release-prod`
+- **Service annotations:** Instead of a standalone `TwingateResource`, the operator can create a resource from annotations on a Service (`resource.twingate.com/downstreamPort`, `resource.twingate.com/upstreamPort`; `upstreamPort` defaults to the Service's port if it exposes only one). See the operator wiki's "Annotating a Service" section in the Privileged Access Management User Guide.
 
 ## Prerequisites
 - Twingate account with admin privileges
