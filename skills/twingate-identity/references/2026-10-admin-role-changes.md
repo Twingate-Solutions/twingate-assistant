@@ -52,7 +52,7 @@ Twingate is updating the Support and DevOps admin roles to restrict access to se
 - Users who relied on Support/DevOps to view DNS filtering logs or Billing lose that access — audit assignments before the change
 
 ## Related Docs
-- [Admin Roles overview](https://www.twingate.com/docs/admin-roles) — summarized in `admins.md`
+- [Admin Roles overview](https://www.twingate.com/docs/admins) — summarized in `admins.md`
 - Helpdesk role documentation
 - Internet Security role documentation
 - Twingate Support: contact for questions about these changes

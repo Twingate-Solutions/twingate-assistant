@@ -274,6 +274,34 @@ def test_process_doc_hash_skip(tmp_path):
     assert output_file.read_text(encoding="utf-8") == "old summary"
 
 
+def test_process_doc_resummarizes_a_truncated_reference_even_when_unchanged(tmp_path):
+    """An existing reference that ends mid-link is re-summarized despite a hash match."""
+    skills_dir = tmp_path / "skills"
+    triage_dir = skills_dir / "_triage"
+    url = "https://www.twingate.com/docs/connector-deployment"
+    output_file = skills_dir / "twingate-connectors" / "references" / "connector-deployment.md"
+    output_file.parent.mkdir(parents=True)
+    output_file.write_text(
+        "---\nsource: x\n---\n\n# T\n## Related Docs\n- [Peer](https://www.t", encoding="utf-8"
+    )
+    hash_cache = {url: "hash001"}
+    stats = {"updated": 0, "skipped": 0, "failed": 0}
+
+    with (
+        patch("update_references.SKILLS_DIR", skills_dir),
+        patch("update_references.TRIAGE_DIR", triage_dir),
+        patch("update_references.fetch_doc_html", return_value="<html></html>"),
+        patch("update_references.extract_text_from_html", return_value="same content"),
+        patch("update_references.content_hash", return_value="hash001"),
+        patch("update_references.summarize_with_backoff", return_value="# Fresh\n\nWhole summary.") as mock_sum,
+    ):
+        process_doc(url, "twingate-connectors", hash_cache, stats)
+
+    mock_sum.assert_called_once()
+    assert stats["updated"] == 1
+    assert "Whole summary." in output_file.read_text(encoding="utf-8")
+
+
 def test_process_doc_summary_fail(tmp_path):
     """When summarize_with_backoff returns None, stats['failed'] increments."""
     skills_dir = tmp_path / "skills"
@@ -783,7 +811,7 @@ def test_process_doc_skips_manual_reference(tmp_path):
     triage_dir = skills_dir / "_triage"
     url = "https://www.twingate.com/docs/gateway-troubleshooting"
 
-    manual_file = skills_dir / "twingate-idfw" / "references" / "gateway-troubleshooting.md"
+    manual_file = skills_dir / "twingate-pam" / "references" / "gateway-troubleshooting.md"
     manual_file.parent.mkdir(parents=True)
     manual_file.write_text(_manual_content(), encoding="utf-8")
 
@@ -796,7 +824,7 @@ def test_process_doc_skips_manual_reference(tmp_path):
         patch("update_references.fetch_doc_html") as mock_fetch,
         patch("update_references.summarize_with_backoff") as mock_summarize,
     ):
-        process_doc(url, "twingate-idfw", hash_cache, stats)
+        process_doc(url, "twingate-pam", hash_cache, stats)
 
     assert stats == {"updated": 0, "skipped": 1, "failed": 0}
     mock_fetch.assert_not_called()
@@ -808,7 +836,7 @@ def test_process_doc_skips_manual_reference(tmp_path):
 def test_write_reference_file_rejects_manual_overwrite(tmp_path):
     """write_reference_file refuses to clobber a hand-authored reference."""
     skills_dir = tmp_path / "skills"
-    manual_file = skills_dir / "twingate-idfw" / "references" / "gateway-troubleshooting.md"
+    manual_file = skills_dir / "twingate-pam" / "references" / "gateway-troubleshooting.md"
     manual_file.parent.mkdir(parents=True)
     manual_file.write_text(_manual_content(), encoding="utf-8")
 
@@ -817,7 +845,7 @@ def test_write_reference_file_rejects_manual_overwrite(tmp_path):
         pytest.raises(ValueError, match="hand-authored"),
     ):
         write_reference_file(
-            "twingate-idfw",
+            "twingate-pam",
             "gateway-troubleshooting",
             "## Generated",
             source="https://www.twingate.com/docs/gateway-troubleshooting",
@@ -1249,6 +1277,42 @@ def test_main_excludes_configured_urls_from_discovery(tmp_path):
     assert not (skills_dir / "twingate-connectors" / "references" / "unlisted.md").exists()
 
 
+def test_main_runs_link_maintenance_with_sitemap_and_mapped_urls(tmp_path):
+    """Link maintenance gets every kept sitemap URL plus mapped (possibly
+    unlisted) pages, minus excluded URLs, and the mapping's link_aliases."""
+    skills_dir = tmp_path / "skills"
+    sitemap_url = "https://www.twingate.com/docs/connectors"
+    unlisted_mapped = "https://www.twingate.com/docs/trusted-devices"
+    excluded = "https://www.twingate.com/docs/identity-firewall"
+    aliases = {excluded: "https://www.twingate.com/docs/privileged-access-management"}
+    fake_mapping = {
+        "sources": [{"name": "docs", "sitemap_url": "s", "path_filter": "/docs/", "type": "docs"}],
+        "docs": [{"url": unlisted_mapped, "skill": "twingate-identity"}],
+        "exclude": [excluded],
+        "link_aliases": aliases,
+        "auto_assign_patterns": [],
+    }
+
+    with (
+        patch("update_references.check_api_health", return_value=True),
+        patch("update_references.process_github_source"),
+        patch("update_references.SKILLS_DIR", skills_dir),
+        patch("update_references.TRIAGE_DIR", skills_dir / "_triage"),
+        patch("update_references.fetch_sitemap", return_value=[sitemap_url, excluded]),
+        patch("update_references.diff_docs", return_value=([], [])),
+        patch("update_references.load_mapping", return_value=fake_mapping),
+        patch("update_references.process_doc", side_effect=lambda *a, **k: a[3].__setitem__("skipped", 1)),
+        patch("update_references.repair_reference_tree") as mock_repair,
+    ):
+        mock_repair.return_value = {"files_changed": 0, "rewritten": 0, "unlinked": 0, "unresolved": 0}
+        assert main() == 0
+
+    args = mock_repair.call_args.args
+    assert args[0] == skills_dir
+    assert args[1] == {sitemap_url, unlisted_mapped}
+    assert args[2] == aliases
+
+
 # ---------------------------------------------------------------------------
 # process_doc — churn-attribution metrics + shadow-hash cache
 # ---------------------------------------------------------------------------
@@ -1424,7 +1488,7 @@ def test_process_doc_manual_reference_records_metrics_manual_skipped(tmp_path):
     triage_dir = skills_dir / "_triage"
     url = "https://www.twingate.com/docs/gateway-troubleshooting"
 
-    manual_file = skills_dir / "twingate-idfw" / "references" / "gateway-troubleshooting.md"
+    manual_file = skills_dir / "twingate-pam" / "references" / "gateway-troubleshooting.md"
     manual_file.parent.mkdir(parents=True)
     manual_file.write_text(_manual_content(), encoding="utf-8")
 
@@ -1438,7 +1502,7 @@ def test_process_doc_manual_reference_records_metrics_manual_skipped(tmp_path):
         patch("update_references.fetch_doc_html") as mock_fetch,
         patch("update_references.summarize_with_backoff") as mock_summarize,
     ):
-        process_doc(url, "twingate-idfw", hash_cache, stats, metrics=metrics)
+        process_doc(url, "twingate-pam", hash_cache, stats, metrics=metrics)
 
     assert stats == {"updated": 0, "skipped": 1, "failed": 0}
     assert metrics.sources["docs"]["manual_skipped"] == 1
@@ -1964,6 +2028,33 @@ def test_process_github_source_unmapped_repo_routes_to_triage(tmp_path):
     assert "triage: unassigned" in triage_file.read_text(encoding="utf-8")
 
 
+def test_process_github_source_excluded_repo_is_skipped(tmp_path):
+    """A repo listed in `exclude_repos` is neither summarized nor triaged."""
+    skills_dir = tmp_path / "skills"
+    triage_dir = skills_dir / "_triage"
+    repo = _repo_info(name=".github", full_name="Twingate/.github")
+    fake_mapping = {"repos": [], "exclude_repos": ["Twingate/.github"]}
+    stats = {"updated": 0, "skipped": 0, "failed": 0}
+    github_metrics = GitHubRunMetrics()
+
+    with (
+        patch("update_references.SKILLS_DIR", skills_dir),
+        patch("update_references.TRIAGE_DIR", triage_dir),
+        patch("update_references.load_mapping", return_value=fake_mapping),
+        patch("update_references.load_repo_state", return_value={}),
+        patch("update_references.save_repo_state"),
+        patch("update_references.discover_org_repos", side_effect=_discover_dispatch(repo)),
+        patch("update_references.get_default_branch_head_sha") as mock_head,
+        patch("update_references.summarize_repo_full") as mock_full,
+    ):
+        process_github_source("2026-08-06", stats, github_metrics)
+
+    mock_head.assert_not_called()
+    mock_full.assert_not_called()
+    assert not triage_dir.exists() or not any(triage_dir.iterdir())
+    assert stats == {"updated": 0, "skipped": 0, "failed": 0}
+
+
 def test_process_github_source_manual_reference_collision_is_untouched(tmp_path):
     """A hand-authored reference file colliding with the computed slug is
     never overwritten, and Claude is never called for that repo."""
@@ -2039,6 +2130,43 @@ def test_process_github_source_skips_when_head_sha_unchanged_and_doc_exists(tmp_
     mock_full.assert_not_called()
     mock_delta.assert_not_called()
     assert doc_path.read_text(encoding="utf-8") == "---\nsource: x\n---\n\nExisting body"
+
+
+def test_process_github_source_truncated_doc_gets_full_resummarize_despite_same_sha(tmp_path):
+    """A truncated gh-* reference is re-summarized in full mode (never delta'd
+    against the truncated body), even when the head sha is unchanged."""
+    skills_dir = tmp_path / "skills"
+    triage_dir = skills_dir / "_triage"
+    repo = _repo_info(pushed_at="2024-07-01T00:00:00Z")
+    fake_mapping = {"repos": [{"full_name": "Twingate/example-repo", "skill": "twingate-terraform"}]}
+    doc_path = skills_dir / "twingate-terraform" / "references" / "gh-twingate-example-repo.md"
+    doc_path.parent.mkdir(parents=True)
+    doc_path.write_text("---\nsource: x\n---\n\n# Repo\n- [Config](documentation/", encoding="utf-8")
+    state = {"Twingate/example-repo": {"last_sha": "samesha000", "pushed_at": "2024-01-01T00:00:00Z"}}
+    result = SummaryResult(text="# Repo\n\nComplete.", input_tokens=1, output_tokens=1, model="m")
+    stats = {"updated": 0, "skipped": 0, "failed": 0}
+
+    with (
+        patch("update_references.SKILLS_DIR", skills_dir),
+        patch("update_references.TRIAGE_DIR", triage_dir),
+        patch("update_references.load_mapping", return_value=fake_mapping),
+        patch("update_references.load_repo_state", return_value=state),
+        patch("update_references.save_repo_state"),
+        patch("update_references.discover_org_repos", side_effect=_discover_dispatch(repo)),
+        patch("update_references.get_default_branch_head_sha", return_value="samesha000"),
+        patch("update_references.build_filtered_diff") as mock_diff,
+        patch("update_references.fetch_repo_readme", return_value="# README"),
+        patch("update_references.fetch_latest_release_notes", return_value=None),
+        patch("update_references.summarize_repo_full", return_value=result) as mock_full,
+        patch("update_references.summarize_repo_delta") as mock_delta,
+    ):
+        process_github_source("2026-08-06", stats, GitHubRunMetrics())
+
+    mock_full.assert_called_once()
+    mock_delta.assert_not_called()
+    mock_diff.assert_not_called()
+    assert stats["updated"] == 1
+    assert "Complete." in doc_path.read_text(encoding="utf-8")
 
 
 def test_process_github_source_stub_repo_writes_one_liner_without_claude_call(tmp_path):

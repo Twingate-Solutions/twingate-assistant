@@ -58,8 +58,8 @@ None.
 
 ## Related Docs
 - [Twingate Trust Portal](https://trust.twingate.com) (external)
-- [Responsible Disclosure Policy](https://www.twingate.com/docs/responsible-disclosure)
-- [GDPR Compliance](https://www.twingate.com/docs/gdpr)
-- [HIPAA Compliance](https://www.twingate.com/docs/hipaa)
-- [SOC 2 Report](https://www.twingate.com/docs/soc2)
-- [Privacy Policy](https://www.twingate.com/docs/privacy-policy)
+- [Responsible Disclosure Policy](https://www.twingate.com/docs/responsible-disclosure-policy)
+- [GDPR Compliance](https://www.twingate.com/docs/gdpr-compliance)
+- [HIPAA Compliance](https://www.twingate.com/docs/hipaa-compliance)
+- [SOC 2 Report](https://www.twingate.com/docs/soc-2)
+- Privacy Policy

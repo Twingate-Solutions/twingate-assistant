@@ -5,7 +5,7 @@
 any special access patterns decided.
 
 **Load:** twingate-identity (security policies, device trust, JIT/approval access, service
-accounts). twingate-idfw if SSH / Kubernetes / internal web apps need per-user identity.
+accounts). twingate-pam if SSH / Kubernetes / internal web apps need per-user identity.
 
 ## Steps
 
@@ -16,9 +16,9 @@ accounts). twingate-idfw if SSH / Kubernetes / internal web apps need per-user i
    policies need creating. Check twingate-api's schema for what the API can do with policies
    (at the time of writing it can assign policies to groups and to individual access edges, but
    not create policies or edit their rules) — creating policies is usually an admin-console task.
-3. Ask the Phase 4 questions (contractors, service accounts, admin/app split, IDFW candidates).
-4. Optional: delegate a matrix draft to `network-designer`; delegate IDFW candidates to
-   `idfw-deployer`.
+3. Ask the Phase 4 questions (contractors, service accounts, admin/app split, Privileged Access Management (PAM) candidates).
+4. Optional: delegate a matrix draft to `network-designer`; delegate PAM candidates to
+   `pam-deployer`.
 5. Present the final matrix and get an explicit approval; log it as a phase-4 decision
    ("Approved access matrix vN").
 

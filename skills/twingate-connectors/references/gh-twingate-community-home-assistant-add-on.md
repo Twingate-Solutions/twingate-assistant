@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 44f6d226ae3148eaeefb138c2d60bce1a148c4ab
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Connector Home Assistant Add-on
 
 ## Summary
@@ -55,6 +53,6 @@ Check `twingate-connector/config.yaml` in the repo for the authoritative list of
 - This is a community-maintained repository, not an official Twingate-supported product.
 
 ## Related Docs
-- [Twingate Connector documentation](https://www.twingate.com/docs/connector)
+- [Twingate Connector documentation](https://www.twingate.com/docs/connectors)
 - [Home Assistant Add-on development](https://developers.home-assistant.io/docs/add-ons/)
 - [Home Assistant Supervisor add-on store](https://www.home-assistant.io/addons/)

@@ -77,13 +77,14 @@ prompt, load and grep the named skills' `references/` *in addition to* this one 
 at the first skill that matched. Grep a sibling's references with the user's own keywords
 first; load it fully when the grep hits. Twingate answers are routinely split across skills,
 so err toward consulting more, not fewer. Common cross-cutting clusters here: access-model
-design → **architect**; carrying identity *into* an app / SSO / per-request audit → **idfw**;
+design → **architect**; carrying identity *into* an app / SSO / per-request audit → **pam**;
 per-group internet filtering → **dns-security**; scripting the admin API → **api**.
 
 - **→ twingate-architect**: for Resource definition, Remote Network design, or deployment
   sequencing questions
-- **→ twingate-idfw**: for protocol-level identity enforcement on top of network access —
-  SSH PAM, Kubernetes gateway, session recording, and **Privileged Access for Web Apps**
+- **→ twingate-pam**: for protocol-level identity enforcement on top of network access —
+  Privileged Access Management (PAM): Gateway SSH with short-lived certificates, Kubernetes,
+  session recording, and **Privileged Access for Web Apps**
   (SSO into a self-hosted app, injecting/forwarding the user's identity into HTTP requests,
   per-request access audit). If the user asks how to carry IdP identity *into* an app, or to
   audit app access per user, load it.

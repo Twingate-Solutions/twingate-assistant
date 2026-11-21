@@ -20,7 +20,7 @@ Guide for distributing the Twingate Client via Omnissa Workspace ONE MDM on macO
 
 ## Prerequisites
 - Workspace ONE admin access
-- **macOS:** PKG installer downloaded from [Twingate download page](https://www.twingate.com/docs/downloads)
+- **macOS:** PKG installer downloaded from [Twingate download page](https://www.twingate.com/docs/clients)
 - **iOS:** Apple Business Manager account with Twingate app added; Workspace ONE linked to ABM
 
 ## Step-by-Step
@@ -52,7 +52,7 @@ Guide for distributing the Twingate Client via Omnissa Workspace ONE MDM on macO
 - If device assignment is not enabled on iOS, users will be prompted for their personal Apple ID to accept app assignments.
 
 ## Related Docs
-- [Twingate macOS/iOS Download Page](https://www.twingate.com/docs/downloads)
-- [Twingate Configuration Profiles (macOS pre-config)](https://www.twingate.com/docs/configuration-profiles)
+- [Twingate macOS/iOS Download Page](https://www.twingate.com/docs/clients)
+- Twingate Configuration Profiles (macOS pre-config)
 - Workspace ONE official docs: non-App Store app distribution
 - Apple Business Manager + Workspace ONE integration docs

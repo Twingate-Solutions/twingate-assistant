@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: afc9ffacb45dd18f8ef3e3c90a1bf993824dd446
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Helm Charts
 
 ## Summary
@@ -67,6 +65,6 @@ Refer to each chart's individual `values.yaml` for specific parameters. Common T
 
 ## Related Docs
 - [Twingate Documentation](https://docs.twingate.com)
-- [Twingate Connector Deployment](https://docs.twingate.com/docs/connector)
+- [Twingate Connector Deployment](https://www.twingate.com/docs/connectors)
 - [Helm Docs](https://helm.sh/docs/)
 - [Artifact Hub listing](https://artifacthub.io/) (search "Twingate")

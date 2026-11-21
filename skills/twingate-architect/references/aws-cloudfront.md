@@ -57,6 +57,6 @@ Configure IP whitelisting for AWS CloudFront using Twingate AWS Exit Nodes as th
 - Twingate matches on FQDN/IP in the connection request — Resource name must exactly match the CloudFront domain
 
 ## Related Docs
-- [AWS Exit Nodes setup](https://www.twingate.com/docs/aws-exit-nodes)
-- [Creating Twingate Resources and Groups](https://www.twingate.com/docs/resources-and-groups)
+- [AWS Exit Nodes setup](https://www.twingate.com/docs/configuring-aws-exit-nodes)
+- Creating Twingate Resources and Groups
 - [AWS S3 Origin Access Identity documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/)

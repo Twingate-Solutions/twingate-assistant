@@ -51,5 +51,5 @@ Configures Twingate to use Cloudflare Zero Trust's DNS-over-HTTPS (DoH) for encr
 - The DoH URL is location-specific; ensure you copy from the correct location if managing multiple
 
 ## Related Docs
-- [Configure a Custom DoH Resolver in Twingate](https://www.twingate.com/docs/custom-doh) *(referenced in page)*
+- Configure a Custom DoH Resolver in Twingate *(referenced in page)*
 - Cloudflare Zero Trust Gateway DNS Locations documentation

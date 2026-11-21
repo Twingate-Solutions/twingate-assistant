@@ -1,21 +1,23 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator/wiki
 type: github
-fetched: 2026-11-01
-source_version: 59543783a59405bad0a23fe377164fa66b27ea97
+fetched: 2026-11-19
+source_version: fed6a5e92e87bc31004b922a88553fa9dfe33fa1
 trust: official
 ---
 
 # Twingate Kubernetes Operator
 
 ## Summary
-A Kubernetes operator (OSS) that manages Twingate network resources as Kubernetes custom resources. It syncs CRD definitions to the Twingate control plane, handling connectors, resources, access policies, gateways, and identity firewall configuration. Deployed via Helm and built on the `kopf` Python framework.
+A Kubernetes operator (OSS) that manages Twingate network resources as Kubernetes custom resources. It syncs CRD definitions to the Twingate control plane, handling connectors, resources, access policies, gateways, and Privileged Access Management (PAM) configuration. Deployed via Helm and built on the `kopf` Python framework.
 
 ## Key Information
 - API group: `twingate.com/v1beta`
 - Custom resource types: `TwingateConnector`, `TwingateResource`, `TwingateResourceAccess`, `TwingateGroup`, `TwingateGateway`, `TwingateCertificateAuthority`
 - Resource types supported: `Network`, `Kubernetes`, `WebApp`
-- Identity Firewall support via `TwingateGateway` (Layer 7 reverse proxy for Kubernetes impersonation and WebApp header injection)
+- Privileged Access Management (PAM, formerly called Identity Firewall) support via `TwingateGateway` (Layer 7 reverse proxy for Kubernetes impersonation and WebApp header injection)
+- `TwingateGateway` is reached either through `spec.serviceRef` (Service plus port) or `spec.address` (`host` as DNS name or IPv4, plus `port` 1-65535) for indirect access such as proxy, ingress, or private endpoint
+- `WebApp` resources have `downstream.tlsMode` (`TLS13`, `NONE`; default `NONE`) and `upstream.tlsMode` (`VERIFY_FULL`, `VERIFY_CA`, `INSECURE`, `NONE`; default `NONE`)
 - Image auto-update via `imagePolicy` with DockerHub or Google Container Registry providers and cron schedule
 - Kubernetes labels on `TwingateResource` sync to Twingate as tags by default (`syncLabels: true`)
 
@@ -64,4 +66,5 @@ A Kubernetes operator (OSS) that manages Twingate network resources as Kubernete
 - `requestHeaderRewrites` only applies to `WebApp` resources
 - `TwingateGateway` and `TwingateResource` of type `Kubernetes`/`WebApp` require `gatewayRef`; `Network` resources do not allow it
 - `TwingateGateway.spec.remoteNetworkId` is immutable once set (overrides operator-wide default)
-- `spec.protocols` is only accepted on `Network` resources (v3+); setting it on `Kubernetes` or `WebApp` resources causes the API server to reject creates/updates and the operator to
+- `TwingateGateway` must set exactly one of `serviceRef` or `address`
+- `spec.protocols` is only accepted on `Network` resources (v3+); setting it on `Kubernetes` or `WebApp` resources causes the API server to reject creates/updates (CRD validation)

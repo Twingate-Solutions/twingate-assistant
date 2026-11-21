@@ -67,7 +67,7 @@ Host a private Minecraft Java Edition server using Docker Compose with a Twingat
 - **Connector offline**: Verify all three `TWINGATE_*` env vars; check outbound internet; run `docker compose logs twingate-connector`
 
 ## Related Docs
-- [Bedrock Edition guide](https://www.twingate.com/docs/minecraft-bedrock)
-- [Forge/modded guide](https://www.twingate.com/docs/minecraft-forge)
-- [Linux native install](https://www.twingate.com/docs/minecraft-linux)
+- [Bedrock Edition guide](https://www.twingate.com/docs/minecraft-bedrock-server)
+- [Forge/modded guide](https://www.twingate.com/docs/minecraft-forge-server)
+- [Linux native install](https://www.twingate.com/docs/minecraft-server-linux)
 - [itzg/minecraft

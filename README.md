@@ -82,7 +82,7 @@ Skills load automatically when Twingate topics are detected, or you can invoke e
 | `twingate-terraform` | Terraform provider, resource definitions, secrets management |
 | `twingate-pulumi` | Pulumi provider — TypeScript, Python, Go, C# |
 | `twingate-kubernetes` | Helm chart, Kubernetes operator, CRDs, traffic routing |
-| `twingate-idfw` | Identity Firewall — SSH PAM, Kubernetes gateway, session recording |
+| `twingate-pam` | Privileged Access Management (PAM) — the Twingate Gateway for Kubernetes, SSH and web apps, session recording |
 | `twingate-identity` | IdP integration, SCIM, security policies, device trust, JIT |
 | `twingate-api` | GraphQL API, CLI tools, automation scripts |
 | `twingate-dns-security` | DNS filtering, exit networks, DNS-over-HTTPS |
@@ -102,7 +102,7 @@ Agents orchestrate multiple skills for end-to-end workflows. Invoke them by name
 | `gcp-deployer` | Deploying connectors on GCP (Cloud Run, GCE, Secret Manager, Google Workspace) |
 | `deployment-reviewer` | Read-only review of a deployment plan before Remote Networks or Resources are built: unconfirmed items, broad access, missing connector HA |
 | `network-designer` | Planning a new Twingate network before writing IaC — resource strategy, security tiers, output tables |
-| `idfw-deployer` | Implementing certificate-based SSH PAM or kubectl proxy access |
+| `pam-deployer` | Deploying the Twingate Gateway: SSH with short-lived certificates, identity-aware kubectl, web-app identity injection |
 
 Example invocations:
 
@@ -113,6 +113,8 @@ Use the aws-deployer agent to help me set up HA connectors in us-west-2.
 ```text
 Use the network-designer agent to plan our resource structure for three environments.
 ```
+
+> **Renamed in November 2026:** the `twingate-idfw` skill is now `twingate-pam` and the `idfw-deployer` agent is now `pam-deployer`, following Twingate's product rename to Privileged Access Management. Update any prompts or scripts that call them by the old names.
 
 ---
 

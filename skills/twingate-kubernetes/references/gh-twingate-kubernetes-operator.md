@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/kubernetes-operator
 type: github
-fetched: 2026-11-15
-source_version: 40168342d7d3b3e917c0b968779926c315de042b
+fetched: 2026-11-19
+source_version: c40e60e5b6eccd0688b3f94b611a57623ba13528
 trust: official
 ---
 
@@ -17,7 +17,11 @@ The Twingate Kubernetes Operator is a custom controller that lets you configure 
 - Chart source lives in `./deploy/twingate-operator`; default values are in `deploy/twingate-operator/values.yaml`.
 - Container images are on Docker Hub: `twingate/kubernetes-operator`.
 - Documentation is in the GitHub wiki: Wiki, Getting Started, and API Reference pages.
-- Latest release is a chore release (bump of certifi from 2026.7.22 to 2026.10.19, PR #1210).
+- Latest release is v3.1.0 (2026-11-18). It contains CRD changes, so update to the latest CRDs (see the upgrading-chart note in the README). Highlights:
+  - Feature: the `TwingateGateway` address can now be set explicitly (PR #1243).
+  - Performance: integration test runtime cut by 42% (PR #1232).
+  - Chores: many dependency bumps, including gateway 2.0.1 to 2.1.0 in `/deploy/twingate-operator`, croniter 7.0.0, kopf 1.45.2, kubernetes 37.0.2, pydantic 2.14.3; docs for kvz as the macOS local cluster; markdownlint pre-commit hook fix.
+- Previous release: v3.0.2 (2026-10-21), a chore release (certifi bump).
 - Changelog: `CHANGELOG.md`. Developer guide: `DEVELOPER.md`.
 
 ## Prerequisites
@@ -55,7 +59,7 @@ helm upgrade twop ./deploy/twingate-operator --install --wait -f ./deploy/twinga
 - Helm release name used in examples: `twop`.
 
 ## Gotchas
-- With Helm v3, CRDs created by this chart are not updated on upgrade by default; they must be updated manually. See the Helm documentation on CRDs and `helm upgrade`.
+- With Helm v3, CRDs created by this chart are not updated on upgrade by default; they must be updated manually. See the Helm documentation on CRDs and `helm upgrade`. This matters for v3.1.0, which includes CRD changes.
 - The API token must have `Read/Write/Provision` permissions, otherwise resource management will fail.
 - Connectors and a Remote Network must already exist for the cluster.
 

@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: dafb9df9c650cc52c93cc95f4aaee813bbe1127a
 ---
 
-<!-- triage: unassigned -->
-
 # pulumi-scripts
 
 ## Repo Title

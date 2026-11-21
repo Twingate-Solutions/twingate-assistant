@@ -39,6 +39,6 @@ The Twingate Client must be installed and running on a device to access protecte
 - TCP 443 is the minimum required port; without it, the Client cannot communicate at all
 
 ## Related Docs
-- [Download & Installation](https://www.twingate.com/docs/download-and-installation)
+- [Download & Installation](https://www.twingate.com/docs/clients)
 - [Managed Devices](https://www.twingate.com/docs/managed-devices)
 - QUIC/HTTP3 guide (linked inline on the docs page)

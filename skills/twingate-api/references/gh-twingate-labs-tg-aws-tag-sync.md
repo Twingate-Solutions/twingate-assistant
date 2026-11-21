@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: e4d4a550049d02de55b157252bdcb662642967e5
 ---
 
-<!-- triage: unassigned -->
-
 # tg-aws-tag-sync
 
 ## Summary

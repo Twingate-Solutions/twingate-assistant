@@ -1,46 +1,49 @@
 ---
 source: https://help.twingate.com/articles/5856392229-how-do-i-delete-my-twingate-network-tenant
 type: help
-fetched: 2026-10-25
-source_version: b14bda47af1772fd489ca606ff69c01231b5f64afdb535b127e3eb0870ed15f2
+fetched: 2026-11-19
+source_version: 660029a679703926c99c4743eec52c9d0a56e7f68a1efdef2ff237dcaf557db5
 trust: official
 ---
 
-# How to Delete a Twingate Network/Tenant
+# How do I delete my Twingate Network/tenant?
 
 ## Summary
-Describes the process for permanently deleting a Twingate network tenant via the Admin Console. Requires downgrading any active paid subscription to Starter before deletion becomes available.
+This page explains how to permanently delete a Twingate Network (tenant) from the Admin Console. Paid Teams or Business subscriptions must first be downgraded to the free Starter plan, and the delete option only appears once no subscription is active.
 
 ## Key Information
-- Only applicable to **Starter**, **Teams**, and **Business** plan admins
-- **Enterprise/invoice accounts** must contact their Twingate representative directly
-- **End-users** cannot delete the network — only admins can; end-users should contact their admin to be removed
+- Deletion is done by an admin in the Admin Console under Settings > Billing.
+- The **Delete Network Account** option is hidden while a paid subscription is active.
+- A downgrade takes effect at the next billing period, not immediately.
+- This process deletes the whole Network/tenant, not an individual user account.
+- Enterprise or invoice accounts: work directly with your Twingate representative instead of using this process.
+- End-users: this is not how to remove yourself from a Network. Contact your Twingate Admin to be removed.
 
 ## Prerequisites
-- Admin access to the Twingate Admin Console
-- Subscription must be on the **Starter (free)** plan — paid plans must be downgraded first
-- Subscription downgrade takes effect at the **end of the current billing period**
+- Admin access to the Twingate Admin Console.
+- Network is on the free Starter plan (downgrade any Teams or Business subscription first).
+- Not an Enterprise or invoice account (those go through a Twingate representative).
 
 ## Step-by-Step
+1. **Downgrade active subscriptions (if applicable).** Downgrade Teams or Business to Starter using the "Downgrade your subscription" article.
+2. Verify the scheduled change using "How do I check that my subscription will downgrade?". The downgrade applies at the next billing period.
+3. Once on Starter, sign into the Admin Console.
+4. Click **Settings**.
+5. Click **Billing**.
+6. Scroll to the **Delete Network Account** section.
+7. Click **Delete**.
+8. Follow the prompts to confirm deletion.
 
-### Step 1: Downgrade Subscription (if on Teams or Business)
-1. Downgrade to the free Starter plan (see *Downgrade your subscription* docs)
-2. Wait until the next billing period for the downgrade to take effect
-3. Verify the scheduled change via *How do I check that my subscription will downgrade?*
-
-### Step 2: Delete the Network
-1. Sign into the **Admin Console**
-2. Click **Settings**
-3. Click **Billing**
-4. Scroll to the bottom — locate **Delete Network Account** section
-5. Click **Delete**
-6. Follow the confirmation prompts
+## Configuration Values
+None. No env vars, CLI flags, or API parameters are documented. This is a UI-only process.
 
 ## Gotchas
-- The **Delete Network Account** option is hidden while any active paid subscription exists — it only appears after the subscription has fully lapsed to Starter
-- Downgrade is not immediate; you must wait until the end of the billing period before deletion becomes available
-- This process deletes the **entire network/tenant**, not an individual user account
+- If you don't see **Delete Network Account**, an active subscription still exists. Wait until the subscription period ends and the plan reverts to Starter.
+- Downgrading is not immediate, so deletion may be delayed until the end of the current billing period.
+- Don't use this flow to remove a single user. It deletes the entire Network.
+- Enterprise and invoice-billed customers cannot self-serve deletion.
 
 ## Related Docs
 - Downgrade your subscription
 - How do I check that my subscription will downgrade?
+- Source: https://help.twingate.com/articles/5856392229-how-do-i-delete-my-twingate-network-tenant

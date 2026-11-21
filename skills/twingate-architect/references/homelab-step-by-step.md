@@ -66,6 +66,6 @@ Step-by-step guide for securing a home lab using Twingate to replace VPN/port fo
 - Two Connectors per Remote Network provide automatic HA — deploying one works but is single point of failure
 
 ## Related Docs
-- [Connector deployment options](https://www.twingate.com/docs/connector)
-- [Security Policies](https://www.twingate.com/docs/policies)
-- [Twingate Client download](https://www.twingate.com/docs/client)
+- [Connector deployment options](https://www.twingate.com/docs/connectors)
+- [Security Policies](https://www.twingate.com/docs/security-policies)
+- [Twingate Client download](https://www.twingate.com/docs/clients)

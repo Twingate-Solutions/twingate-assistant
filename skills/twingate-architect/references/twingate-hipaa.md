@@ -43,6 +43,6 @@ Twingate's position is that it does not qualify as a HIPAA "business associate" 
 - Reach your **account manager** for BAA or HIPAA-related questions
 
 ## Related Docs
-- [Twingate Security Overview](https://www.twingate.com/docs/security)
+- Twingate Security Overview
 - DHHS Omnibus Rule commentary (conduit exception)
 - DHHS clarification on subcontractor conduit exception

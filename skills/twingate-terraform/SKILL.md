@@ -55,7 +55,7 @@ leaking credentials.
   before tokens exist.
 - **Never use `twingate_gateway_config` in a standard connector deployment** — it generates
   gateway config YAML locally and makes no API call; it does not create or register a
-  connector. It is an IDFW-only resource.
+  connector. It is a Privileged Access Management (PAM)-only resource.
 - **Check `references/gh-twingate-terraform-provider-twingate.md` for the current stable
   release and any open schema gotchas before pinning `required_providers` or writing HCL
   from memory** — e.g. the `access_group`/`security_policy_id` inconsistency-after-apply
@@ -104,8 +104,8 @@ prompt, load and grep the named skills' `references/` *in addition to* this one 
 at the first skill that matched. Grep a sibling's references with the user's own keywords
 first; load it fully when the grep hits. Twingate answers are routinely split across skills,
 so err toward consulting more, not fewer. Common cross-cutting clusters here: before writing
-IaC → **architect + connectors**; provisioning groups/policies → **identity**; Gateway (IDFW)
-infra → **idfw**; K8s Helm token passing → **kubernetes**; field missing from the provider →
+IaC → **architect + connectors**; provisioning groups/policies → **identity**; Gateway (PAM)
+infra → **pam**; K8s Helm token passing → **kubernetes**; field missing from the provider →
 **api**.
 
 - **→ twingate-architect**: for Remote Network topology, Resource definition strategy, or
@@ -114,7 +114,7 @@ infra → **idfw**; K8s Helm token passing → **kubernetes**; field missing fro
   or C#
 - **→ twingate-kubernetes**: when passing connector tokens to a Helm release via the
   `helm_release` resource
-- **→ twingate-idfw**: for `twingate_gateway_config` usage — only relevant in IDFW
+- **→ twingate-pam**: for `twingate_gateway_config` usage — only relevant in PAM
   deployments
 - **→ twingate-api**: when a Terraform data source doesn't expose a needed field and a
   direct GraphQL call is required

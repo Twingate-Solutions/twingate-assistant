@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 2981e82635f81fe203c764f961b7c9031bd846fc
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate-Solutions/network-utilities
 
 ## Summary
@@ -74,4 +72,4 @@ A collection of shell and Python scripts for network troubleshooting in Twingate
 ## Related Docs
 - [Twingate Documentation](https://www.twingate.com/docs/)
 - [Twingate Client Troubleshooting](https://www.twingate.com/docs/troubleshooting)
-- [Twingate Support](https://support.twingate.com/)
+- [Twingate Support](https://help.twingate.com/)

@@ -62,7 +62,7 @@ Use Twingate Connectors deployed on AWS EC2 instances to provide user-based acce
 - Software/image versions in examples may be outdated; check official docs
 
 ## Related Docs
-- [Whitelisting Traffic to Public Resources](https://www.twingate.com/docs/whitelisting-traffic)
+- [Whitelisting Traffic to Public Resources](https://www.twingate.com/docs/whitelisting-traffic-to-public-services)
 - [Deploying Connectors on Linux](https://www.twingate.com/docs/linux)
 - [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
 - [Creating Resources and Groups](https://www.twingate.com/docs/resources)

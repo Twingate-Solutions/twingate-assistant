@@ -51,5 +51,5 @@ The Twingate Client creates a dedicated network adapter during installation that
 - Windows output shows "Unknown adapter" — this is expected and not an error
 
 ## Related Docs
-- [Twingate Troubleshooting Guide](https://help.twingate.com/articles/8648750331-checking-network-interfaces) (parent guide linked at bottom of page)
+- Twingate Troubleshooting Guide (parent guide linked at bottom of page)
 - Twingate Client installation documentation

@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 5533fce2da2ecfdcf90ea2be94f9ee80d25a0f6b
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate + GitHub Codespaces
 
 ## Summary

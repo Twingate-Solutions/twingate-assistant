@@ -142,7 +142,7 @@ first; load it fully when the grep hits. Twingate answers are routinely split ac
 so err toward consulting more, not fewer. Common cross-cutting clusters here: any
 connectivity diagnosis → **connectors + architect**; access-denied / policy / device trust →
 **identity**; DNS or exit-network symptom → **dns-security**; gateway / SSH cert / kubectl
-failures → **idfw**.
+failures → **pam**.
 
 - **→ twingate-connectors**: for Connector deployment, upgrade, or token questions
 - **→ twingate-identity**: for security policy configuration, device trust setup, or SCIM
@@ -153,10 +153,10 @@ failures → **idfw**.
   third-party DNS-provider conflict rather than a private-resource connectivity failure;
   for "why was this site blocked?", start from
   `skills/twingate-dns-security/references/filtering-analytics.md`
-- **→ twingate-idfw**: for SSH certificate validation failures, PAM module errors, or
+- **→ twingate-pam**: for Privileged Access Management (PAM) SSH certificate validation failures, or
   any Twingate Gateway failure (TLS handshake errors, CONNECT 401/407, kubectl through
   the gateway, session recording) — that skill has a hand-authored field guide at
-  `skills/twingate-idfw/references/gateway-troubleshooting.md`
+  `skills/twingate-pam/references/gateway-troubleshooting.md`
 - **→ twingate-onboarding**: when the failure happens mid-rollout (connectors not coming up,
   pilot users failing) and a `deployment.yaml` exists — record the outcome back into the
   deployment plan once diagnosed.

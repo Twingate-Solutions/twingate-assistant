@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: c07ed7dd42c394e5def628b1e9bf6f6f9f965ac5
 ---
 
-<!-- triage: unassigned -->
-
 # Janus Updater Service
 
 ## Summary

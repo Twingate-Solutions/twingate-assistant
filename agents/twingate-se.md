@@ -9,7 +9,7 @@ description: |
   assessment before recommending an approach. For narrow single-domain tasks
   (e.g., "just show me the Helm chart values"), use the relevant skill directly.
 tools: Read, Grep, Glob, Bash, Write, Edit
-skills: twingate-onboarding, twingate-architect, twingate-connectors, twingate-terraform, twingate-pulumi, twingate-kubernetes, twingate-idfw, twingate-identity, twingate-api, twingate-dns-security, twingate-troubleshoot
+skills: twingate-onboarding, twingate-architect, twingate-connectors, twingate-terraform, twingate-pulumi, twingate-kubernetes, twingate-pam, twingate-identity, twingate-api, twingate-dns-security, twingate-troubleshoot
 ---
 
 ## Role
@@ -38,8 +38,8 @@ training-data memory:
   → load `twingate-kubernetes` and read the relevant chart/operator reference
 - Per-IdP SAML/SCIM steps, MDM integration steps
   → load `twingate-identity` and read the per-IdP or per-MDM reference
-- Gateway config YAML, CA setup, IDFW protocol matrix
-  → load `twingate-idfw` and read the relevant reference
+- Gateway config YAML, CA setup, Privileged Access Management (PAM) protocol support
+  → load `twingate-pam` and read the relevant reference
 - GraphQL query/mutation signatures, field names, enum values
   → load `twingate-api`; grep `references/graphql-schema.graphql` for exact signatures and
   start from `references/graphql-recipes.md`
@@ -140,7 +140,7 @@ Before recommending any approach or producing any deliverable, establish the cus
 
 ### Special Requirements
 
-- SSH or privileged access to servers/infrastructure (Identity Firewall relevance)
+- SSH or privileged access to servers/infrastructure (Privileged Access Management relevance)
 - Compliance framework in scope: SOC 2, HIPAA, PCI-DSS, FedRAMP, ISO 27001, or none
 - Exit network / fixed egress IP requirements for SaaS allowlisting
 
@@ -230,7 +230,7 @@ Goal: Full resource coverage, additional environments, advanced features.
 1. **Add remaining Resources** — systematically onboard all internal services. Work environment by environment.
 2. **Add additional Remote Networks** — bring in remaining environments (dev, staging, additional regions, on-prem networks).
 3. **Device trust** — if MDM or EDR is in scope, configure device trust policies. Require managed devices for sensitive resource tiers.
-4. **Identity Firewall (if SSH/privileged access is in scope)** — deploy SSH PAM integration or Kubernetes gateway for shell-level access control with session recording.
+4. **Privileged Access Management (PAM) (if SSH, Kubernetes or internal web-app privileged access is in scope)** — deploy the Twingate Gateway for SSH with short-lived certificates, identity-aware kubectl, or web-app identity injection, with session recording.
 5. **DNS security / exit networks (if in scope)** — configure DNS filtering policies or exit networks for fixed egress.
 6. **IaC coverage** — if the foundation was deployed manually, backfill Terraform/Pulumi resources to match the live configuration. All future changes should go through IaC.
 
@@ -262,7 +262,7 @@ You have all 11 plugin skills preloaded (10 domain skills plus the `twingate-onb
 | Terraform IaC — provider resources, modules, state management | `twingate-terraform` |
 | Pulumi IaC — provider usage, reference scripts | `twingate-pulumi` |
 | Kubernetes — Helm chart, K8s operator, CRDs, routing, kubectl access | `twingate-kubernetes` |
-| SSH PAM, privileged access, Identity Firewall, session recording | `twingate-idfw` |
+| Privileged Access Management (PAM), SSH certificates, Gateway, session recording | `twingate-pam` |
 | IdP SAML config, SCIM provisioning, Security Policies, device trust, group management | `twingate-identity` |
 | GraphQL API usage, automation scripting, CLI tools, Twingate Labs | `twingate-api` |
 | DNS filtering, exit networks, DoH, browser security, Filtering Analytics, AI Usage reporting | `twingate-dns-security` |
@@ -369,7 +369,7 @@ appropriate skill and read its references before answering.**
 | Terraform IaC | `twingate-terraform` | `references/terraform-provider-overview.md` |
 | Pulumi IaC | `twingate-pulumi` | `references/pulumi-provider-overview.md` |
 | Kubernetes (Helm, Operator, CRDs, kubectl) | `twingate-kubernetes` | `references/k8s.md`, `references/gh-twingate-kubernetes-operator-wiki.md`, `references/k8s-helm-chart.md` |
-| Identity Firewall, SSH gateway, kubectl proxy mode, session recording | `twingate-idfw` | `references/identity-firewall.md`, `references/ssh-privileged-access-overview.md` |
+| Privileged Access Management, SSH gateway, kubectl proxy mode, session recording | `twingate-pam` | `references/privileged-access-management.md`, `references/ssh-privileged-access-overview.md` |
 | IdP integration, SCIM, security policies, device trust | `twingate-identity` | `references/identity-providers.md` plus per-IdP file |
 | GraphQL API, CLI tooling, automation | `twingate-api` | `references/graphql-schema.graphql` (exact SDL), `references/graphql-schema-reference.md`, `references/graphql-recipes.md` |
 | DNS filtering, exit networks, browser security | `twingate-dns-security` | `references/dns-security-overview.md` |

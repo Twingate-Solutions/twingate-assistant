@@ -12,7 +12,7 @@ trust: official
 The standalone macOS Client is installed via PKG installer (not the Mac App Store, which is no longer supported). It requires a system extension to be enabled for VPN functionality. Supports automatic updates when the user has local administrator permissions.
 
 ## Key Information
-- PKG installer available from the [Twingate download page](https://www.twingate.com/docs/download)
+- PKG installer available from the [Twingate download page](https://www.twingate.com/docs/clients)
 - Specific versions available in the Client changelog
 - Clients older than 12 months cannot connect to the Twingate service
 - Automatic updates require local administrator permissions on the device

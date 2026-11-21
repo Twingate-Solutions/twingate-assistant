@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 9c603b9d5f2029eab0af8f204fd646069cd3709f
 ---
 
-<!-- triage: unassigned -->
-
 # Twindeck
 
 ## Summary
@@ -65,6 +63,6 @@ pnpm run bundle      # build frontend + fetch binaries + output zip to out/
 
 ## Related Docs
 - [Decky Loader](https://github.com/SteamDeckHomebrew/decky-loader)
-- [Twingate Service Accounts (Admin Console)](https://www.twingate.com/docs/service-accounts)
+- [Twingate Service Accounts (Admin Console)](https://www.twingate.com/docs/service-accounts-guide)
 - [Twingate Headless Client](https://www.twingate.com/docs/linux-headless)
 - [Twindeck Releases](https://github.com/Twingate-Community/twindeck/releases)

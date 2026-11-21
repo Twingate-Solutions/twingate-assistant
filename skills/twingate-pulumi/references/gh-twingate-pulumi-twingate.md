@@ -1,8 +1,8 @@
 ---
 source: https://github.com/Twingate/pulumi-twingate
 type: github
-fetched: 2026-11-15
-source_version: 2557182d7b1fec90a5e9d4c471902051b34b4dbc
+fetched: 2026-11-19
+source_version: 7c8efb6e82e920102b92fea88a63a3dd48a5fd35
 trust: official
 ---
 

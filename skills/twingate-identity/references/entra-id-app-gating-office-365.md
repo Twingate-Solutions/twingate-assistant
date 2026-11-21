@@ -63,6 +63,6 @@ Create Resources in the Admin Console for Office 365 URLs:
 - **Multiple Resources**: Full Office 365 protection requires adding all relevant Microsoft domain Resources in Twingate, not just one
 
 ## Related Docs
-- [SaaS App Gating with Microsoft Entra ID](https://www.twingate.com/docs/entra-id-saas-app-gating) (general pattern)
+- [SaaS App Gating with Microsoft Entra ID](https://www.twingate.com/docs/saas-app-gating-with-entra-id) (general pattern)
 - [Microsoft Entra ID Conditional Access documentation](https://learn.microsoft.com/en-us/entra/identity/conditional-access/)
 - Entra ID Conditional Access licensing information

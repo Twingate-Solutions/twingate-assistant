@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: cc1e9288230ba26b7fee8aecaf8fab4decd60b34
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Connector — Unraid Template
 
 ## Summary

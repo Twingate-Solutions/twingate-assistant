@@ -1,82 +1,48 @@
 ---
 source: https://www.twingate.com/docs/guides
 type: docs
-fetched: 2026-11-08
-source_version: de9597baaf6fdb84f36cc07ac04993a90596df20cea965d8d22b3bafc6baf567
+fetched: 2026-11-19
+source_version: 367a2b0505fb02cd85aae41003d61312c0af6562d0e8f8106eac66e2b8347ebe
 trust: official
 ---
 
-# Twingate Guides Index
-
-## Page Title
-Twingate Guides — Deployment, Configuration, and Management Reference
+# Twingate Guides (Index Page)
 
 ## Summary
-This is the top-level index page for Twingate's documentation guides. It categorizes all available guides into deployment targets, configuration topics, use cases, and best practices. No implementation steps are on this page; it serves as a navigation hub.
+This is the landing/index page for Twingate's guides. It categorizes guides for deploying, configuring, and managing Twingate across cloud, on-prem, IaC, MDM, homelab, and security-policy scenarios. It contains no procedures itself; it points to sub-guides.
 
 ## Key Information
-
-### Deployment Targets
-- **Cloud**: AWS EC2, GCP Compute, Azure Compute, Kubernetes, DigitalOcean
-- **On-premises**: Docker Compose, Ubiquiti, Firewalla, Synology, QNAP, TrueNAS SCALE
-- **IaC**: Terraform, Pulumi
-- **Homelab**: Home Assistant, Proxmox, Unraid, ZimaOS, CasaOS
-- **Client MDM**: Jamf, Iru, Omnissa Workspace ONE, Microsoft Intune
-
-### Configuration Topics
-- Internet Security (DoH, DNS filtering)
-- SaaS App Gating (IP-based access control)
-- Security Policies (per-network and per-resource)
-- Logging and audit export
-- Service integrations: Active Directory, Cisco Umbrella, Cloudflare DNS, Netskope DLP, Zscaler
-
-### Database Access
-MongoDB, AWS, GCP, Azure, Oracle, Snowflake, Redis
-
-### Notable Use Cases
-- Kubernetes resource routing and kubectl management
-- CI/CD pipeline security
-- Site-to-site connections
-- Vendor/contractor access management
-- IoT headless client gateway
-- AWS VPN replacement
-- SaaS App Gating with Okta, Entra ID, Google Workspace, JumpCloud, OneLogin
-- Exit Networks (self-hosted VPN alternative)
-
-### Best Practices Docs Available
-- Connector placement and configuration
-- Private DNS configuration
-- Overlapping IP addresses
-- Security policies
-- Non-production environment access
-- Internal network design with peer-to-peer
-
-### Technical Reference
-- NAT traversal mechanics
-- Encryption internals
-- Firewall behavior
-- Connector shutdown process
-- Service accounts
-- Windows Start Before Logon
-- Performance evaluation
+- **Popular topics:** Internet Security (DNS-over-HTTPS encryption, DNS filtering), SaaS App Gating (IP-based access/whitelisting), Client Deployment, Kubernetes, Security Policies, Logging (audit log view/export), Remote Network Best Practices, Connector Best Practices.
+- **Cloud deployment:** AWS EC2, GCP Compute, Azure Compute, Kubernetes, DigitalOcean.
+- **On-prem deployment:** Docker Compose, Ubiquiti, Firewalla, Synology, QNAP NAS, TrueNAS SCALE.
+- **IaC:** Terraform, Pulumi.
+- **Homelab:** Home Assistant, Proxmox, Unraid, ZimaOS, CasaOS.
+- **MDM client rollout:** Jamf, Iru, Omnissa Workspace ONE, Microsoft Intune & Endpoint Manager.
+- **Service compatibility:** Active Directory, Cisco Umbrella, Cloudflare DNS filtering, Netskope DLP, Zscaler.
+- **Database access:** MongoDB, AWS, GCP, Azure, Oracle, Snowflake, Redis.
+- **Use-case guides:** AI/LLM access (OpenClaw, GitHub Codespaces, Daytona, RWX sandboxes), game streaming/Minecraft, bastion cloaking, strongDM cloaking, headless Client gateway for IoT, vendor/contractor access, Elasticsearch/Kibana, legacy MFA, home lab protection, replacing AWS VPN, CI/CD pipeline security, site-to-site, AWS Workspaces, self-hosted VPN via Exit Networks.
+- **Service integrations:** Ingesting Connector logs into a SIEM.
+- **SaaS App Gating guides:** Getting started, best practices, Google Workspace, JumpCloud, Microsoft Entra ID, Okta, OneLogin, app-native IP filtering with AWS exit nodes, AWS CloudFront, Office 365 with Entra ID.
+- **Kubernetes guides:** route traffic from K8s, private Resources, publicly exposed Resources, managing K8s with kubectl.
+- **Best practices:** AWS reference architecture, private DNS, Connector placement, local peer-to-peer internal network design, overlapping IPs, SaaS App Gating, non-production environments, Security Policies, whitelisting public Resource traffic.
+- **Technical explainers:** NAT traversal, troubleshooting P2P connections, encryption, performance evaluation, Connector shutdown process, firewalls, Service Accounts, Windows Start Before Logon, service status/maintenance monitoring, release stages.
 
 ## Prerequisites
-None — index page only. Individual guides have their own prerequisites.
+None on this page. Individual guides have their own requirements (typically a Twingate account and a Remote Network).
 
 ## Step-by-Step
-Not applicable — navigation page only.
+Not applicable. Locate the relevant guide from the categories above.
 
 ## Configuration Values
-Not applicable — no configuration parameters on this page.
+None listed on this page.
 
 ## Gotchas
-- This page is an index only; all implementation details are in linked sub-pages
-- "Open with AI" buttons appear on this page, suggesting Twingate has an AI assistant for docs navigation
+- This is only an index; implementation details (env vars, CLI flags, API params) live in the linked guides.
+- SaaS App Gating guidance is split across several pages. Read the getting-started and best-practices guides before provider-specific ones.
+- Some guides cover overlapping topics (e.g., Kubernetes appears under both deployment and its own section).
 
 ## Related Docs
-All Twingate documentation is linked from this page. Key starting points:
-- `/docs/client-deployment` — Client installation
-- `/docs/kubernetes` — K8s deployment
-- `/docs/security-policies` — Policy configuration
-- `/docs/logging` — Audit logs
-- `/docs/connector-best-practices` — Connector optimization
+- Connector deployment guides (cloud/on-prem)
+- Terraform/Pulumi provider docs
+- Security Policies and Logging docs
+- Best Practices and "How Twingate Works" technical explainers

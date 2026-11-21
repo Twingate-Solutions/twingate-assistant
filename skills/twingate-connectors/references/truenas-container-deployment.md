@@ -59,6 +59,6 @@ Deploy a Twingate Connector as a Docker container on TrueNAS SCALE using the "La
 - Container inherits DNS from TrueNAS host by default unless `TWINGATE_DNS` is set
 
 ## Related Docs
-- [Peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer)
-- [Local connection logging guide](https://www.twingate.com/docs/log-analytics)
-- [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)
+- [Peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer-communication-in-twingate)
+- [Local connection logging guide](https://www.twingate.com/docs/analytics)
+- Fair Use Policy

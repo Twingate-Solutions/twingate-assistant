@@ -76,6 +76,6 @@ Covers distributing the Twingate Client via Jamf MDM for macOS (PKG-based) and i
 - VPN `Server` field cannot be blank; use any placeholder value
 
 ## Related Docs
-- [macOS & iOS configuration options](https://www.twingate.com/docs/macos-ios) — full list of MDM-manageable keys
+- [macOS & iOS configuration options](https://www.twingate.com/docs/macos-and-ios) — full list of MDM-manageable keys
 - Twingate download page — latest PKG
 - Jamf official docs — package

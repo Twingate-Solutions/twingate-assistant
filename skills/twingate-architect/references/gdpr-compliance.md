@@ -26,7 +26,7 @@ Twingate complies with GDPR in both data controller and data processor capacitie
 ## For Customers Needing GDPR Compliance
 - A **Data Processing Addendum (DPA)** is included in customer agreements
 - Review the Customer Agreement for data handling commitments
-- See [Twingate & Customer Data](https://www.twingate.com/docs/twingate-and-customer-data) for specifics on data types processed
+- See [Twingate & Customer Data](https://www.twingate.com/docs/twingate-customer-data) for specifics on data types processed
 
 ## Gotchas
 - Twingate is a US-based company — cross-border transfer mechanisms (SCCs, UK Addendum) are required for EU/UK data flows

@@ -71,8 +71,8 @@ Deploys a Twingate Connector via Docker on Firewalla boxes (Gold, Purple, Blue P
 
 ## Related Docs
 - [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
-- [Support Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
-- [Site-to-Site with Twingate](https://www.twingate.com/docs/site-to-site)
+- [Support Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer-communication-in-twingate)
+- [Site-to-Site with Twingate](https://www.twingate.com/docs/site-2-site)
 - [Twingate Quick Start](https://www.twingate.com/docs/quick-start)
 - Firewalla Router Mode configuration guides
 - Firewalla Customized Scripting docs

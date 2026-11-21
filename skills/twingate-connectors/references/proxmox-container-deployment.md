@@ -68,7 +68,7 @@ apt install curl -y
 - Peer-to-peer connections should be enabled to stay within Fair Use Policy bandwidth limits
 
 ## Related Docs
-- [Supported Linux distros](https://www.twingate.com/docs/supported-distros)
-- [Support peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer)
-- [Automate updates via cron job](https://www.twingate.com/docs/connector-updates)
-- [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)
+- Supported Linux distros
+- [Support peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer-communication-in-twingate)
+- Automate updates via cron job
+- Fair Use Policy

@@ -54,5 +54,5 @@ Vendor: Microsoft Corporation
 - Use x64 variant specifically; ensure architecture matches device
 
 ## Related Docs
-- [Twingate Windows Client download page](https://www.twingate.com/downloads)
-- [Windows Client deployment documentation](https://www.twingate.com/docs/windows-client-deployment)
+- [Twingate Windows Client download page](https://www.twingate.com/download)
+- Windows Client deployment documentation

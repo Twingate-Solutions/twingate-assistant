@@ -42,7 +42,7 @@ Guide for distributing Twingate macOS and iOS clients via Iru MDM. macOS deploym
 4. Sign in to Iru → **Library** → find Twingate iOS Client → distribute
 
 ## Configuration Values
-- Pre-configuration of macOS Client (VPN profile, system extension, Network name) is done via **configuration profiles** — see the [configuration profiles guide](https://www.twingate.com/docs/configuration-profiles)
+- Pre-configuration of macOS Client (VPN profile, system extension, Network name) is done via **configuration profiles** — see the configuration profiles guide
 
 ## Gotchas
 - **Manually installed clients must be removed first**: Users with pre-existing manual installs may experience version conflicts
@@ -52,5 +52,5 @@ Guide for distributing Twingate macOS and iOS clients via Iru MDM. macOS deploym
 
 ## Related Docs
 - [Twingate download page](https://www.twingate.com/download)
-- [Configuration profiles guide](https://www.twingate.com/docs/configuration-profiles)
+- Configuration profiles guide
 - [Iru official documentation](https://support.kandji.io) (for Apple Business Manager enrollment steps)

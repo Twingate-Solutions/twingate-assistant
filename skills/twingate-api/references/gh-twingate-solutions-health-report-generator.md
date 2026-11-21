@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 8fa4ae54c8b5f4639bf2c615a950b9427b01bab1
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Health Report Generator
 
 ## Summary
@@ -54,6 +52,6 @@ A Python notebook that generates insights and health reports from Twingate Netwo
 - Notebook-based tooling means output is not automatically scheduled or alerting — manual re-run required for fresh reports
 
 ## Related Docs
-- [Twingate Network Events documentation](https://www.twingate.com/docs/network-events)
+- Twingate Network Events documentation
 - [Twingate Admin Console](https://www.twingate.com/docs/administration)
 - Twingate-Solutions GitHub org for other operational utilities

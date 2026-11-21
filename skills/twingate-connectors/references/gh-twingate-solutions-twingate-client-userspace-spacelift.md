@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: d50c5dfa0f236065a664e76cc6bf5255beede99f
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Userspace + Proxytunnel on Spacelift
 
 ## Summary

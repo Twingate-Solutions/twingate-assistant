@@ -1,3 +1,5 @@
+<!-- manual-reference: do-not-overwrite -->
+
 # GCP Connector Deployment Patterns
 
 Reference for the `twingate-connectors` skill. Contains complete Terraform modules

@@ -50,7 +50,7 @@ Twingate provides analytics covering network traffic, admin audit logs, and user
 - No mention of log retention limits for network traffic logs (audit logs are lifetime)
 
 ## Related Docs
-- [Analyzing Network Traffic](https://www.twingate.com/docs/network-traffic) — detailed network log analysis
-- [Advanced Connector Configuration](https://www.twingate.com/docs/connector-advanced) — real-time log output setup
+- [Analyzing Network Traffic](https://www.twingate.com/docs/exporting-network-traffic) — detailed network log analysis
+- [Advanced Connector Configuration](https://www.twingate.com/docs/advanced-connector-management) — real-time log output setup
 - [Audit Logs Export](https://www.twingate.com/docs/audit-logs) — how to export admin audit logs
 - [User Activity Reports](https://www.twingate.com/docs/user-activity) — export usage reports

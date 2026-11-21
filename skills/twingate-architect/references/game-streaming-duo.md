@@ -64,7 +64,7 @@ Duo enables multiple users to game simultaneously on a single Windows 11 PC via 
 ## Related Docs
 - [Sunshine Remote Streaming](https://www.twingate.com/docs/game-streaming-sunshine) — single-user
 - [Apollo Remote Streaming](https://www.twingate.com/docs/game-streaming-apollo) — auto virtual displays
-- [Game Streaming Overview](https://www.twingate.com/docs/game-streaming)
-- [Connector Deployment Guides](https://www.twingate.com/docs/connector)
+- Game Streaming Overview
+- [Connector Deployment Guides](https://www.twingate.com/docs/connectors)
 - [Resource Access Configuration](https://www.twingate.com/docs/resources)
 - [Duo GitHub Repository](https://github.com/blackseraph/duo)

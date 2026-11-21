@@ -48,7 +48,7 @@ Configure Twingate and Microsoft Entra ID to gate SaaS application access by req
 - **Multiple Connectors**: If multiple Connectors share the Remote Network, ensure all their egress IPs are included in the Named Location
 
 ## Related Docs
-- [SaaS App Gating Office 365 with Entra ID](https://www.twingate.com/docs/saas-app-gating-office-365-with-entra-id) — step-by-step example
+- [SaaS App Gating Office 365 with Entra ID](https://www.twingate.com/docs/saas-app-gating-with-entra-id) — step-by-step example
 - Twingate: Create a Resource
 - Twingate: Device-only Resource Policy
 - Microsoft: Named Locations (Entra ID documentation)

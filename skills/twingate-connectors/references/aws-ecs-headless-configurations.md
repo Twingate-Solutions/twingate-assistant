@@ -57,6 +57,6 @@ Twingate provides secure private access for ECS workloads using service accounts
 - Confirm execution role has Secrets Manager read permissions
 
 ## Related Docs
-- [Userspace Networking](https://www.twingate.com/docs/userspace-networking)
+- [Userspace Networking](https://www.twingate.com/docs/linux-userspace-networking)
 - [How Twingate Works](https://www.twingate.com/docs/how-twingate-works)
 - Twingate Troubleshooting Guide

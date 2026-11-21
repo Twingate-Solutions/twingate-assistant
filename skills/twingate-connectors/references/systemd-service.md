@@ -78,5 +78,5 @@ echo "0 2 * * 0 root /usr/local/sbin/keep-one-behind.sh twingate-connector --app
 ## Related Docs
 - [Upgrading Connectors best practices](https://www.twingate.com/docs/upgrading-connectors)
 - [Linux systemd deployment](https://www.twingate.com/docs/systemd-service)
-- [Connector Release Notes](https://www.twingate.com/docs/connector-release-notes)
+- Connector Release Notes
 - [Automated Connector update template script](https://github.com/Twingate-Solutions/general-scripts/blob/main/bash-scripts/keep-one-behind.sh)

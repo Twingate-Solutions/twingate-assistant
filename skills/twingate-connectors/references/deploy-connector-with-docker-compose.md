@@ -89,6 +89,6 @@ services:
 - Peer-to-peer connections are recommended to stay within the Fair Use Policy for bandwidth
 
 ## Related Docs
-- [How to Deploy a Connector](https://www.twingate.com/docs/deploy-connector) — token generation
-- [Support Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer)
-- [Twingate Connector Logs](https://www.twingate.com/docs/connector-logs) — log level values
+- How to Deploy a Connector — token generation
+- [Support Peer-to-Peer Connections](https://www.twingate.com/docs/peer-to-peer-communication-in-twingate)
+- [Twingate Connector Logs](https://www.twingate.com/docs/connector-real-time-logs) — log level values

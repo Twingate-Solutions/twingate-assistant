@@ -42,7 +42,7 @@ Steps vary by cloud provider but generally involve:
 
 ## Gotchas
 - IPv6-only VM configurations will silently fail relay connectivity — the Connector may appear online but all Resource connections fail
-- Confirm against [Twingate Network Requirements](https://www.twingate.com/docs/connector-requirements) that all necessary ports/protocols are open for the IPv4 address
+- Confirm against Twingate Network Requirements that all necessary ports/protocols are open for the IPv4 address
 
 ## Related Docs
 - Twingate Network Requirements

@@ -60,8 +60,8 @@ Twingate secures access to Azure SQL Database and other Azure-managed/self-hoste
 - **No Activity** = Client not routing to Connector; check Client running, Resource access, no conflicting VPN
 
 ## Related Docs
-- [AWS Database Access Guide](https://www.twingate.com/docs/aws-database-access)
-- [GCP Database Access Guide](https://www.twingate.com/docs/gcp-database-access)
+- [AWS Database Access Guide](https://www.twingate.com/docs/database-access-aws)
+- [GCP Database Access Guide](https://www.twingate.com/docs/database-access-gcp)
 - [SaaS App Gating Guide](https://www.twingate.com/docs/saas-app-gating)
 - [Connector Best Practices](https://www.twingate.com/docs/connector-best-practices)
 - [Microsoft: Configure server-level IP firewall rule](https://docs.microsoft.com/azure/azure-sql/database/firewall-configure)

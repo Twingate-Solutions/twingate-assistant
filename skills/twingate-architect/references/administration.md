@@ -41,6 +41,6 @@ The Administration section covers Admin Console security configuration, subscrip
 - 2FA configuration for admins is managed separately from 2FA settings for regular users
 
 ## Related Docs
-- [Reporting](https://www.twingate.com/docs/reporting)
+- Reporting
 - [Admin Console Security](https://www.twingate.com/docs/admin-console-security)
-- [Subscription Management](https://www.twingate.com/docs/subscription)
+- [Subscription Management](https://www.twingate.com/docs/subscription-management)

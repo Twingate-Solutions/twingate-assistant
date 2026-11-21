@@ -34,4 +34,4 @@ Twingate supports HIPAA compliance requirements for covered entities and busines
 - Page contains minimal technical detail; compliance support specifics are handled via direct communication
 
 ## Related Docs
-- [Twingate Security Measures](https://www.twingate.com/docs/security) — referenced as "Learn more about the security measures we take at Twingate"
+- Twingate Security Measures — referenced as "Learn more about the security measures we take at Twingate"

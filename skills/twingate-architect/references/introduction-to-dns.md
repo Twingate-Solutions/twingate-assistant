@@ -58,4 +58,4 @@ To reverse-lookup `22.33.44.55`:
 3. Resolution follows same hierarchy via `arpa` → `in-addr.arpa` nameservers
 
 ## Related Docs
-- [How DNS Works with Twingate](https://www.twingate.com/docs/dns-with-twingate) — explains why Twingate inserts its own resolver and how private DNS queries are handled
+- [How DNS Works with Twingate](https://www.twingate.com/docs/how-dns-works-with-twingate) — explains why Twingate inserts its own resolver and how private DNS queries are handled
