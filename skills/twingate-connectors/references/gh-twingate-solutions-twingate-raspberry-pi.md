@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: bd4822effca83354875145deb4bf7fdedddaa406
 ---
 
-<!-- triage: unassigned -->
-
 # twingate-raspberry-pi
 
 ## Summary

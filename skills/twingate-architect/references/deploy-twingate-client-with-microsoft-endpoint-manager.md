@@ -21,7 +21,7 @@ Guide for deploying the Twingate Windows Client via Microsoft Endpoint Manager (
 - Windows MSI installer downloaded from Twingate
 - .NET Desktop Runtime (script handles install check)
 - For Detection & Remediation: Windows 10/11 Enterprise E3/E5 license
-- Review [Windows Managed Device](https://www.twingate.com/docs/windows-managed-device) page before proceeding
+- Review [Windows Managed Device](https://www.twingate.com/docs/windows-managed-devices) page before proceeding
 
 ## Method 1: MSI via Endpoint Manager
 
@@ -73,7 +73,7 @@ Script requirements:
 - New devices enrolled in Intune automatically receive assigned script packages
 
 ## Related Docs
-- [Windows Managed Device](https://www.twingate.com/docs/windows-managed-device)
+- [Windows Managed Device](https://www.twingate.com/docs/windows-managed-devices)
 - [Example PowerShell script (GitHub)](https://github.com/Twingate-Labs)
 - [Microsoft Detection/Remediation documentation](https://learn.microsoft.com/en-us/mem/intune/fundamentals/remediations)
 - [Intune Platform Scripts](https://learn.microsoft.com/en-us/mem/intune/apps/intune-management-extension)

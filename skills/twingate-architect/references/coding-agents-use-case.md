@@ -6,8 +6,6 @@ source_version: 9391818a05f2c739ec49f1840d97e27987280b8a3d2c8af32688b7272475cd7b
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Page Title
 Coding Agents Use Case (Twingate Docs)
 

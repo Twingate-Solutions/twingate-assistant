@@ -6,8 +6,6 @@ source_version: 6b9594a51217f11c100f29f99d5c9273e8a866a3c6b2697e854e96221afc4952
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Access Private Resources from Daytona Sandboxes
 
 ## Summary

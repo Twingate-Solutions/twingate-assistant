@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 60affada2a8e6be465c3dab35ec456e62b278826
 ---
 
-<!-- triage: unassigned -->
-
 # tg-group-profile-manager-helm
 
 ## Summary

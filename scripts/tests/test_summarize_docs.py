@@ -304,6 +304,11 @@ def test_extract_summary_text_skips_thinking_and_fallback_blocks() -> None:
     [
         ("refusal", (), "declined"),
         ("max_tokens", (MagicMock(type="text", text="# Partial"),), "max_tokens"),
+        (
+            "end_turn",
+            (MagicMock(type="text", text="# Doc\n## Related Docs\n- [Peer](https://www.t"),),
+            "truncated",
+        ),
         ("end_turn", (MagicMock(type="thinking", text=None),), "no text"),
     ],
 )
@@ -479,3 +484,50 @@ def test_fetch_doc_html_allows_github_twingate_url(mock_get: MagicMock) -> None:
 
     assert result is not None
     mock_get.assert_called_once()
+
+
+# ── link-preserving extraction (summarizer input only) ──────────────────────
+
+from summarize_docs import LINK_RULE, SYSTEM_PROMPT, extract_text_with_links  # noqa: E402
+
+LINK_HTML = """<html><body><main>
+<p>See <a href="/docs/peer-to-peer-communication-in-twingate">Peer-to-Peer Connections</a>
+and <a href="https://github.com/Twingate/gateway">the Gateway repo</a>.</p>
+<p><a href="#prereqs">Prerequisites</a> <a href="mailto:support@example.com">email us</a>
+<a href="https://www.twingate.com/docs/this-page#top">back to top</a>
+<a href="https://example.com/x">https://example.com/x</a></p>
+</main></body></html>"""
+
+
+def test_extract_text_with_links_inlines_absolute_urls() -> None:
+    text = extract_text_with_links(LINK_HTML, "https://www.twingate.com/docs/this-page")
+    assert "Peer-to-Peer Connections (https://www.twingate.com/docs/peer-to-peer-communication-in-twingate)" in text
+    assert "the Gateway repo (https://github.com/Twingate/gateway)" in text
+
+
+def test_extract_text_with_links_leaves_anchors_mailto_self_and_url_text_alone() -> None:
+    text = extract_text_with_links(LINK_HTML, "https://www.twingate.com/docs/this-page")
+    assert "Prerequisites" in text and "#prereqs" not in text
+    assert "mailto:" not in text
+    assert "back to top" in text and "this-page#top" not in text
+    assert text.count("https://example.com/x") == 1
+
+
+def test_hashed_text_stays_link_free() -> None:
+    """Change detection hashes extract_text_from_html, which must not gain URLs,
+    or every page would look changed and re-summarize."""
+    assert "http" not in extract_text_from_html(LINK_HTML).replace("https://example.com/x", "")
+
+
+@patch("summarize_docs.anthropic.Anthropic")
+def test_summarize_doc_sends_real_link_urls_and_the_no_guess_rule(mock_anthropic_cls: MagicMock) -> None:
+    mock_client = MagicMock()
+    mock_anthropic_cls.return_value = mock_client
+    mock_client.beta.messages.create.return_value = _mock_claude_message("# Summary\nOk.")
+
+    summarize_doc("https://www.twingate.com/docs/this-page", LINK_HTML)
+
+    kwargs = mock_client.beta.messages.create.call_args.kwargs
+    assert "https://www.twingate.com/docs/peer-to-peer-communication-in-twingate" in kwargs["messages"][0]["content"]
+    assert LINK_RULE in kwargs["system"]
+    assert "Never construct or guess a URL" in SYSTEM_PROMPT

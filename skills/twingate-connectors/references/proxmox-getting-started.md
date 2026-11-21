@@ -59,6 +59,6 @@ Admin Console → Remote Networks → select network → select Connector → co
 
 ## Related Docs
 - [Setting Up Resources](https://www.twingate.com/docs/resources) — configure access to private apps/services post-deployment
-- [Home Assistant Setup Guide](https://www.twingate.com/docs/home-assistant)
-- [Unraid Helper Script Guide](https://www.twingate.com/docs/unraid)
+- [Home Assistant Setup Guide](https://www.twingate.com/docs/home-assistant-getting-started)
+- [Unraid Helper Script Guide](https://www.twingate.com/docs/unraid-getting-started)
 - [Community Scripts Repo](https://github.com/community-scripts/ProxmoxVE)

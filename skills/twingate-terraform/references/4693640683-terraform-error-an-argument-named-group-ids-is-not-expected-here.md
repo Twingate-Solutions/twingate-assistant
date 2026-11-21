@@ -58,5 +58,5 @@ resource "twingate_resource" "resource" {
 - Run `terraform validate` after migration to confirm all instances are fixed
 
 ## Related Docs
-- [Twingate Terraform Provider v1.0.0 upgrade guide](https://help.twingate.com/articles/update-to-v1.0.0)
+- Twingate Terraform Provider v1.0.0 upgrade guide
 - [`twingate_resource` resource reference](https://registry.terraform.io/providers/Twingate/twingate/latest/docs/resources/resource)

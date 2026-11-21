@@ -5,8 +5,6 @@ fetched: 2026-09-13
 source_version: 84a905c0fbf3fb564080bf46a9db3d6992940258
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Custom Connector Container
 
 ## Summary

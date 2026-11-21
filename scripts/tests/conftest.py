@@ -26,6 +26,13 @@ def _isolate_committed_state(tmp_path, monkeypatch):
     monkeypatch.setattr(update_references, "GITHUB_RUNS_PATH", state_dir / "github-runs.jsonl")
     monkeypatch.setattr(update_references, "NORM_HASH_CACHE_PATH", state_dir / ".doc_norm_hashes.json")
     monkeypatch.setattr(update_references, "HASH_CACHE_PATH", state_dir / ".doc_hashes.json")
+    # Link maintenance scans a skills tree and probes URLs over HTTP; main()
+    # tests must never reach the real corpus or the network.
+    monkeypatch.setattr(
+        update_references,
+        "repair_reference_tree",
+        lambda *args, **kwargs: {"files_changed": 0, "rewritten": 0, "unlinked": 0, "unresolved": 0},
+    )
     for var in ("GITHUB_OUTPUT", "GITHUB_STEP_SUMMARY", "SECURITY_REVIEW_REPORT"):
         monkeypatch.delenv(var, raising=False)
     yield

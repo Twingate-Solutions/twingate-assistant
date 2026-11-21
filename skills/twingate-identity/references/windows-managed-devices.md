@@ -56,11 +56,11 @@ Run on existing installation: performs in-place upgrade and restores session via
 - Chocolatey packages may lag behind official releases (not in automated release pipeline)
 
 ## Downloads
-- EXE (latest): https://www.twingate.com/downloads/windows (latest)
+- EXE (latest): https://www.twingate.com/download (latest)
 - MSI (latest): linked from Twingate downloads page
 - .NET 10 Desktop Runtime (x64): Microsoft download center
 - .NET 8.0 Desktop Runtime (x64): Microsoft download center
-- [Public changelog](https://www.twingate.com/docs/windows-changelog)
+- Public changelog
 
 ## Related Docs
 - Microsoft Intune & Endpoint Manager guide

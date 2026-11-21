@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: eaa08cd4b6cd5e8c6d746041cf066e824879dbc7
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate-PagerDuty Integration
 
 ## Summary

@@ -54,6 +54,10 @@ why it stopped, this skill answers those questions.
   and Compose / systemd equivalents are in `references/docker.md`,
   `references/deploy-connector-with-docker-compose.md`, and
   `references/systemd-service.md`.
+- **For hosting Docker-based Connectors, consider a container manager** such as
+  [Portainer](https://www.portainer.io/) or [DockMin](https://github.com/Sphexi/DockMin) —
+  for Fleet Commander hosts, individually hosted Docker Compose Connectors, or headless
+  Clients run as part of a stack (third-party tools, not Twingate products).
 - **Prefer official deployment paths first.** The community, Labs, and SE repos indexed
   below are reference implementations for platforms Twingate doesn't officially package
   for (Raspberry Pi images, Ubiquiti gateways, Steam Deck, Hyper-V, CI runners, fleet
@@ -93,7 +97,7 @@ first; load it fully when the grep hits. Twingate answers are routinely split ac
 so err toward consulting more, not fewer. Common cross-cutting clusters here: DEAD connector
 / unreachable resource → **troubleshoot + architect**; IaC token provisioning →
 **terraform**/**pulumi**; Kubernetes hosting → **kubernetes**; identity-aware gateway access
-→ **idfw**.
+→ **pam**.
 
 - **→ twingate-architect**: for questions about Remote Network topology or Resource
   definition strategy
@@ -152,7 +156,7 @@ of file live there:
 
 ### GitHub repository tooling
 
-These 19 repos are **not bundled** — clone/inspect at runtime. Each solves a distinct
+These 18 active repos (plus one retired) are **not bundled** — clone/inspect at runtime. Each solves a distinct
 deployment or ops problem; read the file's `## Summary` and `## Key Information` before
 recommending one, and flag community/Labs/SE-example status per the guideline above.
 
@@ -179,6 +183,7 @@ recommending one, and flag community/Labs/SE-example status per the guideline ab
 | **render.com** | One-click "Deploy to Render" button that stands up a Connector as a render.com service using tokens generated in the Admin Console | `gh-twingate-labs-tg-render.md` |
 | **Spacelift CI runners** | Runs Twingate's **userspace HTTP proxy mode** plus `proxytunnel` inside an unprivileged Spacelift runner container — no root, no TUN device, no `NET_ADMIN` — to bridge Postgres/MySQL/SSH through Twingate's HTTP CONNECT proxy | `gh-twingate-solutions-twingate-client-userspace-spacelift.md` |
 | **HCP Terraform / Terraform Cloud workers** | Same userspace-client pattern packaged as a custom Terraform provider (`twingatetunnel`) whose ephemeral resources open TCP tunnels or an HTTP CONNECT proxy during plan/apply — owned by twingate-terraform | `skills/twingate-terraform/references/gh-twingate-solutions-twingate-client-userspace-terraform-cloud.md` |
+| **Coding-agent sandboxes (Daytona, RWX)** | Official docs: headless Client authenticated as a Service inside each agent sandbox (Daytona SDK helper, RWX `twingate/setup` package) — owned by twingate-architect | `skills/twingate-architect/references/daytona-with-twingate.md`, `skills/twingate-architect/references/rwx-with-twingate.md`, `skills/twingate-architect/references/coding-agents-use-case.md` |
 
 **Observability, ops, and fleet automation:**
 
@@ -187,7 +192,7 @@ recommending one, and flag community/Labs/SE-example status per the guideline ab
 | **Grafana dashboards** | Community Grafana dashboard (`grafana/insights.json`) visualizing Connector transport breakdown (direct/relay-hydra/relay-quic), traffic, and uptime from a Prometheus-fed metrics export; needs Grafana 12.2.1+ | `gh-twingate-community-dashboards.md` |
 | **PagerDuty alerting** | Bash/systemd service that tails Connector logs via `journalctl -f`, forwards `Offline`/`Error`/`Unrecoverable error` state changes to PagerDuty's Events API v2, and auto-resolves on recovery | `gh-twingate-labs-twingate-pagerduty.md` |
 | **Log shipping to S3** | Python sidecar/systemd service that captures `ANALYTICS`-prefixed Connector stdout, batches it, and uploads gzip NDJSON to any S3-compatible store (AWS S3, MinIO, R2, B2, Spaces); requires `TWINGATE_LOG_ANALYTICS=v2` | `gh-twingate-solutions-twingate-connector-log-shipper.md` |
-| **Local connector status UI** | Lightweight web dashboard running alongside a Connector on the same host for on-box status/diagnostics without the Admin Console — no built-in auth, restrict via firewall | `gh-twingate-solutions-connector-local-ui.md` |
+| **Local connector status UI** (**retired — repo no longer public**; do not recommend) | Lightweight web dashboard running alongside a Connector on the same host for on-box status/diagnostics without the Admin Console — no built-in auth, restrict via firewall | `gh-twingate-solutions-connector-local-ui.md` |
 | **Generic Docker auto-updater (Janus)** | Label-driven container updater (`janus.autoupdate.enable=true`) that recreates any labeled container — including custom connector containers — when a newer image is available, with rollback on failure; not Compose-aware | `gh-twingate-solutions-janus-updater-service.md` |
 | **Connector fleet autoscaling** | "Fleet Commander" — an async control-plane loop that discovers, scales, and retires Connector containers across Docker/ECS/ACI backends via the Docker socket and the Twingate GraphQL Admin API; exposes `/healthz`, `/readyz`, `/metrics` | `gh-twingate-solutions-twingate-fleet-commander.md` |
 

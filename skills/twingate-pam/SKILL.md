@@ -1,22 +1,24 @@
 ---
-name: twingate-idfw
+name: twingate-pam
 description: >
-  Use for the Twingate Identity Firewall (IDFW) and Twingate Gateway — protocol-level identity
-  enforcement for SSH, the Kubernetes API, AND self-hosted/internal web apps, not just network
-  access. LOAD when the user wants to grant, secure, SSO into, or audit a self-hosted/internal web
-  app — identity forwarding/injection into HTTP requests, per-request audit trails. Gateway = Layer
+  Use for Twingate Privileged Access Management (PAM; formerly Identity Firewall/IDFW) and the
+  Twingate Gateway — Privileged Access for Kubernetes, SSH, AND self-hosted/internal Web Apps:
+  protocol-level identity enforcement, not just network access. LOAD when the user wants to
+  grant, secure, SSO into, or audit a self-hosted/internal web app — identity forwarding/injection into HTTP requests, per-request audit. Gateway = Layer
   7 reverse proxy injecting ES256 JWTs (Gateway Access Tokens) or trusted headers: JWKS
-  verification, request-header injection, framework middleware (Express, Django, Next.js, Auth.js),
-  no-code SSO (Grafana, Jenkins). Covers Gateway deployment; SSH privileged access with short-lived
-  certs; vendor/contractor access; Certificate Authorities (X.509/SSH CA, local or Vault); kubectl
-  via the Gateway; Terraform/Ansible automation; session recording (.cast playback, scanning for
-  dangerous commands/leaked secrets). Assume this skill for "can Twingate pass the user's identity
-  to my app?", "audit who used this app", or "SSO for my internal tool".
+  verification, framework middleware (Express, Django, Next.js, Auth.js), no-code SSO (Grafana,
+  Jenkins). Covers Gateway deployment; SSH with short-lived certs; vendor/contractor access;
+  Certificate Authorities (X.509/SSH CA, local or Vault); kubectl via the Gateway; Terraform
+  automation; session recording (.cast playback, dangerous-command/leaked-secret scanning).
+  Assume this skill for "can Twingate pass the user's identity to my app?", "audit who used
+  this app", or "SSO for my internal tool".
 ---
 
 ## Role
 
-Twingate's Identity Firewall specialist. Owns the Twingate Gateway — its deployment,
+Twingate's Privileged Access Management (PAM) specialist — the product formerly called
+Identity Firewall (IDFW), renamed November 2026; treat the old name in user input, older
+docs, and repos as the same product. Owns the Twingate Gateway — its deployment,
 Certificate Authority configuration (X.509 and SSH CA, local or Vault-backed), SSH
 privileged access with short-lived certificates, Kubernetes kubectl proxy mode, session
 recording, contractor access patterns, and **Privileged Access for Web Apps** (the Gateway
@@ -34,16 +36,21 @@ infrastructure belongs in `twingate-terraform`.
 
 - **Connectors** = transparent TCP tunnels (network layer); they route packets without
   understanding the protocol.
-- **Gateway** = active protocol mediator (application layer); it validates SSH certificates
-  and enforces K8s RBAC inside the protocol.
+- **Gateway** = active protocol mediator (application layer); it signs in to SSH targets with
+  short-lived certificates, impersonates the user to the Kubernetes API server (so the
+  cluster's own RBAC and audit logs see the real identity), and injects identity into
+  web-app requests.
 
-These are complementary, not interchangeable. Adding more Connectors does not provide IDFW
+These are complementary, not interchangeable. Adding more Connectors does not provide PAM
 capabilities. You need a gateway.
 
-- **The SSH username lives in the gateway config YAML** (`ssh.resources[].username`) — not
-  in the admin console resource definition, not in the `twingate_resource` Terraform
-  resource, not in the GraphQL API. This is the single most common source of confusion in
-  IDFW deployments.
+- **The SSH username lives in the gateway config YAML** (`ssh.gateway.username`) — one
+  Linux account the Gateway signs in as on every target it serves, which must exist on each
+  target. It is not in the admin console resource definition, not in the `twingate_resource`
+  Terraform resource, not in the GraphQL API. This is the single most common source of
+  confusion in PAM deployments. Different accounts for different audiences (e.g.
+  contractors) mean a separate Gateway — see the `third-party-access` recipe mapped in
+  `references/gh-twingate-solutions-gwops.md`.
 - **Deploy session recording from day one** if any audit or compliance requirement exists —
   it is not retroactive; enabling it later captures nothing from past sessions.
 - **Use HashiCorp Vault as the SSH CA in production** — local CA mode keeps the private
@@ -57,12 +64,24 @@ capabilities. You need a gateway.
   `references/ssh-installation.md`.
 - **A single gateway instance is a SPOF** for all SSH and K8s access to the resources it
   serves — deploy at least two behind a load balancer.
-- **The IDFW feature set is actively expanding beyond SSH and K8s.** Check
-  `references/identity-firewall.md` and `references/identity-firewall-overview.md`
-  for the current protocol support matrix and roadmap. Do not list specific
-  upcoming protocols from memory — they may have already shipped, been
-  renamed, or been deprioritized. Web App privileged access has now shipped
-  (Beta) — see the web-app references below.
+- **The rename is marketing-only.** API, GraphQL, Terraform and Pulumi identifiers did not
+  change with it, and some external URLs still say Identity-Firewall (e.g. the Kubernetes
+  operator wiki's `Identity-Firewall-User-Guide`) — read identifiers and links from
+  `references/`, never derive them from the new name.
+- **"PAM" here never means Linux Pluggable Authentication Modules.** The Gateway does not
+  install a PAM module on target hosts; SSH access is the Gateway signing in with a
+  short-lived certificate from an SSH CA. Spell out "Privileged Access Management (PAM)" on
+  first use so a reader doesn't confuse the two.
+- **All three components are "Available Now"** (Kubernetes, SSH, Web Apps); the docs point
+  customers to Twingate for a free trial. The earlier "free for up to 5 Resources" tier and
+  the SSH "Early Access" / Web Apps "Beta" labels were removed upstream in November 2026 —
+  a reference summarized before then may still show them, so do not repeat them as current.
+  The component references may lag behind this; when they conflict, the live page at
+  `https://www.twingate.com/docs/privileged-access-management` is authoritative.
+- **The feature set is actively expanding.** Check
+  `references/privileged-access-management.md` (overview, traffic path, minimum versions)
+  for the current protocol support. Do not list upcoming protocols from memory — they may
+  have already shipped, been renamed, or been deprioritized.
 - **Privileged Access for Web Apps is the Gateway acting as a Layer 7 reverse proxy**,
   not a connector feature. It injects a signed **ES256 JWT** (the Gateway Access Token,
   GAT) or plain trusted headers into each HTTP request forwarded upstream; apps verify
@@ -71,14 +90,13 @@ capabilities. You need a gateway.
   form `<tenant>.<shard>.twingate.com` (e.g. `us1`). Always take the host from the Admin
   Console URL rather than assuming a single label.
   Guidelines a domain expert would enforce, not derivable from a doc scan:
-  - **HTTP upstreams only, today.** The Gateway currently reverse-proxies to web-app
-    targets over plaintext **HTTP**; encrypted **HTTPS upstream support is a future
-    roadmap item**. Two failure modes to avoid: (1) do NOT tell a user Twingate can't
-    inject/forward identity into a web app — HTTP web-app privileged access (JWT/header
-    injection, SSO, per-request audit) works **now**; (2) do NOT imply the encrypted
-    variant is ready — HTTPS upstream is pending. The Gateway↔app hop being plaintext is
-    acceptable when that hop is on an isolated/trusted network. Confirm current scheme
-    support against `references/web-app-access.md` before a customer designs around it.
+  - **HTTP and HTTPS upstreams are both supported as of Gateway 2.0.** Recommend HTTPS
+    for the Gateway↔app hop unless that hop is on an isolated, trusted network. Upstream
+    TLS has its own constraints (e.g. TLS 1.3, trust of the app's certificate) — read
+    them from `references/gh-twingate-solutions-gwops.md` and the Gateway repo rather
+    than from memory. Some references summarized before Gateway 2.0 may still describe
+    HTTPS upstream as a roadmap item; that is out of date. Never tell a user Twingate
+    can't inject/forward identity into a web app — it works today.
   - **Prefer JWT verification over trusted-header auth.** Trusted-header mode (e.g. Grafana
     `auth.proxy`, Jenkins reverse-proxy) is plaintext and only safe when the app is
     network-isolated so the Gateway is its **only** ingress — otherwise any internal client
@@ -90,9 +108,6 @@ capabilities. You need a gateway.
     on the Web App Resource; per-Resource rewrites override same-named gateway-wide headers.
   - **Own the code → developer guides (direct JWT verification); can't modify the app →
     integrations (trusted header).** Route by whether the customer controls the source.
-  - It is **Beta** (requires contacting Twingate for access) — say so before a customer
-    designs a production dependency on it. Confirm current status against
-    `references/web-app-access.md` rather than asserting GA from memory.
 - **The Gateway itself is the only production-supported component here.** Session-recording
   *playback/archival* tooling (e.g. `gh-twingate-solutions-gatorcast.md`) is explicitly an
   example/reference project with no warranty — recommend it for self-hosted review of
@@ -113,19 +128,19 @@ find.** Filenames reveal only the topic — Helm value names, env vars, and erro
 live in the file bodies, so a filename scan alone will miss them:
 
 ```
-grep -ril "asciicast" references/      # -> gh-twingate-gateway-wiki.md, gh-twingate-gateway.md, gh-twingate-solutions-gatorcast.md
+grep -ril "asciicast" references/      # -> privileged-access-management.md, gh-twingate-gateway-wiki.md, gh-twingate-solutions-gatorcast.md
 grep -ril "vault" references/          # -> ssh-privileged-access-overview.md, ssh-installation.md
 grep -ril "jwks" references/           # -> web-app-*.md (JWT verification for web apps)
 grep -ril "X-WEBAUTH-USER" references/ # -> web-app-grafana.md (exact trusted-header env var)
 ```
 
 Never answer from training-data memory for: gateway config YAML keys and structure
-(recording, ssh.resources, CA refs), gateway failure diagnosis — exact log messages,
+(recording, `ssh.gateway`, CA refs), gateway failure diagnosis — exact log messages,
 error signatures, TLS/CONNECT failure modes, metrics names (read
 `references/gateway-troubleshooting.md`), admin console navigation paths and UI labels,
 Vault secrets engine paths or policy syntax, Smallstep CA configuration syntax, Helm
 chart values for kubectl proxy mode or session recording, the supported SSH/protocol
-matrix and IDFW roadmap, or web-app integration specifics — the JWKS endpoint path, JWT
+matrix and PAM roadmap, or web-app integration specifics — the JWKS endpoint path, JWT
 `typ`/`alg` values, header template variables (`{{jwt}}`/`{{username}}`/`{{groups}}`),
 and per-framework middleware config (library names, exact env vars like `X-JWT-Assertion`,
 Grafana/Jenkins plugin IDs). These drift; read the `web-app-*` references. Config keys and CA setup steps drift, and an out-of-date YAML
@@ -178,11 +193,12 @@ of file live there, plus one hand-authored field guide:
 | If the user asks about… | Read first |
 |---|---|
 | Gateway not working — TLS/cert failures, 401/407 CONNECT errors, SSH upstream rejection, kubectl `InternalError`/403, missing recordings, log/metric signatures | `gateway-troubleshooting.md` |
-| IDFW feature overview, protocol support matrix, roadmap | `identity-firewall.md`, `identity-firewall-overview.md` |
+| PAM overview — traffic path, identity propagation per protocol, minimum Connector/Client/kubectl versions, where audit logs and recordings go (your infrastructure, never Twingate), availability | `privileged-access-management.md` |
+| Kubeconfig sync and AI-agent access to a cluster (upstream files these under PAM; owned by twingate-kubernetes) | `skills/twingate-kubernetes/references/kubernetes-kubeconfig-sync.md`, `skills/twingate-kubernetes/references/kubernetes-agent-access.md` |
 | SSH gateway architecture, CA types, supported SSH features, Client requirements | `ssh-privileged-access-overview.md` |
 | SSH gateway deployment (Terraform, local vs Vault CA, cloud quick-starts) | `ssh-installation.md` |
 | Kubectl proxy mode, K8s RBAC integration, K8s session recording (docs page) | `kubernetes-access.md` |
-| **Web App privileged access** — architecture, request flow, GAT/JWT payload claims, JWKS endpoint, `typ: GAT` gotcha, header template variables, Helm/operator header config (Beta) | `web-app-access.md` |
+| **Web App privileged access** — architecture, request flow, GAT/JWT payload claims, JWKS endpoint, `typ: GAT` gotcha, header template variables, Helm/operator header config | `web-app-access.md` |
 | **Web App developer guides index** — which framework middleware exists, ES256/`Authorization`-header pattern common to all | `web-app-developer-guides.md` |
 | Web App middleware — **Express.js** (`jose`, `req.twingateIdentity`, 401 on bad token) | `web-app-express.md` |
 | Web App middleware — **Django** (`PyJWT[crypto]`, `request.gat`, user provisioning, MIDDLEWARE ordering) | `web-app-django.md` |
@@ -192,8 +208,9 @@ of file live there, plus one hand-authored field guide:
 | Web App SSO — **Grafana** (`auth.jwt` vs `auth.proxy`, `X-JWT-Assertion`/`X-WEBAUTH-USER`, whitelist) | `web-app-grafana.md` |
 | Web App SSO — **Jenkins** (reverse-proxy-auth-plugin, role-strategy, JCasC, `X-Forwarded-User`/`-Groups`) | `web-app-jenkins.md` |
 | **Gateway repo/wiki** — protocol support (K8s/SSH/Web App), GAT auth flow, identity propagation, asciicast v2 session recording, Prometheus metrics, Helm chart values, Docker image | `gh-twingate-gateway.md`, `gh-twingate-gateway-wiki.md` |
-| **Session-recording browse/replay UI** (Gatorcast) — ingests Gateway asciicast fragments via HTTP/syslog, reassembles by connection, flags dangerous commands and secret exposure; **example/reference project, not a supported product** | `gh-twingate-solutions-gatorcast.md` |
+| **Session-recording browse/replay UI** (Gatorcast) — ingests Gateway asciicast fragments via HTTP/syslog, reassembles by connection, flags dangerous commands and secret exposure; **example/reference project, not a supported product** | `gh-twingate-solutions-gatorcast.md`, `gh-twingate-solutions-gatorcast-wiki.md` |
 | **Self-managed Gateway container** (gwops) — Gateway 2.0 binary wrapped by a Python control plane: generated/BYO CAs, ACME via Cloudflare, declarative seed that syncs resources to the tenant, recording to an NDJSON receiver/SIEM; gateway-binary limits; a map of 19 deployment recipes (cloud VM, homelab, multi-network, GitOps, restricted egress, third-party access, in-cluster). **Example project, not supported.** Open the repo docs it maps for detail | `gh-twingate-solutions-gwops.md`, then `https://github.com/Twingate-Solutions/gwops` |
+| **Gateway lab / demo box** (Twingate in a Box) — Terraform stands up a Remote Network, Connector and Gateway as Docker containers on one Ubuntu VM; `docker/` (bundled apps: Open WebUI via `X-Twingate-User` header, Grafana via signed token, Uptime Kuma, IT Tools, keyless SSH with recording) or `proxy/` (front existing homelab apps); `install.sh`, `TG_SERVICES`, cloud-init. Terraform state holds the CA/Gateway keys and Connector tokens in plaintext, and the box CA is not name-constrained. **Community lab tool, not a production deployment** | `gh-twingate-community-twingate-in-a-box.md` |
 | Remote development with SSH (VS Code, JetBrains Gateway, Cursor) | `ssh-remote-development.md` |
 | Smallstep CA integration | `ssh-smallstep.md` |
 | Gateway config YAML schema, exact field names | Gateway repo: `https://github.com/Twingate/gateway` (`deploy/` directory) |

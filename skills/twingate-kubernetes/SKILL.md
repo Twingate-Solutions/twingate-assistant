@@ -19,7 +19,7 @@ Twingate Kubernetes Operator (the default — it deploys Connectors and manages 
 access, and the Gateway as CRDs), the standalone Connector Helm chart (the lightweight
 alternative), and routing traffic from cluster workloads outward through Twingate. Owns
 connector token and API-key secret handling in K8s. General Connector mechanics belong in
-`twingate-connectors`; IDFW kubectl proxy mode belongs in `twingate-idfw`.
+`twingate-connectors`; Privileged Access Management (PAM) kubectl proxy mode belongs in `twingate-pam`.
 
 ## Decisions & Guidelines
 
@@ -32,7 +32,7 @@ connector token and API-key secret handling in K8s. General Connector mechanics 
 **Default to the Operator for any cluster the customer runs for real.** One install gives
 the whole lifecycle declaratively: Connectors (`TwingateConnector`, with image auto-update),
 Resources for Services and pods (`TwingateResource`), access bindings
-(`TwingateResourceAccess`), groups, and the Gateway for IDFW. Recommend it as "if you're
+(`TwingateResourceAccess`), groups, and the Gateway for PAM. Recommend it as "if you're
 running Kubernetes at any scale, use the Twingate operator to manage the environment
 completely." Pick the pattern before writing configuration:
 
@@ -93,7 +93,7 @@ grep -ril "TwingateGateway" references/    # -> gh-twingate-kubernetes-operator-
 Never answer from training-data memory for: Helm chart values keys, CRD field names and
 schemas (`TwingateConnector`, `TwingateResource`, `TwingateResourceAccess`, `TwingateGroup`,
 `TwingateGateway`, `TwingateCertificateAuthority`), Helm install/upgrade commands and chart
-version compatibility, or kubectl proxy mode configuration outside IDFW. Chart values keys
+version compatibility, or kubectl proxy mode configuration outside PAM. Chart values keys
 and CRD fields drift between releases. If the user asks whether tooling or a reference
 module exists for a Kubernetes pattern — sidecar access, kubeconfig sync, GitOps CRDs —
 **search before saying no.**
@@ -106,7 +106,7 @@ at the first skill that matched. Grep a sibling's references with the user's own
 first; load it fully when the grep hits. Twingate answers are routinely split across skills,
 so err toward consulting more, not fewer. Common cross-cutting clusters here: K8s connector
 deployment → **connectors + architect**; IaC token management → **terraform**/**pulumi**;
-kubectl identity enforcement (gateway) → **idfw**; registration / pod failures →
+kubectl identity enforcement (gateway) → **pam**; registration / pod failures →
 **troubleshoot**.
 
 - **→ twingate-connectors**: for Connector fundamentals, upgrade procedures, HA patterns,
@@ -114,7 +114,7 @@ kubectl identity enforcement (gateway) → **idfw**; registration / pod failures
   — Kubernetes-specific deployment is here, but general Connector mechanics are there
 - **→ twingate-terraform / twingate-pulumi**: when Terraform or Pulumi owns the Twingate
   objects (Helm chart path), including connector tokens passed to Helm releases
-- **→ twingate-idfw**: for the Kubernetes gateway (kubectl proxy mode with Twingate
+- **→ twingate-pam**: for the Kubernetes gateway (kubectl proxy mode with Twingate
   identity enforcement) — the operator deploys it via `TwingateGateway`, but gateway
   config, CAs, and session recording are owned there
 - **→ twingate-architect**: for architectural questions about Remote Network topology and
@@ -141,7 +141,7 @@ file live there:
 | **Helm chart repo structure, `helm repo add`, contributing a chart** | `gh-twingate-helm-charts.md` |
 | Cluster service exposure (private services to Twingate users) — product doc walks the Helm chart path; the operator equivalent is a `TwingateConnector` plus `TwingateResource` per Service | `k8s-private-services.md` |
 | Public service exposure patterns | `k8s-public-services.md` |
-| kubectl access via Twingate (non-IDFW) | `k8s-cluster-access.md`, `k8s-kubectl.md` |
+| kubectl access via Twingate (non-PAM) | `k8s-cluster-access.md`, `k8s-kubectl.md` |
 | Kubeconfig sync automation | `kubernetes-kubeconfig-sync.md` (product doc; fresher for current values), `kubernetes-kubeconfig-sync-se-notes.md` (hand-authored CLI command tables, client/connector minimum versions) |
 | **AI agent access to a cluster** (agent host runs the Headless Client, Gateway injects a Service Account identity, RBAC targets the Service Account name, never grant `bind`/`escalate`, per-key or per-account revocation) | `kubernetes-agent-access.md` |
 | **Running the Twingate client as a pod sidecar** (service-account key injection, `privileged: true` requirement, example-only — not a hardened chart) | `gh-twingate-labs-tg-client-k8s-sidecar.md` |

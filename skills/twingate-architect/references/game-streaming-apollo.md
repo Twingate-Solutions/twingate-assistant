@@ -65,4 +65,4 @@ Apollo extends Sunshine with automatic virtual display management via SudoVDA, e
 - [Duo Remote Streaming](https://www.twingate.com/docs) — multi-user simultaneous gaming
 - [Connector Deployment Guides](https://www.twingate.com/docs)
 - [Resource Access Configuration](https://www.twingate.com/docs)
-- [Apollo GitHub Repository](https://github.com/apolloapp/apollo)
+- [Apollo GitHub Repository](https://github.com/ClassicOldSong/Apollo)

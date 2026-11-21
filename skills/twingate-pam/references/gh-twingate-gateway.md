@@ -49,6 +49,6 @@ Specific environment variables, CLI flags, and API parameters are documented in 
 - [Wiki home](https://github.com/Twingate/gateway/wiki)
 - [How It Works](https://github.com/Twingate/gateway/wiki/How-It-Works)
 - [Developer Guide](https://github.com/Twingate/gateway/wiki/Developers)
-- [Twingate PAM product docs](https://www.twingate.com/docs/identity-firewall)
+- [Twingate PAM product docs](https://www.twingate.com/docs/privileged-access-management)
 - [Twingate community forum](https://forum.twingate.com/)
 - [Support tickets](https://help.twingate.com/)

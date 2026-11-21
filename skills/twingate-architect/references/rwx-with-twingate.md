@@ -6,8 +6,6 @@ source_version: 5e89c25bb35e14e36fbac3087befddb6f72b3abf1736fef322f120d6c82e3c32
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Access Private Resources from RWX Sandboxes
 
 ## Summary

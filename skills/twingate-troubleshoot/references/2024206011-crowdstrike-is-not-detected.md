@@ -50,4 +50,4 @@ CrowdStrike may be installed and reporting correctly to its own dashboard while 
 - CrowdStrike can appear fully functional from its own perspective while ZTA remains disabled
 
 ## Related Docs
-- [CrowdStrike Configuration](https://help.twingate.com/articles/crowdstrike-configuration) (referenced in source)
+- CrowdStrike Configuration (referenced in source)

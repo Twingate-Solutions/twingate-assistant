@@ -39,10 +39,10 @@ twingate kube config sync    # Sync kubeconfig for kubectl access
 ## Related Docs / Resources
 - [Twingate Kubernetes Operator (GitHub)](https://github.com/Twingate/kubernetes-operator)
 - [Kubernetes Access Gateway (GitHub)](https://github.com/Twingate/kubernetes-access-gateway)
-- [Kubernetes Operator Quick Start Guide](https://www.twingate.com/docs/k8s-operator-quick-start)
-- [Kubernetes Kubeconfig Sync](https://www.twingate.com/docs/k8s-kubeconfig-sync)
-- [Privileged Access for Kubernetes](https://www.twingate.com/docs/k8s-access)
-- [Helm Chart](https://www.twingate.com/docs/k8s-helm)
+- Kubernetes Operator Quick Start Guide
+- [Kubernetes Kubeconfig Sync](https://www.twingate.com/docs/kubernetes-kubeconfig-sync)
+- [Privileged Access for Kubernetes](https://www.twingate.com/docs/k8s-cluster-access)
+- [Helm Chart](https://www.twingate.com/docs/k8s-helm-chart)
 - How to Securely Manage Kubernetes using kubectl
 - How to Route Traffic from a Kubernetes Cluster Using the Twingate Client
 - How to Securely Access Private Resources in a Kubernetes Cluster

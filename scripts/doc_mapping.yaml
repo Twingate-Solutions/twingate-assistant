@@ -17,13 +17,26 @@
 # First matching pattern wins; unmatched docs go to _triage/ for review.
 # A discovered GitHub repo not listed in `repos:` also routes to _triage/.
 #
-# Last updated: 2026-07-06 (302 entries; docsTemplate, unlisted, WIP excluded)
+# Last updated: 2026-11-20 (401 entries; docsTemplate, unlisted, WIP excluded)
 
 # ── Exclude ─────────────────────────────────────────────────────────────────
 # URLs present in a sitemap but with no usable content (dead/unlisted/placeholder
 # pages). Dropped from discovery before diffing so they don't re-triage every run.
 exclude:
   - https://www.twingate.com/docs/unlisted
+  - https://www.twingate.com/docs/docsTemplate
+  # Renamed to /docs/privileged-access-management (2026-11-20). The docs site
+  # still serves a cached copy, so drop it here or it re-routes as "new".
+  - https://www.twingate.com/docs/identity-firewall
+
+# GitHub repos discovered by github_repos.discover_org_repos that carry no
+# Twingate product content (org-profile `.github` repos). Skipped before
+# routing so they don't re-triage every run.
+exclude_repos:
+  - Twingate/.github
+  - Twingate-Community/.github
+  - Twingate-Labs/.github
+  - Twingate-Solutions/.github
 
 # ── Retired ─────────────────────────────────────────────────────────────────
 # Mapped URLs whose source page was unpublished (404, absent from its sitemap,
@@ -79,6 +92,78 @@ retired:
   - url: https://help.twingate.com/articles/9546556496-vpn-clients-with-installed-tap-adapter
     skill: twingate-troubleshoot
     retired: "2026-11-13"
+  # Identity Firewall renamed Privileged Access Management; the overview slug
+  # moved to /docs/privileged-access-management. Reference file deleted.
+  - url: https://www.twingate.com/docs/identity-firewall
+    skill: twingate-pam
+    retired: "2026-11-20"
+  # GitHub repo deleted or made private (API 404); removed from `repos:`.
+  - url: https://github.com/Twingate-Solutions/connector-local-ui
+    skill: twingate-connectors
+    retired: "2026-11-20"
+
+# ── Link aliases ────────────────────────────────────────────────────────────
+# Wrong Twingate docs URL -> correct URL. Used by link maintenance (Step 4.75
+# of update_references.py, scripts/reference_links.py) to rewrite links in
+# generated references. Most entries are URLs the summarizer guessed from link
+# text before summaries were given real link URLs (none of them, apart from
+# identity-firewall and create-a-resource, ever existed in the www.twingate.com
+# repo); identity-firewall is a real rename. Add an entry when a page is
+# renamed upstream or a wrong URL recurs. A docs/help link that is in neither
+# this table nor this run's sitemaps is probed and, if it 404s, unlinked.
+link_aliases:
+  https://www.twingate.com/docs/download: https://www.twingate.com/docs/clients
+  https://www.twingate.com/docs/downloads: https://www.twingate.com/docs/clients
+  https://www.twingate.com/docs/download-and-installation: https://www.twingate.com/docs/clients
+  https://www.twingate.com/docs/connector: https://www.twingate.com/docs/connectors
+  https://www.twingate.com/docs/client: https://www.twingate.com/docs/clients
+  https://www.twingate.com/docs/sessions: https://www.twingate.com/docs/how-sessions-work
+  https://www.twingate.com/docs/site-to-site: https://www.twingate.com/docs/site-2-site
+  https://www.twingate.com/docs/soc2: https://www.twingate.com/docs/soc-2
+  https://www.twingate.com/docs/responsible-disclosure: https://www.twingate.com/docs/responsible-disclosure-policy
+  https://www.twingate.com/docs/aws-exit-nodes: https://www.twingate.com/docs/configuring-aws-exit-nodes
+  https://www.twingate.com/docs/whitelisting-traffic: https://www.twingate.com/docs/whitelisting-traffic-to-public-services
+  https://www.twingate.com/docs/k8s-helm: https://www.twingate.com/docs/k8s-helm-chart
+  https://www.twingate.com/docs/k8s-kubeconfig-sync: https://www.twingate.com/docs/kubernetes-kubeconfig-sync
+  https://www.twingate.com/docs/k8s-access: https://www.twingate.com/docs/k8s-cluster-access
+  https://www.twingate.com/docs/linux-headless-client: https://www.twingate.com/docs/linux-headless
+  https://www.twingate.com/docs/userspace-networking: https://www.twingate.com/docs/linux-userspace-networking
+  https://www.twingate.com/docs/macos-ios: https://www.twingate.com/docs/macos-and-ios
+  https://www.twingate.com/docs/windows-managed-device: https://www.twingate.com/docs/windows-managed-devices
+  https://www.twingate.com/docs/ephemeral-access: https://www.twingate.com/docs/ephemeral-access-to-resources
+  https://www.twingate.com/docs/twingate-and-customer-data: https://www.twingate.com/docs/twingate-customer-data
+  https://www.twingate.com/docs/aws-database-access: https://www.twingate.com/docs/database-access-aws
+  https://www.twingate.com/docs/gcp-database-access: https://www.twingate.com/docs/database-access-gcp
+  https://www.twingate.com/docs/identity-firewall: https://www.twingate.com/docs/privileged-access-management
+  https://www.twingate.com/docs/active-directory: https://www.twingate.com/docs/using-active-directory-with-twingate
+  https://www.twingate.com/docs/auto-lock: https://www.twingate.com/docs/usage-based-auto-lock
+  https://www.twingate.com/docs/cancel-subscription: https://www.twingate.com/docs/subscription-cancellation
+  https://www.twingate.com/docs/subscription: https://www.twingate.com/docs/subscription-management
+  https://www.twingate.com/docs/connector-logs: https://www.twingate.com/docs/connector-real-time-logs
+  https://www.twingate.com/docs/connector-advanced: https://www.twingate.com/docs/advanced-connector-management
+  https://www.twingate.com/docs/device-security: https://www.twingate.com/docs/device-security-guide
+  https://www.twingate.com/docs/dns-with-twingate: https://www.twingate.com/docs/how-dns-works-with-twingate
+  https://www.twingate.com/docs/entra-id-saas-app-gating: https://www.twingate.com/docs/saas-app-gating-with-entra-id
+  https://www.twingate.com/docs/saas-app-gating-office-365-with-entra-id: https://www.twingate.com/docs/saas-app-gating-with-entra-id
+  https://www.twingate.com/docs/gdpr: https://www.twingate.com/docs/gdpr-compliance
+  https://www.twingate.com/docs/hipaa: https://www.twingate.com/docs/hipaa-compliance
+  https://www.twingate.com/docs/home-assistant: https://www.twingate.com/docs/home-assistant-getting-started
+  https://www.twingate.com/docs/unraid: https://www.twingate.com/docs/unraid-getting-started
+  https://www.twingate.com/docs/synology-dsm-6: https://www.twingate.com/docs/how-to-set-up-twingate-on-a-synology-nas-dsm-6
+  https://www.twingate.com/docs/minecraft-bedrock: https://www.twingate.com/docs/minecraft-bedrock-server
+  https://www.twingate.com/docs/minecraft-forge: https://www.twingate.com/docs/minecraft-forge-server
+  https://www.twingate.com/docs/minecraft-java-server: https://www.twingate.com/docs/minecraft-server
+  https://www.twingate.com/docs/minecraft-java-server-linux: https://www.twingate.com/docs/minecraft-server-linux
+  https://www.twingate.com/docs/minecraft-linux: https://www.twingate.com/docs/minecraft-server-linux
+  https://www.twingate.com/docs/network-events-export: https://www.twingate.com/docs/network-events-ac-export
+  https://www.twingate.com/docs/network-traffic: https://www.twingate.com/docs/exporting-network-traffic
+  https://www.twingate.com/docs/peer-to-peer: https://www.twingate.com/docs/peer-to-peer-communication-in-twingate
+  https://www.twingate.com/docs/service-accounts: https://www.twingate.com/docs/service-accounts-guide
+  https://www.twingate.com/docs/log-analytics: https://www.twingate.com/docs/analytics
+  https://www.twingate.com/docs/policies: https://www.twingate.com/docs/security-policies
+  https://www.twingate.com/docs/admin-roles: https://www.twingate.com/docs/admins
+  https://www.twingate.com/docs/create-a-remote-network: https://www.twingate.com/docs/remote-networks
+  https://www.twingate.com/docs/create-a-resource: https://www.twingate.com/docs/resources
 
 # ── Sources ─────────────────────────────────────────────────────────────────
 # Sitemaps the pipeline crawls. Each source pairs a sitemap URL with the URL
@@ -114,9 +199,6 @@ repos:
     skill: twingate-api
   - full_name: Twingate/kubernetes-operator
     skill: twingate-kubernetes
-    track_releases: true
-  - full_name: Twingate/kubernetes-access-gateway
-    skill: twingate-idfw
     track_releases: true
   # Repos hand-routed from _triage after the Session 23 baseline seed.
   # --- twingate-api ---
@@ -167,8 +249,6 @@ repos:
     skill: twingate-connectors
   - full_name: Twingate-Labs/twingate-pagerduty
     skill: twingate-connectors
-  - full_name: Twingate-Solutions/connector-local-ui
-    skill: twingate-connectors
   - full_name: Twingate-Solutions/janus-updater-service
     skill: twingate-connectors
   - full_name: Twingate-Solutions/twingate-client-userspace-spacelift
@@ -201,14 +281,16 @@ repos:
     skill: twingate-identity
   - full_name: Twingate-Solutions/twingate-wayfinder-app
     skill: twingate-identity
-  # --- twingate-idfw ---
+  # --- twingate-pam ---
   - full_name: Twingate-Solutions/gatorcast
-    skill: twingate-idfw
+    skill: twingate-pam
   - full_name: Twingate-Solutions/gwops
-    skill: twingate-idfw
+    skill: twingate-pam
   - full_name: Twingate/gateway
-    skill: twingate-idfw
+    skill: twingate-pam
     track_releases: true
+  - full_name: Twingate-Community/twingate-in-a-box
+    skill: twingate-pam
   # --- twingate-kubernetes ---
   - full_name: Twingate-Labs/tg-client-k8s-sidecar
     skill: twingate-kubernetes
@@ -453,6 +535,19 @@ docs:
   - url: https://www.twingate.com/docs/github-codespaces
     skill: twingate-architect
     keywords: [GitHub Codespaces, cloud development, VS Code, remote resources, developer tools, open source]
+
+  # Coding agents — local / cloud-sandbox / self-hosted agents reaching private Resources as a Service
+  - url: https://www.twingate.com/docs/coding-agents-use-case
+    skill: twingate-architect
+    keywords: [coding agents, AI agents, Claude Code, Codex, Cursor, Devin, sandbox, Service, Service Key, headless Client, least privilege]
+
+  - url: https://www.twingate.com/docs/daytona-with-twingate
+    skill: twingate-architect
+    keywords: [Daytona, sandbox, coding agents, Daytona SDK, Service Key, headless setup, twingate setup --headless, service-start, networkBlockAll, Invalid service key]
+
+  - url: https://www.twingate.com/docs/rwx-with-twingate
+    skill: twingate-architect
+    keywords: [RWX, sandbox, coding agents, rwx sandbox exec, sandbox.yml, twingate/setup, vault, Service Key, headless Client, ready-check]
 
   - url: https://www.twingate.com/docs/homelab-step-by-step
     skill: twingate-architect
@@ -1087,67 +1182,67 @@ docs:
     keywords: [AI agents, Kubernetes, Gateway, Headless Client, Service Account, RBAC, sandbox]
 
 
-  # ── twingate-idfw ───────────────────────────────────────────────────────────
+  # ── twingate-pam ────────────────────────────────────────────────────────────
 
   - url: https://www.twingate.com/docs/ssh-smallstep
-    skill: twingate-idfw
+    skill: twingate-pam
     keywords: [SSH, Smallstep, certificate authority, zero trust, MFA, AWS, "application-layer authentication", PKI]
 
-  - url: https://www.twingate.com/docs/identity-firewall
-    skill: twingate-idfw
-    keywords: [Identity Firewall, Layer 7, privileged access, session recording, zero trust, Kubernetes, SSH, PAM]
+  - url: https://www.twingate.com/docs/privileged-access-management
+    skill: twingate-pam
+    keywords: [Privileged Access Management, PAM, Layer 7, Gateway, Kubernetes, SSH, web apps, session recording, asciicast, minimum versions]
 
   - url: https://www.twingate.com/docs/kubernetes-access
-    skill: twingate-idfw
+    skill: twingate-pam
     keywords: [Kubernetes, privileged access, RBAC, zero trust, session recording, gateway, identity propagation, audit]
 
   - url: https://www.twingate.com/docs/ssh-remote-development
-    skill: twingate-idfw
+    skill: twingate-pam
     keywords: [SSH, remote development, VS Code, JetBrains, Cursor, IDE, developer tools, privileged access]
 
   - url: https://www.twingate.com/docs/ssh-privileged-access-overview
-    skill: twingate-idfw
+    skill: twingate-pam
     keywords: [SSH, privileged access, Gateway, certificate authority, session recording, zero trust, audit, identity]
 
   - url: https://www.twingate.com/docs/ssh-installation
-    skill: twingate-idfw
+    skill: twingate-pam
     keywords: [ssh, installation]
 
-  # Privileged Access for Web Apps (Beta) — Gateway L7 reverse proxy, ES256 JWT injection
+  # Privileged Access for Web Apps — Gateway L7 reverse proxy, ES256 JWT injection
   - url: https://www.twingate.com/docs/web-app-access
-    skill: twingate-idfw
-    keywords: [web app, privileged access, Layer 7, reverse proxy, ES256, JWT, JWKS, GAT, Gateway Access Token, request headers, groups, beta]
+    skill: twingate-pam
+    keywords: [web app, privileged access, Layer 7, reverse proxy, ES256, JWT, JWKS, GAT, Gateway Access Token, request headers, groups]
 
   - url: https://www.twingate.com/docs/web-app-developer-guides
-    skill: twingate-idfw
+    skill: twingate-pam
     keywords: [web app, developer guides, middleware, JWT verification, ES256, jose, PyJWT, Express, Django, Next.js, Auth.js]
 
   - url: https://www.twingate.com/docs/web-app-express
-    skill: twingate-idfw
+    skill: twingate-pam
     keywords: [web app, Express.js, Node.js, middleware, jose, JWKS, ES256, JWT, twingateIdentity, Bearer]
 
   - url: https://www.twingate.com/docs/web-app-django
-    skill: twingate-idfw
+    skill: twingate-pam
     keywords: [web app, Django, Python, middleware, PyJWT, JWKS, ES256, JWT, request.gat, session, get_or_create]
 
   - url: https://www.twingate.com/docs/web-app-nextjs
-    skill: twingate-idfw
+    skill: twingate-pam
     keywords: [web app, Next.js, App Router, Edge Middleware, jose, JWKS, ES256, JWT, Server Components, route handlers]
 
   - url: https://www.twingate.com/docs/web-app-nextjs-authjs
-    skill: twingate-idfw
+    skill: twingate-pam
     keywords: [web app, Next.js, Auth.js, NextAuth, session cookie, useSession, auth(), JWT, ES256, middleware, twingateGroups]
 
   - url: https://www.twingate.com/docs/web-app-integrations
-    skill: twingate-idfw
+    skill: twingate-pam
     keywords: [web app, integrations, trusted header, proxy auth, no code changes, "{{jwt}}", "{{username}}", "{{groups}}", off-the-shelf apps]
 
   - url: https://www.twingate.com/docs/web-app-grafana
-    skill: twingate-idfw
+    skill: twingate-pam
     keywords: [web app, Grafana, auth.jwt, auth.proxy, X-JWT-Assertion, X-WEBAUTH-USER, trusted header, auto-provision, whitelist]
 
   - url: https://www.twingate.com/docs/web-app-jenkins
-    skill: twingate-idfw
+    skill: twingate-pam
     keywords: [web app, Jenkins, reverse-proxy-auth-plugin, role-strategy, JCasC, X-Forwarded-User, X-Forwarded-Groups, SSO, trusted header]
 
 
@@ -1802,13 +1897,13 @@ auto_assign_patterns:
   - pattern: "/docs/kubernetes"
     skill: twingate-kubernetes
   - pattern: "/docs/ssh-"
-    skill: twingate-idfw
-  - pattern: "/docs/idfw"
-    skill: twingate-idfw
-  - pattern: "/docs/identity-firewall"
-    skill: twingate-idfw
+    skill: twingate-pam
+  - pattern: "/docs/privileged-access"
+    skill: twingate-pam
+  - pattern: "/docs/pam"
+    skill: twingate-pam
   - pattern: "/docs/web-app"
-    skill: twingate-idfw
+    skill: twingate-pam
   - pattern: "/docs/terraform"
     skill: twingate-terraform
   - pattern: "/docs/pulumi"

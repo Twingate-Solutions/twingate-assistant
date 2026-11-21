@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: cfd3a888d6845f5cc99705feaefe5f283aeda17c
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Connector Log Shipper
 
 ## Summary

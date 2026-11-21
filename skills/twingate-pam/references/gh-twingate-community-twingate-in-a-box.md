@@ -6,8 +6,6 @@ source_version: 21d158f8bb3f96efff1a81a2ee0380f7ff37e731
 trust: community
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate in a Box
 
 ## Summary

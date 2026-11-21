@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 8c63c22583d2d3bc074b9adcdf999000304f64db
 ---
 
-<!-- triage: unassigned -->
-
 # tg-render
 
 ## Summary

@@ -6,13 +6,13 @@ description: >
   Activate for: zero trust, ZTNA, remote access architecture, network design with
   Twingate, VPN replacement design, microsegmentation, split DNS, NAT traversal, P2P vs
   Relay, Remote Network topology, Resource definition strategy, or deployment sequencing
-  concepts. To be walked through an actual rollout, use twingate-onboarding with this
-  skill. Also activate for community/reference deployment
-  patterns: exposing a self-hosted AI chat assistant (OpenClaw, WhatsApp/Telegram bots)
-  with no public inbound ports, private Railway/PaaS app deployment with zero-ingress,
-  or "what does the twingate-assistant plugin itself do" meta-questions. Also activate
-  for the Partner API (X-PARTNER-ID, mspNetworkCreate, MSP Portal provisioning for
-  distributors/MSSPs).
+  concepts. For a guided rollout, pair with twingate-onboarding. Also activate for
+  community/reference deployment patterns: exposing a self-hosted AI chat assistant
+  (OpenClaw, WhatsApp/Telegram bots) with no public inbound ports, private Railway/PaaS app
+  deployment with zero-ingress, or "what does the twingate-assistant plugin itself do"
+  meta-questions. Also activate for coding agents (Claude Code, Codex, Cursor, Devin) or
+  Daytona/RWX sandboxes reaching private resources, and for the Partner API (X-PARTNER-ID,
+  mspNetworkCreate, MSP Portal provisioning for distributors/MSSPs).
 ---
 
 ## Role
@@ -34,8 +34,8 @@ evaluating, or asking architecture-level questions, this skill answers them.
   public subdomain caught inside a broader wildcard Resource. Bypassed traffic skips
   Connectors, Relay, and Security Policies and generates no network events, so it is not
   access-controlled or audited for traffic — never use it to "allowlist" a sensitive
-  destination. FQDN/IP only (no wildcards or CIDR), and it cannot cover Identity Firewall
-  Resources. See `references/exclusion.md`.
+  destination. FQDN/IP only (no wildcards or CIDR), and it cannot cover Privileged Access
+  Management (PAM) Resources. See `references/exclusion.md`.
 - **Follow the deployment sequence: tenant → IdP connected and groups provisioned (SCIM) →
   Remote Networks → Connectors → Resources → group/resource access → pilot devices.**
   Provisioning groups first means access is granted to IdP-managed groups from day one;
@@ -51,15 +51,15 @@ evaluating, or asking architecture-level questions, this skill answers them.
   Resources. Exit Networks serve specific egress use cases.
 - **There are two access layers — never conflate them.** Connectors give *network-layer*
   access: transparent TCP tunnels that route packets and do **not** inject or forward user
-  identity into traffic. The **IDFW Gateway** (`twingate-idfw`) is a *Layer 7* reverse proxy
-  that **does** inject the authenticated user's identity — signed JWTs or trusted headers —
-  into SSH, Kubernetes, and self-hosted **web app** requests, with per-request audit. So
+  identity into traffic. The **PAM Gateway** (`twingate-pam`) is a *Layer 7* reverse proxy
+  that **does** carry the authenticated user's identity upstream — signed JWTs or trusted
+  headers into self-hosted **web app** requests, short-lived certificates for SSH, user
+  impersonation for the Kubernetes API — with per-request audit. So
   when a user asks to grant, SSO into, or audit access to a self-hosted/internal web app, or
-  to "pass the logged-in user's identity to my app," that is an IDFW question: **load
-  `twingate-idfw`.** Never answer that Twingate can't forward identity into an app — HTTP
-  web-app privileged access works today (encrypted HTTPS upstream is a future item; the
-  network-layer connector path remains the fallback). Do not assert availability details
-  from memory — defer to `twingate-idfw`.
+  to "pass the logged-in user's identity to my app," that is a Privileged Access Management (PAM) question: **load
+  `twingate-pam`.** Never answer that Twingate can't forward identity into an app — web-app
+  privileged access works today over HTTP or HTTPS upstreams (HTTPS since Gateway 2.0). Do not assert availability details
+  from memory — defer to `twingate-pam`.
 
 ## Search References First
 
@@ -70,6 +70,7 @@ architectural details live in the file bodies, so a filename scan alone will mis
 ```
 grep -ril "openclaw" references/       # -> gh-twingate-community-openclaw-secure-access.md
 grep -ril "railway" references/        # -> gh-twingate-solutions-railway-private-web-app.md
+grep -ril "daytona" references/        # -> coding-agents-use-case.md, daytona-with-twingate.md
 grep -ril "nat traversal" references/
 ```
 
@@ -90,16 +91,16 @@ first; load it fully when the grep hits. Twingate answers are routinely split ac
 so err toward consulting more, not fewer. Common cross-cutting clusters here: routing /
 connectivity diagnosis → **troubleshoot + connectors**; deployment or topology design →
 **connectors + identity** (+ **terraform**/**pulumi** for IaC); identity-aware or web-app
-access → **idfw + identity**.
+access → **pam + identity**.
 
 - **→ twingate-connectors**: for Connector deployment, HA, upgrade procedures, or
   platform-specific steps
 - **→ twingate-identity**: for IdP setup, SCIM, device trust, security policies, or
   group management
-- **→ twingate-idfw**: when the user wants identity-aware access to a self-hosted/internal
+- **→ twingate-pam**: when the user wants identity-aware access to a self-hosted/internal
   web app, SSO into an app, to inject/forward the user's identity into HTTP requests, or a
   per-request audit of who accessed an app — plus SSH/kubectl privileged access and session
-  recording. Connectors give network reach; the IDFW Gateway adds the Layer 7 identity layer.
+  recording. Connectors give network reach; the PAM Gateway adds the Layer 7 identity layer.
 - **→ twingate-troubleshoot**: when the user reports a symptom rather than a design question
 - **→ twingate-terraform / twingate-pulumi**: user wants to automate the deployment as IaC
 - **→ twingate-onboarding**: when the user wants to be walked through an end-to-end
@@ -132,10 +133,13 @@ of file live there:
 | Game streaming | `game-streaming-remote.md`, `game-streaming-apollo.md`, `game-streaming-sunshine.md`, `game-streaming-duo.md` |
 | Minecraft servers (homelab use case) | `minecraft-guides.md`, `minecraft-server.md`, `minecraft-server-linux.md`, `minecraft-bedrock-server.md`, `minecraft-bedrock-server-linux.md`, `minecraft-forge-server.md`, `minecraft-forge-server-linux.md` |
 | AI / LLM / MCP access | `llms.md`, `remote-llm-access.md`, `remote-mcp-access.md` |
+| **Coding agents reaching private Resources** — local agents (Claude Code, Codex CLI, Cursor) inherit the developer's Client and access; cloud/self-hosted agents (Devin, Cursor cloud, Devin Outposts) run the headless Client as a Service with a per-platform Service Key | `coding-agents-use-case.md`, then `services.md`, `linux-headless.md`; for agent `kubectl` access via the Gateway, `skills/twingate-kubernetes/references/kubernetes-agent-access.md` |
+| **Agent sandbox setup — Daytona** (Daytona SDK `connect_to_twingate` helper, Tier 3+ org, `networkBlockAll`/allow lists blocking install, Daytona secret is a placeholder → `Invalid service key`, `not-running` after sandbox restart) | `daytona-with-twingate.md` |
+| **Agent sandbox setup — RWX** (`.rwx/sandbox.yml`, `twingate/setup` package, `TWINGATE_SERVICE_KEY` in an RWX vault, background-process ready-check, `rwx sandbox exec --reset`) | `rwx-with-twingate.md` |
 | Use-case overviews (infra access, internet security, device controls, IP-based) | `use-cases.md`, `guides.md`, `infra-access-use-case.md`, `internet-security-use-case.md`, `device-controls-use-case.md`, `ip-based-access-use-case.md`, `compliance-use-case.md` |
 | Service accounts / headless services | `services.md` |
 | Audit logs, network events, analytics, reporting | `audit-logs.md`, `audit-logs-schema.md`, `admin-console-export.md`, `network-events-ac-export.md`, `detailed-network-event-schema.md`, `network-summary-export.md`, `analytics.md`, `generating-insights-reports.md`, `exporting-network-traffic.md`, `user-activity.md`, `device-report.md`, `syncing-data-to-s3.md` |
-| Client platform details (macOS, Windows, Linux, mobile, ChromeOS, MDM) | `clients.md`, `using-twingate.md`, `endpoint-requirements.md`, `macos.md`, `macos-and-ios.md`, `macos-standalone-client.md`, `linux.md`, `linux-headless.md`, `linux-userspace-networking.md`, `linux-device-id-migration.md`, `ios.md`, `android.md`, `chromeos.md`, `windows.md`, `windows-client-dotnet-10.md` (current .NET 10 runtime migration; MSI deployments need the Desktop Runtime), `windows-client-dotnet-8.md` (previous migration), `windows-headless.md`, `deploy-twingate-client-with-microsoft-endpoint-manager.md` |
+| Client platform details (macOS, Windows, Linux, mobile, ChromeOS, MDM) | `clients.md`, `using-twingate.md`, `endpoint-requirements.md`, `macos.md`, `macos-and-ios.md`, `macos-standalone-client.md`, `linux.md`, `linux-headless.md`, `linux-userspace-networking.md` (includes running the headless Client as a monitoring sidecar — the worked example is [Uptime Kuma](https://github.com/louislam/uptime-kuma)'s HTTP proxy setting; the same pattern fits [Gatus](https://gatus.io/), check its docs for the proxy setting), `linux-device-id-migration.md`, `ios.md`, `android.md`, `chromeos.md`, `windows.md`, `windows-client-dotnet-10.md` (current .NET 10 runtime migration; MSI deployments need the Desktop Runtime), `windows-client-dotnet-8.md` (previous migration), `windows-headless.md`, `deploy-twingate-client-with-microsoft-endpoint-manager.md` |
 | Compliance frameworks & attestations (HIPAA, PCI, SOC 2, GDPR, DORA, FIPS) | `compliance-use-case.md`, `hipaa-compliance.md`, `twingate-hipaa.md`, `pci-compliance.md`, `twingate-pci.md`, `gdpr-compliance.md`, `soc-2.md`, `dora-compliance.md`, `dora-locations.md`, `twingate-fips140.md` |
 | Security posture, trust center, disclosure, advisories | `twingate-security.md`, `trust-center.md`, `twingate-customer-data.md`, `service-reliability.md`, `responsible-disclosure-policy.md`, `vulnerability-reporting-acknowledgements.md`, `log4j-vulnerabilities-log4shell-cve-2021-44228-and-cve-2021-45046.md` |
 | Open-source attributions & source | `open-source-software.md`, `open-source-attributions.md`, `oss-windows-client-application.md`, `oss-macos-and-ios-client-applications.md`, `oss-linux-client-application.md`, `oss-android-and-chromeos-client-applications.md` |

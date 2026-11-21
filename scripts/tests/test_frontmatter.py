@@ -135,7 +135,7 @@ def _manual_content() -> str:
 def test_write_reference_file_manual_reference_not_overwritten(tmp_path):
     """A file carrying the manual marker is never overwritten."""
     skills_dir = tmp_path / "skills"
-    manual_file = skills_dir / "twingate-idfw" / "references" / "gateway-troubleshooting.md"
+    manual_file = skills_dir / "twingate-pam" / "references" / "gateway-troubleshooting.md"
     manual_file.parent.mkdir(parents=True)
     manual_file.write_text(_manual_content(), encoding="utf-8")
 
@@ -144,7 +144,7 @@ def test_write_reference_file_manual_reference_not_overwritten(tmp_path):
         pytest.raises(ValueError, match="hand-authored"),
     ):
         write_reference_file(
-            "twingate-idfw",
+            "twingate-pam",
             "gateway-troubleshooting",
             "## Generated content",
             source="https://www.twingate.com/docs/gateway-troubleshooting",

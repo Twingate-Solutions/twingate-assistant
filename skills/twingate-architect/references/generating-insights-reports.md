@@ -60,5 +60,5 @@ The Insights Report is a Jupyter Notebook-based tool that processes Twingate Net
 - Customization requires Python/pandas dataframe knowledge
 
 ## Related Docs
-- [Network Events Export](https://www.twingate.com/docs/network-events-export)
+- [Network Events Export](https://www.twingate.com/docs/network-events-ac-export)
 - Twingate subreddit (feedback channel)

@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 2fa305be5ff336d50bbaaeb657c026b3568810ea
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate + Coder
 
 ## Summary

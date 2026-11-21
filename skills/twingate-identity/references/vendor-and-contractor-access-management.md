@@ -48,6 +48,6 @@ Twingate addresses the unique challenges of vendor/contractor remote access—tr
 ## Related Docs
 - [Identity Providers](https://www.twingate.com/docs/identity-providers)
 - [Resources](https://www.twingate.com/docs/resources)
-- [Network Traffic](https://www.twingate.com/docs/network-traffic)
-- [Ephemeral Access](https://www.twingate.com/docs/ephemeral-access)
-- [Auto-lock](https://www.twingate.com/docs/auto-lock)
+- [Network Traffic](https://www.twingate.com/docs/exporting-network-traffic)
+- [Ephemeral Access](https://www.twingate.com/docs/ephemeral-access-to-resources)
+- [Auto-lock](https://www.twingate.com/docs/usage-based-auto-lock)

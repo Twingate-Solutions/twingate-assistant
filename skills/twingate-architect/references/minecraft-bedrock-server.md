@@ -69,6 +69,6 @@ Deploy a private Minecraft Bedrock Edition server using Docker Compose with a Tw
 - Crashes/memory: Check `docker compose logs bedrock`; Bedrock has no configurable heap size
 
 ## Related Docs
-- [Minecraft Java Edition guide](https://www.twingate.com/docs/minecraft-java-server)
+- [Minecraft Java Edition guide](https://www.twingate.com/docs/minecraft-server)
 - [itzg/minecraft-bedrock-server documentation](https://github.com/itzg/docker-minecraft-bedrock-server)
 - Twingate Security Policies, Resources configuration, Protect Your Home

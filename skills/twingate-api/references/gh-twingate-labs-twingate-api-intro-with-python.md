@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: d525d2e6c5faabcde47c48729c06f128ffccef0f
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate API Intro with Python
 
 ## Summary
@@ -51,5 +49,5 @@ A Jupyter Notebook tutorial for learning the Twingate GraphQL API using Python. 
 - GraphQL introspection must be enabled on your Twingate tenant for the introspection sections to work
 
 ## Related Docs
-- [Twingate GraphQL API Documentation](https://docs.twingate.com/docs/graphql-overview)
+- Twingate GraphQL API Documentation
 - [Jupyter Notebook Installation](https://jupyter.org/install)

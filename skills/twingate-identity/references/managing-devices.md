@@ -59,4 +59,4 @@ Twingate tracks device information for all users connecting through the network,
 - EDR/MDM integration required for automatic device verification
 
 ## Related Docs
-- [Device Security Guide](https://www.twingate.com/docs/device-security) — Trusted Profiles, Security Policies, verification integration setup
+- [Device Security Guide](https://www.twingate.com/docs/device-security-guide) — Trusted Profiles, Security Policies, verification integration setup

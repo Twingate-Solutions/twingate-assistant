@@ -15,7 +15,7 @@ A Claude Code plugin made up of:
 - **Reference files** — auto-generated summaries of the live Twingate documentation, refreshed weekly by a GitHub Action.
 - **Pipeline scripts** — Python scripts that fetch the docs sitemap, summarize changed pages via the Claude API, and write summaries to the right skill's `references/` directory.
 
-The plugin is just files — no server, no MCP component, no live API calls at runtime. Everything ships as Markdown, YAML, and a handful of Python scripts that only run inside the GitHub Action.
+The plugin is just files — no server, no MCP component, no built-in live API calls (any Twingate API call runs only in the admin's session after their explicit approval — see CLAUDE.md rule 7). Everything ships as Markdown, YAML, and a handful of Python scripts that only run inside the GitHub Action.
 
 ---
 
@@ -38,7 +38,7 @@ twingate-assistant/
 │   ├── azure-deployer.md
 │   ├── gcp-deployer.md
 │   ├── network-designer.md
-│   └── idfw-deployer.md
+│   └── pam-deployer.md
 ├── scripts/                      # Auto-update pipeline
 │   ├── update_references.py     # Orchestrator
 │   ├── fetch_sitemap.py         # Sitemap XML parser
@@ -77,7 +77,15 @@ Each run:
 5. Writes the summary to the appropriate skill's `references/` directory.
 6. Opens a PR if anything changed; exits silently if nothing did.
 
-Unmapped docs are routed to `_triage/` for manual review before being added to `doc_mapping.yaml`.
+Unmapped docs and unmapped GitHub repos are routed to `_triage/` for manual review. To clear a triage item:
+
+- **It belongs to a skill:** add a `docs:` entry (URL) or `repos:` entry (`full_name`) to `doc_mapping.yaml`, move the file into that skill's `references/` and delete its `<!-- triage: unassigned -->` line, and add a row for it to the skill's `## References` table. For a repo, also update its `doc_path` in `scripts/.repo_state.json`. Add an `auto_assign_patterns` entry if the URL starts a new family of pages.
+- **It has no useful content:** add the URL to `exclude:` or the repo to `exclude_repos:`, then delete the file. Deleting it without excluding it only brings it back on the next run.
+
+Two zero-LLM safeguards run on every pass (`scripts/reference_links.py`):
+
+- **Truncated summaries are rejected and repaired.** A new summary that stops mid-output (an unclosed markdown link, bracket or code fence) is not written. An existing reference that looks truncated is re-summarized even when its source is unchanged; a GitHub repo or wiki is re-summarized in full rather than as a delta against the truncated text.
+- **Stale Twingate links are maintained (Step 4.75).** Every `twingate.com/docs` and `help.twingate.com` link in a generated reference body is checked against this run's sitemaps plus the mapped URLs. A link to a renamed page is rewritten through `link_aliases:` in `doc_mapping.yaml`. Anything else is probed over HTTP: a redirect into a live page is rewritten to it, a 404/410 markdown link becomes plain text, and an error keeps the link. Frontmatter `source:` URLs are never touched, and the step is skipped if the sitemaps return fewer than 50 URLs. When Twingate renames a page, add an `old: new` entry to `link_aliases:`.
 
 The pipeline requires one secret: `ANTHROPIC_API_KEY`. Set it as a repository secret in your fork.
 

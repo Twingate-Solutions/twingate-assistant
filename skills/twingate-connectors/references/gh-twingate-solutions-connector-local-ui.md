@@ -5,7 +5,7 @@ fetched: 2026-08-06
 source_version: 66a2dbe67d5885fc0a6b379f1989ea4d0b9765dd
 ---
 
-<!-- triage: unassigned -->
+> **Retired source:** this GitHub repo is no longer public (2026-11-20: 404). Kept for historical context; it is no longer refreshed. Do not recommend it as available tooling.
 
 # connector-local-ui
 
@@ -63,7 +63,7 @@ A web-based local UI that runs directly on a Twingate Connector host machine. It
 - Port conflicts with other services on the host should be checked before deployment
 
 ## Related Docs
-- [Twingate Connector documentation](https://www.twingate.com/docs/connector)
+- [Twingate Connector documentation](https://www.twingate.com/docs/connectors)
 - [Twingate Admin Console](https://auth.twingate.com)
 - Twingate Connector local API reference (consult Twingate support or internal docs)
 

@@ -8,7 +8,7 @@ description: |
   over-broad access, missing connector HA, sensitive resources on weak policies —
   and returns blocking and advisory findings. It never changes files or the tenant.
 tools: Read, Grep, Glob, Bash
-skills: twingate-onboarding, twingate-architect, twingate-connectors, twingate-identity, twingate-api, twingate-idfw
+skills: twingate-onboarding, twingate-architect, twingate-connectors, twingate-identity, twingate-api, twingate-pam
 ---
 
 ## Role
@@ -58,7 +58,7 @@ commenting on access through an everyone-style group.
      - `["*"]` ports or ALLOW_ALL-style protocols on prod resources.
      - Admin ports (RDP/SSH) and app ports on the same resource for different personas.
      - Sensitive resources whose personas sit on the `standard` policy tier.
-     - SSH / Kubernetes / internal web apps with audit needs not considered for IDFW.
+     - SSH / Kubernetes / internal web apps with audit needs not considered for Privileged Access Management (PAM).
      - MANUAL groups used where SCIM is enabled, without a recorded decision.
      - Open questions still open that touch an item in the build.
      - Remote Network names or locations that disagree with `subnets`/`boundary`.

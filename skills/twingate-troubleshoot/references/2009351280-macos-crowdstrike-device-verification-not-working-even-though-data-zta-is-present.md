@@ -19,7 +19,7 @@ When CrowdStrike Device Verification fails on macOS even though `data.zta` exist
 ## Prerequisites
 - Terminal access with `sudo` privileges
 - CrowdStrike installed and `data.zta` already present and populated
-- Confirm `data.zta` exists before proceeding (see [related article on verifying data.zta](https://help.twingate.com/articles/2009351280))
+- Confirm `data.zta` exists before proceeding (see related article on verifying data.zta)
 
 ## Step-by-Step: Fix Permissions
 

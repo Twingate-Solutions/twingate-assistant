@@ -52,4 +52,4 @@ dig @10.0.0.2 TXT nas.home.int
 
 ## Related Docs
 - [How DNS works with Twingate](https://www.twingate.com/docs/how-dns-works-with-twingate)
-- [Port restrictions](https://www.twingate.com/docs/port-restrictions)
+- Port restrictions

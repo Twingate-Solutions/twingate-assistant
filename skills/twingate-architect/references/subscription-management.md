@@ -57,5 +57,5 @@ Twingate subscriptions are billed monthly or annually based on total user and se
 ## Related Docs
 - [Users Management](https://www.twingate.com/docs/users)
 - [Admins & Roles](https://www.twingate.com/docs/admins)
-- [How to Cancel Your Subscription](https://www.twingate.com/docs/cancel-subscription)
-- [Twingate Home Upgrade Instructions](https://www.twingate.com/docs/twingate-home)
+- [How to Cancel Your Subscription](https://www.twingate.com/docs/subscription-cancellation)
+- Twingate Home Upgrade Instructions

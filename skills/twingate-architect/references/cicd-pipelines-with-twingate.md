@@ -43,7 +43,7 @@ Twingate provides Service Accounts to enable Zero Trust access control for autom
 - Windows and Linux clients support headless mode; **macOS headless support is not mentioned**
 
 ## Related Docs
-- [Twingate Service Accounts](https://www.twingate.com/docs/service-accounts)
-- [CircleCI integration example](https://www.twingate.com/docs/circleci)
-- [GitHub Actions integration example](https://www.twingate.com/docs/github-actions)
+- [Twingate Service Accounts](https://www.twingate.com/docs/service-accounts-guide)
+- CircleCI integration example
+- GitHub Actions integration example
 - Twingate Admin Console — Resource and Group management

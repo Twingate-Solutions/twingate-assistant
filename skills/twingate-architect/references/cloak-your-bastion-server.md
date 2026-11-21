@@ -52,6 +52,6 @@ Step-by-step guide to hide a bastion server from public internet access using Tw
 - If deploying multiple Connectors for redundancy, add a firewall allow rule for each Connector IP
 
 ## Related Docs
-- [Create a new Remote Network](https://www.twingate.com/docs/create-a-remote-network)
-- [Create a new Resource](https://www.twingate.com/docs/create-a-resource)
-- [Create a new Group](https://www.twingate.com/docs/create-a-group)
+- [Create a new Remote Network](https://www.twingate.com/docs/remote-networks)
+- [Create a new Resource](https://www.twingate.com/docs/resources)
+- Create a new Group

@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 11cc1546a1db1a9a3976f3af888289f1a0a66d19
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Ubiquiti Connector
 
 ## Summary

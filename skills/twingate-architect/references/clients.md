@@ -40,7 +40,7 @@ The Twingate Client enables users to access private network resources and threat
 - **Local VPN binding**: `127.0.0.1`
 
 ## Update Management
-- Historical versions (macOS PKG, Windows MSI): available via [public changelog](https://www.twingate.com/docs/client-changelog)
+- Historical versions (macOS PKG, Windows MSI): available via public changelog
 - iOS/Android: distributed via App Store / Google Play Store (no manual URL needed)
 - Managed deployment guides exist for macOS/iOS and Windows
 
@@ -53,6 +53,6 @@ The Twingate Client enables users to access private network resources and threat
 - [Endpoint Requirements](https://www.twingate.com/docs/endpoint-requirements)
 - [Managed Devices](https://www.twingate.com/docs/managed-devices)
 - [Linux Client / Source Repositories](https://www.twingate.com/docs/linux)
-- [Client Changelog](https://www.twingate.com/docs/client-changelog)
+- Client Changelog
 - [macOS Managed Deployment](https://www.twingate.com/docs/macos)
 - [Windows Managed Deployment](https://www.twingate.com/docs/windows)

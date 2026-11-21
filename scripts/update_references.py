@@ -53,6 +53,7 @@ from pipeline_metrics import (
     save_norm_cache,
 )
 from reference_lint import SecurityReport, lint_and_record, write_markdown_report
+from reference_links import is_truncated_reference, repair_reference_tree
 from summarize_docs import (
     CLAUDE_MODEL,
     MAX_TEXT_LENGTH,
@@ -448,7 +449,10 @@ def process_doc(
     prev_norm = norm_cache.get(url) if norm_cache is not None else None
     raw_unchanged = hash_cache.get(url) == current_hash
     norm_unchanged = prev_norm is not None and prev_norm == norm_hash
-    if (raw_unchanged or norm_unchanged) and output_path.exists():
+    truncated = is_truncated_reference(output_path) if output_path.exists() else None
+    if truncated:
+        logger.warning("%s looks truncated (%s); re-summarizing", output_path, truncated)
+    if (raw_unchanged or norm_unchanged) and output_path.exists() and not truncated:
         logger.info("Content unchanged for %s, skipping", url)
         stats["skipped"] += 1
         if metrics is not None:
@@ -929,7 +933,12 @@ def _process_github_repo(
             stats["failed"] += 1
         else:
             prior_sha = entry_state.get("last_sha")
-            if head_sha == prior_sha and doc_path.exists():
+            truncated = is_truncated_reference(doc_path) if doc_path.exists() else None
+            if truncated:
+                logger.warning(
+                    "%s: %s looks truncated (%s); full re-summarize", full_name, doc_path, truncated
+                )
+            if head_sha == prior_sha and doc_path.exists() and not truncated:
                 logger.info(
                     "%s: head sha unchanged (%s) and doc exists, skipping",
                     full_name,
@@ -948,7 +957,8 @@ def _process_github_repo(
                     "latest_release_notes": release_notes,
                 }
 
-                prior_doc_body = _read_prior_doc_body(doc_path)
+                # A truncated prior summary must not be the base for a delta.
+                prior_doc_body = None if truncated else _read_prior_doc_body(doc_path)
                 start = time.perf_counter()
                 filtered: FilteredDiff | None = None
                 if prior_doc_body is not None:
@@ -1050,7 +1060,12 @@ def _process_github_wiki(
 
         entry_state = state.get(full_name, {})
         prior_wiki_sha = entry_state.get("wiki_last_sha")
-        if snapshot.head_sha == prior_wiki_sha and doc_path.exists():
+        truncated = is_truncated_reference(doc_path) if doc_path.exists() else None
+        if truncated:
+            logger.warning(
+                "%s wiki: %s looks truncated (%s); full re-summarize", full_name, doc_path, truncated
+            )
+        if snapshot.head_sha == prior_wiki_sha and doc_path.exists() and not truncated:
             logger.info("%s wiki: head sha unchanged, skipping", full_name)
             stats["skipped"] += 1
             state[full_name] = {**entry_state, "wiki_last_sha": snapshot.head_sha}
@@ -1062,7 +1077,7 @@ def _process_github_wiki(
             "default_branch": "wiki",
             "latest_release_notes": None,
         }
-        prior_doc_body = _read_prior_doc_body(doc_path)
+        prior_doc_body = None if truncated else _read_prior_doc_body(doc_path)
 
         start = time.perf_counter()
         filtered: FilteredDiff | None = None
@@ -1151,12 +1166,18 @@ def process_github_source(
     repo_config = {
         entry["full_name"]: entry for entry in mapping.get("repos", []) if entry.get("full_name")
     }
+    # Repos with no product content (org-profile `.github` repos); skipped
+    # before routing so they never re-triage.
+    excluded_repos: set[str] = set(mapping.get("exclude_repos") or [])
     state = load_repo_state()
 
     with rate_limit_wait():
         for org in DEFAULT_ORGS:
             org_discovery = discover_org_repos(org, token)
             for repo in org_discovery.kept:
+                if repo.full_name in excluded_repos:
+                    logger.info("Skipping %s (listed in exclude_repos)", repo.full_name)
+                    continue
                 try:
                     _process_github_repo(
                         repo,
@@ -1222,6 +1243,7 @@ def main() -> int:
     # is fatal and must occur before any doc is written.
     logger.info("Step 2: Fetching and diffing %d source(s)", len(sources))
     discovered: list[tuple[dict, list[str]]] = []  # (source, new_urls)
+    live_urls: set[str] = set()  # every sitemap URL kept this run, for link maintenance
     total_new = 0
     total_removed = 0
     for source in sources:
@@ -1249,6 +1271,7 @@ def main() -> int:
             dropped = before - len(sitemap_urls)
             if dropped:
                 logger.info("Source %r: excluded %d URL(s) via the exclude list", name, dropped)
+        live_urls.update(sitemap_urls)
         # Scope the diff to this source's path so URLs owned by other sources
         # (the mapping holds all sources' URLs) are not reported as removed.
         new_urls, removed_urls = diff_docs(sitemap_urls, path_filter=path_filter)
@@ -1266,6 +1289,9 @@ def main() -> int:
 
     # Step 3: Process all docs already in the mapping, stamped as ``docs``.
     mapped_docs = mapping.get("docs", [])
+    # Mapped pages are fetched every run, so they count as live for link
+    # maintenance even when unlisted from the sitemaps.
+    live_urls.update(e["url"] for e in mapped_docs if e.get("url") and e["url"] not in exclude_urls)
     logger.info("Step 3: Processing %d mapped docs", len(mapped_docs))
     for entry in mapped_docs:
         url = entry.get("url", "")
@@ -1320,6 +1346,19 @@ def main() -> int:
     github_metrics = GitHubRunMetrics()
     github_run_start = time.perf_counter()
     process_github_source(fetched, stats, github_metrics, security=security)
+
+    # Step 4.75: Link maintenance (no LLM) — rewrite Twingate docs/help links
+    # to renamed pages via link_aliases, and unlink pages that left the sitemaps.
+    logger.info("Step 4.75: Checking Twingate links in references against this run's sitemaps")
+    link_counts = repair_reference_tree(SKILLS_DIR, live_urls, mapping.get("link_aliases") or {})
+    logger.info(
+        "Link maintenance: %d file(s) changed, %d link(s) rewritten, %d unlinked, "
+        "%d dead bare URL(s) left for review",
+        link_counts["files_changed"],
+        link_counts["rewritten"],
+        link_counts["unlinked"],
+        link_counts["unresolved"],
+    )
 
     # Step 5: Persist the hash cache and the observation-only shadow cache.
     save_hash_cache(hash_cache, HASH_CACHE_PATH)

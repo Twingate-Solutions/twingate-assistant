@@ -11,6 +11,7 @@ import anthropic
 from summarize_docs import (
     CLAUDE_MODEL,
     MAX_TEXT_LENGTH,
+    LINK_RULE,
     create_summary_message,
     extract_summary_text,
 )
@@ -52,7 +53,7 @@ _DELTA_SYSTEM_PROMPT = (
     "Here is the current summary and the changes since it was written. "
     "Return an updated summary in the same structure. Preserve accurate "
     "detail; revise only what the changes affect. No marketing language. "
-    f"{_OUTPUT_ONLY_RULE} If the changes do not affect the summary, reply "
+    f"{LINK_RULE} {_OUTPUT_ONLY_RULE} If the changes do not affect the summary, reply "
     f"with exactly {NO_CHANGE_SENTINEL} and nothing else. "
     f"{_UNTRUSTED_CONTENT_RULES}"
 )
@@ -63,7 +64,7 @@ _FULL_SYSTEM_PROMPT = (
     "Information (bullets), Prerequisites, Usage / Step-by-Step (if "
     "applicable), Configuration Values (env vars, CLI flags, API params), "
     f"Gotchas, Related Docs. Keep under 500 words. No marketing language. "
-    f"{_OUTPUT_ONLY_RULE} {_UNTRUSTED_CONTENT_RULES}"
+    f"{LINK_RULE} {_OUTPUT_ONLY_RULE} {_UNTRUSTED_CONTENT_RULES}"
 )
 
 

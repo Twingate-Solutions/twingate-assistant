@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: a0eef17c253d8fb8ac1fa7eed55fde0b7dc8412b
 ---
 
-<!-- triage: unassigned -->
-
 # tg-group-profile-manager
 
 ## Summary

@@ -40,5 +40,5 @@ Twingate enables secure access to development servers on private home networks w
 - Access grants must be explicitly configured — coworkers do not get access by default
 
 ## Related Docs
-- [Deploying a Connector](https://www.twingate.com/docs/connector)
+- [Deploying a Connector](https://www.twingate.com/docs/connectors)
 - [Adding a Resource](https://www.twingate.com/docs/resources)

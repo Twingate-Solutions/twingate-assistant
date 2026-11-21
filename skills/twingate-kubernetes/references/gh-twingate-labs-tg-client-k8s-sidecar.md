@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 47fe25a003baacb04f678911adbcae93e808bc3f
 ---
 
-<!-- triage: unassigned -->
-
 # tg-client-k8s-sidecar
 
 ## Summary
@@ -57,6 +55,6 @@ Demonstrates how to run the Twingate headless client as a Kubernetes sidecar con
 
 ## Related Docs
 - [Twingate Service Accounts](https://www.twingate.com/docs/services)
-- [Twingate Headless Client](https://www.twingate.com/docs/linux-headless-client)
+- [Twingate Headless Client](https://www.twingate.com/docs/linux-headless)
 - Kubernetes [Sidecar Containers](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/)
 - Kubernetes [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)

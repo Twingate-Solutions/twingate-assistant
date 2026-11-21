@@ -6,8 +6,6 @@ source_version: e41968eef3b68712dd443e42cdea5c40f0b95de34bc7a4db51641035d2bdd90b
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Page Title
 Twingate Privileged Access Management (Overview)
 

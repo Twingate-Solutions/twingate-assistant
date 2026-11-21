@@ -72,7 +72,7 @@ Ask about the lowest-confidence rows first, framed as confirming a guess:
 - "Do any **contractors or vendors** need access? To what, and for how long?"
 - "Do any **scripts, CI pipelines or monitoring systems** need to reach these?" (service accounts)
 - "Should **admin access** (RDP/SSH) be separate from **app access** (web/DB)?" Default: yes for prod.
-- "Do any SSH, Kubernetes or internal web-app resources need per-user identity or session recording?" (twingate-idfw)
+- "Do any SSH, Kubernetes or internal web-app resources need per-user identity or session recording?" (twingate-pam)
 
 ## Phase 5–6 — Remote Networks and Connectors
 

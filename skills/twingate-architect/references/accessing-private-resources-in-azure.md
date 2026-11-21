@@ -30,7 +30,7 @@ Step-by-step guide to deploy Twingate Connectors in Azure to access private VMs 
 3. Go to **Subnets** → add new subnet using the new address space (name it distinctly, e.g., `twingate-connector`)
 
 ### 2. Deploy the Connector
-1. Follow the [Azure Connector Deployment Guide](https://www.twingate.com/docs/connector-deployment-azure)
+1. Follow the Azure Connector Deployment Guide
 2. Provide: Resource Group, VNet name, Subnet name from step 1
 3. Verify: container service running in Azure + Connector shows green in Admin Console
 
@@ -56,6 +56,6 @@ Step-by-step guide to deploy Twingate Connectors in Azure to access private VMs 
 - Troubleshooting guidance is available in the deployment workflow screen in Admin Console
 
 ## Related Docs
-- [Azure Connector Deployment Guide](https://www.twingate.com/docs/connector-deployment-azure)
+- Azure Connector Deployment Guide
 - Twingate Client installation (Windows, macOS, Android, iOS, ChromeOS, Linux)
 - Hybrid deployment documentation

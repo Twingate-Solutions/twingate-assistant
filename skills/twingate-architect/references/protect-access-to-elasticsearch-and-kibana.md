@@ -46,4 +46,4 @@ Twingate adds SSO and MFA to Elasticsearch and Kibana without modifying the appl
 - [Add Resources (Twingate admin console)](https://www.twingate.com/docs/resources)
 - [Deploy a Connector](https://www.twingate.com/docs/connectors)
 - [Configure Identity Provider](https://www.twingate.com/docs/identity-providers)
-- [Access Policies / MFA](https://www.twingate.com/docs/access-policies)
+- Access Policies / MFA

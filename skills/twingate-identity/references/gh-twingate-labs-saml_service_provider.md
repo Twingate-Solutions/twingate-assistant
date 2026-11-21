@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 1489b6a33fcdd7d9242837db383c1c426e84e9a0
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate-Labs/saml_service_provider
 
 ## Summary

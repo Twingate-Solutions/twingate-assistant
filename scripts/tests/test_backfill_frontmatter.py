@@ -45,7 +45,7 @@ def _make_fixture_tree(skills_dir: Path) -> Path:
         encoding="utf-8",
     )
 
-    manual_dir = skills_dir / "twingate-idfw" / "references"
+    manual_dir = skills_dir / "twingate-pam" / "references"
     manual_dir.mkdir(parents=True)
     manual_file = manual_dir / "gateway-troubleshooting.md"
     manual_file.write_text(_manual_content(), encoding="utf-8")
@@ -163,7 +163,7 @@ def test_backfill_skips_file_already_carrying_frontmatter(tmp_path):
 def test_backfill_never_touches_manual_reference_file(tmp_path):
     skills_dir = tmp_path / "skills"
     _make_fixture_tree(skills_dir)
-    manual_file = skills_dir / "twingate-idfw" / "references" / "gateway-troubleshooting.md"
+    manual_file = skills_dir / "twingate-pam" / "references" / "gateway-troubleshooting.md"
     before = manual_file.read_text(encoding="utf-8")
 
     stats = run_backfill(skills_dir, fetched="2026-08-05", apply=True)

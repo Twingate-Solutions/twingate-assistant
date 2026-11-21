@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 48505939ccbf648040335963761379ffb437f725
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Headless Client for Ubiquiti Gateways
 
 ## Summary

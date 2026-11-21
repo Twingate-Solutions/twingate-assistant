@@ -69,6 +69,6 @@ services:
 - Additional options (custom DNS, local connection logging) available via Docker Compose examples
 
 ## Related Docs
-- [Synology NAS DSM 6 guide](https://www.twingate.com/docs/synology-dsm-6)
+- [Synology NAS DSM 6 guide](https://www.twingate.com/docs/how-to-set-up-twingate-on-a-synology-nas-dsm-6)
 - [Docker Compose examples](https://www.twingate.com/docs/docker)
 - [Resources guide](https://www.twingate.com/docs/resources)

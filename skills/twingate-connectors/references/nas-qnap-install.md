@@ -54,6 +54,6 @@ Install a Twingate Connector on a QNAP NAS using Container Station (Docker). Thi
 
 ## Related Docs
 - [Resources Guide](https://www.twingate.com/docs/resources) — add QNAP NAS as a Resource
-- [Peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer) — recommended for bandwidth optimization
-- [Fair Use Policy](https://www.twingate.com/docs/fair-use-policy)
+- [Peer-to-peer connections](https://www.twingate.com/docs/peer-to-peer-communication-in-twingate) — recommended for bandwidth optimization
+- Fair Use Policy
 - [Twingate Starter Plan](https://www.twingate.com/pricing)

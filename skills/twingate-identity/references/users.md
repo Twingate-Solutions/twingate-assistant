@@ -45,4 +45,4 @@ Twingate manages users via social logins or a synchronized IdP (SCIM). New users
 - [Groups](https://www.twingate.com/docs/groups)
 - [Offboarding Users](https://www.twingate.com/docs/offboarding-users)
 - [Admins](https://www.twingate.com/docs/admins)
-- [Billing](https://www.twingate.com/docs/billing)
+- Billing

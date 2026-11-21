@@ -64,5 +64,5 @@ Sets up a private Forge modded Minecraft server on bare-metal Linux with Twingat
 - CurseForge auto-install is Docker-only; manual mod management required here
 
 ## Related Docs
-- [Vanilla Java guide](https://www.twingate.com/docs/minecraft-java-server-linux)
+- [Vanilla Java guide](https://www.twingate.com/docs/minecraft-server-linux)
 - [Bedrock guide](https://www.twin

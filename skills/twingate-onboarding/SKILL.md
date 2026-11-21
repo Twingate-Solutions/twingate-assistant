@@ -97,7 +97,7 @@ Each phase has a playbook in `guides/phases/` and an exit gate checked by `scrip
 | 1 | Discover — ingest artifacts, draft networks/resources, propose personas | every resource has address + network; ≥1 persona |
 | 2 | Tenant & IdP — connect IdP, provision chosen groups, map personas → groups | IdP + SCIM; every used persona has a group ID |
 | 3 | Confirm resources | no in-scope resource `inferred`; ports set |
-| 4 | Access model — matrix, policy tiers, IDFW candidates | matrix approved |
+| 4 | Access model — matrix, policy tiers, Privileged Access Management (PAM) candidates | matrix approved |
 | 5 | Remote Networks | created, IDs recorded, approved |
 | 6 | Connectors | ≥2 ALIVE per network |
 | 7 | Resources & group mapping | created, access granted, read-back matches |
@@ -118,7 +118,7 @@ depth, and grep its references first.
 - **→ twingate-terraform / twingate-pulumi**: IaC build path, including adding Twingate to an
   existing codebase.
 - **→ twingate-kubernetes**: connectors or resources in clusters.
-- **→ twingate-idfw**: SSH, Kubernetes or internal web apps needing per-user identity or session
+- **→ twingate-pam**: SSH, Kubernetes or internal web apps needing per-user identity or session
   recording.
 - **→ twingate-dns-security**: DNS filtering, exit networks, fixed egress, DNS-product conflicts.
 - **→ twingate-troubleshoot**: anything failing in Phases 6–8 — grep the literal error first.
@@ -131,7 +131,7 @@ Delegate bounded jobs with a brief and a slice of the state (`guides/agent-deleg
 - **network-designer** — draft networks, resource table, access matrix (Phases 1, 4).
 - **aws-deployer / azure-deployer / gcp-deployer** — connector hosting and IaC per cloud network
   (Phases 5–6).
-- **idfw-deployer** — privileged SSH / Kubernetes / web-app access (Phases 4, 7).
+- **pam-deployer** — privileged SSH / Kubernetes / web-app access (Phases 4, 7).
 - **deployment-reviewer** — read-only pre-build review before Phases 5 and 7.
 - **twingate-se** — broad cross-domain design questions.
 

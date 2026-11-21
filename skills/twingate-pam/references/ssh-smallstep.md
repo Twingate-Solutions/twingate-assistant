@@ -71,6 +71,6 @@ pulumi config set --path data.key_name "SSH_KEYPAIR_NAME"
 - Twingate access must be explicitly granted per user in Admin Console after deploy
 
 ## Related Docs
-- [Smallstep SSH managed service](https://smallstep.com/ssh/) — eliminates manual user management
+- [Smallstep SSH managed service](https://smallstep.com/docs/ssh/) — eliminates manual user management
 - [DIY Single Sign-On for SSH (Smallstep blog)](https://smallstep.com/blog/diy-single-sign-on-for-ssh/)
 - [

@@ -62,5 +62,5 @@ VLAN 1  | VLAN 2      | *:*          | Block
 ## Related Docs
 - [Twingate Architecture](https://www.twingate.com/docs/architecture)
 - [How Twingate Works](https://www.twingate.com/docs/how-twingate-works)
-- [Peer-to-Peer Communication in Twingate](https://www.twingate.com/docs/peer-to-peer)
+- [Peer-to-Peer Communication in Twingate](https://www.twingate.com/docs/peer-to-peer-communication-in-twingate)
 - [Troubleshooting P2P](https://www.twingate.com/docs/troubleshooting-p2p)

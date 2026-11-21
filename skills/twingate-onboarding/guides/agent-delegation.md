@@ -12,7 +12,7 @@ main thread records (as `inferred` until the admin approves).
 |---|---|---|---|
 | 1, 4 | `network-designer` | Draft Remote Network boundaries, the Resource table, and the persona/access matrix from the catalog | Proposed tables + rationale |
 | 5, 6 | `aws-deployer` / `azure-deployer` / `gcp-deployer` (by `remote_networks[].location`) | Connector hosting plan and IaC for that cloud, network rules, preflight | Plan, generated code, admin tasks |
-| 4, 7 | `idfw-deployer` | SSH, Kubernetes, or internal web-app resources needing per-user identity or session recording | IDFW design + tasks |
+| 4, 7 | `pam-deployer` | SSH, Kubernetes, or internal web-app resources needing per-user identity or session recording | Privileged Access Management (PAM) design + tasks |
 | Before 5 and before 7 | `deployment-reviewer` | Read-only review of the state file and planned build | Findings list (blocking / advisory) |
 | Any, cross-domain | `twingate-se` | Broad design questions spanning several domains | Recommendation |
 

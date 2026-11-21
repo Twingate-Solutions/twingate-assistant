@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 012eb5f14ca539989cd1857d7db175985e9463fb
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Chocolatey Packages
 
 ## Summary

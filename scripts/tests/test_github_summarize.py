@@ -162,6 +162,7 @@ def test_system_prompts_instruct_to_ignore_embedded_instructions(prompt: str) ->
     assert "untrusted" in prompt.lower()
     assert "<untrusted_source>" in prompt
     assert "binaries.twingate.com" in prompt
+    assert github_summarize.LINK_RULE in prompt
 
 
 @patch("github_summarize.anthropic.Anthropic")

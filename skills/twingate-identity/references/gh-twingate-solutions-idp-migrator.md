@@ -5,8 +5,6 @@ fetched: 2026-09-27
 source_version: ca812751cd81a4bbc890e7ccb8e9d2d79df70657
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate IDP Migrator
 
 ## Summary

@@ -66,5 +66,5 @@ Any value other than `endpoint-independent` indicates incompatible NAT.
 
 ## Related Docs
 - [How NAT traversal works](https://www.twingate.com/docs/how-nat-traversal-works)
-- [Connector network requirements](https://www.twingate.com/docs/connector-requirements)
+- Connector network requirements
 - Relay transport documentation

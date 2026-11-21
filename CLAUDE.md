@@ -24,7 +24,7 @@ twingate-assistant/
 │   ├── twingate-terraform/             # Terraform provider usage
 │   ├── twingate-pulumi/                # Pulumi provider
 │   ├── twingate-kubernetes/            # K8s operator, Helm, routing
-│   ├── twingate-idfw/                  # Identity Firewall (SSH, K8s gateway)
+│   ├── twingate-pam/                   # Privileged Access Management (Gateway: K8s, SSH, web apps)
 │   ├── twingate-identity/              # IdP, SCIM, policies, device trust
 │   ├── twingate-api/                   # GraphQL API & automation
 │   ├── twingate-dns-security/          # DNS filtering, exit networks
@@ -36,7 +36,7 @@ twingate-assistant/
 │   ├── azure-deployer.md               # Azure-specific guidance
 │   ├── gcp-deployer.md                 # GCP-specific guidance
 │   ├── network-designer.md             # Topology & resource planning
-│   └── idfw-deployer.md                # Identity Firewall setup
+│   └── pam-deployer.md                 # Privileged Access Management setup
 ├── scripts/                            # Auto-update pipeline
 │   ├── update_references.py            # Orchestrator (sitemaps + GitHub source)
 │   ├── fetch_sitemap.py                # Sitemap XML parser (multi-source: docs + help)
@@ -45,6 +45,7 @@ twingate-assistant/
 │   ├── github_repos.py                 # GitHub org/repo/wiki discovery, zero-LLM
 │   ├── github_summarize.py             # GitHub delta/full summarization (LLM)
 │   ├── pipeline_metrics.py             # Per-run token/time/cost metrics
+│   ├── reference_links.py              # Truncation check + Twingate link maintenance (zero-LLM)
 │   ├── backfill_frontmatter.py         # One-time frontmatter backfill (dry-run default)
 │   ├── doc_mapping.yaml                # Multi-source (sources:) + doc/repo → skill routing
 │   └── requirements.txt
@@ -115,7 +116,7 @@ twingate-assistant/
 │   ├── twingate-kubernetes/
 │   │   ├── SKILL.md
 │   │   └── references/
-│   ├── twingate-idfw/
+│   ├── twingate-pam/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   ├── twingate-identity/
@@ -140,7 +141,7 @@ twingate-assistant/
 │   ├── azure-deployer.md
 │   ├── gcp-deployer.md
 │   ├── network-designer.md
-│   └── idfw-deployer.md
+│   └── pam-deployer.md
 ├── scripts/
 │   ├── update_references.py
 │   ├── fetch_sitemap.py
@@ -149,6 +150,7 @@ twingate-assistant/
 │   ├── github_repos.py
 │   ├── github_summarize.py
 │   ├── pipeline_metrics.py
+│   ├── reference_links.py
 │   ├── backfill_frontmatter.py
 │   ├── doc_mapping.yaml
 │   ├── .repo_state.json          # per-repo GitHub state, generated at runtime
@@ -163,7 +165,8 @@ twingate-assistant/
 │       ├── test_github_repos.py
 │       ├── test_github_summarize.py
 │       ├── test_onboarding_status.py
-│       └── test_pipeline_metrics.py
+│       ├── test_pipeline_metrics.py
+│       └── test_reference_links.py
 ├── .github/
 │   └── workflows/
 │       └── update-docs.yml
@@ -312,7 +315,7 @@ Then a `| If the user asks about… | Read first |` routing table covering EVERY
 6. **GraphQL SDL ships statically.** Hand-placed snapshot at `skills/twingate-api/references/graphql-schema.graphql`, with the curated `graphql-schema-reference.md` and `graphql-recipes.md` derived from it. Refresh all three together when the schema changes.
 7. **No MCP server. Live API calls only with the admin's approval.** Claude may run Twingate API calls in the admin's environment (Claude Code, local Cowork) only after showing the exact plan and getting an explicit yes; reads use the narrowest token available; the token comes from an env var and never appears in chat, state files, or generated code. The plugin ships no complete deployment scripts.
 8. **twingate-se agent always starts with environment assessment.**
-9. **Identity Firewall skill is expansion-ready.** SSH PAM + K8s gateway today, structured for future protocols.
+9. **Privileged Access Management (PAM) skill is expansion-ready.** Gateway-based Kubernetes, SSH and web-app access today, structured for future protocols. PAM was called Identity Firewall (IDFW) until November 2026; keep the old name only as a trigger keyword in the PAM skill and agent. "PAM" here never means Linux Pluggable Authentication Modules.
 10. **Auto-update pipeline is idempotent.** No commits when nothing changes.
 11. **One deployment order, plugin-wide:** tenant → IdP connected and groups provisioned (SCIM) → Remote Networks → Connectors → Resources → group/resource access → pilot → rollout and hardening. Skills and agents that describe sequencing must agree with it.
 
@@ -339,7 +342,7 @@ Then a `| If the user asks about… | Read first |` routing table covering EVERY
 | twingate-terraform | ~3+repo | Provider resources, SE reference modules |
 | twingate-pulumi | ~2+repo | Pulumi provider, reference scripts |
 | twingate-kubernetes | ~7+repos | Helm chart, operator, CRDs, routing, kubectl |
-| twingate-idfw | ~8+repo | SSH PAM, K8s gateway, session recording, Ansible, IDFW TF |
+| twingate-pam | ~16+repos | Gateway, K8s/SSH/web-app privileged access, CAs, session recording, Gateway TF |
 | twingate-identity | ~18 | IdP configs, SCIM, security policies, device trust, groups, JIT |
 | twingate-api | ~6+SDL | GraphQL API, CLI tools, schema, Twingate Labs |
 | twingate-dns-security | ~7 | DNS filtering, exit networks, DoH, browser security |
@@ -350,12 +353,12 @@ Then a `| If the user asks about… | Read first |` routing table covering EVERY
 | Agent | Role | Skills Preloaded |
 |---|---|---|
 | twingate-se | Senior SE orchestrator, environment assessment | all |
-| deployment-reviewer | Read-only pre-build review of a deployment plan | onboarding, architect, connectors, identity, api, idfw |
+| deployment-reviewer | Read-only pre-build review of a deployment plan | onboarding, architect, connectors, identity, api, pam |
 | aws-deployer | AWS deployment specialist | all |
 | azure-deployer | Azure deployment specialist | all |
 | gcp-deployer | GCP deployment specialist | all |
 | network-designer | Remote network topology planner | all |
-| idfw-deployer | Identity Firewall implementation | all |
+| pam-deployer | Privileged Access Management implementation | all |
 
 ## Toolchain (Local Only)
 

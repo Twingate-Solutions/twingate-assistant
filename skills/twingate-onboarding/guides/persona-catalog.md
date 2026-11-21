@@ -19,7 +19,7 @@ are starting points to confirm, never values to build from.
 | identity | AD DC, LDAP, IdM | 443; AD: 53, 88, 389, 445, 464, 636, 3268-3269; UDP 53/88/123/389 | 3389 | identity-admins | restricted |
 | mainframe | "mainframe", z/OS, AS/400 | 23/992 (TN3270), vendor ports | — | mainframe-ops, specific app users | high |
 | ssh-host | Linux/Unix server, bastion | — | 22 | server-admin, app owner team | medium |
-| kubernetes | k8s API, cluster | 6443 / 443 | — | platform-eng (consider twingate-idfw / twingate-kubernetes) | high |
+| kubernetes | k8s API, cluster | 6443 / 443 | — | platform-eng (consider twingate-pam / twingate-kubernetes) | high |
 | hypervisor | vCenter, Hyper-V host, iDRAC/iLO | 443 | 443 / 22 / 3389 | infra-admins | restricted |
 | network-device | router, firewall, switch management | 443, 22 | 22 | network-admins | restricted |
 | workstation | developer desktop, user PC | — | 3389 / 22 / 5900 | usually a **client**, not a resource | low |
@@ -64,4 +64,4 @@ features) comes from the twingate-identity skill's references at the time of the
   IP-allowlisting use case (twingate-architect, twingate-dns-security for fixed egress).
 - An EOL operating system is a finding to raise, not a blocker. Record it in `open_questions`.
 - SSH, Kubernetes API, or internal web apps where *who* did *what* matters → suggest
-  twingate-idfw in Phase 4.
+  twingate-pam in Phase 4.

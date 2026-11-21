@@ -5,8 +5,6 @@ fetched: 2026-08-06
 source_version: 792c0b311c0823e26f2db113866bc52ba6aca7ee
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate CLI (tg-cli)
 
 ## Summary

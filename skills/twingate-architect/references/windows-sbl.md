@@ -57,7 +57,7 @@ All three must be true:
 - Session length applies globally via Minimum Authentication Requirements, not per-policy
 
 ## Related Docs
-- [Active Directory with Twingate](https://www.twingate.com/docs/active-directory)
+- [Active Directory with Twingate](https://www.twingate.com/docs/using-active-directory-with-twingate)
 - Device-only Resource Policies documentation
 - Trusted Devices documentation
 - Minimum Authentication Requirements
