@@ -1,41 +1,47 @@
 ---
 source: https://www.twingate.com/docs/devices
 type: docs
-fetched: 2026-08-14
-source_version: 96b5c2e0bf508bc4f34ffc4b4919758ca0460f0ae3f98b0e113a9e909265b63f
+fetched: 2026-11-22
+source_version: 4998abad33e5d2ea015bdea0380af7e7cfc8300863050994991f28e32e9cddfb
+trust: official
 ---
 
-# Twingate Devices Overview
+# Devices
 
-## Page Title
-Devices — Practical Overview
+**Source:** https://www.twingate.com/docs/devices
 
 ## Summary
-This page serves as a navigation hub for Twingate device-related documentation. It covers three main areas: installing the Twingate Client, deploying to managed devices via MDM/EMM, and administering device posture for zero trust access control.
+This page is an overview and index for installing the Twingate Client and managing devices. It points to separate pages for Client installation, deployment to managed devices via MDM/EMM, the Twingate CLI, and device administration within Twingate.
 
 ## Key Information
-- **Twingate Client**: Runs on end-user devices; enables access to private Resources and Internet Security features
-- **Admin privileges required**: Client intercepts network traffic, so it requires administrator privileges on the device
-- **MDM/EMM support**: For users without local admin rights, Client can be deployed via managed device management platforms
-- **Device posture**: Devices are a primary factor in zero trust access evaluation; Twingate provides posture checks and status monitoring
-
-## Three Core Topic Areas
-
-| Topic | Purpose |
-|---|---|
-| Twingate Client Application | Download locations and platform-specific setup |
-| Deploying to Managed Devices | MDM/EMM deployment for non-admin users |
-| Device Administration | Posture checks, device status, access policy integration |
+- The Twingate Client runs on user devices. It provides access to private Resources and Internet Security features.
+- The Client requires administrator privileges on end-user devices because it intercepts network traffic on the device.
+- For users without admin access, the Client can be deployed to managed devices through MDM/EMM products.
+- The macOS, Windows, and Linux Clients include the `twingate` command-line interface (CLI). It can:
+  - connect
+  - check status
+  - list Resources
+  - manage accounts
+  - change Client settings
+  - run from a terminal or script
+- Devices are a primary component of zero trust assessment. Twingate supports using device posture and status when evaluating access attempts to Resources.
 
 ## Prerequisites
-- Administrator privileges on the device (for manual Client install)
-- MDM/EMM platform (for managed deployments without user admin rights)
+- Administrator privileges on the device for a manual Client install.
+- An MDM/EMM product for managed deployments where users lack admin rights.
+
+## Step-by-Step
+The page contains no procedures. It only links to the detailed pages below.
+
+## Configuration Values
+None on this page. CLI flags and settings are documented on the CLI page.
 
 ## Gotchas
-- Users **without** local admin access cannot self-install; must use MDM/EMM deployment path
-- Device posture is actively used in access decisions — misconfigured posture policies can block legitimate access
+- Users without admin rights cannot install the Client themselves. Plan MDM/EMM deployment for them.
+- The CLI is bundled with the Client on macOS, Windows, and Linux only. The page does not mention it for other platforms.
 
 ## Related Docs
-- Twingate Client application (platform-specific install guides)
-- Managed device deployment (MDM/EMM setup)
-- Administering devices in Twingate (posture, status, policy configuration)
+- Using the Twingate Client application (https://www.twingate.com/docs/clients): download locations and platform-specific setup
+- Deploying Twingate on managed devices (https://www.twingate.com/docs/managed-devices): MDM/EMM deployment
+- Using the Twingate CLI (https://www.twingate.com/docs/twingate-cli): `twingate` command reference
+- Administering devices in Twingate (https://www.twingate.com/docs/managing-devices): device posture and status for access policy

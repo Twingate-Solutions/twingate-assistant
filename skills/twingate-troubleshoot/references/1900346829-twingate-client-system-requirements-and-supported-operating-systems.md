@@ -1,51 +1,48 @@
 ---
 source: https://help.twingate.com/articles/1900346829-twingate-client-system-requirements-and-supported-operating-systems
 type: help
-fetched: 2026-10-25
-source_version: 5ec3b5e2bd4b6caaa39c5bb3c8cce6ede1c079cc6fdbeb889081235923d7ddf8
+fetched: 2026-11-22
+source_version: 69806462aab08d1737422bfd036066c2f7f4de8d062cd25f26cd588dc305dc56
 trust: official
 ---
 
 # Twingate Client System Requirements and Supported Operating Systems
 
 ## Summary
-Documents minimum supported OS versions for Twingate Client across desktop and mobile platforms. Twingate drops support for OS versions that reach end-of-life; the client may continue functioning temporarily but receives no updates or official support.
+Lists the minimum OS versions and platforms supported by the Twingate Client on desktop (Windows, macOS, Linux) and mobile (iOS, Android). Twingate does not support OS versions that have reached end-of-life. The client may still work on them for a time, but updates may stop being available.
 
 ## Key Information
+- **Windows:** Windows 10 21H2 (E) (LTS) minimum. Windows 7/8 are not supported.
+- **macOS:** macOS 14 (Sequoia) minimum. Older versions (e.g. Monterey) may install older client versions but are not officially supported.
+- **Linux (x86/AMD64 and ARM64 unless noted):**
+  - Ubuntu 20.04, 22.04, 24.04 LTS
+  - Debian 9 or later
+  - Fedora 40 or later
+  - CentOS Stream 9 or later
+  - Oracle Linux 8 or later
+  - Arch Linux, ThinPro, NixOS: x64/AMD64 only
+- **iOS:** iOS 18 minimum (App Store).
+- **Android:** Android 14 minimum (Google Play). Some custom ROMs or restricted devices may be unsupported.
 
-### Desktop Clients
-| Platform | Minimum Version | Notes |
-|----------|----------------|-------|
-| Windows | Windows 10 21H2 (LTS) | Requires .NET 8 Desktop Runtime |
-| macOS | macOS 14 (Sequoia) | Older versions may run older client builds, unsupported |
-| Linux | Varies by distro | See below |
+## Prerequisites
+- Admin rights for the initial install on Windows and macOS.
+- Windows: .NET 8 Desktop Runtime (bundled with the .exe installer).
+- macOS: the System Extension framework must be available, since the client relies on it for network extensions.
 
-### Supported Linux Distributions (x86/AMD64 and ARM64 unless noted)
-- **Ubuntu**: 20.04 LTS, 22.04 LTS, 24.04 LTS
-- **Debian**: 9+
-- **Fedora**: 40+
-- **CentOS**: Stream 9+
-- **Oracle Linux**: 8+
-- **Arch Linux, ThinPro, NixOS**: x64/AMD64 only
+## Step-by-Step
+Not applicable. This is a reference page. Use it to verify the OS version before installing.
 
-### Mobile Clients
-| Platform | Minimum Version |
-|----------|----------------|
-| iOS | iOS 18 (App Store) |
-| Android | Android 14 / "Upside Down Cake" (Google Play) |
-
-## Additional Requirements
-- **.NET 8 Desktop Runtime**: Required on Windows; bundled with `.exe` installer
-- **Admin Rights**: Required for initial installation on Windows and macOS
-- **Network Extensions**: macOS client uses the System Extension framework
-- **DNS**: Twingate installs a local DNS resolver for private resource name resolution
+## Configuration Values
+None listed. Behaviors noted:
+- Twingate sets up a local DNS resolver on the device to resolve private resources (system DNS configuration is modified).
 
 ## Gotchas
-- Windows 7 and 8 are explicitly unsupported
-- Android custom ROMs or restricted devices may not work even on Android 14+
-- macOS versions older than Sequoia (14) may install an older client version but are not officially supported — no guarantee of parity or updates
-- End-of-life OS versions may continue working temporarily but will eventually stop receiving client updates
+- End-of-life OS versions may work but are unsupported, and client updates may stop arriving.
+- Windows 7/8 are unsupported.
+- The macOS minimum is high (14); older macOS may silently receive older client builds.
+- Arch Linux, ThinPro, and NixOS are x64/AMD64 only (no ARM64).
+- Custom Android ROMs and restricted devices may not work.
+- Because the client changes local DNS, conflicts with other DNS or VPN software are possible (inferred from the local resolver behavior; verify in your environment).
 
 ## Related Docs
-- Twingate Client installation guides (Windows, macOS, Linux, iOS, Android)
-- Twingate Connector system requirements (separate page)
+No related page links appear in the source material.

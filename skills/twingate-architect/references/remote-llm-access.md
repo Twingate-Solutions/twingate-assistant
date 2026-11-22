@@ -1,58 +1,53 @@
 ---
 source: https://www.twingate.com/docs/remote-llm-access
 type: docs
-fetched: 2026-08-14
-source_version: 0080308e2cd6d97927174aa252b8fb407b061b1b6bb70d0b3159ced6e02166e8
+fetched: 2026-11-22
+source_version: a1e516644cd3bb281f2a0cf37708331539732f8b1eec3888e2df0ffd6b30e59e
+trust: official
 ---
 
 # Remote LLM Access with Twingate
 
 ## Summary
-Securely connect a local development machine to a self-hosted or cloud-hosted LLM (e.g., Ollama) using Twingate as a zero-trust network layer. The LLM server is never exposed to the public internet; Twingate's Connector handles all inbound routing. Example uses the Continue VS Code extension as the LLM client.
+Guide to securing communication between a local editor (VS Code with the Continue extension) and a remote self-hosted LLM (Ollama) using Twingate. The LLM server is never exposed to the public internet. A Twingate Connector on the server makes outbound-only connections, and the local Twingate Client routes traffic to a private Resource.
 
 ## Key Information
-- Twingate Connector runs on the LLM server and makes **outbound-only** connections — no inbound firewall ports required
-- LLM server (Ollama) listens on `localhost`/internal IP only, never `0.0.0.0`
-- Traffic is end-to-end encrypted; LLM server is invisible to the public internet
-- Works with any cloud VM (DigitalOcean, AWS, GCP, Azure) or on-premises server
-- Continue extension supports VS Code, JetBrains, and Cursor
+- Architecture: local machine (VS Code + Continue + Twingate Client) → Twingate network → Connector on the LLM server → Ollama.
+- Benefits: no inbound firewall ports, no traditional VPN, only authenticated and authorized users can reach the LLM, traffic is encrypted.
+- Reasons to avoid public exposure: protecting IP in prompts and code, preventing abuse of the endpoint, compliance, and preventing man-in-the-middle tampering.
+- The example server is a Digital Ocean GPU droplet, but any Linux VM or physical server works (AWS, GCP, Azure, on-prem).
+- The same approach works anywhere Continue is supported, including JetBrains IDEs and Cursor.
 
 ## Prerequisites
-- Twingate account (free tier available)
-- Remote Linux server with GPU (DigitalOcean droplet or equivalent)
-- [Ollama](https://ollama.ai) installed on the remote server
-- VS Code with [Continue](https://continue.dev) extension installed locally
-- Twingate client installed on local machine
+- A Twingate account (free sign-up available).
+- A Linux server with enough GPU/compute for the chosen model.
+- Twingate Client installed on the dev machine (Windows, macOS, or Linux).
+- The Continue extension installed in the editor.
 
 ## Step-by-Step
+1. **Set up the LLM server.** Install Ollama using the install script from the Ollama site, then run `ollama run llama3` to download the model and start the service. Ollama listens on `localhost:11434` by default. The page's install command pipes a script from ollama.ai into a shell, so see the Ollama site for the official install instructions.
+2. **Set up Twingate.**
+   - Create a Remote Network (the page's example name is `llm-dev-network`) and choose On-Premise or the matching cloud option.
+   - Deploy a Connector on the LLM server using the script generated in the admin console. The script is unique to your account and includes your tokens and network name.
+   - Confirm the Connector shows as connected.
+   - Add a Resource and grant access to the users who need it.
+3. **Configure the local machine.** Install the Twingate Client and sign in with your identity provider. Then run "Continue: Edit Config" from the command palette (Cmd/Ctrl+Shift+P) to open Continue's `config.json`.
+4. **Test.** Confirm the Client is connected, select the model in Continue, and send a prompt.
 
-### 1. Remote Server — Install Ollama
-```bash
-curl https://ollama.ai/install.sh | sh
-ollama run llama3   # downloads model and starts service
-```
-Ollama defaults to `localhost:11434`. **Do not** bind to `0.0.0.0`.
+## Configuration Values
+**Twingate Resource**
+- Label: e.g., `Ollama LLM`
+- Address: internal IP of the LLM machine
+- Port: `11434`
+- Protocol: TCP
 
-### 2. Twingate Admin Console — Network Setup
-1. Create a Remote Network (name: e.g., `llm-dev-network`; type: On-Premise or cloud)
-2. Add a Connector → run the generated install script on the LLM server:
-```bash
-curl "https://binaries.twingate.com/connector/setup.sh" | sudo \
-  TWINGATE_ACCESS_TOKEN="{token}" \
-  TWINGATE_REFRESH_TOKEN="{refresh_token}" \
-  TWINGATE_NETWORK="{network_name}" \
-  TWINGATE_LABEL_DEPLOYED_BY="linux" bash
-```
-3. Add a Resource:
-   - **Label**: `Ollama LLM`
-   - **Address**: internal IP of the LLM server
-   - **Port**: `11434`
-   - **Protocol**: TCP
-4. Assign the Resource to your Twingate user(s)
+**Connector environment variables** (from the generated script)
+- `TWINGATE_ACCESS_TOKEN`
+- `TWINGATE_REFRESH_TOKEN`
+- `TWINGATE_NETWORK`
+- `TWINGATE_LABEL_DEPLOYED_BY`
 
-### 3. Local Machine — Client + Continue Config
-1. Install and sign in to the Twingate client
-2. Edit Continue config (`Cmd+Shift+P` → "Continue: Edit Config") — `config.json`:
+**Continue `config.json` model entry**
 ```json
 {
   "models": [
@@ -66,23 +61,14 @@ curl "https://binaries.twingate.com/connector/setup.sh" | sudo \
 }
 ```
 
-## Configuration Values
-
-| Parameter | Value |
-|-----------|-------|
-| Ollama default port | `11434` |
-| Ollama bind address | `localhost` / internal IP only |
-| Continue `provider` | `ollama` |
-| Continue `apiBase` | `http://{internal_ip}:11434` |
-| Connector env: `TWINGATE_ACCESS_TOKEN` | From Twingate admin console |
-| Connector env: `TWINGATE_REFRESH_TOKEN` | From Twingate admin console |
-| Connector env: `TWINGATE_NETWORK` | Your Twingate network name |
-
 ## Gotchas
-- **Never** expose Ollama on `0.0.0.0` — defeats the entire security model
-- Twingate client must be running and connected on the local machine before making LLM requests
-- Use the server's **internal** IP (not public IP) in both the Twingate Resource definition and `apiBase`
-- Connector must show "connected" in admin console before traffic can flow
+- Do **not** bind Ollama to `0.0.0.0` or expose it publicly. Use the machine's internal IP so only the Connector can reach it.
+- The Twingate Client must be running and connected, or Continue cannot reach `apiBase`.
+- The Resource address and the `apiBase` host must match.
+- Connector tokens are account-specific. Use the script from your own admin console, not the example.
+- Connector install commands use `binaries.twingate.com`, which is Twingate's official host.
 
 ## Related Docs
-- [Twingate Connector Setup](https://www.twingate.
+- Continue (https://continue.dev/)
+- Ollama (https://ollama.ai/)
+- Twingate (https://www.twingate.com/)
