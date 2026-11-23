@@ -144,6 +144,7 @@ file live there:
 | kubectl access via Twingate (non-PAM) | `k8s-cluster-access.md`, `k8s-kubectl.md` |
 | Kubeconfig sync automation | `kubernetes-kubeconfig-sync.md` (product doc; fresher for current values), `kubernetes-kubeconfig-sync-se-notes.md` (hand-authored CLI command tables, client/connector minimum versions) |
 | **AI agent access to a cluster** (agent host runs the Headless Client, Gateway injects a Service Account identity, RBAC targets the Service Account name, never grant `bind`/`escalate`, per-key or per-account revocation) | `kubernetes-agent-access.md` |
+| **`kubectl` can't reach a cluster through Privileged Access for Kubernetes** — connection resets (Connector-to-Gateway reachability, TLS mismatch), kubeconfig sync failures, known issues with session recording and `kubectl` | `kubernetes-troubleshooting.md`, then `skills/twingate-pam/references/gateway-troubleshooting.md` for Gateway-side log signatures |
 | **Running the Twingate client as a pod sidecar** (service-account key injection, `privileged: true` requirement, example-only — not a hardened chart) | `gh-twingate-labs-tg-client-k8s-sidecar.md` |
 | Helm values schema (exact field names) | `gh-twingate-helm-charts.md`, or clone `https://github.com/Twingate/helm-charts` and inspect `charts/connector/values.yaml` |
 | CRD schemas (exact field names) | `gh-twingate-kubernetes-operator-wiki.md`, or clone `https://github.com/Twingate/kubernetes-operator` and check `config/crd/` |

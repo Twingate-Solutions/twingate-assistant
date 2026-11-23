@@ -883,15 +883,22 @@ def _process_github_repo(
     track_releases = bool((config_entry or {}).get("track_releases", False))
     trust = trust_tier_for_org(org)
 
-    if not is_changed_since_last_run(repo, state):
+    slug = github_repo_slug(org, repo.name)
+    out_dir = references_dir_for_skill(skill) if skill else TRIAGE_DIR
+    doc_path = out_dir / f"{slug}.md"
+    wiki_doc_path = out_dir / f"{github_wiki_slug(org, repo.name)}.md"
+
+    # A truncated repo or wiki reference must be re-summarized even when the
+    # repo has not been pushed since the last run; the sha checks below and in
+    # _process_github_wiki then force a full summary for it.
+    needs_repair = any(
+        path.exists() and is_truncated_reference(path) for path in (doc_path, wiki_doc_path)
+    )
+    if not needs_repair and not is_changed_since_last_run(repo, state):
         logger.info("%s: unchanged since last run, skipping", full_name)
         stats["skipped"] += 1
         return
 
-    slug = github_repo_slug(org, repo.name)
-    doc_path = (
-        references_dir_for_skill(skill) / f"{slug}.md" if skill else TRIAGE_DIR / f"{slug}.md"
-    )
     entry_state = state.get(full_name, {})
 
     if is_manual_reference(doc_path):

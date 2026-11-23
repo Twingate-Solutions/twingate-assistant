@@ -1,96 +1,67 @@
 ---
 source: https://www.twingate.com/docs/minecraft-server-linux
 type: docs
-fetched: 2026-08-14
-source_version: 5a0ec180c5c4329f6ce4e9c37201ddf5e2f8650a0875f59742513eb0bf7729ee
+fetched: 2026-11-22
+source_version: 4969e3e5f2be23424553720143a53bc886166b791befa2b6b890c5502bf8e192
+trust: official
 ---
 
 # Minecraft Server with Twingate (Linux)
 
 ## Summary
-Deploy a private Minecraft Java Edition server on bare-metal Linux using systemd and OpenJDK 21, secured via Twingate Connector instead of port forwarding. Players connect through the Twingate Client using the server's private IP, keeping port 25565 off the public internet entirely.
+Guide to hosting a private vanilla Java Edition Minecraft server on bare-metal Linux (Java + systemd) with a natively installed Twingate Connector. Players reach the server's private IP through the Twingate Client, so no port forwarding or public exposure of port 25565 is needed.
 
 ## Key Information
-- Minecraft Java Edition uses TCP port 25565 only (no UDP needed)
-- Twingate Connector creates outbound-only tunnel — no inbound firewall/router changes required
-- Server binds to `0.0.0.0:25565` by default, accessible to Connector on same host without internet exposure
-- Twingate Client must remain connected for entire play session
-- Connector overhead: <256 MB RAM, negligible CPU
+- Architecture: Player (Twingate Client) → Twingate Cloud → Connector (outbound-only tunnel) → Minecraft server on TCP 25565.
+- Java Edition uses TCP 25565 only. Bedrock uses UDP 19132 and is covered in a separate guide.
+- The server binds to 0.0.0.0:25565 by default. This is reachable by the local Connector and not exposed to the internet if the router does not forward it.
+- Access is controlled with Twingate Groups instead of Minecraft allowlists.
+- Connector overhead: under 256 MB RAM.
 
 ## Prerequisites
-- Linux machine (Ubuntu 22.04/24.04 or Debian 12 tested): 2+ GB RAM, 2+ CPU cores, 10+ GB disk
-- Java 21 (OpenJDK) — installed via `apt`
-- Twingate account with Admin Console access
-- SSH/terminal access with `sudo`
+- Linux host (Ubuntu 22.04/24.04 or Debian 12 tested): 2 GB RAM, 2 CPU cores, 10 GB disk.
+- OpenJDK 21, installed in Step 2.
+- Twingate account with Admin Console access.
+- Terminal/SSH access with sudo.
 
 ## Step-by-Step
-
-**1. Twingate Setup**
-- Admin Console → Remote Networks → Add Remote Network → Add Connector → Select Linux → Generate Tokens
-- Copy Access Token and Refresh Token
-
-**2. Server Setup**
-```bash
-sudo useradd -r -m -U -d /opt/minecraft -s /bin/bash minecraft
-sudo mkdir -p /opt/minecraft/server
-sudo chown -R minecraft:minecraft /opt/minecraft
-sudo apt update && sudo apt install -y openjdk-21-jre-headless
-sudo -u minecraft -s
-cd /opt/minecraft/server
-wget https://piston-data.mojang.com/v1/objects/[VERSION_HASH]/server.jar  # get URL from minecraft.net
-echo "eula=true" > eula.txt
-exit
-```
-
-**3. systemd Service** (`/etc/systemd/system/minecraft.service`):
-```ini
-[Unit]
-Description=Minecraft Server
-After=network.target
-[Service]
-Type=simple
-User=minecraft
-WorkingDirectory=/opt/minecraft/server
-ExecStart=/usr/bin/java -Xmx2G -Xms1G -jar server.jar nogui
-Restart=on-failure
-RestartSec=10
-[Install]
-WantedBy=multi-user.target
-```
-```bash
-sudo systemctl daemon-reload && sudo systemctl enable --now minecraft
-```
-
-**4. Install Connector**
-```bash
-curl "https://binaries.twingate.com/connector/setup.sh" | \
-sudo TWINGATE_ACCESS_TOKEN="<TOKEN>" \
-TWINGATE_REFRESH_TOKEN="<REFRESH>" \
-TWINGATE_NETWORK="<NETWORK>" bash
-```
-
-**5. Add Resource** — Admin Console → Resources → Add Resource → TCP port 25565 → server private IP (`hostname -I | awk '{print $1}'`)
-
-**6. Player Setup** — Install Twingate Client, sign in, connect, then add server IP in Minecraft Multiplayer
+1. **Admin Console:** Remote Networks → Add Remote Network (e.g., On Premise) → add Connector → choose Linux → Generate Tokens. Copy the Access Token and Refresh Token.
+2. **Server setup:**
+   - Create user and directory: `sudo useradd -r -m -U -d /opt/minecraft -s /bin/bash minecraft`, then `sudo mkdir -p /opt/minecraft/server` and `sudo chown -R minecraft:minecraft /opt/minecraft`.
+   - Install Java: `sudo apt install -y openjdk-21-jre-headless`.
+   - As the minecraft user in `/opt/minecraft/server`, download server.jar from the official Minecraft download page (the URL changes each release).
+   - Write `eula=true` to `eula.txt` (this accepts Mojang's EULA).
+   - Create `server.properties`.
+   - Create `/etc/systemd/system/minecraft.service` with `ExecStart=/usr/bin/java -Xmx2G -Xms1G -jar server.jar nogui`, `User=minecraft`, `Restart=on-failure`.
+   - Run `sudo systemctl daemon-reload && sudo systemctl enable --now minecraft`.
+   - Watch for "For help, type "help"" in `journalctl -u minecraft -f`.
+3. **Connector:** Run the official installer from binaries.twingate.com with the three env vars below. The source shows a piped one-liner, so follow the Connector Linux deployment option in the Admin Console for the exact command. Verify with `systemctl status twingate-connector` and confirm Controller and Relay show Connected.
+4. **Resource:** Find the private IP with `hostname -I | awk '{print $1}'`. Add a Resource with the name Minecraft Server, that IP as the address, and TCP 25565. Grant access to a Group.
+5. **Players:** Install the Twingate Client, sign in to `yournetwork.twingate.com`, then in Minecraft go to Multiplayer → Add Server using the private IP.
+6. **Access control:** Invite users under Team, create a "Minecraft Players" Group, assign it to the Resource, and remove Everyone.
 
 ## Configuration Values
-
-| Parameter | Value |
-|-----------|-------|
-| `server-port` | 25565 |
-| `max-players` | 10 (default 20) |
-| `difficulty` | `peaceful/easy/normal/hard` |
-| `gamemode` | `survival/creative/adventure/spectator` |
-| `-Xmx` / `-Xms` | 2G/1G (increase for mods: 4-8G) |
+- Connector env vars: `TWINGATE_ACCESS_TOKEN`, `TWINGATE_REFRESH_TOKEN`, `TWINGATE_NETWORK`.
+- `server.properties`: server-port (25565), max-players, difficulty, gamemode, motd, view-distance (10), level-seed, white-list, pvp.
+- JVM: `-Xmx`/`-Xms` in the systemd unit. Use 4 GB or more for mods, and 6-8 GB or more for heavy modpacks.
 
 ## Gotchas
-- Download URL for `server.jar` changes each release — always get from [minecraft.net](https://minecraft.net/en-us/download/server)
-- Each Connector needs unique tokens — never reuse token sets
-- Heavy modpacks may need 6-8 GB RAM; adjust `-Xmx` in service file + `daemon-reload`
-- Port conflict check: `sudo ss -tlnp | grep 25565`
-- World data stored in `/opt/minecraft/server/` — back up regularly; deletion = data loss
+- Each Connector needs its own unique token pair.
+- Players must keep the Twingate Client connected during play.
+- If you change the port, update the Twingate Resource to match.
+- Crashes are usually caused by low memory, so raise `-Xmx` and restart.
+- Back up `/opt/minecraft/server/`, since it holds the world data.
+- Port conflict check: `sudo ss -tlnp | grep 25565`.
+- Connector offline: check the tokens, outbound internet access, and `journalctl -u twingate-connector`.
+- Revoking access: remove the user from the Group.
 
-## Troubleshooting Commands
-```bash
-sudo systemctl status minecraft
-sudo journal
+## Related Docs
+- [All Minecraft guides](https://www.twingate.com/docs/minecraft-guides)
+- [Bedrock](https://www.twingate.com/docs/minecraft-bedrock-server)
+- [Forge (modded)](https://www.twingate.com/docs/minecraft-forge-server)
+- [Docker version](https://www.twingate.com/docs/minecraft-server)
+- [Resources](https://www.twingate.com/docs/resources)
+- [Security Policies](https://www.twingate.com/docs/security-policies)
+- [Deploy a second Connector](https://www.twingate.com/docs/deploy-connector-with-docker-compose)
+- [Protect Your Home Lab](https://www.twingate.com/docs/homelab-step-by-step)
+- [Linux Client install guide](https://www.twingate.com/docs/linux)

@@ -2169,6 +2169,92 @@ def test_process_github_source_truncated_doc_gets_full_resummarize_despite_same_
     assert "Complete." in doc_path.read_text(encoding="utf-8")
 
 
+def test_process_github_source_truncated_doc_is_repaired_when_repo_not_pushed(tmp_path):
+    """Regression: an unpushed repo (pushed_at == recorded) used to hit the
+    'unchanged since last run' early return before the truncation check, so a
+    truncated gh-* reference was never repaired."""
+    skills_dir = tmp_path / "skills"
+    repo = _repo_info(pushed_at="2024-01-01T00:00:00Z")
+    fake_mapping = {"repos": [{"full_name": "Twingate/example-repo", "skill": "twingate-terraform"}]}
+    doc_path = skills_dir / "twingate-terraform" / "references" / "gh-twingate-example-repo.md"
+    doc_path.parent.mkdir(parents=True)
+    doc_path.write_text("---\nsource: x\n---\n\n# Repo\n- [Config](documentation/", encoding="utf-8")
+    state = {"Twingate/example-repo": {"last_sha": "samesha000", "pushed_at": "2024-01-01T00:00:00Z"}}
+    result = SummaryResult(text="# Repo\n\nComplete.", input_tokens=1, output_tokens=1, model="m")
+    stats = {"updated": 0, "skipped": 0, "failed": 0}
+
+    with (
+        patch("update_references.SKILLS_DIR", skills_dir),
+        patch("update_references.TRIAGE_DIR", skills_dir / "_triage"),
+        patch("update_references.load_mapping", return_value=fake_mapping),
+        patch("update_references.load_repo_state", return_value=state),
+        patch("update_references.save_repo_state"),
+        patch("update_references.discover_org_repos", side_effect=_discover_dispatch(repo)),
+        patch("update_references.get_default_branch_head_sha", return_value="samesha000"),
+        patch("update_references.build_filtered_diff") as mock_diff,
+        patch("update_references.fetch_repo_readme", return_value="# README"),
+        patch("update_references.fetch_latest_release_notes", return_value=None),
+        patch("update_references.summarize_repo_full", return_value=result) as mock_full,
+        patch("update_references.summarize_repo_delta") as mock_delta,
+    ):
+        process_github_source("2026-08-06", stats, GitHubRunMetrics())
+
+    mock_full.assert_called_once()
+    mock_delta.assert_not_called()
+    mock_diff.assert_not_called()
+    assert stats == {"updated": 1, "skipped": 0, "failed": 0}
+    assert "Complete." in doc_path.read_text(encoding="utf-8")
+
+
+def test_process_github_source_truncated_wiki_is_repaired_when_repo_not_pushed(tmp_path):
+    """A truncated -wiki reference also bypasses the unpushed early return; the
+    intact repo reference is left alone and only the wiki is re-summarized in full."""
+    from github_repos import WikiSnapshot
+
+    skills_dir = tmp_path / "skills"
+    refs = skills_dir / "twingate-terraform" / "references"
+    refs.mkdir(parents=True)
+    repo_doc = refs / "gh-twingate-example-repo.md"
+    wiki_doc = refs / "gh-twingate-example-repo-wiki.md"
+    repo_doc.write_text("---\nsource: x\n---\n\n# Repo\n\nIntact.", encoding="utf-8")
+    wiki_doc.write_text("---\nsource: x\n---\n\n# Wiki\n```yaml\nkey: 1\n", encoding="utf-8")
+    repo = _repo_info(pushed_at="2024-01-01T00:00:00Z", has_wiki=True)
+    fake_mapping = {"repos": [{"full_name": "Twingate/example-repo", "skill": "twingate-terraform"}]}
+    state = {
+        "Twingate/example-repo": {
+            "last_sha": "samesha000",
+            "wiki_last_sha": "wikisha000",
+            "pushed_at": "2024-01-01T00:00:00Z",
+        }
+    }
+    result = SummaryResult(text="# Wiki\n\nComplete.", input_tokens=1, output_tokens=1, model="m")
+    stats = {"updated": 0, "skipped": 0, "failed": 0}
+
+    with (
+        patch("update_references.SKILLS_DIR", skills_dir),
+        patch("update_references.TRIAGE_DIR", skills_dir / "_triage"),
+        patch("update_references.load_mapping", return_value=fake_mapping),
+        patch("update_references.load_repo_state", return_value=state),
+        patch("update_references.save_repo_state"),
+        patch("update_references.discover_org_repos", side_effect=_discover_dispatch(repo)),
+        patch("update_references.get_default_branch_head_sha", return_value="samesha000"),
+        patch(
+            "update_references.clone_wiki",
+            return_value=WikiSnapshot(head_sha="wikisha000", files={"Home.md": "# Home"}),
+        ),
+        patch("update_references.build_wiki_diff") as mock_wiki_diff,
+        patch("update_references.summarize_repo_full", return_value=result) as mock_full,
+        patch("update_references.summarize_repo_delta") as mock_delta,
+    ):
+        process_github_source("2026-08-06", stats, GitHubRunMetrics())
+
+    mock_full.assert_called_once()
+    mock_delta.assert_not_called()
+    mock_wiki_diff.assert_not_called()
+    assert repo_doc.read_text(encoding="utf-8").endswith("Intact.")
+    assert "Complete." in wiki_doc.read_text(encoding="utf-8")
+
+
 def test_process_github_source_stub_repo_writes_one_liner_without_claude_call(tmp_path):
     """Stub repos (archived/disabled/empty) get a one-line summary with mode
     'stub'; Claude is never called for them."""
