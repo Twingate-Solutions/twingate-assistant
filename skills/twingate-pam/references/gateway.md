@@ -6,8 +6,6 @@ source_version: ddd9c321ecac06166f5c23e76bb936097817432359decc85a1edc9f94728ce94
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate Gateway
 
 ## Summary

@@ -156,7 +156,9 @@ failures → **pam**.
 - **→ twingate-pam**: for Privileged Access Management (PAM) SSH certificate validation failures, or
   any Twingate Gateway failure (TLS handshake errors, CONNECT 401/407, kubectl through
   the gateway, session recording) — that skill has a hand-authored field guide at
-  `skills/twingate-pam/references/gateway-troubleshooting.md`
+  `skills/twingate-pam/references/gateway-troubleshooting.md`; for `kubectl` failures
+  through the Gateway, also read
+  `skills/twingate-kubernetes/references/kubernetes-troubleshooting.md`
 - **→ twingate-onboarding**: when the failure happens mid-rollout (connectors not coming up,
   pilot users failing) and a `deployment.yaml` exists — record the outcome back into the
   deployment plan once diagnosed.

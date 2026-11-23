@@ -6,8 +6,6 @@ source_version: f63d6b0a5add26f487910a9a8b182c1dc5c029426a1d67864ba66525e10bbddf
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Platform Resiliency Overview
 
 ## Summary

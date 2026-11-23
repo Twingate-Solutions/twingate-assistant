@@ -6,8 +6,6 @@ source_version: 1e9a7f7572d2275542cdabb8ce4682cf2bda78f69972eee2ac24e223f761cdcd
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Session Recordings (Twingate Gateway)
 
 ## Summary

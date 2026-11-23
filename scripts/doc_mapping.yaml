@@ -17,7 +17,7 @@
 # First matching pattern wins; unmatched docs go to _triage/ for review.
 # A discovered GitHub repo not listed in `repos:` also routes to _triage/.
 #
-# Last updated: 2026-11-20 (401 entries; docsTemplate, unlisted, WIP excluded)
+# Last updated: 2026-11-23 (409 entries; docsTemplate, unlisted, WIP excluded)
 
 # ── Exclude ─────────────────────────────────────────────────────────────────
 # URLs present in a sitemap but with no usable content (dead/unlisted/placeholder
@@ -535,6 +535,14 @@ docs:
   - url: https://www.twingate.com/docs/github-codespaces
     skill: twingate-architect
     keywords: [GitHub Codespaces, cloud development, VS Code, remote resources, developer tools, open source]
+
+  - url: https://www.twingate.com/docs/twingate-cli
+    skill: twingate-architect
+    keywords: [twingate CLI, Client command line, twingate status, resource auth, resource sync, account add, service key, exit-network, json output, scripting]
+
+  - url: https://www.twingate.com/docs/platform-resiliency-overview
+    skill: twingate-architect
+    keywords: [platform resiliency, SLA, 99.95% uptime, active-active, control plane, Relays, outage behavior, token validity, read-only mode, availability]
 
   # Coding agents — local / cloud-sandbox / self-hosted agents reaching private Resources as a Service
   - url: https://www.twingate.com/docs/coding-agents-use-case
@@ -1181,12 +1189,36 @@ docs:
     skill: twingate-kubernetes
     keywords: [AI agents, Kubernetes, Gateway, Headless Client, Service Account, RBAC, sandbox]
 
+  - url: https://www.twingate.com/docs/kubernetes-troubleshooting
+    skill: twingate-kubernetes
+    keywords: [Kubernetes, troubleshooting, kubectl, connection reset, Connector-to-Gateway, TLS mismatch, kubeconfig sync, session recording, Privileged Access for Kubernetes]
+
 
   # ── twingate-pam ────────────────────────────────────────────────────────────
 
   - url: https://www.twingate.com/docs/ssh-smallstep
     skill: twingate-pam
     keywords: [SSH, Smallstep, certificate authority, zero trust, MFA, AWS, "application-layer authentication", PKI]
+
+  - url: https://www.twingate.com/docs/gateway
+    skill: twingate-pam
+    keywords: [Twingate Gateway, Layer 7, reverse proxy, GAT, Gateway Access Token, Gateway address, connection flow, CONNECT, impersonation, SSH certificate, PAM Resource]
+
+  - url: https://www.twingate.com/docs/gateway-monitoring
+    skill: twingate-pam
+    keywords: [Gateway, Prometheus, metrics, port 9090, PodMonitor, ServiceMonitor, PrometheusRule, Grafana dashboard, alerting, twingate_gateway_http]
+
+  - url: https://www.twingate.com/docs/gateway-session-recordings
+    skill: twingate-pam
+    keywords: [Gateway, session recording, asciicast v2, session_recording logger, conn_id, asciicast_sequence_num, Vector, Fluentd, Fluent Bit, session player]
+
+  - url: https://www.twingate.com/docs/gateway-tls-certificates
+    skill: twingate-pam
+    keywords: [Gateway, TLS certificates, SNI, static certificate, on-demand certificate, cert-manager, Local CA, Vault, wildcard, dnsNames]
+
+  - url: https://www.twingate.com/docs/gateway-upgrades
+    skill: twingate-pam
+    keywords: [Gateway, upgrade, version 2.1, version 2.0, version 1.0, Helm values, breaking changes, migration, HTTP/2, 421 Misdirected Request]
 
   - url: https://www.twingate.com/docs/privileged-access-management
     skill: twingate-pam
@@ -1901,6 +1933,8 @@ auto_assign_patterns:
   - pattern: "/docs/privileged-access"
     skill: twingate-pam
   - pattern: "/docs/pam"
+    skill: twingate-pam
+  - pattern: "/docs/gateway"
     skill: twingate-pam
   - pattern: "/docs/web-app"
     skill: twingate-pam

@@ -6,8 +6,6 @@ source_version: 170ed336d99091e96a2c8d546b0b3aefe5f6ce180fb4c8d694505d1104e1ef9f
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Upgrading the Gateway
 
 ## Summary

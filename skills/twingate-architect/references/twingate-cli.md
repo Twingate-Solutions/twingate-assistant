@@ -6,8 +6,6 @@ source_version: 53f2ab25a64df20ab02f7fe85f64a6832ea62e3b13e29a5bd33ddd68d4dc1f0d
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Twingate CLI
 
 ## Summary

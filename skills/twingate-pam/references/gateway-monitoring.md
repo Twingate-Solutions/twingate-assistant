@@ -6,8 +6,6 @@ source_version: c6c759645e5bec0cfa83a3e28ab6f7d649d27f106a6e3bb89019ce3d3acfba9a
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Gateway Monitoring
 
 ## Summary

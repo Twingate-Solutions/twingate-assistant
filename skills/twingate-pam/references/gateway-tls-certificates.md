@@ -6,8 +6,6 @@ source_version: 02422fa679cc9f63dabc964c63ed7949c67213e761d9ec665518198e3ecd1b0f
 trust: official
 ---
 
-<!-- triage: unassigned -->
-
 # Gateway TLS Certificates
 
 ## Summary

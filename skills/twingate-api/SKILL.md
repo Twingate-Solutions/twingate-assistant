@@ -28,7 +28,7 @@ This skill owns Twingate's GraphQL API, service account key management, CLI tool
 - **Prefer Terraform or Pulumi over raw GraphQL for persistent configuration management.** The API is the right tool for scripting, automation, and reporting. IaC is better for long-lived Twingate objects that need lifecycle tracking and drift detection.
 - **Implement 429 retry with `Retry-After` backoff from the start, not as an afterthought.** The API enforces per-minute rate limits. Scripts that ignore 429 fail mid-run on large operations. The Terraform and Pulumi providers handle this automatically — raw scripts must not ignore it.
 - **Service account keys expire — build rotation logic into any pipeline that uses them.** Monitor `expiresAt` and rotate before expiry. Reactive rotation on failure disrupts pipelines.
-- **There are two unrelated tools both called "the Twingate CLI" — do not conflate them.** `Twingate-Labs/tg-cli` (Deno/TypeScript; export/import, topology diagrams) and `Twingate-Labs/Twingate-CLI` (Python, installed as `tgcli`; full CRUD, multi-tenant sessions) are separate projects with different flags and no shared history. Confirm which one the user means before giving command syntax. Flag repos like `gh-twingate-solutions-general-scripts.md` as LLM-assisted reference examples, not supported products, before recommending them for production use.
+- **Three unrelated tools are called "the Twingate CLI" — do not conflate them.** `Twingate-Labs/tg-cli` (Deno/TypeScript; export/import, topology diagrams) and `Twingate-Labs/Twingate-CLI` (Python, installed as `tgcli`; full CRUD, multi-tenant sessions) are separate admin-API projects with different flags and no shared history. The third is the `twingate` command that ships with the Client (`twingate status`, `resource auth`, `account add`); it controls the local Client, not the admin API — see `skills/twingate-architect/references/twingate-cli.md`. Confirm which one the user means before giving command syntax. Flag repos like `gh-twingate-solutions-general-scripts.md` as LLM-assisted reference examples, not supported products, before recommending them for production use.
 
 ## Search References First
 
@@ -103,6 +103,7 @@ never auto-regenerated):
 | Exploring the API, sample queries | `exploring-the-apis.md` |
 | Python CLI docs page (`tg-cli`) | `introduction-to-the-python-cli.md` |
 | JavaScript CLI docs page (`tg-cli`) | `introduction-to-tg-cli-javascript.md` |
+| The Client's own `twingate` command (connect, status, `resource auth`, service-key `account add`) — not an admin-API tool; owned by twingate-architect | `skills/twingate-architect/references/twingate-cli.md` |
 | OpenClaw automation tool (general, Docker Compose, DigitalOcean) | `openclaw.md`, `openclaw-docker-compose.md`, `openclaw-digitalocean.md` |
 | CI/CD pipeline patterns (docs page) | `example-cicd-configurations.md` |
 | **GitHub Action for CI runners** — installs the Client on a runner via a Service Key so workflow steps can reach IP-restricted/private resources | `gh-twingate-github-action.md` |
